@@ -1,0 +1,613 @@
+galileofm.library/AddSorted                             galileofm.library/AddSorted
+
+    NAME
+        AddSorted - add a node to a list in alphabetical order
+
+    SYNOPSIS
+        AddSorted(list, node)
+                   A0    A1
+
+        void AddSorted(struct List *, struct Node *);
+
+    FUNCTION
+        This function adds a Node to a List, in alphabetical order based on
+        ln_Name.
+
+    INPUTS
+        list - List to add Node to
+        node - Node to add
+
+    RESULT
+        The node is inserted in the list in its alphabetical position.
+        ALL the nodes in the list must have a valid ln_Name, or this routine
+        will cause enforcer hits.
+
+    NOTES
+        This routine uses a simple insertion sort based on strcmpi(). As such,
+        it is neither terrible efficient, or locale-sensitive.
+
+    SEE ALSO
+        exec.library/Insert()
+
+galileofm.library/Att_ChangeNodeName           galileofm.library/Att_ChangeNodeName
+
+    NAME
+        Att_ChangeNodeName - change the name of a node
+
+    SYNOPSIS
+        Att_ChangeNodeName(node, name)
+                            A0    A1
+
+        void Att_ChangeNodeName(Att_Node *, char *);
+
+    FUNCTION
+        Frees the old name of the node and copies the new name.
+
+    INPUTS
+        node - Att_Node to change name for
+        name - new name of the node
+
+    RESULT
+        The new name is copied and installed.
+
+    SEE ALSO
+        Att_NewNode()
+
+galileofm.library/Att_FindNode                       galileofm.library/Att_FindNode
+
+    NAME
+        Att_FindNode - find a node by number
+
+    SYNOPSIS
+        Att_FindNode(list, number)
+                      A0     D0
+
+        Att_Node *Att_FindNode(Att_List *, long);
+
+    FUNCTION
+        This routine finds the specified node in the list and returns a
+        pointer to it.
+
+    INPUTS
+        list - list to search
+        number - ordinal number of the node to find
+
+    RESULT
+        Returns the specified Att_Node or NULL if not found.
+
+    NOTES
+        This routine can also work on normal Lists with proper type-casting.
+
+    SEE ALSO
+        Att_NewNode(), Att_NodeName()
+
+galileofm.library/Att_FindNodeData               galileofm.library/Att_FindNodeData
+
+    NAME
+        Att_FindNodeData - find a node by its data
+
+    SYNOPSIS
+        Att_FindNodeData(list, data)
+                          A0    D0
+
+        Att_Node *Att_FindNodeData(Att_List *, ULONG);
+
+    FUNCTION
+        This function searches the list for a node with data that matches
+        the supplied ULONG value (the data is specified with the Att_NewNode()
+        function).
+
+    INPUTS
+        list - list to search
+        data - data to look for
+
+    RESULT
+        Returns the Att_Node if found, otherwise NULL.
+
+    SEE ALSO
+        Att_NewNode()
+
+galileofm.library/Att_FindNodeNumber           galileofm.library/Att_FindNodeNumber
+
+    NAME
+        Att_FindNodeNumber - find ordinal number of a node
+
+    SYNOPSIS
+        Att_FindNodeNumber(list, node)
+                            A0    A1
+
+        long Att_FindNodeNumber(Att_List *, Att_Node *);
+
+    FUNCTION
+        This routine searches the list for the specified node, and returns
+        the offset from the beginning of the list.
+
+    INPUTS
+        list - list to search
+        node - node to look for
+
+    RESULT
+        Returns the ordinal number of the node or -1 if not found.
+
+    NOTES
+        This routine can also work on normal Lists with proper type-casting.
+
+    SEE ALSO
+        Att_NewNode()
+
+galileofm.library/Att_NewList                         galileofm.library/Att_NewList
+
+    NAME
+        Att_NewList - create a new list
+
+    SYNOPSIS
+        Att_NewList(flags)
+                     D0
+
+        Att_List *Att_NewList(ULONG);
+
+    FUNCTION
+        Creates a new Att_List structure, which you use in conjunction with
+        Att_Nodes. These functions provide a convenient way of dynamically
+        allocating members of lists and performing searches and sorts on them.
+
+    INPUTS
+        flags - control flags. Currently valid values are :
+
+                    LISTF_LOCK  - list is to be shared and requires locking
+                    LISTF_POOL  - use memory pooling for nodes and names
+
+                If you specify LISTF_LOCK, a semaphore will be initialised for
+                this list. Any of the list management functions in the 
+                galileofm.library will lock the semaphore before accessing the
+                list.
+
+                If you specify LISTF_POOL, a small memory pool will be used
+                to allocate list nodes and node names, which can result in
+                greater speed and less memory fragmentation.
+
+    RESULT
+        Returns pointer to an Att_List structure or NULL for failure.
+
+    SEE ALSO
+        Att_RemList(), exec.library/NewList()
+
+galileofm.library/Att_NewNode                         galileofm.library/Att_NewNode
+
+    NAME
+        Att_NewNode - add a new node to a list
+
+    SYNOPSIS
+        Att_NewNode(list, name, data, flags)
+                     A0    A1    D0    D1
+
+        Att_Node *Att_NewNode(Att_List *, char *, ULONG, ULONG);
+
+    FUNCTION
+        This routine allocates a new node and adds it to the specified list.
+        It can also allocate and copy a name for the node, and store
+        user-defined data with it. The new node can be added to the list
+        sorted in several ways.
+
+    INPUTS
+        list - list to add node to
+        name - name for the node (will be copied)
+        data - user-defined data for the node
+        flags - control flags. Currently valid flags are:
+
+                    ADDNODEF_SORT       - sort names alphabetically
+
+                    ADDNODEF_EXCLUSIVE  - name must be exclusive; if a node
+                                          already exists with this name, the
+                                          call will fail. Only works in
+                                          conjunction with ADDNODEF_SORT.
+
+                    ADDNODEF_NUMSORT    - the node name is taken to be an
+                                          ascii string containing a number,
+                                          and the sort is based on numerical
+                                          order rather than ascii order (so
+                                          that 10 would come after 1 rather
+                                          than before).
+
+                    ADDNODEF_PRI        - sort is based on priority. If you
+                                          specify this flag, the 'data'
+                                          parameter is taken to be the node's
+                                          priority.
+
+                If no sorting flags are specified, the node is added to the
+                end of the list.
+
+    RESULT
+        If successful, the new Att_Node is returned.
+
+    SEE ALSO
+        Att_NewList(), Att_RemNode()
+
+galileofm.library/Att_NodeCount                     galileofm.library/Att_NodeCount
+
+    NAME
+        Att_NodeCount - count the nodes in a list
+
+    SYNOPSIS
+        Att_NodeCount(list)
+                       A0
+
+        long Att_NodeCount(Att_List *);
+
+    FUNCTION
+        Returns the number of nodes in the list.
+
+    INPUTS
+        list - list to count
+
+    NOTES
+        This routine can also work on normal Lists with proper type-casting.
+
+    SEE ALSO
+        Att_NewNode()
+
+galileofm.library/Att_NodeDataNumber           galileofm.library/Att_NodeDataNumber
+
+    NAME
+        Att_NodeDataNumber - find ordinal number of a node
+
+    SYNOPSIS
+        Att_NodeDataNumber(list, data)
+                            A0    D0
+
+        long Att_NodeDataNumber(Att_List *, ULONG);
+
+    FUNCTION
+        This routine is similar to Att_FindNodeNumber(), except that it takes
+        a ULONG value and searches the list for a node with that value as
+        it's 'data' (the data specified in the call to Att_NewNode).
+
+    INPUTS
+        list - list to search
+        data - node data to look for
+
+    RESULT
+        Returns the Att_Node if found, or NULL.
+
+    SEE ALSO
+        Att_NewNode(), Att_FindNodeNumber()
+
+galileofm.library/Att_NodeName                       galileofm.library/Att_NodeName
+
+    NAME
+        Att_NodeName - find a node name by number
+
+    SYNOPSIS
+        Att_NodeName(list, number)
+                      A0     D0
+
+        char *Att_NodeName(Att_List *, long);
+
+    FUNCTION
+        This routine is similar to Att_FindNode() except that it returns
+        a pointer to the node's name rather than the node itself.
+
+    INPUTS
+        list - list to search
+        number - ordinal number of the node to find
+
+    RESULT
+        Returns a pointer to the node's name, or NULL if not found.
+
+    NOTES
+        This routine can also work on normal Lists with proper type-casting.
+
+    SEE ALSO
+        Att_NewNode(), Att_FindNode()
+
+galileofm.library/Att_NodeNumber                    galileofm.library/Att_NodeNumber
+
+    NAME
+        Att_NodeNumber - find ordinal number of node by name
+
+    SYNOPSIS
+        Att_NodeNumber(list, name)
+                        A0    A1
+
+        long Att_NodeNumber(Att_List *, char *);
+
+    FUNCTION
+        This routine is similar to Att_FindNodeNumber(), except that you
+        specify a name to search for rather than a node pointer.
+
+    INPUTS
+        list - list to search
+        name - name of node to search for
+
+    RESULT
+        Returns the ordinal number of the node or -1 if not found.
+
+    NOTES
+        This routine can also work on normal Lists with proper type-casting.
+        The search is not case-sensitive.
+
+    SEE ALSO
+        Att_NewNode(), Att_FindNodeNumber()
+
+galileofm.library/Att_PosNode                         galileofm.library/Att_PosNode
+
+    NAME
+        Att_PosNode - reposition an Att_Node in an Att_List
+
+    SYNOPSIS
+        Att_PosNode(list, node, before)
+                     A0    A1    A2
+
+        void Att_PosNode(Att_List *, Att_Node *, Att_Node *);
+
+    FUNCTION
+        This routine removes an Att_Node from its current position and
+        re-inserts it in the list in a new position.
+
+    INPUTS
+        list - Att_List containing node
+        node - Att_Node to reposition
+        before - Att_Node to re-insert the node before
+
+    RESULT
+        The node is inserted in the list before the supplied node.
+
+    SEE ALSO
+        Att_NewNode()
+
+galileofm.library/Att_RemList                         galileofm.library/Att_RemList
+
+    NAME
+        Att_RemList - free an entire Att_List
+
+    SYNOPSIS
+        Att_RemList(list, flags)
+                     A0     D0
+
+        void Att_RemList(Att_List *, long);
+
+    FUNCTION
+        This function releases all the memory used by an Att_List, including
+        freeing all of the Att_Nodes attached to it.
+
+    INPUTS
+        list - Att_List to free
+        flags - control flags. Current flag values are :
+
+                    REMLISTF_FREEDATA  - If you specify this flag, the data
+                                         pointers of each of the nodes will
+                                         be automatically freed with FreeVec().
+                                         Therefore, if you use this feature,
+                                         the data you supply to Att_NewNode()
+                                         MUST have been allocated with
+                                         AllocVec().
+
+                    REMLISTF_FREEMEMH  - Specify this in conjunction with
+                                         REMLISTF_FREEDATA and the data will
+                                         be freed using FreeMemH() instead of
+                                         FreeVec().
+
+                    REMLISTF_SAVELIST  - If you specify this flag, only the
+                                         nodes of the list will be freed. The
+                                         Att_List itself will be reinitialised,
+                                         ready for use.
+
+    RESULT
+        The list nodes and optionally the list itself is freed.
+
+    SEE ALSO
+        Att_NewList(), Att_NewNode(), Att_RemNode()
+
+galileofm.library/Att_RemNode                         galileofm.library/Att_RemNode
+
+    NAME
+        Att_RemNode - remove a node from a list
+
+    SYNOPSIS
+        Att_RemNode(node)
+                     A0
+
+        void Att_RemNode(Att_Node *);
+
+    FUNCTION
+        This function removes the specified node from its list, and frees
+        the name copy and node structure.
+
+    INPUTS
+        node - node to free
+
+    RESULT
+        The node is removed and freed. The node data is NOT freed by this
+        routine.
+
+    SEE ALSO
+        Att_NewNode(), Att_RemList()
+
+galileofm.library/FindNameI                             galileofm.library/FindNameI
+
+    NAME
+        FindNameI - find a node by name
+
+    SYNOPSIS
+        FindNameI(list, name)
+                   A0    A1
+
+        struct Node *FindNameI(struct List *, char *);
+
+    FUNCTION
+        This routine is similar to the exec.library/FindName routine, except
+        that the comparison used in FindNameI() is not case-sensitive.
+
+    INPUTS
+        list - list to search
+        name - name to search for
+
+    RESULT
+        Returns pointer to the node if found, otherwise NULL.
+
+    SEE ALSO
+        exec.library/FindName()
+
+galileofm.library/GetSemaphore                       galileofm.library/GetSemaphore
+
+    NAME
+        GetSemaphore - lock a semaphore
+
+    SYNOPSIS
+        GetSemaphore(semaphore, flags, unused)
+                        A0       D0      A1
+
+        long GetSemaphore(struct SignalSemaphore *, long, APTR);
+
+    FUNCTION
+        This routine locks or attempts to lock the given Semaphore. This
+        routine fixes some bugs that the exec.library Semaphore routines
+        have under some versions of the OS.
+
+    INPUTS
+        semaphore - Semaphore to lock
+        flags - control flags. Valid flags are :
+
+                    SEMF_SHARED     - lock in shared mode
+                    SEMF_EXCLUSIVE  - lock in exclusive mode
+                    SEMF_ATTEMPT    - only attempt to lock
+
+        unused - must be NULL
+
+    RESULT
+        Returns TRUE if the Semaphore was successfully locked. If SEMF_ATTEMPT
+        is not specified, this routine will block until the Semaphore is
+        available, and will always return TRUE.
+
+    NOTES
+        To unlock a Semaphore locked with this function, use the standard
+        exec.library ReleaseSemaphore() call.
+
+    SEE ALSO
+        exec.library/ObtainSemaphore(), exec.library/ObtainSemaphoreShared(),
+        exec.library/AttemptSemaphore(), exec.library/AttemptSemaphoreShared(),
+        exec.library/ReleaseSemaphore()
+
+galileofm.library/InitListLock                       galileofm.library/InitListLock
+
+    NAME
+        InitListLock - initialise a list/lock pair
+
+    SYNOPSIS
+        InitListLock(ll, unused)
+                     A0     A1
+
+        void InitListLock(struct ListLock *, APTR);
+
+    FUNCTION
+        A ListLock is a convenient structure that ties a List to a Semaphore.
+        This routine initialises both with the one call.
+
+    INPUTS
+        ll - ListLock to initialised
+        unused - must be NULL
+
+    RESULT
+        The List and the Semaphore in the ListLock are initialised.
+
+    SEE ALSO
+        exec.library/NewList(), exec.library/InitSemaphore()
+
+galileofm.library/IsListLockEmpty                 galileofm.library/IsListLockEmpty
+
+    NAME
+        IsListLockEmpty - see if a list is empty
+
+    SYNOPSIS
+        IsListLockEmpty(ll)
+                        A0
+
+        BOOL IsListLockEmpty(struct ListLock *);
+
+    FUNCTION
+        This routine is equivalent to the IsListEmpty() macro, except that
+        it locks the list in shared mode before accessing it.
+
+    INPUTS
+        ll - ListLock to test
+
+    RESULT
+        Returns TRUE if the list is empty.
+
+    SEE ALSO
+        InitListLock(), exec.library/IsListEmpty()
+
+galileofm.library/LockAttList                         galileofm.library/LockAttList
+
+    NAME
+        LockAttList - lock an Att_List
+
+    SYNOPSIS
+        LockAttList(list, exclusive)
+                     A0      D0
+
+        void LockAttList(Att_List *, BOOL);
+
+    FUNCTION
+        If an Att_List was created with the LISTF_LOCK flag, this routine can
+        be used to lock the list.
+
+    INPUTS
+        list - Att_List to lock
+        exclusive - set to TRUE if you want exclusive access
+
+    RESULT
+        This routine will block until the list can be locked, and then return.
+        You must call UnlockAttList() to unlock the list when you have
+        finished with it.
+
+    SEE ALSO
+        Att_NewList(), UnlockAttList()
+
+galileofm.library/SwapListNodes                     galileofm.library/SwapListNodes
+
+    NAME
+        SwapListNodes - swap two nodes in a list around
+
+    SYNOPSIS
+        SwapListNodes(list, node1, node2);
+                       A0     A1     A2
+
+        void SwapListNodes(struct List *, struct Node *, struct Node *);
+
+    FUNCTION
+        This routine exchanges the positions of two nodes in a list.
+
+    INPUTS
+        list - List containing the nodes
+        node1 - first node to swap
+        node2 - second node to swap
+
+    RESULT
+        The nodes' positions will be exchanged.
+
+galileofm.library/UnlockAttList                     galileofm.library/UnlockAttList
+
+    NAME
+        UnlockAttList - unlock an Att_List
+
+    SYNOPSIS
+        UnlockAttList(list)
+                       A0
+
+        void UnlockAttList(Att_List *);
+
+    FUNCTION
+        This routine unlocks an Att_List that was locked with LockAttList().
+
+    INPUTS
+        list - list to unlock
+
+    RESULT
+        The list is unlocked. Calls to LockAttList() are nested, so you must
+        unlock the list as many times as you locked it.
+
+    SEE ALSO
+        LockAttList()
+
+

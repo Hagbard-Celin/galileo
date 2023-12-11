@@ -1,0 +1,258 @@
+galileofm.library/AsyncRequest                       galileofm.library/AsyncRequest
+
+    NAME
+        AsyncRequest - display a requester
+
+    SYNOPSIS
+        AsyncRequest(ipc, type, window, callback, data, tags)
+                      A0   D0     A1       A2      A3    D1
+
+        long AsyncRequest(IPCData *, long, struct Window *,
+                          REF_CALLBACK, APTR, struct TagItem *);
+
+        long AsyncRequestTags(IPCData *, long, struct Window *,
+                              REF_CALLBACK, APTR, Tag, ...);
+
+    FUNCTION
+        Displays requesters of different types. The name of this function
+        is slightly misleading, as the routine itself is not asynchronous.
+        However, the requester is launched by a separate process, which makes
+        it possible for you to provide a callback function that can handle
+        refreshing of a window while the requester is displayed. There are
+        currently two types of requesters defined:
+
+
+        REQTYPE_FILE
+
+        This opens an ASL file requester. The FileRequester itself is defined
+        by you; this routine simples opens it with a separate process,
+        providing asynchronicity. The only value tag for this requester type
+        is AR_Requester, with which you specify the address of a file
+        requester structure obtained via AllocAslRequest().
+
+
+        REQTYPE_SIMPLE
+
+        This displays a simple text requester to the user. There are several
+        control tags for this requester type which give you great control
+        over the appearance of the requester :
+
+            AR_Window (struct Window *)
+
+            Use this to specify a parent window for the requester. The
+            requester will appear centered over this window (overrides
+            AR_Screen)
+
+            AR_Screen (struct Screen *)
+
+            Use this to specify a parent screen for the requester. The
+            requester will appear centered in the screen.
+
+            AR_Title (char *)
+
+            The requester title. This is displayed in the title bar of the
+            requester window. If not specified, this value defaults to
+            "Galileo Request".
+
+            AR_Message (char *)
+
+            The requester message. This is the text displayed in the main
+            body of the requester. Use a \n character to represent a linefeed.
+
+            AR_Button (char *)
+
+            This tag allows you to define a button for the requester. You
+            can use this tag multiple times.
+
+            AR_ButtonCode (long)
+
+            Specifies the ID code for the previous AR_Button tag. By default,
+            buttons are numbered 1, 2, 3, ... in the order they appear in the
+            tag list. This tag allows you to change the ID codes, and
+            therefore the result code from the AsyncRequest() function.
+
+            AR_Buffer (char *)
+
+            If you want a string gadget to be displayed in the requester,
+            specify this tag with a pointer to a string buffer.
+
+            AR_BufLen (long)
+
+            If a buffer was specified with AR_Buffer, you must also supply
+            this tag to set the size of the buffer.
+
+            AR_History (Att_List *)
+
+            Points to an Att_List which contains the history list for this
+            gadget. If supplied, the user will be able to press the cursor
+            up and down keys to access the history. See the docs on
+            GetEditHook() for more information.
+
+            AR_CheckMark (char *)
+
+            If you want a check mark gadget to appear in the requester,
+            specify this as a pointer to the text for the gadget.
+
+            AR_CheckPtr (short *)
+
+            If you specify the AR_CheckMark tag, you must also supply this
+            tag. ti_Data is a pointer to a short variable which will receive
+            the state of the checkmark gadget when the requester is closed.
+
+            AR_Flags (ULONG)
+
+            Control flags.
+
+        The control flags for the AR_Flags tag are :
+
+            SRF_LONGINT     - the string gadget is an integer field
+            SRF_CENTJUST    - center-justify the string gadget
+            SRF_RIGHTJUST   - right-justify the string gadget
+            SRF_PATH_FILTER - filter path characters from string field
+            SRF_SECURE      - set for secure password field
+            SRF_HISTORY     - set if supplying the AR_History tag
+            SRF_CHECKMARK   - set if supplying the AR_CheckMark tag
+            SRF_MOUSE_POS   - center requester over mouse pointer
+
+            AR_Requester (struct FileRequester *)
+
+            If you pass a filerequester structure with this tag, AND you
+            have a string gadget displayed (by passing the AR_Buffer),
+            the string gadget will be given a popup 'file' button which,
+            when clicked, will invoke this filerequester.
+
+        The callback function is a function that you define to handle the
+        situation when the parent window needs to be refreshed. If the parent
+        window is simplerefresh, you should provide this function. The function
+        has the following prototype:
+
+            void __asm refresh_callback(    register __d0 ULONG type,
+                                            register __a0 struct Window *window,
+                                            register __a1 ULONG data )
+
+        The routine will be called whenever the parent window needs to be
+        refreshed. 'type' is the IDCMP message type; usually
+        IDCMP_REFRESHWINDOW. 'window' is a pointer to the parent window, and
+        'data' is the data value passed to the AsyncRequest() function.
+
+    INPUTS
+        ipc      - your process' IPCData pointer
+        type     - type of requester to display
+        window   - parent window for requester
+        callback - your callback function
+        data     - data that is passed to the callback
+        tags     - control tags
+
+    RESULT
+        Returns the result from the requester. Returns 0 if the requester
+        could not be displayed.
+
+    NOTES
+        For a REQTYPE_SIMPLE requester, the default gadget IDs are (from
+        left to right), 1, 2, 3 ... 0. The right-most gadget is defined as
+        0 to act as a "cancel" gadget. Therefore, in a simple "Ok", "Cancel"
+        requester, "Ok" returns 1 (or TRUE) and "Cancel" returns 0 (or FALSE).
+
+    SEE ALSO
+        asl.library/AllocAslRequest(), GetEditHook()
+
+galileofm.library/OpenStatusWindow               galileofm.library/OpenStatusWindow
+
+    NAME
+        OpenStatusWindow - open a status window
+
+    SYNOPSIS
+        OpenStatusWindow(title, text, screen, flags, unused)
+                           A0    A1      A2     D0     D1
+
+        struct Window *OpenStatusWindow(char *, char *, struct Screen *, 
+                                        ULONG, long);
+
+    FUNCTION
+        A status window is kind of like a "dumb" progress window; it has
+        the ability to display a single line of text.
+
+    INPUTS
+        title  - status window title
+        text   - initial text to display
+        screen - screen to open on
+        flags  - set to 0
+        unused - set to 0
+
+    RESULT
+        Returns a pointer to the new window. To close the status window,
+        call CloseConfigWindow() on it.
+
+    SEE ALSO
+        SetStatusText(), CloseConfigWindow()
+
+galileofm.library/SelectionList                     galileofm.library/SelectionList
+
+    NAME
+        SelectionList - display a list in a requester
+
+    SYNOPSIS
+        SelectionList(  list, window, screen,
+                        title, initialsel, flags,
+                        buffer, okay_txt, cancel_txt )
+
+        short SelectionList(    Att_List *, struct Window *, struct Screen *,
+                                char *, short, ULONG,
+                                char *, char *, char * );
+
+    FUNCTION
+        This routine displays a requester containing a listview gadget,
+        prompting the user to select an item from the list. The requester
+        can optionally have a directory field, which allows the user to open
+        an ASL file requester to locate a directory that is not in the list.
+
+    INPUTS
+        list       - Att_List to display (the name of each node is displayed)
+        window     - parent window
+        screen     - screen to open on if no window specified
+        title      - title of requester
+        initialsel - initially selected item, or -1 for no selection
+        flags      - control flags. Specify SLF_DIR_FIELD to get a directory
+                     field
+        buffer     - If SLF_DIR_FIELD is specified, this must point to a
+                     buffer (256 bytes or greater) to contain the path name
+                     chosen by the user
+        okay_txt   - text for the "Ok" gadget
+        cancel_txt - text for the "Cancel" gadget
+
+    RESULT
+        Returns the number of the selected item in the list, or -1 if the
+        user made no selection. If a directory field was specified with
+        SLF_DIR_FIELD, and -1 is returned, you should check the supplied
+        buffer to see if it is empty. If not, the user selected a path
+        manually.
+
+    SEE ALSO
+        Att_NewList()
+
+galileofm.library/SetStatusText                     galileofm.library/SetStatusText
+
+    NAME
+        SetStatusText - change text in a status window
+
+    SYNOPSIS
+        SetStatusText(window, text)
+                        A0     A1
+
+        void SetStatusText(struct Window *, char *);
+
+    FUNCTION
+        Changes the text displayed in the supplied status window.
+
+    INPUTS
+        window - status window
+        text   - new text to display
+
+    RESULT
+        The text is displayed immediately. Do NOT call this function on a
+        window other than one returned by the OpenStatusWindow() call.
+
+    SEE ALSO
+        OpenStatusWindow()
+
+

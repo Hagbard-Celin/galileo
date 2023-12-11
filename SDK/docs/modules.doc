@@ -1,0 +1,488 @@
+
+									Galileo
+
+                          External Module Definition
+
+
+
+CONTENTS
+
+1. Introduction
+2. Main module entry point
+3. Second module entry point
+4. Module identification
+5. Function definitions
+6. Standard startup code
+7. Module callback function
+
+
+1. Galileo supports two types of "external modules". This document
+describes the main type, an AmigaDos library file. The other type, ARexx
+modules, are described in the main Galileo documentation.
+
+    Library-based modules are located in the Galileo:Modules/ directory, and
+are identified by the ".module" suffix. They are standard AmigaDos libraries,
+with two compulsory entry points. They main contain any other entry points you
+want, but the first two are required to work with Galileo.
+
+    The example code supplied with the SDK illustrates how to create an Galileo
+module. While the supplied code is designed for SAS/C, it would be easy to
+adapt it to any other C compiler.
+
+
+2. The main entry point to the module is a function called Module_Entry().
+The prototype for this function is as follows:
+
+        long Module_Entry(  register __a0 char *args,
+                            register __a1 struct Screen *screen,
+                            register __a2 IPCData *ipc,
+                            register __a3 IPCData *mainipc,
+                            register __a4 APTR *memhandlep,
+                            register __d0 ULONG mod_id,
+                            register __d1 EXT_FUNC(callback)  );
+
+    This function must be at offset -0x1e in the library, and take parameters
+in the specified registers.
+
+    You should never call this function yourself; it is called by Galileo when
+the user runs one of the commands in your module. The parameters to the
+Module_Entry() function are as follows:
+
+        args        - null-terminated argument string, contains any arguments
+                      the user supplied for the command
+
+        screen      - main Galileo screen pointer, you should open any
+                      requesters on this screen
+
+        ipc         - a pointer to your IPCData structure - Galileo launches
+                      each module command as a new process
+
+        mainipc     - a pointer to the main IPCData structure for Galileo
+
+        memhandlerp - NULL if running synchronously, pointer to MemHandle if
+                      running asynchronously
+                      (see Documentation/Module-Changes.txt)
+
+        mod_id      - the ID code of the command selected by the user
+
+        callback    - address of Galileo callback function (see below)
+
+
+3. The second entry point is a function that the module uses to identify
+itself. When Galileo starts up it scans the contents of the modules directory,
+and calls this function in each of the modules.
+
+    The standard modinit.o module startup code supplies this function for you.
+It is not recommended that you change it. If you need to supply your own
+function, the prototype is as follows :
+
+        APTR Module_Identify(  register __d0 long num  );
+
+    This function must be at offset -0x24 in the library. "num" is the command
+ID number that Galileo is enquiring about. If "num" is equal to -1, you must
+return a pointer to the ModuleInfo structure for the module. If "num" is equal
+to a valid command ID code, you must return a pointer to a description string
+for that command. If "num" is an invalid value, you must return 0.
+
+
+4. The contents of the module are identified with a ModuleInfo structure. All
+fields of the ModuleInfo structure must be initialised. The meaning of the
+fields is as follows:
+
+        ver            - Module version number (for your own use)
+        name           - pointer to module name, including ".module" suffix
+        locale_name    - name of locale catalog for the module. This is opened
+                         automatically by the standard modinit.o startup code,
+                         which you should use.
+        flags          - Module flags, see below
+        function_count - The number of functions in this module
+        function       - The definition of the first function
+
+    Module flag values (for the "flags" field) are as follows:
+
+        MODULEF_CALL_STARTUP    - If this flag is specified, Galileo will run
+                                  your module automatically on startup, with
+                                  the special "mod_id" value of FUNCID_STARTUP
+
+        MODULEF_STARTUP_SYNC    - If MODULEF_CALL_STARTUP is also specified,
+                                  this flag causes Galileo to wait for your
+                                  module to return from the startup call before
+                                  continuing
+
+        MODULEF_CATALOG_VERSION - If this flag is set, Galileo will use the "ver"
+                                  field to check that the locale catalog for
+                                  this module is the correct version.
+
+        MODULEF_HELP_AVAILABLE  - If this flag is set, Galileo will look for an
+                                  AmigaGuide help file (in Galileo:help/) to
+                                  show help for the commands in this module.
+                                  The name of the help file is taken from the
+                                  'name' field of the ModuleInfo structure,
+                                  with the '.module' suffix replaced by
+                                  '.guide'
+
+    The ModuleInfo structure contains room for only one function definition.
+If your module contains more than one function, the additional ModuleFunction
+structures MUST follow the ModuleInfo structure in memory. You must provide as
+many ModuleFunction structures are were specified in the "function_count"
+field of the ModuleInfo structure. For example,
+
+        // Module definition, includes first function
+        ModuleInfo
+            module_info={
+                1,                  // Version
+                "example.module",   // Module name
+                "example.catalog",  // Catalog name
+                0,                  // Flags
+                2,                  // Number of functions
+                {0,"Example1",MSG_EXAMPLE1_DESC,0,0}};
+
+        // Second function definition follows immediately on
+        ModuleFunction
+            module_func_2={
+                 1,"Example2",MSG_EXAMPLE2_DESC,0,0};
+
+
+
+5. The ModuleFunction structure is used to define each command that the
+module provides. The first function is defined with a ModuleFunction structure
+embedded in the ModuleInfo; additional commands must be defined after that.
+All fields of the ModuleFunction structure must be initialised, as follows:
+
+        id        - command ID code. This value is passed as the "mod_id"
+                    parameter to the Module_Entry() function
+
+        name      - name of the function. This is the actual command name
+                    that will be used to invoke this command
+
+        desc      - locale string ID for the function description. This is the
+                    ID of the string in the catalog for this module that is
+                    used to describe this command in the popup command list.
+
+        flags     - command flags, see below
+
+        template  - command template (in ReadArgs() format). This string is
+                    displayed in the popup argument list in Galileo function
+                    editors, but is not actually parsed by Galileo. You will
+                    need to use the ParseArgs() routine on the "args"
+                    parameter in the Module_Entry() function.
+
+    ModuleFunction flags are as follows:
+
+        FUNCF_NEED_SOURCE    - set if your module requires a valid source
+                               directory - if one is not available, your
+                               command will not be launched
+
+        FUNCF_NEED_DEST      - set if your module requires a valid destination
+                               directory
+
+        FUNCF_NEED_FILES     - set if you need there to be selected files
+
+        FUNCF_NEED_DIRS      - set if you need selected directories
+
+        FUNCF_CAN_DO_ICONS   - set if you can operate on icons as well as
+                               normal files/directories
+
+        FUNCF_SINGLE_SOURCE  - set if you can only operate on a single source
+                               lister
+
+        FUNCF_SINGLE_DEST    - set if you can only operate on a single
+                               destination lister
+
+        FUNCF_WANT_DEST      - set if you want a destination directory, but
+                               don't require one
+
+        FUNCF_WANT_SOURCE    - set if you want a source directory, but don't
+                               require one
+
+        FUNCF_WANT_ENTRIES   - set in conjunction with FUNCF_NEED_FILES or
+                               FUNCF_NEED_DIRS, to specify that you want those
+                               items but don't require them
+
+        FUNCF_PRIVATE        - the function is private, it won't show up in
+                               the popup command list
+
+        FUNCF_SYNC           - set if you want the old behviour when the user
+                               selects "Run Asynchronously" in the Function
+                               Editor (see Documentation/Module-Changes.txt)
+
+
+6. It is highly recommended that you link with the standard module startup
+code (modinit.o) when creating modules. This code contains the
+Module_Identify() function, and automatically initialises several library bases
+which you may need. See the <galileofm/modules.h> file for more information on
+this file.
+
+
+7. The "callback" parameter to the Module_Entry() function provides the
+address of a callback function within Galileo. This function allows you to access
+information that your module command may need. The callback function is
+defined as follows:
+
+        ULONG callback(     register __d0 ULONG command,
+                            register __a0 APTR handle,
+                            register __a1 APTR packet   );
+
+        command     - the callback command, see below for the list
+
+        handle      - the callback handle. You must pass the value of
+                      IPCDATA(ipc) for this parameter ("ipc" is the argument
+                      passed to the Module_Entry() function)
+
+        packet      - a command-specific packet
+
+    Following is the list of callback commands. Each command takes a packet
+specific to it.
+
+
+        Command : EXTCMD_GET_SOURCE
+        Purpose : Returns the current source path
+        Packet  : char path[256]
+        Returns : struct path_node *path
+        Notes   : The packet is a pointer to a 256 character buffer, into
+                  which the current source path will be copied. The return
+                  value is a pointer to a path_node structure, which can be
+                  used with other callback commands. This structure is
+                  READ ONLY!
+
+        Command : EXTCMD_END_SOURCE
+        Purpose : Finishes and cleans up current source path
+        Packet  : Set to 0
+        Returns : <none>
+        Notes   : Call this command if you are aborting early and do not
+                  wish to process further source paths.
+
+        Command : EXTCMD_NEXT_SOURCE
+        Purpose : Gets the next source path
+        Packet  : char path[256]
+        Returns : struct path_node *path
+        Notes   : Call this command when you have finished with the first
+                  source path and want to move onto the next one. The
+                  return value is NULL if there are no more source paths.
+
+        Command : EXTCMD_UNLOCK_SOURCE
+        Purpose : Unlock source listers
+        Packet  : <none>
+        Returns : <none>
+        Notes   : When your module command is called, any source listers
+                  are locked automatically. Call this command when you want
+                  to unlock them (they are unlocked automatically when
+                  your module returns).
+
+        Command : EXTCMD_GET_DEST
+        Purpose : Returns the next destination path
+        Packet  : char path[256]
+        Returns : struct path_node *path
+        Notes   : The packet is a pointer to a 256 character buffer, into
+                  which the current destination path will be copied. The
+                  return value is a handle to the path, which can be used with
+                  other callback commands. Call this command repeatedly to
+                  move through the destination paths. When all the destination
+                  paths have been used, this command will return NULL. If you
+                  call this command again, it will will start again with the
+                  first destination path.
+
+        Command : EXTCMD_END_DEST
+        Purpose : Ends the current destination path
+        Packet  : FALSE to abort, TRUE to continue
+        Returns : <none>
+        Notes   : You must call this command when you have finished with one
+                  destination path, prior to calling EXTCMD_GET_DEST.
+
+        Command : EXTCMD_GET_ENTRY
+        Purpose : Get the next entry to work with
+        Packet  : <none>
+        Returns : struct function_entry {
+                    struct MinNode      node;   // Node
+                    char                *name;  // File name
+                    APTR                entry;  // Not used
+                    short               type;   // Type; <0 = file, >0 = dir
+                    short               flags;  // Not used
+                  };
+        Notes   : This returns a pointer to the next entry in the current
+                  source path. This structure is READ ONLY! Use the "name"
+                  field to get the entry name.
+
+        Command : EXTCMD_END_ENTRY
+        Purpose : Finish with specific entry
+        Packet  : struct endentry_packet {
+                    struct function_entry   *entry;     // Entry to end
+                    BOOL                    deselect;   // TRUE for deselect
+                  };
+        Returns : <none>
+        Notes   : Call this command when you have finished working with one
+                  entry and wish to move on to the next. "entry" must be set
+                  to the pointer that was returned by EXTCMD_GET_ENTRY.
+                  Set "deselect" to TRUE to have the entry deselected in the
+                  lister.
+
+        Command : EXTCMD_RELOAD_ENTRY
+        Purpose : Marks an entry to be reloaded
+        Packet  : struct function_entry *entry;
+        Returns : <none>
+        Notes   : This command marks the specified entry to be reloaded.
+                  When the function finishes, the entry will be reloaded to
+                  update any changes that your module might have made to
+                  it.
+
+        Command : EXTCMD_REMOVE_ENTRY
+        Purpose : Marks an entry to be reloaded
+        Packet  : struct function_entry *entry;
+        Returns : <none>
+        Notes   : This command marks the specified entry to be removed.
+                  When the function finishes, the entry will be removed
+                  from the lister it is in.
+
+        Command : EXTCMD_ENTRY_COUNT
+        Purpose : Returns total count of entries
+        Packet  : <none>
+        Returns : long entry_count;
+        Notes   : Returns the number of selected entries for the function.
+
+        Command : EXTCMD_ADD_FILE
+        Purpose : Adds a file to a lister
+        Packet  : struct addfile_packet {
+                    char                 *path;     // Path to add file to
+                    struct FileInfoBlock *fib;      // FileInfoBlock to add
+                    APTR                 lister;    // Lister pointer
+                  };
+        Returns : <none>
+        Notes   : Allows you to add a file or directory to a lister. The path
+                  field points to the full path of the file to add. fib is an
+                  initialised FileInfoBlock which is used to create the file
+                  entry. The lister pointer is found in the path_node
+                  structure, which is obtained via a call to EXTCMD_GET_SOURCE
+                  or EXTCMD_GET_DEST. The display is not updated until you
+                  call EXTCMD_DO_CHANGES, or your function returns.
+
+        Command : EXTCMD_DEL_FILE
+        Purpose : Delete a file from a lister
+        Packet  : struct delfile_packet {
+                    char    *path;      // Path file is in
+                    char    *name;      // Filename to delete
+                    APTR    lister;     // Lister pointer
+                  };
+        Returns : <none>
+        Notes   : This removes the specified file from any listers it is
+                  current shown in. The file itself is not deleted, only the
+                  display of it in the lister. The display is not updated
+                  until you call EXTCMD_DO_CHANGES, or your function returns.
+
+        Command : EXTCMD_LOAD_FILE
+        Purpose : Load a new file in a lister
+        Packet  : struct loadfile_packet {
+                    char    *path;      // Path file is in
+                    char    *name;      // Name of file
+                    short   flags;      // Flags
+                    short   reload;     // Reload existing file
+                  };
+        Returns : <none>
+        Notes   : This command is similar to EXTCMD_ADD_FILE except that it
+                  Examines() the file and supplies the FileInfoBlock
+                  automatically. 'path' is the full path of the file and
+                  'name' is the file name. The only valid flag at this time
+                  is LFF_ICON, which indicates that the icon (.info) of the
+                  supplied file is to be loaded instead of the file itself.
+                  If 'reload' is set to TRUE, an existing file will be
+                  reloaded (ie the old entry in the lister will be removed).
+
+        Command : EXTCMD_DO_CHANGES
+        Purpose : Perform file changes in listers
+        Packet  : <none>
+        Returns : <none>
+        Notes   : This command causes any changes made to listers by the
+                  EXTCMD_ADD_FILE, EXTCMD_DEL_FILE and EXTCMD_LOAD_FILE
+                  commands to be displayed. If your function returns without
+                  calling this command, the changes are displayed
+                  automatically.
+
+        Command : EXTCMD_CHECK_ABORT
+        Purpose : Check abort status in lister
+        Packet  : <undefined>
+        Returns : BOOL
+        Notes   : This command returns TRUE if your 'function' has been
+                  aborted by the user. This could have occurred because the
+                  user pressed escape or clicked the close button on a lister,
+                  or quit the program.
+
+        Command : EXTCMD_GET_WINDOW
+        Purpose : Get a lister's window pointer
+        Packet  : struct path_node *path
+        Returns : struct Window *window
+        Notes   : Returns a pointer to the Window for the lister specified by
+                  the path_node structure. This is useful if you want to open
+                  a requester over a lister window.
+
+        Command : EXTCMD_GET_HELP
+        Purpose : Get help on a topic
+        Packet  : char *topic
+        Returns : <none>
+        Notes   : This command causes Galileo to open the AmigaGuide help file and
+                  search for the named topic.
+
+        Command : EXTCMD_GET_PORT
+        Purpose : Get ARexx port name
+        Packet  : char name[40]
+        Returns : <none>
+        Notes   : This command copies the name of the Galileo ARexx port into the
+                  supplied buffer.
+
+        Command : EXTCMD_GET_SCREEN
+        Purpose : Get public screen name
+        Packet  : char name[40]
+        Returns : <none>
+        Notes   : This command copies the name of the Galileo public screen into
+                  the supplied buffer.
+
+        Command : EXTCMD_REPLACE_REQ
+        Purpose : Shows a "file exists - replace?" requester
+        Packet  : struct replacereq_packet {
+                    struct Window        *window;   // Window to open over
+                    struct Screen        *screen;   // Screen to open on
+                    IPCData              *ipc;      // Process IPC pointer
+                    struct FileInfoBlock *file1;    // First file information
+                    struct FileInfoBlock *file2;    // Second file information
+                    short                flags;     // Set to 0 for now
+                  };
+        Returns : Result of requester; REPLACE_ABORT for abort,
+                  REPLACE_LEAVE for skip or REPLACE_REPLACE for replace.
+                  If the REPLACEF_ALL flag is set, it indicates an "All"
+                  gadget (eg Skip All, Replace All)
+
+        Command : EXTCMD_GET_SCREENDATA
+        Purpose : Get information about the Galileo display
+        Packet  : <none>
+        Returns : struct GalileoScreenData {
+                    struct Screen   *screen;        // Pointer to Galileo screen
+                    struct DrawInfo *draw_info;     // DrawInfo structure
+                    USHORT          depth;          // Depth of screen
+                    USHORT          pen_alloc;      // Pen allocation flag
+                    USHORT          pen_array[16];  // User pen array
+                    USHORT          pen_count;      // Number of pens;
+                  };
+        Notes   : Returns a structure with useful information about the Galileo
+                  screen. This structure is READ ONLY!
+                  Call EXTCMD_FREE_SCREENDATA to free it.
+
+        Command : EXTCMD_FREE_SCREENDATA
+        Purpose : Free a GalileoScreenData structure
+        Packet  : struct GalileoScreenData *
+        Returns : <none>
+        Notes   : Frees the result of an EXTCMD_GET_SCREENDATA call
+
+`       Command : EXTCMD_SEND_COMMAND
+        Purpose : Send an ARexx command to Galileo
+        Packet  : struct command_packet {
+                    char    *command;       // Command to send
+                    ULONG   flags;          // Command flags
+                    char    *result;        // Result pointer
+                    ULONG   rc;             // Result code
+                  };
+        Returns : TRUE if the message was sent
+        Notes   : This command allows you to send an ARexx instruction
+                  directly to the Galileo ARexx port. Set the COMMANDF_RESULT
+                  flag if you want a result string returned; if one is,
+                  the 'result' field of the packet will contain a pointer
+                  to it. You MUST call FreeVec() on this pointer when you
+                  have finished with the result.
+

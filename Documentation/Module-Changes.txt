@@ -1,0 +1,51 @@
+Module changes:
+
+C module filename extention is changed from ".module" to ".gfmmodule"
+
+The prefix for callbacks is changed to from dc_ to gc_ for GaileoCallback.
+
+Some previously undocumented callbacks are now documented, and some new ones
+added. See "SDK/docs/hooks.doc".
+
+Commands from gfmmodules now detach if the user selects "Run Asynchronously" in
+the Function Editor.
+
+For this to work the Module_Entry function got a new argument "APTR *memhandlep"
+and now looks like this:
+int __saveds __asm L_Module_Entry(register __a0 char *args,
+    							  register __a1 struct Screen *screen,
+								  register __a2 IPCData *ipc,
+							      register __a3 IPCData *main_ipc,
+							      register __a4 APTR *memhandlep,
+							      register __d0 ULONG mod_id,
+							      register __d1 EXT_FUNC(func_callback))
+
+When "Run Asynchronously" is not selected, this pointer is null.
+
+When "Run Asynchronously" is selected, it is a pointer to a memory handle.
+
+You can use it as a handle for allocating memory,if you please, like this:
+
+mymem=AllocMemH(*memhandlep, size_of_allocation)
+
+All memory allocated with this handle will be freed when you module returns.
+The handle is not pooled. If you require pooling, you MUST create your own handle
+with NewMemHandle().
+
+This was mainly implemented to support modules that need source entries, but
+might outlive the closing of the source lister, or want to take it over completely.
+To make this work you have to take care of one more thing. As soon as you are
+finished with collecting entries from the source lister you must deallocate the
+FunctionHandle in you got with you "IPCData *ipc" (the one you reference with
+"IPCDATA(ipc)"). This is done like this:
+
+gc_FreePointerDirect(IPCDATA(ipc),GETPTR_HANDLE,0);
+
+Hooks, callbacks or AREXX commands that require the FunctionHandle CAN NOT be used
+after this call. And dc_RexxCommand MUST be used in place of gc_SendCommand even if
+it appears before this call.
+
+If you don't want to support running asynchronously. Or are porting a .module to
+.gfmmodule and just want it to work as before. You will have to add FUNCF_SYNC
+to your command flags in in you function definition(s). The effect of the
+"Run Asynchronously" setting will then be as before this change.

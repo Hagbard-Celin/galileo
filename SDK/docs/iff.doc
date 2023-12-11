@@ -1,0 +1,377 @@
+galileofm.library/IFFChunkID                           galileofm.library/IFFChunkID
+
+    NAME
+        IFFChunkID - get current chunk ID
+
+    SYNOPSIS
+        IFFChunkID(handle)
+                     A0
+
+        ULONG IFFChunkID(APTR);
+
+    FUNCTION
+        Returns the four-byte ID of the current chunk.
+
+    INPUTS
+        handle - IFF handle
+
+    RESULT
+        Returns chunk ID.
+
+    SEE ALSO
+        IFFOpen(), IFFGetFORM(), IFFNextChunk()
+
+galileofm.library/IFFChunkRemain                   galileofm.library/IFFChunkRemain
+
+    NAME
+        IFFChunkRemain - return size of remaining data
+
+    SYNOPSIS
+        IFFChunkRemain(handle)
+                         A0
+
+        long IFFChunkRemain(APTR);
+
+    FUNCTION
+        Returns the amout of data left to be read in the current chunk.
+
+    INPUTS
+        handle - IFF handle
+
+    RESULT
+        Returns size of data or 0 if no data left.
+
+    SEE ALSO
+        IFFOpen(), IFFNextChunk(), IFFChunkSize(), IFFReadChunkBytes()
+
+galileofm.library/IFFChunkSize                       galileofm.library/IFFChunkSize
+
+    NAME
+        IFFChunkSize - size of current chunk
+
+    SYNOPSIS
+        IFFChunkSize(handle)
+                       A0
+
+        long IFFChunkSize(APTR);
+
+    FUNCTION
+        Obtain the amount of data in the current chunk.
+
+    INPUTS
+        handle - IFF handle
+
+    RESULT
+        Returns the total number of bytes of data in the current chunk
+        (excluding the chunk header). If there is no valid current chunk,
+        returns -1.
+
+    SEE ALSO
+        IFFOpen(), IFFNextChunk(), IFFChunkRemain(), IFFReadChunkBytes()
+
+galileofm.library/IFFClose                               galileofm.library/IFFClose
+
+    NAME
+        IFFClose - close an IFF file
+
+    SYNOPSIS
+        IFFClose(handle)
+                   A0
+
+        void IFFClose(APTR);
+
+    FUNCTION
+        Closes an IFF file.
+
+    INPUTS
+        handle - file to close
+
+    RESULT
+        The file is closed.
+
+    SEE ALSO
+        IFFOpen()
+
+galileofm.library/IFFFailure                           galileofm.library/IFFFailure
+
+    NAME
+        IFFFailure - indicate failure to "safe" file routine
+
+    SYNOPSIS
+        IFFFailure(handle)
+                     A0
+
+        void IFFFailure(APTR)
+
+    FUNCTION
+        The IFFOpen() routine has a "safe" mode, where an existing IFF file
+        is renamed rather than being over-written. If you create a file in
+        this safe mode, and then subsequent IFF operations fail (with the
+        result that the whole operation fails), you should call this routine.
+        Then, when you call IFFClose(), the pre-existing file will be
+        renamed back to what it was instead of being deleted.
+
+    INPUTS
+        handle - IFF handle
+
+    RESULT
+        The 'failure' flag is set, and the "safe" file will be restored.
+
+    SEE ALSO
+        IFFOpen(), IFFClose()
+
+galileofm.library/IFFGetForm                           galileofm.library/IFFGetForm
+
+    NAME
+        IFFGetForm - get current FORM ID
+
+    SYNOPSIS
+        IFFGetForm(handle)
+                     A0
+
+        ULONG IFFGetForm(APTR);
+
+    FUNCTION
+        This routine returns the four-byte FORM ID of the file.
+
+    INPUTS
+        handle - IFF handle
+
+    RESULT
+        Returns the FORM ID, or 0 if no valid FORM.
+
+    SEE ALSO
+        IFFOpen(), IFFChunkID()
+
+galileofm.library/IFFNextChunk                       galileofm.library/IFFNextChunk
+
+    NAME
+        IFFNextChunk - skip to the next chunk
+
+    SYNOPSIS
+        IFFNextChunk(handle, chunkid)
+                       A0       D0
+
+        ULONG IFFNextChunk(APTR, ULONG);
+
+    FUNCTION
+        This is the main work-horse of the IFF routines. This function will
+        scan through the IFF file from the current position looking for the
+        next chunk. You can optionally specify a chunk to look for.
+
+    INPUTS
+        handle - IFF handle
+        chunkid - ID of chunk to look for, or 0 for next chunk
+
+    RESULT
+        Returns ID of the new chunk, or 0 for error or end-of-file.
+
+    NOTES
+        The IFF routines do not handle LISTs, CATs or other complicated IFF
+        structures. This routine will handle multiple FORMs within the one
+        file, which allows it to read ANIMs.
+
+    SEE ALSO
+        IFFOpen(), IFFReadChunkBytes()
+
+galileofm.library/IFFOpen                                 galileofm.library/IFFOpen
+
+    NAME
+        IFFOpen - open an IFF file
+
+    SYNOPSIS
+        IFFOpen(name, mode, form)
+                 A0    D0    D1
+
+        APTR IFFOpen(char *, USHORT, ULONG);
+
+    FUNCTION
+        This routine opens either a disk-based file or the clipboard for
+        IFF reading/writing. This and the other IFF routines in the
+        galileofm.library are far simpler (and seem to be less buggy) than the
+        iffparse.library functions. These routines were specifically designed
+        to make the reading and writing of "normal" IFF files as easy as
+        possible. They use the buffered IO routines for high performance.
+        They do not support LISTs, CATs or other complicated IFF structures.
+
+    INPUTS
+        name - Filename or clipboard unit to open.
+        mode - Mode to open in :
+
+                   IFF_READ       - open for reading
+                   IFF_WRITE      - open for writing
+                   IFF_CLIP_READ  - open clipboard for reading
+                   IFF_CLIP_WRITE - open clipboard for writing
+
+               This flag can be set in conjunction with IFF_WRITE :
+
+                   IFF_SAFE       - backup existing file
+
+        form - If this is not 0, it specifies an IFF FORM. If you open
+               the file for reading, it will be tested against this FORM and
+               the open will fail if the FORM does not match. If you open
+               for writing, this specifies the FORM of the file to be
+               created.
+
+    RESULT
+        If successful, returns an IFF handle which you use in all subsequent
+        calls to the IFF routines. Returns 0 on failure, and IoErr() is set
+        to the reason for the failure.
+
+    NOTES
+        To use the clipboard, you must specify either IFF_CLIP_READ or
+        IFF_CLIP_WRITE. The clipboard unit you want is passed as the name
+        parameter. For example, to open clipboard unit 3 to write an ILBM,
+
+            handle = IFFOpen( (char *)3, IFF_CLIP_WRITE, ID_ILBM );
+
+        If you specify IFF_WRITE|IFF_SAFE, and the file you are creating
+        already exists, it will be renamed to a temporary filename. When
+        IFFClose() is called, the temporary file will be deleted. If you
+        call IFFFailure() because of a failure at some stage, it sets a flag
+        which causes the old file to be restored. If you specify IFF_SAFE
+        and the file already exists, and is read-only, this call will fail.
+
+    SEE ALSO
+        IFFClose(), IFFFailure()
+
+galileofm.library/IFFPopChunk                         galileofm.library/IFFPopChunk
+
+    NAME
+        IFFPopChunk - flush the chunk cache
+
+    SYNOPSIS
+        IFFPopChunk(handle)
+                      A0
+
+        long IFFPopChunk(APTR);
+
+    FUNCTION
+        This function flushes the current chunk write cache and writes the
+        chunk to disk.
+
+    INPUTS
+        handle - IFF handle
+
+    RESULT
+        The current chunk is written to disk. Returns TRUE if successful.
+
+    SEE ALSO
+        IFFOpen(), IFFPushChunk(), IFFWriteChunkBytes()
+
+galileofm.library/IFFPushChunk                       galileofm.library/IFFPushChunk
+
+    NAME
+        IFFPushChunk - start writing a chunk
+
+    SYNOPSIS
+        IFFPushChunk(handle, id)
+                       A0    D0
+
+        long IFFPushChunk(APTR, ULONG);
+
+    FUNCTION
+        This routine initialises a new chunk to be written to the file.
+        It is similar in concept to the PushChunk() routine in
+        iffparse.library, but does not support nesting of chunks. Therefore,
+        you should always call IFFPopChunk() before you call IFFPushChunk()
+        again.
+
+    INPUTS
+        handle - IFF handle
+        id - ID of chunk to write
+
+    RESULT
+        The chunk is initialised for writing. The usual procedure is :
+
+            1. IFFPushChunk()
+            2. One or more calls to IFFWriteChunkBytes()
+            3. IFFPopChunk()
+
+    SEE ALSO
+        IFFOpen(), IFFWriteChunkBytes(), IFFPopChunk()
+
+galileofm.library/IFFReadChunkBytes             galileofm.library/IFFReadChunkBytes
+
+    NAME
+        IFFReadChunkBytes - read data from a chunk
+
+    SYNOPSIS
+        IFFReadChunkBytes(handle, buffer, size)
+                            A0      A1     D0
+
+        long IFFReadChunkBytes(APTR, APTR, long);
+
+    FUNCTION
+        This routine reads data from the current position in the current
+        chunk.
+
+    INPUTS
+        handle - IFF handle
+        buffer - buffer to store data
+        size - amount of data to read
+
+    RESULT
+        Returns the amount of data read or -1 for failure. Will not read
+        past the end of a chunk.
+
+    SEE ALSO
+        IFFOpen(), IFFNextChunk(), IFFChunkSize()
+
+galileofm.library/IFFWriteChunkBytes           galileofm.library/IFFWriteChunkBytes
+
+    NAME
+        IFFWriteChunkBytes - write data in a chunk
+
+    SYNOPSIS
+        IFFWriteChunkBytes(handle, data, size)
+                             A0     A1    D0
+
+        long IFFWriteChunkBytes(APTR, APTR, long);
+
+    FUNCTION
+        This routine writes data to a chunk that was initialised with
+        PushChunk(). The data is generally cached and not written to the disk
+        until PopChunk() is called, resulting in higher performance.
+
+    INPUTS
+        handle - IFF handle
+        data - data to write
+        size - amount of data
+
+    RESULT
+        Returns TRUE if successful.
+
+    SEE ALSO
+        IFFOpen(), IFFPushChunk(), IFFPopChunk()
+
+galileofm.library/IFFWriteChunk                     galileofm.library/IFFWriteChunk
+
+    NAME
+        IFFWriteChunk - write a chunk straight out
+
+    SYNOPSIS
+        IFFWriteChunk(handle, data, id, size)
+                        A0     A1   D0   D1
+
+        long IFFWriteChunk(APTR, APTR, ULONG, ULONG);
+
+    FUNCTION
+        If you have a single structure or piece of data you wish to write
+        as a chunk, this routine is simpler than the PushChunk()/PopChunk()
+        method.
+
+    INPUTS
+        handle - IFF handle
+        data - data to write
+        id - ID of chunk
+        size - size of data
+
+    RESULT
+        If successful, the chunk is written straight to the file. Returns
+        FALSE on failure.
+
+    SEE ALSO
+        IFFOpen(), IFFPushChunk(), IFFPopChunk(), IFFWriteChunkBytes()
+
+

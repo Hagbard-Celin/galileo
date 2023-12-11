@@ -1,0 +1,151 @@
+#ifndef CLEANUP_H
+#define CLEANUP_H
+
+
+/****************************************************************************/
+
+
+/* This file was created automatically by CatComp.
+ * Do NOT edit by hand!
+ */
+
+
+#ifndef EXEC_TYPES_H
+#include <exec/types.h>
+#endif
+
+#ifdef CATCOMP_ARRAY
+#undef CATCOMP_NUMBERS
+#undef CATCOMP_STRINGS
+#define CATCOMP_NUMBERS
+#define CATCOMP_STRINGS
+#endif
+
+#ifdef CATCOMP_BLOCK
+#undef CATCOMP_STRINGS
+#define CATCOMP_STRINGS
+#endif
+
+
+/****************************************************************************/
+
+
+#ifdef CATCOMP_NUMBERS
+
+#define MSG_PLEASE_WAIT 1000
+#define MSG_CLEANUP_TITLE 1001
+#define MSG_CLEANUP_DESC 1002
+
+#endif /* CATCOMP_NUMBERS */
+
+
+/****************************************************************************/
+
+
+#ifdef CATCOMP_STRINGS
+
+#define MSG_PLEASE_WAIT_STR "Please wait..."
+#define MSG_CLEANUP_TITLE_STR "Galileo - CleanUp Djinn"
+#define MSG_CLEANUP_DESC_STR "Perform cleanup maintenance"
+
+#endif /* CATCOMP_STRINGS */
+
+
+/****************************************************************************/
+
+
+#ifdef CATCOMP_ARRAY
+
+struct CatCompArrayType
+{
+    LONG   cca_ID;
+    STRPTR cca_Str;
+};
+
+static const struct CatCompArrayType CatCompArray[] =
+{
+    {MSG_PLEASE_WAIT,(STRPTR)MSG_PLEASE_WAIT_STR},
+    {MSG_CLEANUP_TITLE,(STRPTR)MSG_CLEANUP_TITLE_STR},
+    {MSG_CLEANUP_DESC,(STRPTR)MSG_CLEANUP_DESC_STR},
+};
+
+#endif /* CATCOMP_ARRAY */
+
+
+/****************************************************************************/
+
+
+#ifdef CATCOMP_BLOCK
+
+static const char CatCompBlock[] =
+{
+    "\x00\x00\x03\xE8\x00\x10"
+    MSG_PLEASE_WAIT_STR "\x00\x00"
+    "\x00\x00\x03\xE9\x00\x18"
+    MSG_CLEANUP_TITLE_STR "\x00"
+    "\x00\x00\x03\xEA\x00\x1C"
+    MSG_CLEANUP_DESC_STR "\x00"
+};
+
+#endif /* CATCOMP_BLOCK */
+
+
+/****************************************************************************/
+
+
+struct LocaleInfo
+{
+    APTR li_LocaleBase;
+    APTR li_Catalog;
+};
+
+
+#ifdef CATCOMP_CODE
+
+struct CatCompBlockType
+{
+	LONG	ccb_ID;
+	UWORD	ccb_StringSize;
+};
+
+STRPTR GetString(struct LocaleInfo * li, LONG stringNum)
+{
+	const struct CatCompBlockType * ccb = (APTR)CatCompBlock;
+	const struct CatCompBlockType * ccb_stop = (APTR)&((BYTE *)ccb)[sizeof(CatCompBlock)];
+
+	STRPTR builtin = NULL;
+	STRPTR result = NULL;
+
+	while(ccb < ccb_stop && ccb->ccb_StringSize > 0)
+	{
+		if(ccb->ccb_ID == stringNum)
+		{
+			builtin = (STRPTR)&ccb[1];
+			break;
+		}
+
+		ccb = (struct CatCompBlockType *)&((BYTE *)ccb)[sizeof(*ccb) + ccb->ccb_StringSize];
+	}
+
+	if(li != NULL && li->li_LocaleBase != NULL)
+	{
+		struct Library * LocaleBase = li->li_LocaleBase;
+
+		result = GetCatalogStr(li->li_Catalog, stringNum, builtin);
+	}
+	else
+	{
+		result = builtin;
+	}
+
+	return(result);
+}
+
+
+#endif /* CATCOMP_CODE */
+
+
+/****************************************************************************/
+
+
+#endif /* CLEANUP_H */

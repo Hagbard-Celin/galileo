@@ -1,0 +1,59 @@
+
+OBJS = $(OBJ)font.o $(OBJ)font_data.o $(OBJ)font_strings.o
+
+all : ViewFont
+
+################
+
+ViewFont: $(BIN)ViewFont
+
+#$(OBJ)font_strings.o : font.strings
+#	 -delete >nil: $(OBJ)ViewFont/font_strings.o quiet
+#	 sc font_strings.c objname $@
+
+$(BIN)ViewFont : $(OBJS) 
+	slink with <<
+define __ctype=___ctype
+$(ADDSYM) from lib:c.o $(OBJS) 
+to $(BIN)ViewFont
+lib lib:sc.lib lib:amiga.lib lib:debug.lib lib:galileofm.lib  $(DEBUGLIB)
+noicons
+$(STRIPDEBUG)
+sd
+sc
+<
+
+################
+
+.c.o:
+	sc $*.c objname $@
+.asm.o:
+	sc:c/asm -o$(OBJ) -iASMINC: $*.asm
+.cd.strings:
+	catcomp descriptor=$*.cd cfile=$*.strings
+.strings.o:
+    -delete >nil: $@ quiet
+	sc $*_strings.c objname $@
+
+################
+
+depend:
+    makedepend -Y -DAMIGA -p$$(OBJ) -Q$(OBJ) $(OBJS)
+
+################
+
+clean:
+    -delete $(OBJS) quiet
+    -delete $(BIN)ViewFont quiet
+#    touch >nil: \#?.(cd|fd)
+
+
+
+# DO NOT DELETE THIS LINE makedepend needs it
+
+$(OBJ)font.o: font.c font.h font.strings //Library/galileofmbase.h
+$(OBJ)font.o: //Program/galileo_config.h //Library/galileofmpragmas.h
+$(OBJ)font_data.o: font_data.c font.h font.strings //Library/galileofmbase.h
+$(OBJ)font_data.o: //Program/galileo_config.h //Library/galileofmpragmas.h
+$(OBJ)font_strings.o: font_strings.c font.strings //Library/galileofmbase.h
+$(OBJ)font_strings.o: //Program/galileo_config.h //Library/galileofmpragmas.h

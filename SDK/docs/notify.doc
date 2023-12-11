@@ -1,0 +1,208 @@
+galileofm.library/AddNotifyRequest               galileofm.library/AddNotifyRequest
+
+    NAME
+        AddNotifyRequest - add a request to Galileo's notify chain
+
+    SYNOPSIS
+        AddNotifyRequest(type, userdata, port)
+                          D0      D1      A0
+
+        APTR AddNotifyRequest(ULONG, ULONG, struct MsgPort *);
+
+    FUNCTION
+        Galileo keeps track of several different system events, and this routine
+        allows you to request notification on them.
+
+        The events currently available for notification:
+
+            GN_WRITE_ICON      - an icon is written to disk
+            GN_APP_ICON_LIST   - an AppIcon is added or removed
+            GN_APP_MENU_LIST   - an AppMenuItem is added or removed
+            GN_CLOSE_WORKBENCH - CloseWorkbench() has been called
+            GN_OPEN_WORKBENCH  - OpenWorkbench() has been called
+            GN_RESET_WORKBENCH - the workbench screen has been closed and
+                                 re-opened
+            GN_DISKCHANGE      - a disk has been inserted or removed
+            GN_DOS_ACTION      - a DOS event has occurred. In Galileo.5,
+                                 these messages are only available if the
+                                 Galileo/DOSPatch environment variable is set.
+            GN_REXX_UP         - the ARexx process has been started.
+            GN_FLUSH_MEM       - low memory handler called, please free memory
+            GN_APP_WINDOW_LIST - AppWindow added or removed
+
+        Several Galileo events are also available for notification:
+
+            GN_GALILEOFM_START      - Galileo has started
+            GN_GALILEOFM_QUIT       - Galileo has quit
+            GN_GALILEOFM_HIDE       - Galileo has been hidden
+            GN_GALILEOFM_SHOW       - Galileo has been revealed
+
+        When an event occurs that you have requested notification for, a
+        GalileoNotify message is sent to your message port. The message
+        structure is defined as follows:
+
+            gn_Msg      - Exec message header
+
+            gn_Type     - Event type
+
+            gn_UserData - the userdata you supplied to AddNotifyRequest()
+
+            gn_Data     - data specific to the type of event
+
+            gn_Flags    - flags specific to the type of event
+
+            gn_Fib      - a FileInfoBlock for some types of event
+
+            gn_Name     - pathname specific to the type of event
+
+
+        The event-specific fields are used in the following way:
+
+            GN_WRITE_ICON
+            -------------
+                gn_Data  - NULL
+                gn_Flags - if DNF_ICON_REMOVED is set, icon was deleted
+                gn_Fib   - NULL
+                gn_Name  - full pathname of icon
+
+            GN_APP_ICON_LIST
+            ----------------
+                gn_Data  - pointer to the AppIcon added or removed
+                gn_Flags - if DNF_ICON_REMOVED is set, icon was removed
+                           if DNF_ICON_CHANGED is set, the icon image
+                           was changed
+                gn_Fib   - NULL
+                gn_Name  - NULL
+
+            GN_APP_MENU_LIST
+            ----------------
+                gn_Data  - pointer to the AppMenuItem added or removed
+                gn_Flags - if DNF_ICON_REMOVED is set, item was removed
+                gn_Fib   - NULL
+                gn_Name  - NULL
+
+            GN_DISKCHANGE
+            -------------
+                gn_Data  - disk units the change occurred in (bits 0-3
+                           represent units 0-3) *
+                gn_Flags - which units have disks in them (bits 0-3
+                           represent units 0-3) *
+                gn_Fib   - NULL
+                gn_Name  - device that was changed
+
+                * note that these are only valid for DF0: through to DF3:
+
+            GN_DOS_ACTION
+            -------------
+                gn_Data  - NULL
+                gn_Flags - which DOS action occurred (see <galileofm/notify.h>)
+                gn_Fib   - FileInfoBlock with file information. This is
+                           supplied for all actions except Delete.
+                gn_Name  - full pathname of file involved
+
+            GN_APP_WINDOW_LIST
+            ----------------
+                gn_Data  - pointer to the AppWindow added or removed
+                gn_Flags - if DNF_WINDOW_REMOVED is set, window was removed
+                           (in this case the AppWindow in gn_Data is no longer
+                           valid)
+                gn_Fib   - NULL
+                gn_Name  - NULL
+
+    INPUTS
+        type - type of events you want to be notified of. One request can
+               ask for multiple events. See <galileofm/notify.h> for the full
+               list.
+
+        userdata - a user-defined data field that is passed in any notify
+                   messages.
+
+        port - message port to send notification messages to.
+
+    NOTES
+        Most notification messages are sent "reply free", meaning you must
+        use the ReplyFreeMsg() call to reply to them. Otherwise, the
+        message memory will be lost.
+
+    RESULT
+        Returns a notify handle which you use to remove the request.
+
+    SEE ALSO
+        RemoveNotifyRequest(), SetNotifyRequest()
+
+galileofm.library/RemoveNotifyRequest         galileofm.library/RemoveNotifyRequest
+
+    NAME
+        RemoveNotifyRequest - remove a notification request
+
+    SYNOPSIS
+        RemoveNotifyRequest(request)
+                              A0
+
+        void RemoveNotifyRequest(APTR);
+
+    FUNCTION
+        Removes a notify request that was added with AddNotifyRequest().
+
+    INPUTS
+        request - request to remove
+
+    RESULT
+        The request is removed. You will receive no more notifications for
+        that request. Once you have removed the request you should check
+        your message port for outstanding messages and reply to them.
+
+    SEE ALSO
+        AddNotifyRequest()
+
+galileofm.library/ReplyFreeMsg                       galileofm.library/ReplyFreeMsg
+
+    NAME
+        ReplyFreeMsg - reply or free a message
+
+    SYNOPSIS
+        ReplyFreeMsg(msg)
+                      A0
+
+        void ReplyFreeMsg(struct Message *);
+
+    FUNCTION
+        If the message has a valid ReplyPort, this function simply passes it
+        through to ReplyMsg(). If the message has no reply port set, this
+        function calls FreeVec() on the message to free it.
+
+    INPUTS
+        msg - message to reply or free
+
+    NOTES
+        Most Galileo notification messages are sent "reply free", meaning you
+        MUST use this function to reply to them or the memory will be lost.
+
+    SEE ALSO
+        AddNotifyRequest()
+
+galileofm.library/SetNotifyRequest               galileofm.library/SetNotifyRequest
+
+    NAME
+        SetNotifyRequest - change notification events
+
+    SYNOPSIS
+        SetNotifyRequest(request, new_type, mask)
+                           A0        D0      D1
+
+        void SetNotifyRequest(APTR, ULONG, ULONG);
+
+    FUNCTION
+        This routine changes the type of events that an existing notification
+        request is interested in.
+
+    INPUTS
+        request - notification request to change
+        new_type - the new event flags to receive notification about
+        mask - mask of event flags to change (any events not specified in the
+               mask field will not be modified)
+
+    SEE ALSO
+        AddNotifyRequest()
+
+

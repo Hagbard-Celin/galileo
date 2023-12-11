@@ -1,0 +1,9 @@
+#pragma libcall NewIconBase GetNewDiskObject 1e 801
+#pragma libcall NewIconBase PutNewDiskObject 24 9802
+#pragma libcall NewIconBase FreeNewDiskObject 2a 801
+#pragma libcall NewIconBase newiconPrivate1 30 801
+#pragma libcall NewIconBase newiconPrivate2 36 801
+#pragma libcall NewIconBase newiconPrivate3 3c 801
+#pragma libcall NewIconBase RemapChunkyImage 42 9802
+#pragma libcall NewIconBase FreeRemappedImage 48 9802
+#pragma libcall NewIconBase GetDefNewDiskObject 4e 001

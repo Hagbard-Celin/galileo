@@ -1,0 +1,16 @@
+
+all: gst gstffp
+
+################
+
+gst:
+    sc noobjname mgst=//3rdPartyInclude/os.gst gst.c
+
+gstffp:
+    sc noobjname math=ffp mgst=//3rdPartyInclude/osffp.gst gst.c
+
+################
+
+clean:
+    -delete //3rdPartyInclude/\#?.gst quiet
+

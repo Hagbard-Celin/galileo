@@ -1,0 +1,381 @@
+galileofm.library/Atoh                                       galileofm.library/Atoh
+
+    NAME
+        Atoh - convert a hex ascii string to a long
+
+    SYNOPSIS
+        Atoh(string, len)
+               A0     D0
+
+        long Atoh(char *, long);
+
+    FUNCTION
+        Converts an ascii representation of a hex value to a long value.
+
+    INPUTS
+        string - string to convert
+        len - length of string to convert, or -1 for the whole string
+
+    RESULT
+        Returns the long value equivalent to the ascii string.
+
+galileofm.library/BtoCStr                                 galileofm.library/BtoCStr
+
+    NAME
+        BtoCStr - convert a BCPL string to a C string
+
+    SYNOPSIS
+        BtoCStr(bstr, cstr, length)
+                 A0    A1     D0
+
+        void BtoCStr(BSTR, char *, long);
+
+    FUNCTION
+        Converts the supplied BSTR to a null-terminated C string.
+
+    INPUTS
+        bstr - BCPL pointer to BSTR to convert
+        cstr - buffer to store converted string in
+        length - size of buffer
+
+    RESULT
+        The string is converted. BSTRs are limited to 255 characters.
+
+galileofm.library/BuildKeyString                   galileofm.library/BuildKeyString
+
+    NAME
+        BuildKeyString - build a commodities key code string
+
+    SYNOPSIS
+        BuildKeyString(code, qual, qual_mask, qual_same, buffer)
+                        D0    D1      D2         D3        A0
+
+        void BuildKeyString(USHORT, USHORT, USHORT, USHORT, char *);
+
+    FUNCTION
+        Takes the supplied key code and qualifier and converts them to an
+        ASCII string that is compatible with Commodities.
+
+    INPUTS
+        code - key code
+        qual - key qualifier
+        qual_mask - mask of the qualifiers to care about
+        qual_same - which qualifiers are equivalent
+
+    RESULT
+        The string is stored in the supplied buffer. String lenghts can
+        vary but for safety this buffer should be at least 80 bytes.
+
+    SEE ALSO
+        commodities.library/ParseIX()
+
+galileofm.library/BytesToString                     galileofm.library/BytesTOString
+
+    NAME
+        BytesToString - build a string representation of a byte size
+
+    SYNOPSIS
+        BytesToString(bytes, buffer, places, separator)
+                       D0      A0      D1       D2
+
+        void BytesToString(ULONG, char *, short, char);
+
+    FUNCTION
+        This routine takes a long value and creates a string to represent
+        that value as an expression of size. Some examples are :
+
+                 102       ->    102b
+                 5804      ->    5K
+                 1829382   ->    1.8M
+
+    INPUTS
+        bytes - byte value
+        buffer - buffer to store result
+        places - number of decimal places. This must be set to 1 currently.
+        separator - column separator (eg a comma could produce "1,193")
+
+    RESULT
+        The string is stored in the buffer. The buffer should be at least
+        16 bytes long.
+
+galileofm.library/CalcPercent                         galileofm.library/CalcPercent
+
+    NAME
+        CalcPercent - calculate a percentage value
+
+    SYNOPSIS
+        CalcPercent(amount, total, utility_lib)
+                      D0      D1        A0
+
+        long CalcPercent(ULONG, ULONG, struct Library *);
+
+    FUNCTION
+        Calculates the percentage that amount is of total. For
+        example, with amount == 25 and total == 50, the percentage
+        returned would be 50.
+
+    INPUTS
+        amount - amount of total
+        total - total value
+        utility_lib - requires a pointer to UtilityBase
+
+galileofm.library/ConvertRawKey                     galileofm.library/ConvertRawKey
+
+    NAME
+        ConvertRawKey - convert a key from the raw key code
+
+    SYNOPSIS
+        ConvertRawKey(code, qual, keybuf)
+                       D0    D1     A0
+
+        BOOL ConvertRawKey(USHORT, USHORT, char *);
+
+    FUNCTION
+        Takes the supplied code and qualifier and returns the equivalent
+        key in the current key map. This function provides a convenient path
+        to the console.device's RawKeyConvert() routine.
+
+    INPUTS
+        code - key code
+        qual - key qualifier
+        keybuf - buffer to store key
+
+    RESULT
+        The key is stored in the supplied buffer. Most keys only require
+        a single byte but in case one is larger the buffer should be at
+        least 8 bytes in size.
+
+    SEE ALSO
+        console.device/RawKeyConvert()
+
+galileofm.library/DivideToString                   galileofm.library/DivideToString
+
+    NAME
+        DivideToString - divide two numbers, store the result as ASCII
+
+    SYNOPSIS
+        DivideToString(buffer, numerator, denominator, places, separator)
+                         A0       D0          D1         D2        D3
+
+        void DivideToString(char *, ULONG, ULONG, short, char);
+
+    FUNCTION
+        This routine divides the numerator by the denominator, and stores
+        the result with one decimal place precision as an ASCII string.
+
+    INPUTS
+        string - buffer to store result
+        numerator - number to divide
+        denominator - number to divide by
+        places - decimal places, must be set to 1 for now
+        separator - columns separator (eg a comma might produce "1,103")
+
+    RESULT
+        The division is performed and the result stored in the buffer.
+
+galileofm.library/DivideU                                 galileofm.library/DivideU
+
+    NAME
+        DivideU - 32bit unsigned division with remainder
+
+    SYNOPSIS
+        DivideU(numerator, denominator, remainptr, utillib)
+                   D0           D1          A0        A1
+
+        ULONG DivideU(ULONG, ULONG, ULONG *, struct Library *);
+
+    FUNCTION
+        This routine calls the utility.library UDivMod32() routine, and
+        returns the result. Any remainder is stored in the supplied
+        variable.
+
+    INPUTS
+        numerator - number to divide
+        denominator - number to divide by
+        remainptr - pointer to ULONG to store the remainder
+        utillib - pointer to UtilityBase
+
+    RESULT
+        Returns the integer result. The remainder is stored in the supplied
+        variable.
+
+    SEE ALSO
+        utility.library/UDivMod32()
+
+galileofm.library/Itoa                                       galileofm.library/Itoa
+
+    NAME
+        Itoa - converts signed integer to a string
+
+    SYNOPSIS
+        Itoa(num, string, separator)
+              D0     A0       D1
+
+        void Itoa(long, char *, char);
+
+    FUNCTION
+        This routine takes the supplied signed number and converts it to
+        an ASCII string.
+
+    INPUTS
+        num - number to convert
+        string - string to store result
+        separator - column separator character, or 0 for no separator.
+
+    RESULT
+        The string is stored in the supplied buffer.
+
+    SEE ALSO
+        ItoaU()
+
+galileofm.library/ItoaU                                     galileofm.library/ItoaU
+
+    NAME
+        ItoaU - converts unsigned integer to a string
+
+    SYNOPSIS
+        ItoaU(num, string, separator)
+               D0     A0       D1
+
+        void ItoaU(long, char *, char);
+
+    FUNCTION
+        This routine takes the supplied unsigned number and converts it to
+        an ASCII string.
+
+    INPUTS
+        num - number to convert
+        string - string to store result
+        separator - column separator character, or 0 for no separator.
+
+    RESULT
+        The string is stored in the supplied buffer.
+
+    SEE ALSO
+        Itoa()
+
+galileofm.library/QualValid                             galileofm.library/QualValid
+
+    NAME
+        QualValid - mask out invalid qualifiers
+
+    SYNOPSIS
+        QualValid(qual)
+                   D0
+
+        USHORT QualValid(USHORT);
+
+    FUNCTION
+        Masks out invalid qualifiers from the supplied value and returns
+        the result.
+
+    INPUTS
+        qual - qualifier mask
+
+    RESULT
+        The return value is the new qualifier mask. Only the following
+        qualifiers are considered "valid" for operations within Galileo :
+
+            IEQUALIFIER_LCOMMAND, IEQUALIFIER_RCOMMAND,
+            IEQUALIFIER_LSHIFT, IEQUALIFIER_RSHIFT,
+            IEQUALIFIER_LALT, IEQUALIFIER_RALT,
+            IEQUALIFIER_CONTROL, IEQUALIFIER_NUMERICPAD
+
+galileofm.library/Random                                    galileofm.library/Random
+
+    NAME
+        Random - generate a psuedo-random number
+
+    SYNOPSIS
+        Random(limit)
+                D0
+
+        long Random(long);
+
+    FUNCTION
+        Returns a psuedo-random number between 0 and 'limit' inclusive.
+
+    INPUTS
+        limit - upper limit of number
+
+    RESULT
+        Returns random number.
+
+    SEE ALSO
+        Seed()
+
+galileofm.library/StrCombine                           galileofm.library/StrCombine
+
+    NAME
+        StrCombine - combine two strings into one buffer
+
+    SYNOPSIS
+        StrCombine(buffer, first, second, size)
+                     A0      A1     A2     D0
+
+        BOOL StrCombine(char *, char *, char *, long);
+
+    FUNCTION
+        Combines the two supplied strings into the one buffer.
+
+    INPUTS
+        buffer - buffer to store result
+        first - first string
+        second - second string
+        size - size of buffer
+
+    RESULT
+        Returns TRUE if both strings fitted in the buffer, or FALSE
+        if they had to be truncated.
+
+    SEE ALSO
+        StrConcat()
+
+galileofm.library/StrConcat                             galileofm.library/StrConcat
+
+    NAME
+        StrConcat - concatenate two strings
+
+    SYNOPSIS
+        StrConcat(first, second, size)
+                    A0     A1     D0
+
+        BOOL StrConcat(char *, char *, long);
+
+    FUNCTION
+        Joins the second string to the end of the first string.
+
+    INPUTS
+        first - first string
+        second - string to join
+        size - size of first buffer
+
+    RESULT
+        The second string is joined to the end of the first string.
+        This function returns TRUE if the second string fitted in the
+        buffer, or FALSE if it had to be truncated.
+
+    SEE ALSO
+        StrCombine()
+
+galileofm.library/Seed                                       galileofm.library/Seed
+
+    NAME
+        Seed - seed the random number generator
+
+    SYNOPSIS
+        Seed(seed)
+              D0
+
+        void Seed(long);
+
+    FUNCTION
+        Seeds the random number generator.
+
+    INPUTS
+        seed - value to seed generator with
+
+    SEE ALSO
+        Random()
+
+

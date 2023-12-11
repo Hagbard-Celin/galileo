@@ -1,0 +1,48 @@
+Galileo is an Open Source development effort with the code base and
+design provided by the following people:
+
+Original version of magellan2 for SAS/C by
+ - Jonathan Potter & GP Software
+
+Sources are free because of:
+ - Olaf Schönweiß and all the ppl who donated
+
+Original verson of XAD module by
+ - Mladen Milinkovic <mladen.milinkovic@ri.tel.hr>
+
+Original FTP module by
+ - Andrew Dunbar
+
+Various bug fixes and enhansments by
+ - Roman Kargin <kas1e@yandex.ru>
+ - Szilard Biro
+ - Mathias Heyer
+
+Toolbar Images and Icons by
+ - Trevor Morris
+ - Leo Davidson
+ - Roman Patzner
+Also see README-Icons.txt
+
+Galileo, M68k GPL version for SAS/C by
+ - Hagbard Celine
+
+---
+
+Opus® and Directory Opus® and associated images are registered trademarks of
+GPSoftware.
+
+DOpus(TM), DirOpus(TM) and Opus File Manager(TM) are trademarked 1991 by
+GPSoftware.
+
+Opus Magellan (TM) is trademarked 1996 GPSoftware.
+
+All other trademarks are the property of their respective owners.
+
+The release of Directory Opus 5 under the GPL in NO WAY affects
+the existing commercial status of Directory Opus for Windows.
+
+For more information on Directory Opus for Windows please see:
+
+                 http://www.gpsoft.com.au
+

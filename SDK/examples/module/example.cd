@@ -1,0 +1,17 @@
+; ************************************************* 
+; Catalog description file for envoy.module
+; ************************************************* 
+;
+;
+MSG_TITLE (1000//)
+Example Module
+;
+MSG_EXAMPLE_DESC (//)
+Example of an Galileo module
+;
+MSG_MESSAGE (//)
+Welcome to the Galileo example module!
+;
+MSG_OK (//)
+OK
+;

@@ -1,0 +1,11 @@
+The prefix for AREXX scripts is changed to ".galileo"
+
+The AREXX port name is changed to "GALILEO.x", where x is the instance number
+of the program (usually 1).
+
+The "dopus" commands has been renamed to "galileo".
+
+The command "lister query" has a new argument:
+"lister query <handle> sourcedestlock"
+This returns "1" if the lister is locked as either a source or a destination
+lister, or "0" otherwise.

@@ -1,0 +1,17 @@
+; ************************************************* 
+; Catalog description file for debug.gfmmodule
+; ************************************************* 
+;
+;
+MSG_PRINT_DESC (1000//)
+Debug-Print Tracked Resources
+;
+MSG_PRINT_COMPACT_DESC (//)
+Debug-Print Tracked Resources Compact
+;
+MSG_PRINT_HANDLES_DESC (//)
+Debug-Print Tracked Memhancles
+;
+MSG_PRINT_HANDLES_COMPACT_DESC (//)
+Debug-Print Tracked Memhandles Compact
+;

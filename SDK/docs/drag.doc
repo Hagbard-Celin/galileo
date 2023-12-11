@@ -1,0 +1,242 @@
+galileofm.library/Drag Routines                     galileofm.library/Drag Routines
+
+    No, this isn't a new form of software-based cabaret act. The drag
+    routines in the galileofm.library make it easy for you to implement your
+    own drag and drop system.
+
+    The DragInfo structure is the key of this system. Calling the
+    GetDragInfo() function will create one of these structures, and you
+    use it in all subsequent calls.
+
+    The important fields of the DragInfo structure are :
+
+        flags     You can set flags to modify the behavior of dragged images.
+
+                  DRAGF_OPAQUE indicates that the drag image should be opaque;
+                  that is, colour 0 does not allow the background to show
+                  through.
+
+                  DRAGF_NO_LOCK indicates that the drag routines should not
+                  lock the screen layers themselves.
+
+                  DRAGF_TRANSPARENT indicates that the drag image should be
+                  transparent. Used in conjunction with DRAGF_OPAQUE, it
+                  allows you to create irregular shaped images.
+
+        drag_rp   This is a RastPort that you can use to draw into the
+                  drag image.
+
+    The other fields of the DragInfo structure can be used by you, but
+    normally they should be left alone.
+
+    The usual process of dragging an image is :
+
+        1. GetDragInfo()
+        2. Either render into di->drag_rp or call GetDragImage()
+        3. Call GetDragMask() if you rendered directly
+        4. If you set DRAGF_NO_LOCK, LockLayers()
+        5. Multiple calls to ShowDragImage() to make the image visible
+           and move it around (in response to mouse movements)
+        6. FreeDragInfo() to remove the image
+        7. If DRAGF_NO_LOCK was set, UnlockLayers()
+
+    The Amiga OS has a bug which can cause a deadlock if another task attempts
+    to call LockLayers() while you have them locked. If you are dragging over
+    the entire screen rather than an individual window, you will need to take
+    additional steps to prevent this deadlock.
+
+    You need to set up a timer event, roughly every half second or so (the
+    galileofm.library timer routines are ideal for this purpose). You also need
+    to have the IDCMP_INTUITICKS flag set for your window. You then must
+    keep a count of the number of IDCMP_INTUITICKS messages received. Every
+    time your periodic timer event comes around, you must examine this count
+    to see if it has changed. As INTUITICKS are sent roughly every 10th of
+    a second, one or more should have been received between each of your
+    timer events. If no INTUITICKS were received, it's a fair bet that
+    Intuition has deadlocked itself, and you should immediately call
+    UnlockLayers() (or HideDragImage()) to unfreeze the system.
+
+galileofm.library/FreeDragInfo                       galileofm.library/FreeDragInfo
+
+    NAME
+        FreeDragInfo - frees a DragInfo structure
+
+    SYNOPSIS
+        FreeDragInfo(drag)
+                      A0
+
+        void FreeDragInfo(DragInfo *);
+
+    FUNCTION
+        This function removes a drag image from the display if it is still
+        visible, and frees the DragInfo structure.
+
+    INPUTS
+        drag - structure to free
+
+    SEE ALSO
+        GetDragInfo()
+
+galileofm.library/GetDragImage                       galileofm.library/GetDragImage
+
+    NAME
+        GetDragImage - pick up on-screen imagery to drag
+
+    SYNOPSIS
+        GetDragImage(drag, x, y)
+                      A0  D0 D1
+
+        void GetDragImage(DragInfo *, long, long);
+
+    FUNCTION
+        This routine copies on-screen image data into the rastport of the
+        specified DragInfo structure. If the drag image is visible when this
+        routine is called, it is cleared before the data is copied.
+
+    INPUTS
+        drag - DragInfo structure
+        x - x-position on screen
+        y - y-position on screen
+
+    RESULT
+        The image data is copied from the Bitmap of the Window that was
+        specified when the drag image was created. This routine calls
+        GetDragMask() automatically.
+
+    SEE ALSO
+        GetDragInfo()
+
+galileofm.library/GetDragInfo                         galileofm.library/GetDragInfo
+
+    NAME
+        GetDragInfo - create a DragInfo structure
+
+    SYNOPSIS
+        GetDragInfo(window, rastport, width, height, need_gels)
+                      A0       A1       D0     D1       D2
+
+        DragInfo *GetDragInfo(struct Window *, struct RastPort *,
+                              long, long, long);
+
+    FUNCTION
+        Creates a DragInfo structure that is used to implement drag and drop.
+        Drags are inherently attached to a particular RastPort (usually either
+        a screen's or a window's). The drag system is implemented using BOBs,
+        which require a GelsInfo structure to be attached to the destination
+        RastPort. This routine can do this for you if you desire.
+
+    INPUTS
+        window - Window to attach BOB to (or NULL if rastport is supplied)
+        rastport - RastPort to attach BOB to (if not a window)
+        width - width of drag image
+        height - height of drag image
+        need_gels - set to TRUE if you would like this routine to allocate
+                    and initialise a GelsInfo automatically
+
+    RESULT
+        If successful, a DragInfo structure is returned. Nothing is displayed
+        on-screen; you must create the image and display it using the other
+        library calls. Once you have the DragInfo structure, you can
+        initialise the 'flags' field as described in the introduction.
+
+    SEE ALSO
+        FreeDragInfo()
+
+galileofm.library/GetDragMask                         galileofm.library/GetDragMask
+
+    NAME
+        GetDragMask - build mask for drag image
+
+    SYNOPSIS
+        GetDragMask(drag)
+                     A0
+
+        void GetDragMask(DragInfo *);
+
+    FUNCTION
+        Once you have created the image you want to drag, you must call
+        this function. This builds the shadow mask used to drag the image,
+        and is necessary for the image to be displayed correctly.
+
+    INPUTS
+        drag - DragInfo structure to build mask for
+
+    SEE ALSO
+        GetDragInfo()
+
+galileofm.library/HideDragImage                     galileofm.library/HideDragImage
+
+    NAME
+        HideDragImage - remove a drag image from the display
+
+    SYNOPSIS
+        HideDragImage(drag)
+                       A0
+
+        void HideDragImage(DragInfo *);
+
+    FUNCTION
+        This routine removes a visible drag image from the display.
+
+    INPUTS
+        drag - DragInfo structure
+
+    SEE ALSO
+        ShowDragImage()
+
+galileofm.library/ShowDragImage                     galileofm.library/ShowDragImage
+
+    NAME
+        ShowDragImage - display a drag image
+
+    SYNOPSIS
+        ShowDragImage(drag, x, y)
+                       A0  D0 D1
+
+        void ShowDragImage(DragInfo *, long, long);
+
+    FUNCTION
+        This routine displays a drag image at a given location. The image is
+        displayed in the RastPort that was supplied to the GetDragInfo() call.
+        If the image was not already displayed, it is added to the display.
+        If it was, it is removed from its current position and redisplayed in
+        the new location. This is the main call used to move an image around
+        the screen.
+
+    INPUTS
+        drag - DragInfo structure to display
+        x - x position in rastport
+        y - y position in rastport
+
+    SEE ALSO
+        GetDragInfo(), HideDragImage()
+
+galileofm.library/StampDragImage                   galileofm.library/StampDragImage
+
+    NAME
+        StampDragImage - stamp drag image onto the screen
+
+    SYNOPSIS
+        StampDragImage(drag, x, y)
+                        A0  D0 D1
+
+        void StampDragImage(DragInfo *, long, long);
+
+    FUNCTION
+        This routine stamps the drag image onto the bitmap at the given
+        location. Using this function would allow you to "paint" with the
+        drag image.
+
+    INPUTS
+        drag - DragInfo structure
+        x - x position to stamp image at
+        y - y position to stamp image at
+
+    RESULT
+        The image is drawn into the RastPort that was supplied in the
+        GetDragInfo() call.
+
+    SEE ALSO
+        GetDragInfo(), ShowDragImage()
+
+

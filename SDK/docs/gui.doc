@@ -1,0 +1,371 @@
+galileofm.library/ActivateStrGad                   galileofm.library/ActivateStrGad
+
+    NAME
+        ActivateStrGad - Activate a string gadget.
+
+    SYNOPSIS
+        ActivateStrGad(gadget, window)
+                         A0      A1
+
+        void ActivateStrGad(struct Gadget *, struct Window *);
+
+    FUNCTION
+        This function activates a string gadget in a window. The difference
+        between this and the standard ActivateGadget() call is that the
+        cursor will be positioned at the end of the string.
+
+    INPUTS
+        gadget - string gadget you wish to activate
+        window - window the gadget is in
+
+    SEE ALSO
+        intuition.library/ActivateGadget()
+
+galileofm.library/AddScrollBars                     galileofm.library/AddScrollBars
+
+    NAME
+        AddScrollBars - Add BOOPSI scrollers to a window
+
+    SYNOPSIS
+        AddScrollBars(window, list, drawinfo, flags)
+                        A0     A1      A2       D0
+
+        struct Gadget *AddScrollBars(struct Window *, struct List *,
+                                     struct DrawInfo *, short);
+
+    FUNCTION
+        This function adds BOOPSI scrollers (proportional gadget and two
+        arrows) to a window. It can add scrollers either horizontally,
+        vertically or both.
+
+    INPUTS
+        window - window to add scrollers to. The window must have a border
+        for the side(s) you wish to add scrollers to. For example, if you
+        add a horizontal scroller, the window must have a bottom border
+        (ie the WFLG_SIZEBBOTTOM flag is set).
+
+        list - this must point to an initialise List structure. The
+        gadgets created by this routine will be added to this List, which
+        can later be freed by BOOPSIFree().
+
+        drawinfo - pointer to the screen's DrawInfo structure
+
+        flags - the type of scrollers you want :
+
+                SCROLL_VERT     - vertical scroller
+                SCROLL_HORIZ    - horizontal scroller
+                SCROLL_NOIDCMP  - this flag signified that the scrollers
+                                  are only to return the normal
+                                  IDCMP_GADGETUP, IDCMP_GADGETDOWN and
+                                  IDCMP_MOUSEMOVE messages. If not
+                                  specified, the gadgets also generate
+                                  IDCMP_IDCMPUPDATE messages.
+
+    RESULT
+        This routine returns 0 if it fails. If it succeeds, it returns a
+        pointer to the last gadget created. This pointer is not particularly
+        useful; it just signifies success. To actually add the gadgets to the
+        window, call AddGList() on the first gadget in the supplied List
+        structure, and then RefreshGList().
+
+        The gadgets created by this function have pre-defined IDs. If you
+        use this routine you should make sure that your own gadgets do not
+        conflict with these IDs. See the "Galileo/gui.h" file for the ID values.
+
+    SEE ALSO
+        FindBOOPSIGadget(), BOOPSIFree(),
+        intuition.library/GetScreenDrawInfo(), intuition.library/AddGList(),
+        intuition.library/RefreshGList()
+
+galileofm.library/BOOPSIFree                           galileofm.library/BOOPSIFree
+
+    NAME
+        BOOPSIFree - free a list of BOOPSI gadgets
+
+    SYNOPSIS
+        BOOPSIFree(list)
+                    A0
+
+        void BOOPSIFree(struct List *);
+
+    FUNCTION
+        This routine iterates through a list of BOOPSI gadgets, calling
+        DisposeObject on each one in turn. It then reinitialises the list.
+
+    INPUTS
+        list - List of gadgets to free
+
+    SEE ALSO
+        AddScrollBars(), intuition.library/DisposeObject()
+
+galileofm.library/DisposeBitMap                     galileofm.library/DisposeBitMap
+
+    NAME
+        DisposeBitMap - free a bitmap created with NewBitMap()
+
+    SYNOPSIS
+        DisposeBitMap(bm)
+                      A0
+
+        void DisposeBitMap(struct BitMap *);
+
+    FUNCTION
+        This routine frees a bitmap and the associated bitplanes that was
+        allocated with the NewBitMap() function. Under OS39 it simply passes
+        the bitmap through to the graphics.library FreeBitMap() call. Under
+        OS37 it frees the bitmap and bitplanes manually.
+
+    INPUTS
+        bm - BitMap to free
+
+    RESULT
+        The BitMap is freed.
+
+    SEE ALSO
+        NewBitMap(), graphics.library/FreeBitMap()
+
+galileofm.library/DrawBox                                 galileofm.library/DrawBox
+
+    NAME
+        DrawBox - draw a 3D box
+
+    SYNOPSIS
+        DrawBox(rp, rect, info, recessed)
+                A0   A1    A2      D0
+
+        void DrawBox(struct RastPort *, struct Rectangle *,
+                     struct DrawInfo *, BOOL);
+
+    FUNCTION
+        This routine draws a single-pixel 3D box, using the current pen
+        settings in the DrawInfo you supply.
+
+    INPUTS
+        rp - RastPort to draw into
+        rect - Rectangle to draw
+        info - Screen's DrawInfo
+        recessed - set to TRUE if you want a recessed box
+
+    SEE ALSO
+        intuition.library/GetScreenDrawInfo()
+
+galileofm.library/DrawFieldBox                        galileofm.library/DrawFieldBox
+
+    NAME
+        DrawFieldBox - draw a 3D field box
+
+    SYNOPSIS
+        DrawFieldBox(rp, rect, info)
+                     A0   A1    A2
+
+        void DrawFieldBox(struct RastPort *, struct Rectangle *,
+                          struct DrawInfo *);
+
+    FUNCTION
+        Draws a 3D field box (eg the path field in Galileo listers).
+
+    INPUTS
+        rp - RastPort to draw into
+        rect - Rectangle to draw
+        info - Screen's DrawInfo
+
+    SEE ALSO
+        intuition.library/GetScreenDrawInfo()
+
+galileofm.library/FindBOOPSIGadget               galileofm.library/FindBOOPSIGadget
+
+    NAME
+        FindBOOPSIGadget - find a gadget by ID in a BOOPSI list
+
+    SYNOPSIS
+        FindBOOPSIGadget(list, id)
+                          A0   D0
+
+        struct Gadget *FindBOOPSIGadget(struct List *, USHORT);
+
+    FUNCTION
+        This routine iterates through the supplied list of gadgets looking
+        for one with the supplied ID. If found, it returns it.
+        This routine can be used to find a specific gadget in the List
+        created by AddScrollBars(). eg,
+
+            vert_scroll=FindBOOPSIGadget(&list,GAD_VERT_SCROLLER);
+
+    INPUTS
+        list - List of BOOPSI gadgets
+        id - ID to look for
+
+    RESULT
+        If the gadget is found, it is returned, otherwise NULL.
+
+    SEE ALSO
+        AddScrollBars()
+
+galileofm.library/GetPalette32                       galileofm.library/GetPalette32
+
+    NAME
+        GetPalette32 - get a 32 bit palette from a ViewPort
+
+    SYNOPSIS
+        GetPalette32(vp, palette, count, first)
+                     A0    A1       D0     D1
+
+        void GetPalette32(struct ViewPort *, ULONG, USHORT, short);
+
+    FUNCTION
+        This routine copies the palette from the supplied ViewPort into
+        the supplied buffer. Under OS39 it is identical in operation to
+        the graphics.library GetRGB32() function. The advantage of using
+        this function is that it also works under OS37. Under OS37, the
+        4 bit colour values are extended to full 32 bit.
+
+    INPUTS
+        vp - ViewPort to load colours from
+        palette - array of ULONGs to store palette (3 per pen)
+        count - number of pen values to copy
+        first - first pen to copy
+
+    RESULT
+        The palette values are stored in the supplied array.
+
+    SEE ALSO
+        LoadPalette32(), graphics.library/GetRGB32()
+
+galileofm.library/LoadPalette32                     galileofm.library/LoadPalette32
+
+    NAME
+        LoadPalette32 - load a 32 bit palette in a ViewPort
+
+    SYNOPSIS
+        LoadPalette32(vp, palette)
+                      A0     A1
+
+        void LoadPalette32(struct ViewPort *, ULONG *);
+
+    FUNCTION
+        This routine loads a 32 bit palette into a ViewPort. It is
+        identical in operation to the graphics.library LoadRGB32()
+        function, except that it also works under OS37.
+
+    INPUTS
+        vp - ViewPort to load palette
+        palette - Palette to load (in LoadRGB32() format)
+
+    RESULT
+        The palette is loaded.
+
+    SEE ALSO
+        GetPalette32, graphics.library/LoadRGB32()
+
+galileofm.library/NewBitMap                             galileofm.library/NewBitMap
+
+    NAME
+        NewBitMap - allocate a bitmap and bitplanes
+
+    SYNOPSIS
+        NewBitMap(sizex, sizey, depth, flags, friend)
+                   D0      D1     D2     D3      A0
+
+        struct BitMap *NewBitMap(ULONG, ULONG, ULONG, ULONG, struct BitMap *);
+
+    FUNCTION
+        This routine allocates a BitMap and the bitplanes for it. It is
+        identical in operation to the graphics.library AllocBitMap() call,
+        except that it works under OS37. Under OS37 the bitmap and planes
+        are allocated manually, and the friend parameter is ignored.
+
+        Under OS39, if a friend bitmap is supplied and that friend is not
+        a standard BitMap (ie BMF_STANDARD is not set), the new bitmap will
+        be allocated with the BMF_MINPLANES flag. This makes CyberGfx allocate
+        a fast chunky bitmap.
+
+    INPUTS
+        sizex - width of bitmap
+        sizey - height of bitmap
+        depth - number of bitplanes
+        flags - bitmap flags
+        friend - friend bitmap
+
+    RESULT
+        Returns the BitMap if successful, otherwise NULL.
+
+    SEE ALSO
+        DisposeBitMap(), graphics.library/AllocBitMap()
+
+galileofm.library/ScreenInfo                           galileofm.library/ScreenInfo
+
+    NAME
+        ScreenInfo - return information about a screen
+
+    SYNOPSIS
+        ScreenInfo(screen)
+                     A0
+
+        ULONG ScreenInfo(struct Screen *);
+
+    FUNCTION
+        This routine is designed to return simple information about a screen.
+
+    INPUTS
+        screen - Screen to obtain information about.
+
+    RESULT
+        Currently, the only flag defined for the result is SCRI_LORES, which
+        indicates that the screen is low resolution, or does not have a 1:1
+        pixel ratio.
+
+galileofm.library/FindPubScreen                     galileofm.library/FindPubScreen
+
+    NAME
+        FindPubScreen - find (and lock) a public screen
+
+    SYNOPSIS
+        FindPubScreen(screen, lock)
+                        A0     D0
+
+        struct PubScreenNode *FindPubScreen(struct Screen *, BOOL);
+
+    FUNCTION
+        This function takes the address of a Screen, and searches for it in
+        the system Public Screen list. If it is found, the address of the
+        PubScreenNode is returned.
+
+    INPUTS
+        screen - Screen to search for
+        lock - Set to TRUE if you want the screen to be locked on return
+
+    RESULT
+        Returns the PubScreenNode of the screen if found, otherwise NULL.
+        If 'lock' is set to TRUE, the public screen will be locked for you
+        and you should call UnlockPubScreen() on it when you are finished.
+
+    SEE ALSO
+        intuition.library/LockPubScreen()
+
+galileofm.library/SetBusyPointer                   galileofm.library/SetBusyPointer
+
+    NAME
+        SetBusyPointer - set busy pointer in a window
+
+    SYNOPSIS
+        SetBusyPointer(window)
+                         A0
+
+        void SetBusyPointer(struct Window *);
+
+    FUNCTION
+        This function sets the mouse pointer in the supplied window to
+        the busy pointer. Under OS39 it uses the system-defined busy
+        pointer. Under OS37 it uses a standard watch image.
+
+    INPUTS
+        window - Window to set busy pointer for
+
+    RESULT
+        The busy pointer is set in the supplied window. You should call
+        ClearPointer() when you have finished.
+
+    SEE ALSO
+        intuition.library/SetWindowPointer, intuition.library/ClearPointer
+
+

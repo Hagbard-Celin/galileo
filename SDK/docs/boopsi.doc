@@ -1,0 +1,462 @@
+galileofm.library/BOOPSI gadgets                   galileofm.library/BOOPSI gadgets
+
+    The galileofm.library makes several BOOPSI gadgets available globally. These
+gadgets can be accessed globally without even opening the galileofm.library,
+although it is a good idea to open it to make sure the library is present in
+the system.
+
+    The gadgets are all sub-classes of standard BOOPSI gadgets, and so take
+all the standard tags (GA_Left, GA_Top, etc..). Often they are based heavily
+on GadTools gadgets and will support equivalent GadTools tags. They also
+have their own set of tags, which is described below.
+
+galileofm.library/galileobuttongclass             galileofm.library/galileobuttongclass
+
+    The galileobuttongclass provides a standard pushbutton gadget. It is
+similar to a standard buttongclass gadget, but provides some additional
+functionality. This is via the following tags:
+
+    GTCustom_TextAttr (struct TextAttr *) (I) - used to specify a font for
+        the gadget label. (default is the window font).
+
+    GTCustom_ThinBorders (BOOL) (I) - if set to TRUE, the gadget will be
+        rendered with single-pixel borders (default FALSE).
+
+    GTCustom_Borderless (BOOL) (I) - if set to TRUE, the gadget will be
+        rendered with no border (default FALSE).
+
+    GTCustom_Bold (BOOL) (I) - is set to TRUE, the gadget label will be
+        rendered in bold (default FALSE).
+
+    GTCustom_Style (ULONG) (I) - use this tag to control the text style of
+        the gadget label. Valid flags are FSF_BOLD and FSF_ITALIC
+        (default FSF_NORMAL).
+
+    GTCustom_NoGhost (BOOL) (I) - if set to TRUE, the gadget imagery will
+        not 'ghost' when the gadget is disabled (default FALSE).
+
+    GTCustom_TextPlacement (WORD) (I) - Lets you select the position of the
+        label relative to the gadget. Valid values are:
+
+            PLACETEXT_IN (default)
+            PLACETEXT_LEFT
+            PLACETEXT_RIGHT
+            PLACETEXT_ABOVE
+
+galileofm.library/galileocheckgclass                galileofm.library/galileocheckgclass
+
+    The galileocheckgclass provides a replacement for GadTools checkbox gadgets.
+As a BOOPSI class, it allows you to have a checkbox without using GadTools.
+This class uses the same basic code as the galileobuttongclass, and as such
+supports the same tags. The class also supports the GTCB_Checked flag (defined
+in libraries/gadtools.h) to set or get the current state of the gadget.
+
+galileofm.library/galileoframeclass                 galileofm.library/galileoframeclass
+
+    The galileoframeclass is a BOOPSI class for a frame gadget. A frame gadget
+does not respond to user input; its only purpose is to draw a frame (usually
+around some other gadgets). This class uses the same basic code as the
+galileobuttongclass, and as such supports the same tags. The class also supports
+the GTCustom_FrameFlags tag, to specify flags for the frame. Currently, the
+only defined flag is AREAFLAG_RECESSED, which causes the frame to be drawn
+as recessed.
+
+galileofm.library/galileoiclass                         galileofm.library/galileoiclass
+
+    This class allows you to access several predefined images. The image
+you receive is controlled by the following tags:
+
+        DIA_Type
+
+        This sets the image type. Current valid types are:
+
+            IM_ARROW_UP     - an up arrow
+            IM_ARROW_DOWN   - a down arrow
+            IM_CHECK        - a check mark
+            IM_DRAWER       - a "folder" image
+            IM_BBOX         - a filled box with a border
+            IM_BORDER_BOX   - a filled box
+            IM_ICONIFY      - an iconify gadget image
+            IM_LOCK         - a lock gadget image
+
+
+        DIA_FrontPen
+
+        This sets the front pen for the image. Currently, only the IM_CHECK
+        image supports this tag.
+
+    This class is a sub-class of imageclass, and so supports the standard
+IM_Width, IM_Height, etc, tags. Images are scaled to the supplied sizes.
+
+galileofm.library/galileolistviewgclass         galileofm.library/galileolistviewgclass
+
+    This boopsi gadget is a replacement for the gadtools LISTVIEW_KIND
+    gadgets. It has been designed to "drop-in" as easily as possible, and
+    uses many of the same tags as the gadtools equivalent. It is however
+    much more flexibile than the gadtools gadget.
+
+    The gadget duplicates most of the tags provided by gadtools' listview
+    gadget. It also offers some powerful additions not available under
+    gadtools. These include :
+
+        o Current selection indicated by highlight bar, checkmark
+          or text colour
+        o Multiple-selection of items with checkmarks
+        o Items can be rendered in different colours
+        o Simple text formatting in the lister
+        o Scroller can be optionally removed
+        o Supports drag notification
+        o Automatic double-click notification
+        o Supports resizing via OM_SET
+
+    It also does not suffer from the gadtools problem of resizing itself to an
+    integral multiple of the item height (ie, the size you specify is the size
+    you get). It is controlled by the following tags:
+
+    DLV_Top (WORD) (ISG) - Top item visible in the listview.  This value
+        will be made reasonable if out-of-range (defaults to 0).
+
+    DLV_MakeVisible (WORD) (IS) - Number of an item that should be forced
+        within the visible area of the listview by doing minimal scrolling.
+        This tag overrides DLV_Top.
+
+    DLV_Labels (struct List * or Att_List *) (ISG) - List of nodes whose
+        ln_Name fields are to be displayed in the listview. Calling
+        SetGadgetAttrs() and specifying 0 will remove the current list.
+        Specifying ~0 will remove the list but will not disturb the display,
+        allowing you to make changes to the contents and selection status.
+
+    DLV_ReadOnly (BOOL) (I) - If TRUE, then listview is read-only
+        (defaults to FALSE).
+
+    DLV_ScrollWidth (UWORD) (I) - Width of scroll bar for listview.
+        Must be greater than zero (defaults to 16).
+
+    DLV_ShowSelected (void) (I) - Specify this tag to have the currently
+        selected item displayed with a highlight bar (or another method).
+        Note that this tag does not support the automatic copying to
+        a string gadget that gadtools does. You should specify ti_Data
+        as 0 for future compatibility.
+
+    DLV_Selected (UWORD) (ISG) - Ordinal number of currently selected
+        item, or ~0 to have no current selection (defaults to ~0).
+
+    DLV_TextAttr (struct TextAttr *) (I) - Allows you to specify a font to
+        use in the lister. Must have previously been opened.
+
+    DLV_MultiSelect (BOOL) (I) - If TRUE, the listview allows multiple-
+        selection of items (see below for details).
+
+    DLV_Check (BOOL) (I) - If TRUE, and DLV_ShowSelected is TRUE, the
+        current selection will be indicated with a checkmark. Note that
+        this tag has no meaning in conjunction with DLV_MultiSelect.
+
+    DLV_ShowChecks (ULONG) (I) - If set to something other than zero,
+        checkmarks will be shown for selected items (see below for
+        details), but the user will not be able to alter their state.
+
+        If set to 1, selected items will be rendered in the highlight
+        pen colour. If set to 2, they will be rendered in the normal
+        text colour.
+
+    DLV_Highlight (BOOL) (I) - If TRUE, and DLV_ShowSelected is TRUE, the
+        current selection will be displayed in a different colour.
+
+    DLV_NoScroller (BOOL) (I) - If TRUE, the lister will not have a scroller
+        attached. The gadget will still support scrolling by "dragging"
+        the selection highlight.
+
+    DLV_TopJustify (BOOL) (I) - If TRUE, items displayed in the lister will
+        be aligned to the top of the gadget, rather than being centered
+        vertically.
+
+    DLV_Flags (ULONG) (I) - Allows you to specify layout flags for the lister.
+        Currently the only flags supported are :
+
+                PLACETEXT_ABOVE - display title above gadget (default)
+                PLACETEXT_LEFT  - display title at top-left of gadget
+
+    DLV_RightJustify (BOOL) (I) - If TRUE, items displayed in the lister
+        will be aligned to the right of the gadget, rather than to the
+        left.
+
+    DLV_ShowFilenames (BOOL) (I) - If TRUE, items in the lister are taken to
+        be pathnames to files, and only the filename component (ie the
+        result of a FilePart() call) is displayed. This allows you to keep
+        the full pathname in ln_Name but only display the filename.
+
+    DLV_DragNotify (ULONG) (I) - If this is set to something other than zero,
+        the gadget will notify you when the user tries to drag an item
+        out of it. See the section on DragNotify below.
+
+    DLV_ScrollUp (void) (S) - Use this tag with SetGadgetAttrs() to make the
+        lister scroll up one line.
+
+    DLV_ScrollDown (void) (S) - Use this tag with SetGadgetAttrs() to make the
+        lister scroll down one line.
+
+    DLV_SelectPrevious (void) (S) - Use this tag with SetGadgetAttrs() to make
+        the previous entry become selected.
+
+    DLV_SelectNext (void) (S) - Use this tag with SetGadgetAttrs() to make
+        the next entry become selected.
+
+    DLV_Lines (void) (G) - returns number of visible lines displayed in lister.
+
+    DLV_Object (void) (G) - returns the address of the Object * structure.
+
+    DLV_GetLine (void) (G) - this allows you to get the line number in the
+        lister from window-relative mouse coordinates. StoragePtr should be
+        initialised to the mouse coordinates ((x<<16)|y).
+
+    DLV_DrawLine (void) (G) - this allows you to render a line of the listview
+        into your own RastPort. See the section on DragNotify below
+        for more information.
+
+    The gadget is a subclass of gadgetclass and as such supports the
+    standard gadgetclass tags (including GA_Disabled). The title of
+    the gadget can be specified with GA_Text (GA_IntuiText and
+    GA_LabelImage are not supported).
+
+
+   MULTIPLE SELECTION
+
+    The galileolistviewgclass gadget supports multiple-selection of items.
+    This feature is enabled by passing {DLV_MultiSelect,TRUE} on creation.
+    The ln_Type field of each of the node structures is used to
+    indicate whether an item is selected or not. For convenience, this
+    field has been renamed lve_Flags.
+
+    To see whether an item is selected, test the LVEF_SELECTED flag in
+    the lve_Flags field. Similarly, you can set an item's selection
+    status by changing the value of this flag.
+
+
+   CUSTOM PEN COLOURS
+
+    You can specify the individual pen colours of each of the items in
+    the list. The ln_Pri field of each of the node structures is used
+    for this purpose. For convenience, this field has been renamed
+    lve_Pen.
+
+    To specify that an item is to be rendered in other than the default
+    pen colour, set lve_Pen to the appropriate value and set the
+    LVEF_USE_PEN flag in the lve_Flags field.
+
+
+   TEXT FORMATTING
+
+    The gadget supports simple text-formatting for item display. This
+    allows you to have columns and right-justified text in the lister.
+
+    If the text for an entry (ln_Name) contains a \t (tab character),
+    the text following that character will be right-justified in the
+    lister.
+
+    If the text starts with a \v (vertical tab character), the text
+    is centered in the lister.
+
+    You can specify column positions using the \a (alert) character.
+    The character immediately following the \a provides the position
+    for the start of the next column. This is specified in character
+    spaces. You should be aware that characters in proportional fonts
+    are often wider than the nominal width of the font.
+
+    For example, if the following items were supplied to the gadget :
+
+        Bloggs\a\xa Fred\a\x1a 1-Sep-65\tPaid
+        Hall\a\xa Jane\a\x1a 9-Aug-68\tNot paid
+        Hubbard\a\xa Bill\a\x1a 7-Mar-18\tPaid
+
+    The display you would see would be something like this :
+
+        Bloggs    Fred            1-Sep-65          Paid
+        Hall      Jane            9-Aug-68      Not paid
+        Hubbard   Bill            7-Mar-18          Paid
+
+
+   DRAG NOTIFICATION
+
+    To enable drag notification, pass {DLV_DragNotify,1} on creation.
+    You will then be sent an extended taglist via the IDCMP_IDCMPUPDATE
+    message when the user attempts to drag an item out of the list.
+    If you pass {DLV_DragNotify,2} the user will only be able to drag
+    out of the list sideways; dragging up or down will scroll the list
+    as usual.
+
+    The tags you are sent on an attempted drag are as follows :
+
+        Tag         Data
+
+        GA_ID               gadget ID
+        GA_Left
+        GA_Top              window-relative item coordinates
+        GA_Width
+        GA_Height           size of the item as displayed
+        GA_RelRight
+        GA_RelBottom        offset mouse position in item
+        DLV_Top             top item number
+        DLV_DragNotify      ordinal number of item dragged
+
+    To see if an IDCMP_IDCMPUDPATE message is from a drag, just test
+    for the presence of the DLV_DragNotify tag in the taglist.
+
+    Once you get a drag notification, the actual dragging of the item
+    is your responsibility. The easiest way is using the drag routines
+    provided by the galileofm.library. Create a DragInfo large enough for the
+    item (GA_Width and GA_Height in the taglist). There are two ways to get
+    the image for the bitmap.
+
+    The first way is to use the GA_Left and GA_Top coordinates in the
+    taglist and just ClipBlit() from your window into the drag rastport.
+    This is the easiest way, but will also copy the checkmark if there is
+    one, and you may not want that.
+
+    The second way is to use the DLV_DrawLine tag with the GetAttr()
+    call, and have the listview render the item into your bitmap for you.
+
+    To do this, you need to initialise a ListViewDraw structure :
+
+        lvdraw.rp           RastPort to render into
+        lvdraw.drawinfo     DrawInfo for the screen
+        lvdraw.node         List node to render
+        lvdraw.line         Set to 0
+        lvdraw.box.Left     Set to 0
+        lvdraw.box.Top      Set to 0
+        lvdraw.box.Width    Width of BitMap
+        lvdraw.box.Height   Height of BitMap
+
+    Then you pass the address of the ListViewDraw structure as the
+    StoragePtr for the GetAttr call. Eg,
+
+        ULONG *ptr=(ULONG)&lvdraw;
+        Object *obj=GetTagData(DLV_Object,0,tags);
+
+        GetAttr(DLV_DrawLine,obj,&ptr);
+
+    The GA_RelRight and GA_RelBottom tags are used to indicate where
+    in the item the user clicked. When you display the drag image on
+    the screen, you should offset its position by these values.
+
+
+   DOUBLE-CLICK NOTIFICATION
+
+    If you get an IDCMP_IDCMPUPDATE message from the gadget, and the
+    DLV_DragNotify tag is not set, it is a normal selection message.
+    An additional tag is sent in this situation; DLV_DoubleClick.
+    The ti_Data field is a boolean indicating whether the selection
+    is a double-click or a normal single click.
+
+    The tags now sent for this message are :
+
+        Tag                 Data
+
+        GA_ID               Gadget ID
+        DLV_Selected        Ordinal number of selection
+        DLV_DoubleClick     BOOL
+
+
+   RESIZING
+
+    To resize the gadget, pass the new coordinates via GA_Left, GA_Top,
+    GA_Width and GA_Height in a SetGadgetAttrs() call. You will then need
+    to refresh the display yourself, usually by clearing the window and
+    calling RefreshGList(). You may also need to call RefreshWindowFrame(),
+    if the window has been resized smaller, as the gadget may have
+    overwritten the window border before it was resized.
+
+galileofm.library/galileopalettegclass           galileofm.library/galileopalettegclass
+
+    The galileopalettegclass provides a replacement for GadTools PALETTE_KIND
+gadgets. As a BOOPSI class, it allows you to have a palette gadget without
+using GadTools. This class supports the following tags:
+
+    GTCustom_TextAttr (struct TextAttr *) (I) - used to specify a font for
+        the gadget label. (default is the window font).
+
+    GTCustom_ThinBorders (BOOL) (I) - if set to TRUE, the gadget will be
+        rendered with single-pixel borders (default FALSE).
+
+    GTPA_Color (UBYTE) (ISG) - the currently selected colour of the palette.
+        This number is a pen number, and not the ordinal colour number within
+        the palette gadget itself (default 1).
+
+    GTPA_Depth (UWORD) (IS) - Number of bitplanes in the palette (default 1).
+
+    GTPA_ColorTable (UBYTE *) (IS) - Pointer to a table of pen numbers
+        indicating which colours should be used and edited by the palette
+        gadget. This array must contain as many entries as there are colours
+        displayed in the palette gadget. The array provided with this tag
+        must remain valid for the life of the gadget, or until a new table
+        is provided. (default is NULL, which causes a 1-to-1 mapping of pen
+        numbers).
+
+    GTPA_NumColors (UWORD) (IS) - Number of colours to display in the palette
+        gadget. This overrides GTPA_Depth and allows numbers which aren't
+        powers of 2. (defaults to 2)
+
+    DPG_Pen (UWORD) (ISG) - the currently selected colour of the palette.
+        This is similar to GTPA_Color but referes to the ordinal colour
+        number and not the pen number itself.
+
+    DPG_SelectNext (void) (S) - use this tag with SetGadgetAttrs() to cause
+        the next colour in the gadget to be selected.
+
+    DPG_SelectPrevious (void) (S) - use this tag with SetGadgetAttrs() to
+        cause the previous colour in the gadget to be selected.
+
+galileofm.library/galileostrgclass                   galileofm.library/galileostrgclass
+
+    This galileostrgclass provides a replacement for GadTools STRING_KIND
+gadgets. It is basically a standard string gadget with an automatic border,
+but also supports additional features. This class is based on the
+galileobuttongclass, and as such supports all the tags of that class. It is
+also a subclass of strgclass and supports the standard string gadget
+tags of that class (with some important changes, listed below). The control
+tags supported by this class are as follows:
+
+    STRINGA_Buffer (char *) (I) - Specify the main buffer for the gadget.
+        If this is not supplied, a buffer will be allocated automatically
+        (this does not suffer from the maximum 128 bytes limitation of the
+        standard BOOPSI string gadget class).
+
+    STRINGA_UndoBuffer (char *) (I) - Specify the undo buffer for the
+        gadget. Again, one will be allocated automatically if you do not
+        supply one.
+
+    STRINGA_WorkBuffer (char *) (I) - Specify the work buffer for the
+        gadget. This will also be automatically allocated if you do not
+        supply it.
+
+    STRINGA_MaxChars (long) (I) - Specify the maximum length of the string
+        editable by this gadget. If buffers are allocated automatically,
+        they will be this size. GTST_MaxChars and GTIN_MaxChars are also
+        synonyms for this tag. (defaults to 40).
+
+    STRINGA_Font (struct TextFont *) (I) - Specify the font to use for this
+        gadget.
+
+    GTCustom_ChangeSigTask (struct Task *) (I) - Specify a task that is to
+        be signalled whenever the contents of this gadget change.
+        (defaults to NULL).
+
+    GTCustom_ChangeSigBit (BYTE) (I) - Specify the signal bit that is used
+        to signal a task whenever the contents of this gadget change.
+        (defaults to 0).
+
+    STRINGA_TextVal (char *) (IS) - Set the contents of the string gadget.
+        The supplied string is copied to the buffer. GTST_String, GTTX_Text,
+        GTIN_Number and GTNM_Number are valid synonyms for this tag.
+
+    To use the galileofm.library edit hook with a string gadget, you should call
+GetEditHook() and pass the results with the STRINGA_EditHook tag.
+
+galileofm.library/galileoviewgclass                 galileofm.library/galileoviewgclass
+
+    This class provides a simple view gadget, similar to GadTools TEXT_KIND
+and NUMBER_KIND gadgets. It is a subclass of galileobuttongclass, and so
+supports all the tags of that class. To set the contents of the view gadget,
+use the GTTX_Text or GTNM_Number tags (a view gadget can be used to display
+either text or a number interchangeably).
+
+

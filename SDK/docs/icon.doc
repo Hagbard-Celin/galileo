@@ -1,0 +1,265 @@
+galileofm.library/FreeCachedDiskObject       galileofm.library/FreeCachedDiskObject
+
+    NAME
+        FreeCachedDiskObject - free a cached icon
+
+    SYNOPSIS
+        FreeCachedDiskObject(icon)
+                              A0
+
+        void FreeCachedDiskObject(struct DiskObject *);
+
+    FUNCTION
+        This function frees a cached icon obtained via a call to
+        GetCachedDiskObject() or a similar function.
+
+    INPUTS
+        icon - icon to free
+
+    RESULT
+        The usage count of the cached icon is decremented. When the usage
+        count reaches zero, the icon is flushed from the cache.
+
+    NOTES
+        You can pass a normal, uncached icon to this routine, in which case
+        it just passes the call through to FreeDiskObject().
+
+    SEE ALSO
+        GetCachedDiskObject(), icon.library/FreeDiskObject()
+
+galileofm.library/GetCachedDefDiskObject   galileofm.library/GetCachedDefDiskObject
+
+    NAME
+        GetCachedDefDiskObject - GetDefDiskObject() with image caching
+
+    SYNOPSIS
+        GetCachedDefDiskObject(type)
+                                D0
+
+        struct DiskObject *GetCachedDefDiskObject(long);
+
+    FUNCTION
+        This routine returns one of a number of default icons. The main
+        advantage this has over the icon.library GetDefDiskObject() call is
+        that the image data of the icons is cached. This can save a huge
+        amount of chip memory if multiple copies of the same icon are
+        required (compare the chip memory used when you open a large drawer
+        in Workbench with the same drawer in Galileo).
+
+    INPUTS
+        type - type of icon to create
+
+    RESULT
+        Returns a pointer to the icon or NULL for failure.
+
+    SEE ALSO
+        FreeCachedDiskObject(), icon.library/GetDefDiskObject()
+
+galileofm.library/GetCachedDiskObject         galileofm.library/GetCachedDiskObject
+
+    NAME
+        GetCachedDiskObject - get an icon from disk with image caching
+
+    SYNOPSIS
+        GetCachedDiskObject(name,flags)
+                             A0    D0
+
+        struct DiskObject *GetCachedDiskObject(char *,long);
+
+    FUNCTION
+        This routine loads an icon from disk, and caches the image data. If
+        the same icon is loaded again, the cached image data is used instead
+        of loading a new copy. This can save valuable chip memory, especially as
+        the cache is system wide.
+
+    INPUTS
+        name - name of icon to load (without the .info suffix)
+        flags - set to 0 for now
+
+    RESULT
+        Returns a pointer to the icon if successful, otherwise NULL.
+
+    NOTES
+        You should not use this routine if you want to modify the image data.
+        Only the image data is cached, however, so you can modify any of the
+        other fields of the icon.
+
+        Also, this routine is slightly slower than a normal call to
+        GetDiskObject(), and while the icon is loading requires slightly more
+        memory (the whole icon is loaded, then if the image is found in the
+        cache the new copy is discarded).
+
+    SEE ALSO
+        FreeCachedDiskObject(), icon.library/GetDiskObject
+
+galileofm.library/GetCachedDiskObjectNew   galileofm.library/GetCachedDiskObjectNew
+
+    NAME
+        GetCachedDiskObjectNew - get icon with default fallback
+
+    SYNOPSIS
+        GetCachedDiskObjectNew(name,flags)
+                                A0    D0
+
+        struct DiskObject *GetCachedDiskObjectNew(char *,long);
+
+    FUNCTION
+        This routine attempts to load the icon in the same way as the
+        GetCachedDiskObject() routine. If no icon is found for the supplied
+        filename, the object in question is examined, and a default icon is
+        returned. This routine will return WBPROJECT, WBDRAWER, WBTOOL or
+        WBDISK icons, depending on the name passed in.
+
+    INPUTS
+        name - name of object to load icon for (no .info suffix)
+        flags - set to 1 for now
+
+    RESULT
+        Returns a pointer to the icon if successful, otherwise NULL.
+
+    SEE ALSO
+        GetCachedDiskObject(), FreeCachedDiskObject(),
+        icon.library/GetDiskObjectNew()
+
+galileofm.library/GetIconFlags                       galileofm.library/GetIconFlags
+
+    NAME
+        GetIconFlags - get special Galileo icon flags
+
+    SYNOPSIS
+        GetIconFlags(icon)
+                      A0
+
+        ULONG GetIconFlags(struct DiskObject *);
+
+    FUNCTION
+        Galileo stores additional information in icons to control some of the
+        enhanced features. This routine returns the special flags set for the
+        icon you supply.
+
+    INPUTS
+        icon - icon to retrieve flags for
+
+    RESULT
+        Returns ULONG containing the flags set. Current flags in use are :
+
+            ICONF_POSITION_OK   - an Galileo-specific position is available
+            ICONF_NO_BORDER     - icon has no border
+            ICONF_NO_LABEL      - icon has no label
+
+    SEE ALSO
+        SetIconFlags(), GetIconPosition()
+
+galileofm.library/GetIconPosition                 galileofm.library/GetIconPosition
+
+    NAME
+        GetIconPosition - get Galileo-specific icon position
+
+    SYNOPSIS
+        GetIconPosition(icon, xptr, yptr)
+                         A0    A1    A2
+
+        void GetIconPosition(struct DiskObject *, short *, short *);
+
+    FUNCTION
+        Galileo keeps a separate record from Workbench of icon positions. This
+        function allows you to retrieve the Galileo-specific position of the
+        icon (the normal Workbench position is in do_CurrentX/do_CurrentY).
+
+    INPUTS
+        icon - icon to retrieve position for
+        xptr - pointer to short to receive x position
+        yptr - pointer to short to receive y position
+
+    RESULT
+        Stores the position in the two variables provided.
+
+    NOTES
+        You should call GetIconFlags() first to check that an Galileo-specific
+        position is available for this icon.
+
+    SEE ALSO
+        SetIconPosition(), GetIconFlags()
+
+galileofm.library/SetIconFlags                       galileofm.library/SetIconFlags
+
+    NAME
+        SetIconFlags - set Galileo flags in an icon
+
+    SYNOPSIS
+        SetIconFlags(icon, flags);
+                      A0     D0
+
+        void SetIconFlags(struct DiskObject *, ULONG);
+
+    FUNCTION
+        This routine allows you to set the special Galileo flags in an icon.
+
+    INPUTS
+        icon - icon to set flags for
+        flags - new flags for the icon
+
+    RESULT
+        The flags in the icon are set. See GetIconFlags() for a description
+        of the available flags.
+
+    SEE ALSO
+        GetIconFlags()
+
+galileofm.library/SetIconPosition                 galileofm.library/SetIconPosition
+
+    NAME
+        SetIconPosition - set Galileo position for an icon
+
+    SYNOPSIS
+        SetIconPosition(icon, x, y)
+                         A0  D0 D1
+
+        void SetIconPosition(struct DiskObject *, short, short);
+
+    FUNCTION
+        This routine allows you to set the Galileo-specific position for an
+        icon.
+
+    INPUTS
+        icon - icon to set position for
+        x - new x position of icon
+        y - new y position of icon
+
+    RESULT
+        The position is set in the icon.
+
+    NOTES
+        You should also call SetIconFlags() on the icon to set the
+        ICONF_POSITION_OK flag.
+
+    SEE ALSO
+        GetIconPosition(), SetIconFlags()
+
+galileofm.library/CopyFileIcon                       galileofm.library/CopyFileIcon
+
+    NAME
+        CopyFileIcon - copy icon from one file to another
+
+    SYNOPSIS
+        CopyFileIcon(source, dest)
+                         A0     A1
+
+        void CopyFileIcon(char *, char *);
+
+    FUNCTION
+        This routine copies the icon from the specified source object to a
+        new icon for the destination object.
+
+    INPUTS
+        source - source icon (without .info)
+        dest - destination icon (without .info)
+
+    RESULT
+        The icon is copied. If an icon already exists for the source, it is
+        NOT overwritten. No error code is available for this function.
+
+    NOTES
+        If the specified source file has no icon, a default icon is created.
+
+

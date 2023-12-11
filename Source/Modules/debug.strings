@@ -1,0 +1,156 @@
+#ifndef DEBUG_H
+#define DEBUG_H
+
+
+/****************************************************************************/
+
+
+/* This file was created automatically by CatComp.
+ * Do NOT edit by hand!
+ */
+
+
+#ifndef EXEC_TYPES_H
+#include <exec/types.h>
+#endif
+
+#ifdef CATCOMP_ARRAY
+#undef CATCOMP_NUMBERS
+#undef CATCOMP_STRINGS
+#define CATCOMP_NUMBERS
+#define CATCOMP_STRINGS
+#endif
+
+#ifdef CATCOMP_BLOCK
+#undef CATCOMP_STRINGS
+#define CATCOMP_STRINGS
+#endif
+
+
+/****************************************************************************/
+
+
+#ifdef CATCOMP_NUMBERS
+
+#define MSG_PRINT_DESC 1000
+#define MSG_PRINT_COMPACT_DESC 1001
+#define MSG_PRINT_HANDLES_DESC 1002
+#define MSG_PRINT_HANDLES_COMPACT_DESC 1003
+
+#endif /* CATCOMP_NUMBERS */
+
+
+/****************************************************************************/
+
+
+#ifdef CATCOMP_STRINGS
+
+#define MSG_PRINT_DESC_STR "Debug-Print Tracked Resources"
+#define MSG_PRINT_COMPACT_DESC_STR "Debug-Print Tracked Resources Compact"
+#define MSG_PRINT_HANDLES_DESC_STR "Debug-Print Tracked Memhancles"
+#define MSG_PRINT_HANDLES_COMPACT_DESC_STR "Debug-Print Tracked Memhandles Compact"
+
+#endif /* CATCOMP_STRINGS */
+
+
+/****************************************************************************/
+
+
+#ifdef CATCOMP_ARRAY
+
+struct CatCompArrayType
+{
+    LONG   cca_ID;
+    STRPTR cca_Str;
+};
+
+static const struct CatCompArrayType CatCompArray[] =
+{
+    {MSG_PRINT_DESC,(STRPTR)MSG_PRINT_DESC_STR},
+    {MSG_PRINT_COMPACT_DESC,(STRPTR)MSG_PRINT_COMPACT_DESC_STR},
+    {MSG_PRINT_HANDLES_DESC,(STRPTR)MSG_PRINT_HANDLES_DESC_STR},
+    {MSG_PRINT_HANDLES_COMPACT_DESC,(STRPTR)MSG_PRINT_HANDLES_COMPACT_DESC_STR},
+};
+
+#endif /* CATCOMP_ARRAY */
+
+
+/****************************************************************************/
+
+
+#ifdef CATCOMP_BLOCK
+
+static const char CatCompBlock[] =
+{
+    "\x00\x00\x03\xE8\x00\x1E"
+    MSG_PRINT_DESC_STR "\x00"
+    "\x00\x00\x03\xE9\x00\x26"
+    MSG_PRINT_COMPACT_DESC_STR "\x00"
+    "\x00\x00\x03\xEA\x00\x20"
+    MSG_PRINT_HANDLES_DESC_STR "\x00\x00"
+    "\x00\x00\x03\xEB\x00\x28"
+    MSG_PRINT_HANDLES_COMPACT_DESC_STR "\x00\x00"
+};
+
+#endif /* CATCOMP_BLOCK */
+
+
+/****************************************************************************/
+
+
+struct LocaleInfo
+{
+    APTR li_LocaleBase;
+    APTR li_Catalog;
+};
+
+
+#ifdef CATCOMP_CODE
+
+struct CatCompBlockType
+{
+	LONG	ccb_ID;
+	UWORD	ccb_StringSize;
+};
+
+STRPTR GetString(struct LocaleInfo * li, LONG stringNum)
+{
+	const struct CatCompBlockType * ccb = (APTR)CatCompBlock;
+	const struct CatCompBlockType * ccb_stop = (APTR)&((BYTE *)ccb)[sizeof(CatCompBlock)];
+
+	STRPTR builtin = NULL;
+	STRPTR result = NULL;
+
+	while(ccb < ccb_stop && ccb->ccb_StringSize > 0)
+	{
+		if(ccb->ccb_ID == stringNum)
+		{
+			builtin = (STRPTR)&ccb[1];
+			break;
+		}
+
+		ccb = (struct CatCompBlockType *)&((BYTE *)ccb)[sizeof(*ccb) + ccb->ccb_StringSize];
+	}
+
+	if(li != NULL && li->li_LocaleBase != NULL)
+	{
+		struct Library * LocaleBase = li->li_LocaleBase;
+
+		result = GetCatalogStr(li->li_Catalog, stringNum, builtin);
+	}
+	else
+	{
+		result = builtin;
+	}
+
+	return(result);
+}
+
+
+#endif /* CATCOMP_CODE */
+
+
+/****************************************************************************/
+
+
+#endif /* DEBUG_H */

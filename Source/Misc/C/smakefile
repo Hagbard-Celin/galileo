@@ -1,0 +1,88 @@
+
+OBJS = $(OBJ)GalileoRT.o $(OBJ)LoadGB.o $(OBJ)galileomsg.o 
+
+BINS = $(BIN)GalileoRT $(BIN)LoadGB $(BIN)galileomsg
+
+all : $(BINS)
+
+################
+
+$(OBJ)galileomsg.o: galileomsg.c
+
+################
+
+GalileoRT: $(BIN)GalileoRT
+
+$(BIN)GalileoRT : $(OBJ)GalileoRT.o
+	slink with <<
+define __ctype=___ctype
+$(ADDSYM) from lib:cres.o $(OBJ)GalileoRT.o
+to $(BIN)GalileoRT
+lib $(RTLIB) lib:sc.lib $(DEBUGLIB) lib:amiga.lib
+$(STRIPDEBUG)
+noicons
+sc sd
+<
+
+################
+
+LoadGB: $(BIN)LoadGB
+
+$(BIN)LoadGB : $(OBJ)LoadGB.o
+	slink with <<
+define __ctype=___ctype
+$(ADDSYM) from lib:c.o $(OBJ)LoadGB.o
+to $(BIN)LoadGB
+lib $(RTLIB) lib:sc.lib $(DEBUGLIB) lib:amiga.lib
+$(STRIPDEBUG)
+noicons
+sc sd
+<
+
+################
+
+galileomsg: $(BIN)galileomsg
+
+$(BIN)galileomsg : $(OBJ)galileomsg.o
+	slink with <<
+define __ctype=___ctype
+$(ADDSYM) from lib:c.o $(OBJ)galileomsg.o
+to $(BIN)GalileoMsg
+lib $(RTLIB) lib:sc.lib $(DEBUGLIB) lib:amiga.lib
+$(STRIPDEBUG)
+noicons
+sc sd
+<
+
+################
+
+.c.o:
+	sc $(SCFLAGS) $*.c objname $@
+.asm.o:
+	sc:c/asm -o$(OBJ) -iASMINC: $*.asm
+.cd.strings:
+	catcomp descriptor=$*.cd cfile=$*.strings
+.strings.o:
+    -delete >nil: $@ quiet
+	sc $*_strings.c objname $@
+
+################
+
+depend:
+    makedepend -Y -p$$(OBJ) -Q$(OBJ) $(OBJS)
+
+################
+
+clean:
+    -delete $(OBJS) quiet
+    -delete $(BINS) quiet
+#    touch >nil: \#?/\#?.(cd|fd)
+
+
+
+# DO NOT DELETE THIS LINE makedepend needs it
+
+$(OBJ)GalileoRT.o: GalileoRT.c //Library/galileofmbase.h
+$(OBJ)GalileoRT.o: //Program/galileo_config.h //Library/galileofmpragmas.h
+$(OBJ)LoadGB.o: LoadGB.c //Library/galileofmbase.h //Program/galileo_config.h
+$(OBJ)LoadGB.o: //Library/galileofmpragmas.h

@@ -1,0 +1,78 @@
+galileofm.library/OpenDisk                               galileofm.library/OpenDisk
+
+    NAME
+        OpenDisk - open a disk for direct I/O
+
+    SYNOPSIS
+        OpenDisk(disk, port)
+                  A0    A1
+
+        DiskHandle *OpenDisk(char *, struct MsgPort *);
+
+    FUNCTION
+        This routine makes it easy to access the underlying device for
+        direct I/O. It allows you to open any filesystem (that supports
+        direct I/O) with just the device name.
+
+    INPUTS
+        disk - name of disk to open, eg DF0:, HD1:
+        port - message port to use, or NULL
+
+    RESULT
+        If this function succeeds, it returns a DiskHandle structure,
+        which contains all the information you need to access the device
+        directly. The structure fields are :
+
+            dh_Port
+                If you did not supply a message port to use, one is
+                created automatically and its address is stored here. Usually
+                you will want a port created for you, but if you are working
+                with multiple devices at once you might want them all to share
+                the same message port.
+
+            dh_IO
+                This is a pointer to an IOExtTD structure, which you can use
+                to perform I/O on the device.
+
+            dh_Startup
+                A pointer to the FileSysStartupMsg of the device.
+
+            dh_Geo
+                A pointer to the DosEnvec structure of the device.
+
+            dh_Device
+                Full device name (without a colon)
+
+            dh_Info/dh_Result
+                If dh_Result is TRUE, dh_Info is valid, and contains current
+                information about the disk.
+
+            dh_Root/dh_BlockSize
+                These give the block number of the disk's root block, and
+                the block size.
+
+    SEE ALSO
+        CloseDisk(), trackdisk.doc
+
+galileofm.library/CloseDisk                             galileofm.library/CloseDisk
+
+    NAME
+        CloseDisk - close a DiskHandle structure
+
+    SYNOPSIS
+        CloseDisk(handle)
+                    A0
+
+        void CloseDisk(DiskHandle *);
+
+    FUNCTION
+        This function cleans up and closes a DiskHandle structure opened
+        with the OpenDisk() routine.
+
+    INPUTS
+        handle - DiskHandle to close
+
+    SEE ALSO
+        OpenDisk()
+
+

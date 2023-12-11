@@ -1,0 +1,12 @@
+SRC = 
+OBJ = GalileoB:OBJ/Modules/
+BIN = GalileoB:Binary/Modules/
+SBIN = GalileoB:Binary/Storage/Modules/
+TESTBIN =
+SOBJ = //SDK/lib/
+
+
+DEBUGLIB =
+STRIPDEBUG = stripdebug
+ADDSYM =
+SCFLAGS = nodebug define RESOURCE_TRACKING=0

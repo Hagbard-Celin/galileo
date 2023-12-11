@@ -1,0 +1,1671 @@
+
+CONFIGDIR   = config/
+XADDIR      = xadbrowser/
+FTPDIR      = ftp/
+
+STDOBJS     =   $(OBJ)libinit.o $(OBJ)lsprintf.o
+
+SHOWOBJS    =   $(OBJ)show.o $(OBJ)show_data.o $(OBJ)show_strings.o
+SHOWVER     =       0
+SHOWREV     =       1
+
+PLAYOBJS    =   $(OBJ)play.o $(OBJ)play_data.o $(OBJ)play_strings.o
+PLAYVER     =       0
+PLAYREV     =       1
+
+MISCOBJS    =   $(OBJ)misc.o $(OBJ)misc_data.o $(OBJ)misc_strings.o
+MISCVER     =       0
+MISCREV     =       1
+
+ICONOBJS    =   $(OBJ)icon.o $(OBJ)icon_data.o $(OBJ)icon_strings.o
+ICONVER     =       0
+ICONREV     =       17
+
+FORMATOBJS  =   $(OBJ)format.o $(OBJ)format_data.o $(OBJ)format_strings.o
+FORMATVER   =       0
+FORMATREV   =       1
+
+DISKCOPYOBJS    =   $(OBJ)diskcopy.o $(OBJ)diskcopy_data.o $(OBJ)diskcopy_strings.o
+DISKCOPYVER =       0
+DISKCOPYREV =       1
+
+READOBJS    =   $(OBJ)read.o $(OBJ)read_data.o $(OBJ)read_strings.o
+READVER     =       0
+READREV     =       1
+
+JOINOBJS    =   $(OBJ)join.o $(OBJ)join_data.o $(OBJ)join_strings.o
+JOINVER     =       0
+JOINREV     =       1
+
+PRINTOBJS   =   $(OBJ)print.o $(OBJ)print_data.o $(OBJ)print_strings.o
+PRINTVER    =       0
+PRINTREV    =       1
+
+LISTFORMATOBJS  =   $(OBJ)listerformat.o $(OBJ)listerformat_data.o $(OBJ)listerformat_strings.o
+LISTFORMATVER   =       0
+LISTFORMATREV   =       1
+
+DISKINFOOBJS    =   $(OBJ)diskinfo.o $(OBJ)diskinfo_data.o $(OBJ)diskinfo_strings.o
+DISKINFOVER =       0
+DISKINFOREV =       1
+
+FIXICONSOBJS   =   $(OBJ)fixicons.o $(OBJ)fixicons_data.o $(OBJ)fixicons_strings.o
+FIXICONSVER    =   0
+FIXICONSREV    =   1
+
+THEMESOBJS    =   $(OBJ)themes.o $(OBJ)themes_data.o $(OBJ)themes_strings.o
+THEMESVER =       0
+THEMESREV =       1
+
+ABOUTOBJS   =   $(OBJ)about.o $(OBJ)about_data.o
+ABOUTVER    =       0
+ABOUTREV    =       1
+
+UPDATEOBJS  =   $(OBJ)update.o $(OBJ)update_data.o $(OBJ)update_strings.o
+UPDATEVER   =   0
+UPDATEREV   =   1
+
+CLEANUPOBJS =   $(OBJ)cleanup.o $(OBJ)cleanup_data.o $(OBJ)cleanup_strings.o
+CLEANUPVER  =   0
+CLEANUPREV  =   1
+
+FILETYPEOBJS    =   $(OBJ)filetype.o $(OBJ)filetype_data.o $(OBJ)filetype_strings.o
+FILETYPEVER =       0
+FILETYPEREV =       1
+
+RECYCLEBINOBJS  =   $(OBJ)recyclebin.o $(OBJ)recyclebin_data.o $(OBJ)recyclebin_strings.o
+RECYCLEBINVER   =   0
+RECYCLEBINREV   =   1
+
+ICONCLOCKOBJS   =   $(OBJ)iconclock.o $(OBJ)iconclock_data.o $(OBJ)iconclock_strings.o
+ICONCLOCKVER    =   0
+ICONCLOCKREV    =   1
+
+FTPMYOBJS   = $(OBJ)$(FTPDIR)ftp_ver.o  $(OBJ)$(FTPDIR)ftp_main.o $(OBJ)$(FTPDIR)ftp_lister.o \
+			  $(OBJ)$(FTPDIR)ftp_lister_list.o $(OBJ)$(FTPDIR)ftp_lister_xfer.o \
+              $(OBJ)$(FTPDIR)ftp_lister_connect.o $(OBJ)$(FTPDIR)ftp.o $(OBJ)$(FTPDIR)ftp_arexx.o \
+              $(OBJ)$(FTPDIR)ftp_util.o $(OBJ)$(FTPDIR)ftp_recursive.o $(OBJ)$(FTPDIR)ftp_addressbook.o \
+              $(OBJ)$(FTPDIR)ftp_addrsupp.o $(OBJ)$(FTPDIR)ftp_addrformat.o $(OBJ)$(FTPDIR)ftp_protect.o
+
+	
+FTPOBJS	    = $(OBJ)$(FTPDIR)ftp_module.o $(OBJ)$(FTPDIR)ftp_data.o $(OBJ)$(FTPDIR)ftp_strings.o $(FTPMYOBJS)
+FTPVER 	    =  0
+FTPREV      =  1
+
+CONFIGMYOBJS = $(OBJ)$(CONFIGDIR)config_drag.o \
+		$(OBJ)$(CONFIGDIR)config_settings.o \
+		$(OBJ)$(CONFIGDIR)config_environment.o $(OBJ)$(CONFIGDIR)config_environment_data.o \
+		$(OBJ)$(CONFIGDIR)config_environment_lister.o \
+		$(OBJ)$(CONFIGDIR)config_environment_desktop.o \
+		$(OBJ)$(CONFIGDIR)config_environment_palette.o \
+		$(OBJ)$(CONFIGDIR)config_environment_output.o \
+		$(OBJ)$(CONFIGDIR)config_environment_sounds.o \
+		$(OBJ)$(CONFIGDIR)config_environment_display.o \
+		$(OBJ)$(CONFIGDIR)config_environment_icons.o \
+		$(OBJ)$(CONFIGDIR)config_environment_picture.o \
+		$(OBJ)$(CONFIGDIR)config_environment_paths.o \
+		$(OBJ)$(CONFIGDIR)config_buttons.o $(OBJ)$(CONFIGDIR)config_buttons_data.o \
+        $(OBJ)$(CONFIGDIR)config_buttons_god.o $(OBJ)$(CONFIGDIR)config_buttons_support.o \
+		$(OBJ)$(CONFIGDIR)button_editor.o $(OBJ)$(CONFIGDIR)button_editor_data.o \
+		$(OBJ)$(CONFIGDIR)function_editor.o $(OBJ)$(CONFIGDIR)function_editor_data.o \
+		$(OBJ)$(CONFIGDIR)select_colours.o $(OBJ)$(CONFIGDIR)select_colours_data.o \
+		$(OBJ)$(CONFIGDIR)config_convert.o $(OBJ)$(CONFIGDIR)config_convert_data.o \
+        $(OBJ)$(CONFIGDIR)old_config.o $(OBJ)$(CONFIGDIR)config_filetypes.o \
+        $(OBJ)$(CONFIGDIR)config_filetypes_data.o $(OBJ)$(CONFIGDIR)filetype_edit.o \
+		$(OBJ)$(CONFIGDIR)filetype_editor.o $(OBJ)$(CONFIGDIR)fileclass_editor.o \
+		$(OBJ)$(CONFIGDIR)lister_menu.o $(OBJ)$(CONFIGDIR)lister_menu_data.o \
+		$(OBJ)$(CONFIGDIR)config_menus.o $(OBJ)$(CONFIGDIR)config_menus_data.o \
+		$(OBJ)$(CONFIGDIR)config_menus_edit.o $(OBJ)$(CONFIGDIR)config_menus_io.o \
+		$(OBJ)$(CONFIGDIR)config_menus_drag.o $(OBJ)$(CONFIGDIR)function_export.o \
+		$(OBJ)$(CONFIGDIR)edit.o \
+		$(OBJ)$(CONFIGDIR)ipc.o
+
+CONFIGOBJS  = $(OBJ)$(CONFIGDIR)libinit.o $(OBJ)$(CONFIGDIR)config.o $(OBJ)$(CONFIGDIR)config_strings.o $(CONFIGMYOBJS)
+CONFIGVER   = 0
+CONFIGREV   = 1
+
+
+XADMYOBJS   = $(OBJ)$(XADDIR)XADbrowser_progress.o
+
+XADOBJS     = $(OBJ)$(XADDIR)XADbrowser.o $(OBJ)$(XADDIR)XADbrowser_data.o $(OBJ)$(XADDIR)XADbrowser_strings.o $(XADMYOBJS)
+XADVER      = 0
+XADREV      = 1
+
+
+ENVOYOBJS   =   $(OBJ)envoy.o $(OBJ)envoy_data.o $(OBJ)envoy_strings.o
+ENVOYVER    =   0
+ENVOYREV    =   1
+
+PATHFORMATOBJS = $(OBJ)pathformat.o $(OBJ)pathformat_data.o $(OBJ)pathformat_strings.o
+PATHFORMATVER  = 0
+PATHFORMATREV  = 1
+
+MODINITOBJS = $(SOBJ)modinit.o
+
+OBJS1 = $(STDOBJS) $(SHOWOBJS) $(PLAYOBJS) $(MISCOBJS) $(ICONOBJS) $(FORMATOBJS) $(DISKCOPYOBJS) \
+		$(READOBJS) $(JOINOBJS) $(PRINTOBJS) $(LISTFORMATOBJS) $(DISKINFOOBJS) $(FIXICONSOBJS) \
+        $(THEMESOBJS) $(FILETYPEOBJS) $(RECYCLEBINOBJS) $(ICONCLOCKOBJS) \
+        $(UPDATEOBJS) $(CLEANUPOBJS) $(ABOUTOBJS) $(PATHFORMATOBJS)
+OBJS2 = $(ENVOYOBJS) $(FTPOBJS) $(XADOBJS)
+
+OBJS3 = $(CONFIGOBJS)
+
+#########################################################################
+
+#		ftp/ftp.strings ftp.gfmmodule \
+
+all:    modules_pragmas.h \
+		$(BIN)show.gfmmodule \
+		$(BIN)play.gfmmodule \
+		$(BIN)misc.gfmmodule \
+		$(BIN)icon.gfmmodule \
+		$(BIN)format.gfmmodule \
+		$(BIN)diskcopy.gfmmodule \
+		$(BIN)read.gfmmodule \
+		$(BIN)join.gfmmodule \
+		$(BIN)print.gfmmodule \
+		$(BIN)listerformat.gfmmodule \
+		$(BIN)diskinfo.gfmmodule \
+		$(BIN)fixicons.gfmmodule \
+		$(BIN)themes.gfmmodule \
+		$(BIN)filetype.gfmmodule \
+		$(BIN)cleanup.gfmmodule \
+        $(SBIN)recyclebin.gfmmodule \
+		$(BIN)about.gfmmodule \
+        $(BIN)ftp.gfmmodule \
+        $(BIN)pathformat.gfmmodule \
+        $(SBIN)iconclock.gfmmodule \
+        $(CONFIGDIR)galileoconfig_pragmas.h \
+        $(BIN)galileoconfig.gfmmodule \
+        $(BIN)XADbrowser.gfmmodule \
+        modinit
+
+core:   modules_pragmas.h \
+        misc.strings $(BIN)misc.gfmmodule \
+		icon.strings $(BIN)icon.gfmmodule \
+		format.strings $(BIN)format.gfmmodule \
+		diskcopy.strings $(BIN)diskcopy.gfmmodule \
+        listerformat.strings $(BIN)listerformat.gfmmodule \
+		diskinfo.strings $(BIN)diskinfo.gfmmodule \
+		fixicons.strings $(BIN)fixicons.gfmmodule \
+		themes.strings $(BIN)themes.gfmmodule \
+		filetype.strings $(BIN)filetype.gfmmodule \
+        cleanup.strings $(BIN)cleanup.gfmmodule \
+		$(BIN)about.gfmmodule \
+        pathformat.strings $(BIN)pathformat.gfmmodule \
+        $(CONFIGDIR)galileoconfig_pragmas.h $(CONFIGDIR)config.strings $(BIN)galileoconfig.gfmmodule
+
+ftp:    ftp/ftp.strings $(BIN)ftp.gfmmodule
+#		envoy.strings envoy.gfmmodule \
+#		iconclock.strings iconclock.gfmmodule \
+#########################################################################
+
+
+$(CONFIGDIR)galileoconfig_pragmas.h: $(CONFIGDIR)galileoconfig.fd
+	fd2pragma $(CONFIGDIR)galileoconfig.fd $(CONFIGDIR)galileoconfig_pragmas.h
+
+modules_pragmas.h: modules.fd
+	fd2pragma modules.fd modules_pragmas.h
+
+$(OBJ)lsprintf.o: lsprintf.asm
+$(OBJ)$(FTPDIR)ftp_ver.o: $(FTPDIR)ftp_ver.c
+
+#########################################################################
+
+modinit: $(MODINITOBJS)
+	copy modinit.c //SDK/source/
+
+#########################################################################
+
+$(BIN)show.gfmmodule: $(STDOBJS) $(SHOWOBJS) 
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(SHOWOBJS) 
+to $(BIN)show.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(SHOWVER)
+librevision $(SHOWREV)
+$(STRIPDEBUG) noicons
+sc sd 
+<
+
+#########################################################################
+
+$(BIN)play.gfmmodule: $(STDOBJS) $(PLAYOBJS) 
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(PLAYOBJS) 
+to $(BIN)play.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(PLAYVER)
+librevision $(PLAYREV)
+$(STRIPDEBUG) noicons
+sc sd 
+<
+
+#########################################################################
+
+$(BIN)misc.gfmmodule: $(STDOBJS) $(MISCOBJS) 
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(MISCOBJS) 
+to $(BIN)misc.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(MISCVER)
+librevision $(MISCREV)
+$(STRIPDEBUG) noicons
+sc sd 
+<
+
+#########################################################################
+
+$(BIN)icon.gfmmodule: $(STDOBJS) $(ICONOBJS)
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(ICONOBJS) 
+to $(BIN)icon.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(ICONVER)
+librevision $(ICONREV)
+$(STRIPDEBUG) noicons
+sc sd 
+<
+
+#########################################################################
+
+$(BIN)format.gfmmodule: $(STDOBJS) $(FORMATOBJS) 
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(FORMATOBJS)
+to $(BIN)format.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(FORMATVER)
+librevision $(FORMATREV)
+$(STRIPDEBUG) noicons
+sc sd 
+<
+
+#########################################################################
+
+$(BIN)diskcopy.gfmmodule: $(STDOBJS) $(DISKCOPYOBJS) 
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(DISKCOPYOBJS) 
+to $(BIN)diskcopy.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(DISKCOPYVER)
+librevision $(DISKCOPYREV)
+$(STRIPDEBUG) noicons
+sc sd 
+<
+
+#########################################################################
+
+$(BIN)read.gfmmodule: $(STDOBJS) $(READOBJS) 
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(READOBJS) 
+to $(BIN)read.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(READVER)
+librevision $(READREV)
+$(STRIPDEBUG) noicons
+sc sd 
+<
+
+#########################################################################
+
+$(BIN)join.gfmmodule: $(STDOBJS) $(JOINOBJS) 
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(JOINOBJS) 
+to $(BIN)join.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(JOINVER)
+librevision $(JOINREV)
+$(STRIPDEBUG) noicons
+sc sd 
+<
+
+#########################################################################
+
+$(BIN)print.gfmmodule: $(STDOBJS) $(PRINTOBJS) 
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(PRINTOBJS) 
+to $(BIN)print.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(PRINTVER)
+librevision $(PRINTREV)
+$(STRIPDEBUG) noicons
+sc sd 
+<
+
+#########################################################################
+
+$(BIN)listerformat.gfmmodule: $(STDOBJS) $(LISTFORMATOBJS) 
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(LISTFORMATOBJS) 
+to $(BIN)listerformat.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(LISTFORMATVER)
+librevision $(LISTFORMATREV)
+$(STRIPDEBUG) noicons
+sc sd 
+<
+
+#########################################################################
+
+$(OBJ)diskinfo.o: diskinfo.c
+	sc $*.c $(SCFLAGS) math=ffp globalsymboltable=sc:include/include30ffp.gst objname $@
+
+$(BIN)diskinfo.gfmmodule: $(STDOBJS) $(DISKINFOOBJS)
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(DISKINFOOBJS) 
+to $(BIN)diskinfo.gfmmodule
+lib lib:scmffp.lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(DISKINFOVER)
+librevision $(DISKINFOREV)
+$(STRIPDEBUG) noicons
+sc sd 
+<
+
+#########################################################################
+
+$(BIN)fixicons.gfmmodule: $(STDOBJS) $(FIXICONSOBJS) 
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(FIXICONSOBJS) 
+to $(BIN)fixicons.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(FIXICONSVER)
+librevision $(FIXICONSREV)
+$(STRIPDEBUG) noicons
+sc sd 
+<
+
+#########################################################################
+
+$(BIN)themes.gfmmodule: $(STDOBJS) $(THEMESOBJS) 
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(THEMESOBJS) 
+to $(BIN)themes.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(THEMESVER)
+librevision $(THEMESREV)
+$(STRIPDEBUG) noicons
+sc sd 
+<
+
+#########################################################################
+
+$(BIN)filetype.gfmmodule: $(STDOBJS) $(FILETYPEOBJS)
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(FILETYPEOBJS) 
+to $(BIN)filetype.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(FILETYPEVER)
+librevision $(FILETYPEREV)
+$(STRIPDEBUG) noicons
+sc sd 
+<
+
+#########################################################################
+
+$(BIN)ftp.gfmmodule: $(STDOBJS) $(FTPOBJS) 
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(FTPOBJS)
+to $(BIN)ftp.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(FTPVER)
+librevision $(FTPREV)
+$(STRIPDEBUG) noicons
+sc sd 
+<
+
+#########################################################################
+
+$(SBIN)recyclebin.gfmmodule: $(STDOBJS) $(RECYCLEBINOBJS)
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(RECYCLEBINOBJS)
+to $(SBIN)recyclebin.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(RECYCLEBINVER)
+librevision $(RECYCLEBINREV)
+$(STRIPDEBUG) noicons
+sc sd 
+<
+
+#########################################################################
+
+$(SBIN)iconclock.gfmmodule: $(STDOBJS) $(ICONCLOCKOBJS) 
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(ICONCLOCKOBJS) 
+to $(SBIN)iconclock.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(ICONCLOCKVER)
+librevision $(ICONCLOCKREV)
+$(STRIPDEBUG) noicons
+sc sd 
+<
+	#slink from $(BIN)$@ to $(DISTBIN)$@ $(STRIPDEBUG) $(STRIPDEBUG) noicons
+    #copy $(BIN)$@ $(DEBUGBIN)$@
+	##flush
+
+#########################################################################
+
+$(SBIN)update.gfmmodule: $(STDOBJS) $(UPDATEOBJS) 
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(UPDATEOBJS) 
+to $(SBIN)update.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(UPDATEVER)
+librevision $(UPDATEREV)
+$(STRIPDEBUG) noicons
+sc sd $(STRIPDEBUG)
+<
+	# copy $(BIN)$@ to $(DISTBIN)
+	#flush
+
+#########################################################################
+
+$(BIN)cleanup.gfmmodule: $(STDOBJS) $(CLEANUPOBJS) 
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(CLEANUPOBJS) 
+to $(BIN)cleanup.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(CLEANUPVER)
+librevision $(CLEANUPREV)
+$(STRIPDEBUG) noicons
+sc sd 
+<
+
+#########################################################################
+
+$(BIN)about.gfmmodule: $(STDOBJS) $(ABOUTOBJS)
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(ABOUTOBJS)
+to $(BIN)about.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(ABOUTVER)
+librevision $(ABOUTREV)
+$(STRIPDEBUG) noicons
+sc 
+<
+
+#########################################################################
+
+$(BIN)envoy.gfmmodule: $(STDOBJS) $(ENVOYOBJS) 
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(ENVOYOBJS) 
+to $(BIN)envoy.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(ENVOYVER)
+librevision $(ENVOYREV)
+$(STRIPDEBUG) noicons
+sc sd 
+<
+
+#########################################################################
+
+$(BIN)pathformat.gfmmodule: $(STDOBJS) $(PATHFORMATOBJS) 
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(PATHFORMATOBJS) 
+to $(BIN)pathformat.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(PATHFORMATVER)
+librevision $(PATHFORMATREV)
+$(STRIPDEBUG) noicons
+sc sd
+<
+
+#########################################################################
+
+$(BIN)XADbrowser.gfmmodule: $(STDOBJS) $(XADOBJS) 
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd modules.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(XADOBJS) 
+to $(BIN)XADbrowser.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(XADVER)
+librevision $(XADREV)
+$(STRIPDEBUG) noicons
+sc sd
+<
+
+#########################################################################
+
+$(BIN)galileoconfig.gfmmodule: $(CONFIGOBJS) 
+	slink with lib:utillib.with with <<
+define __ctype=___ctype
+libprefix _L_
+libfd $(CONFIGDIR)galileoconfig.fd
+$(ADDSYM) from lib:libent.o lib:libinit.o $(CONFIGOBJS) $(OBJ)lsprintf.o
+to $(BIN)galileoconfig.gfmmodule
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+libversion $(CONFIGVER)
+librevision $(CONFIGREV)
+$(STRIPDEBUG) noicons
+sc sd
+maxhunk 51200
+<
+
+#########################################################################
+
+
+.c.o:
+	sc $(SCFLAGS) $*.c objname $@
+#.strings.o:
+#    -delete >nil: $@ quiet
+#	 sc $*_strings.c objname $@
+.asm.o:
+	sc:c/asm -o$(OBJ) -iASMINC: $*.asm
+.cd.strings:
+	catcomp descriptor=$*.cd cfile=$*.strings
+
+#########################################################################
+
+depend:
+    makedepend -Y//SDK/include/ -p$$(OBJ) -Q$(OBJ) $(OBJS1)
+    makedepend -a -Y//SDK/include/ -p$$(OBJ) -Q$(OBJ)  $(OBJS2)
+    makedepend -a -Y//SDK/include/ -p$$(OBJ) -Q$(OBJ)  $(OBJS3)
+    makedepend -a -Y//SDK/include/ -p$$(SOBJ) -Q$(SOBJ) $(MODINITOBJS)
+
+#########################################################################
+
+
+clean: ftpclean xadclean configclean
+	-delete $(OBJ)\#?.o quiet
+    -delete $(BIN)\#?.gfmmodule
+    -delete $(SBIN)\#?.gfmmodule
+#	 touch >nil: \#?.(cd|fd)
+    
+
+ftpclean:
+    -delete $(OBJ)$(FTPDIR)\#?.o quiet
+#    touch >nil: $(FTPDIR)\#?.(cd|fd)
+
+xadclean:
+    -delete $(OBJ)$(XADDIR)\#?.o quiet
+#    touch >nil: $(XADDIR)\#?.(cd|fd)
+
+configclean:
+    -delete $(OBJ)$(CONFIGDIR)\#?.o quiet
+#    touch >nil: $(CONFIGDIR)\#?.(cd|fd)
+
+
+# DO NOT DELETE THIS LINE makedepend needs it
+
+$(OBJ)libinit.o: libinit.c modules_lib.h /Library/galileofmbase.h
+$(OBJ)libinit.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)libinit.o: modules.h /Modules/modules_pragmas.h
+$(OBJ)show.o: show.c show.h show.strings modules_lib.h
+$(OBJ)show.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)show.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)show.o: /Modules/modules_pragmas.h /Library/read_ilbm.h
+$(OBJ)show_data.o: show_data.c show.h show.strings modules_lib.h
+$(OBJ)show_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)show_data.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)show_data.o: /Modules/modules_pragmas.h /Library/read_ilbm.h
+$(OBJ)show_strings.o: show_strings.c show.strings /Library/galileofmbase.h
+$(OBJ)show_strings.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)play.o: play.c play.h play.strings modules_lib.h
+$(OBJ)play.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)play.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)play.o: /Modules/modules_pragmas.h music.h
+$(OBJ)play_data.o: play_data.c play.h play.strings modules_lib.h
+$(OBJ)play_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)play_data.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)play_data.o: /Modules/modules_pragmas.h
+$(OBJ)play_strings.o: play_strings.c play.strings /Library/galileofmbase.h
+$(OBJ)play_strings.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)misc.o: misc.c misc.h misc.strings modules_lib.h
+$(OBJ)misc.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)misc.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)misc.o: /Modules/modules_pragmas.h
+$(OBJ)misc_data.o: misc_data.c misc.h misc.strings modules_lib.h
+$(OBJ)misc_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)misc_data.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)misc_data.o: /Modules/modules_pragmas.h
+$(OBJ)misc_strings.o: misc_strings.c misc.strings /Library/galileofmbase.h
+$(OBJ)misc_strings.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)icon.o: icon.c icon.h icon.strings modules_lib.h
+$(OBJ)icon.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)icon.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)icon.o: /Modules/modules_pragmas.h /Program/main_commands.h
+$(OBJ)icon_data.o: icon_data.c icon.h icon.strings modules_lib.h
+$(OBJ)icon_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)icon_data.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)icon_data.o: /Modules/modules_pragmas.h /Program/main_commands.h
+$(OBJ)icon_strings.o: icon_strings.c icon.strings /Library/galileofmbase.h
+$(OBJ)icon_strings.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)format.o: format.c format.h format.strings modules_lib.h
+$(OBJ)format.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)format.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)format.o: /Modules/modules_pragmas.h
+$(OBJ)format_data.o: format_data.c format.h format.strings modules_lib.h
+$(OBJ)format_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)format_data.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)format_data.o: /Modules/modules_pragmas.h
+$(OBJ)format_strings.o: format_strings.c format.strings
+$(OBJ)format_strings.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)format_strings.o: /Library/galileofmpragmas.h
+$(OBJ)diskcopy.o: diskcopy.c diskcopy.h diskcopy.strings modules_lib.h
+$(OBJ)diskcopy.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)diskcopy.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)diskcopy.o: /Modules/modules_pragmas.h
+$(OBJ)diskcopy_data.o: diskcopy_data.c diskcopy.h diskcopy.strings
+$(OBJ)diskcopy_data.o: modules_lib.h /Library/galileofmbase.h
+$(OBJ)diskcopy_data.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)diskcopy_data.o: modules.h /Modules/modules_pragmas.h
+$(OBJ)diskcopy_strings.o: diskcopy_strings.c diskcopy.strings
+$(OBJ)diskcopy_strings.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)diskcopy_strings.o: /Library/galileofmpragmas.h
+$(OBJ)read.o: read.c read.h read.strings modules_lib.h
+$(OBJ)read.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)read.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)read.o: /Modules/modules_pragmas.h
+$(OBJ)read_data.o: read_data.c read.h read.strings modules_lib.h
+$(OBJ)read_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)read_data.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)read_data.o: /Modules/modules_pragmas.h
+$(OBJ)read_strings.o: read_strings.c read.strings /Library/galileofmbase.h
+$(OBJ)read_strings.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)join.o: join.c join.h join.strings modules_lib.h
+$(OBJ)join.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)join.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)join.o: /Modules/modules_pragmas.h
+$(OBJ)join_data.o: join_data.c join.h join.strings modules_lib.h
+$(OBJ)join_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)join_data.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)join_data.o: /Modules/modules_pragmas.h
+$(OBJ)join_strings.o: join_strings.c join.strings /Library/galileofmbase.h
+$(OBJ)join_strings.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)print.o: print.c print.h print.strings modules_lib.h
+$(OBJ)print.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)print.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)print.o: /Modules/modules_pragmas.h
+$(OBJ)print_data.o: print_data.c print.h print.strings modules_lib.h
+$(OBJ)print_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)print_data.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)print_data.o: /Modules/modules_pragmas.h
+$(OBJ)print_strings.o: print_strings.c print.strings /Library/galileofmbase.h
+$(OBJ)print_strings.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)listerformat.o: listerformat.c listerformat.h listerformat.strings
+$(OBJ)listerformat.o: modules_lib.h /Library/galileofmbase.h
+$(OBJ)listerformat.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)listerformat.o: modules.h /Modules/modules_pragmas.h
+$(OBJ)listerformat.o: Config/galileoconfig.h
+$(OBJ)listerformat.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)listerformat_data.o: listerformat_data.c listerformat.h
+$(OBJ)listerformat_data.o: listerformat.strings modules_lib.h
+$(OBJ)listerformat_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)listerformat_data.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)listerformat_data.o: /Modules/modules_pragmas.h
+$(OBJ)listerformat_strings.o: listerformat_strings.c listerformat.strings
+$(OBJ)listerformat_strings.o: /Library/galileofmbase.h
+$(OBJ)listerformat_strings.o: /Program/galileo_config.h
+$(OBJ)listerformat_strings.o: /Library/galileofmpragmas.h
+$(OBJ)diskinfo.o: diskinfo.c diskinfo.h diskinfo.strings modules_lib.h
+$(OBJ)diskinfo.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)diskinfo.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)diskinfo.o: /Modules/modules_pragmas.h
+$(OBJ)diskinfo_data.o: diskinfo_data.c diskinfo.h diskinfo.strings
+$(OBJ)diskinfo_data.o: modules_lib.h /Library/galileofmbase.h
+$(OBJ)diskinfo_data.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)diskinfo_data.o: modules.h /Modules/modules_pragmas.h
+$(OBJ)diskinfo_strings.o: diskinfo_strings.c diskinfo.strings
+$(OBJ)diskinfo_strings.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)diskinfo_strings.o: /Library/galileofmpragmas.h
+$(OBJ)fixicons.o: fixicons.c fixicons.h fixicons.strings modules_lib.h
+$(OBJ)fixicons.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)fixicons.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)fixicons.o: /Modules/modules_pragmas.h
+$(OBJ)fixicons_data.o: fixicons_data.c fixicons.h fixicons.strings
+$(OBJ)fixicons_data.o: modules_lib.h /Library/galileofmbase.h
+$(OBJ)fixicons_data.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)fixicons_data.o: modules.h /Modules/modules_pragmas.h
+$(OBJ)fixicons_strings.o: fixicons_strings.c fixicons.strings
+$(OBJ)fixicons_strings.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)fixicons_strings.o: /Library/galileofmpragmas.h
+$(OBJ)themes.o: themes.c themes.h themes.strings modules_lib.h
+$(OBJ)themes.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)themes.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)themes.o: /Modules/modules_pragmas.h //SDK/include/galileofm/hooks.h
+$(OBJ)themes_data.o: themes_data.c themes.h themes.strings modules_lib.h
+$(OBJ)themes_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)themes_data.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)themes_data.o: /Modules/modules_pragmas.h
+$(OBJ)themes_data.o: //SDK/include/galileofm/hooks.h
+$(OBJ)themes_strings.o: themes_strings.c themes.strings
+$(OBJ)themes_strings.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)themes_strings.o: /Library/galileofmpragmas.h
+$(OBJ)filetype.o: filetype.c filetype.h filetype.strings modules_lib.h
+$(OBJ)filetype.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)filetype.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)filetype.o: /Modules/modules_pragmas.h Config/galileoconfig.h
+$(OBJ)filetype.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)filetype_data.o: filetype_data.c filetype.h filetype.strings
+$(OBJ)filetype_data.o: modules_lib.h /Library/galileofmbase.h
+$(OBJ)filetype_data.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)filetype_data.o: modules.h /Modules/modules_pragmas.h
+$(OBJ)filetype_data.o: Config/galileoconfig.h
+$(OBJ)filetype_data.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)filetype_strings.o: filetype_strings.c filetype.strings
+$(OBJ)filetype_strings.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)filetype_strings.o: /Library/galileofmpragmas.h
+$(OBJ)recyclebin.o: recyclebin.c recyclebin.h recyclebin.strings
+$(OBJ)recyclebin.o: modules_lib.h /Library/galileofmbase.h
+$(OBJ)recyclebin.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)recyclebin.o: modules.h /Modules/modules_pragmas.h
+$(OBJ)recyclebin_data.o: recyclebin_data.c recyclebin.h recyclebin.strings
+$(OBJ)recyclebin_data.o: modules_lib.h /Library/galileofmbase.h
+$(OBJ)recyclebin_data.o: /Program/galileo_config.h
+$(OBJ)recyclebin_data.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)recyclebin_data.o: /Modules/modules_pragmas.h
+$(OBJ)recyclebin_strings.o: recyclebin_strings.c recyclebin.strings
+$(OBJ)recyclebin_strings.o: /Library/galileofmbase.h
+$(OBJ)recyclebin_strings.o: /Program/galileo_config.h
+$(OBJ)recyclebin_strings.o: /Library/galileofmpragmas.h
+$(OBJ)iconclock.o: iconclock.c iconclock.h iconclock.strings modules_lib.h
+$(OBJ)iconclock.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)iconclock.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)iconclock.o: /Modules/modules_pragmas.h
+$(OBJ)iconclock_data.o: iconclock_data.c iconclock.h iconclock.strings
+$(OBJ)iconclock_data.o: modules_lib.h /Library/galileofmbase.h
+$(OBJ)iconclock_data.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)iconclock_data.o: modules.h /Modules/modules_pragmas.h
+$(OBJ)iconclock_strings.o: iconclock_strings.c iconclock.strings
+$(OBJ)iconclock_strings.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)iconclock_strings.o: /Library/galileofmpragmas.h
+$(OBJ)update.o: update.c update.h update.strings modules_lib.h
+$(OBJ)update.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)update.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)update.o: /Modules/modules_pragmas.h /Program/position.h
+$(OBJ)update_data.o: update_data.c update.h update.strings modules_lib.h
+$(OBJ)update_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)update_data.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)update_data.o: /Modules/modules_pragmas.h
+$(OBJ)update_strings.o: update_strings.c update.strings
+$(OBJ)update_strings.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)update_strings.o: /Library/galileofmpragmas.h
+$(OBJ)cleanup.o: cleanup.c cleanup.h cleanup.strings modules_lib.h
+$(OBJ)cleanup.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)cleanup.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)cleanup.o: /Modules/modules_pragmas.h /Program/position.h
+$(OBJ)cleanup.o: /Program/main_commands.h
+$(OBJ)cleanup_data.o: cleanup_data.c cleanup.h cleanup.strings modules_lib.h
+$(OBJ)cleanup_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)cleanup_data.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)cleanup_data.o: /Modules/modules_pragmas.h
+$(OBJ)cleanup_strings.o: cleanup_strings.c cleanup.strings
+$(OBJ)cleanup_strings.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)cleanup_strings.o: /Library/galileofmpragmas.h
+$(OBJ)about.o: about.c about.h modules_lib.h /Library/galileofmbase.h
+$(OBJ)about.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)about.o: modules.h /Modules/modules_pragmas.h
+$(OBJ)about_data.o: about_data.c about.h modules_lib.h
+$(OBJ)about_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)about_data.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)about_data.o: /Modules/modules_pragmas.h
+$(OBJ)pathformat.o: pathformat.c pathformat.h pathformat.strings
+$(OBJ)pathformat.o: modules_lib.h /Library/galileofmbase.h
+$(OBJ)pathformat.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)pathformat.o: modules.h /Modules/modules_pragmas.h
+$(OBJ)pathformat.o: Config/galileoconfig.h
+$(OBJ)pathformat.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)pathformat.o: /Program/position.h
+$(OBJ)pathformat_data.o: pathformat_data.c pathformat.h pathformat.strings
+$(OBJ)pathformat_data.o: modules_lib.h /Library/galileofmbase.h
+$(OBJ)pathformat_data.o: /Program/galileo_config.h
+$(OBJ)pathformat_data.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)pathformat_data.o: /Modules/modules_pragmas.h
+$(OBJ)pathformat_strings.o: pathformat_strings.c pathformat.strings
+$(OBJ)pathformat_strings.o: /Library/galileofmbase.h
+$(OBJ)pathformat_strings.o: /Program/galileo_config.h
+$(OBJ)pathformat_strings.o: /Library/galileofmpragmas.h
+$(OBJ)debug.o: debug.c debug.h debug.strings modules_lib.h
+$(OBJ)debug.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)debug.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)debug.o: /Modules/modules_pragmas.h
+$(OBJ)debug_data.o: debug_data.c debug.h debug.strings modules_lib.h
+$(OBJ)debug_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)debug_data.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)debug_data.o: /Modules/modules_pragmas.h
+$(OBJ)debug_strings.o: debug_strings.c debug.strings /Library/galileofmbase.h
+$(OBJ)debug_strings.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+
+$(OBJ)envoy.o: envoy.c envoy.h envoy.strings modules_lib.h
+$(OBJ)envoy.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)envoy.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)envoy.o: /Modules/modules_pragmas.h
+$(OBJ)envoy_data.o: envoy_data.c envoy.h envoy.strings modules_lib.h
+$(OBJ)envoy_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)envoy_data.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)envoy_data.o: /Modules/modules_pragmas.h
+$(OBJ)envoy_strings.o: envoy_strings.c envoy.strings /Library/galileofmbase.h
+$(OBJ)envoy_strings.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)ftp/ftp_module.o: ftp/ftp_module.c ftp/ftp.h ftp/ftp.strings
+$(OBJ)ftp/ftp_module.o: modules_lib.h /Library/galileofmbase.h
+$(OBJ)ftp/ftp_module.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)ftp/ftp_module.o: modules.h /Modules/modules_pragmas.h ftp/hooks.h
+$(OBJ)ftp/ftp_module.o: ftp/ftp_ad_internet.h ftp/ftp_arexx.h
+$(OBJ)ftp/ftp_module.o: ftp/ftp_module.h ftp/ftp_ipc.h ftp/ftp_galileoftp.h
+$(OBJ)ftp/ftp_module.o: /Program/reselect.h /Program/pattern.h
+$(OBJ)ftp/ftp_module.o: /Program/toolbar.h /Program/lister.h /Program/popup.h
+$(OBJ)ftp/ftp_module.o: /Program/dirlist.h ftp/ftp_util.h
+$(OBJ)ftp/ftp_module.o: ftp/ftp_addrsupp_protos.h
+$(OBJ)ftp/ftp_data.o: ftp/ftp_data.c ftp/ftp.h ftp/ftp.strings modules_lib.h
+$(OBJ)ftp/ftp_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)ftp/ftp_data.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)ftp/ftp_data.o: /Modules/modules_pragmas.h ftp/hooks.h
+$(OBJ)ftp/ftp_data.o: ftp/ftp_ad_internet.h ftp/ftp_galileoftp.h
+$(OBJ)ftp/ftp_data.o: /Program/reselect.h /Program/pattern.h
+$(OBJ)ftp/ftp_data.o: /Program/toolbar.h /Program/lister.h /Program/popup.h
+$(OBJ)ftp/ftp_data.o: /Program/dirlist.h
+$(OBJ)ftp/ftp_strings.o: ftp/ftp_strings.c ftp/ftp.strings
+$(OBJ)ftp/ftp_strings.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)ftp/ftp_strings.o: /Library/galileofmpragmas.h
+$(OBJ)ftp/ftp_main.o: ftp/ftp_main.c ftp/ftp.h ftp/ftp.strings modules_lib.h
+$(OBJ)ftp/ftp_main.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)ftp/ftp_main.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)ftp/ftp_main.o: /Modules/modules_pragmas.h ftp/hooks.h
+$(OBJ)ftp/ftp_main.o: ftp/ftp_ad_internet.h ftp/ftp_ad_sockproto2.h
+$(OBJ)ftp/ftp_main.o: ftp/ftp_extern_pragmas.h ftp/ftp_arexx.h
+$(OBJ)ftp/ftp_main.o: ftp/ftp_module.h ftp/ftp_ipc.h ftp/ftp_galileoftp.h
+$(OBJ)ftp/ftp_main.o: /Program/reselect.h /Program/pattern.h
+$(OBJ)ftp/ftp_main.o: /Program/toolbar.h /Program/lister.h /Program/popup.h
+$(OBJ)ftp/ftp_main.o: /Program/dirlist.h ftp/ftp_lister.h ftp/ftp_util.h
+$(OBJ)ftp/ftp_main.o: ftp/ftp_addrsupp_protos.h
+$(OBJ)ftp/ftp_lister.o: ftp/ftp_lister.c ftp/ftp.h ftp/ftp.strings
+$(OBJ)ftp/ftp_lister.o: modules_lib.h /Library/galileofmbase.h
+$(OBJ)ftp/ftp_lister.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)ftp/ftp_lister.o: modules.h /Modules/modules_pragmas.h ftp/hooks.h
+$(OBJ)ftp/ftp_lister.o: ftp/ftp_ad_internet.h ftp/ftp_ad_sockproto2.h
+$(OBJ)ftp/ftp_lister.o: ftp/ftp_extern_pragmas.h ftp/ftp_ad_errno.h
+$(OBJ)ftp/ftp_lister.o: ftp/ftp_arexx.h ftp/ftp_ipc.h ftp/ftp_galileoftp.h
+$(OBJ)ftp/ftp_lister.o: /Program/reselect.h /Program/pattern.h
+$(OBJ)ftp/ftp_lister.o: /Program/toolbar.h /Program/lister.h /Program/popup.h
+$(OBJ)ftp/ftp_lister.o: /Program/dirlist.h ftp/ftp_lister.h ftp/ftp_util.h
+$(OBJ)ftp/ftp_lister.o: ftp/ftp_recursive.h ftp/ftp_addrsupp_protos.h
+$(OBJ)ftp/ftp_lister.o: ftp/ftp_protect.h
+$(OBJ)ftp/ftp_lister_list.o: ftp/ftp_lister_list.c ftp/ftp.h ftp/ftp.strings
+$(OBJ)ftp/ftp_lister_list.o: modules_lib.h /Library/galileofmbase.h
+$(OBJ)ftp/ftp_lister_list.o: /Program/galileo_config.h
+$(OBJ)ftp/ftp_lister_list.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)ftp/ftp_lister_list.o: /Modules/modules_pragmas.h ftp/hooks.h
+$(OBJ)ftp/ftp_lister_list.o: ftp/ftp_ad_internet.h ftp/ftp_ad_sockproto.h
+$(OBJ)ftp/ftp_lister_list.o: ftp/ftp_extern_pragmas.h ftp/ftp_ad_errno.h
+$(OBJ)ftp/ftp_lister_list.o: ftp/ftp_lister.h ftp/ftp_galileoftp.h
+$(OBJ)ftp/ftp_lister_list.o: /Program/reselect.h /Program/pattern.h
+$(OBJ)ftp/ftp_lister_list.o: /Program/toolbar.h /Program/lister.h
+$(OBJ)ftp/ftp_lister_list.o: /Program/popup.h /Program/dirlist.h
+$(OBJ)ftp/ftp_lister_list.o: ftp/ftp_arexx.h ftp/ftp_ipc.h ftp/ftp_util.h
+$(OBJ)ftp/ftp_lister_list.o: ftp/ftp_list.h
+$(OBJ)ftp/ftp_lister_xfer.o: ftp/ftp_lister_xfer.c ftp/ftp.h ftp/ftp.strings
+$(OBJ)ftp/ftp_lister_xfer.o: modules_lib.h /Library/galileofmbase.h
+$(OBJ)ftp/ftp_lister_xfer.o: /Program/galileo_config.h
+$(OBJ)ftp/ftp_lister_xfer.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)ftp/ftp_lister_xfer.o: /Modules/modules_pragmas.h ftp/hooks.h
+$(OBJ)ftp/ftp_lister_xfer.o: ftp/ftp_ad_internet.h ftp/ftp_ad_sockproto.h
+$(OBJ)ftp/ftp_lister_xfer.o: ftp/ftp_extern_pragmas.h ftp/ftp_ad_errno.h
+$(OBJ)ftp/ftp_lister_xfer.o: ftp/ftp_arexx.h ftp/ftp_ipc.h
+$(OBJ)ftp/ftp_lister_xfer.o: ftp/ftp_galileoftp.h /Program/reselect.h
+$(OBJ)ftp/ftp_lister_xfer.o: /Program/pattern.h /Program/toolbar.h
+$(OBJ)ftp/ftp_lister_xfer.o: /Program/lister.h /Program/popup.h
+$(OBJ)ftp/ftp_lister_xfer.o: /Program/dirlist.h ftp/ftp_lister.h
+$(OBJ)ftp/ftp_lister_xfer.o: ftp/ftp_util.h ftp/ftp_recursive.h
+$(OBJ)ftp/ftp_lister_xfer.o: ftp/ftp_lister_xfer.h ftp/ftp_addrsupp_protos.h
+$(OBJ)ftp/ftp_lister_connect.o: ftp/ftp_lister_connect.c ftp/ftp.h
+$(OBJ)ftp/ftp_lister_connect.o: ftp/ftp.strings modules_lib.h
+$(OBJ)ftp/ftp_lister_connect.o: /Library/galileofmbase.h
+$(OBJ)ftp/ftp_lister_connect.o: /Program/galileo_config.h
+$(OBJ)ftp/ftp_lister_connect.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)ftp/ftp_lister_connect.o: /Modules/modules_pragmas.h ftp/hooks.h
+$(OBJ)ftp/ftp_lister_connect.o: ftp/ftp_ad_internet.h ftp/ftp_ad_sockproto.h
+$(OBJ)ftp/ftp_lister_connect.o: ftp/ftp_extern_pragmas.h ftp/ftp_ad_errno.h
+$(OBJ)ftp/ftp_lister_connect.o: ftp/ftp_arexx.h ftp/ftp_ipc.h
+$(OBJ)ftp/ftp_lister_connect.o: ftp/ftp_galileoftp.h /Program/reselect.h
+$(OBJ)ftp/ftp_lister_connect.o: /Program/pattern.h /Program/toolbar.h
+$(OBJ)ftp/ftp_lister_connect.o: /Program/lister.h /Program/popup.h
+$(OBJ)ftp/ftp_lister_connect.o: /Program/dirlist.h ftp/ftp_lister.h
+$(OBJ)ftp/ftp_lister_connect.o: ftp/ftp_util.h ftp/ftp_module.h
+$(OBJ)ftp/ftp_lister_connect.o: ftp/ftp_addrsupp_protos.h
+$(OBJ)ftp/ftp.o: ftp/ftp.c ftp/ftp_ad_sockproto2.h ftp/ftp_ad_internet.h
+$(OBJ)ftp/ftp.o: ftp/ftp_extern_pragmas.h ftp/ftp_ad_errno.h ftp/ftp.h
+$(OBJ)ftp/ftp.o: ftp/ftp.strings modules_lib.h /Library/galileofmbase.h
+$(OBJ)ftp/ftp.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)ftp/ftp.o: modules.h /Modules/modules_pragmas.h ftp/hooks.h
+$(OBJ)ftp/ftp.o: ftp/ftp_galileoftp.h /Program/reselect.h /Program/pattern.h
+$(OBJ)ftp/ftp.o: /Program/toolbar.h /Program/lister.h /Program/popup.h
+$(OBJ)ftp/ftp.o: /Program/dirlist.h ftp/ftp_ipc.h ftp/ftp_lister.h
+$(OBJ)ftp/ftp.o: ftp/ftp_arexx.h ftp/ftp_util.h
+$(OBJ)ftp/ftp_arexx.o: ftp/ftp_arexx.c ftp/ftp_arexx.h ftp/ftp_galileoftp.h
+$(OBJ)ftp/ftp_arexx.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)ftp/ftp_arexx.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)ftp/ftp_arexx.o: /Modules/modules_pragmas.h ftp/hooks.h
+$(OBJ)ftp/ftp_arexx.o: /Program/reselect.h /Program/pattern.h
+$(OBJ)ftp/ftp_arexx.o: /Program/toolbar.h /Program/lister.h /Program/popup.h
+$(OBJ)ftp/ftp_arexx.o: /Program/dirlist.h
+$(OBJ)ftp/ftp_util.o: ftp/ftp_util.c ftp/ftp.h ftp/ftp.strings modules_lib.h
+$(OBJ)ftp/ftp_util.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)ftp/ftp_util.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)ftp/ftp_util.o: /Modules/modules_pragmas.h ftp/hooks.h
+$(OBJ)ftp/ftp_util.o: ftp/ftp_ad_internet.h ftp/ftp_ad_sockproto.h
+$(OBJ)ftp/ftp_util.o: ftp/ftp_extern_pragmas.h ftp/ftp_galileoftp.h
+$(OBJ)ftp/ftp_util.o: /Program/reselect.h /Program/pattern.h
+$(OBJ)ftp/ftp_util.o: /Program/toolbar.h /Program/lister.h /Program/popup.h
+$(OBJ)ftp/ftp_util.o: /Program/dirlist.h ftp/ftp_list.h ftp/ftp_lister.h
+$(OBJ)ftp/ftp_util.o: ftp/ftp_util.h ftp/ftp_recursive.h
+$(OBJ)ftp/ftp_recursive.o: ftp/ftp_recursive.c ftp/ftp_recursive.h
+$(OBJ)ftp/ftp_recursive.o: ftp/ftp_lister.h ftp/ftp_galileoftp.h
+$(OBJ)ftp/ftp_recursive.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)ftp/ftp_recursive.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)ftp/ftp_recursive.o: /Modules/modules_pragmas.h ftp/hooks.h
+$(OBJ)ftp/ftp_recursive.o: /Program/reselect.h /Program/pattern.h
+$(OBJ)ftp/ftp_recursive.o: /Program/toolbar.h /Program/lister.h
+$(OBJ)ftp/ftp_recursive.o: /Program/popup.h /Program/dirlist.h ftp/ftp.h
+$(OBJ)ftp/ftp_recursive.o: ftp/ftp.strings modules_lib.h
+$(OBJ)ftp/ftp_recursive.o: ftp/ftp_ad_internet.h ftp/ftp_util.h
+$(OBJ)ftp/ftp_recursive.o: ftp/ftp_list.h ftp/ftp_ipc.h ftp/ftp_arexx.h
+$(OBJ)ftp/ftp_recursive.o: ftp/ftp_lister_xfer.h ftp/ftp_ad_sockproto2.h
+$(OBJ)ftp/ftp_recursive.o: ftp/ftp_extern_pragmas.h ftp/ftp_addrsupp_protos.h
+$(OBJ)ftp/ftp_addressbook.o: ftp/ftp_addressbook.c ftp/ftp.h ftp/ftp.strings
+$(OBJ)ftp/ftp_addressbook.o: modules_lib.h /Library/galileofmbase.h
+$(OBJ)ftp/ftp_addressbook.o: /Program/galileo_config.h
+$(OBJ)ftp/ftp_addressbook.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)ftp/ftp_addressbook.o: /Modules/modules_pragmas.h ftp/hooks.h
+$(OBJ)ftp/ftp_addressbook.o: ftp/ftp_ad_internet.h ftp/ftp_ad_sockproto2.h
+$(OBJ)ftp/ftp_addressbook.o: ftp/ftp_extern_pragmas.h ftp/ftp_addressbook.h
+$(OBJ)ftp/ftp_addressbook.o: ftp/ftp_galileoftp.h /Program/reselect.h
+$(OBJ)ftp/ftp_addressbook.o: /Program/pattern.h /Program/toolbar.h
+$(OBJ)ftp/ftp_addressbook.o: /Program/lister.h /Program/popup.h
+$(OBJ)ftp/ftp_addressbook.o: /Program/dirlist.h ftp/ftp_addressbook_protos.h
+$(OBJ)ftp/ftp_addressbook.o: ftp/ftp_addrsupp.h ftp/ftp_addrsupp_protos.h
+$(OBJ)ftp/ftp_addressbook.o: ftp/ftp_addrformat.h ftp/ftp_ipc.h
+$(OBJ)ftp/ftp_addressbook.o: ftp/ftp_util.h config/galileoconfig.h
+$(OBJ)ftp/ftp_addressbook.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)ftp/ftp_addrsupp.o: ftp/ftp_addrsupp.c ftp/ftp.h ftp/ftp.strings
+$(OBJ)ftp/ftp_addrsupp.o: modules_lib.h /Library/galileofmbase.h
+$(OBJ)ftp/ftp_addrsupp.o: /Program/galileo_config.h
+$(OBJ)ftp/ftp_addrsupp.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)ftp/ftp_addrsupp.o: /Modules/modules_pragmas.h ftp/hooks.h
+$(OBJ)ftp/ftp_addrsupp.o: ftp/ftp_ad_internet.h ftp/ftp_ipc.h
+$(OBJ)ftp/ftp_addrsupp.o: ftp/ftp_galileoftp.h /Program/reselect.h
+$(OBJ)ftp/ftp_addrsupp.o: /Program/pattern.h /Program/toolbar.h
+$(OBJ)ftp/ftp_addrsupp.o: /Program/lister.h /Program/popup.h
+$(OBJ)ftp/ftp_addrsupp.o: /Program/dirlist.h ftp/ftp_addressbook.h
+$(OBJ)ftp/ftp_addrsupp.o: ftp/ftp_addressbook_protos.h ftp/ftp_addrsupp.h
+$(OBJ)ftp/ftp_addrsupp.o: ftp/ftp_addrsupp_protos.h ftp/ftp_addrformat.h
+$(OBJ)ftp/ftp_addrsupp.o: ftp/ftp_util.h
+$(OBJ)ftp/ftp_addrformat.o: ftp/ftp_addrformat.c ftp/ftp.h ftp/ftp.strings
+$(OBJ)ftp/ftp_addrformat.o: modules_lib.h /Library/galileofmbase.h
+$(OBJ)ftp/ftp_addrformat.o: /Program/galileo_config.h
+$(OBJ)ftp/ftp_addrformat.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)ftp/ftp_addrformat.o: /Modules/modules_pragmas.h ftp/hooks.h
+$(OBJ)ftp/ftp_addrformat.o: ftp/ftp_ad_internet.h ftp/ftp_ipc.h
+$(OBJ)ftp/ftp_addrformat.o: ftp/ftp_galileoftp.h /Program/reselect.h
+$(OBJ)ftp/ftp_addrformat.o: /Program/pattern.h /Program/toolbar.h
+$(OBJ)ftp/ftp_addrformat.o: /Program/lister.h /Program/popup.h
+$(OBJ)ftp/ftp_addrformat.o: /Program/dirlist.h ftp/ftp_addressbook.h
+$(OBJ)ftp/ftp_addrformat.o: ftp/ftp_addressbook_protos.h ftp/ftp_addrformat.h
+$(OBJ)ftp/ftp_protect.o: ftp/ftp_protect.c ftp/ftp.h ftp/ftp.strings
+$(OBJ)ftp/ftp_protect.o: modules_lib.h /Library/galileofmbase.h
+$(OBJ)ftp/ftp_protect.o: /Program/galileo_config.h
+$(OBJ)ftp/ftp_protect.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)ftp/ftp_protect.o: /Modules/modules_pragmas.h ftp/hooks.h
+$(OBJ)ftp/ftp_protect.o: ftp/ftp_ad_internet.h ftp/ftp_galileoftp.h
+$(OBJ)ftp/ftp_protect.o: /Program/reselect.h /Program/pattern.h
+$(OBJ)ftp/ftp_protect.o: /Program/toolbar.h /Program/lister.h
+$(OBJ)ftp/ftp_protect.o: /Program/popup.h /Program/dirlist.h ftp/ftp_ipc.h
+$(OBJ)ftp/ftp_protect.o: ftp/ftp_util.h ftp/ftp_protect.h
+$(OBJ)ftp/ftp_protect.o: config/galileoconfig.h
+$(OBJ)ftp/ftp_protect.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)xadbrowser/XADbrowser.o: xadbrowser/XADbrowser.c xadbrowser/XADbrowser.h
+$(OBJ)xadbrowser/XADbrowser.o: xadbrowser/XADbrowser.strings modules_lib.h
+$(OBJ)xadbrowser/XADbrowser.o: /Library/galileofmbase.h
+$(OBJ)xadbrowser/XADbrowser.o: /Program/galileo_config.h
+$(OBJ)xadbrowser/XADbrowser.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)xadbrowser/XADbrowser.o: /Modules/modules_pragmas.h
+$(OBJ)xadbrowser/XADbrowser.o: //SDK/include/galileofm/hooks.h
+$(OBJ)xadbrowser/XADbrowser_data.o: xadbrowser/XADbrowser_data.c xadbrowser/XADbrowser.h
+$(OBJ)xadbrowser/XADbrowser_data.o: xadbrowser/XADbrowser.strings
+$(OBJ)xadbrowser/XADbrowser_data.o: modules_lib.h /Library/galileofmbase.h
+$(OBJ)xadbrowser/XADbrowser_data.o: /Program/galileo_config.h
+$(OBJ)xadbrowser/XADbrowser_data.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)xadbrowser/XADbrowser_data.o: /Modules/modules_pragmas.h
+$(OBJ)xadbrowser/XADbrowser_data.o: //SDK/include/galileofm/hooks.h
+$(OBJ)xadbrowser/XADbrowser_strings.o: xadbrowser/XADbrowser_strings.c xadbrowser/XADbrowser.strings
+$(OBJ)xadbrowser/XADbrowser_strings.o: /Library/galileofmbase.h
+$(OBJ)xadbrowser/XADbrowser_strings.o: /Program/galileo_config.h
+$(OBJ)xadbrowser/XADbrowser_strings.o: /Library/galileofmpragmas.h
+$(OBJ)xadbrowser/XADbrowser_progress.o: xadbrowser/XADbrowser_progress.c xadbrowser/XADbrowser.h
+$(OBJ)xadbrowser/XADbrowser_progress.o: xadbrowser/XADbrowser.strings
+$(OBJ)xadbrowser/XADbrowser_progress.o: modules_lib.h
+$(OBJ)xadbrowser/XADbrowser_progress.o: /Library/galileofmbase.h
+$(OBJ)xadbrowser/XADbrowser_progress.o: /Program/galileo_config.h
+$(OBJ)xadbrowser/XADbrowser_progress.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)xadbrowser/XADbrowser_progress.o: /Modules/modules_pragmas.h
+$(OBJ)xadbrowser/XADbrowser_progress.o: //SDK/include/galileofm/hooks.h
+
+$(OBJ)config/libinit.o: config/libinit.c config/config_lib.h
+$(OBJ)config/libinit.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)config/libinit.o: /Library/galileofmpragmas.h config/galileoconfig.h
+$(OBJ)config/libinit.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/libinit.o: config/config.strings config/enums.h
+$(OBJ)config/libinit.o: config/config_data.h config/function_export.h
+$(OBJ)config/libinit.o: config/function_editor.h config/select_colours.h
+$(OBJ)config/libinit.o: config/button_editor.h
+$(OBJ)config/config.o: config/config.c config/config_lib.h
+$(OBJ)config/config.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)config/config.o: /Library/galileofmpragmas.h config/galileoconfig.h
+$(OBJ)config/config.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config.o: config/config.strings config/enums.h
+$(OBJ)config/config.o: config/config_data.h config/function_export.h
+$(OBJ)config/config.o: config/function_editor.h config/select_colours.h
+$(OBJ)config/config.o: config/button_editor.h
+$(OBJ)config/config_strings.o: config/config_strings.c config/config.strings
+$(OBJ)config/config_strings.o: /Library/galileofmbase.h
+$(OBJ)config/config_strings.o: /Program/galileo_config.h
+$(OBJ)config/config_strings.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_drag.o: config/config_drag.c config/config_lib.h
+$(OBJ)config/config_drag.o: /Library/galileofmbase.h
+$(OBJ)config/config_drag.o: /Program/galileo_config.h
+$(OBJ)config/config_drag.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_drag.o: config/galileoconfig.h
+$(OBJ)config/config_drag.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_drag.o: config/config.strings config/enums.h
+$(OBJ)config/config_drag.o: config/config_data.h config/function_export.h
+$(OBJ)config/config_drag.o: config/function_editor.h config/select_colours.h
+$(OBJ)config/config_drag.o: config/button_editor.h
+$(OBJ)config/config_settings.o: config/config_settings.c config/config_lib.h
+$(OBJ)config/config_settings.o: /Library/galileofmbase.h
+$(OBJ)config/config_settings.o: /Program/galileo_config.h
+$(OBJ)config/config_settings.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_settings.o: config/galileoconfig.h
+$(OBJ)config/config_settings.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_settings.o: config/config.strings config/enums.h
+$(OBJ)config/config_settings.o: config/config_data.h config/function_export.h
+$(OBJ)config/config_settings.o: config/function_editor.h
+$(OBJ)config/config_settings.o: config/select_colours.h
+$(OBJ)config/config_settings.o: config/button_editor.h /Modules/modules.h
+$(OBJ)config/config_settings.o: /Modules/modules_pragmas.h
+$(OBJ)config/config_environment.o: config/config_environment.c config/config_lib.h
+$(OBJ)config/config_environment.o: /Library/galileofmbase.h
+$(OBJ)config/config_environment.o: /Program/galileo_config.h
+$(OBJ)config/config_environment.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_environment.o: config/galileoconfig.h
+$(OBJ)config/config_environment.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_environment.o: config/config.strings config/enums.h
+$(OBJ)config/config_environment.o: config/config_data.h
+$(OBJ)config/config_environment.o: config/function_export.h
+$(OBJ)config/config_environment.o: config/function_editor.h
+$(OBJ)config/config_environment.o: config/select_colours.h
+$(OBJ)config/config_environment.o: config/button_editor.h
+$(OBJ)config/config_environment.o: config/config_environment.h
+$(OBJ)config/config_environment.o: /Modules/modules.h
+$(OBJ)config/config_environment.o: /Modules/modules_pragmas.h
+$(OBJ)config/config_environment_data.o: config/config_environment_data.c config/config_lib.h
+$(OBJ)config/config_environment_data.o: /Library/galileofmbase.h
+$(OBJ)config/config_environment_data.o: /Program/galileo_config.h
+$(OBJ)config/config_environment_data.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_environment_data.o: config/galileoconfig.h
+$(OBJ)config/config_environment_data.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_environment_data.o: config/config.strings config/enums.h
+$(OBJ)config/config_environment_data.o: config/config_data.h
+$(OBJ)config/config_environment_data.o: config/function_export.h
+$(OBJ)config/config_environment_data.o: config/function_editor.h
+$(OBJ)config/config_environment_data.o: config/select_colours.h
+$(OBJ)config/config_environment_data.o: config/button_editor.h
+$(OBJ)config/config_environment_data.o: config/config_environment.h
+$(OBJ)config/config_environment_lister.o: config/config_environment_lister.c config/config_lib.h
+$(OBJ)config/config_environment_lister.o: /Library/galileofmbase.h
+$(OBJ)config/config_environment_lister.o: /Program/galileo_config.h
+$(OBJ)config/config_environment_lister.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_environment_lister.o: config/galileoconfig.h
+$(OBJ)config/config_environment_lister.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_environment_lister.o: config/config.strings
+$(OBJ)config/config_environment_lister.o: config/enums.h config/config_data.h
+$(OBJ)config/config_environment_lister.o: config/function_export.h
+$(OBJ)config/config_environment_lister.o: config/function_editor.h
+$(OBJ)config/config_environment_lister.o: config/select_colours.h
+$(OBJ)config/config_environment_lister.o: config/button_editor.h
+$(OBJ)config/config_environment_lister.o: config/config_environment.h
+$(OBJ)config/config_environment_lister.o: /Modules/modules.h
+$(OBJ)config/config_environment_lister.o: /Modules/modules_pragmas.h
+$(OBJ)config/config_environment_desktop.o: config/config_environment_desktop.c config/config_lib.h
+$(OBJ)config/config_environment_desktop.o: /Library/galileofmbase.h
+$(OBJ)config/config_environment_desktop.o: /Program/galileo_config.h
+$(OBJ)config/config_environment_desktop.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_environment_desktop.o: config/galileoconfig.h
+$(OBJ)config/config_environment_desktop.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_environment_desktop.o: config/config.strings
+$(OBJ)config/config_environment_desktop.o: config/enums.h
+$(OBJ)config/config_environment_desktop.o: config/config_data.h
+$(OBJ)config/config_environment_desktop.o: config/function_export.h
+$(OBJ)config/config_environment_desktop.o: config/function_editor.h
+$(OBJ)config/config_environment_desktop.o: config/select_colours.h
+$(OBJ)config/config_environment_desktop.o: config/button_editor.h
+$(OBJ)config/config_environment_desktop.o: config/config_environment.h
+$(OBJ)config/config_environment_desktop.o: /Modules/modules.h
+$(OBJ)config/config_environment_desktop.o: /Modules/modules_pragmas.h
+$(OBJ)config/config_environment_palette.o: config/config_environment_palette.c config/config_lib.h
+$(OBJ)config/config_environment_palette.o: /Library/galileofmbase.h
+$(OBJ)config/config_environment_palette.o: /Program/galileo_config.h
+$(OBJ)config/config_environment_palette.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_environment_palette.o: config/galileoconfig.h
+$(OBJ)config/config_environment_palette.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_environment_palette.o: config/config.strings
+$(OBJ)config/config_environment_palette.o: config/enums.h
+$(OBJ)config/config_environment_palette.o: config/config_data.h
+$(OBJ)config/config_environment_palette.o: config/function_export.h
+$(OBJ)config/config_environment_palette.o: config/function_editor.h
+$(OBJ)config/config_environment_palette.o: config/select_colours.h
+$(OBJ)config/config_environment_palette.o: config/button_editor.h
+$(OBJ)config/config_environment_palette.o: config/config_environment.h
+$(OBJ)config/config_environment_palette.o: /Modules/modules.h
+$(OBJ)config/config_environment_palette.o: /Modules/modules_pragmas.h
+$(OBJ)config/config_environment_output.o: config/config_environment_output.c config/config_lib.h
+$(OBJ)config/config_environment_output.o: /Library/galileofmbase.h
+$(OBJ)config/config_environment_output.o: /Program/galileo_config.h
+$(OBJ)config/config_environment_output.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_environment_output.o: config/galileoconfig.h
+$(OBJ)config/config_environment_output.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_environment_output.o: config/config.strings
+$(OBJ)config/config_environment_output.o: config/enums.h config/config_data.h
+$(OBJ)config/config_environment_output.o: config/function_export.h
+$(OBJ)config/config_environment_output.o: config/function_editor.h
+$(OBJ)config/config_environment_output.o: config/select_colours.h
+$(OBJ)config/config_environment_output.o: config/button_editor.h
+$(OBJ)config/config_environment_output.o: config/config_environment.h
+$(OBJ)config/config_environment_output.o: /Modules/modules.h
+$(OBJ)config/config_environment_output.o: /Modules/modules_pragmas.h
+$(OBJ)config/config_environment_sounds.o: config/config_environment_sounds.c config/config_lib.h
+$(OBJ)config/config_environment_sounds.o: /Library/galileofmbase.h
+$(OBJ)config/config_environment_sounds.o: /Program/galileo_config.h
+$(OBJ)config/config_environment_sounds.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_environment_sounds.o: config/galileoconfig.h
+$(OBJ)config/config_environment_sounds.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_environment_sounds.o: config/config.strings
+$(OBJ)config/config_environment_sounds.o: config/enums.h config/config_data.h
+$(OBJ)config/config_environment_sounds.o: config/function_export.h
+$(OBJ)config/config_environment_sounds.o: config/function_editor.h
+$(OBJ)config/config_environment_sounds.o: config/select_colours.h
+$(OBJ)config/config_environment_sounds.o: config/button_editor.h
+$(OBJ)config/config_environment_sounds.o: config/config_environment.h
+$(OBJ)config/config_environment_sounds.o: /Modules/modules.h
+$(OBJ)config/config_environment_sounds.o: /Modules/modules_pragmas.h
+$(OBJ)config/config_environment_display.o: config/config_environment_display.c config/config_lib.h
+$(OBJ)config/config_environment_display.o: /Library/galileofmbase.h
+$(OBJ)config/config_environment_display.o: /Program/galileo_config.h
+$(OBJ)config/config_environment_display.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_environment_display.o: config/galileoconfig.h
+$(OBJ)config/config_environment_display.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_environment_display.o: config/config.strings
+$(OBJ)config/config_environment_display.o: config/enums.h
+$(OBJ)config/config_environment_display.o: config/config_data.h
+$(OBJ)config/config_environment_display.o: config/function_export.h
+$(OBJ)config/config_environment_display.o: config/function_editor.h
+$(OBJ)config/config_environment_display.o: config/select_colours.h
+$(OBJ)config/config_environment_display.o: config/button_editor.h
+$(OBJ)config/config_environment_display.o: config/config_environment.h
+$(OBJ)config/config_environment_display.o: /Modules/modules.h
+$(OBJ)config/config_environment_display.o: /Modules/modules_pragmas.h
+$(OBJ)config/config_environment_icons.o: config/config_environment_icons.c config/config_lib.h
+$(OBJ)config/config_environment_icons.o: /Library/galileofmbase.h
+$(OBJ)config/config_environment_icons.o: /Program/galileo_config.h
+$(OBJ)config/config_environment_icons.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_environment_icons.o: config/galileoconfig.h
+$(OBJ)config/config_environment_icons.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_environment_icons.o: config/config.strings config/enums.h
+$(OBJ)config/config_environment_icons.o: config/config_data.h
+$(OBJ)config/config_environment_icons.o: config/function_export.h
+$(OBJ)config/config_environment_icons.o: config/function_editor.h
+$(OBJ)config/config_environment_icons.o: config/select_colours.h
+$(OBJ)config/config_environment_icons.o: config/button_editor.h
+$(OBJ)config/config_environment_icons.o: config/config_environment.h
+$(OBJ)config/config_environment_picture.o: config/config_environment_picture.c config/config_lib.h
+$(OBJ)config/config_environment_picture.o: /Library/galileofmbase.h
+$(OBJ)config/config_environment_picture.o: /Program/galileo_config.h
+$(OBJ)config/config_environment_picture.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_environment_picture.o: config/galileoconfig.h
+$(OBJ)config/config_environment_picture.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_environment_picture.o: config/config.strings
+$(OBJ)config/config_environment_picture.o: config/enums.h
+$(OBJ)config/config_environment_picture.o: config/config_data.h
+$(OBJ)config/config_environment_picture.o: config/function_export.h
+$(OBJ)config/config_environment_picture.o: config/function_editor.h
+$(OBJ)config/config_environment_picture.o: config/select_colours.h
+$(OBJ)config/config_environment_picture.o: config/button_editor.h
+$(OBJ)config/config_environment_picture.o: config/config_environment.h
+$(OBJ)config/config_environment_picture.o: /Modules/modules.h
+$(OBJ)config/config_environment_picture.o: /Modules/modules_pragmas.h
+$(OBJ)config/config_environment_paths.o: config/config_environment_paths.c config/config_lib.h
+$(OBJ)config/config_environment_paths.o: /Library/galileofmbase.h
+$(OBJ)config/config_environment_paths.o: /Program/galileo_config.h
+$(OBJ)config/config_environment_paths.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_environment_paths.o: config/galileoconfig.h
+$(OBJ)config/config_environment_paths.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_environment_paths.o: config/config.strings config/enums.h
+$(OBJ)config/config_environment_paths.o: config/config_data.h
+$(OBJ)config/config_environment_paths.o: config/function_export.h
+$(OBJ)config/config_environment_paths.o: config/function_editor.h
+$(OBJ)config/config_environment_paths.o: config/select_colours.h
+$(OBJ)config/config_environment_paths.o: config/button_editor.h
+$(OBJ)config/config_environment_paths.o: config/config_environment.h
+$(OBJ)config/config_environment_paths.o: /Modules/modules.h
+$(OBJ)config/config_environment_paths.o: /Modules/modules_pragmas.h
+$(OBJ)config/config_buttons.o: config/config_buttons.c config/config_lib.h
+$(OBJ)config/config_buttons.o: /Library/galileofmbase.h
+$(OBJ)config/config_buttons.o: /Program/galileo_config.h
+$(OBJ)config/config_buttons.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_buttons.o: config/galileoconfig.h
+$(OBJ)config/config_buttons.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_buttons.o: config/config.strings config/enums.h
+$(OBJ)config/config_buttons.o: config/config_data.h config/function_export.h
+$(OBJ)config/config_buttons.o: config/function_editor.h
+$(OBJ)config/config_buttons.o: config/select_colours.h config/button_editor.h
+$(OBJ)config/config_buttons.o: config/config_buttons.h
+$(OBJ)config/config_buttons.o: /Program/main_commands.h
+$(OBJ)config/config_buttons_data.o: config/config_buttons_data.c config/config_lib.h
+$(OBJ)config/config_buttons_data.o: /Library/galileofmbase.h
+$(OBJ)config/config_buttons_data.o: /Program/galileo_config.h
+$(OBJ)config/config_buttons_data.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_buttons_data.o: config/galileoconfig.h
+$(OBJ)config/config_buttons_data.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_buttons_data.o: config/config.strings config/enums.h
+$(OBJ)config/config_buttons_data.o: config/config_data.h
+$(OBJ)config/config_buttons_data.o: config/function_export.h
+$(OBJ)config/config_buttons_data.o: config/function_editor.h
+$(OBJ)config/config_buttons_data.o: config/select_colours.h
+$(OBJ)config/config_buttons_data.o: config/button_editor.h
+$(OBJ)config/config_buttons_god.o: config/config_buttons_god.c config/config_lib.h
+$(OBJ)config/config_buttons_god.o: /Library/galileofmbase.h
+$(OBJ)config/config_buttons_god.o: /Program/galileo_config.h
+$(OBJ)config/config_buttons_god.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_buttons_god.o: config/galileoconfig.h
+$(OBJ)config/config_buttons_god.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_buttons_god.o: config/config.strings config/enums.h
+$(OBJ)config/config_buttons_god.o: config/config_data.h
+$(OBJ)config/config_buttons_god.o: config/function_export.h
+$(OBJ)config/config_buttons_god.o: config/function_editor.h
+$(OBJ)config/config_buttons_god.o: config/select_colours.h
+$(OBJ)config/config_buttons_god.o: config/button_editor.h
+$(OBJ)config/config_buttons_god.o: config/config_buttons.h
+$(OBJ)config/config_buttons_support.o: config/config_buttons_support.c config/config_lib.h
+$(OBJ)config/config_buttons_support.o: /Library/galileofmbase.h
+$(OBJ)config/config_buttons_support.o: /Program/galileo_config.h
+$(OBJ)config/config_buttons_support.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_buttons_support.o: config/galileoconfig.h
+$(OBJ)config/config_buttons_support.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_buttons_support.o: config/config.strings config/enums.h
+$(OBJ)config/config_buttons_support.o: config/config_data.h
+$(OBJ)config/config_buttons_support.o: config/function_export.h
+$(OBJ)config/config_buttons_support.o: config/function_editor.h
+$(OBJ)config/config_buttons_support.o: config/select_colours.h
+$(OBJ)config/config_buttons_support.o: config/button_editor.h
+$(OBJ)config/config_buttons_support.o: config/config_buttons.h
+$(OBJ)config/button_editor.o: config/button_editor.c config/config_lib.h
+$(OBJ)config/button_editor.o: /Library/galileofmbase.h
+$(OBJ)config/button_editor.o: /Program/galileo_config.h
+$(OBJ)config/button_editor.o: /Library/galileofmpragmas.h
+$(OBJ)config/button_editor.o: config/galileoconfig.h
+$(OBJ)config/button_editor.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/button_editor.o: config/config.strings config/enums.h
+$(OBJ)config/button_editor.o: config/config_data.h config/function_export.h
+$(OBJ)config/button_editor.o: config/function_editor.h
+$(OBJ)config/button_editor.o: config/select_colours.h config/button_editor.h
+$(OBJ)config/button_editor.o: config/config_buttons.h
+$(OBJ)config/button_editor_data.o: config/button_editor_data.c config/config_lib.h
+$(OBJ)config/button_editor_data.o: /Library/galileofmbase.h
+$(OBJ)config/button_editor_data.o: /Program/galileo_config.h
+$(OBJ)config/button_editor_data.o: /Library/galileofmpragmas.h
+$(OBJ)config/button_editor_data.o: config/galileoconfig.h
+$(OBJ)config/button_editor_data.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/button_editor_data.o: config/config.strings config/enums.h
+$(OBJ)config/button_editor_data.o: config/config_data.h
+$(OBJ)config/button_editor_data.o: config/function_export.h
+$(OBJ)config/button_editor_data.o: config/function_editor.h
+$(OBJ)config/button_editor_data.o: config/select_colours.h
+$(OBJ)config/button_editor_data.o: config/button_editor.h
+$(OBJ)config/function_editor.o: config/function_editor.c config/config_lib.h
+$(OBJ)config/function_editor.o: /Library/galileofmbase.h
+$(OBJ)config/function_editor.o: /Program/galileo_config.h
+$(OBJ)config/function_editor.o: /Library/galileofmpragmas.h
+$(OBJ)config/function_editor.o: config/galileoconfig.h
+$(OBJ)config/function_editor.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/function_editor.o: config/config.strings config/enums.h
+$(OBJ)config/function_editor.o: config/config_data.h config/function_export.h
+$(OBJ)config/function_editor.o: config/function_editor.h
+$(OBJ)config/function_editor.o: config/select_colours.h
+$(OBJ)config/function_editor.o: config/button_editor.h
+$(OBJ)config/function_editor.o: /Program/function_data.h
+$(OBJ)config/function_editor.o: config/config_buttons.h
+$(OBJ)config/function_editor_data.o: config/function_editor_data.c config/config_lib.h
+$(OBJ)config/function_editor_data.o: /Library/galileofmbase.h
+$(OBJ)config/function_editor_data.o: /Program/galileo_config.h
+$(OBJ)config/function_editor_data.o: /Library/galileofmpragmas.h
+$(OBJ)config/function_editor_data.o: config/galileoconfig.h
+$(OBJ)config/function_editor_data.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/function_editor_data.o: config/config.strings config/enums.h
+$(OBJ)config/function_editor_data.o: config/config_data.h
+$(OBJ)config/function_editor_data.o: config/function_export.h
+$(OBJ)config/function_editor_data.o: config/function_editor.h
+$(OBJ)config/function_editor_data.o: config/select_colours.h
+$(OBJ)config/function_editor_data.o: config/button_editor.h
+$(OBJ)config/select_colours.o: config/select_colours.c config/config_lib.h
+$(OBJ)config/select_colours.o: /Library/galileofmbase.h
+$(OBJ)config/select_colours.o: /Program/galileo_config.h
+$(OBJ)config/select_colours.o: /Library/galileofmpragmas.h
+$(OBJ)config/select_colours.o: config/galileoconfig.h
+$(OBJ)config/select_colours.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/select_colours.o: config/config.strings config/enums.h
+$(OBJ)config/select_colours.o: config/config_data.h config/function_export.h
+$(OBJ)config/select_colours.o: config/function_editor.h
+$(OBJ)config/select_colours.o: config/select_colours.h config/button_editor.h
+$(OBJ)config/select_colours_data.o: config/select_colours_data.c config/config_lib.h
+$(OBJ)config/select_colours_data.o: /Library/galileofmbase.h
+$(OBJ)config/select_colours_data.o: /Program/galileo_config.h
+$(OBJ)config/select_colours_data.o: /Library/galileofmpragmas.h
+$(OBJ)config/select_colours_data.o: config/galileoconfig.h
+$(OBJ)config/select_colours_data.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/select_colours_data.o: config/config.strings config/enums.h
+$(OBJ)config/select_colours_data.o: config/config_data.h
+$(OBJ)config/select_colours_data.o: config/function_export.h
+$(OBJ)config/select_colours_data.o: config/function_editor.h
+$(OBJ)config/select_colours_data.o: config/select_colours.h
+$(OBJ)config/select_colours_data.o: config/button_editor.h
+$(OBJ)config/config_convert.o: config/config_convert.c config/config_lib.h
+$(OBJ)config/config_convert.o: /Library/galileofmbase.h
+$(OBJ)config/config_convert.o: /Program/galileo_config.h
+$(OBJ)config/config_convert.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_convert.o: config/galileoconfig.h
+$(OBJ)config/config_convert.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_convert.o: config/config.strings config/enums.h
+$(OBJ)config/config_convert.o: config/config_data.h config/function_export.h
+$(OBJ)config/config_convert.o: config/function_editor.h
+$(OBJ)config/config_convert.o: config/select_colours.h config/button_editor.h
+$(OBJ)config/config_convert.o: config/old_config.h
+$(OBJ)config/config_convert_data.o: config/config_convert_data.c config/config_lib.h
+$(OBJ)config/config_convert_data.o: /Library/galileofmbase.h
+$(OBJ)config/config_convert_data.o: /Program/galileo_config.h
+$(OBJ)config/config_convert_data.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_convert_data.o: config/galileoconfig.h
+$(OBJ)config/config_convert_data.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_convert_data.o: config/config.strings config/enums.h
+$(OBJ)config/config_convert_data.o: config/config_data.h
+$(OBJ)config/config_convert_data.o: config/function_export.h
+$(OBJ)config/config_convert_data.o: config/function_editor.h
+$(OBJ)config/config_convert_data.o: config/select_colours.h
+$(OBJ)config/config_convert_data.o: config/button_editor.h
+$(OBJ)config/old_config.o: config/old_config.c config/config_lib.h
+$(OBJ)config/old_config.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)config/old_config.o: /Library/galileofmpragmas.h config/galileoconfig.h
+$(OBJ)config/old_config.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/old_config.o: config/config.strings config/enums.h
+$(OBJ)config/old_config.o: config/config_data.h config/function_export.h
+$(OBJ)config/old_config.o: config/function_editor.h config/select_colours.h
+$(OBJ)config/old_config.o: config/button_editor.h config/old_config.h
+$(OBJ)config/config_filetypes.o: config/config_filetypes.c config/config_lib.h
+$(OBJ)config/config_filetypes.o: /Library/galileofmbase.h
+$(OBJ)config/config_filetypes.o: /Program/galileo_config.h
+$(OBJ)config/config_filetypes.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_filetypes.o: config/galileoconfig.h
+$(OBJ)config/config_filetypes.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_filetypes.o: config/config.strings config/enums.h
+$(OBJ)config/config_filetypes.o: config/config_data.h
+$(OBJ)config/config_filetypes.o: config/function_export.h
+$(OBJ)config/config_filetypes.o: config/function_editor.h
+$(OBJ)config/config_filetypes.o: config/select_colours.h
+$(OBJ)config/config_filetypes.o: config/button_editor.h
+$(OBJ)config/config_filetypes.o: config/config_filetypes.h
+$(OBJ)config/config_filetypes_data.o: config/config_filetypes_data.c config/config_lib.h
+$(OBJ)config/config_filetypes_data.o: /Library/galileofmbase.h
+$(OBJ)config/config_filetypes_data.o: /Program/galileo_config.h
+$(OBJ)config/config_filetypes_data.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_filetypes_data.o: config/galileoconfig.h
+$(OBJ)config/config_filetypes_data.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_filetypes_data.o: config/config.strings config/enums.h
+$(OBJ)config/config_filetypes_data.o: config/config_data.h
+$(OBJ)config/config_filetypes_data.o: config/function_export.h
+$(OBJ)config/config_filetypes_data.o: config/function_editor.h
+$(OBJ)config/config_filetypes_data.o: config/select_colours.h
+$(OBJ)config/config_filetypes_data.o: config/button_editor.h
+$(OBJ)config/config_filetypes_data.o: config/config_filetypes.h
+$(OBJ)config/filetype_edit.o: config/filetype_edit.c config/config_lib.h
+$(OBJ)config/filetype_edit.o: /Library/galileofmbase.h
+$(OBJ)config/filetype_edit.o: /Program/galileo_config.h
+$(OBJ)config/filetype_edit.o: /Library/galileofmpragmas.h
+$(OBJ)config/filetype_edit.o: config/galileoconfig.h
+$(OBJ)config/filetype_edit.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/filetype_edit.o: config/config.strings config/enums.h
+$(OBJ)config/filetype_edit.o: config/config_data.h config/function_export.h
+$(OBJ)config/filetype_edit.o: config/function_editor.h
+$(OBJ)config/filetype_edit.o: config/select_colours.h config/button_editor.h
+$(OBJ)config/filetype_edit.o: config/config_filetypes.h
+$(OBJ)config/filetype_edit.o: /Program/main_commands.h
+$(OBJ)config/filetype_editor.o: config/filetype_editor.c config/config_lib.h
+$(OBJ)config/filetype_editor.o: /Library/galileofmbase.h
+$(OBJ)config/filetype_editor.o: /Program/galileo_config.h
+$(OBJ)config/filetype_editor.o: /Library/galileofmpragmas.h
+$(OBJ)config/filetype_editor.o: config/galileoconfig.h
+$(OBJ)config/filetype_editor.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/filetype_editor.o: config/config.strings config/enums.h
+$(OBJ)config/filetype_editor.o: config/config_data.h config/function_export.h
+$(OBJ)config/filetype_editor.o: config/function_editor.h
+$(OBJ)config/filetype_editor.o: config/select_colours.h
+$(OBJ)config/filetype_editor.o: config/button_editor.h
+$(OBJ)config/filetype_editor.o: config/config_filetypes.h
+$(OBJ)config/filetype_editor.o: config/config_buttons.h
+$(OBJ)config/fileclass_editor.o: config/fileclass_editor.c config/config_lib.h
+$(OBJ)config/fileclass_editor.o: /Library/galileofmbase.h
+$(OBJ)config/fileclass_editor.o: /Program/galileo_config.h
+$(OBJ)config/fileclass_editor.o: /Library/galileofmpragmas.h
+$(OBJ)config/fileclass_editor.o: config/galileoconfig.h
+$(OBJ)config/fileclass_editor.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/fileclass_editor.o: config/config.strings config/enums.h
+$(OBJ)config/fileclass_editor.o: config/config_data.h
+$(OBJ)config/fileclass_editor.o: config/function_export.h
+$(OBJ)config/fileclass_editor.o: config/function_editor.h
+$(OBJ)config/fileclass_editor.o: config/select_colours.h
+$(OBJ)config/fileclass_editor.o: config/button_editor.h
+$(OBJ)config/fileclass_editor.o: config/config_filetypes.h
+$(OBJ)config/lister_menu.o: config/lister_menu.c config/config_lib.h
+$(OBJ)config/lister_menu.o: /Library/galileofmbase.h
+$(OBJ)config/lister_menu.o: /Program/galileo_config.h
+$(OBJ)config/lister_menu.o: /Library/galileofmpragmas.h
+$(OBJ)config/lister_menu.o: config/galileoconfig.h
+$(OBJ)config/lister_menu.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/lister_menu.o: config/config.strings config/enums.h
+$(OBJ)config/lister_menu.o: config/config_data.h config/function_export.h
+$(OBJ)config/lister_menu.o: config/function_editor.h config/select_colours.h
+$(OBJ)config/lister_menu.o: config/button_editor.h config/lister_menu.h
+$(OBJ)config/lister_menu.o: config/config_buttons.h
+$(OBJ)config/lister_menu_data.o: config/lister_menu_data.c config/config_lib.h
+$(OBJ)config/lister_menu_data.o: /Library/galileofmbase.h
+$(OBJ)config/lister_menu_data.o: /Program/galileo_config.h
+$(OBJ)config/lister_menu_data.o: /Library/galileofmpragmas.h
+$(OBJ)config/lister_menu_data.o: config/galileoconfig.h
+$(OBJ)config/lister_menu_data.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/lister_menu_data.o: config/config.strings config/enums.h
+$(OBJ)config/lister_menu_data.o: config/config_data.h
+$(OBJ)config/lister_menu_data.o: config/function_export.h
+$(OBJ)config/lister_menu_data.o: config/function_editor.h
+$(OBJ)config/lister_menu_data.o: config/select_colours.h
+$(OBJ)config/lister_menu_data.o: config/button_editor.h
+$(OBJ)config/config_menus.o: config/config_menus.c config/config_lib.h
+$(OBJ)config/config_menus.o: /Library/galileofmbase.h
+$(OBJ)config/config_menus.o: /Program/galileo_config.h
+$(OBJ)config/config_menus.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_menus.o: config/galileoconfig.h
+$(OBJ)config/config_menus.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_menus.o: config/config.strings config/enums.h
+$(OBJ)config/config_menus.o: config/config_data.h config/function_export.h
+$(OBJ)config/config_menus.o: config/function_editor.h config/select_colours.h
+$(OBJ)config/config_menus.o: config/button_editor.h config/config_menus.h
+$(OBJ)config/config_menus.o: config/config_buttons.h
+$(OBJ)config/config_menus_data.o: config/config_menus_data.c config/config_lib.h
+$(OBJ)config/config_menus_data.o: /Library/galileofmbase.h
+$(OBJ)config/config_menus_data.o: /Program/galileo_config.h
+$(OBJ)config/config_menus_data.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_menus_data.o: config/galileoconfig.h
+$(OBJ)config/config_menus_data.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_menus_data.o: config/config.strings config/enums.h
+$(OBJ)config/config_menus_data.o: config/config_data.h
+$(OBJ)config/config_menus_data.o: config/function_export.h
+$(OBJ)config/config_menus_data.o: config/function_editor.h
+$(OBJ)config/config_menus_data.o: config/select_colours.h
+$(OBJ)config/config_menus_data.o: config/button_editor.h
+$(OBJ)config/config_menus_edit.o: config/config_menus_edit.c config/config_lib.h
+$(OBJ)config/config_menus_edit.o: /Library/galileofmbase.h
+$(OBJ)config/config_menus_edit.o: /Program/galileo_config.h
+$(OBJ)config/config_menus_edit.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_menus_edit.o: config/galileoconfig.h
+$(OBJ)config/config_menus_edit.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_menus_edit.o: config/config.strings config/enums.h
+$(OBJ)config/config_menus_edit.o: config/config_data.h
+$(OBJ)config/config_menus_edit.o: config/function_export.h
+$(OBJ)config/config_menus_edit.o: config/function_editor.h
+$(OBJ)config/config_menus_edit.o: config/select_colours.h
+$(OBJ)config/config_menus_edit.o: config/button_editor.h
+$(OBJ)config/config_menus_edit.o: config/config_menus.h
+$(OBJ)config/config_menus_edit.o: config/config_buttons.h
+$(OBJ)config/config_menus_io.o: config/config_menus_io.c config/config_lib.h
+$(OBJ)config/config_menus_io.o: /Library/galileofmbase.h
+$(OBJ)config/config_menus_io.o: /Program/galileo_config.h
+$(OBJ)config/config_menus_io.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_menus_io.o: config/galileoconfig.h
+$(OBJ)config/config_menus_io.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_menus_io.o: config/config.strings config/enums.h
+$(OBJ)config/config_menus_io.o: config/config_data.h config/function_export.h
+$(OBJ)config/config_menus_io.o: config/function_editor.h
+$(OBJ)config/config_menus_io.o: config/select_colours.h
+$(OBJ)config/config_menus_io.o: config/button_editor.h config/config_menus.h
+$(OBJ)config/config_menus_io.o: config/config_buttons.h
+$(OBJ)config/config_menus_drag.o: config/config_menus_drag.c config/config_lib.h
+$(OBJ)config/config_menus_drag.o: /Library/galileofmbase.h
+$(OBJ)config/config_menus_drag.o: /Program/galileo_config.h
+$(OBJ)config/config_menus_drag.o: /Library/galileofmpragmas.h
+$(OBJ)config/config_menus_drag.o: config/galileoconfig.h
+$(OBJ)config/config_menus_drag.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/config_menus_drag.o: config/config.strings config/enums.h
+$(OBJ)config/config_menus_drag.o: config/config_data.h
+$(OBJ)config/config_menus_drag.o: config/function_export.h
+$(OBJ)config/config_menus_drag.o: config/function_editor.h
+$(OBJ)config/config_menus_drag.o: config/select_colours.h
+$(OBJ)config/config_menus_drag.o: config/button_editor.h
+$(OBJ)config/config_menus_drag.o: config/config_menus.h
+$(OBJ)config/config_menus_drag.o: config/config_buttons.h
+$(OBJ)config/function_export.o: config/function_export.c config/config_lib.h
+$(OBJ)config/function_export.o: /Library/galileofmbase.h
+$(OBJ)config/function_export.o: /Program/galileo_config.h
+$(OBJ)config/function_export.o: /Library/galileofmpragmas.h
+$(OBJ)config/function_export.o: config/galileoconfig.h
+$(OBJ)config/function_export.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/function_export.o: config/config.strings config/enums.h
+$(OBJ)config/function_export.o: config/config_data.h config/function_export.h
+$(OBJ)config/function_export.o: config/function_editor.h
+$(OBJ)config/function_export.o: config/select_colours.h
+$(OBJ)config/function_export.o: config/button_editor.h
+$(OBJ)config/edit.o: config/edit.c config/config_lib.h
+$(OBJ)config/edit.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)config/edit.o: /Library/galileofmpragmas.h config/galileoconfig.h
+$(OBJ)config/edit.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/edit.o: config/config.strings config/enums.h
+$(OBJ)config/edit.o: config/config_data.h config/function_export.h
+$(OBJ)config/edit.o: config/function_editor.h config/select_colours.h
+$(OBJ)config/edit.o: config/button_editor.h
+$(OBJ)config/ipc.o: config/ipc.c config/config_lib.h /Library/galileofmbase.h
+$(OBJ)config/ipc.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)config/ipc.o: config/galileoconfig.h
+$(OBJ)config/ipc.o: /Modules/Config/galileoconfig_pragmas.h
+$(OBJ)config/ipc.o: config/config.strings config/enums.h config/config_data.h
+$(OBJ)config/ipc.o: config/function_export.h config/function_editor.h
+$(OBJ)config/ipc.o: config/select_colours.h config/button_editor.h
+
+$(SOBJ)modinit.o: modinit.c //SDK/include/galileofm/modules.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/galileofmbase.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/args.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/bufferedio.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/gui.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/clipboard.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/images.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/iff.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/misc.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/progress.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/appicon.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/drag.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/locale.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/lists.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/timer.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/notify.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/ipc.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/requesters.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/layout.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/popup.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/diskio.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/edithook.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/icon.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/memory.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/dos.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/rexx.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/hooks.h
+$(SOBJ)modinit.o: //SDK/include/pragmas/galileofm_pragmas.h

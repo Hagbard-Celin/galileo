@@ -1,0 +1,183 @@
+galileofm.library/AllocTimer                           galileofm.library/AllocTimer
+
+    NAME
+        AllocTimer - allocate a timer handle
+
+    SYNOPSIS
+        AllocTimer(unit, port)
+                    D0    A0
+
+        TimerHandle *AllocTimer(ULONG, struct MsgPort *);
+
+    FUNCTION
+        This function allocates a timer handle to enable easy use of the
+        timer.device. You can supply a message port for it to use,
+        or have it create one for you. If you do not supply a message port,
+        the "port" field of the returned TimerHandle structure contains
+        the address of the port that was created for you.
+
+    INPUTS
+        unit - the timer.device unit you wish to use (eg UNIT_VBLANK)
+        port - message port to use (or NULL to have one created)
+
+    RESULT
+        Returns a TimerHandle to use with the other functions.
+
+    SEE ALSO
+        FreeTimer(), StartTimer()
+
+galileofm.library/CheckTimer                           galileofm.library/CheckTimer
+
+    NAME
+        CheckTimer - see if a timer request has completed
+
+    SYNOPSIS
+        CheckTimer(handle)
+                     A0
+
+        BOOL CheckTimer(TimerHandle *);
+
+    FUNCTION
+        This function allows you to discover if a timer request you have
+        started has completed.
+
+    INPUTS
+        handle - timer handle
+
+    RESULT
+        Returns TRUE if the request is complete, or FALSE if it has not
+        completed or is invalid.
+
+    SEE ALSO
+        StartTimer(), StopTimer()
+
+galileofm.library/FreeTimer                             galileofm.library/FreeTimer
+
+    NAME
+        FreeTimer - free a timer handle
+
+    SYNOPSIS
+        FreeTimer(handle)
+                    A0
+
+        void FreeTimer(TimerHandle *);
+
+    FUNCTION
+        This function frees a timer handle created with AllocTimer(). Any
+        outstanding request is aborted automatically. If you supplied your
+        own message port to the AllocTimer() function, you are responsible
+        for deleting the port yourself.
+
+    INPUTS
+        handle - timer handle
+
+    SEE ALSO
+        AllocTimer()
+
+galileofm.library/GetTimerBase                       galileofm.library/GetTimerBase
+
+    NAME
+        GetTimerBase - get a pointer to the timer.device library base
+
+    SYNOPSIS
+        GetTimerBase()
+
+        struct Libary *GetTimerBase(void);
+
+    FUNCTION
+        This function returns a pointer to the library base of the
+        timer.device. The library base pointer is needed if you want to call
+        any of the library functions of the timer.device. This routine saves
+        you having to open the timer.device to get this base pointer.
+
+    INPUTS
+        none
+
+    RESULT
+        Returns struct Library * pointer. You must NOT call CloseLibrary() on
+        this pointer.
+
+galileofm.library/StartTimer                           galileofm.library/StartTimer
+
+    NAME
+        StartTimer - send a timer request
+
+    SYNOPSIS
+        StartTimer(handle, seconds, micros)
+                     A0       D0      D1
+
+        void StartTimer(TimerHandle *, ULONG, ULONG);
+
+    FUNCTION
+        This function starts a timer request for a given period of time.
+        Your code should wait on "handle->port" for a signal indicating a
+        completed request. You can call CheckTimer() at any time to see if
+        the request has been completed.
+
+    INPUTS
+        handle - timer handle
+        seconds - number of seconds for the request
+        micros - number of microseconds (0-999999)
+
+    NOTES
+        You can call this routine with a request already pending; the first
+        request will automatically be aborted.
+
+    SEE ALSO
+        AllocTimer(), StopTimer(), CheckTimer()
+
+galileofm.library/StopTimer                             galileofm.library/StopTimer
+
+    NAME
+        StopTimer - stop a timer request in progress
+
+    SYNOPSIS
+        StopTimer(handle)
+                    A0
+
+        void StopTimer(TimerHandle *);
+
+    FUNCTION
+        This function aborts a timer request that was previously started
+        with StartTimer(). If the request has already completed, this
+        function simply does the cleanup.
+
+    INPUTS
+        handle - timer handle
+
+    SEE ALSO
+        AllocTimer(), StartTimer(), CheckTimer()
+
+galileofm.library/TimerActive                         galileofm.library/TimerActive
+
+    NAME
+        TimerActive - check if a timer request is pending
+
+    SYNOPSIS
+        TimerActive(handle)
+                      A0
+
+        BOOL TimerActive(TimerHandle *);
+
+    FUNCTION
+        If you lose track of (or can't be bothered keeping track of)
+        whether or not you have a pending timer request, this function
+        allows you to find out.
+
+        This function is actually not really necessary. All the timer
+        functions are robust enough to cope with multiple requests
+        (a StartTimer() with an already-pending request), or a StopTimer()
+        when a request is already complete (or was never sent), or any of
+        the other "error" conditions that the timer.device is usually
+        sensitive to.
+
+    INPUTS
+        handle - timer handle
+
+    RESULT
+        Returns TRUE if there is a request pending.
+
+    SEE ALSO
+        AllocTimer()
+
+

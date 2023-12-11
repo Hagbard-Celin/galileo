@@ -1,0 +1,504 @@
+galileofm.library/AppXXX routines                 galileofm.library/AppXXX routines
+
+    The galileofm.library installs patches into the system when it loads to
+    intercept calls to the workbench.library AddAppXXX() functions. This
+    allows Galileo to show AppIcons, AppMenuItems, and support drag and drop
+    onto AppWindows.
+
+    The emulation is transparent as far as a third-party application is
+    concerned, but it is possible to access additional features that Galileo
+    provides (especially for AppIcons). Obviously these are only available
+    through Galileo, and not through Workbench.
+
+    Using tags with the AddAppIcon() function, it is possible to control
+    the Galileo-only features of AppIcons. Workbench ignores these tags, and
+    so if Workbench is running as well it will just see the plain AppIcon
+    itself.
+
+    The tags are as follows :
+
+        DAE_Local
+
+        This tag causes the icon to only be added to Galileo. If Workbench is
+        running as well, it will not see this icon. Supplying this tag
+        is probably a good idea if your AppIcon depends on some of the other
+        Galileo-specific functions.
+
+        DAE_Snapshot
+
+        Indicates that this icon can support the Snapshot function. If this
+        tag is specified, the Snapshot item in the icon popup menu will be
+        enabled, and the Snapshot item in the main Icon menu will work.
+        Use of this tag generates AppSnapshotMsgs, see below for more
+        information.
+
+        DAE_Close
+
+        Turns the 'Open' item in the icon popup menu into a 'Close' item.
+        APPSNAPF_CLOSE will be set in the AppSnapshotMsg that is
+        generated.
+
+        DAE_Info
+
+        Indicates that this icon can support the Information function.
+        This is similar in operation to the DAE_Snapshot tag. The
+        APPSNAPF_INFO flag will be set in the AppSnapshotMsg.
+
+        DAE_Menu
+
+        This tag can be used several times for one icon. It allows you to
+        specify additional entries for the icon popup menu. ti_Data points
+        to a string that is displayed for the menu item. The order these
+        tags are supplied specifies the order they are displayed, and
+        also controls the ID that is returned in AppSnapshotMsgs.
+
+        DAE_ToggleMenu
+
+        Similar to DAE_Menu, this allows you to specify a menu item for
+        the icon popup menu. The only difference is that the menu item
+        is a toggle-select item (analagous to CHECKIT for Intuition menus).
+
+        DAE_ToggleMenuSel
+
+        The same as DAE_ToggleMenu, but specifies that the item is to be
+        selected by default (analagous to CHECKED for Intuition menus).
+
+        DAE_MenuBase
+
+        This tag allows you to specify a base ID for menu IDs that
+        are generated via the DAE_Menu, DAE_ToggleMenu and DAE_ToggleMenuSel
+        tags. Menu IDs usually start at 0 for the first menu and increase
+        from there. If you specify the DAE_MenuBase tag, the menu IDs will
+        start from your supplied value.
+
+        DAE_Background
+
+        This allows you to specify a pen to use to render the background
+        colour of the icon. If not supplied, the default is pen 0.
+
+        DAE_Locked
+
+        This tag specifies that the icon position is to be locked.
+        That is, the user will be unable to reposition the icon from the
+        initial coordinates. This flag can be changed later using the
+        ChangeAppIcon() function.
+
+
+    Using the new tags can cause special messages to be sent to your
+    message port. These are an extension of the normal AppMessages,
+    and can be identified by an am_Type of MTYPE_APPSNAPSHOT.
+
+    The events you will get special messages for are :
+
+        Snapshot
+
+        If the DAE_Snapshot tag was specified and the user snapshots your
+        icon, you will receive a message containing the icon position
+        (AppSnapshotMsg->position_x and AppSnapshotMsg->position_y).
+        It is your responsibility to save these values, and use them
+        when adding the AppIcon in the future.
+
+        If the APPSNAPF_WINDOW_POS flag is set in the AppSnapshotMsg->flags
+        field, the position in AppSnapshotMsg->window_pos is also valid.
+
+        Un-Snapshot
+
+        If the DAE_Snapshot tag was specified and the user unsnapshots
+        your icon, you will receive a message with the APPSNAPF_UNSNAPSHOT
+        flag set.
+
+        Close
+
+        If DAE_Close was specified, and the user selects the Close item
+        in the icon popup menu, you will receive a message with the
+        APPSNAPF_CLOSE flag set.
+
+        Information
+
+        You will receive a message with the APPSNAPF_INFO flag set if you
+        specified the DAE_Info tag, and the user selects Information on your
+        icon.
+
+        Menu
+
+        If menus were added with the DAE_Menu tags, you will receive a
+        message with the APPSNAPF_MENU flag set when the user selects one
+        of your menu items. The AppSnapshotMsg->id field contains the
+        item ID. If the user pressed the help key on one of the items,
+        the APPSNAPF_HELP flag will also be set.
+
+    Galileo also sends additional information to AppWindows. If you
+    receive an AppMessage of type MTYPE_APPWINDOW, you should check to see
+    if it is an Galileo message using the CheckAppMessage() function. If so,
+    the message is a GalileoAppMessage, which contains additional information.
+    The extra fields are :
+
+        da_DropPos
+
+        This field contains an array of Point structures. Each structure
+        gives the offset from the origin of each file in the message.
+        This allows you to maintain the relative positions of all icons
+        dropped in a multiple-file operation.
+
+        da_DragOffset
+
+        This Point structure gives you the offset of the primary icon
+        from the mouse pointer. That is, if the user clicked on the primary
+        icon in the top-left corner, this offset would be 0,0. If they
+        picked up the icon from the bottom-right corner, it might be 32,18.
+
+        da_Flags
+
+        The only flag supported so far is DAPPF_ICON_DROP. This indicates
+        that the files dropped were in fact icons (ie from an icon mode
+        lister).
+
+    The da_DropPos and da_DragOffset fields enable you to calculate the
+    exact position that the user dropped the files on. Normal AppMessages
+    only provide the position of the mouse pointer, which is useless if you
+    want to maintain the relative and correct positions of the icons.
+
+galileofm.library/AllocAppMessage                 galileofm.library/AllocAppMessage
+
+    NAME
+        AllocAppMessage - allocate a GalileoAppMessage
+
+    SYNOPSIS
+        AllocAppMessage(memory, port, count)
+                          A0     A1     D0
+
+        GalileoAppMessage *AllocAppMessage(APTR, struct MsgPort *, short);
+
+    FUNCTION
+        This function allows you to create a GalileoAppMessage (an extended
+        AppMessage) easily.
+
+    INPUTS
+        memory - memory handle or NULL (see memory.doc)
+        port - address of reply port
+        count - number of arguments
+
+    RESULT
+        Allocates a GalileoAppMessage, including space for count arguments
+        (both da_Msg.am_ArgList and da_DropPos will be initialised).
+
+    NOTES
+        Unless you actually want to send an AppMessage to a Galileo window
+        with relative icon positions, you don't really need this function.
+        It does provide a convenient way to allocate an AppMessage, though,
+        and there's no reason you can't use GalileoAppMessages totally in
+        place of AppMessages if you want to.
+
+    SEE ALSO
+        FreeAppMessage(), SetWBArg()
+
+galileofm.library/AppWindowData                     galileofm.library/AppWindowData
+
+    NAME
+        AppWindowData - extract data from an AppWindow
+
+    SYNOPSIS
+        AppWindowData(appwindow, idptr, userdataptr)
+                         A0        A1       A2
+
+        struct MsgPort *AppWindowData(APTR, ULONG *, ULONG *);
+
+    FUNCTION
+        This function returns the ID, Userdata and Message port associated
+        with the specified AppWindow. These are the parameters that are
+        supplied in the call to AddAppWindow.
+
+    INPUTS
+        appwindow - AppWindow handle
+        idptr - pointer to ULONG to contain the ID
+        userdataptr - pointer to ULONG to contain the Userdata
+
+    RESULT
+        The AppWindow ID and Userdata are stored in the variables supplied,
+        and the address of the AppWindow's message port is returned.
+
+    SEE ALSO
+        FindAppWindow(), workbench.library/AddAppWindow()
+
+galileofm.library/AppWindowWindow                 galileofm.library/AppWindowWindow
+
+    NAME
+        AppWindowWindow - get Window pointer from an AppWindow
+
+    SYNOPSIS
+        AppWindowWindow(appwindow)
+                           A0
+
+        struct Window *AppWindowWindow(APTR);
+
+    FUNCTION
+        This function returns the underlying Window pointer for the
+        specified AppWindow.
+
+    INPUTS
+        appwindow - AppWindow handle
+
+    RESULT
+        The Window pointer is returned.
+
+    SEE ALSO
+        FindAppWindow(), workbench.library/AddAppWindow()
+
+galileofm.library/ChangeAppIcon                     galileofm.library/ChangeAppIcon
+
+    NAME
+        ChangeAppIcon - make changes to an AppIcon
+
+    SYNOPSIS
+        ChangeAppIcon(icon, render, select, label, flags)
+                       A0     A1      A2      A3     D0
+
+        void ChangeAppIcon
+             (APTR, struct Image *, struct Image *, char *,
+              ULONG);
+
+    FUNCTION
+        This function allows you to make changes to an AppIcon that
+        was previously added to Galileo. It has no effect on the icon
+        on Workbench, so you should use the DAE_Local tag when adding
+        the icon if your program depends on this function.
+
+        You are able to change both frames of the icon's image and the
+        icon's label. You can also lock or unlock the icon's position,
+        and make it busy.
+
+    INPUTS
+        icon - icon to act on, as returned by AddAppIcon()
+        render - new main image for the icon
+        select - new select image for the icon
+        label - new label for the icon
+        flags - control flags. The available flags are :
+
+                CAIF_RENDER     - change the main image
+                CAIF_SELECT     - change the select image
+                CAIF_TITLE      - change the label
+                CAIF_LOCKED     - change the 'locked' flag
+                CAIF_SET        - use with CAIF_LOCKED
+                CAIF_BUSY       - make icon busy
+                CAIF_UNBUSY     - make icon unbusy
+
+    NOTES
+        To lock an icon, pass CAIF_LOCKED|CAIF_SET. To unlock it, pass
+        CAIF_LOCKED by itself. The render, select and label parameters are
+        ignored unless their corresponding flags are set. You can specify
+        any combination of these flags at once. To reduce the visible
+        effects, you should make as many changes with the one call as
+        possible.
+
+    SEE ALSO
+        SetAppIconMenuState(), workbench.library/AddAppIcon
+
+galileofm.library/CheckAppMessage                 galileofm.library/CheckAppMessage
+
+    NAME
+        CheckAppMessage - check if an AppMessage is from Galileo
+
+    SYNOPSIS
+        CheckAppMessage(msg)
+                         A0
+
+        BOOL CheckAppMessage(GalileoAppMessage *);
+
+    FUNCTION
+        This function allows you to discover whether an AppMessage is
+        actually an extended GalileoAppMessage.
+
+    INPUTS
+        msg - AppMessage to test
+
+    RESULT
+        Returns TRUE if the message is a GalileoAppMessage.
+
+    NOTES
+        You MUST only pass AppMessages (or GalileoAppMessages) to this
+        function. Passing other types of messages (eg IntuiMessages)
+        results in undefined behaviour.
+
+    SEE ALSO
+        AllocAppMessage()
+
+galileofm.library/FindAppWindow                     galileofm.library/FindAppWindow
+
+    NAME
+        FindAppWindow - test to see if a window is an AppWindow
+
+    SYNOPSIS
+        FindAppWindow(window)
+                        A0
+
+        APTR FindAppWindow(struct Window *);
+
+    FUNCTION
+        This routine allows you to discover whether a Window is in fact
+        an AppWindow.
+
+    INPUTS
+        window - pointer to the window to test
+
+    RESULT
+        Returns the AppWindow handle if it is an AppWindow, or NULL if not.
+
+    NOTES
+        You should only use the returned value within a Forbid()/Permit(),
+        as the window in question could disappear at any time. Also note that
+        the system patches are not installed until the galileofm.library is
+        loaded. Any AppWindows added to the system before the patches are
+    	installed are undetectable.
+
+    SEE ALSO
+        AppWindowData(), workbench.library/AddAppWindow()
+
+galileofm.library/FreeAppMessage                   galileofm.library/FreeAppMessage
+
+    NAME
+        FreeAppMessage - frees a GalileoAppMessage
+
+    SYNOPSIS
+        FreeAppMessage(msg)
+                        A0
+
+        void FreeAppMessage(GalileoAppMessage *);
+
+    FUNCTION
+        This function frees the supplied GalileoAppMessage. It is only
+        designed for messages allocated with AllocAppMessage.
+
+    INPUTS
+        msg - message to free
+
+    NOTES
+        You should not use this routine for AppMessages you receive
+        (ie are sent by another process). You should ReplyMsg() those
+        messages as normal. This function is used to free GalileoAppMessages
+        that YOU create, usually when they are replied to by another
+        task.
+
+    SEE ALSO
+        AllocAppMessage()
+
+galileofm.library/GetWBArgPath                       galileofm.library/GetWBArgPath
+
+    NAME
+        GetWBArgPath - extract pathname from WBArg
+
+    SYNOPSIS
+        GetWBArgPath(wbarg, buffer, size)
+                      A0      A1     D0
+
+        BOOL GetWBArgPath(struct WBArg *, char *, long);
+
+    FUNCTION
+        This function is provided as a convenient method of extracting
+        the pathname of a file/directory from a WBArg structure (usually
+        within an AppMessage).
+
+    INPUTS
+        wbarg - pointer to the WBArg structure
+        buffer - buffer to write pathname to
+        size - size of buffer
+
+    RESULT
+        The full path and name of the object referred to by the WBArg
+        structure is copied to the supplied buffer. This routine returns
+        TRUE if it was successful.
+
+galileofm.library/ReplyAppMessage                 galileofm.library/ReplyAppMessage
+
+    NAME
+        ReplyAppMessage - reply to an AppMessage
+
+    SYNOPSIS
+        ReplyAppMessage(msg)
+                         A0
+
+        void ReplyAppMessage(GalileoAppMessage *);
+
+    FUNCTION
+        This function is the best way to reply to a GalileoAppMessage. Its
+        operation is quite straightforward - if the message has a reply
+        port set, it calls ReplyMsg() as normal. Otherwise, it calls
+        FreeAppMessage. This allows messages to be sent with no reply
+        needed. Galileo will never send an AppMessage without a
+        reply port, but you might want to use this routine among your
+        own processes.
+
+    INPUTS
+        msg - message to reply to
+
+    RESULT
+        The message is replied or freed.
+
+    SEE ALSO
+        FreeAppMessage()
+
+galileofm.library/SetAppIconMenuState         galileofm.library/SetAppIconMenuState
+
+    NAME
+        SetAppIconMenuState - change the state of an icon popup menu
+
+    SYNOPSIS
+        SetAppIconMenuState(icon, item, state)
+                             A0    D0     D1
+
+        long SetAppIconMenuState(APTR, long, long);
+
+    FUNCTION
+        This allows you to set the state of a toggle-select menu item in
+        the icon popup menu of AppIcons. These menu items would have been
+        added with the DAE_ToggleMenu and DAE_ToggleMenuSel tags.
+
+    INPUTS
+        icon - icon to act on, as returned by AddAppIcon()
+        item - number of item to change (in the order they were added)
+        state - new state for the item (TRUE=selected)
+
+    RESULT
+        Returns the old selection state of the item.
+
+    NOTES
+        This routine uses 0 as a base ID for the menu items, even if you
+        specified a new base with DAE_MenuBase.
+
+    SEE ALSO
+        ChangeAppIcon(), workbench.library/AddAppIcon
+
+galileofm.library/SetWBArg                               galileofm.library/SetWBArg
+
+    NAME
+        SetWBArg - fill out a WBArg entry in a GalileoAppMessage
+
+    SYNOPSIS
+        SetWBArg(msg, item, lock, name, memory)
+                  A0   D0    D1    A1     A2
+
+        BOOL SetWBArg(GalileoAppMessage *, short, BPTR, char *, APTR);
+
+    FUNCTION
+        This routine makes it easy to initialise the WBArg structures
+        in an AppMessage (or a GalileoAppMessage).
+
+    INPUTS
+        msg - AppMessage to initialise
+        item - item to initialise (starting at 0)
+        lock - lock on parent directory
+        name - name of file
+        memory - memory handle or NULL
+
+    RESULT
+        The specified WBArg in the AppMessage is initialised with the
+        lock and name specified. This routine returns TRUE if it was
+        successful.
+
+    NOTES
+        'lock' is the lock of the item's parent directory in the case of
+        files, or on the item itself in the case of directories. For files,
+        'name' is the name of the file. 'name' is null for directories.
+        The lock and name you supply are both copied, so they do not need
+        to remain valid once this call is complete.
+
+

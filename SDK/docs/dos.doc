@@ -1,0 +1,552 @@
+galileofm.library/DateFromStrings                 galileofm.library/DateFromStrings
+
+    NAME
+        DateFromStrings - convert date and time strings to a datestamp
+
+    SYNOPSIS
+        DateFromStrings(date, time, ds)
+                         A0    A1   A2
+
+        BOOL DateFromStrings(char *, char *, struct DateStamp *);
+
+    FUNCTION
+        This routine takes a date string and a time string and converts them
+        to a DOS DateStamp. The DOS StrToDate() routine is used to perform
+        this conversion, so it is sensitive to the current locale. If the
+        time string contains an 'a' or a 'p' to signify am or pm, it
+        is automatically converted to 24 hour time for the DOS call.
+
+    INPUTS
+        date - date string to convert
+        time - time string to convert
+        ds - DateStamp to store result
+
+    RESULT
+        Returns TRUE if successful.
+
+    NOTES
+        This routine expects the date string in the FORMAT_DOS format
+        (dd-mmm-yy). DateFromStringsNew() offers more control.
+
+    SEE ALSO
+        ParseDateStrings(), DateFromStringsNew(), dos.library/StrToDate()
+
+galileofm.library/DateFromStringsNew           galileofm.library/DateFromStringsNew
+
+    NAME
+        DateFromStringsNew - convert date and time strings to a datestamp
+
+    SYNOPSIS
+        DateFromStringsNew(date, time, ds, method)
+                            A0    A1   A2    D0
+
+        BOOL DateFromStrings(char *, char *, struct DateStamp *, ULONG);
+
+    FUNCTION
+        This routine takes a date string and a time string and converts them
+        to a DOS DateStamp. The DOS StrToDate() routine is used to perform
+        this conversion, so it is sensitive to the current locale. If the
+        time string contains an 'a' or a 'p' to signify am or pm, it
+        is automatically converted to 24 hour time for the DOS call.
+
+    INPUTS
+        date - date string to convert
+        time - time string to convert
+        ds - DateStamp to store result
+        method - date string format (eg FORMAT_DOS, FORMAT_CDN, etc)
+
+    RESULT
+        Returns TRUE if successful.
+
+    SEE ALSO
+        ParseDateStrings(), dos.library/StrToDate()
+
+galileofm.library/DeviceFromHandler             galileofm.library/DeviceFromHandler
+
+    NAME
+        DeviceFromHandler - returns device name from handler
+
+    SYNOPSIS
+        DeviceFromHandler(handler, buffer)
+                            A0       A1
+
+        struct DosList *DeviceFromHandler(struct MsgPort *, char *);
+
+    FUNCTION
+        This function takes a pointer to a filesystem's handler
+        (message port) and returns the associated device name.
+
+    INPUTS
+        handler - pointer to handler message port
+        buffer - buffer to store device name (must be >=34 bytes)
+
+    RESULT
+        If the port supplied is a valid filesystem handler, the
+        name of the device is stored in the supplied buffer, and
+        a pointer to the DosList entry for that device is returned.
+
+    SEE ALSO
+        DeviceFromLock(), DevNameFromLock()
+
+galileofm.library/DeviceFromLock                   galileofm.library/DeviceFromLock
+    NAME
+        DeviceFromLock - returns device name from a filelock
+
+    SYNOPSIS
+        DeviceFromLock(lock, buffer)
+                        A0     A1
+
+        struct DosList *DeviceFromLock(BPTR, char *);
+
+    FUNCTION
+        This function takes a filelock and returns the name of the
+        device that lock resides on.
+
+    INPUTS
+        lock - pointer to lock
+        buffer - buffer to store device name (must be >=34 bytes)
+
+    RESULT
+        The name of the device is stored in the supplied buffer, and
+        a pointer to the DosList entry for that device is returned.
+
+    SEE ALSO
+        DeviceFromHandler(), DevNameFromLock()
+
+galileofm.library/DevNameFromLock                 galileofm.library/DevNameFromLock
+
+    NAME
+        DevNameFromLock - return the full pathname of a file
+
+    SYNOPSIS
+        DevNameFromLock(lock, buffer, size)
+                         D1     D2     D3
+
+        BOOL DevNameFromLock(BPTR, char *, long);
+
+    FUNCTION
+        Returns a fully qualified path for the lock. The only difference
+        between this function and the equivalent DOS library routine is
+        that the device name of the disk is returned, rather than the
+        volume name.
+
+        For example, if the NameFromLock() routine returned :
+
+            Workbench:S/startup-sequence
+
+        The DevNameFromLock() routine would return :
+
+            DH0:S/startup-sequence
+
+    INPUTS
+        lock - filelock to obtain the path for
+        buffer - buffer to store path
+        size - size of buffer
+
+    RESULT
+        This function returns TRUE if it succeeds.
+
+    SEE ALSO
+        DeviceFromLock(), dos.library/NameFromLock()
+
+galileofm.library/FreeDosPathList                 galileofm.library/FreeDosPathList
+
+    NAME
+        FreeDosPathList - free a DOS path list
+
+    SYNOPSIS
+        FreeDosPathList(list)
+                         A0
+
+        void FreeDosPathList(BPTR);
+
+    FUNCTION
+        This function frees a standard DOS path list, by unlocking each
+        lock and FreeVec()ing each entry.
+
+    INPUTS
+        list - pointer to head of list
+
+    RESULT
+        The list is freed.
+
+    SEE ALSO
+        GetDosPathList()
+
+galileofm.library/GetDosPathList                   galileofm.library/GetDosPathList
+
+    NAME
+        GetDosPathList - get a copy of a DOS path list
+
+    SYNOPSIS
+        GetDosPathList(list)
+                        A0
+
+        BPTR GetDosPathList(BPTR);
+
+    FUNCTION
+        This routine has two uses. The first is to copy an existing DOS
+        path list that you supply. The second is to attempt to find and copy
+        the system path list.
+
+    INPUTS
+        list - path list to copy or NULL
+
+    RESULT
+        If you supply a path list, it will be copied and the address of the
+        first entry of the new list will be returned.
+
+        If you pass NULL, this routine attempts to find a system path list to
+        copy. The Amiga has no definitive path list, so the only way to
+        obtain one is to copy it from another process. This routine looks for
+        the following processes (in order) : Workbench, Initial CLI, Shell
+        Process, New_WShell and Background CLI. If one of these processes is
+        found and it has a valid path list, that list is copied and returned
+        to you.
+
+    NOTES
+        If Workbench is not running, Galileo creates a dummy task called
+        'Workbench', purely to provide a path list for programs that use this
+        method.
+
+    SEE ALSO
+        FreeDosPathList()
+
+galileofm.library/GetFileVersion                   galileofm.library/GetFileVersion
+
+    NAME
+        GetFileVersion - get a file's version information
+
+    SYNOPSIS
+        GetFileVersion(name, verptr, revptr, date, progress)
+                        A0     D0      D1     A1      A2
+
+        BOOL GetFileVersion(char *, short *, short *,
+                            struct DateStamp *, APTR);
+
+    FUNCTION
+        This routine examines the given file and returns the file's version
+        number and revision, and creation date if available. It looks primarily
+        for a $VER string, but also understands the format of libraries,
+        devices, etc, and can extract the version from the Romtag structure in
+        the file. You can also supply a Progress handle if you want to use a
+        progress indicator while looking for the version information.
+
+    INPUTS
+        name - full pathname of file to examine
+        verptr - pointer to short to receive the version number
+        revptr - pointer to short to receive the revision number
+        date - pointer to DateStamp structure (NULL if no date needed)
+        progress - pointer to progress indicator (or NULL)
+
+    RESULT
+        Returns TRUE if a valid version number was found (this does not
+        necessarily mean that a date was found too).
+
+galileofm.library/IsDiskDevice                       galileofm.library/IsDiskDevice
+
+    NAME
+        IsDiskDevice - determine if a device is a DOS storage device
+
+    SYNOPSIS
+        IsDiskDevice(handler)
+                       A0
+
+        BOOL IsDiskDevice(struct MsgPort *);
+
+    FUNCTION
+        This function takes a pointer to a handler (message port) and
+        returns TRUE if the device is for storage (eg a disk or a hard
+        drive), and FALSE if it is not.
+
+    INPUTS
+        handler - pointer to handler message port
+
+galileofm.library/LaunchCLI                             galileofm.library/LaunchCLI
+
+    NAME
+        LaunchCLI - launch a program as a CLI process
+
+    SYNOPSIS
+        LaunchCLI(name, screen, curdir, input, output, flags, stack)
+                   A0     A1      D0      D1     D2     D3     D4
+
+        BOOL LaunchCLI(char *, struct Screen *, BPTR, BPTR, BPTR, short, long);
+
+    FUNCTION
+        This routine makes it easy to launch a program as a CLI process. The
+        launched process will have a full path list and copy of local
+        environment variables. You can have the process launched synchronously,
+        which means this function would not return until the process quit.
+        The stack size defaults to 4096 bytes, but you may specify your own
+        stack size by setting the LAUNCHF_USE_STACK flag.
+
+    INPUTS
+        name - name of the program to launch, including any arguments
+        screen - a screen for errors to appear on (or NULL for default)
+        curdir - lock for current directory, or NULL for default
+        input - file handle for standard input, or NULL
+        output - file handle for standard output, or NULL
+        flags - set LAUNCHF_WAIT flag if you want to wait for the process to return
+                set LAUNCHF_USE_STACK flag if you are specifying a stack size
+        stack - stack size to use if LAUNCHF_USE_STACK flag is set
+
+    RESULT
+        Returns TRUE if the process was launched successfully. If the
+        'wait' parameter was set to TRUE, will not return until the child
+        process does.
+
+    NOTES
+        This function will search the current path list for your program
+        if you do not specify the full path.
+
+    SEE ALSO
+        LaunchWB, dos.library/SystemTagList
+
+galileofm.library/LaunchWB                               galileofm.library/LaunchWB
+
+    NAME
+        LaunchWB - launch a program as a Workbench process
+
+    SYNOPSIS
+        LaunchWB(name, screen, wait)
+                   A0     A1    D0
+
+        BOOL LaunchWB(char *, struct Screen *, short);
+
+    FUNCTION
+        This routine makes it easy to launch a program as a Workbench process.
+        Workbench processes expect to receive a startup message from the
+        launching process, and ordinarily the launching process must wait
+        until this message is replied to. Using this function relieves you
+        of this - you can launch the process and then forget about it.
+        The launched process will have a full path list and copy of local
+        environment variables.
+
+    INPUTS
+        name - name of the program to launch, including any arguments
+        screen - a screen for errors to appear on (or NULL for default)
+        wait - wait for the process to return or not
+
+    RESULT
+        Returns TRUE if the process was launched successfully. If the
+        'wait' parameter was set to 1, will not return until the child
+        process does. If the 'wait' parameter was set to 2, it will wait
+        for about 5 seconds for the process to return, before displaying
+        a requester giving the user the chance to wait some more. If 'wait'
+        is set to 0, it will return immediately and you do not need to
+        wait for a reply to the startup message.
+
+    NOTES
+        This function will search the current path list for your program
+        if you do not specify the full path.
+
+    SEE ALSO
+        LaunchCLI, LaunchWBNew, LaunchWBNotify, dos.library/SystemTagList
+
+galileofm.library/LaunchWBNew                         galileofm.library/LaunchWBNew
+
+    NAME
+        LaunchWBNew - launch a program as a Workbench process
+
+    SYNOPSIS
+        LaunchWBNew(name, screen, wait, stack, default_tool)
+                   A0     A1    D0     D1        A2
+
+        BOOL LaunchWBNew(char *, struct Screen *, short, long, char *);
+
+    FUNCTION
+        This routine offers more control than LaunchWB() when launching a
+        Workbench process. It allows you to specify the stack size and
+        default tool that are used if the program you are launching is
+        a project and has no icon of its own.
+
+    INPUTS
+        name - name of the program to launch, including any arguments
+        screen - a screen for errors to appear on (or NULL for default)
+        wait - wait for the process to return or not
+        stack - stack size to use if no icon present
+        default_tool - default tool to use if no icon or not set
+
+    RESULT
+        Returns TRUE if the process was launched successfully. If the
+        'wait' parameter was set to 1, will not return until the child
+        process does. If the 'wait' parameter was set to 2, it will wait
+        for about 5 seconds for the process to return, before displaying
+        a requester giving the user the chance to wait some more. If 'wait'
+        is set to 0, it will return immediately and you do not need to
+        wait for a reply to the startup message.
+
+    NOTES
+        This function will search the current path list for your program
+        if you do not specify the full path.
+
+    SEE ALSO
+        LaunchWB, LaunchWBNotify, LaunchCLI, dos.library/SystemTagList
+
+galileofm.library/LaunchWBNotify                   galileofm.library/LaunchWBNotify
+
+    NAME
+        LaunchWBNotify - launch a program as a Workbench process
+
+    SYNOPSIS
+        LaunchWBNotify
+             (name, screen, wait, stack, default_tool,
+               A0     A1    D0     D1        A2
+              proc_ptr, notify_ipc, flags)
+               A3         A4         D2
+
+        BOOL LaunchWBNotify
+              (char *, struct Screen *, short, long, char *, 
+               struct Process **, IPCData *, ULONG);
+
+    FUNCTION
+        This routine offers even more control than LaunchWBNew() when
+        launching a Workbench process. It allows you to specify the
+        stack size and default tool that are used if the program you are
+        launching is a project and has no icon of its own. It also lets
+        you obtain a pointer to the Process structure of the newly-
+        launched program, and specify an IPC port that will be notified
+        when the program exits.
+
+    INPUTS
+        name - name of the program to launch, including any arguments
+        screen - a screen for errors to appear on (or NULL for default)
+        wait - wait for the process to return or not
+        stack - stack size to use if no icon present
+        default_tool - default tool to use if no icon or not set
+        proc_ptr - address of variable that receives the Process pointer
+        notify_ipc - IPC port recieves a message when the process exists
+        flags - unused, set to 0
+
+    RESULT
+        Returns TRUE if the process was launched successfully. If the
+        'wait' parameter was set to 1, will not return until the child
+        process does. If the 'wait' parameter was set to 2, it will wait
+        for about 5 seconds for the process to return, before displaying
+        a requester giving the user the chance to wait some more. If 'wait'
+        is set to 0, it will return immediately and you do not need to
+        wait for a reply to the startup message.
+
+        If 'proc_ptr' is specified, the address of the new Process structure
+        will be returned in it. If an IPC port is specified for 'notify_ipc',
+        it will receive an IPC_GOT_GOODBYE message when the process exits.
+        The 'data' field of the IPCMessage will contain the old Process
+        pointer so you can determine which process it was that exited.
+        Note that you must set the 'wait' parameter to 1 if you want a
+        notification message sent.
+
+    NOTES
+        This function will search the current path list for your program
+        if you do not specify the full path.
+
+    SEE ALSO
+        LaunchWB, LaunchWBNew, LaunchCLI, dos.library/SystemTagList
+
+galileofm.library/ParseDateStrings               galileofm.library/ParseDateStrings
+
+    NAME
+        ParseDateStrings - parse a date/time string into separate buffers
+
+    SYNOPSIS
+        ParseDateStrings(string, date, time, rangeptr)
+                           A0     A1    A2      A3
+
+        char *ParseDateStrings(char *, char *, char *, long *);
+
+    FUNCTION
+        This function takes a date/time string (eg "8-12-95 10:34:18") and
+        splits the date and time elements into separate buffers. It also
+        supports the use of the '>' character to indicate ranges. For
+        example, "10-jan-94 > 15-jun-95" would indicate any date between
+        those dates.
+
+    INPUTS
+        string - combined date/time string. This routine is smart enough
+                 to handle it if the time comes before the date, or
+                 vice versa, and it also deals reasonably well with
+                 different types of date inputs.
+        date - buffer to receive the date component (>=22 bytes)
+        time - buffer to receive the time component (>=22 bytes)
+        rangeptr - long pointer to receive the range code (or NULL)
+
+    RESULT
+        The return from this function is a pointer to the end of the
+        parsed part of the input string. If the range returns RANGE_BETWEEN
+        (to signify a range between two dates), you will need to call
+        ParseDateStrings() again on the remainder of the string to get the
+        next date and time.
+
+    SEE ALSO
+        DateFromStrings()
+
+galileofm.library/SearchFile                           galileofm.library/SearchFile
+
+    NAME
+        SearchFile - search a file or buffer for a text string
+
+    SYNOPSIS
+        SearchFile(file, text, flags, buffer, bufsize)
+                    A0    A1     D0     A2      D1
+
+        long SearchFile(APTR, UBYTE *, ULONG, UBYTE *, ULONG);
+
+    FUNCTION
+        This routine searches a file, either on disk or in memory, for
+        a specified text string. It supports hex or decimal ascii values,
+        and limited wildcard searching. To search for a hex string,
+        the supplied search string should begin with a $ and then consist
+        of two-character hex codes. When searching for plain text, a
+        decimal ascii value can be specified with a \ character (eg \127).
+        A literal \ is given as \\. A question mark (?) is used as a
+        single wildcard character in both hex and text searches.
+
+    INPUTS
+        file - buffered IO file handle
+        text - text string to search for
+        flags - Combination of the following flags :
+
+                   SEARCH_NOCASE     - not case sensitive
+                   SEARCH_WILDCARD   - support ? as a wildcard character
+                   SEARCH_ONLYWORDS  - only match whole words
+
+        buffer - memory buffer to search if no file specified
+        bufsize - size of memory buffer, or amount of disk file to search
+
+    RESULT
+        If the supplied string is found, the offset within the file/buffer
+        of the first instance is returned. If no match is found or an error
+        occurs, -1 is returned.
+
+galileofm.library/SetEnv                                   galileofm.library/SetEnv
+
+    NAME
+        SetEnv - set a global environment variable
+
+    SYNOPSIS
+        SetEnv(name, string, permanent)
+                A0     A1        D0
+
+        void SetEnv(char *, char *, BOOL);
+
+    FUNCTION
+        This routine sets the named environment variable to the supplied
+        string value, and optionally saves it permanently.
+
+    INPUTS
+        name - name of the variable to set
+        string - text string to set the variable to (must be null-terminated)
+        permanent - set to TRUE if you want the variable saved
+
+    RESULT
+        The environment variable will be created if it does not exist. Any
+        sub-directories that are needed will also be created. For example,
+        if you set the variable "foo/bar/baz", the directories "env:foo"
+        and "env:foo/bar" would be automatically created if they did not
+        exist. If you set the 'permanent' flag to TRUE, the variable
+        will also be created in the ENVARC: directory.
+
+    SEE ALSO
+        dos.library/GetVar
+
+

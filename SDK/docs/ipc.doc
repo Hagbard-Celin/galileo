@@ -1,0 +1,327 @@
+galileofm.library/IPC_Command                         galileofm.library/IPC_Command
+
+    NAME
+        IPC_Command - send a command to an IPC process
+
+    SYNOPSIS
+        IPC_Command(ipc, command, flags, data, data_free, reply)
+                     A0    D0      D1     A1      A2       A3
+
+        ULONG IPC_Command(IPCData *, ULONG, ULONG, APTR, APTR,
+                          struct MsgPort *);
+
+    FUNCTION
+        Sends a command to an IPC process. Can be used from a non-IPC
+        process but this is not recommended.
+
+    INPUTS
+        ipc - IPC process to send command to
+
+        command - command code (application-specific)
+
+        flags - command flags (application-specific)
+
+        data - command data (application-specific)
+
+        data_free - additional data. The data specified here will be
+                    automatically freed with FreeVec() when the message
+                    is replied to, so you MUST allocate it with
+                    AllocVec().
+
+        reply - reply port. You can either specify a message port for
+                the reply, or use one of these special values :
+
+                    REPLY_NO_PORT     - use default port for reply
+                    REPLY_NO_PORT_IPC - specify this if the message is sent
+                                        from a non-IPC process
+
+                If you don't want a reply to this message (ie you want it
+                to be sent asynchronously), specify NULL for this value.
+
+    RESULT
+        The command will be sent to the specified process. If the command
+        was not sent asynchronously, the destination process' result code
+        is returned.
+
+    NOTES
+        There are several reserved command codes. You are free to use these
+        for your own applications, or use your own codes. These are listed
+        in <galileofm/ipc.h>.
+
+    SEE ALSO
+        IPC_Launch(), IPC_Reply()
+
+galileofm.library/IPC_FindProc                       galileofm.library/IPC_FindProc
+
+    NAME
+        IPC_FindProc - find an IPC process by name
+
+    SYNOPSIS
+        IPC_FindProc(list, name, activate, data)
+                      A0    A1      D0      D1
+
+        IPCData *IPC_FindProc(struct ListLock *, char *, BOOL, ULONG);
+
+    FUNCTION
+        This routine searches the supplied list for a named IPC process.
+        Optionally, it can send this process an IPC_ACTIVATE message with
+        user-specified data.
+
+    INPUTS
+        list - ListLock to search. This routine locks this list in shared
+               mode, and will block until the list is available.
+
+        name - name to search for (case sensitive)
+
+        activate - specify TRUE if you want an IPC_ACTIVATE message to be sent
+                   automatically.
+
+        data - if 'activate' is TRUE, this value will be passed in the data
+               field of the IPC_ACTIVATE command.
+
+    RESULT
+        If the process is found, its IPCData pointer is returned. To ensure
+        that this pointer remains valid you should Forbid(), or lock the
+        list yourself (in shared mode!).
+
+    SEE ALSO
+        IPC_Launch(), IPC_Command()
+
+galileofm.library/IPC_Flush                             galileofm.library/IPC_Flush
+
+    NAME
+        IPC_Flush - flush an IPC command port
+
+    SYNOPSIS
+        IPC_Flush(ipc)
+                   A0
+
+        void IPC_Flush(IPCData *);
+
+    FUNCTION
+        This routine searches the command port for any messages and replies
+        to them with an IPC_ABORT.
+
+    INPUTS
+        ipc - IPCData of the process
+
+    RESULT
+        The port is emptied.
+
+    NOTES
+        In practice you rarely need this function.
+
+    SEE ALSO
+        IPC_Free()
+
+galileofm.library/IPC_Free                               galileofm.library/IPC_Free
+
+    NAME
+        IPC_Free - free an IPC process
+
+    SYNOPSIS
+        IPC_Free(ipc)
+                  A0
+
+        void IPC_Free(IPCData *);
+
+    FUNCTION
+        This routine frees all the memory associated with an IPC process
+        entry. It does NOT remove the process itself from the system. It is
+        designed to be called by a process on itself, as the last step before
+        exiting.
+
+    INPUTS
+        ipc - IPCData to free
+
+    RESULT
+        The IPCData handle is freed. If the process was a member of a list,
+        it is removed from that list. Any commands still in its message port
+        are replied to with IPC_ABORT.
+
+    SEE ALSO
+        IPC_Launch()
+
+galileofm.library/IPC_Launch                           galileofm.library/IPC_Launch
+
+    NAME
+        IPC_Launch - launch a new process
+
+    SYNOPSIS
+        IPC_Launch(list, ipcptr, name, entry, stack, data, doslib)
+                    A0     A1     A2     D0    D1     D2     A3
+
+        long IPC_Launch(struct ListLock *, IPCData **, char *,
+                        ULONG, ULONG, ULONG, struct Library *);
+
+    FUNCTION
+        The IPC routines in the galileofm.library provide an easy and efficient
+        way to implement multi-threading in your application. Using the
+        IPC_Launch functions creates an IPCData, which is a handle to a
+        process. Using this handle you can easily send command between
+        multiple processes.
+
+        The important fields in the IPCData structure are as follows :
+
+            proc            - pointer to the Process structure
+            command_port    - port to listen to for commands
+            userdata        - user-specified data
+            memory          - a memory pool you can use
+
+        All Galileo modules are launched as IPC processes, and are passed
+        a pointer to their IPCData structures. They are also passed the
+        address of the main Galileo IPCData structure, which allows
+        them to send direct commands to Galileo.
+
+        If you are writing a standalone application and wish to use the IPC
+        routines, your main thread will need to create an IPCData structure
+        manually. It must be initialised as follows :
+
+            proc            - pointer to your main Process
+            command_port    - pointer to a message port
+            list            - NULL
+            reply_port      - pointer to a DIFFERENT message port
+
+        IPC processes can automatically be added to a list. There is no
+        need for you to keep track of a process once it has been launched,
+        except that your main process can't exit while a child is still
+        running (as the code would be freed).
+
+    INPUTS
+        list - pointer to an initialise ListLock structure if you want this
+               process to be automatically added to a list (can be NULL).
+
+        ipcptr - pointer to a pointer to IPCData. If the process is launched
+                 successfully, the new IPCData handle will be stored in this
+                 address (can be NULL).
+
+        name - name for the new process.
+
+        entry - pointer to code for the new process.
+
+        stack - stack size for the new process. You can also set the
+                IPCF_GETPATH flag in the stack variable, to have the new
+                process automatically inherit the system path list.
+
+        data - data that is automatically passed to the new process
+
+        doslib - you must supply a pointer to the DOS library
+
+    RESULT
+        This routine returns 0 if the child process failed to launch.
+        However, if the child process was actually launched, but failed
+        to initialise because of lack of memory, or a failure in your
+        user-defined initialisation code (see IPC_ProcStartup), the
+        return value will still indicate success.
+
+        A better way to test failure is to specify a variable for the 'ipcptr'
+        parameter. If this is NULL after this call, the process failed to
+        start.
+
+    SEE ALSO
+        IPC_ProcStartup(), IPC_Command(), IPC_Free
+
+galileofm.library/IPC_ListCommand                 galileofm.library/IPC_ListCommand
+
+    NAME
+        IPC_ListCommand - send a command to a list of processes
+
+    SYNOPSIS
+        IPC_ListCommand(list, command, flags, data, wait)
+                         A0      D0      D1    D2    D3
+
+        void IPC_ListCommand(struct ListLock *, ULONG, ULONG, ULONG, BOOL);
+
+    FUNCTION
+        Sends the same command to every process on the supplied list.
+        Optionally waits for a reply from every process.
+
+    INPUTS
+        list - list of processes
+        command - command ID to send
+        flags - command flags
+        data - command data
+        wait - specify TRUE if you want to wait for replies
+
+    RESULT
+        The command is sent to every process on the list. If 'wait' is
+        TRUE, does not return until every process has replied.
+
+    SEE ALSO
+        IPC_Launch(), IPC_Command()
+
+galileofm.library/IPC_ProcStartup                 galileofm.library/IPC_ProcStartup
+
+    NAME
+        IPC_ProcStartup - startup code for an IPC process
+
+    SYNOPSIS
+        IPC_ProcStartup(data, code)
+                         A0    A1
+
+        IPCData *IPC_ProcStartup(ULONG *, ULONG *);
+
+    FUNCTION
+        Your IPC process should call this routine as the very first
+        instruction. It receives the startup message from the parent process,
+        and lets you retrieve your own IPCData handle.
+
+    INPUTS
+        data - pointer to a variable to receive a pointer to the data that
+               was passed to IPC_Launch.
+
+        code - address of a user-supplied initialisation routine to call. If
+               you provide this, your routine is called from this function.
+               The prototype of this routine is as follows :
+
+                    ULONG __asm code(register __a0 IPCData *ipc,
+                                     register __a1 APTR data)
+
+               Your intialisation routine receives a pointer to the IPCData
+               handle of the new process, and a pointer to the data passed
+               to IPC_Launch. This routine can do pretty much anything, but
+               you should keep it as simple as possible (there should
+               certainly be no IPC functions called from within it).
+               Your routine should return FALSE for failure and TRUE for
+               success. If it returns FALSE, the IPC_ProcStartup() call will
+               return NULL, and the new process should then quit.
+
+    RESULT
+        Returns a pointer to your new IPCData handle. The 'data' value that
+        was passed to IPC_Launch() is stored in the supplied variable.
+        If this routine returns NULL, it means an error occurred (either in
+        the intialisation of the new process, or in your own initialisation
+        code). In this case, you should exit immediately.
+
+    SEE ALSO
+        IPC_Launch()
+
+galileofm.library/IPC_Reply                             galileofm.library/IPC_Reply
+
+    NAME
+        IPC_Reply - reply to an IPC message
+
+    SYNOPSIS
+        IPC_Reply(msg)
+                   A0
+
+        void IPC_Reply(IPCMessage *);
+
+    FUNCTION
+        Call this routine to reply to IPCMessages you receive at your
+        command port (do not call ReplyMsg())
+
+    INPUTS
+        msg - message to reply
+
+    RESULT
+        The message is replied. It is possible to pass a return code back
+        to the sending task (providing the message was sent synchronously).
+        To do this, set the 'command' field of the message to the value.
+        This will then be the return from the IPC_Command() function for the
+        other process.
+
+    SEE ALSO
+        IPC_Launch(), IPC_Command()
+
+

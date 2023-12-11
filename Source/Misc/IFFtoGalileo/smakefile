@@ -1,0 +1,49 @@
+
+OBJS = $(OBJ)IFFtoGalileo/IFFtoGalileo.o
+
+all : IFFtoGalileo
+
+################
+
+$(OBJ)IFFtoGalileo.o: IFFtoGalileo.c
+
+################
+
+IFFtoGalileo: $(BIN)IFFtoGalileo
+
+$(BIN)IFFtoGalileo: $(OBJ)IFFtoGalileo.o
+   slink with <<
+$(ADDSYM) from lib:c.o $(OBJ)IFFtoGalileo.o
+to $(BIN)IFFtoGalileo
+lib lib:sc.lib lib:small.lib
+noicons 
+$(STRIPDEBUG)
+sc sd
+<
+
+################
+
+.c.o:
+	sc $(SCFLAGS) $*.c objname $@
+.asm.o:
+	sc:c/asm -o$(OBJ) -iASMINC: $*.asm
+.cd.strings:
+	catcomp descriptor=$*.cd cfile=$*.strings
+.strings.o:
+    -delete >nil: $@ quiet
+	sc $*_strings.c objname $@
+
+################
+
+depend:
+    makedepend -Y -p$$(OBJ) -Q$(OBJ) $(OBJS)
+
+################
+
+clean:
+    -delete $(OBJS) quiet
+    -delete $(BIN)IFFtoGalileo quiet
+#    touch >nil: \#?/\#?.(cd|fd)
+
+
+# DO NOT DELETE THIS LINE makedepend needs it

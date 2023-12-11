@@ -1,0 +1,68 @@
+; Script for building release version of Galileo File Manager.
+;
+; To speed up buld time, copy the directory "Build" to another drive,
+; and change the path of the variable "$builddir" to point to this new location.
+;
+
+set builddir GalileoD:Build
+
+stack 8192
+assign GalileoD: ""
+
+assign include: SDK/include/ ADD
+assign include: 3rdPartyInclude ADD
+
+assign GalileoS: EXISTS >NIL:
+if WARN
+assign GalileoS: Source
+set sassign made
+endif
+
+assign GalileoB: EXISTS >NIL:
+if WARN
+assign GalileoB: $builddir
+set bassign made
+endif
+
+if NOT EXISTS 3rdPartyInclude/os.gst
+cd GalileoS:GST
+smake gst
+cd GalileoD:
+endif
+
+if NOT EXISTS 3rdPartyInclude/osffp.gst
+cd GalileoS:GST
+smake gstffp
+cd GalileoD:
+endif
+
+cd GalileoS:Library
+smake all
+cd GalileoS:Program
+smake all
+cd GalileoS:Modules
+smake all
+cd GalileoS:Misc/c
+smake all
+cd GalileoS:Misc/ifftogalileo
+smake all
+cd GalileoS:Misc/viewfont
+smake all
+cd GalileoD:
+assign GalileoD:
+
+if $sassign EQ made
+assign GalileoS:
+unset sassign
+endif
+
+if $bassign EQ made
+assign GalileoB:
+unset bassign
+endif
+
+assign include: SDK/include/ REMOVE
+assign include: 3rdPartyInclude REMOVE
+
+unset builddir
+

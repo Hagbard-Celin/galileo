@@ -1,0 +1,187 @@
+galileofm.library/BuildRexxMsgEx                   galileofm.library/BuildRexxMsgEx
+
+    NAME
+        BuildRexxMsgEx - build a complete REXX message
+
+    SYNOPSIS
+        BuildRexxMsgEx(port, extension, host, tags)
+                        A0       A1      D0    A2
+
+        struct RexxMsg *BuildRexxMsgEx(struct MsgPort *, UBYTE *, UBYTE *,
+                                        struct TagItem *);
+
+        struct RexxMsg *BuildRexxMsgExTags(struct MsgPort *, UBYTE *,
+                                            UBYTE *,Tag,...);
+
+    FUNCTION
+        This routine calls CreateRexxMsgEx() to create a new ARexx message,
+        and then automatically initialises arguments and variables.
+
+        The tags used to initialise the message are as follows:
+
+            RexxTag_Arg0        - argument 0 (string in ti_Data)
+            RexxTag_Arg1        - argument 1
+                .
+                .
+            RexxTag_Arg15       - argument 15
+            RexxTag_VarName     - variable name
+            RexxTag_VarValue    - variable value
+
+        The RexxTag_VarName and RexxTag_VarValue tags are always used in
+        pairs; the variable name must be specified before the value is set.
+        ti_Data points to a string which is copied to the new variable.
+
+    INPUTS
+        port - reply port for message
+        extension - default extension
+        host - defaut host name
+        tags - tag list
+
+    RESULT
+        Returns a pointer to the message if sucessful, or NULL for failure.
+        This message MUST be freed with a call to FreeRexxMsgEx().
+
+    SEE ALSO
+        galileofm.library/CreateRexxMsgEx(), galileofm.library/FreeRexxMsgEx(),
+        rexxsyslib.library/CreateRexxMsg()
+
+galileofm.library/CreateRexxMsgEx                 galileofm.library/CreateRexxMsgEx
+
+    NAME
+        CreateRexxMsgEx - create a REXX message with space for variables
+
+    SYNOPSIS
+        CreateRexxMsgEx(port, extension, host)
+                         A0       A1      D0
+
+        struct RexxMsg *CreateRexxMsgEx(struct MsgPort *, UBYTE *, UBYTE *);
+
+    FUNCTION
+        This routine creates an ARexx message that you can use to send
+        direct ARexx commands. It is identical to the CreateRexxMsg()
+        function in rexxsyslib.library, except that it also allocates
+        space for variables, which can be set with the SetRexxVarEx()
+        routine.
+
+    INPUTS
+        port - reply port for message
+        extension - default extension
+        host - defaut host name
+
+    RESULT
+        Returns a pointer to the message if sucessful, or NULL for failure.
+        This message MUST be freed with a call to FreeRexxMsgEx().
+
+    SEE ALSO
+        galileofm.library/FreeRexxMsgEx(), galileofm.library/SetRexxVarEx(),
+        rexxsyslib.library/CreateRexxMsg()
+
+galileofm.library/FreeRexxMsgEx                     galileofm.library/FreeRexxMsgEx
+
+    NAME
+        FreeRexxMsgEx - free a REXX message created with CreateRexxMsgEx()
+
+    SYNOPSIS
+        FreeRexxMsgEx(msg)
+                       A0
+
+        void FreeRexxMsgEx(struct RexxMsg *);
+
+    FUNCTION
+        This routine frees the supplied ARexx message. It will accept either
+        messages created with the CreateRexxMsgEx() (or BuildRexxMsgEx())
+        function, or with the CreateRexxMsg() function in rexxsyslib.library.
+
+        Any arguments (Arg0 through to Arg15) are freed automatically.
+        If the message passed was created with the galileofm.library function,
+        any variables associated with the message are also freed.
+
+    INPUTS
+        msg - message to free
+
+    NOTES
+        This is the ONLY way to free a message allocated with
+        CreateRexxMsgEx() or BuildRexxMsgEx().
+
+    SEE ALSO
+        CreateRexxMsgEx(), rexxsyslib.library/DeleteRexxMsg()
+
+galileofm.library/GetRexxVarEx                        galileofm.library/GetRexxVarEx
+
+    NAME
+        GetRexxVarEx - get variables associated with a Rexx message
+
+    SYNOPSIS
+        GetRexxVarEx(msg, varname, bufpointer)
+                      A0     A1         A2
+
+        long GetRexxVarEx(struct RexxMsg *, char *, char *);
+
+    FUNCTION
+        This routine is identical to the GetRexxVar() function in amiga.lib,
+        except that it also works with messages created with the
+        CreateRexxMsgEx() function. This allows you to store variables
+        in C-allocated ARexx messages.
+
+    INPUTS
+        msg - ARexx message
+        varname - name of variable
+        bufpointer - pointer to buffer pointer
+
+    RESULT
+        If the variable exists, bufpointer will contain the address of the
+        variable's value string. This string MUST NOT be modified.
+        This routine returns 0 for success. See the amiga.lib GetRexxVar()
+        function autodocs for other error codes.
+
+    NOTES
+        Generally, the only program that will send you messages containing
+        variables is Galileo, or ARexx itself. This routine handles both
+        types of messages transparently; you can replace all your calls
+        to GetRexxVar() with calls to this function.
+
+    SEE ALSO
+        amiga.lib/GetRexxVar(), SetRexxVarEx()
+
+galileofm.library/SetRexxVarEx                        galileofm.library/SetRexxVarEx
+
+    NAME
+        SetRexxVarEx - set variables associated with a Rexx message
+
+    SYNOPSIS
+        SetRexxVarEx(msg, varname, value, length)
+                      A0     A1      D0      D1
+
+        long SetRexxVarEx(struct RexxMsg *, char *, char *, long);
+
+    FUNCTION
+        This routine is identical to the SetRexxVar() function in amiga.lib,
+        except that it also works with messages created with the
+        CreateRexxMsgEx() function. This allows you to store variables
+        in C-allocated ARexx messages.
+
+    INPUTS
+        msg - ARexx message
+        varname - name of variable
+        value - value of variable, or 0 to delete variable
+        length - length of value string, -1 for strlen()
+
+    RESULT
+        The variable will be created (if it does not already exist) and
+        its value set. The supplied value is copied by this function.
+        This routine returns 0 for success. See the amiga.lib SetRexxVar()
+        function autodocs for other error codes.
+
+    NOTES
+        This allows you to send ARexx messages to Galileo that contain stem
+        variables. This routine also works with messages created with
+        the rexxsyslib.library CreateRexxMsg() function, and handles both
+        types transparently. You can only send variables to Galileo if the
+        message was created with the CreateRexxMsgEx() function.
+        You can replace all your calls to SetRexxVar() with calls to this
+        function.
+
+    SEE ALSO
+        amiga.lib/SetRexxVar(), GetRexxVarEx()
+
+

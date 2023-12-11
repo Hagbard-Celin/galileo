@@ -1,0 +1,150 @@
+galileofm.library/AllocMemH                             galileofm.library/AllocMemH
+
+    NAME
+        AllocMemH - allocate memory using pooling routines
+
+    SYNOPSIS
+        AllocMemH(handle, size)
+                    A0     D0
+
+        void *AllocMemH(APTR, ULONG);
+
+    FUNCTION
+        This function allows you to allocate a chunk of memory. The type of
+        memory allocated was specified when the memory handle was created.
+        The size of the allocation is tracked automatically (similar to
+        AllocVec).
+
+        You can actually use this function with a NULL memory handle - in this
+        case, the function performs much like AllocVec(). This disadvantage
+        to this is that you are unable to specify the type of memory you need
+        (the default is MEMF_ANY|MEMF_CLEAR). Memory allocated in this way can
+        obviously not be tracked, and you must FreeMemH() each allocation
+        individually.
+
+    INPUTS
+        handle - memory handle (from NewMemHandle())
+        size - the amount of memory to allocate
+
+    RESULT
+        Returns a pointer to the memory block for you to use, or NULL if
+        the request could not be satisfied.
+
+    SEE ALSO
+        NewMemHandle(), FreeMemH()
+
+galileofm.library/ClearMemHandle                   galileofm.library/ClearMemHandle
+
+    NAME
+        ClearMemHandle - free all memory allocated via a handle
+
+    SYNOPSIS
+        ClearMemHandle(handle)
+                         A0
+
+        void ClearMemHandle(APTR);
+
+    FUNCTION
+        This function frees all memory that has been allocated with
+        AllocMemH() via the specified handle. The memory handle itself
+        remains intact.
+
+    INPUTS
+        handle - memory handle (from NewMemHandle())
+
+    SEE ALSO
+        NewMemHandle(), AllocMemH(), FreeMemHandle()
+
+galileofm.library/FreeMemH                               galileofm.library/FreeMemH
+
+    NAME
+        FreeMemH - free memory allocated with AllocMemH()
+
+    SYNOPSIS
+        FreeMemH(memory)
+                   A0
+
+        void FreeMemH(APTR);
+
+    FUNCTION
+        This function frees an individual memory chunk that was allocated
+        using AllocMemH().
+
+    INPUTS
+        memory - memory address returned from AllocMemH()
+
+    SEE ALSO
+        NewMemHandle(), AllocMemH()
+
+galileofm.library/FreeMemHandle                     galileofm.library/FreeMemHandle
+
+    NAME
+        FreeMemHandle - free a memory handle completely
+
+    SYNOPSIS
+        FreeMemHandle(handle)
+                        A0
+
+        void FreeMemHandle(APTR);
+
+    FUNCTION
+        This function frees all memory that was allocated using the specified
+        handle, and then frees the handle itself.
+
+    INPUTS
+        handle - memory handle from NewMemHandle()
+
+    SEE ALSO
+        NewMemHandle(), ClearMemHandle()
+
+galileofm.library/NewMemHandle                       galileofm.library/NewMemHandle
+
+    NAME
+        NewMemHandle - allocate a new memory handle
+
+    SYNOPSIS
+        NewMemHandle(puddle_size, thresh_size, type)
+                         D0            D1       D2
+
+        APTR NewMemHandle(ULONG, ULONG, ULONG);
+
+    FUNCTION
+        This function allocates a new memory handle, to enable easy access to
+        memory pooling and tracking functions.
+
+        If you wish to use the OS memory pooling routines, specify a puddle
+        and a threshhold size for the memory pool. If you do not specify
+        these, the memory handle will use ordinary memory allocations and
+        keep track of these via a linked list. A linked list will also be
+        used if the creation of a memory pool fails for any reason.
+
+        You must specify the type of memory you want when you create the
+        handle. All memory allocated with this handle will be of the requested
+        type (ie you can not mix fast and chip memory within the same handle).
+        The normal MEMF_ flags are used for this, with the following notes:
+
+          - If MEMF_CLEAR is specified, the AllocMemH() routine clears the
+            memory itself (as the OS pooling routines do not support this).
+
+          - If MEMF_PUBLIC is specified, it indicates that you want the memory
+            handle to be shareable between tasks, and the allocation routines
+            will use semaphore locking when accessing the handle.
+
+        The galileofm.library is linked with the standalone memory pool routines,
+        and therefore these routines work under OS37 as well as OS39.
+
+    INPUTS
+        puddle_size - size of puddles to use for pooling, or 0 for no pools
+        thresh_size - allocation threshhold size for pooling
+        type - type of memory to allocate
+
+    RESULT
+        Returns a memory handle for use with the other memory functions, or
+        NULL for failure.
+
+    SEE ALSO
+        AllocMemH(), ClearMemHandle(), FreeMemH(), FreeMemHandle(),
+        exec.library/AllocPooled(), exec.library/FreePooled(),
+        exec.library/CreatePool(), exec.library/DeletePool()
+
+

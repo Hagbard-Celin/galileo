@@ -1,0 +1,238 @@
+galileofm.library/CloseBuf                               galileofm.library/CloseBuf
+
+    NAME
+        CloseBuf - close a buffered file
+
+    SYNOPSIS
+        CloseBuf(file)
+                  A0
+
+        long CloseBuf(APTR);
+
+    FUNCTION
+        Closes a file opened with OpenBuf().
+
+    INPUTS
+        file - file to close
+
+    RESULT
+        Any write data in the buffer is written to disk and the
+        file is closed. If the return value is less than zero, this
+        indicates there was an error writing the last chunk of data
+        to the file.
+
+    SEE ALSO
+        OpenBuf()
+galileofm.library/ExamineBuf                           galileofm.library/ExamineBuf
+
+    NAME
+        ExamineBuf - Examine an open file
+
+    SYNOPSIS
+        ExamineBuf(file, fib)
+                    A0    A1
+
+        long ExamineBuf(APTR, struct FileInfoBlock *);
+
+    FUNCTION
+        This function calls ExamineFH() on the underlying DOS file handle.
+
+    INPUTS
+        file - file to examine
+        fib - FileInfoBlock structure, must be longword aligned
+
+    RESULT
+        Returns DOSTRUE if successful. The FileInfoBlock will contain
+        information about the open file.
+
+    BUGS
+        If the file is open for writing, the file size reported by this
+        function may not be accurate.
+
+    SEE ALSO
+        OpenBuf(), dos.library/ExamineFH()
+
+galileofm.library/FHFromBuf                             galileofm.library/FHFromBuf
+
+    NAME
+        FHFromBuf - get DOS file handle
+
+    SYNOPSIS
+        FHFromBuf(file)
+                   A0
+
+        BPTR FHFromBuf(APTR);
+
+    FUNCTION
+        This function returns the underlying DOS file handle for a
+        buffered IO handle.
+
+    INPUTS
+        file - buffered IO file handle
+
+    RESULT
+        Returns the file handle.
+
+    SEE ALSO
+        OpenBuf()
+galileofm.library/FlushBuf                               galileofm.library/FlushBuf
+
+    NAME
+        FlushBuf - flush file buffer
+
+    SYNOPSIS
+        FlushBuf(file)
+                  A0
+
+        long FlushBuf(APTR);
+
+    FUNCTION
+        This function flushes the buffer of a buffered IO file. If there
+        is any write data in the buffer, it is written to disk.
+        If the return value is less than zero, this indicates there was an
+	error writing the last chunk of data to the file.
+
+    INPUTS
+        file - file handle to flush
+
+    RESULT
+        The buffer is flushed.
+
+    NOTES
+        In practice, you never need to call this function.
+
+    SEE ALSO
+        OpenBuf(), WriteBuf(), ReadBuf()
+galileofm.library/OpenBuf                                 galileofm.library/OpenBuf
+
+    NAME
+        OpenBuf - open a file for buffered I/O
+
+    SYNOPSIS
+        OpenBuf(name, mode, bufsize)
+                 A0    D0     D1
+
+        APTR OpenBuf(char *, long, long);
+
+    FUNCTION
+        This function opens a file for use with the buffered I/O routines.
+
+    INPUTS
+        name - name of the file to open
+        mode - mode to use
+        bufsize - size of the buffer to use
+
+    RESULT
+        Returns a buffered file handle if successful, or NULL. This is
+        not a standard DOS file handle, and can only be used with the
+        other buffered IO functions.
+
+    SEE ALSO
+        CloseBuf(), dos.library/Open()
+galileofm.library/ReadBuf                                 galileofm.library/ReadBuf
+
+    NAME
+        ReadBuf - read data from a buffered file
+
+    SYNOPSIS
+        ReadBuf(file, buffer, size)
+                 A0     A1     D0
+
+        long ReadBuf(APTR, char *, long);
+
+    FUNCTION
+        This function reads data from a buffered IO file.
+
+    INPUTS
+        file - buffered IO file handle
+        buffer - buffer to place data in
+        size - size to read
+
+    RESULT
+        This function returns the size of the data actually read,
+        or -1 if an error occurred.
+
+    SEE ALSO
+        OpenBuf(), dos.library/Read()
+
+galileofm.library/ReadBufLine                         galileofm.library/ReadBufLine
+
+    NAME
+        ReadBufLine - read a line of input from a buffered file
+
+    SYNOPSIS
+        ReadBufLine(file, buffer, size)
+                     A0     A1     D0
+
+        long ReadBufLine(APTR, char *, long);
+
+    FUNCTION
+        This function reads data from a buffered IO file, up until the
+        first newline character (or the buffer is full). It is similar to
+        the fgets() standard C function.
+
+    INPUTS
+        file - buffered IO file handle
+        buffer - buffer to place data in
+        size - size to read
+
+    RESULT
+        This function returns the size of the data actually read,
+        or -1 if an error occurred.
+
+    SEE ALSO
+        OpenBuf(), ReadBuf()
+
+galileofm.library/SeekBuf                                 galileofm.library/SeekBuf
+
+    NAME
+        SeekBuf - seek within a buffered IO file
+
+    SYNOPSIS
+        SeekBuf(file, offset, mode)
+                 A0     D0     D1
+
+        long SeekBuf(APTR, long, long);
+
+    FUNCTION
+        This function sets the read/write position for a buffered IO file.
+        If the seek takes the position outside of the current buffer, the
+        buffer will be flushed and re-read automatically.
+
+    INPUTS
+        file - file to seek within
+        offset - offset to seek
+        mode - type of seet (OFFSET_BEGINNING, OFFSET_CURRENT, OFFSET_END)
+
+    RESULT
+        Returns the previous file position.
+
+    SEE ALSO
+        OpenBuf(), dos.library/Seek()
+
+galileofm.library/WriteBuf                               galileofm.library/WriteBuf
+
+    NAME
+        WriteBuf - write data to a buffered IO file
+
+    SYNOPSIS
+        WriteBuf(file, data, size)
+                  A0    A1    D0
+
+        long WriteBuf(APTR, char *, long);
+
+    FUNCTION
+        Writes data to a file opened for buffered IO.
+
+    INPUTS
+        file - file handle
+        data - data to write
+        size - size to write (-1 works for a null-terminated string)
+
+    RESULT
+        Returns the number of bytes written, or -1 for an error.
+
+    SEE ALSO
+        OpenBuf(), dos.library/Write()
+
+

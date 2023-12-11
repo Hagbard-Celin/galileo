@@ -1,0 +1,332 @@
+galileofm.library/CloseImage                           galileofm.library/CloseImage
+
+    NAME
+        CloseImage - close an image
+
+    SYNOPSIS
+        CloseImage(image)
+                     A0
+
+        void CloseImage(APTR);
+
+    FUNCTION
+        Closes an image that was opened with OpenImage(). The usage count
+        of the image is decremented. When the count reaches 0 the image is
+        flushed from memory.
+
+    INPUTS
+        image - image to close
+
+    SEE ALSO
+        OpenImage()
+
+galileofm.library/CopyImage                             galileofm.library/CopyImage
+
+    NAME
+        CopyImage - copy an opened image
+
+    SYNOPSIS
+        CopyImage(image)
+                    A0
+
+        APTR CopyImage(APTR);
+
+    FUNCTION
+        Returns another pointer to the supplied image.
+
+    INPUTS
+        image - image to copy
+
+    RESULT
+        Returns a new pointer to the image.
+
+    SEE ALSO
+        OpenImage()
+
+galileofm.library/FreeImageRemap                   galileofm.library/FreeImageRemap
+
+    NAME
+        FreeImageRemap - free pens used to remap images
+
+    SYNOPSIS
+        FreeImageRemap(remap)
+                         A0
+
+        void FreeImageRemap(ImageRemap *);
+
+    FUNCTION
+        Frees all the pens allocated with the supplied ImageRemap structure.
+        You should call this function after you have called FreeRemapImage()
+        or CloseImage() on the individual images.
+
+    INPUTS
+        remap - ImageRemap structure to free
+
+    SEE ALSO
+        RemapImage()
+
+galileofm.library/FreeRemapImage                   galileofm.library/FreeRemapImage
+
+    NAME
+        FreeRemapImage - free a remapped image
+
+    SYNOPSIS
+        FreeRemapImage(image, remap)
+                        A0     A1
+
+        void FreeRemapImage(APTR, ImageRemap *);
+
+    FUNCTION
+        This function frees the remapped bitplanes allocated for an image
+        via the RemapImage() call.
+
+    INPUTS
+        image - image to free remap bitplanes for
+        remap - ImageRemap structure
+
+    RESULT
+        The remapped bitplanes are freed. This routine does not free any pens
+        that were allocated - these are released when you call FreeImageRemap().
+        Note that the image itself is not freed, only the remapped version of
+        it.
+
+    SEE ALSO
+        RemapImage(), FreeImageRemap()
+
+galileofm.library/GetImageAttrs                     galileofm.library/GetImageAttrs
+
+    NAME
+        GetImageAttrs - get information about an image
+
+    SYNOPSIS
+        GetImageAttrs(image, tags)
+                       A0     A1
+
+        void GetImageAttrs(APTR, struct TagItem *);
+
+    FUNCTION
+        This routine allows you to retrieve information about an image opened
+        with OpenImage().
+
+    INPUTS
+        image - image to investigate
+        tags - control tags. The following tags are valid :
+
+               IM_Width             - width of image
+               IM_Height            - height of image
+               IM_Depth             - number of bitplanes
+               IM_State             - 1 if the image has two frames, 0 if not
+
+    RESULT
+        The requested information is stored in the ti_Data field of each of
+        the Tags passed in.
+
+    SEE ALSO
+        OpenImage()
+
+galileofm.library/GetImagePalette                 galileofm.library/GetImagePalette
+
+    NAME
+        GetImagePalette - get pointer to image palette
+
+    SYNOPSIS
+        GetImagePalette(image)
+                         A0
+
+        ULONG *GetImagePalette(APTR);
+
+    FUNCTION
+        This allows you to retrieve a pointer to the palette of the image.
+
+    INPUTS
+        image - image you want the palette for
+
+    RESULT
+        If the image has associated palette information (eg a brush), a
+        pointer to a longword palette table is returned. This palette table
+        is in LoadRGB32() format. If the image has no associated palette,
+        this routine returns NULL.
+
+    SEE ALSO
+        OpenImage(), graphics.library/LoadRGB32()
+
+galileofm.library/OpenImage                             galileofm.library/OpenImage
+
+    NAME
+        OpenImage - read an image off disk
+
+    SYNOPSIS
+        OpenImage(name, info)
+                   A0    A1
+
+        APTR OpenImage(char *, OpenImageInfo *);
+
+    FUNCTION
+        The primary purpose of this function is to read an image from a file
+        on disk. This routine supports ILBM brushes and pictures, animbrushes
+        and Amiga icons.
+
+        This routine is also used to create an image handle to bitmap data
+        that you supply. This image handle can then be used with the image
+        remapping functions.
+
+        This function caches images based on their full pathname. If two
+        copies of the same file are loaded, the first copy will be used to
+        save memory.
+
+    INPUTS
+        name - name of image to load, or NULL if you are supplying a bitmap
+        info - if 'name' is NULL, this must point to an initialised
+               OpenImageInfo structure:
+
+                    oi_ImageData - must point to the image data. This data
+                    does not need to be in chip memory.
+
+                    oi_Palette - must point to a palette for the image, in
+                    LoadRGB32() format.
+
+                    oi_Width - width of the image
+
+                    oi_Height - height of the image
+
+                    oi_Depth - number of image bitplanes
+
+    RESULT
+        Returns an image handle if it succeeds. This handle is used in
+        subsequent calls to the image routines. This routine returns NULL if
+        it fails.
+
+    SEE ALSO
+        CloseImage(), graphics.library/LoadRGB32()
+
+galileofm.library/RemapImage                           galileofm.library/RemapImage
+
+    NAME
+        RemapImage - remap an image
+
+    SYNOPSIS
+        RemapImage(image, screen, remap)
+                    A0      A1      A2
+
+        BOOL RemapImage(APTR, struct Screen *, ImageRemap *);
+
+    FUNCTION
+        This function remaps an image to the colours of the specified screen.
+        It will allocate pens from the screen if necessary (and possible).
+
+    INPUTS
+        image - image to remap (from OpenImage())
+        remap - ImageRemap structure. This structure must be initialised for
+                the first call to RemapImage(). All fields must be set to
+                NULL.
+
+                For the first and subsequent calls to this function, the
+                ir_Flags field can be set with the following values :
+
+                    IRF_REMAP_COL0      - remap colour 0 in the image
+                    IRF_PRECISION_EXACT - use best precision when pen matching
+                    IRF_PRECISION_ICON  - lower precision
+                    IRF_PRECISION_GUI   - lowest precision
+
+                You can use the one ImageRemap structure to remap multiple
+                images, but only for the one screen. The ir_Flags field can be
+                changed for every call to this function, but none of the
+                other fields may be changed.
+                
+    RESULT
+        This image returns TRUE if it was able to remap the image. Once the
+        image has been remapped, any call to RenderImage() to display it will
+        show the remapped version. Call FreeRemapImage() to free the remap
+        and return to the original image.
+
+    SEE ALSO
+        OpenImage(), RenderImage(), FreeRemapImage(), FreeImageRemap()
+
+galileofm.library/RenderImage                         galileofm.library/RenderImage
+
+    NAME
+        RenderImage - display an image
+
+    SYNOPSIS
+        RenderImage(rp, image, left, top, tags)
+                    A0    A1    D0   D1    A2
+
+        short RenderImage(struct RastPort *, APTR, USHORT, USHORT,
+                          struct TagItem *);
+
+    FUNCTION
+        This routine is used to render an image to a RastPort.
+
+    INPUTS
+        rp - RastPort to render to
+        image - image to render
+        left - x position to render to
+        top - y position to render to
+        tags - control tags. The following tags are available :
+
+            IM_State - 0 or 1 (default 0)
+
+                This tag controls which frame of the image is shown.
+                Defaults to frame 0, but for two-frame images (eg icons or
+                animbrushes) you can set this to 1.
+
+            IM_Rectangle - struct Rectangle * (default not supplied)
+
+                This specifies a rectangle to display the image within. If
+                you supply this tag, the image will be centered within this
+                area. Use of this tag overrides the 'left' and 'top'
+                parameters. 
+
+            IM_ClipBoundary - integer (default 2)
+
+                This is used with the IM_Rectangle tag. If IM_Rectangle is
+                specified, the image is clipped to the boundaries of the
+                rectangle. The default operation is to leave a two pixel
+                margin around the image (to allow room for a border). Using
+                the IM_ClipBoundary tag you can adjust this margin (set to 0
+                if you want no margin).
+
+            IM_Mask - TRUE or FALSE (default FALSE)
+
+                If you set this tag to TRUE, the image will be masked when
+                it is rendered. This has the effect of making colour 0
+                transparent, and the existing background will show through
+                the image.
+
+            IM_Erase - integer (default not supplied)
+
+                This tag allows you to specify a pen value that is used to
+                erase the background before the image is rendered. By
+                default the background is not cleared.
+
+            IM_NoDrawInvalid (default not supplied)
+
+                If you specify this tag, and also specify 1 for IM_State,
+                then the call to RenderImage() will fail if the image has
+                no secondary image. If this tag is not specified and you
+                try to draw the second frame of an image that doesn't have
+                one, it falls back to drawing the first frame.
+
+            IM_NoIconRemap - TRUE or FALSE (default FALSE)
+
+                By default, an icon that is drawn with RenderImage() is
+                "remapped". This is not a true colour remapping, but the
+                third bitplane of an eight colour icon is shifted to the
+                top bitplane of the display. This makes most normal eight
+                colour icons work properly on screens of more than eight
+                colours. However, it can cause problems with NewIcons
+                icons. Specify TRUE with this tag to disable this remapping.
+
+    RESULT
+        The image is rendered. If you specified IM_NoDrawInvalid and you
+        tried to draw an image that didn't exist, this routine returns FALSE.
+        Otherwise it returns TRUE.
+
+    NOTES
+        If the image has been remapped with RemapImage(), the remapped image
+        will be automatically drawn by this routine.
+
+    SEE ALSO
+        OpenImage(), RemapImage()
+
+

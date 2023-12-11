@@ -1,0 +1,102 @@
+galileofm.library/CloseClipBoard                   galileofm.library/CloseClipBoard
+
+    NAME
+        CloseClipBoard - close a clipboard handle
+
+    SYNOPSIS
+        CloseClipBoard(handle)
+                         A0
+
+        void CloseClipBoard(APTR);
+
+    FUNCTION
+        Closes a handle to the clipboard opened with OpenClipBoard().
+
+    INPUTS
+        handle - clipboard handle
+
+    RESULT
+        The clipboard unit is closed.
+
+    SEE ALSO
+        OpenClipBoard()
+
+galileofm.library/OpenClipBoard                     galileofm.library/OpenClipBoard
+
+    NAME
+        OpenClipBoard - open clipboard for easy access
+
+    SYNOPSIS
+        OpenClipBoard(unit)
+                       D0
+
+        APTR OpenClipBoard(ULONG);
+
+    FUNCTION
+        This function opens a specified unit of the clipboard.device. Used
+        with the other clipboard functions, it provides an easy method to
+        manipulate text strings with the clipboard.
+
+    INPUTS
+        unit - unit number to open (usually 0)
+
+    RESULT
+        Returns clipboard handle.
+
+    SEE ALSO
+        CloseClipBoard()
+
+galileofm.library/ReadClipString                   galileofm.library/ReadClipString
+
+    NAME
+        ReadClipString - read a text string from the clipboard
+
+    SYNOPSIS
+        ReadClipString(handle, buffer, size)
+                         A0      A1     D0
+
+        long ReadClipString(APTR, char *, long);
+
+    FUNCTION
+        This function reads a string of text from the clipboard handle.
+
+    INPUTS
+        handle - clipboard handle
+        buffer - buffer to store string
+        size - size of buffer
+
+    RESULT
+        Returns the length of the string. If there was no valid FTXT string
+        in the clipboard, it returns 0.
+
+    SEE ALSO
+        OpenClipBoard(), WriteClipString()
+
+galileofm.library/WriteClipString                 galileofm.library/WriteClipString
+
+    NAME
+        WriteClipString - write a text string to the clipboard
+
+    SYNOPSIS
+        WriteClipString(handle, buffer, size)
+                          A0      A1     D0
+
+        BOOL WriteClipString(APTR, char *, long);
+
+    FUNCTION
+        This function writes a string of text to the clipboard handle.
+
+    INPUTS
+        handle - clipboard handle
+        buffer - buffer containing string
+        size - length of string
+
+    RESULT
+        Returns TRUE if it succeeded, FALSE otherwise. The string is stored
+        in standard FTXT format, readable by ReadClipString() and most
+        other programs that access the clipboard.
+
+    SEE ALSO
+        OpenClipBoard(), ReadClipString()
+
+

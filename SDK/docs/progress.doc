@@ -1,0 +1,256 @@
+galileofm.library/CheckProgressAbort           galileofm.library/CheckProgressAbort
+
+    NAME
+        CheckProgressAbort - check for abort in progress window
+
+    SYNOPSIS
+        CheckProgressAbort(handle)
+                             A0
+
+        BOOL CheckProgressAbort(APTR);
+
+    FUNCTION
+        Allows you to check the state of the abort flag in the specified
+        progress window.
+
+    INPUTS
+        handle - progress window handle
+
+    RESULT
+        Returns TRUE if the Abort button has been clicked.
+
+    SEE ALSO
+        OpenProgressWindow()
+
+galileofm.library/CloseProgressWindow         galileofm.library/CloseProgressWindow
+
+    NAME
+        CloseProgressWindow - close a progress window
+
+    SYNOPSIS
+        CloseProgressWindow(handle)
+                              A0
+
+        void CloseProgressWindow(APTR);
+
+    FUNCTION
+        Closes the specified progress window.
+
+    INPUTS
+        handle - progress window to close
+
+    SEE ALSO
+        OpenProgressWindow()
+
+galileofm.library/GetProgressWindow             galileofm.library/GetProgressWindow
+
+    NAME
+        GetProgressWindow - get progress window information
+
+    SYNOPSIS
+        GetProgressWindow(handle, tags)
+                            A0     A1
+
+        void GetProgressWindow(APTR, struct TagItem *);
+
+        void GetProgressWindowTags(APTR, Tag, ...);
+
+    FUNCTION
+        Returns information about the progress window. Currently available
+        information is :
+
+            PW_Window      - returns Window pointer
+
+    INPUTS
+        handle - progress window handle
+        tags   - inquiry tags
+
+    RESULT
+        The result of each tag query is stored in the ti_Data field of the
+        TagItem.
+
+    SEE ALSO
+        OpenProgressWindow(), SetProgressWindow()
+
+galileofm.library/HideProgressWindow           galileofm.library/HideProgressWindow
+
+    NAME
+        HideProgressWindow - hide a progress window
+
+    SYNOPSIS
+        HideProgressWindow(handle)
+                             A0
+
+        void HideProgressWindow(APTR);
+
+    FUNCTION
+        Removes the specified progress window from the display. The progress
+        window is still operative; it can still be updated and even closed
+        while it is hidden.
+
+    INPUTS
+        handle - progress window handle
+
+    SEE ALSO
+        OpenProgressWindow(), ShowProgressWindow()
+
+galileofm.library/OpenProgressWindow           galileofm.library/OpenPRogressWindow
+
+    NAME
+        OpenProgressWindow - open a progress window display
+
+    SYNOPSIS
+        OpenProgressWindow(tags)
+                            A0
+
+        APTR OpenProgressWindow(struct TagItem *);
+
+        APTR OpenProgressWindowTags(Tag, ...);
+
+    FUNCTION
+        Opens a progress window that your application can use to display the
+        progression of some operation. The progress window can have a filename
+        display, file counter and progress guage.
+
+    INPUTS
+        tags - control tags. Control tags are:
+
+            PW_Screen    - screen to open on. The progress window will
+                           appear centered in the screen. Use of this tag
+                           overrides PW_Window.
+
+            PW_Window    - window to open over. The progress window will
+                           appear centered over the supplied window.
+
+            PW_Title     - title for the progress window
+
+            PW_SigTask   - task to signal when the abort gadget is pressed.
+
+            PW_SigBit    - bit to signal task with (signal bit, not mask)
+
+            PW_FileName  - initial filename for display
+
+            PW_FileSize  - initial file size
+    
+            PW_FileCount - initial file count
+
+            PW_Flags     - control flags
+
+        The control flags for the PW_Flags tag are :
+
+            PWF_FILENAME  - specify if you want a filename display
+            PWF_FILESIZE  - specify if you want a file size display (1)
+            PWF_INFO      - specify if you want an information line
+            PWF_INFO2     - specify if you want a second information line
+            PWF_INFO3     - specify if you want a third information line
+            PWF_GRAPH     - specify if you want a bar graph display (1)
+            PWF_NOABORT   - specify if you don't want an Abort button (2)
+            PWF_INVISIBLE - if you want the progress window to open in 'hidden'
+                            mode (ie you need to call ShowProgressWindow() to
+                            make it visible)
+            PWF_ABORT     - specify if you do want an Abort button (2)
+
+        1. Ordinarily, the file size is displayed as a "xxxxxx bytes" string in
+           the top-right of the progress window, and the bar graph is used to
+           represent "x out of y files". If, however, you specify both
+           PWF_FILESIZE and PWF_GRAPH, the meanings of these displays is
+           automatically swapped around. The current file progress (eg bytes
+           copied) is displayed in the bar graph, and the current operation
+           progress (eg files copied) is displayed in text in the top-right
+           corner.
+
+        2. If you specify a signal task with the pw_SigTask flag, the
+           progress window will automatically get an Abort button. You can use
+           the PWF_NOABORT flag to stop this happening.
+
+           If you do not specify the pw_SigTask flag, you can use the PWF_ABORT
+           flag to add an Abort button without signalling (you will need to
+           call CheckProgressAbort() to detect an abort).
+
+    RESULT
+        Returns a handle to the newly created progress window, or NULL for
+        failure.
+
+    SEE ALSO
+        SetProgressWindow(), CloseProgressWindow()
+
+galileofm.library/SetProgressWindow             galileofm.library/SetProgressWindow
+
+    NAME
+        SetProgressWindow - update progress window information
+
+    SYNOPSIS
+        SetProgressWindow(handle, tags)
+                            A0     A1
+
+        void SetProgressWindow(APTR, struct TagItem *);
+
+        void SetProgressWindowTags(APTR, Tag, ...);
+
+    FUNCTION
+        This is the routine you use to update the information displayed in
+        a progress window.
+
+    INPUTS
+        handle - progress window handle
+        tags   - control tags. Valid tags are :
+
+            PW_Title       - change the window title
+
+            PW_FileName    - change the displayed filename
+
+            PW_FileSize    - change the total size of the current file
+
+            PW_FileDone    - change the "done" size of the current file
+                             (eg, if the file size was 12800 and you had
+                             copied half of it, the done size would be
+                             6400).
+
+            PW_Info        - change the information field display
+
+            PW_Info2       - change the second information field display
+
+            PW_Info3       - change the third information field display
+
+            PW_FileCount   - change the total number of files
+
+            PW_FileNum     - change the number of files processed (eg,
+                             if the total file count was 84 and you had
+                             processed a quarter of them, the current
+                             file number would be 21).
+
+    RESULT
+        The changes are displayed immediately. If the progress window is
+        currently hidden, the changes are still effective and will be
+        visible when the progress window is revealed.
+
+    SEE ALSO
+        OpenProgressWindow()
+
+galileofm.library/ShowProgressWindow           galileofm.library/ShowProgressWindow
+
+    NAME
+        ShowProgressWindow - reveal a hidden progress window
+
+    SYNOPSIS
+        ShowProgressWindow(handle, screen, window)
+                             A0      A1      A2
+
+        void ShowProgressWindow(APTR, struct Screen *, struct Window *);
+
+    FUNCTION
+        Reveals a progress window that was hidden with HideProgressWindow().
+
+    INPUTS
+        handle - progress window handle
+        screen - new parent screen (if no window supplied)
+        window - new owner window (if no screen supplied)
+
+    RESULT
+        The progress window is revealed. If possible, it will be displayed
+        at the same position on the screen as it was when it was hidden.
+
+    SEE ALSO
+        OpenProgressWindow(), HideProgressWindow()
+
+

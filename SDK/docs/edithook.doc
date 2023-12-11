@@ -1,0 +1,128 @@
+galileofm.library/Edit Hook                             galileofm.library/Edit Hook
+
+    The galileofm.library provides an edit hook which you can attach to string
+    gadgets, to take advantage of some additional features. The features
+    provided by the edit hook include :
+
+        - Enhanced cursor movement using alt and shift
+        - History using up/down cursor
+        - Clipboard support (copy, cut and paste)
+        - Optional filtering of path characters
+        - Secure option where string is not displayed
+        - Return automatically activates the next string gadget
+        - Key press notification
+
+    To use the edit hook in your gadgets, you must obtain a Hook structure
+    with the GetEditHook() function. Once you have finished with it, you
+    must free this with FreeEditHook().
+
+galileofm.library/FreeEditHook                       galileofm.library/FreeEditHook
+
+    NAME
+        FreeEditHook - free a Hook created with GetEditHook()
+
+    SYNOPSIS
+        FreeEditHook(hook)
+                      A0
+
+        void FreeEditHook(struct Hook *);
+
+    FUNCTION
+        This routine frees a Hook that you obtained via a call to
+        GetEditHook().
+
+    INPUTS
+        hook - hook to free
+
+    SEE ALSO
+        GetEditHook()
+
+galileofm.library/GetEditHook                         galileofm.library/GetEditHook
+
+    NAME
+        GetEditHook - get a Hook pointer to access the edit hook
+
+    SYNOPSIS
+        GetEditHook(type, flags, tags)
+                     D0     D1    A0
+
+        struct Hook *GetEditHook(ULONG, ULONG, struct TagItem *);
+
+        struct Hook *GetEditHookTags(ULONG, ULONG, Tag, ...);
+
+    FUNCTION
+        This routine returns a Hook structure that you can use to give
+        the additional capabilities to your string gadgets.
+
+    INPUTS
+        type - type of Hook (only HOOKTYPE_STANDARD is valid so far)
+        flags - a combination of the following flags :
+
+                EDITF_NO_SELECT_NEXT - stops the return key from
+                automatically activating the next (or previous, with shift)
+                string gadget.
+
+                EDITF_PATH_FILTER - filters path characters out of the
+                string (/ and :)
+
+                EDITF_SECURE - secure password field, doesn't display the
+                characters that are typed. If this flag is specified, the
+                gadget's StringInfo->MaxChars value must be twice what
+                it would ordinarily be. The gadget's StringInfo->Buffer
+                must be this size plus an additional two bytes, eg
+                (max_len*2)+2.
+
+        tags - the following tags are supported by the edit hook :
+
+               EH_History - supplies a pointer to an Att_List structure
+               which contains the history list for this gadget. Each entry
+               in the list is the name of a node, with the most recent node
+               at the end of the list. The Att_List should be created using
+               Semaphore locking.
+
+               EH_ChangeSigTask - allows you to specify a task that is to be
+               signalled whenever the contents of the string gadget are
+               changed by the user. This allows you to have a display
+               dynamically updated as the user types.
+
+               EH_ChangeSigBit - the signal bit used to signal your task.
+               This is the bit number, not a mask.
+
+    RESULT
+        Returns a pointer to a Hook structure which you can use for your
+        gadget. It is not a good idea to share hooks between gadgets
+        (although unless you are using the EH_History facility it should
+        not really be a problem).
+
+    SEE ALSO
+        FreeEditHook(), GetSecureString(), Att_NewList()
+
+galileofm.library/GetSecureString                 galileofm.library/GetSecureString
+
+    NAME
+        GetSecureString - retrieve the real string from a secure field
+
+    SYNOPSIS
+        GetSecureString(gadget)
+                          A0
+
+        char *GetSecureString(struct Gadget *);
+
+    FUNCTION
+        The secure feature of the edit hook is implemented using a buffer for
+        the gadget that is twice as large plus 2 bytes as it would
+        ordinarily be. This is because the first half of the buffer is filled
+        with * characters as the user types. The real text is stored in the
+        second half of the buffer.
+
+    INPUTS
+        gadget - secure string gadget
+
+    RESULT
+        Returns a pointer to the real text for the gadget. The text is
+        properly null-terminated.
+
+    SEE ALSO
+        GetEditHook()
+
+

@@ -1,0 +1,1413 @@
+galileofm.library/Layout Routines                 galileofm.library/Layout Routines
+
+1.  The galileofm.library provides font-sensitive layout routines to make it
+easy to create and use a user interface for your application or module. The
+layout code is not as straightforward, or indeed as powerful, as MUI or some
+of the other GUI engines available, and so you might want to consider using
+one of those instead of the Galileo routines.
+
+    The normal procedure in creating an interface is :
+
+    1. Define a list of "objects" (gadgets, text, etc)
+    2. Define a window
+    3. Call OpenConfigWindow() to open the window
+    4. Call AddObjectList() to add the objects
+    5. Call SetGadgetValue() to initialise gadgets
+    6. Message loop with GetWindowMsg()
+    7. Call GetGadgetValue() to get gadget final values
+    8. Call CloseConfigWindow() to close the window
+
+
+2.  The list of objects is defined as an array of ObjectDef structures.
+You call AddObjectList() to add a list of objects to a window; indeed, you
+can make multiple calls to this function to add multiple lists. Each ObjectDef
+structure is defined as follows:
+
+        od_Type
+
+        This field indicates the type of object. Current values are :
+
+            OD_GADGET       - a gadget
+            OD_TEXT         - a text string
+            OD_AREA         - a rectangular area
+            OD_IMAGE        - an image
+
+        Two control values are also used:
+
+            OD_SKIP         - skip this entry
+            OD_END          - ends an ObjectDef array
+
+
+        od_ObjectKind
+
+        If od_Type is set to OD_GADGET, this field describes the type of
+        gadget. Valid types are:
+
+            BUTTON_KIND         - standard push button
+            STRING_KIND         - a string gadget
+            INTEGER_KIND        - an integer gadget
+            HOTKEY_KIND         - a hotkey field
+            CHECKBOX_KIND       - a checkbox gadget
+            GALILEO_LISTVIEW_KIND  - an Galileo listview gadget
+            PALETTE_KIND        - a palette gadget (pen selection)
+            FILE_BUTTON_KIND    - a button that opens a file requester
+            DIR_BUTTON_KIND     - a button that opens a directory requester
+            FONT_BUTTON_KIND    - a button that opens a font requester
+                                  (only works under v38 ASL)
+            FRAME_KIND          - a frame (rectangular area)
+            FIELD_KIND          - a readonly string gadget
+            NUMBER_KIND         - a number display
+            TEXT_KIND           - a text display
+
+        The above gadgets are all implemented by the galileofm.library. Many are
+        similar to their GadTools equivalents. Any GadTools gadget that is not
+        replaced by the above types is also available. Currently, these are:
+
+            LISTVIEW_KIND       - standard GadTools listview
+            MX_KIND             - radio buttons gadget
+            CYCLE_KIND          - cycle gadget
+            SCROLLER_KIND       - scroller gadget
+            SLIDER_KIND         - slider gadget
+
+        If od_Type is OD_AREA or OD_TEXT, the od_ObjectKind field is used to
+        specify the pen used for text rendering. This is not a literal pen
+        number but is a DrawInfo pen index (eg TEXTPEN).
+
+
+        od_CharDims
+
+        This field structure is used to define the character position of the
+        object. All objects (and windows, for that matter) have two sets of
+        positioning information - character and fine. The character position
+        is used to specify the size and position in "font units" - this value
+        is scaled for the current font and so allows the display to be
+        font-sensitive. A "font unit" is the average width of the font for
+        a horizontal coordinate, and the height of the font for a vertical
+        coordinate. The "Left" and "Top" fields of the IBox structure control
+        the position of the object, and the "Width" and "Height" fields control
+        the size.
+
+        There are some magic values for object positioning and sizing. The
+        positioning values are:
+
+            POS_CENTER          - use this in the "Left" or "Top" field to have
+                                  the object positioned in the center of the
+                                  window.
+
+            POS_RIGHT_JUSTIFY   - position relative to the right/bottom border
+
+        POS_CENTER is an absolute value. POS_RIGHT_JUSTIFY is more of a flag,
+        used in conjunction with another value. For example, POS_RIGHT_JUSTIFY
+        by itself would position an object hard up against the right border.
+        POS_RIGHT_JUSTIFY-2 would position an object at a two 'font unit'
+        margin from the border.
+
+        The magic values for sizes are:
+
+            SIZE_MAXIMUM        - the object will be the maximum possible size
+                                  in this direction
+
+            SIZE_MAX_LESS       - maximum possible size minus an amount
+
+        For example, od_CharDims might be defined as:
+
+            {POS_CENTER,POS_RIGHT_JUSTIFY-1,SIZE_MAX_LESS-4,2}
+
+        This would create an object that was centered in the display, and as
+        wide as possible with a two space gap on either side. The object would
+        be one space from the bottom border, and be two spaces high.
+
+
+        od_FineDims
+
+        This field structure is used to define the fine position and size of
+        the object. The fine position is given as an absolute pixel value, and
+        allows you to make adjustments for GUI components that do not scale
+        with the font (eg, borders are always 1 or 2 pixels high, irrespective
+        of the font size). You can also make fine adjustments through this
+        field when the od_CharDims field uses the POS_ and SIZE_ values.
+
+
+        od_GadgetText
+
+        This is the locale string ID for the gadget label, or text or area
+        string. It must be a valid ID in the locale specified in the
+        NewConfigWindow structure. If the TEXTFLAG_TEXT_STRING flag is set
+        for this object, the od_GadgetText field is a pointer to an actual
+        text string.
+
+
+        od_Flags
+
+        The object flags are heavily object dependent. For standard GadTools
+        gadgets, the standard GadTools flags apply. Some GadTools flags are
+        also applicable to Galileo gadgets:
+
+            PLACETEXT_LEFT
+            PLACETEXT_RIGHT
+            PLACETEXT_ABOVE (only works for some gadgets)
+            PLACETEXT_IN    (only works for some gadgets)
+
+        General purpose Galileo flags are:
+
+            TEXTFLAG_TEXT_STRING - this flag is used with all the object
+            types, and indicates that the od_GadgetText field of the ObjectDef
+            structure points to a literal text string and not a locale ID.
+
+            TEXTFLAG_NO_USCORE - if you specify this flag, an underscore
+            character in the string will be treated literally. Otherwise,
+            the underscore is used to specify a character to be underscored,
+            indicating a keyboard equivalent.
+
+        Flags for BUTTON_KIND gadgets:
+
+            BUTTONFLAG_OKAY_BUTTON - indicates that this button is an "ok"
+            button. The 'enter' key will automatically be used as a key
+            equivalent for this button. The label for this button is
+            automatically rendered in bold.
+
+            BUTTONFLAG_CANCEL_BUTTON - indicates that this button is a
+            "cancel" button. The 'escape' key will automatically be used as a
+            key equivalent for this button.
+
+            BUTTONFLAG_TOGGLE_SELECT - specifies that you want a toggle-select
+            button (one that can be turned on or off).
+
+            BUTTONFLAG_THIN_BORDERS - specifies that you want 'thin' borders
+            for the button. Thin borders are one pixel wide on all sides,
+            whereas normal borders are two pixels wide on the left and right,
+            and one pixel wide at the top and bottom. This flag can also
+            be used with CHECKBOX_KIND, FRAME_KIND, NUMBER_KIND, TEXT_KIND,
+            PALETTE_KIND, FILE_BUTTON_KIND, DIR_BUTTON_KIND and
+            FONT_BUTTON_KIND gadgets.
+
+        Flags for GALILEO_LISTVIEW_KIND gadgets:
+
+            LISTVIEWFLAG_CURSOR_KEYS - specifies that the cursor keys can
+            be used to scroll up and down in this listview.
+
+        Flags for FILE_BUTTON_KIND gadgets:
+
+            FILEBUTFLAG_SAVE - specifies that the file requester is to be
+            opened in save mode.
+
+        Flags for OD_TEXT objects:
+
+            TEXTFLAG_RIGHT_JUSTIFY - right justify the text
+            TEXTFLAG_CENTER        - center the text
+
+        Flags for OD_AREA objects:
+
+            AREAFLAG_RAISED - a raised rectangle
+            AREAFLAG_RECESSED - a recessed rectangle
+            AREAFLAG_THIN - draw rectangle with thin borders
+            AREAFLAG_ICON - draw an icon drop box
+            AREAFLAG_ERASE - erase the interior of the rectangle
+            AREAFLAG_LINE - draw a separator line
+            AREAFLAG_OPTIM - optimised refreshing when updating
+            AREAFLAG_TITLE - draw a group box with a title
+            AREAFLAG_NOFILL - don't fill interior
+
+
+        od_ID
+
+        This is the ID of the object. If the object is a gadget, it will
+        also set the gadget ID.
+
+
+        od_TagList
+
+        Object-specific taglist. For GadTools gadgets, all the standard
+        GadTools flags apply.
+
+            GTCustom_LocaleLabels - (USHORT *)
+
+            Used with : MX_KIND, CYCLE_KIND
+
+            This tag points to an array of locale IDs. It allows you to
+            specify the text contents of the gadgets using locale. The array
+            must be terminated with a 0 value. You can use this instead of
+            the GTCY_Labels or GTMX_Labels tags.
+
+
+            GTCustom_Image - (struct Image *)
+
+            Used with : BUTTON_KIND
+
+            Points to an Image structure that defines an image to be displayed
+            within the button.
+
+
+            GTCustom_CallBack - (void __asm (*)(register __a1 struct TagItem *,
+                                                register __a2 struct Window *))
+
+            Used with : All types
+
+            This tag allows you to specify the address of a callback function
+            that is called when the object is added to the window via
+            AddObjectList(). The callback function is passed both the window
+            pointer and a pointer to the tag. The function can modify both the
+            ti_Tag and ti_Data values of the tag, and when it returns the
+            Tag will be re-evaluated with the new contents.
+
+
+            GTCustom_LayoutRel - USHORT
+
+            Used with : All types
+
+            Lets you position objects relative to another. The ti_Data field
+            contains the ID of an object that *has previously been added*
+            (eg is before this one in the ObjectDef array). The new object
+            will be positioned relative to the specified object; from the
+            new object's point of view, coordinate 0,0 is the top-left
+            corner of the relative object. You can use POS_CENTER and the
+            other magic position values with this tag. For example, to
+            position an object in the center of another one, you would
+            use the GTCustom_LayoutRel tag, and set char_dims.Left and
+            char_dims.Top for the new object to POS_CENTER.
+
+            If the window is resizeable, you must supply the GTCustom_CopyTags
+            tag as well.
+            
+
+            GTCustom_LayoutPos - USHORT
+
+            Used with : All types
+
+            Lets you position objects based on the position of another object.
+            The ti_Data field contains the ID of an object that must have been
+            previously added. This tag is used in conjunction with the
+            following object flags:
+
+                POSFLAG_ADJUST_POS_X    - X-position is relative to X-position
+                                          of other object
+
+                POSFLAG_ADJUST_POS_Y    - Y-position is relative to Y-position
+                                          of other object
+
+                POSFLAG_ALIGN_X         - Align X-position with other object
+
+                POSFLAG_ALIGN_Y         - Align Y-position with other object
+
+            If the window is resizeable, you must supply the GTCustom_CopyTags
+            tag when you supply this tag.
+
+
+            GTCustom_Control - USHORT
+
+            Used with : CHECKBOX_KIND, FILE_BUTTON_KIND, DIR_BUTTON_KIND,
+                        FONT_BUTTON_KIND
+
+            Specifies another gadget that this gadget controls. The ti_Data
+            field contains the ID of the other gadget. For CHECKBOX_KIND
+            gadgets, the other gadget will be disabled when the checkbox
+            is deselected, and enabled when it is selected. For the other
+            types of gadget, the other gadget MUST be a STRING_KIND, into
+            which will go the pathname that was selected by the file requester.
+
+            For FONT_BUTTON_KIND gadgets, the font name is copied into the
+            STRING_KIND gadget specified with this tag, and the font size is
+            copied into an INTEGER_KIND gadget with the control ID + 1.
+
+
+            GTCustom_TextAttr - struct TextAttr *
+
+            Used with : All gadgets
+
+            Lets you specify the font that will be used for a specific gadget.
+
+
+            GTCustom_MinMax - ULONG
+
+            Used with : SLIDER_KIND, INTEGER_KIND, SCROLLER_KIND
+
+            Allows you to specify the minimum and maximum values of a gadget.
+            The ULONG contains the maximum value in the upper 16 bits and the
+            minimum value in the lower 16 bits. For SLIDER_KIND and
+            SCROLLER_KIND, you can also use the GadTools equivalent tags.
+
+
+            GTCustom_ThinBorders - BOOL
+
+            Used with : BUTTON_KIND, CHECKBOX_KIND, FRAME_KIND, NUMBER_KIND,
+                        TEXT_KIND, PALETTE_KIND, FILE_BUTTON_KIND,
+                        DIR_BUTTON_KIND and FONT_BUTTON_KIND
+
+            This tag can be used instead of the BUTTONFLAG_THIN_BORDERS flag.
+            This tag also allows you to control thin borders when accessing
+            the Galileo BOOPSI gadgets directly.
+
+
+            GTCustom_Borderless - BOOL
+
+            Used with : BUTTON_KIND, CHECKBOX_KIND, FRAME_KIND, NUMBER_KIND,
+                        TEXT_KIND, PALETTE_KIND, FILE_BUTTON_KIND,
+                        DIR_BUTTON_KIND and FONT_BUTTON_KIND
+
+            If set to TRUE, this causes the gadget to be rendered without
+            a border.
+
+
+            GTCustom_LocaleKey - ULONG
+
+            Used with : All gadgets
+
+            This tag takes a locale ID, and uses the corresponding string to
+            set the key equivalent for this gadget. The string is searched
+            for the first underscore character, and the character immediately
+            after the underscore is used as the key equivalent.
+
+
+            GTCustom_NoSelectNext - BOOL
+
+            Used with : STRING_KIND, INTEGER_KIND
+
+            Ordinarily, pressing return in a string field causes the cursor
+            to move to the next field automatically. If you specify TRUE for
+            this tag, pressing return will simply deactivate the current field.
+
+
+            GTCustom_PathFilter - BOOL
+
+            Used with : STRING_KIND
+
+            If you specify TRUE for this tag, the string field will
+            automatically filter the / and : path characters out.
+
+
+            GTCustom_Secure - BOOL
+
+            Used with : STRING_KIND
+
+            If you specify TRUE for this tag, the string field will operate
+            in secure "password" mode.
+
+
+            GTCustom_History - Att_List *
+
+            Used with : STRING_KIND, INTEGER_KIND
+
+            Lets you specify a history list for the gadget. See the docs
+            for the EH_History tag under GetEditHook() for more information.
+
+
+            GTCustom_CopyTags - BOOL
+
+            Used with : All types
+
+            If you specify TRUE for this tag, the supplied tag list will be
+            copied when the object is created. You need to specify this tag
+            in conjunction with other tags, depending on the situation.
+
+
+            GTCustom_FontPens - ULONG *
+
+            Used with : FONT_BUTTON_KIND
+
+            The ti_Data field must point to a ULONG that will be used to
+            store the front pen, back pen and draw mode result from the
+            font requester. The data is stored with FgPen in the lowest
+            byte, BgPen in the second byte and DrawMode in the third
+            byte. The most significant byte is not used. You must supply
+            the GTCustom_CopyTags tag if you use this tag.
+
+
+            GTCustom_FontPenCount - short
+
+            Used with : FONT_BUTTON_KIND (only under ASL v39.9)
+
+            This allows you to specify the number of pens displayed in the
+            font requester. It is used in conjunction with the
+            GTCustom_FontPenTable tag, and the GTCustom_CopyTags tag must
+            also be supplied.
+
+
+            GTCustom_FontPenTable - UBYTE *
+
+            Used with : FONT_BUTTON_KIND (only under ASL v39.9)
+
+            This is used with GTCustom_FontPenCount. The ti_Data field points
+            to a UBYTE array of pen numbers to display in the font requester.
+            You must also specify the GTCustom_CopyTags tag.
+
+
+            GTCustom_Bold - BOOL
+
+            Used with : BUTTON_KIND, CHECKBOX_KIND, FRAME_KIND, NUMBER_KIND,
+                        TEXT_KIND, PALETTE_KIND, FILE_BUTTON_KIND,
+                        DIR_BUTTON_KIND and FONT_BUTTON_KIND
+
+            If set to TRUE, this tag causes the label for the button to be
+            rendered in bold. Use GTCustom_Style for greater control.
+
+
+            GTCustom_NoGhost - BOOL
+
+            Used with : BUTTON_KIND, CHECKBOX_KIND, FRAME_KIND, NUMBER_KIND,
+                        TEXT_KIND, PALETTE_KIND, FILE_BUTTON_KIND,
+                        DIR_BUTTON_KIND and FONT_BUTTON_KIND
+
+            If set to TRUE, when the button is disabled its image will not
+            be ghosted.
+
+
+            GTCustom_Style - ULONG
+
+            Used with : BUTTON_KIND, CHECKBOX_KIND, FRAME_KIND, NUMBER_KIND,
+                        TEXT_KIND, PALETTE_KIND, FILE_BUTTON_KIND,
+                        DIR_BUTTON_KIND and FONT_BUTTON_KIND
+
+            This tag allows you to control the text style used to render the
+            button label. Valid flags for the style are FSF_BOLD and
+            FSF_ITALIC.
+
+
+            GTCustom_FrameFlags - ULONG
+
+            Used with : FRAME_KIND
+
+            This tag lets you specify the type of frame rendered for the
+            frame gadget. Currently the only value valid is AREAFLAG_RECESSED,
+            to specify a recessed frame.
+
+
+            GTCustom_ChangeSigTask - struct Task *
+
+            Used with : STRING_KIND, INTEGER_KIND
+
+            This tag lets you specify a Task that is to be signalled whenever
+            the contents of the string gadget change.
+
+
+            GTCustom_ChangeSigBit - short
+
+            Used with : STRING_KIND, INTEGER_KIND
+
+            This tag lets you specify the bit that a task is signalled with
+            whenever the contents of the string gadget change.
+
+
+            GTCustom_Justify - short
+
+            Used with : TEXT_KIND, NUMBER_KIND
+
+            This tag lets you specify the justification of the text displayed
+            in the gadget. Valid values are JUSTIFY_CENTER (the default),
+            JUSTIFY_LEFT and JUSTIFY_RIGHT.
+
+        In addition to these tags, GALILEO_LISTVIEW_KIND gadgets (via the Galileo
+        BOOPSI listview class) supports several additional tags. See the
+        section on the listview class for information on these.
+
+
+    The last member in an array of ObjectDef structures must have a od_Type
+of OD_END set.
+
+
+3.  The layout routines can only add gadgets to a special sort of window; one
+that has been created with the OpenConfigWindow() call. Two structures are
+needed to open one of these windows. The first, a ConfigWindow structure,
+specifies the position and size of the new window. It has cw_CharDims and
+cw_FineDims fields, analagous to the fields in ObjectDef structures.
+
+    The second is a NewConfigWindow structure. This is initialised as follows:
+
+        nw_Parent
+
+        This field points to the parent of the Window. The parent can be
+        either another window (the default) or a screen (if the
+        WINDOWF_SCREEN_PARENT flag is set).
+
+
+        nw_Dims
+
+        This points to the ConfigWindow structure used to define the size
+        of the new window.
+
+
+        nw_Title
+
+        This points to a title string for the new window.
+
+
+        nw_Locale
+
+        This points to a valid GalileoLocale structure for the window. All
+        ObjectDefs that use a locale ID will obtain their strings via this
+        structure.
+
+
+        nw_Port
+
+        Allows you to specify a message port to use; you should set this to
+        NULL.
+
+
+        nw_Flags
+
+        Control flags. Valid values are:
+
+            WINDOW_SCREEN_PARENT    - nw_Parent points to a Screen
+            WINDOW_NO_CLOSE         - no close gadget on the window
+            WINDOW_NO_BORDER        - borderless window
+            WINDOW_SIMPLE           - simplerefresh window
+            WINDOW_AUTO_REFRESH     - use with WINDOW_SIMPLE
+            WINDOW_AUTO_KEYS        - handle keypresses automatically
+            WINDOW_REQ_FILL         - backfill the window with stipple pattern
+            WINDOW_NO_ACTIVATE      - don't activate the window on open
+            WINDOW_VISITOR          - open as a visitor window
+            WINDOW_SIZE_RIGHT       - size gadget in right border
+            WINDOW_SIZE_BOTTOM      - size gadget in bottom border
+            WINDOW_ICONIFY          - iconify gadget in title bar
+
+
+        nw_Font
+
+        Allows you to specify a font to use for the window. If NULL, the
+        current screen font will be used.
+
+galileofm.library/AddObjectList                     galileofm.library/AddObjectList
+
+    NAME
+        AddObjectList - add a list of objects to a window
+
+    SYNOPSIS
+        AddObjectList(window, objects)
+                        A0       A1
+
+        ObjectList *AddObjectList(struct Window *, ObjectDef *);
+
+    FUNCTION
+        This function adds a list of objects to a window. The window must have
+        previously been opened with the OpenConfigWindow() call.
+
+    INPUTS
+        window - window to add the objects to
+        objects - array of objects to add
+
+    RESULT
+        Returns a pointer to the list of created objects, or NULL for failure.
+
+    NOTES
+        You can add multiple object lists to a window with multiple calls to
+        AddObjectList(). These lists are chained together, and as long as
+        you pass the address of the FIRST object list to any functions that
+        search an object list, all chained lists will be searched
+        automatically.
+
+    SEE ALSO
+        OpenConfigWindow(), SetGadgetValue()
+
+galileofm.library/AddWindowMenus                   galileofm.library/AddWindowMenus
+
+    NAME
+        AddWindowMenus - add menus to a window
+
+    SYNOPSIS
+        AddWindowMenus(window, menus)
+                         A0     A1
+
+        void AddWindowMenus(struct Window *, MenuData *);
+
+    FUNCTION
+        This function makes it easy to add menus to a window opened via
+        OpenConfigWindow(). Even if you don't use the AddObjectList() routine
+        to add gadgets to the window, you can still use this call to add
+        menus.
+
+        AddWindowMenus() takes an array of MenuData structures, and constructs
+        and initialises the Intuition Menu structures automatically. The
+        MenuData structures are initialised as follows:
+
+            md_Type     - entry type; NM_TITLE, NM_ITEM or NM_SUB. The array
+                          must be terminated by an NM_END item.
+
+            md_ID       - the ID value for the menu item.
+
+            md_Name     - the name of the menu item. This can either be a
+                          locale ID, or, if the MENUFLAG_TEXT_STRING flag is
+                          set, a pointer to a real string.
+
+            md_Flags    - control flags.
+
+        The md_Flags field supports the standard Intuition and GadTools menu
+        flags as well as several custom flags:
+
+            MENUFLAG_TEXT_STRING - md_Name is a real string
+            MENUFLAG_COMM_SEQ    - the menu will be given a command sequence
+                                   (Right-Amiga + a key)
+            MENUFLAG_AUTO_MUTEX  - automatic mutual exclusion
+
+        If MENUFLAG_COMM_SEQ is specified, the key used for the command
+        sequence is normally the first character of the menu name. However,
+        you can specify a character to use instead of this, by setting the
+        MENUFLAG_USE_SEQ flag, and using the MENUFLAG_MAKE_SEQ() macro.
+        For example, to specify a command sequence of Right Amiga and A, you
+        would use :
+
+            MENUFLAG_COMM_SEQ|MENUFLAG_USE_SEQ|MENUFLAG_MAKE_SEQ('A')
+
+        The automatic mutual exclusion works on all items at the current
+        level that have the CHECKIT flag set.
+
+    INPUTS
+        window - window to add menus to
+        menus - array of MenuData structures, terminated with NM_END
+
+    RESULT
+        The menus are added to the window. You can check if this operation
+        failed (through lack of memory) by examining the window->MenuStrip
+        pointer; if NULL, the window has no menus.
+
+    SEE ALSO
+        FindMenuItem(), FreeWindowMenus()
+
+galileofm.library/BoundsCheckGadget             galileofm.library/BoundsCheckGadget
+
+    NAME
+        BoundsCheckGadget - bounds check an integer gadget
+
+    SYNOPSIS
+        BoundsCheckGadget(list, id, min, max)
+                           A0   D0   D1   D2
+
+        long BoundsCheckGadget(ObjectList *, ULONG, long, long);
+
+    FUNCTION
+        This routine tests the value of an integer gadget against the supplied
+        minimum and maximum, adjusts and refreshes it if it is invalid, and
+        returns the new value.
+
+    INPUTS
+        list - ObjectList containing the gadget
+        id - gadget ID
+        min - minimum value
+        max - maximum value
+
+    RESULT
+        Returns the new value of the gadget.
+
+galileofm.library/BuildMenuStrip                   galileofm.library/BuildMenuStrip
+
+    NAME
+        BuildMenuStrip - build a MenuStrip easily
+
+    SYNOPSIS
+        BuildMenuStrip(menus, locale)
+                         A0     A1
+
+        struct Menu *BuildMenuStrip(MenuData *, struct GalileoLocale *);
+
+    FUNCTION
+        This routine takes the supplied MenuData array, and returns an
+        initialised menu strip. This menu strip can then be layed out
+        using the LayoutMenus() function in gadtools.library, and added
+        to any window.
+
+    INPUTS
+        menus - array of MenuData structures
+        locale - locale to use for text strings
+
+    RESULT
+        Returns a pointer to the head of the menu strip.
+
+    NOTES
+        The menus returned by this function can be used on any window. If
+        your window was opened with OpenConfigWindow(), you should use the
+        AddWindowMenus() function instead of this one.
+
+        The returned menu strip can be freed with a call to FreeMenus() in
+        gadtools.library.
+
+        See the instructions for AddWindowMenus() for information about
+        initialising the MenuData structures.
+
+    SEE ALSO
+        AddWindowMenus(), gadtools.library/LayoutMenusA(),
+        gadtools.library/FreeMenus()
+
+galileofm.library/CheckObjectArea                 galileofm.library/CheckObjectArea
+
+    NAME
+        CheckObjectArea - check if a point is within an object's area
+
+    SYNOPSIS
+        CheckObjectArea(object, x, y)
+                          A0   D0 D1
+
+        BOOL CheckObjectArea(GL_Object *, long, long);
+
+    FUNCTION
+        This routine tests if the coordinate is within the "select" area of
+        the object.
+
+    INPUTS
+        object - object to test
+        x - x coordinate
+        y - y coordinate
+
+    RESULT
+        Returns TRUE if the point falls within the object.
+
+galileofm.library/ClearWindowBusy                 galileofm.library/ClearWindowBusy
+
+    NAME
+        ClearWindowBusy - make a window unbusy
+
+    SYNOPSIS
+        ClearWindowBusy(window)
+                          A0
+
+        void ClearWindowBusy(struct Window *);
+
+    FUNCTION
+        This routine undoes the effect of a SetWindowBusy() call. The mouse
+        pointer of the window is returned to normal, and input is unblocked.
+
+    INPUTS
+        window - the window in question
+
+    SEE ALSO
+        SetWindowBusy()
+
+galileofm.library/CloseConfigWindow             galileofm.library/CloseConfigWindow
+
+    NAME
+        CloseConfigWindow - close a window
+
+    SYNOPSIS
+        CloseConfigWindow(window)
+                            A0
+
+        void CloseConfigWindow(struct Window *);
+
+    FUNCTION
+        This function closes a window that was opened with a call to
+        OpenConfigWindow(). All memory associated with the window, including
+        object lists, menus and memory allocated from the window's memory
+        pool is freed by this call.
+
+    INPUTS
+        window - window to close. MUST have been opened with OpenConfigWindow()
+
+    RESULT
+        The window is closed.
+
+    SEE ALSO
+        OpenConfigWindow()
+
+galileofm.library/DisableObject                     galileofm.library/DisableObject
+
+    NAME
+        DisableObject - disable/enable an object
+
+    SYNOPSIS
+        DisableObject(list, id, state)
+                       A0   D0    D1
+
+        void DisableObject(ObjectList *, ULONG, BOOL);
+
+    FUNCTION
+        This routine disables or enables an object. Currently, only gadgets
+        support being disabled.
+
+    INPUTS
+        list - ObjectList containing object
+        id - object ID
+        state - TRUE for disable, FALSE for enable
+
+    RESULT
+        The object is disabled or enabled.
+
+galileofm.library/DisplayObject                     galileofm.library/DisplayObject
+
+    NAME
+        DisplayObject - redisplay an object
+
+    SYNOPSIS
+        DisplayObject(window, object, fpen, bpen, text)
+                        A0      A1     D0    D1    A2
+
+        void DisplayObject(struct Window *, GL_Object *, long, long, char *);
+
+    FUNCTION
+        This routine lets you change and refresh an object. Currently, it is
+        only used for OD_TEXT and OD_AREA objects.
+
+    INPUTS
+        window - window containing the object
+        object - object to display
+        fpen - new foreground pen, -1 for no change
+        bpen - new background pen, -1 for no change
+        text - new text
+
+    RESULT
+        The display is refreshed immediately.
+
+galileofm.library/EndRefreshConfigWindow   galileofm.library/EndRefreshConfigWindow
+
+    NAME
+        EndRefreshConfigWindow - finish refreshing a config window
+
+    SYNOPSIS
+        EndRefreshConfigWindow(window)
+                                 A0
+
+        void EndRefreshConfigWindow(struct Window *);
+
+    FUNCTION
+        This is analagous to calling GT_EndRefresh(window,TRUE) on the
+        window. It finishes and cleans up the refresh process begun with
+        StartRefreshConfigWindow().
+
+    INPUTS
+        window - window to end refresh of
+
+    NOTES
+        If you are using a smart refresh window, or have set the
+        WINDOW_AUTO_REFRESH flag, you will not need to call this function.
+
+    SEE ALSO
+        StartRefreshConfigWindow(), gadtools.library/GT_EndRefresh()
+
+galileofm.library/FindMenuItem                       galileofm.library/FindMenuItem
+
+    NAME
+        FindMenuItem - find a menu item by ID
+
+    SYNOPSIS
+        FindMenuItem(menu, id)
+                      A0   D0
+
+        struct MenuItem *FindMenuItem(struct Menu *, USHORT);
+
+    FUNCTION
+        Traverses the menu list from the supplied pointer, searching for
+        a menu with the given ID. This ID is extracted using the
+        GTMENUITEM_USERDATA() macro. If you constructed the menu item
+        with AddWindowMenus() or BuildMenuStrip(), the ID was supplied
+        in the md_ID field of the MenuData structure.
+
+    INPUTS
+        menu - Menu to start search
+        id - ID to search for
+
+    RESULT
+        Returns a pointer to the MenuItem or NULL if not found.
+
+    SEE ALSO
+        AddWindowMenus(), BuildMenuStrip()
+
+galileofm.library/FreeObjectList                   galileofm.library/FreeObjectList
+
+    NAME
+        FreeObjectList - free a list of objects
+
+    SYNOPSIS
+        FreeObjectList(list)
+                        A0
+
+        void FreeObjectList(ObjectList *);
+
+    FUNCTION
+        This routine frees the supplied list of objects. If there are any
+        gadgets in the list, they are automatically removed from the window
+        before being freed.
+
+        Ordinarily you do not need to call this function; any existing objects
+        are freed automatically when you close the window with
+        CloseConfigWindow(). However, this function together with
+        AddObjectList() allows you to add and remove objects (gadgets) from
+        the window dynamically. This is something that is not possible under
+        GadTools.
+
+    INPUTS
+        list - object list to free
+
+    RESULT
+        The list is delinked and all its objects are freed. If you are freeing
+        just one list from a window, you will need to refresh the display
+        after you have freed the objects.
+
+    SEE ALSO
+        AddObjectList(), CloseConfigWindow()
+
+galileofm.library/FreeWindowMenus                 galileofm.library/FreeWindowMenus
+
+    NAME
+        FreeWindowMenus - free menus from a window
+
+    SYNOPSIS
+        FreeWindowMenus(window)
+                          A0
+
+        void FreeWindowMenus(struct Window *);
+
+    FUNCTION
+        Frees the menus that were attached with a call to AddWindowMenus().
+        Normally you do not need to call this function, as menus are
+        automatically freed when you close the window with CloseConfigWindow().
+
+    INPUTS
+        window - window to free menus for
+
+    RESULT
+        The menus are removed from the window and freed.
+
+    SEE ALSO    
+        AddWindowMenus()
+
+galileofm.library/GetGadgetValue                   galileofm.library/GetGadgetValue
+
+    NAME
+        GetGadgetValue - get the value of a gadget
+
+    SYNOPSIS
+        GetGadgetValue(list, id)
+                        A0   A1
+
+        long GetGadgetValue(ObjectList *, USHORT);
+
+    FUNCTION
+        This returns the current value of the gadget, specified by gadget ID.
+        The supplied list is searched for the gadget.
+
+    INPUTS
+        list - ObjectList containing the gadget
+        id - gadget ID
+
+    RESULT
+        Returns the current value of the gadget. The contents of the return
+        value are dependant on the type of gadget:
+
+            BUTTON_KIND     - if the BUTTONFLAG_TOGGLE_SELECT flag was set,
+                              returns TRUE or FALSE to indicate the state of
+                              the gadget.
+
+            MX_KIND
+            CYCLE_KIND
+            GALILEO_LISTVIEW_KIND
+            LISTVIEW_KIND
+            SLIDER_KIND
+            SCROLLER_KIND
+            PALETTE_KIND    - returns the current selection or value
+
+            CHECKBOX_KIND   - returns TRUE or FALSE to indicate the state
+                              of the gadget.
+
+            INTEGER_KIND    - returns the integer value of the gadget
+
+            STRING_KIND     - returns a pointer to the string contents. This
+                              pointer is READ ONLY!
+
+    SEE ALSO
+        SetGadgetValue()
+
+galileofm.library/GetObject                             galileofm.library/GetObject
+
+    NAME
+        GetObject - get an object by ID from a list
+
+    SYNOPSIS
+        GetObject(list, id)
+                   A0   D0
+
+        GL_Object *GetObject(ObjectList *, ULONG);
+
+    FUNCTION
+        Searches the supplied object list (and any chained lists) for the
+        object with the given ID value.
+
+    INPUTS
+        list - ObjectList to search
+        id - ID to search for
+
+    RESULT
+        Returns a pointer to the object or NULL if not found.
+
+    SEE ALSo
+        AddObjectList()
+
+galileofm.library/GetObjectRect                     galileofm.library/GetObjectRect
+
+    NAME
+        GetObjectRect - get an object's rectangle
+
+    SYNOPSIS
+        GetObjectRect(list, id, rect)
+                       A0   D0   A1
+
+        BOOL GetObjectRect(ObjectList *, ULONG, struct Rectangle *);
+
+    FUNCTION
+        Searches for the object, and if found, copies the coordinates of the    
+        object's display rectangle into the supplied structure.
+
+    INPUTS
+        list - ObjectList containing the object
+        id - ID of the object
+        rect - Rectangle structure for result
+
+    RESULT
+        Returns FALSE if the object could not be found.
+
+galileofm.library/GetWindowAppPort               galileofm.library/GetWindowAppPort
+
+    NAME
+        GetWindowAppPort - get a window's application port
+
+    SYNOPSIS
+        GetWindowAppPort(window)
+                           A0
+
+        struct MsgPort *GetWindowAppPort(struct Window *);
+
+    FUNCTION
+        If a window has registered itself with a call to SetWindowID(), this
+        function will return the address of its application message port.
+
+    INPUTS
+        window - window in question
+
+    RESULT
+        Returns a pointer to the message port, or NULL if the window wasn't
+        registered.
+
+    SEE ALSO
+        SetWindowID(), GetWindowID()
+
+galileofm.library/GetWindowID                         galileofm.library/GetWindowID
+
+    NAME
+        GetWindowID - get a window's ID code
+
+    SYNOPSIS
+        GetWindowID(window)
+                      A0
+
+        ULONG GetWindowID(struct Window *);
+
+    FUNCTION
+        If a window has been registered with SetWindowID(), this function
+        returns the ID code.
+
+    INPUTS
+        window - window in question
+
+    RESULT
+        Returns the ID code of the window if it is registered. Returns
+        WINDOW_UNKNOWN if not registered. Returns WINDOW_UNDEFINED if the
+        Window is registered, but does not have an ID or application port.
+
+    SEE ALSO
+        SetWindowID(), GetWindowAppPort()
+
+galileofm.library/GetWindowMsg                       galileofm.library/GetWindowMsg
+
+    NAME
+        GetWindowMsg - get IntuiMessage for a window
+
+    SYNOPSIS
+        GetWindowMsg(port)
+                      A0
+
+        struct IntuiMessage *GetWindowMsg(struct MsgPort *);
+
+    FUNCTION
+        This routine is analagous to the GT_GetIMsg call under GadTools.
+        It searches the supplied port for an IntuiMessage, performs
+        pre-processing on the message and returns the result to you.
+        It is highly recommended that you use this instead of a normal call
+        to GetMsg() when using the layout routines. In particular, auto
+        refreshing of simplerefresh windows, resizing, key equivalents and
+        proper gadget processing will all be affected if you do not call
+        this function.
+
+    INPUTS
+        port - port to search for messages (window->UserPort)
+
+    RESULT
+        Returns a pointer to the message, or NULL if there was none. You
+        must call ReplyWindowMsg() to reply to messages from this function.
+
+    SEE ALSO
+        ReplyWindowMsg()
+
+galileofm.library/LayoutResize                       galileofm.library/LayoutResize
+
+    NAME
+        LayoutResize - resize a window
+
+    SYNOPSIS
+        LayoutResize(window)
+                       A0
+
+        void LayoutResize(struct Window *);
+
+    FUNCTION
+        This routine is called to handle refreshing of a window when it is
+        resized by the user. If you call GetWindowMsg() in your event loop,
+        this is called automatically for you.
+
+    INPUTS
+        window - window that has been resized
+
+    RESULT
+        All objects in the window are resized (if they were defined with
+        proportional or relative sizes) and refreshed.
+
+galileofm.library/OpenConfigWindow               galileofm.library/OpenConfigWindow
+
+    NAME
+        OpenConfigWindow - open a window
+
+    SYNOPSIS
+        OpenConfigWindow(newwin)
+                           A0
+
+        struct Window *OpenConfigWindow(NewConfigWindow *);
+
+    FUNCTION
+        This routine opens the window defined by the suppled NewConfigWindow
+        structure.
+
+    INPUTS
+        newwin - initialised NewConfigWindow structure
+
+    RESULT
+        Returns a pointer to the Window. This is a normal Intuition window
+        in most respects, but its UserData field points to a structure of
+        additional information. You MUST NOT modify the UserData field of
+        such a window.
+
+    SEE ALSO
+        AddObjectList(), CloseConfigWindow()
+
+galileofm.library/ReplyWindowMsg                   galileofm.library/ReplyWindowMsg
+
+    NAME
+        ReplyWindowMsg - reply to a message
+
+    SYNOPSIS
+        ReplyWindowMsg(msg)
+                        A0
+
+        void ReplyWindowMsg(struct IntuiMessage *);
+
+    FUNCTION
+        Call this function to reply to a message you received via
+        GetWindowMsg().
+
+    INPUTS
+        msg - message to reply to
+
+    SEE ALSO
+        GetWindowMsg()
+
+galileofm.library/SetConfigWindowLimits     galileofm.library/SetConfigWindowLimits
+
+    NAME
+        SetConfigWindowLimits - set size limits for a window
+
+    SYNOPSIS
+        SetConfigWindowLimits(window, min, max)
+                                A0     A1   A2
+
+        void SetConfigWindowLimits(struct Window *, ConfigWindow *,
+                                                    ConfigWindow *);
+
+    FUNCTION
+        Sets the sizing limits of the supplied window. The minimum and
+        maximum dimensions are specified with two ConfigWindow structures.
+
+    INPUTS
+        window - window to set limits for
+        min - minimum dimensions
+        max - maximum dimensions
+
+    SEE ALSO
+        OpenConfigWindow()
+
+galileofm.library/SetGadgetChoices               galileofm.library/SetGadgetChoices
+
+    NAME
+        SetGadgetChoices - set the "choices" for a gadget
+
+    SYNOPSIS
+        SetGadgetChoices(list, id, choices)
+                          A0   D0     A1
+
+        void SetGadgetChoices(ObjectList *, ULONG, APTR);
+
+    FUNCTION
+        This routine sets the choices for a gadget. It operates differently for
+        different types of gadgets:
+
+            SCROLLER_KIND
+
+            Sets the maximum value of the gadget, and adjusts the current value
+            if it exceeds this limit.
+
+            SLIDER_KIND
+
+            Sets the minimum (lower 16 bits)  and maximum (upper 16 bits)
+            values of the gadget, and adjusts the current value if it exceeds
+            either of these limits.
+
+            LISTVIEW_KIND/GALILEO_LISTVIEW_KIND
+
+            Sets the list contents pointer. This is either a struct List * or
+            an Att_List *. If you set the value to NULL, the current list
+            will be detached from the gadget and the list will be cleared.
+            If you set the value to -1, the list will be detached but the
+            gadget display will not be cleared.
+
+            CYCLE_KIND
+
+            Sets the cycle gadget contents. This points to a char * array, or
+            NULL if you want the gadget to be empty. The array must be
+            null-terminated.
+
+    INPUTS
+        list - ObjectList containing the gadget
+        id - gadget ID
+        choices - new choices for the gadget
+
+    RESULT
+        The display is updated immediately, if appropriate.
+    
+galileofm.library/SetGadgetValue                   galileofm.library/SetGadgetValue
+
+    NAME
+        SetGadgetValue - set the value of a gadget
+
+    SYNOPSIS
+        SetGadgetValue(list, id, value)
+                        A0   D0    D1
+
+        void SetGadgetValue(ObjectList *, USHORT, ULONG);
+
+    FUNCTION
+        Sets the value of a gadget. See the instructions for GetGadgetValue()
+        for a list of the gadgets a value can be set for. Note that in the
+        case of a STRING_KIND gadget, the string that you supply is copied,
+        and does not need to remain valid once you have set it.
+
+    INPUTS
+        list - ObjectList containing the gadget
+        id - gadget ID
+        value - new value for the gadget
+
+    RESULT
+        The display is updated immediately.
+
+    SEE ALSO
+        GetGadgetValue()
+
+galileofm.library/SetWindowBusy                     galileofm.library/SetWindowBusy
+
+    NAME
+        SetWindowBusy - make a window busy
+
+    SYNOPSIS
+        SetWindowBusy(window)
+                        A0
+
+        void SetWindowBusy(struct Window *);
+
+    FUNCTION
+        Makes the supplied window busy. The mouse pointer is changed to the
+        system busy pointer, and all gadget input to the window is blocked.
+        You must call ClearWindowBusy() to reverse this state.
+
+    INPUTS
+        window - window to make busy
+
+    RESULT
+        The window goes busy.
+
+    NOTES
+        You can only call this routine on a window opened with
+        OpenConfigWindow().
+
+    SEE ALSo
+        OpenConfigWindow(), ClearWindowBusy()
+
+galileofm.library/SetWindowID                         galileofm.library/SetWindowID
+
+    NAME
+        SetWindowID - register a window's ID
+
+    SYNOPSIS
+        SetWindowID(window, idptr, id, port)
+                      A0      A1   D0   A2
+
+        void SetWindowID(struct Window *, WindowID *, ULONG, struct MsgPort *);
+
+    FUNCTION
+        This routine "registers" a window, giving it an ID value and
+        associating a message port with it.
+
+        This is invaluable in a drag and drop situation, when you want to
+        determine whether a particular window supports a particular type of
+        drop operation.
+
+        The function takes a pointer to a WindowID structure, which is stored
+        in the UserData field of the Window. You therefore lose the use of the
+        UserData field, but you can easily recover it by embedding a WindowID
+        structure in a larger structure.
+
+        It also takes an ID value, and a pointer to a message port. These
+        values are retrievable with the GetWindowID() and GetWindowAppPort()
+        calls.
+
+        All windows opened with OpenConfigWindow() have an ID associated
+        with them automatically; by default, the ID is set to WINDOW_UNDEFINED.
+        If you wish to change it, you can use the SET_WINDOW_ID() macro.
+
+    INPUTS
+        window - window to register
+        idptr  - pointer to WindowID structure. This MUST remain valid for the
+                 life of the window
+        id     - ID value for the window. You should set the WINDOW_USER bit
+                 of any IDs you define.
+        port   - pointer to message port. This does not actually have to be
+                 a message port; it can be any 32 bit value.
+
+    RESULT
+        The window association is made.
+
+    SEE ALSO
+        GetWindowID(), GetWindowAppPort()
+
+galileofm.library/StartRefreshConfigWindowgalileofm.library/StartRefreshConfigWindow
+
+    NAME
+        StartRefreshConfigWindow - begin refreshing a window
+
+    SYNOPSIS
+        StartRefreshConfigWindow(window, finish)
+                                   A0      D0
+
+        void StartRefreshConfigWindow(struct Window *, long);
+
+    FUNCTION
+        This routine begins refresh of a simplerefresh window that was
+        opened with OpenConfigWindow(). If you specify the WINDOW_AUTO_REFRESH
+        flag, you will never need to call this function.
+
+    INPUTS
+        window - window to begin refreshing
+        finish - if set to TRUE, the refresh is ended by this function too. Use
+                 this if you don't want to do any rendering of your own for
+                 the refresh (but if that's the case, why not just use
+                 WINDOW_AUTO_REFRESH?)
+
+    RESULT
+        Refreshing is started (and optionally finished). All the objects in 
+        the window will be refreshed.
+
+    SEE ALSO
+        EndRefreshConfigWindow(), intuition.library/BeginRefresh()
+
+

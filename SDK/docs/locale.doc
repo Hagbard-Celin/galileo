@@ -1,0 +1,54 @@
+galileofm.library/GalileoGetString                   galileofm.library/GalileoGetString
+
+    NAME
+        GalileoGetString - get a text string from the locale table
+
+    SYNOPSIS
+        GalileoGetString(locale, id)
+                         A0    D0
+
+        STRPTR GalileoGetString(struct GalileoLocale *, long);
+
+    FUNCTION
+        This routine searches the string table referenced by the supplied
+        GalileoLocale structure for the string matching the supplied ID,
+        and returns a pointer to it.
+
+        The GalileoLocale structure must be initialised in the following way :
+
+            li_LocaleBase   - locale.library base address, or NULL
+            li_Catalog      - OpenCatalog() result, or NULL
+            li_BuiltIn      - default string table
+            li_Locale       - current system locale or NULL
+
+        If there is no external catalog file, or locale.library is not
+        available, all fields except li_BuiltIn must be initialised to
+        NULL. li_BuiltIn MUST point to a table of default strings. This
+        table is in the CatComp block format. The easiest way to initialise
+        this pointer is to have a separate source module to a) include
+        the string table, and b) initialise the pointer. For example,
+
+            #define CATCOMP_BLOCK
+            #include "strings.h"
+
+            void init_locale_ptr(struct GalileoLocale *locale)
+            {
+                locale->li_BuiltIn=(char *)CatCompBlock;
+            }
+
+    INPUTS
+        locale - pointer to initialised GalileoLocale structure.
+        id - string ID to return.
+
+    RESULT
+        Returns a pointer to the requested string. If there is no catalog,
+        or the given string is not in the supplied catalog, the default
+        string is returned. This pointer is READ-ONLY!
+
+        You MUST NOT pass invalid string IDs to this routine.
+
+    SEE ALSO
+        locale.library/OpenLocale(), locale.library/OpenCatalog(),
+        locale.library/GetLocaleStr()
+
+

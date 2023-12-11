@@ -1,0 +1,135 @@
+galileofm.library/DoPopUpMenu                         galileofm.library/DoPopUpMenu
+
+    NAME
+        DoPopUpMenu - display a popup menu
+
+    SYNOPSIS
+        DoPopUpMenu(window, menu, itemptr, button)
+                      A0     A1      A2      D0
+
+        USHORT DoPopUpMenu(struct Window *, PopUpMenu *, PopUpItem **, USHORT);
+
+    FUNCTION
+        This routine displays a popup menu. The PopUpMenu structure must be
+        initialised as follows:
+
+            item_list - a list of the menu items
+
+            locale    - a pointer to an initialised GalileoLocale structure
+
+            flags     - menu flags. Currently supported flags are:
+
+                            POPUPMF_HELP    - menu supports help via the user
+                                              pressing the help key
+
+                            POPUPMF_REFRESH - the callback function supplied
+                                              should be used to refresh the
+                                              parent window
+
+                            POPUPMF_ABOVE   - the popup menu should open
+                                              above the parent window, instead
+                                              of over the current mouse
+                                              position
+
+            callback  - pointer to your refresh callback function, or NULL
+
+        The callback function is a function that you define to handle the
+        situation when the parent window needs to be refreshed. If the parent
+        window is simplerefresh, you should provide this function. The function
+        has the following prototype:
+
+            void __asm refresh_callback(    register __d0 ULONG type,
+                                            register __a0 struct Window *window,
+                                            register __a1 ULONG userdata )
+
+        The routine will be called whenever the parent window needs to be
+        refreshed. 'type' is the IDCMP message type; usually
+        IDCMP_REFRESHWINDOW. 'window' is a pointer to the parent window, and
+        'userdata' is the userdata field of the PopUpMenu structure.
+
+        The 'item_list' parameter is a MinList containing the items of the
+        popup menu. Each node on this list is a PopUpItem structure, which is
+        defined as follows :
+
+            item_name - pointer to item name
+
+            id        - item ID
+
+            flags     - item flags. Currently supported flags are:
+
+                            POPUPF_LOCALE   - signifies that 'item_name' is
+                                              not a pointer to a string, but
+                                              is a locale ID representing a
+                                              string in the supplied locale.
+
+                            POPUPF_CHECKIT  - item can be checked, much like
+                                              CHECKIT in Intuition menus
+
+                            POPUPF_CHECKED  - item starts out checked, much
+                                              like CHECKED in Intuition menus
+
+                            POPUPF_SUB      - item has sub-items
+
+                            POPUPF_DISABLED - item is disabled
+
+            data      - unless POPUPF_SUB is set, this is a userdata field
+                        that can be set to anything. If POPUPF_SUB is set, this
+                        field must point to an initialised MinList containing
+                        the PopUpItem structures for the sub-menu. You can
+                        have up to four levels of sub-menus.
+
+        Set 'item_name' to the special value POPUP_BARLABEL to produce a
+        separator bar in the menu.
+
+    INPUTS
+        window  - Parent window to open menu over
+        menu    - PopUpMenu to open
+        itemptr - Pointer to location to receive a pointer to the selected
+                  item
+        button  - The code of the mouse button pressed to generate this menu.
+                  This is used to control which mouse button release will
+                  remove the menu (eg, if you pass SELECTDOWN for the 'button'
+                  value, the menu will be removed on a SELECTUP event)
+
+    RESULT
+        Returns -1 if no item was selected. If an item was selected,
+        the item ID is returned, and the address of the PopUpItem structure
+        is stored in 'itemptr'. If the user pressed the help key over an item
+        and the POPUPMF_HELP flag is set, the POPUP_HELPFLAG flag will be
+        set in the returned item ID.
+
+    SEE ALSO
+        GetPopUpItem()
+
+galileofm.library/GetPopUpItem                       galileofm.library/GetPopUpItem
+
+    NAME
+        GetPopUpItem - find a PopUpItem by ID
+
+    SYNOPSIS
+        GetPopUpItem(menu, id)
+                      A0   D0
+
+        PopUpItem *GetPopUpItem(PopUpMenu *, USHORT);
+
+    FUNCTION
+        This searches the supplied menu for a PopUpItem with the specified ID,
+        and returns a pointer to it.
+
+    INPUTS
+        menu - PopUpMenu to search
+        id   - ID to search for
+
+    RESULT
+        Returns a pointer to the PopUpItem if found, or else NULL. This routine
+        supports one level of sub-menus, and will not find an item that is
+        more than one sub-menu deep.
+
+    NOTES
+        This routine is useful in allowing you to find an item to set the state
+        of the POPUPF_CHECKED and POPUPF_DISABLED flags.
+
+    SEE ALSO
+        DoPopUpMenu()
+
+

@@ -1,0 +1,76 @@
+galileofm.library/ParseArgs                             galileofm.library/ParseArgs
+
+    NAME
+        ParseArgs - easier interface to ReadArgs()
+
+    SYNOPSIS
+        ParseArgs(template, args)
+                     A0      A1
+
+        FuncArgs *ParseArgs(char *, char *);
+
+    FUNCTION
+        This routine makes it much more straightforward to use ReadArgs() to
+        parse an argument string. Using ReadArgs to parse a string requires
+        you to allocate and initialise a RDArgs structure and argument
+        array structure, and also requires the argument string to have a 
+        newline character. This function automates this process for you.
+
+    INPUTS
+        template - pointer to ReadArgs template string
+        args - pointer to argument string (need not have a newline)
+
+    RESULT
+        If successful, this function returns a FuncArgs structure. This
+        structure has several fields, but the useful ones are :
+
+            FA_Arguments
+
+            This is the argument array you should use. It is an array
+            of long *, each member of which points to the argument result
+            for the corresponding template entry. If you need to modify
+            any of the values in this array you can, as it is just a copy
+            of the real array.
+
+            FA_Count
+
+            This contains the number of arguments in the template. Galileo
+            counts the arguments in the template and initialises the
+            argument array accordingly.
+
+        The strings supplied to this function are not needed once the
+        function has returned.
+
+    NOTES
+        You should use this routine when parsing arguments supplied to
+        your Galileo modules.
+
+    SEE ALSO
+        DisposeArgs(), dos.library/ReadArgs()
+
+galileofm.library/DisposeArgs                         galileofm.library/DisposeArgs
+
+    NAME
+        DisposeArgs - free a FuncArgs structure
+
+    SYNOPSIS
+        DisposeArgs(funcargs)
+                       A0
+
+        void DisposeArgs(FuncArgs *);
+
+    FUNCTION
+        This function frees the FuncArgs structure returned by ParseArgs().
+
+    INPUTS
+        funcargs - pointer to FuncArgs structure to free
+
+    RESULT
+        The structure is free. Once you have freed it, none of the arguments
+        remain valid, so you should make local copies of anything you need
+        to refer to.
+
+    SEE ALSO
+        ParseArgs(), dos.library/ReadArgs()
+
+
