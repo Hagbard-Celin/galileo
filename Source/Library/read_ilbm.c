@@ -497,7 +497,6 @@ void __asm __saveds L_DecodeILBM(
 //    UBYTE destp96 = p96GetBitMapAttr(dest,P96BMA_ISP96);
     struct TrueColorInfo buffer_infop;
     struct RenderInfo rinfop;
-    
 
     // Check valid source and destination
 	if (!source || !dest) return;
@@ -731,15 +730,13 @@ void __asm __saveds L_DecodeILBM(
                 // Picasso96?
                 if (P96Base)
                 {
-                    if (planes=24)
+                    if (planes==24)
                     {
-                    	//Write pixel array
-
-                   	   p96WriteTrueColorData(
-               		   &buffer_infop,0,0,
-                   	   &rp,0,row,
-                   	   width,1);
-
+                    	//Write true color
+                   	    p96WriteTrueColorData(
+               		    &buffer_infop,0,0,
+                   	    &rp,0,row,
+                   	    width,1);
                     }
                     else
                     {
@@ -757,8 +754,11 @@ void __asm __saveds L_DecodeILBM(
 					WritePixelArray(buffer,0,0,width,&rp,0,row,width,1,(planes==24)?RECTFMT_RGB:RECTFMT_LUT8);
 				}
 */
-				// Write to bitmap
-				else WritePixelLine8(&rp,0,row,width,buffer,&temprp);
+				else
+                {
+				     // Write to bitmap
+                     WritePixelLine8(&rp,0,row,width,buffer,&temprp);
+                }
 			}
 
 			// Increment bitmap offset
