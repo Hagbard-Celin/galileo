@@ -431,7 +431,7 @@ ULONG __asm __saveds recyclebin_startup(
 
 	// Create message ports
 	if (!(data->notify_port=CreateMsgPort()) ||
-		!(data->reply_port=CreateMsgPort()) |\
+		!(data->reply_port=CreateMsgPort()) ||
 		!(data->app_port=CreateMsgPort()))
 		return 0;
 
