@@ -403,7 +403,7 @@ void __saveds function_launch_code(void)
 	}
 
     // If running async, leave cleanup to module
-    if (!(handle->result_flags&FRESULTF_DETACHED))
+    if (!(ipc->flags&IPCF_DETACHEDCHILD))
     {
 		// Do any file changes
 		function_filechange_do(handle,0);
@@ -411,34 +411,35 @@ void __saveds function_launch_code(void)
 		// Unlock listers
 		function_unlock_paths(handle,&handle->source_paths,1);
 		function_unlock_paths(handle,&handle->dest_paths,0);
+
+
+		// Update desktop?
+		if (handle->flags&FUNCF_RESCAN_DESKTOP)
+		{
+			// Update the desktop folder
+			misc_startup("galileo_desktop_update",MENU_UPDATE_DESKTOP,GUI->window,0,TRUE);
+		}
     }
-
-	// Update desktop?
-	if (handle->flags&FUNCF_RESCAN_DESKTOP)
-	{
-		// Update the desktop folder
-		misc_startup("galileo_desktop_update",MENU_UPDATE_DESKTOP,GUI->window,0,TRUE);
-	}
-
 	// Send goodbye message
 	IPC_Goodbye(ipc,&main_ipc,WINDOW_FUNCTION);
 
-	// Done message?
-	if (handle->done_msg)
-	{
-		handle->done_msg->mn_Node.ln_Pri=handle->ret_code;
-		PutMsg(handle->done_msg->mn_ReplyPort,handle->done_msg);
-	}
+    // Only free data if not running asynchronous
+    if (!(ipc->flags&IPCF_DETACHEDCHILD))
+    {
+		// Done message?
+		if (handle->done_msg)
+		{
+			handle->done_msg->mn_Node.ln_Pri=handle->ret_code;
+			PutMsg(handle->done_msg->mn_ReplyPort,handle->done_msg);
+		}
 
-	// Free reply port
-    while (msg=GetMsg(handle->reply_port))
-			ReplyFreeMsg(msg);
-	DeleteMsgPort(handle->reply_port);
+		// Free reply port
+    	while (msg=GetMsg(handle->reply_port))
+				ReplyFreeMsg(msg);
+		DeleteMsgPort(handle->reply_port);
 
-    // Only free data if not running asynchronus
-	if (!(handle->result_flags&FRESULTF_DETACHED))
 		function_free(handle);
-
+    }
 	// Cleanup process
 	IPC_Free(ipc);
 }

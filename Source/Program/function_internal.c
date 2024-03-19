@@ -220,6 +220,8 @@ function_internal_command(
             	    	{
 	            	        if ( (command->flags&FUNCF_NO_ARGS) || (adata->args=AllocMemH(*memhandlep, strlen(buffer)+1)) )
     	            	    {
+                                IPCData *myipc=handle->ipc;
+
 	    	            	    if (adata->args)
     	    	            		strcpy(adata->args, buffer);
 	        	    	        else
@@ -237,7 +239,7 @@ function_internal_command(
 		                    	// Call module asynchronous
     		                	if (ret=function_internal_async(adata))
                                 {
-                                    handle->result_flags|=FRESULTF_DETACHED;
+                                    myipc->flags|=IPCF_DETACHEDCHILD;
                                 }
                                 else
         		                {

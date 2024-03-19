@@ -634,8 +634,8 @@ Added in Galileo:
     This function is the equivalent of gc_FreePointer, without the need for a
     GetPointerPkt. It is useful for closing the function-handle of the
     originating lister for asynchronous gfmmodules. This is done by using
-    IPCDATA(ipc) for 'pointer' and GETPTR_HANDLE for 'type'. 'flags' MUST be
-    NULL.
+    IPCDATA(ipc) for 'pointer', GETPTR_HANDLE for 'type' and GETPTRF_DELPORT for
+    'flags'.
 
 
     BOOL gc_issourcedestlock(    ULONG lister)

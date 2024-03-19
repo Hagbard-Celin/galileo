@@ -727,6 +727,7 @@ typedef struct _IPC {
 #define IPCF_INVALID		(1<<0)
 #define IPCF_LISTED		(1<<1)
 #define IPCF_STARTED		(1<<2)
+#define IPCF_DETACHEDCHILD (1<<3) // running asynchronous
 
 #define IPCDATA(ipc)		((APTR)ipc->userdata)
 #define SET_IPCDATA(ipc,data)	ipc->userdata=(APTR)data

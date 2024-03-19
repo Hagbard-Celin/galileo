@@ -570,6 +570,26 @@ void __asm __saveds HookFreePointerDirect(
 		// Handle
 		case MODPTR_HANDLE:
 
+            if (flags&POINTERF_DELPORT)
+            {
+                FunctionHandle *handle;
+                struct Message *msg;
+
+                handle=(FunctionHandle *)pointer;
+
+                // Done message?
+				if (handle->done_msg)
+				{
+					handle->done_msg->mn_Node.ln_Pri=handle->ret_code;
+					PutMsg(handle->done_msg->mn_ReplyPort,handle->done_msg);
+				}
+
+				// Free reply port
+    			while (msg=GetMsg(handle->reply_port))
+					ReplyFreeMsg(msg);
+				DeleteMsgPort(handle->reply_port);
+            }
+
 			// Free handle
 			function_free((FunctionHandle *)pointer);
 			break;

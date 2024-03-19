@@ -24,7 +24,7 @@ When "Run Asynchronously" is not selected, this pointer is null.
 
 When "Run Asynchronously" is selected, it is a pointer to a memory handle.
 
-You can use it as a handle for allocating memory,if you please, like this:
+You can use it as a handle for allocating memory, if you please, like this:
 
 mymem=AllocMemH(*memhandlep, size_of_allocation)
 
@@ -39,7 +39,7 @@ finished with collecting entries from the source lister you must deallocate the
 FunctionHandle in you got with you "IPCData *ipc" (the one you reference with
 "IPCDATA(ipc)"). This is done like this:
 
-gc_FreePointerDirect(IPCDATA(ipc),GETPTR_HANDLE,0);
+gc_FreePointerDirect(IPCDATA(ipc),GETPTR_HANDLE,GETPTRF_DELPORT);
 
 Hooks, callbacks or AREXX commands that require the FunctionHandle CAN NOT be used
 after this call. And dc_RexxCommand MUST be used in place of gc_SendCommand even if

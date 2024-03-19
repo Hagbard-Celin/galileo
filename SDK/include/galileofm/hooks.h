@@ -469,6 +469,8 @@ struct GetPointerPkt
 #define GETPTR_HANDLE		2	// Get a function handle
 #define GETPTR_COMMANDS		4	// Get internal command list
 
+#define GETPTRF_DELPORT     (1<<1)
+
 #ifndef DEF_GALILEOFMCOMMANDLIST
 #define DEF_GALILEOFMCOMMANDLIST
 

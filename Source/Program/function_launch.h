@@ -362,7 +362,6 @@ typedef struct _FunctionReturn {
 // Result flags
 #define FRESULTF_RESORT			(1<<0)	// Need to resort
 #define FRESULTF_MADE_LISTER	(1<<1)	// We made a lister
-#define FRESULTF_DETACHED      	(1<<2)  // We got detached
 
 // Instruction flags
 #define INSTF_RECURSE_DIRS		(1<<0)	// Enter directories recursively

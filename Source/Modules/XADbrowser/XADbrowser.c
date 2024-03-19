@@ -1319,7 +1319,7 @@ int __saveds __asm L_Module_Entry(
     data.hook.gc_UnlockSource(IPCDATA(ipc));
 
     // Free the FunctionHandle, detaching completely from originating lister
-    data.hook.gc_FreePointerDirect(IPCDATA(ipc),GETPTR_HANDLE,NULL);
+    data.hook.gc_FreePointerDirect(IPCDATA(ipc),MODPTR_HANDLE,POINTERF_DELPORT);
 
     if(data.newlister)
     {
