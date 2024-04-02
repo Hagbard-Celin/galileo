@@ -538,7 +538,7 @@ void __asm __saveds L_SetGadgetValue(
 					info->UndoBuffer[a]='*';
 
 				// Set gadget with asterisks
-				L_SetGadgetAttrs(gadget,list->window,
+				SetGadgetAttrs(gadget,list->window,0,
 					STRINGA_TextVal,info->UndoBuffer,
 					TAG_END);
 
@@ -551,7 +551,7 @@ void __asm __saveds L_SetGadgetValue(
 			}
 
 			// Set string
-			L_SetGadgetAttrs(gadget,list->window,
+			SetGadgetAttrs(gadget,list->window,0,
 				STRINGA_TextVal,(char *)value,
 				TAG_END);
 			break;
@@ -564,7 +564,7 @@ void __asm __saveds L_SetGadgetValue(
 			object->gl_info.gl_gadget.data=value;
 
 			// Set number
-			L_SetGadgetAttrs(gadget,list->window,
+			SetGadgetAttrs(gadget,list->window,0,
 				GTIN_Number,value,
 				TAG_END);
 			break;
@@ -576,7 +576,7 @@ void __asm __saveds L_SetGadgetValue(
 			object->gl_info.gl_gadget.data=value;
 
 			// Set selection
-			L_GT_SetGadgetAttrs(gadget,list->window,
+			GT_SetGadgetAttrs(gadget,list->window,0,
 				GTLV_Selected,value,
 				(value!=(ULONG)~0)?GTLV_MakeVisible:TAG_IGNORE,value,
 				TAG_END);
@@ -589,7 +589,7 @@ void __asm __saveds L_SetGadgetValue(
 			object->gl_info.gl_gadget.data=value;
 
 			// Set selection
-			L_SetGadgetAttrs(gadget,list->window,
+			SetGadgetAttrs(gadget,list->window,0,
 				DLV_Selected,value,
 				(value!=(ULONG)~0)?DLV_MakeVisible:TAG_IGNORE,value,
 				TAG_END);
@@ -605,7 +605,7 @@ void __asm __saveds L_SetGadgetValue(
 			object->gl_info.gl_gadget.data=value;
 
 			// Set check state
-			L_SetGadgetAttrs(gadget,list->window,
+			SetGadgetAttrs(gadget,list->window,0,
 				GTCB_Checked,value,
 				TAG_END);
 
@@ -625,7 +625,7 @@ void __asm __saveds L_SetGadgetValue(
 			object->gl_info.gl_gadget.data=value;
 
 			// Set number
-			L_GT_SetGadgetAttrs(gadget,list->window,
+			GT_SetGadgetAttrs(gadget,list->window,0,
 				GTMX_Active,value,
 				TAG_END);
 			break;
@@ -637,7 +637,7 @@ void __asm __saveds L_SetGadgetValue(
 			object->gl_info.gl_gadget.data=value;
 
 			// Set number
-			L_GT_SetGadgetAttrs(gadget,list->window,
+			GT_SetGadgetAttrs(gadget,list->window,0,
 				GTCY_Active,value,
 				TAG_END);
 			break;
@@ -649,7 +649,7 @@ void __asm __saveds L_SetGadgetValue(
 			object->gl_info.gl_gadget.data=value;
 
 			// Set number
-			L_GT_SetGadgetAttrs(gadget,list->window,
+			GT_SetGadgetAttrs(gadget,list->window,0,
 				GTSL_Level,value,
 				TAG_END);
 			break;
@@ -661,7 +661,7 @@ void __asm __saveds L_SetGadgetValue(
 			object->gl_info.gl_gadget.data=value;
 
 			// Set number
-			L_GT_SetGadgetAttrs(gadget,list->window,
+			GT_SetGadgetAttrs(gadget,list->window,0,
 				GTSC_Top,value,
 				TAG_END);
 			break;
@@ -674,7 +674,7 @@ void __asm __saveds L_SetGadgetValue(
 			object->gl_info.gl_gadget.data=value;
 
 			// Set selection
-			L_SetGadgetAttrs(gadget,list->window,
+			SetGadgetAttrs(gadget,list->window,0,
 				DPG_Pen,value,
 				TAG_END);
 			break;
@@ -687,7 +687,7 @@ void __asm __saveds L_SetGadgetValue(
 			object->gl_info.gl_gadget.data=value;
 
 			// Change value
-			L_SetGadgetAttrs(gadget,list->window,
+			SetGadgetAttrs(gadget,list->window,0,
 				GTNM_Number,value,
 				TAG_END);
 			break;
@@ -697,7 +697,7 @@ void __asm __saveds L_SetGadgetValue(
 		case TEXT_KIND:
 
 			// Change text
-			L_SetGadgetAttrs(gadget,list->window,
+			SetGadgetAttrs(gadget,list->window,0,
 				GTTX_Text,(value)?value:(ULONG)"",
 				TAG_END);
 			break;
@@ -1146,7 +1146,7 @@ struct Gadget *__asm __saveds L_FindKeyEquivalent(
 										status=!(gadget->Flags&GFLG_SELECTED);
 
 										// Toggle gadget status
-										L_SetGadgetAttrs(gadget,list->window,
+										SetGadgetAttrs(gadget,list->window,0,
 											GTCB_Checked,status,
 											TAG_END);
 
@@ -1224,7 +1224,7 @@ struct Gadget *__asm __saveds L_FindKeyEquivalent(
 												tag=GTSL_Level;
 
 											// Change selection
-											L_GT_SetGadgetAttrs(gadget,list->window,
+											GT_SetGadgetAttrs(gadget,list->window,0,
 												tag,sel,
 												tag2,sel,
 												TAG_END);
@@ -1284,7 +1284,7 @@ struct Gadget *__asm __saveds L_FindKeyEquivalent(
 										GetAttr(DLV_Selected,gadget,&old);
 
 										// Change selection
-										L_SetGadgetAttrs(gadget,list->window,
+										SetGadgetAttrs(gadget,list->window,0,
 											tag,1,
 											TAG_END);
 
@@ -1295,7 +1295,7 @@ struct Gadget *__asm __saveds L_FindKeyEquivalent(
 										if (sel!=old)
 										{
 											// Make it visible
-											L_SetGadgetAttrs(gadget,list->window,
+											SetGadgetAttrs(gadget,list->window,0,
 												DLV_MakeVisible,sel,
 												TAG_END);
 
@@ -1320,7 +1320,7 @@ struct Gadget *__asm __saveds L_FindKeyEquivalent(
 										else tag=DPG_SelectNext;
 
 										// Change selection
-										L_SetGadgetAttrs(gadget,list->window,
+										SetGadgetAttrs(gadget,list->window,0,
 											tag,1,
 											TAG_END);
 
@@ -1410,7 +1410,7 @@ void __asm __saveds L_DisableObject(
 		// GadTools?
 		if (IS_GADTOOLS(object))
 		{
-			L_GT_SetGadgetAttrs(GADGET(object),list->window,
+			GT_SetGadgetAttrs(GADGET(object),list->window,0,
 				GA_Disabled,state,
 				TAG_END);
 		}
@@ -1418,7 +1418,7 @@ void __asm __saveds L_DisableObject(
 		// Boopsi
 		else
 		{
-			L_SetGadgetAttrs(GADGET(object),list->window,
+			SetGadgetAttrs(GADGET(object),list->window,0,
 				GA_Disabled,state,
 				TAG_END);
 		}
@@ -1591,7 +1591,7 @@ void __asm __saveds L_SetGadgetChoices(
 					object->gl_info.gl_gadget.data=object->gl_info.gl_gadget.choice_max-1;
 
 				// Change gadget settings
-				L_GT_SetGadgetAttrs(gadget,list->window,
+				GT_SetGadgetAttrs(gadget,list->window,0,
 					GTSC_Total,(unsigned long)choices,
 					(val&0xffff0000)?GTSC_Visible:TAG_IGNORE,(unsigned long)((val>>16)&0xffff),
 					TAG_END);
@@ -1619,7 +1619,7 @@ void __asm __saveds L_SetGadgetChoices(
 					object->gl_info.gl_gadget.data=object->gl_info.gl_gadget.choice_min;
 
 				// Change gadget settings
-				L_GT_SetGadgetAttrs(gadget,list->window,
+				GT_SetGadgetAttrs(gadget,list->window,0,
 					GTSL_Min,min,
 					GTSL_Max,max,
 					TAG_END);
@@ -1652,7 +1652,7 @@ void __asm __saveds L_SetGadgetChoices(
 			}
 
 			// Attach labels to listview
-			L_GT_SetGadgetAttrs(gadget,list->window,
+			GT_SetGadgetAttrs(gadget,list->window,0,
 				GTLV_Labels,(ULONG)choices,
 				TAG_END);
 			break;
@@ -1660,7 +1660,7 @@ void __asm __saveds L_SetGadgetChoices(
 
 		// Custom listview
 		case MY_LISTVIEW_KIND:
-			L_SetGadgetAttrs(gadget,list->window,
+			SetGadgetAttrs(gadget,list->window,0,
 				DLV_Labels,(ULONG)choices,
 				TAG_END);
 			break;
@@ -1692,7 +1692,7 @@ void __asm __saveds L_SetGadgetChoices(
 			}
 
 			// Attach labels to gadget
-			L_GT_SetGadgetAttrs(gadget,list->window,
+			GT_SetGadgetAttrs(gadget,list->window,0,
 				GTCY_Labels,(ULONG)choices,
 				TAG_END);
 			break;

@@ -55,8 +55,6 @@ void _req_backfill(struct Window *window);
 #endif
 
 void _layout_add_gad_image(APTR *memory,struct Gadget *,struct Image *);
-void __stdargs L_GT_SetGadgetAttrs(struct Gadget *gad,struct Window *win,ULONG tag1,...);
-void __stdargs L_SetGadgetAttrs(struct Gadget *gad,struct Window *win,Tag tag,...);
 
 APTR alloc_object_memory(APTR *memory,long size);
 

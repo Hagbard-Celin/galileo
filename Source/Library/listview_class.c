@@ -192,8 +192,7 @@ ULONG __asm __saveds listview_dispatch(
 					(data->flags&(LVF_SHOW_SELECTED|LVF_SELECTED_CHECK))==(LVF_SHOW_SELECTED|LVF_SELECTED_CHECK))
 				{
 					// Create check image
-					if (data->check=L_NewObject(
-						cl,
+					if (data->check=NewObject(
 						0,"galileoiclass",
 						DIA_Type,IM_CHECK,
 						IA_Width,13,
@@ -211,8 +210,7 @@ ULONG __asm __saveds listview_dispatch(
 				if (!(data->flags&LVF_NO_SCROLLER))
 				{
 					// Create scroller
-					if ((data->scroller=L_NewObject(
-						cl,
+					if ((data->scroller=NewObject(
 						0,"propgclass",
 						GA_Previous,gadget,
 						GA_ID,LVGID_SCROLLER,
@@ -234,8 +232,7 @@ ULONG __asm __saveds listview_dispatch(
 					}
 
 					// Create up arrow image
-					if (image=L_NewObject(
-						cl,
+					if (image=NewObject(
 						0,"galileoiclass",
 						IA_Width,data->scroller_dims.Width,
 						IA_Height,data->arrow_height,
@@ -248,8 +245,7 @@ ULONG __asm __saveds listview_dispatch(
 					}
 
 					// Create up arrow button
-					if (data->arrows[0]=L_NewObject(
-						cl,
+					if (data->arrows[0]=NewObject(
 						0,"buttongclass",
 						GA_ID,LVGID_ARROW,
 						GA_Previous,data->scroller,
@@ -268,8 +264,7 @@ ULONG __asm __saveds listview_dispatch(
 					}
 
 					// Create down arrow image
-					if (image=L_NewObject(
-						cl,
+					if (image=NewObject(
 						0,"galileoiclass",
 						IA_Width,data->scroller_dims.Width,
 						IA_Height,data->arrow_height,
@@ -282,8 +277,7 @@ ULONG __asm __saveds listview_dispatch(
 					}
 
 					// Create down arrow button
-					if (data->arrows[1]=L_NewObject(
-						cl,
+					if (data->arrows[1]=NewObject(
 						0,"buttongclass",
 						GA_ID,LVGID_ARROW,
 						GA_Previous,data->arrows[0],
@@ -2027,7 +2021,7 @@ void listview_resize(
 	}
 }
 
-
+/*
 // varargs NewObject
 APTR __stdargs L_NewObject(
 	Class *cl,
@@ -2036,7 +2030,7 @@ APTR __stdargs L_NewObject(
 {
 	return NewObjectA(class,classid,(struct TagItem *)&tag);
 }
-
+*/
 
 // local FilePart
 char *lv_FilePart(char *name)

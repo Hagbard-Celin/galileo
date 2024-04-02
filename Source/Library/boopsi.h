@@ -260,8 +260,6 @@ void button_field_shrink(StringData *,struct Gadget *,struct Window *,struct Req
 
 void palette_render(Class *,struct Gadget *,PaletteData *,struct gpRender *);
 
-APTR __stdargs L_NewObject(Class *,Class *,UBYTE *,Tag,...);
-void __stdargs LV_SetGadgetAttrs(Class *,struct Gadget *,struct Window *,Tag,...);
 
 #define GOTBUF_MAIN	(1<<0)
 #define GOTBUF_UNDO	(1<<1)

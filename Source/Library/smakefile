@@ -33,7 +33,6 @@ OBJS = $(OBJ)libinit.o $(OBJ)data.o $(OBJ)string_data.o \
 	$(OBJ)icons.o \
 	$(OBJ)icon_cache.o \
 	$(OBJ)devices.o \
-	$(OBJ)varargs.o \
 	$(OBJ)version.o \
 	$(OBJ)getusage.o \
 	$(OBJ)savepos.o \
@@ -343,10 +342,6 @@ $(OBJ)devices.o: devices.c galileofmlib.h galileofmbase.h
 $(OBJ)devices.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
 $(OBJ)devices.o: wb.h filetypes.h images.h dos_patch.h galileofmlib.strings
 $(OBJ)devices.o: pools.h
-$(OBJ)varargs.o: varargs.c galileofmlib.h galileofmbase.h
-$(OBJ)varargs.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)varargs.o: wb.h filetypes.h images.h dos_patch.h galileofmlib.strings
-$(OBJ)varargs.o: pools.h
 $(OBJ)version.o: version.c galileofmlib.h galileofmbase.h
 $(OBJ)version.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
 $(OBJ)version.o: wb.h filetypes.h images.h dos_patch.h galileofmlib.strings

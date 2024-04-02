@@ -169,8 +169,7 @@ ULONG __asm __saveds button_dispatch(
 
 					// Get image
 					((CheckData *)data)->check_image=
-						L_NewObject(
-							cl,
+						NewObject(
 							0,"galileoiclass",
 							DIA_Type,IM_CHECK,
 							IA_Width,13, // (gadget->Height>13)?gadget->Height-6:gadget->Height-4,
