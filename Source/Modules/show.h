@@ -39,6 +39,7 @@ For more information on Directory Opus for Windows please see:
 #include "show.strings"
 #include "modules_lib.h"
 #include "/Library/read_ilbm.h"
+#include <proto/Picasso96.h>
 
 typedef struct
 {
@@ -91,12 +92,11 @@ typedef struct
 	ULONG			numcolours;
 
 	struct BitMap		*scr_bm;
+    struct Library      *p96_base;
 } show_data;
 
 #define DataTypesBase	(data->dt_base)
-
-struct Screen *__stdargs my_OpenScreenTags(Tag tag,...);
-struct Window *__stdargs my_OpenWindowTags(Tag tag,...);
+#define P96Base         (data->p96_base)
 
 void show_free(show_data *data);
 BOOL show_help(show_data *data);

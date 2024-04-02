@@ -38,9 +38,11 @@ For more information on Directory Opus for Windows please see:
 #include "galileofmlib.h"
 #include "boopsi.h"
 
+/*
 APTR __stdargs my_NewObject(
 	Class *class,
 	UBYTE *classid,Tag tag,...);
+*/
 
 // Initialise a BOOPSI class
 Class *init_class(
@@ -126,7 +128,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 			((a%2)==0 && flags&SCROLL_HORIZ))
 		{
 			if (!(image[a]=
-				my_NewObject(0,"sysiclass",
+				NewObject(0,"sysiclass",
 					SYSIA_Size,(window->WScreen->Flags&SCREENHIRES)?SYSISIZE_MEDRES:SYSISIZE_LOWRES,
 					SYSIA_Which,LEFTIMAGE+a,
 					SYSIA_DrawInfo,(ULONG)draw_info,
@@ -140,7 +142,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 	{
 		// Create vertical slider
 		if (!(gadget=
-			my_NewObject(0,"propgclass",
+			NewObject(0,"propgclass",
 				GA_ID,GAD_VERT_SCROLLER,
 				GA_RelRight,-(window->BorderRight-5),
 				GA_Top,window->BorderTop+2,
@@ -161,7 +163,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 
 		// Up arrow
 		if (!(gadget=
-			my_NewObject(0,"buttongclass",
+			NewObject(0,"buttongclass",
 				GA_ID,GAD_VERT_ARROW_UP,
 				GA_Image,image[1],
 				GA_Previous,gadget,
@@ -177,7 +179,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 
 		// Down arrow
 		if (!(gadget=
-			my_NewObject(0,"buttongclass",
+			NewObject(0,"buttongclass",
 				GA_ID,GAD_VERT_ARROW_DOWN,
 				GA_Image,image[3],
 				GA_Previous,gadget,
@@ -197,7 +199,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 	{
 		// Create horizontal slider
 		if (!(gadget=
-			my_NewObject(0,"propgclass",
+			NewObject(0,"propgclass",
 				GA_ID,GAD_HORIZ_SCROLLER,
 				(gadget)?GA_Previous:TAG_IGNORE,gadget,
 				GA_Left,window->BorderLeft,
@@ -219,7 +221,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 
 		// Left arrow
 		if (!(gadget=
-			my_NewObject(0,"buttongclass",
+			NewObject(0,"buttongclass",
 				GA_ID,GAD_HORIZ_ARROW_LEFT,
 				GA_Image,image[0],
 				GA_Previous,gadget,
@@ -235,7 +237,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 
 		// Right arrow
 		if (!(gadget=
-			my_NewObject(0,"buttongclass",
+			NewObject(0,"buttongclass",
 				GA_ID,GAD_HORIZ_ARROW_RIGHT,
 				GA_Image,image[2],
 				GA_Previous,gadget,
@@ -290,7 +292,7 @@ void __asm __saveds L_BOOPSIFree(register __a0 struct List *list)
 	NewList(list);
 }
 
-
+/*
 // varargs NewObject
 APTR __stdargs my_NewObject(
 	Class *class,
@@ -298,7 +300,7 @@ APTR __stdargs my_NewObject(
 {
 	return NewObjectA(class,classid,(struct TagItem *)&tag);
 }
-
+*/
 
 // Create a gadget in the window title bar
 struct Gadget *__asm __saveds L_CreateTitleGadget(
@@ -346,7 +348,7 @@ struct Gadget *__asm __saveds L_CreateTitleGadget(
 		drinfo=GetScreenDrawInfo(screen);
 
 		// Get depth gadget image
-		if (image=my_NewObject(
+		if (image=NewObject(
 					0,
 					"sysiclass",
 					SYSIA_DrawInfo,drinfo,
@@ -364,7 +366,7 @@ struct Gadget *__asm __saveds L_CreateTitleGadget(
 		if (!cover_zoom)
 		{
 			// Get zoom gadget image
-			if (image=my_NewObject(
+			if (image=NewObject(
 						0,
 						"sysiclass",
 						SYSIA_DrawInfo,drinfo,
@@ -412,14 +414,14 @@ struct Gadget *__asm __saveds L_CreateTitleGadget(
 
 	// Create image (except for gauge)
 	if (type==IM_GAUGE ||
-		(image=my_NewObject(0,"galileoiclass",
+		(image=NewObject(0,"galileoiclass",
 			DIA_Type,type,
 			IA_Width,width,
 			IA_Height,screen->WBorTop+screen->Font->ta_YSize+1,
 			TAG_END)))
 	{
 		// Create gadget
-		if (gadget=my_NewObject(0,(type==IM_GAUGE)?"galileogaugeclass":"galileobuttongclass",
+		if (gadget=NewObject(0,(type==IM_GAUGE)?"galileogaugeclass":"galileobuttongclass",
 			GA_ID,id,
 			(type==IM_GAUGE)?GA_Left:GA_RelRight,(type==IM_GAUGE)?left:left-image->Width-1,
 			GA_Top,top,

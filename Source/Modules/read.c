@@ -185,7 +185,7 @@ int __asm __saveds L_Module_Entry(
 	data->appport=CreateMsgPort();
 
 	// Allocate filerequester
-	data->filereq=my_AllocAslRequest(
+	data->filereq=AllocAslRequestTags(
 		ASL_FileRequest,
 		ASLFR_SleepWindow,TRUE,
 		ASLFR_TitleText,GetString(locale,MSG_ENTER_FILENAME),
@@ -355,7 +355,7 @@ struct Window *read_open_window(read_data *data)
 
 		// Open screen
 		pens[0]=(USHORT)~0;
-		if (data->my_screen=my_OpenScreenTags(
+		if (data->my_screen=OpenScreenTags(0,
 			SA_Depth,(data->mode==MODE_ANSI)?4:2,
 			SA_DisplayID,modeid,
 			SA_AutoScroll,TRUE,
@@ -391,7 +391,7 @@ struct Window *read_open_window(read_data *data)
 			GAD_ID_ICONIFY);
 
 	// Open window
-	if (!(data->window=my_OpenWindowTags(
+	if (!(data->window=OpenWindowTags(0,
 		WA_Top,dims.Top,
 		WA_Left,dims.Left,
 		WA_Width,dims.Width,
@@ -461,7 +461,7 @@ struct Window *read_open_window(read_data *data)
 		struct MenuItem *item;
 
 		// Lay menus out
-		my_LayoutMenus(data->menus,data->vi,GTMN_NewLookMenus,TRUE,TAG_END);
+		LayoutMenus(data->menus,data->vi,GTMN_NewLookMenus,TRUE,TAG_END);
 
 		// If not using ASL 38+, disable Pick screen mode
 		if (AslBase->lib_Version<38)
@@ -569,13 +569,12 @@ void read_close_window(read_data *data)
 	}
 }
 
-
+/*
 // varargs OpenWindowTags()
 struct Window *__stdargs my_OpenWindowTags(Tag tag,...)
 {
 	return OpenWindowTagList(0,(struct TagItem *)&tag);
 }
-
 
 // varargs OpenScreenTags()
 struct Screen *__stdargs my_OpenScreenTags(Tag tag,...)
@@ -583,12 +582,12 @@ struct Screen *__stdargs my_OpenScreenTags(Tag tag,...)
 	return OpenScreenTagList(0,(struct TagItem *)&tag);
 }
 
-
 // varargs AllocAslRequest()
 APTR __stdargs my_AllocAslRequest(ULONG type,Tag tag,...)
 {
 	return AllocAslRequest(type,(struct TagItem *)&tag);
 }
+*/
 
 
 // Read text file
@@ -618,11 +617,11 @@ BOOL read_file(read_data *data,ULONG type)
 	data->sel_top_pos=-1;
 
 	// Initialise scrollers
-	my_SetGadgetAttrs(data->vert_scroller,data->window,
+	SetGadgetAttrs(data->vert_scroller,data->window,0,
 		PGA_Total,0,
 		PGA_Top,0,
 		TAG_END);
-	my_SetGadgetAttrs(data->horiz_scroller,data->window,
+	SetGadgetAttrs(data->horiz_scroller,data->window,0,
 		PGA_Total,0,
 		PGA_Top,0,
 		TAG_END);
@@ -2200,12 +2199,12 @@ void read_calc_size(read_data *data)
 	read_check_bounds(data);
 
 	// Initialise scrollers
-	my_SetGadgetAttrs(data->vert_scroller,data->window,
+	SetGadgetAttrs(data->vert_scroller,data->window,0,
 		PGA_Top,(data->slider_div>1)?UDivMod32(data->top,data->slider_div):data->top,
 		PGA_Total,(data->slider_div>1)?UDivMod32(data->lines,data->slider_div):data->lines,
 		PGA_Visible,(data->slider_div>1)?UDivMod32(data->v_visible,data->slider_div):data->v_visible,
 		TAG_END);
-	my_SetGadgetAttrs(data->horiz_scroller,data->window,
+	SetGadgetAttrs(data->horiz_scroller,data->window,0,
 		PGA_Top,data->left,
 		PGA_Total,data->columns,
 		PGA_Visible,data->h_visible,
@@ -2389,10 +2388,10 @@ void read_update_text(read_data *data,long dx,long dy,short show_two)
 	read_show_text(data,dx,dy,show_two);
 
 	// Update scrollers
-	my_SetGadgetAttrs(data->vert_scroller,data->window,
+	SetGadgetAttrs(data->vert_scroller,data->window,0,
 		PGA_Top,(data->slider_div>1)?UDivMod32(data->top,data->slider_div):data->top,
 		TAG_END);
-	my_SetGadgetAttrs(data->horiz_scroller,data->window,
+	SetGadgetAttrs(data->horiz_scroller,data->window,0,
 		PGA_Top,data->left,
 		TAG_END);
 }
@@ -3761,13 +3760,13 @@ void read_remove_highlight(read_data *data)
 	}
 }
 
-
+/*
 // varargs SetGadgetAttrs()
 ULONG __stdargs my_SetGadgetAttrs(struct Gadget *gadget,struct Window *window,Tag tag,...)
 {
 	return SetGadgetAttrsA(gadget,window,0,(struct TagItem *)&tag);
 }
-
+*/
 
 // Parse number out of string, leave pointer at one character after end of number
 void read_parse_set(char **ptr,unsigned short *val)
@@ -3813,7 +3812,7 @@ BOOL read_pick_screen_mode(read_data *data)
 	APTR request;
 
 	// Allocate an ASL request
-	if (!(request=my_AllocAslRequestTags(
+	if (!(request=AllocAslRequestTags(
 		ASL_ScreenModeRequest,
 		ASLSM_Window,data->window,
 		ASLSM_SleepWindow,TRUE,
@@ -3858,7 +3857,7 @@ void read_pick_font(read_data *data)
 	APTR request;
 
 	// Allocate an ASL request
-	if (!(request=my_AllocAslRequestTags(
+	if (!(request=AllocAslRequestTags(
 		ASL_FontRequest,
 		ASLFO_Window,data->window,
 		ASLFO_SleepWindow,TRUE,
@@ -3935,19 +3934,19 @@ read_line __asm *read_alloc_node(register __a0 read_data *data)
 	return line;
 }
 
-
+/*
 // varargs AllocAslRequest()
 APTR __stdargs my_AllocAslRequestTags(ULONG type,Tag tag,...)
 {
 	return AllocAslRequest(type,(struct TagItem *)&tag);
 }
 
-
 // varargs LayoutMenus()
 BOOL __stdargs my_LayoutMenus(struct Menu *menu,APTR vi,Tag tag,...)
 {
 	return LayoutMenusA(menu,vi,(struct TagItem *)&tag);
 }
+*/
 
 
 // Print

@@ -258,14 +258,7 @@ enum
 
 extern ULONG ansi_palette[PEN_COUNT];
 
-struct Window *__stdargs my_OpenWindowTags(Tag tag,...);
-struct Screen *__stdargs my_OpenScreenTags(Tag tag,...);
-APTR __stdargs my_AllocAslRequest(ULONG type,Tag tag,...);
-ULONG __stdargs my_SetGadgetAttrs(struct Gadget *gadget,struct Window *window,Tag tag,...);
-APTR __stdargs my_AllocAslRequestTags(ULONG type,Tag tag,...);
-BOOL __stdargs my_LayoutMenus(struct Menu *menu,APTR vi,Tag tag,...);
 void read_parse_set(char **ptr,unsigned short *);
-
 void read_free(read_data *,struct read_startup *,IPCData *);
 BOOL read_file(read_data *,ULONG);
 struct Window *read_open_window(read_data *);

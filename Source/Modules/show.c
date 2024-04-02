@@ -222,7 +222,7 @@ int __asm __saveds L_Module_Entry(
 
 			// Open screen
 			if (data->display_screen=
-				my_OpenScreenTags(
+				OpenScreenTags(0,
 					SA_Width,data->width,
 					SA_Height,(data->height<16)?16:data->height,
 					SA_Depth,data->depth,
@@ -282,7 +282,7 @@ int __asm __saveds L_Module_Entry(
 
 				// Open window
 				data->display_window=
-					my_OpenWindowTags(
+					OpenWindowTags(0,
 						WA_Width,data->display_screen->Width,
 						WA_Height,data->display_screen->Height,
 						WA_IDCMP,IDCMP_RAWKEY|IDCMP_VANILLAKEY|IDCMP_MOUSEBUTTONS|IDCMP_INACTIVEWINDOW,
@@ -758,7 +758,7 @@ BOOL show_help(show_data *data)
 	}
 
 	// Open help screen
-	if (!(help_screen=my_OpenScreenTags(
+	if (!(help_screen=OpenScreenTags(0,
 		SA_Width,STDSCREENWIDTH,
 		SA_Height,STDSCREENHEIGHT,
 		SA_Overscan,OSCAN_TEXT,
@@ -954,7 +954,7 @@ BOOL show_help(show_data *data)
 	return ret;
 }
 
-
+/*
 // varargs OpenScreenTags()
 struct Screen *__stdargs my_OpenScreenTags(Tag tag,...)
 {
@@ -967,12 +967,13 @@ struct Window *__stdargs my_OpenWindowTags(Tag tag,...)
 	return OpenWindowTagList(0,(struct TagItem *)&tag);
 }
 
+
 // varargs BestModeID()
 ULONG __stdargs BestModeID(Tag tag,...)
 {
 	return BestModeIDA((struct TagItem *)&tag);
 }
-
+*/
 
 // Next animation frame
 void show_next_frame(show_data *data)

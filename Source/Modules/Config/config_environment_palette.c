@@ -106,7 +106,7 @@ void _config_env_palette_change_colour(
 
 	// On a picasso screen we need to redraw the colour square
 	if (data->picasso_flag)
-		my_SetGadgetAttrs(GADGET(data->palette_gadget),data->window,
+		SetGadgetAttrs(GADGET(data->palette_gadget),data->window,0,
 			DPG_Redraw,data->orig_colour_sel,
 			TAG_END);
 
@@ -203,7 +203,7 @@ void _config_env_palette_init(config_env_data *data)
 	if (data->own_screen) count+=4;
 
 	// Set number of colours and palette table
-	my_SetGadgetAttrs(GADGET(data->palette_gadget),data->window,
+	SetGadgetAttrs(GADGET(data->palette_gadget),data->window,0,
 		GTPA_NumColors,count,
 		GTPA_ColorTable,data->palette_edit_pens,
 		TAG_END);

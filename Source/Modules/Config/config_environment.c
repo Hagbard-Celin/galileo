@@ -2811,7 +2811,7 @@ void _config_env_store(config_env_data *data,short option)
 	}
 }
 
-
+/*
 // varargs SetGadgetAttrs()
 ULONG __stdargs my_SetGadgetAttrs(struct Gadget *gad,struct Window *win,Tag tag,...)
 {
@@ -2824,7 +2824,7 @@ struct Window *__stdargs my_OpenWindowTags(Tag tag,...)
 {
 	return OpenWindowTagList(0,(struct TagItem *)&tag);
 }
-
+*/
 
 // Check output device is valid
 void config_env_check_device(config_env_data *data)

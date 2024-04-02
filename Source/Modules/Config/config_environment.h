@@ -162,12 +162,10 @@ void set_rgb32(config_env_data *data,short col,ULONG *palette);
 BOOL get_palette_file(config_env_data *data,char *name);
 void _config_env_update_example(config_env_data *data,UBYTE *ptr);
 void _config_env_palette_init(config_env_data *data);
-ULONG __stdargs my_SetGadgetAttrs(struct Gadget *gad,struct Window *win,Tag tag,...);
 void _config_env_colours_init(config_env_data *data);
 void _config_env_update_output(config_env_data *data);
 void _config_env_update_output_dims(config_env_data *data);
 
-struct Window *__stdargs my_OpenWindowTags(Tag tag,...);
 IPCMessage *_config_env_output_window_set(config_env_data *data,USHORT);
 void _config_env_size_instructions(struct Window *window,USHORT);
 void _config_env_reset_palette(config_env_data *data);

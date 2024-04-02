@@ -117,9 +117,9 @@ void config_env_path_add(config_env_data *data)
 			data->path_list->list.l_pad=1;
 
 			// Make last entry visible
-			my_SetGadgetAttrs(
+			SetGadgetAttrs(
 				GADGET(GetObject(data->option_list,GAD_SETTINGS_PATHLIST)),
-				data->window,
+				data->window,0,
 				DLV_MakeVisible,Att_FindNodeNumber(data->path_list,node),
 				TAG_END);
 		}

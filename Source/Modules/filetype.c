@@ -109,11 +109,13 @@ return SimpleRequest( window, title, buttons, message, 0, (APTR)(((ULONG *)&mess
 
 /********************************/
 
+/*
 // varargs AllocAslRequest()
 APTR __stdargs my_AllocAslRequest( ULONG type, Tag tag, ... )
 {
 return AllocAslRequest( type, (struct TagItem *)&tag );
 }
+*/
 
 /********************************/
 
@@ -2704,7 +2706,7 @@ if	(data = AllocVec( sizeof(creator_data), MEMF_CLEAR ))
 	strcpy( data->filetype_name, "Untitled" );
 
 	// Allocate filerequester
-	data->filereq = my_AllocAslRequest(
+	data->filereq = AllocAslRequestTags(
 		ASL_FileRequest,
 		ASLFR_SleepWindow, TRUE,
 		ASLFR_TitleText, GetString( locale, MSG_CREATE_ADD_FILE ),

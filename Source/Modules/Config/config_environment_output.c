@@ -126,7 +126,7 @@ IPCMessage *_config_env_output_window_set(config_env_data *data,USHORT id)
 	}
 
 	// Open window
-	if (!(window=my_OpenWindowTags(
+	if (!(window=OpenWindowTags(0,
 		WA_Left,dims.Left,
 		WA_Top,dims.Top,
 		WA_Width,dims.Width,
