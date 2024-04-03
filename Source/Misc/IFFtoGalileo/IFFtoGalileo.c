@@ -1,5 +1,5 @@
 #include 	<proto/dos.h>
-#include    <pragmas/exec_pragmas.h>
+#include    <proto/exec.h>
 
 
 UBYTE *vers = "\0$VER: IFFtoGalileo 0.2 "__AMIGADATE__" ";
@@ -23,8 +23,6 @@ int main(void)
     UWORD x;
     char **files;
     BOOL  quiet=0, reverse=0;
-
-    //SysBase = (*((struct ExecBase  **)4));
 
     /* Need to ask DOS for a RDArgs structure */
     if (rda = ReadArgs(TEMPLATE, result, NULL))
