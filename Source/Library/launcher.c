@@ -270,8 +270,6 @@ void launch_setarg(LaunchProc *,short,BPTR,char *);
 char *launcher_parse(char *,char *,short);
 BPTR launcher_get_parent(struct LibData *,char *);
 void free_launch_packet(struct LibData *data,LaunchPacket *packet);
-struct Process *launcher_CreateNewProcTags(struct LibData *data,Tag tag1,...);
-LONG launcher_SystemTags(struct LibData *data,char *command,Tag tag1,...);
 long __asm launch_exit_code(register __d1 LaunchPacket *);
 ErrorNode *__stdargs launch_error(struct LibData *data,LaunchPacket *packet,short,short,char *args,...);
 
@@ -641,7 +639,7 @@ void __saveds launcher_proc(void)
 				if (packet->type==LAUNCH_DOS)
 				{
 					// Launch program
-					if (launcher_SystemTags(data,
+					if (SystemTags(
 						packet->name,
 						SYS_Input,packet->in,
 						SYS_Output,packet->out,
@@ -1084,8 +1082,7 @@ LaunchProc *launcher_launch(
 		homedir=DupLock((cur_dir)?cur_dir:launch->startup.sm_ArgList[0].wa_Lock);
 
 		// Launch program
-		if (proc=launcher_CreateNewProcTags(
-			data,
+		if (proc=CreateNewProcTags(
 			NP_Seglist,launch->startup.sm_Segment,
 			NP_FreeSeglist,FALSE,
 			NP_StackSize,stack,
@@ -1320,19 +1317,19 @@ void free_launch_packet(struct LibData *data,LaunchPacket *packet)
 #undef ResTrackBase
 #endif
 
+/*
 // varargs CreateNewProcTags
 struct Process *launcher_CreateNewProcTags(struct LibData *data,Tag tag1,...)
 {
 	return CreateNewProc((struct TagItem *)&tag1);
 }
 
-
 // varargs SystemTags
 LONG launcher_SystemTags(struct LibData *data,char *command,Tag tag1,...)
 {
 	return SystemTagList(command,(struct TagItem *)&tag1);
 }
-
+*/
 
 // Launch exit code
 long __saveds __asm launch_exit_code(

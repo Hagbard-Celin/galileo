@@ -42,8 +42,6 @@ char *version="$VER: play.gfmmodule 0.1 "__AMIGADATE__" ";
 
 static char *modtypes[]={"SoundTracker","MED","Octalyzer","SoundTracker 15"};
 
-Object *myNewDTObject(play_data *data,APTR name,Tag tag,...);
-
 int __asm __saveds L_Module_Entry(
 	register __a0 struct List *files,
 	register __a1 struct Screen *screen,
@@ -292,7 +290,7 @@ BOOL play_file(play_data *data)
 	// If we've got datatypes, see if it matches
 	if (!iff &&
 		DataTypesBase &&
-		(data->dt_object=myNewDTObject(data,data->file,
+		(data->dt_object=NewDTObject(data->file,
 										SDTA_SignalTask,(ULONG)FindTask(0),
 										SDTA_SignalBit,data->dt_signal,
 										DTA_GroupID,GID_SOUND,
@@ -987,13 +985,13 @@ void play_update_length(play_data *data)
 	play_update_info(data,(char *)-1,length_buf,(char *)-1,(char *)-1);
 }
 
-
+/*
 // varargs stuff
 Object *myNewDTObject(play_data *data,APTR name,Tag tag,...)
 {
 	return NewDTObjectA(name,(struct TagItem *)&tag);
 }
-
+*/
 
 // Wait for play
 BOOL wait_for_play(play_data *data,BOOL dt)

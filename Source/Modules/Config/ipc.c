@@ -52,7 +52,7 @@ IPCData *__saveds Local_IPC_ProcStartup(
 	return IPC_ProcStartup(data,code);
 }
 
-
+/*
 // varargs CreateNewProcTags
 struct Process *CreateNewProcTags(Tag tag1,...)
 {
@@ -65,3 +65,4 @@ struct Process *CreateNewProcTags(Tag tag1,...)
 	// Create process
 	return CreateNewProc((struct TagItem *)&tag1);
 }
+*/

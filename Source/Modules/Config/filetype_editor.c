@@ -56,7 +56,6 @@ For more information on Directory Opus for Windows please see:
 #define LayersBase		(data->func_startup.layers_base)
 */
 
-static BOOL __stdargs L_AslRequestTags(filetype_ed_data *data,APTR requester,Tag tag1,...);
 
 void FiletypeEditor(void)
 {
@@ -983,7 +982,7 @@ BOOL filetypeed_pick_icon(filetype_ed_data *data)
 	ParsePatternNoCase("#?.info",pattern,10);
 
 	// Display requester
-	if (L_AslRequestTags(data,DATA(data->window)->request,
+	if (AslRequestTags(DATA(data->window)->request,
 		ASLFR_Flags1,FRF_PRIVATEIDCMP,
 		ASLFR_Window,data->window,
 		ASLFR_TitleText,GetString(Locale,MSG_FILETYPE_PICK_ICON),
@@ -1032,7 +1031,7 @@ BOOL filetypeed_pick_icon(filetype_ed_data *data)
 	return ret;
 }
 
-
+/*
 // varargs AslRequestTags
 static BOOL __stdargs L_AslRequestTags(
 	filetype_ed_data *data,
@@ -1041,7 +1040,7 @@ static BOOL __stdargs L_AslRequestTags(
 {
 	return AslRequest(requester,(struct TagItem *)&tag1);
 }
-
+*/
 
 // Update icon menu list
 void filetypeed_update_iconmenu(filetype_ed_data *data)
