@@ -2,12 +2,13 @@
 #include    <pragmas/exec_pragmas.h>
 
 
-UBYTE *vers = "\0$VER: IFFtoGalileo 0.1 "__AMIGADATE__" ";
+UBYTE *vers = "\0$VER: IFFtoGalileo 0.2 "__AMIGADATE__" ";
 
 #define TEMPLATE "FILES/A/M,QUIET/S,REVERSE/S"
-#define OPT_FILES  0
-#define OPT_QUIET  1
-#define OPT_COUNT  2
+#define OPT_FILES  	0
+#define OPT_QUIET  	1
+#define OPT_REVERSE	2
+#define OPT_COUNT  	3
 
 extern struct ExecBase *SysBase;
 
@@ -30,6 +31,9 @@ int main(void)
     {
         if (result[OPT_QUIET])
             quiet=1;
+
+        if (result[OPT_REVERSE])
+            reverse=1;
 
         files = (char **)result[OPT_FILES];
         if (!(quiet)) VPrintf("Files specified:\n", NULL);
