@@ -230,6 +230,7 @@ struct pointer_packet
 };
 
 #define POINTERF_COPY		(1<<0)
+#define POINTERF_DELPORT    (1<<1)
 #define POINTERF_LOCKED		(1<<16)
 
 struct command_packet
