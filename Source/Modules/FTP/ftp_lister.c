@@ -111,6 +111,9 @@ For more information on Directory Opus for Windows please see:
  *
  */
 
+#include <stdarg.h>
+#include <errno.h>
+
 #include "ftp.h"
 #include "ftp_ad_sockproto2.h"
 #include "ftp_ad_errno.h"

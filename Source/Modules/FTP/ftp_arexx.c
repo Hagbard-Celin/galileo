@@ -59,6 +59,8 @@ For more information on Directory Opus for Windows please see:
  *
  */
 
+#include <stdarg.h>
+
 #include "ftp_arexx.h"
 #include "ftp_galileoftp.h"
 

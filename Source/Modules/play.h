@@ -36,6 +36,9 @@ For more information on Directory Opus for Windows please see:
 */
 
 #define CATCOMP_NUMBERS
+
+#include <devices/audio.h>
+
 #include "play.strings"
 #include "modules_lib.h"
 

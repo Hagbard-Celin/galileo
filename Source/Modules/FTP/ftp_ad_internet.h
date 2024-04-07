@@ -38,7 +38,7 @@ For more information on Directory Opus for Windows please see:
 #ifndef AD_INTERNET_H
 #define AD_INTERNET_H
 
-/* sys/types.h */
+#include <sys/types.h>
 
 /**
 

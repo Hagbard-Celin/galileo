@@ -35,6 +35,8 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <prefs/palette.h>
+
 #include "config_lib.h"
 #include "config_environment.h"
 #include "//Modules/modules.h"

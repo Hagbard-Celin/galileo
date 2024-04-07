@@ -57,6 +57,11 @@ For more information on Directory Opus for Windows please see:
      This file controls the interaction with FTP protocol
 **************************************************************/
 
+#include <stdarg.h>
+#include <sys/types.h>
+
+#include <exec/types.h>
+
 // Network includes
 #include "ftp_ad_sockproto2.h"
 #include "ftp_ad_internet.h"

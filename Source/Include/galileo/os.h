@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/commargs.h>
 
 #include <proto/exec.h>
 #include <proto/dos.h>

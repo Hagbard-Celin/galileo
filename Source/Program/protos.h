@@ -38,8 +38,6 @@ For more information on Directory Opus for Windows please see:
 #ifndef _GALILEOFM_PROTOS
 #define _GALILEOFM_PROTOS
 
-#include <sys/commargs.h>
-
 void __stdargs loc_printf(char *,char *,long,...);
 
 // main.c
