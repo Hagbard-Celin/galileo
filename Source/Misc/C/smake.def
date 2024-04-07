@@ -1,5 +1,5 @@
 SRC =
-OBJ = GalileoB:OBJ/Misc/
+OBJ = GalileoB:OBJ/Misc/C/
 BIN = GalileoB:Binary/C/
 
 
