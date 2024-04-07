@@ -1,0 +1,7 @@
+etc/
+Source/**/*.lib
+*.gst
+*.lnk
+*.bak
+*.o
+
