@@ -46,6 +46,8 @@ For more information on Directory Opus for Windows please see:
 
 //#define DEBUG
 
+#include "/Include/galileo/os.h"
+
 #include "/Library/galileofmbase.h"
 #include "/Library/galileofmpragmas.h"
 #include "/Modules/Config/galileoconfig.h"

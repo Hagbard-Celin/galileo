@@ -35,6 +35,8 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <exec/memory.h>
+
 USHORT __chip
 
 	moon_big_data[8][2][13]={

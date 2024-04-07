@@ -35,6 +35,11 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <ctype.h>
+#include <string.h>
+
+#include <proto/exec.h>
+
 #include "eliza.h"
 
 #define isws(x)  ((x)==' ' || (x)=='\t' || (x)=='\n')

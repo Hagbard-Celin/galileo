@@ -38,6 +38,8 @@ For more information on Directory Opus for Windows please see:
 #ifndef _GALILEOFM_HELP
 #define _GALILEOFM_HELP
 
+#include <proto/amigaguide.h>
+
 #define GENERIC_BUTTON			"Button"
 #define GENERIC_TOOLBAR_BUTTON		"ToolbarButton"
 #define GENERIC_LISTER_MENU		"ListerMenu"
