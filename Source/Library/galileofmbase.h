@@ -39,6 +39,8 @@ For more information on Directory Opus for Windows please see:
 #ifndef _GALILEOFMBASE
 #define _GALILEOFMBASE
 
+#include "/Include/galileo/os.h"
+
 #include "/Program/galileo_config.h"
 
 

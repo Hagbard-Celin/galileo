@@ -35,6 +35,8 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <sys/commargs.h>
+
 #include "galileofmbase.h"
 #include "read_ilbm.h"
 #include "wb.h"
