@@ -35,6 +35,11 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <stdlib.h>
+
+#include <proto/exec.h>
+#include <rexx/storage.h>
+
 void main(int argc,char **argv)
 {
 	struct RexxMsg *msg;
