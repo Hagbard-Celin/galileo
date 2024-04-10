@@ -217,7 +217,7 @@ void __stdargs __main(char *arg_string)
 	if (!ok)
 	{
 		// Failed for some reason; start old-fashioned Workbench
-		strcpy(buf,"c:LoadWB_Old");
+		strcpy(buf,"c:LoadWB");
 
 		// Add Workbench arguments
 		if (arg_array[ARG_DEBUG]) strcat(buf," -DEBUG");
