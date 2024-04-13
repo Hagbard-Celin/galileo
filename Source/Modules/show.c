@@ -40,9 +40,6 @@ For more information on Directory Opus for Windows please see:
 static unsigned short pens[1]={(unsigned short)~0};
 char *version="$VER: show.gfmmodule 0.1 "__AMIGADATE__" ";
 
-Object *myNewDTObject(show_data *data,APTR name,Tag tag,...);
-ULONG myGetDTAttrs(show_data *data,Object *object,Tag tag,...);
-
 int __asm __saveds L_Module_Entry(
 	register __a0 struct List *files,
 	register __a1 struct Screen *screen,
@@ -1598,7 +1595,7 @@ short show_print(
 	return ret;
 }
 
-
+/*
 // varargs stuff
 Object *myNewDTObject(show_data *data,APTR name,Tag tag,...)
 {
@@ -1609,7 +1606,7 @@ ULONG myGetDTAttrs(show_data *data,Object *object,Tag tag,...)
 {
 	return GetDTAttrsA(object,(struct TagItem *)&tag);
 }
-
+*/
 
 // Get picture through datatypes
 BOOL show_get_dtpic(show_data *data,struct Node *node)
@@ -1620,10 +1617,10 @@ BOOL show_get_dtpic(show_data *data,struct Node *node)
 	// Try for datatypes
 	if (DataTypesBase)
 	{
-		if (data->dt_object=myNewDTObject(data,node->ln_Name,
-											PDTA_Remap,FALSE,
-											DTA_GroupID,GID_PICTURE,
-											TAG_END))
+		if (data->dt_object=NewDTObject(node->ln_Name,
+										PDTA_Remap,FALSE,
+										DTA_GroupID,GID_PICTURE,
+										TAG_END))
 		{
 			// Get desired display info
 			data->framebox.MethodID=DTM_FRAMEBOX;
@@ -1652,15 +1649,15 @@ BOOL show_get_dtpic(show_data *data,struct Node *node)
 				long horiz,vert;
 
 				// Get attributes of picture
-				myGetDTAttrs(data,data->dt_object,
-							PDTA_ModeID,&data->modeid,
-							PDTA_CRegs,&data->cregs,
-							PDTA_NumColors,&data->numcolours,
-							PDTA_BitMap,&data->dt_bm,
-							DTA_DataType,(ULONG *)&dt,
-							DTA_NominalVert,&vert,
-							DTA_NominalHoriz,&horiz,
-							TAG_END);
+				GetDTAttrs(data->dt_object,
+						   PDTA_ModeID,&data->modeid,
+						   PDTA_CRegs,&data->cregs,
+						   PDTA_NumColors,&data->numcolours,
+   						   PDTA_BitMap,&data->dt_bm,
+   						   DTA_DataType,(ULONG *)&dt,
+   						   DTA_NominalVert,&vert,
+   						   DTA_NominalHoriz,&horiz,
+   						   TAG_END);
 
 				// Store screen size
 				data->width=data->frameinfo.fri_Dimensions.Width;
