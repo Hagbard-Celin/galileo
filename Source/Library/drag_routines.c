@@ -36,10 +36,6 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofmlib.h"
-#if 0
-#include <cybergraphx/cybergraphics.h>
-#include <proto/cybergraphics.h>
-#endif
 
 #ifdef _DEBUG_DRAG
 ULONG original, orgwithallocs, lastmem;
