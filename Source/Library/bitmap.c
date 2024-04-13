@@ -36,7 +36,6 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofmlib.h"
-#include <proto/Picasso96.h>
 
 struct BitMap *__asm __saveds L_NewBitMap(
 	register __d0 ULONG sizex,

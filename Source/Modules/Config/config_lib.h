@@ -40,8 +40,6 @@ For more information on Directory Opus for Windows please see:
 #include "//Program/galileo_config.h"
 #include "galileoconfig.h"
 
-#include <proto/Picasso96.h>
-
 #define CATCOMP_NUMBERS
 #include "config.strings"
 

@@ -42,7 +42,7 @@ For more information on Directory Opus for Windows please see:
 #include <proto/cybergraphics.h>
 #endif
 //#include <libraries/Picasso96.h>
-#include <proto/Picasso96.h>
+ 
 #include <proto/newicon.h>
 
 

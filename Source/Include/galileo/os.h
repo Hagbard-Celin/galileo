@@ -28,6 +28,7 @@
 #include <proto/datatypes.h>
 #include <proto/layers.h>
 #include <proto/rexxsyslib.h>
+#include <proto/Picasso96.h>
 
 #include <exec/execbase.h>
 #include <exec/memory.h>

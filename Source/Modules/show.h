@@ -39,7 +39,6 @@ For more information on Directory Opus for Windows please see:
 #include "show.strings"
 #include "modules_lib.h"
 #include "/Library/read_ilbm.h"
-#include <proto/Picasso96.h>
 
 typedef struct
 {

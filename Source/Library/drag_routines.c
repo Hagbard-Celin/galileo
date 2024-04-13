@@ -40,7 +40,6 @@ For more information on Directory Opus for Windows please see:
 #include <cybergraphx/cybergraphics.h>
 #include <proto/cybergraphics.h>
 #endif
-#include <proto/Picasso96.h>
 
 #ifdef _DEBUG_DRAG
 ULONG original, orgwithallocs, lastmem;
