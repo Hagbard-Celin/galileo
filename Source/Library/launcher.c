@@ -897,6 +897,9 @@ void __saveds launcher_proc(void)
 		}
 	}
 
+    // Delete reply port
+    DeleteMsgPort(reply_port);
+
 	// Free timers
 	FreeTimer(secondtimer);
 	FreeTimer(timer);
