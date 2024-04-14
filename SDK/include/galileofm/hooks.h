@@ -13,7 +13,7 @@
 
 #define HOOKCMD_GET_CALLBACKS	0x40100
 
-#define GALILEOFM_HOOK_COUNT	54
+#define GALILEOFM_HOOK_COUNT	56
 
 // This structure will grow in the future, correct use of the gc_Count field
 // ensures innocent memory won't get overwritten.
@@ -326,6 +326,13 @@ typedef struct
 
     // Check if lister source/dest status is locked
     BOOL __asm  (*gc_IsSourceDestLock)
+                (register __a0 ULONG lister);
+
+    void __asm  (*gc_FakeDir)
+           	    (register __a0 ULONG lister,
+                 register __d0 BOOL fakedir);
+
+	BOOL __asm  (*gc_IsFakeDir)
                 (register __a0 ULONG lister);
 
 } GalileoCallbackInfo;

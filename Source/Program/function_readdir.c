@@ -517,6 +517,9 @@ read_dir(
 	buffer->flags&=~DWF_READING;
 	buffer->flags|=DWF_VALID;
 
+    // Clear fake-dir flag
+    lister->more_flags&=~LISTERF_FAKEDIR;
+
 	// Free up
 	FreeDosObject(DOS_FIB,fileinfo);
 	return 1;

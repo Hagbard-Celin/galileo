@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2023 Hagbard Celine
+Copyright 2023-2024 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -916,4 +916,27 @@ BOOL __asm __saveds HookIsSourceDestLock(
         islocked=FALSE;
 
     return islocked;
+}
+
+void __asm __saveds HookFakeDir(
+	register __a0 Lister *lister,
+    register __d0 BOOL fakedir)
+{
+    if (fakedir)
+        lister->more_flags|=LISTERF_FAKEDIR;
+    else
+    	lister->more_flags&=~LISTERF_FAKEDIR;
+}
+
+BOOL __asm __saveds HookIsFakeDir(
+     register __a0 Lister *lister)
+{
+    BOOL isfake;
+
+    if (lister->more_flags&LISTERF_FAKEDIR)
+        isfake=TRUE;
+    else
+        isfake=FALSE;
+
+    return isfake;
 }

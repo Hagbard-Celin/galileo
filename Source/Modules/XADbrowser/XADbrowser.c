@@ -1344,6 +1344,9 @@ int __saveds __asm L_Module_Entry(
             struct _PathNode listp;
             data.listp=&listp;
 
+            // To avoid usless snapshot attempt when quitting
+            data.hook.gc_FakeDir(data.listh,TRUE);
+
 			sprintf(buf, "lister wait %s quick", data.lists);
 			data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 

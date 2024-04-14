@@ -94,6 +94,8 @@ ULONG
 		(ULONG)HookGetThemes,
         (ULONG)HookFreePointerDirect,
         (ULONG)HookIsSourceDestLock,
+        (ULONG)HookFakeDir,
+        (ULONG)HookIsFakeDir,
 	};
 
 

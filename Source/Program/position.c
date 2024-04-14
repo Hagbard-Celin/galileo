@@ -402,6 +402,10 @@ position_rec *PositionUpdate(Lister *lister,short flags)
 	char icon_path[512];
 	BOOL new=0,disk_flag=0;
 
+    // Fake dirs can not make use of this
+    if (lister->more_flags&LISTERF_FAKEDIR)
+        return 0;
+
 	// Just update position, in workbench icon mode?
 	if (flags==0 && environment->env->display_options&DISPOPTF_ICON_POS && lister && lister->backdrop)
 	{

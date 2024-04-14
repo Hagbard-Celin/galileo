@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2023 Hagbard Celine
+Copyright 2023-2024 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -264,6 +264,13 @@ void __asm __saveds HookFreePointerDirect(
 BOOL __asm __saveds HookIsSourceDestLock(
     register __a0 Lister *lister);
 
+void __asm __saveds HookFakeDir(
+	 register __a0 Lister *lister,
+     register __d0 BOOL fakedir);
+
+BOOL __asm __saveds HookIsFakeDir(
+     register __a0 Lister *lister);
+
 typedef struct
 {
 	USHORT	gc_Count;
@@ -323,9 +330,11 @@ typedef struct
 	APTR	gc_GetThemes;
     APTR    gc_FreePointerDirect;
     APTR    gc_IsSourceDestLock;
+    APTR    gc_FakeDir;
+    APTR    gc_IsFakeDir;
 } GalileoCallbackInfo;
 
-#define GALILEOFM_HOOK_COUNT	54
+#define GALILEOFM_HOOK_COUNT	56
 
 // Values for HookFileSet
 

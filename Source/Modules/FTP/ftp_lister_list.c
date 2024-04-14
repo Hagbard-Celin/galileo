@@ -272,6 +272,9 @@ ftpnode->fn_ftp.fi_found_index = 0;
 ftpnode->fn_ftp.fi_found_index_size = 0;
 ftpnode->fn_ftp.fi_found_fbbs_size = 0;
 
+// To avoid usless snapshot attempt when quitting
+ftpnode->fn_og->og_hooks.gc_FakeDir(ftpnode->fn_handle,TRUE);
+
 // Passive mode required?
 ftpnode->fn_ftp.fi_flags &= ~FTP_PASSIVE;
 if	(ftpnode->fn_site.se_env->e_passive)

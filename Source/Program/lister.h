@@ -495,6 +495,7 @@ typedef struct ListerWindow
 #define LISTERF_NO_ACTIVE	(1<<6)	// Don't activate lister
 #define LISTERF_TITLEBARRED	(1<<7)	// Shrunk to title bar
 #define LISTERF_NEED_RECALC	(1<<8)	// Contents changed, needs recalc
+#define LISTERF_FAKEDIR     (1<<9)  // Buffer contains fake directory
 
 #define EDITF_REFRESH		(1<<0)	// Refresh needed
 #define EDITF_CANCEL		(1<<1)	// Cancel

@@ -141,6 +141,9 @@ GALILEOFM_FUNC(function_devicelist)
 		// Mark as a cache list
 		lister->cur_buffer->more_flags|=DWF_CACHE_LIST;
 
+        // Mark lister as containing fake directory
+        lister->more_flags|=LISTERF_FAKEDIR;
+
 		// Create temporary list
 		if (list=Att_NewList(0))
 		{
@@ -231,6 +234,9 @@ GALILEOFM_FUNC(function_devicelist)
 
 		// Mark as a device list
 		lister->cur_buffer->more_flags|=DWF_DEVICE_LIST;
+
+        // Mark lister as containing fake directory
+        lister->more_flags|=LISTERF_FAKEDIR;
 
 		// Which sort of device-list?
 		if (instruction->funcargs)
