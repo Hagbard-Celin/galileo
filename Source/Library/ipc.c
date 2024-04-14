@@ -172,6 +172,10 @@ __asm L_IPC_Startup(
 	struct MsgPort *port=0;
 	IPCMessage startup;
 
+#if RESOURCE_TRACKING
+#define ResTrackBase (struct Library *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"restrack.library")
+#endif
+
 	// If no message port supplied, create one
 	if (!reply) port=reply=CreateMsgPort();
 
@@ -304,6 +308,9 @@ void __asm __saveds L_IPC_Flush(register __a0 IPCData *ipc)
 	}
 }
 
+#if RESOURCE_TRACKING
+#undef ResTrackBase
+#endif
 
 // Send an IPC command
 ULONG __asm __saveds L_IPC_Command(
