@@ -91,20 +91,20 @@ struct ftp_environment	*fd_env;
 */
 ListFormat *get_galileo_format(struct galileoftp_globals *og)
 {
-struct pointer_packet  pp;
+struct GetPointerPkt pp;
 ListFormat *galileo;
 
-pp.type    = MODPTR_DEFFORMAT;
-pp.pointer = 0;
-pp.flags   = 0;
+pp.gpp_Type    = MODPTR_DEFFORMAT;
+pp.gpp_Ptr = 0;
+pp.gpp_Flags   = 0;
 
 if	(og->og_hooks.gc_GetPointer(&pp ))
 	{
-	galileo=(ListFormat *)pp.pointer;
+	galileo=(ListFormat *)pp.gpp_Ptr;
 
 	*(&og->og_galileo_format)=*galileo;
 
-	if	(pp.flags & POINTERF_LOCKED)
+	if	(pp.gpp_Flags & POINTERF_LOCKED)
 		og->og_hooks.gc_FreePointer(&pp );
 	}
 

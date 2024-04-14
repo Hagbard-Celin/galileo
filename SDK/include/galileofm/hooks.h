@@ -354,7 +354,7 @@ typedef struct
 #define DCRFF_SCREENPARENT	(1<<30)
 #define DCRFF_REJECTICONS	(1<<31)
 
-
+#ifndef _GALILEOFM_DIRLIST
 // Holds version information (used by HFFS_VERSION)
 typedef struct _VersionInfo {
 	UWORD		vi_Version;		// Major version #
@@ -364,7 +364,7 @@ typedef struct _VersionInfo {
 	char		vi_Char;		// Version character
 	char		vi_String[1];		// Version string
 } VersionInfo;
-
+#endif
 
 
 // Flags for gc_RefreshLister()

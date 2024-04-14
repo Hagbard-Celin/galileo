@@ -52,7 +52,38 @@ For more information on Directory Opus for Windows please see:
 
 #include "//Library/galileofmbase.h"
 #include "modules.h"
-#include "hooks.h"
+
+/********************************/
+
+//
+//	Some structures copied from the Galileo includes...
+//
+
+// Defines information about a GUI element
+typedef struct
+{
+	BOOL			visible;		// Indicates visibility
+
+	struct IBox		box;			// Dimensions in an IBox
+	struct Rectangle	rect;			// Dimensions in a Rectangle
+
+	UWORD			fg_pen;			// Foreground pen to use
+	UWORD			bg_pen;			// Background pen to use
+	struct TextFont		*font;			// Font to use
+
+	struct RastPort		rast;			// RastPort copy
+} GUI_Element;
+
+#include "//Program/reselect.h"
+#include "//Program/pattern.h"
+#include "//Program/toolbar.h"
+#include "//Program/lister.h"
+#include "//Program/dirlist.h"
+
+/********************************/
+
+// FIXME: This makes a mix of internal and external interfaces.
+#include <galileofm/hooks.h>
 
 #ifdef DEBUG
 #define err(s)		(kprintf(s),kprintf("\n"))
@@ -562,36 +593,6 @@ ENV_SUB_INDEX,
 ENV_SUB_CONNECTION,
 ENV_SUB_GLOBAL,
 };
-
-/********************************/
-
-//
-//	Some structures copied from the Galileo includes...
-//
-
-// Defines information about a GUI element
-typedef struct
-{
-	BOOL			visible;		// Indicates visibility
-
-	struct IBox		box;			// Dimensions in an IBox
-	struct Rectangle	rect;			// Dimensions in a Rectangle
-
-	UWORD			fg_pen;			// Foreground pen to use
-	UWORD			bg_pen;			// Background pen to use
-	struct TextFont		*font;			// Font to use
-
-	struct RastPort		rast;			// RastPort copy
-} GUI_Element;
-
-#include "//Program/reselect.h"
-#include "//Program/pattern.h"
-#include "//Program/toolbar.h"
-#include "//Program/lister.h"
-#include "//Program/dirlist.h"
-
-/********************************/
-
 
 // Config sub-option handles
 typedef struct _SubOptionHandle {

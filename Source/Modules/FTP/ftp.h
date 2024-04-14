@@ -41,7 +41,6 @@ For more information on Directory Opus for Windows please see:
 #define CATCOMP_NUMBERS
 #include "ftp.strings"
 #include "modules_lib.h"
-#include "hooks.h"
 
 #include "ftp_ad_internet.h"
 

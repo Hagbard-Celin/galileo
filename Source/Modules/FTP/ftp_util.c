@@ -1363,19 +1363,19 @@ return result;
 //
 unsigned long ftpmod_options( struct galileoftp_globals *og, int type )
 {
-struct pointer_packet  pp;
+struct GetPointerPkt pp;
 CFG_SETS              *options;
 unsigned long          rv = 0;
 
-pp.type    = MODPTR_OPTIONS;
-pp.pointer = 0;
-pp.flags   = 0;
+pp.gpp_Type    = MODPTR_OPTIONS;
+pp.gpp_Ptr = 0;
+pp.gpp_Flags   = 0;
 
 og->og_func_callback(
 	EXTCMD_GET_POINTER,
 	IPCDATA(og->og_main_ipc), &pp );
 
-options = (CFG_SETS *)pp.pointer;
+options = (CFG_SETS *)pp.gpp_Ptr;
 
 // Copy options?
 if	(type == OPTION_COPY && options)
@@ -1385,7 +1385,7 @@ if	(type == OPTION_COPY && options)
 else if	(type == OPTION_DELETE)
 	rv = options->delete_flags;
 
-if	(pp.flags & POINTERF_LOCKED)
+if	(pp.gpp_Flags & POINTERF_LOCKED)
 	og->og_func_callback(EXTCMD_FREE_POINTER,IPCDATA(og->og_main_ipc), &pp );
 
 return rv;

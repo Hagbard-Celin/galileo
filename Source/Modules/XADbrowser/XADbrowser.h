@@ -24,6 +24,8 @@
 //#define _GALILEOFM_MODULE_DEF
 //#include <galileofm/modules.h>
 #include "modules_lib.h"
+
+// FIXME: This makes a mix of internal and external interfaces.
 #include <galileofm/hooks.h>
 
 #define XADOPEN_ARGS  "NEWLISTER/S"
