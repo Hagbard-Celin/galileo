@@ -111,9 +111,9 @@ clean:
 
 # DO NOT DELETE THIS LINE makedepend needs it
 
-$(OBJ)data.o: data.c galileofm.h /Library/galileofmbase.h
-$(OBJ)data.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)data.o: /Modules/Config/galileoconfig.h
+$(OBJ)data.o: data.c galileofm.h /Include/galileo/os.h
+$(OBJ)data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)data.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)data.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)data.o: galileo.strings function_select.h pattern.h toolbar.h display.h
 $(OBJ)data.o: reselect.h lister.h popup.h buttons.h dirlist.h app_msg.h
@@ -125,9 +125,11 @@ $(OBJ)data.o: position.h galileodata.h palette_routines.h envoy.h notify.h
 $(OBJ)data.o: graphics.h file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)data.o: menu_data.h tile.h protos.h text.h callback.h
 $(OBJ)string_data.o: string_data.c galileo.strings /Library/galileofmbase.h
-$(OBJ)string_data.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)function_data.o: function_data.c galileofm.h /Library/galileofmbase.h
-$(OBJ)function_data.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)string_data.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)string_data.o: /Library/galileofmpragmas.h
+$(OBJ)function_data.o: function_data.c galileofm.h /Include/galileo/os.h
+$(OBJ)function_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_data.o: /Library/galileofmpragmas.h
 $(OBJ)function_data.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_data.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)function_data.o: main_commands.h galileo.strings function_select.h
@@ -142,8 +144,9 @@ $(OBJ)function_data.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)function_data.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_data.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_data.o: callback.h
-$(OBJ)menu_data.o: menu_data.c galileofm.h /Library/galileofmbase.h
-$(OBJ)menu_data.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)menu_data.o: menu_data.c galileofm.h /Include/galileo/os.h
+$(OBJ)menu_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)menu_data.o: /Library/galileofmpragmas.h
 $(OBJ)menu_data.o: /Modules/Config/galileoconfig.h
 $(OBJ)menu_data.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)menu_data.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -158,7 +161,8 @@ $(OBJ)menu_data.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)menu_data.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)menu_data.o: callback.h
 $(OBJ)palette_routines.o: palette_routines.c galileofm.h
-$(OBJ)palette_routines.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)palette_routines.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)palette_routines.o: /Program/galileo_config.h
 $(OBJ)palette_routines.o: /Library/galileofmpragmas.h
 $(OBJ)palette_routines.o: /Modules/Config/galileoconfig.h
 $(OBJ)palette_routines.o: /Modules/Config/galileoconfig_pragmas.h
@@ -174,9 +178,9 @@ $(OBJ)palette_routines.o: start_menu.h position.h galileodata.h
 $(OBJ)palette_routines.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)palette_routines.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)palette_routines.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)pattern.o: pattern.c galileofm.h /Library/galileofmbase.h
-$(OBJ)pattern.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)pattern.o: /Modules/Config/galileoconfig.h
+$(OBJ)pattern.o: pattern.c galileofm.h /Include/galileo/os.h
+$(OBJ)pattern.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)pattern.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)pattern.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)pattern.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)pattern.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -188,8 +192,9 @@ $(OBJ)pattern.o: desktop.h groups.h help.h scripts.h start_menu.h position.h
 $(OBJ)pattern.o: galileodata.h palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)pattern.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)pattern.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)key_press.o: key_press.c galileofm.h /Library/galileofmbase.h
-$(OBJ)key_press.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)key_press.o: key_press.c galileofm.h /Include/galileo/os.h
+$(OBJ)key_press.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)key_press.o: /Library/galileofmpragmas.h
 $(OBJ)key_press.o: /Modules/Config/galileoconfig.h
 $(OBJ)key_press.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)key_press.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -203,7 +208,7 @@ $(OBJ)key_press.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)key_press.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)key_press.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)key_press.o: callback.h key_finder.h
-$(OBJ)key_finder_data.o: key_finder_data.c galileofm.h
+$(OBJ)key_finder_data.o: key_finder_data.c galileofm.h /Include/galileo/os.h
 $(OBJ)key_finder_data.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)key_finder_data.o: /Library/galileofmpragmas.h
 $(OBJ)key_finder_data.o: /Modules/Config/galileoconfig.h
@@ -220,9 +225,9 @@ $(OBJ)key_finder_data.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)key_finder_data.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)key_finder_data.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)key_finder_data.o: callback.h key_finder.h
-$(OBJ)main.o: main.c galileofm.h /Library/galileofmbase.h
-$(OBJ)main.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)main.o: /Modules/Config/galileoconfig.h
+$(OBJ)main.o: main.c galileofm.h /Include/galileo/os.h
+$(OBJ)main.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)main.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)main.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)main.o: galileo.strings function_select.h pattern.h toolbar.h display.h
 $(OBJ)main.o: reselect.h lister.h popup.h buttons.h dirlist.h app_msg.h
@@ -234,9 +239,9 @@ $(OBJ)main.o: position.h galileodata.h palette_routines.h envoy.h notify.h
 $(OBJ)main.o: graphics.h file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)main.o: menu_data.h tile.h protos.h text.h callback.h
 $(OBJ)main.o: /Modules/modules.h /Modules/modules_pragmas.h eliza.h
-$(OBJ)commands.o: commands.c galileofm.h /Library/galileofmbase.h
-$(OBJ)commands.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)commands.o: /Modules/Config/galileoconfig.h
+$(OBJ)commands.o: commands.c galileofm.h /Include/galileo/os.h
+$(OBJ)commands.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)commands.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)commands.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)commands.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)commands.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -249,9 +254,9 @@ $(OBJ)commands.o: galileodata.h palette_routines.h envoy.h notify.h
 $(OBJ)commands.o: graphics.h file_select.h window_activate.h cleanup.h
 $(OBJ)commands.o: icons.h menu_data.h tile.h protos.h text.h callback.h
 $(OBJ)commands.o: /Modules/modules.h /Modules/modules_pragmas.h
-$(OBJ)menus.o: menus.c galileofm.h /Library/galileofmbase.h
-$(OBJ)menus.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)menus.o: /Modules/Config/galileoconfig.h
+$(OBJ)menus.o: menus.c galileofm.h /Include/galileo/os.h
+$(OBJ)menus.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)menus.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)menus.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)menus.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)menus.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -263,9 +268,9 @@ $(OBJ)menus.o: start_menu.h position.h galileodata.h palette_routines.h
 $(OBJ)menus.o: envoy.h notify.h graphics.h file_select.h window_activate.h
 $(OBJ)menus.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)menus.o: callback.h
-$(OBJ)popup.o: popup.c galileofm.h /Library/galileofmbase.h
-$(OBJ)popup.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)popup.o: /Modules/Config/galileoconfig.h
+$(OBJ)popup.o: popup.c galileofm.h /Include/galileo/os.h
+$(OBJ)popup.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)popup.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)popup.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)popup.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)popup.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -277,8 +282,9 @@ $(OBJ)popup.o: start_menu.h position.h galileodata.h palette_routines.h
 $(OBJ)popup.o: envoy.h notify.h graphics.h file_select.h window_activate.h
 $(OBJ)popup.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)popup.o: callback.h
-$(OBJ)popup_build.o: popup_build.c galileofm.h /Library/galileofmbase.h
-$(OBJ)popup_build.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)popup_build.o: popup_build.c galileofm.h /Include/galileo/os.h
+$(OBJ)popup_build.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)popup_build.o: /Library/galileofmpragmas.h
 $(OBJ)popup_build.o: /Modules/Config/galileoconfig.h
 $(OBJ)popup_build.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)popup_build.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -292,9 +298,9 @@ $(OBJ)popup_build.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)popup_build.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)popup_build.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)popup_build.o: callback.h
-$(OBJ)iconpos.o: iconpos.c galileofm.h /Library/galileofmbase.h
-$(OBJ)iconpos.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)iconpos.o: /Modules/Config/galileoconfig.h
+$(OBJ)iconpos.o: iconpos.c galileofm.h /Include/galileo/os.h
+$(OBJ)iconpos.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)iconpos.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)iconpos.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)iconpos.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)iconpos.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -306,7 +312,7 @@ $(OBJ)iconpos.o: desktop.h groups.h help.h scripts.h start_menu.h position.h
 $(OBJ)iconpos.o: galileodata.h palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)iconpos.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)iconpos.o: menu_data.h tile.h protos.h text.h callback.h iconpos.h
-$(OBJ)cx.o: cx.c galileofm.h /Library/galileofmbase.h
+$(OBJ)cx.o: cx.c galileofm.h /Include/galileo/os.h /Library/galileofmbase.h
 $(OBJ)cx.o: /Program/galileo_config.h /Library/galileofmpragmas.h
 $(OBJ)cx.o: /Modules/Config/galileoconfig.h
 $(OBJ)cx.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
@@ -319,7 +325,7 @@ $(OBJ)cx.o: backdrop.h desktop.h groups.h help.h scripts.h start_menu.h
 $(OBJ)cx.o: position.h galileodata.h palette_routines.h envoy.h notify.h
 $(OBJ)cx.o: graphics.h file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)cx.o: menu_data.h tile.h protos.h text.h callback.h key_finder.h
-$(OBJ)wb.o: wb.c galileofm.h /Library/galileofmbase.h
+$(OBJ)wb.o: wb.c galileofm.h /Include/galileo/os.h /Library/galileofmbase.h
 $(OBJ)wb.o: /Program/galileo_config.h /Library/galileofmpragmas.h
 $(OBJ)wb.o: /Modules/Config/galileoconfig.h
 $(OBJ)wb.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
@@ -333,9 +339,9 @@ $(OBJ)wb.o: position.h galileodata.h palette_routines.h envoy.h notify.h
 $(OBJ)wb.o: graphics.h file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)wb.o: menu_data.h tile.h protos.h text.h callback.h /Modules/modules.h
 $(OBJ)wb.o: /Modules/modules_pragmas.h
-$(OBJ)text.o: text.c galileofm.h /Library/galileofmbase.h
-$(OBJ)text.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)text.o: /Modules/Config/galileoconfig.h
+$(OBJ)text.o: text.c galileofm.h /Include/galileo/os.h
+$(OBJ)text.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)text.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)text.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)text.o: galileo.strings function_select.h pattern.h toolbar.h display.h
 $(OBJ)text.o: reselect.h lister.h popup.h buttons.h dirlist.h app_msg.h
@@ -346,9 +352,9 @@ $(OBJ)text.o: backdrop.h desktop.h groups.h help.h scripts.h start_menu.h
 $(OBJ)text.o: position.h galileodata.h palette_routines.h envoy.h notify.h
 $(OBJ)text.o: graphics.h file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)text.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)help.o: help.c galileofm.h /Library/galileofmbase.h
-$(OBJ)help.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)help.o: /Modules/Config/galileoconfig.h
+$(OBJ)help.o: help.c galileofm.h /Include/galileo/os.h
+$(OBJ)help.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)help.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)help.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)help.o: galileo.strings function_select.h pattern.h toolbar.h display.h
 $(OBJ)help.o: reselect.h lister.h popup.h buttons.h dirlist.h app_msg.h
@@ -360,8 +366,9 @@ $(OBJ)help.o: position.h galileodata.h palette_routines.h envoy.h notify.h
 $(OBJ)help.o: graphics.h file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)help.o: menu_data.h tile.h protos.h text.h callback.h
 $(OBJ)eliza.o: eliza.c eliza.h
-$(OBJ)event_loop.o: event_loop.c galileofm.h /Library/galileofmbase.h
-$(OBJ)event_loop.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)event_loop.o: event_loop.c galileofm.h /Include/galileo/os.h
+$(OBJ)event_loop.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)event_loop.o: /Library/galileofmpragmas.h
 $(OBJ)event_loop.o: /Modules/Config/galileoconfig.h
 $(OBJ)event_loop.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)event_loop.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -375,8 +382,9 @@ $(OBJ)event_loop.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)event_loop.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)event_loop.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)event_loop.o: callback.h
-$(OBJ)main_reset.o: main_reset.c galileofm.h /Library/galileofmbase.h
-$(OBJ)main_reset.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)main_reset.o: main_reset.c galileofm.h /Include/galileo/os.h
+$(OBJ)main_reset.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)main_reset.o: /Library/galileofmpragmas.h
 $(OBJ)main_reset.o: /Modules/Config/galileoconfig.h
 $(OBJ)main_reset.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)main_reset.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -390,9 +398,9 @@ $(OBJ)main_reset.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)main_reset.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)main_reset.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)main_reset.o: callback.h
-$(OBJ)backdrop.o: backdrop.c galileofm.h /Library/galileofmbase.h
-$(OBJ)backdrop.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)backdrop.o: /Modules/Config/galileoconfig.h
+$(OBJ)backdrop.o: backdrop.c galileofm.h /Include/galileo/os.h
+$(OBJ)backdrop.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)backdrop.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)backdrop.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)backdrop.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)backdrop.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -404,7 +412,7 @@ $(OBJ)backdrop.o: desktop.h groups.h help.h scripts.h start_menu.h position.h
 $(OBJ)backdrop.o: galileodata.h palette_routines.h envoy.h notify.h
 $(OBJ)backdrop.o: graphics.h file_select.h window_activate.h cleanup.h
 $(OBJ)backdrop.o: icons.h menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)backdrop_render.o: backdrop_render.c galileofm.h
+$(OBJ)backdrop_render.o: backdrop_render.c galileofm.h /Include/galileo/os.h
 $(OBJ)backdrop_render.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)backdrop_render.o: /Library/galileofmpragmas.h
 $(OBJ)backdrop_render.o: /Modules/Config/galileoconfig.h
@@ -421,8 +429,9 @@ $(OBJ)backdrop_render.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)backdrop_render.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)backdrop_render.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)backdrop_render.o: callback.h
-$(OBJ)backdrop_idcmp.o: backdrop_idcmp.c galileofm.h /Library/galileofmbase.h
-$(OBJ)backdrop_idcmp.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)backdrop_idcmp.o: backdrop_idcmp.c galileofm.h /Include/galileo/os.h
+$(OBJ)backdrop_idcmp.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)backdrop_idcmp.o: /Library/galileofmpragmas.h
 $(OBJ)backdrop_idcmp.o: /Modules/Config/galileoconfig.h
 $(OBJ)backdrop_idcmp.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)backdrop_idcmp.o: main_commands.h galileo.strings function_select.h
@@ -438,7 +447,8 @@ $(OBJ)backdrop_idcmp.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)backdrop_idcmp.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)backdrop_idcmp.o: callback.h
 $(OBJ)backdrop_buttons.o: backdrop_buttons.c galileofm.h
-$(OBJ)backdrop_buttons.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)backdrop_buttons.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)backdrop_buttons.o: /Program/galileo_config.h
 $(OBJ)backdrop_buttons.o: /Library/galileofmpragmas.h
 $(OBJ)backdrop_buttons.o: /Modules/Config/galileoconfig.h
 $(OBJ)backdrop_buttons.o: /Modules/Config/galileoconfig_pragmas.h
@@ -454,8 +464,9 @@ $(OBJ)backdrop_buttons.o: start_menu.h position.h galileodata.h
 $(OBJ)backdrop_buttons.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)backdrop_buttons.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)backdrop_buttons.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)backdrop_utils.o: backdrop_utils.c galileofm.h /Library/galileofmbase.h
-$(OBJ)backdrop_utils.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)backdrop_utils.o: backdrop_utils.c galileofm.h /Include/galileo/os.h
+$(OBJ)backdrop_utils.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)backdrop_utils.o: /Library/galileofmpragmas.h
 $(OBJ)backdrop_utils.o: /Modules/Config/galileoconfig.h
 $(OBJ)backdrop_utils.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)backdrop_utils.o: main_commands.h galileo.strings function_select.h
@@ -471,7 +482,8 @@ $(OBJ)backdrop_utils.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)backdrop_utils.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)backdrop_utils.o: callback.h
 $(OBJ)backdrop_arrange.o: backdrop_arrange.c galileofm.h
-$(OBJ)backdrop_arrange.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)backdrop_arrange.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)backdrop_arrange.o: /Program/galileo_config.h
 $(OBJ)backdrop_arrange.o: /Library/galileofmpragmas.h
 $(OBJ)backdrop_arrange.o: /Modules/Config/galileoconfig.h
 $(OBJ)backdrop_arrange.o: /Modules/Config/galileoconfig_pragmas.h
@@ -488,7 +500,8 @@ $(OBJ)backdrop_arrange.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)backdrop_arrange.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)backdrop_arrange.o: menu_data.h tile.h protos.h text.h callback.h
 $(OBJ)backdrop_position.o: backdrop_position.c galileofm.h
-$(OBJ)backdrop_position.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)backdrop_position.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)backdrop_position.o: /Program/galileo_config.h
 $(OBJ)backdrop_position.o: /Library/galileofmpragmas.h
 $(OBJ)backdrop_position.o: /Modules/Config/galileoconfig.h
 $(OBJ)backdrop_position.o: /Modules/Config/galileoconfig_pragmas.h
@@ -505,8 +518,9 @@ $(OBJ)backdrop_position.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)backdrop_position.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)backdrop_position.o: menu_data.h tile.h protos.h text.h callback.h
 $(OBJ)backdrop_position.o: iconpos.h
-$(OBJ)backdrop_open.o: backdrop_open.c galileofm.h /Library/galileofmbase.h
-$(OBJ)backdrop_open.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)backdrop_open.o: backdrop_open.c galileofm.h /Include/galileo/os.h
+$(OBJ)backdrop_open.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)backdrop_open.o: /Library/galileofmpragmas.h
 $(OBJ)backdrop_open.o: /Modules/Config/galileoconfig.h
 $(OBJ)backdrop_open.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)backdrop_open.o: main_commands.h galileo.strings function_select.h
@@ -521,8 +535,9 @@ $(OBJ)backdrop_open.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)backdrop_open.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)backdrop_open.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)backdrop_open.o: callback.h
-$(OBJ)backdrop_drag.o: backdrop_drag.c galileofm.h /Library/galileofmbase.h
-$(OBJ)backdrop_drag.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)backdrop_drag.o: backdrop_drag.c galileofm.h /Include/galileo/os.h
+$(OBJ)backdrop_drag.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)backdrop_drag.o: /Library/galileofmpragmas.h
 $(OBJ)backdrop_drag.o: /Modules/Config/galileoconfig.h
 $(OBJ)backdrop_drag.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)backdrop_drag.o: main_commands.h galileo.strings function_select.h
@@ -537,7 +552,7 @@ $(OBJ)backdrop_drag.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)backdrop_drag.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)backdrop_drag.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)backdrop_drag.o: callback.h
-$(OBJ)backdrop_groups.o: backdrop_groups.c galileofm.h
+$(OBJ)backdrop_groups.o: backdrop_groups.c galileofm.h /Include/galileo/os.h
 $(OBJ)backdrop_groups.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)backdrop_groups.o: /Library/galileofmpragmas.h
 $(OBJ)backdrop_groups.o: /Modules/Config/galileoconfig.h
@@ -554,7 +569,7 @@ $(OBJ)backdrop_groups.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)backdrop_groups.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)backdrop_groups.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)backdrop_groups.o: callback.h
-$(OBJ)backdrop_notify.o: backdrop_notify.c galileofm.h
+$(OBJ)backdrop_notify.o: backdrop_notify.c galileofm.h /Include/galileo/os.h
 $(OBJ)backdrop_notify.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)backdrop_notify.o: /Library/galileofmpragmas.h
 $(OBJ)backdrop_notify.o: /Modules/Config/galileoconfig.h
@@ -572,7 +587,8 @@ $(OBJ)backdrop_notify.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)backdrop_notify.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)backdrop_notify.o: callback.h
 $(OBJ)backdrop_appicon.o: backdrop_appicon.c galileofm.h
-$(OBJ)backdrop_appicon.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)backdrop_appicon.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)backdrop_appicon.o: /Program/galileo_config.h
 $(OBJ)backdrop_appicon.o: /Library/galileofmpragmas.h
 $(OBJ)backdrop_appicon.o: /Modules/Config/galileoconfig.h
 $(OBJ)backdrop_appicon.o: /Modules/Config/galileoconfig_pragmas.h
@@ -589,7 +605,8 @@ $(OBJ)backdrop_appicon.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)backdrop_appicon.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)backdrop_appicon.o: menu_data.h tile.h protos.h text.h callback.h
 $(OBJ)backdrop_devices.o: backdrop_devices.c galileofm.h
-$(OBJ)backdrop_devices.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)backdrop_devices.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)backdrop_devices.o: /Program/galileo_config.h
 $(OBJ)backdrop_devices.o: /Library/galileofmpragmas.h
 $(OBJ)backdrop_devices.o: /Modules/Config/galileoconfig.h
 $(OBJ)backdrop_devices.o: /Modules/Config/galileoconfig_pragmas.h
@@ -606,7 +623,8 @@ $(OBJ)backdrop_devices.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)backdrop_devices.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)backdrop_devices.o: menu_data.h tile.h protos.h text.h callback.h
 $(OBJ)backdrop_snapshot.o: backdrop_snapshot.c galileofm.h
-$(OBJ)backdrop_snapshot.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)backdrop_snapshot.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)backdrop_snapshot.o: /Program/galileo_config.h
 $(OBJ)backdrop_snapshot.o: /Library/galileofmpragmas.h
 $(OBJ)backdrop_snapshot.o: /Modules/Config/galileoconfig.h
 $(OBJ)backdrop_snapshot.o: /Modules/Config/galileoconfig_pragmas.h
@@ -622,8 +640,9 @@ $(OBJ)backdrop_snapshot.o: scripts.h start_menu.h position.h galileodata.h
 $(OBJ)backdrop_snapshot.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)backdrop_snapshot.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)backdrop_snapshot.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)backdrop_popup.o: backdrop_popup.c galileofm.h /Library/galileofmbase.h
-$(OBJ)backdrop_popup.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)backdrop_popup.o: backdrop_popup.c galileofm.h /Include/galileo/os.h
+$(OBJ)backdrop_popup.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)backdrop_popup.o: /Library/galileofmpragmas.h
 $(OBJ)backdrop_popup.o: /Modules/Config/galileoconfig.h
 $(OBJ)backdrop_popup.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)backdrop_popup.o: main_commands.h galileo.strings function_select.h
@@ -638,7 +657,7 @@ $(OBJ)backdrop_popup.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)backdrop_popup.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)backdrop_popup.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)backdrop_popup.o: callback.h
-$(OBJ)backdrop_format.o: backdrop_format.c galileofm.h
+$(OBJ)backdrop_format.o: backdrop_format.c galileofm.h /Include/galileo/os.h
 $(OBJ)backdrop_format.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)backdrop_format.o: /Library/galileofmpragmas.h
 $(OBJ)backdrop_format.o: /Modules/Config/galileoconfig.h
@@ -655,7 +674,7 @@ $(OBJ)backdrop_format.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)backdrop_format.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)backdrop_format.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)backdrop_format.o: callback.h
-$(OBJ)backdrop_select.o: backdrop_select.c galileofm.h
+$(OBJ)backdrop_select.o: backdrop_select.c galileofm.h /Include/galileo/os.h
 $(OBJ)backdrop_select.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)backdrop_select.o: /Library/galileofmpragmas.h
 $(OBJ)backdrop_select.o: /Modules/Config/galileoconfig.h
@@ -672,8 +691,9 @@ $(OBJ)backdrop_select.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)backdrop_select.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)backdrop_select.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)backdrop_select.o: callback.h
-$(OBJ)backdrop_info.o: backdrop_info.c galileofm.h /Library/galileofmbase.h
-$(OBJ)backdrop_info.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)backdrop_info.o: backdrop_info.c galileofm.h /Include/galileo/os.h
+$(OBJ)backdrop_info.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)backdrop_info.o: /Library/galileofmpragmas.h
 $(OBJ)backdrop_info.o: /Modules/Config/galileoconfig.h
 $(OBJ)backdrop_info.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)backdrop_info.o: main_commands.h galileo.strings function_select.h
@@ -689,7 +709,8 @@ $(OBJ)backdrop_info.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)backdrop_info.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)backdrop_info.o: callback.h
 $(OBJ)backdrop_leftout.o: backdrop_leftout.c galileofm.h
-$(OBJ)backdrop_leftout.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)backdrop_leftout.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)backdrop_leftout.o: /Program/galileo_config.h
 $(OBJ)backdrop_leftout.o: /Library/galileofmpragmas.h
 $(OBJ)backdrop_leftout.o: /Modules/Config/galileoconfig.h
 $(OBJ)backdrop_leftout.o: /Modules/Config/galileoconfig_pragmas.h
@@ -706,7 +727,8 @@ $(OBJ)backdrop_leftout.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)backdrop_leftout.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)backdrop_leftout.o: menu_data.h tile.h protos.h text.h callback.h
 $(OBJ)backdrop_replace.o: backdrop_replace.c galileofm.h
-$(OBJ)backdrop_replace.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)backdrop_replace.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)backdrop_replace.o: /Program/galileo_config.h
 $(OBJ)backdrop_replace.o: /Library/galileofmpragmas.h
 $(OBJ)backdrop_replace.o: /Modules/Config/galileoconfig.h
 $(OBJ)backdrop_replace.o: /Modules/Config/galileoconfig_pragmas.h
@@ -722,9 +744,9 @@ $(OBJ)backdrop_replace.o: start_menu.h position.h galileodata.h
 $(OBJ)backdrop_replace.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)backdrop_replace.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)backdrop_replace.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)desktop.o: desktop.c galileofm.h /Library/galileofmbase.h
-$(OBJ)desktop.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)desktop.o: /Modules/Config/galileoconfig.h
+$(OBJ)desktop.o: desktop.c galileofm.h /Include/galileo/os.h
+$(OBJ)desktop.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)desktop.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)desktop.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)desktop.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)desktop.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -736,8 +758,9 @@ $(OBJ)desktop.o: desktop.h groups.h help.h scripts.h start_menu.h position.h
 $(OBJ)desktop.o: galileodata.h palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)desktop.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)desktop.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)desktop_delete.o: desktop_delete.c galileofm.h /Library/galileofmbase.h
-$(OBJ)desktop_delete.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)desktop_delete.o: desktop_delete.c galileofm.h /Include/galileo/os.h
+$(OBJ)desktop_delete.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)desktop_delete.o: /Library/galileofmpragmas.h
 $(OBJ)desktop_delete.o: /Modules/Config/galileoconfig.h
 $(OBJ)desktop_delete.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)desktop_delete.o: main_commands.h galileo.strings function_select.h
@@ -752,8 +775,9 @@ $(OBJ)desktop_delete.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)desktop_delete.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)desktop_delete.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)desktop_delete.o: callback.h
-$(OBJ)desktop_drop.o: desktop_drop.c galileofm.h /Library/galileofmbase.h
-$(OBJ)desktop_drop.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)desktop_drop.o: desktop_drop.c galileofm.h /Include/galileo/os.h
+$(OBJ)desktop_drop.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)desktop_drop.o: /Library/galileofmpragmas.h
 $(OBJ)desktop_drop.o: /Modules/Config/galileoconfig.h
 $(OBJ)desktop_drop.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)desktop_drop.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -767,8 +791,9 @@ $(OBJ)desktop_drop.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)desktop_drop.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)desktop_drop.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)desktop_drop.o: callback.h
-$(OBJ)desktop_rename.o: desktop_rename.c galileofm.h /Library/galileofmbase.h
-$(OBJ)desktop_rename.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)desktop_rename.o: desktop_rename.c galileofm.h /Include/galileo/os.h
+$(OBJ)desktop_rename.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)desktop_rename.o: /Library/galileofmpragmas.h
 $(OBJ)desktop_rename.o: /Modules/Config/galileoconfig.h
 $(OBJ)desktop_rename.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)desktop_rename.o: main_commands.h galileo.strings function_select.h
@@ -783,8 +808,9 @@ $(OBJ)desktop_rename.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)desktop_rename.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)desktop_rename.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)desktop_rename.o: callback.h
-$(OBJ)desktop_folder.o: desktop_folder.c galileofm.h /Library/galileofmbase.h
-$(OBJ)desktop_folder.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)desktop_folder.o: desktop_folder.c galileofm.h /Include/galileo/os.h
+$(OBJ)desktop_folder.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)desktop_folder.o: /Library/galileofmpragmas.h
 $(OBJ)desktop_folder.o: /Modules/Config/galileoconfig.h
 $(OBJ)desktop_folder.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)desktop_folder.o: main_commands.h galileo.strings function_select.h
@@ -799,8 +825,9 @@ $(OBJ)desktop_folder.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)desktop_folder.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)desktop_folder.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)desktop_folder.o: callback.h
-$(OBJ)groups_new.o: groups_new.c galileofm.h /Library/galileofmbase.h
-$(OBJ)groups_new.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)groups_new.o: groups_new.c galileofm.h /Include/galileo/os.h
+$(OBJ)groups_new.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)groups_new.o: /Library/galileofmpragmas.h
 $(OBJ)groups_new.o: /Modules/Config/galileoconfig.h
 $(OBJ)groups_new.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)groups_new.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -814,9 +841,9 @@ $(OBJ)groups_new.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)groups_new.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)groups_new.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)groups_new.o: callback.h
-$(OBJ)toolbar.o: toolbar.c galileofm.h /Library/galileofmbase.h
-$(OBJ)toolbar.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)toolbar.o: /Modules/Config/galileoconfig.h
+$(OBJ)toolbar.o: toolbar.c galileofm.h /Include/galileo/os.h
+$(OBJ)toolbar.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)toolbar.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)toolbar.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)toolbar.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)toolbar.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -828,8 +855,9 @@ $(OBJ)toolbar.o: desktop.h groups.h help.h scripts.h start_menu.h position.h
 $(OBJ)toolbar.o: galileodata.h palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)toolbar.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)toolbar.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)requesters.o: requesters.c galileofm.h /Library/galileofmbase.h
-$(OBJ)requesters.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)requesters.o: requesters.c galileofm.h /Include/galileo/os.h
+$(OBJ)requesters.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)requesters.o: /Library/galileofmpragmas.h
 $(OBJ)requesters.o: /Modules/Config/galileoconfig.h
 $(OBJ)requesters.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)requesters.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -843,9 +871,9 @@ $(OBJ)requesters.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)requesters.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)requesters.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)requesters.o: callback.h
-$(OBJ)notify.o: notify.c galileofm.h /Library/galileofmbase.h
-$(OBJ)notify.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)notify.o: /Modules/Config/galileoconfig.h
+$(OBJ)notify.o: notify.c galileofm.h /Include/galileo/os.h
+$(OBJ)notify.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)notify.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)notify.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)notify.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)notify.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -858,9 +886,9 @@ $(OBJ)notify.o: palette_routines.h envoy.h notify.h graphics.h file_select.h
 $(OBJ)notify.o: window_activate.h cleanup.h icons.h menu_data.h tile.h
 $(OBJ)notify.o: protos.h text.h callback.h
 
-$(OBJ)graphics.o: graphics.c galileofm.h /Library/galileofmbase.h
-$(OBJ)graphics.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)graphics.o: /Modules/Config/galileoconfig.h
+$(OBJ)graphics.o: graphics.c galileofm.h /Include/galileo/os.h
+$(OBJ)graphics.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)graphics.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)graphics.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)graphics.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)graphics.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -872,9 +900,9 @@ $(OBJ)graphics.o: desktop.h groups.h help.h scripts.h start_menu.h position.h
 $(OBJ)graphics.o: galileodata.h palette_routines.h envoy.h notify.h
 $(OBJ)graphics.o: graphics.h file_select.h window_activate.h cleanup.h
 $(OBJ)graphics.o: icons.h menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)misc.o: misc.c galileofm.h /Library/galileofmbase.h
-$(OBJ)misc.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)misc.o: /Modules/Config/galileoconfig.h
+$(OBJ)misc.o: misc.c galileofm.h /Include/galileo/os.h
+$(OBJ)misc.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)misc.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)misc.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)misc.o: galileo.strings function_select.h pattern.h toolbar.h display.h
 $(OBJ)misc.o: reselect.h lister.h popup.h buttons.h dirlist.h app_msg.h
@@ -885,8 +913,9 @@ $(OBJ)misc.o: backdrop.h desktop.h groups.h help.h scripts.h start_menu.h
 $(OBJ)misc.o: position.h galileodata.h palette_routines.h envoy.h notify.h
 $(OBJ)misc.o: graphics.h file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)misc.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)misc_proc.o: misc_proc.c galileofm.h /Library/galileofmbase.h
-$(OBJ)misc_proc.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)misc_proc.o: misc_proc.c galileofm.h /Include/galileo/os.h
+$(OBJ)misc_proc.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)misc_proc.o: /Library/galileofmpragmas.h
 $(OBJ)misc_proc.o: /Modules/Config/galileoconfig.h
 $(OBJ)misc_proc.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)misc_proc.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -900,9 +929,9 @@ $(OBJ)misc_proc.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)misc_proc.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)misc_proc.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)misc_proc.o: callback.h /Modules/modules.h /Modules/modules_pragmas.h
-$(OBJ)dates.o: dates.c galileofm.h /Library/galileofmbase.h
-$(OBJ)dates.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)dates.o: /Modules/Config/galileoconfig.h
+$(OBJ)dates.o: dates.c galileofm.h /Include/galileo/os.h
+$(OBJ)dates.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)dates.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)dates.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)dates.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)dates.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -914,9 +943,9 @@ $(OBJ)dates.o: start_menu.h position.h galileodata.h palette_routines.h
 $(OBJ)dates.o: envoy.h notify.h graphics.h file_select.h window_activate.h
 $(OBJ)dates.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)dates.o: callback.h
-$(OBJ)links.o: links.c galileofm.h /Library/galileofmbase.h
-$(OBJ)links.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)links.o: /Modules/Config/galileoconfig.h
+$(OBJ)links.o: links.c galileofm.h /Include/galileo/os.h
+$(OBJ)links.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)links.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)links.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)links.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)links.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -928,8 +957,9 @@ $(OBJ)links.o: start_menu.h position.h galileodata.h palette_routines.h
 $(OBJ)links.o: envoy.h notify.h graphics.h file_select.h window_activate.h
 $(OBJ)links.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)links.o: callback.h
-$(OBJ)path_routines.o: path_routines.c galileofm.h /Library/galileofmbase.h
-$(OBJ)path_routines.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)path_routines.o: path_routines.c galileofm.h /Include/galileo/os.h
+$(OBJ)path_routines.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)path_routines.o: /Library/galileofmpragmas.h
 $(OBJ)path_routines.o: /Modules/Config/galileoconfig.h
 $(OBJ)path_routines.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)path_routines.o: main_commands.h galileo.strings function_select.h
@@ -944,8 +974,9 @@ $(OBJ)path_routines.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)path_routines.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)path_routines.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)path_routines.o: callback.h
-$(OBJ)status_text.o: status_text.c galileofm.h /Library/galileofmbase.h
-$(OBJ)status_text.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)status_text.o: status_text.c galileofm.h /Include/galileo/os.h
+$(OBJ)status_text.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)status_text.o: /Library/galileofmpragmas.h
 $(OBJ)status_text.o: /Modules/Config/galileoconfig.h
 $(OBJ)status_text.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)status_text.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -959,9 +990,9 @@ $(OBJ)status_text.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)status_text.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)status_text.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)status_text.o: callback.h
-$(OBJ)scripts.o: scripts.c galileofm.h /Library/galileofmbase.h
-$(OBJ)scripts.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)scripts.o: /Modules/Config/galileoconfig.h
+$(OBJ)scripts.o: scripts.c galileofm.h /Include/galileo/os.h
+$(OBJ)scripts.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)scripts.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)scripts.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)scripts.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)scripts.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -973,9 +1004,9 @@ $(OBJ)scripts.o: desktop.h groups.h help.h scripts.h start_menu.h position.h
 $(OBJ)scripts.o: galileodata.h palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)scripts.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)scripts.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)buffers.o: buffers.c galileofm.h /Library/galileofmbase.h
-$(OBJ)buffers.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)buffers.o: /Modules/Config/galileoconfig.h
+$(OBJ)buffers.o: buffers.c galileofm.h /Include/galileo/os.h
+$(OBJ)buffers.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)buffers.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)buffers.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)buffers.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)buffers.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -987,8 +1018,9 @@ $(OBJ)buffers.o: desktop.h groups.h help.h scripts.h start_menu.h position.h
 $(OBJ)buffers.o: galileodata.h palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)buffers.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)buffers.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)buffers_util.o: buffers_util.c galileofm.h /Library/galileofmbase.h
-$(OBJ)buffers_util.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)buffers_util.o: buffers_util.c galileofm.h /Include/galileo/os.h
+$(OBJ)buffers_util.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)buffers_util.o: /Library/galileofmpragmas.h
 $(OBJ)buffers_util.o: /Modules/Config/galileoconfig.h
 $(OBJ)buffers_util.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)buffers_util.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1002,8 +1034,9 @@ $(OBJ)buffers_util.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)buffers_util.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)buffers_util.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)buffers_util.o: callback.h
-$(OBJ)buffers_sort.o: buffers_sort.c galileofm.h /Library/galileofmbase.h
-$(OBJ)buffers_sort.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)buffers_sort.o: buffers_sort.c galileofm.h /Include/galileo/os.h
+$(OBJ)buffers_sort.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)buffers_sort.o: /Library/galileofmpragmas.h
 $(OBJ)buffers_sort.o: /Modules/Config/galileoconfig.h
 $(OBJ)buffers_sort.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)buffers_sort.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1018,7 +1051,8 @@ $(OBJ)buffers_sort.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)buffers_sort.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)buffers_sort.o: callback.h
 $(OBJ)buffers_reselect.o: buffers_reselect.c galileofm.h
-$(OBJ)buffers_reselect.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)buffers_reselect.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)buffers_reselect.o: /Program/galileo_config.h
 $(OBJ)buffers_reselect.o: /Library/galileofmpragmas.h
 $(OBJ)buffers_reselect.o: /Modules/Config/galileoconfig.h
 $(OBJ)buffers_reselect.o: /Modules/Config/galileoconfig_pragmas.h
@@ -1034,8 +1068,9 @@ $(OBJ)buffers_reselect.o: start_menu.h position.h galileodata.h
 $(OBJ)buffers_reselect.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)buffers_reselect.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)buffers_reselect.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)filetypes.o: filetypes.c galileofm.h /Library/galileofmbase.h
-$(OBJ)filetypes.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)filetypes.o: filetypes.c galileofm.h /Include/galileo/os.h
+$(OBJ)filetypes.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)filetypes.o: /Library/galileofmpragmas.h
 $(OBJ)filetypes.o: /Modules/Config/galileoconfig.h
 $(OBJ)filetypes.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)filetypes.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1049,8 +1084,9 @@ $(OBJ)filetypes.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)filetypes.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)filetypes.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)filetypes.o: callback.h music.h
-$(OBJ)filetypes_proc.o: filetypes_proc.c galileofm.h /Library/galileofmbase.h
-$(OBJ)filetypes_proc.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)filetypes_proc.o: filetypes_proc.c galileofm.h /Include/galileo/os.h
+$(OBJ)filetypes_proc.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)filetypes_proc.o: /Library/galileofmpragmas.h
 $(OBJ)filetypes_proc.o: /Modules/Config/galileoconfig.h
 $(OBJ)filetypes_proc.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)filetypes_proc.o: main_commands.h galileo.strings function_select.h
@@ -1065,8 +1101,9 @@ $(OBJ)filetypes_proc.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)filetypes_proc.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)filetypes_proc.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)filetypes_proc.o: callback.h
-$(OBJ)search_data.o: search_data.c galileofm.h /Library/galileofmbase.h
-$(OBJ)search_data.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)search_data.o: search_data.c galileofm.h /Include/galileo/os.h
+$(OBJ)search_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)search_data.o: /Library/galileofmpragmas.h
 $(OBJ)search_data.o: /Modules/Config/galileoconfig.h
 $(OBJ)search_data.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)search_data.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1080,9 +1117,9 @@ $(OBJ)search_data.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)search_data.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)search_data.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)search_data.o: callback.h
-$(OBJ)lister.o: lister.c galileofm.h /Library/galileofmbase.h
-$(OBJ)lister.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)lister.o: /Modules/Config/galileoconfig.h
+$(OBJ)lister.o: lister.c galileofm.h /Include/galileo/os.h
+$(OBJ)lister.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)lister.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)lister.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)lister.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)lister.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -1094,8 +1131,9 @@ $(OBJ)lister.o: scripts.h start_menu.h position.h galileodata.h
 $(OBJ)lister.o: palette_routines.h envoy.h notify.h graphics.h file_select.h
 $(OBJ)lister.o: window_activate.h cleanup.h icons.h menu_data.h tile.h
 $(OBJ)lister.o: protos.h text.h callback.h
-$(OBJ)lister_data.o: lister_data.c galileofm.h /Library/galileofmbase.h
-$(OBJ)lister_data.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)lister_data.o: lister_data.c galileofm.h /Include/galileo/os.h
+$(OBJ)lister_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)lister_data.o: /Library/galileofmpragmas.h
 $(OBJ)lister_data.o: /Modules/Config/galileoconfig.h
 $(OBJ)lister_data.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)lister_data.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1109,8 +1147,9 @@ $(OBJ)lister_data.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_data.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_data.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_data.o: callback.h
-$(OBJ)lister_proc.o: lister_proc.c galileofm.h /Library/galileofmbase.h
-$(OBJ)lister_proc.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)lister_proc.o: lister_proc.c galileofm.h /Include/galileo/os.h
+$(OBJ)lister_proc.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)lister_proc.o: /Library/galileofmpragmas.h
 $(OBJ)lister_proc.o: /Modules/Config/galileoconfig.h
 $(OBJ)lister_proc.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)lister_proc.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1124,8 +1163,9 @@ $(OBJ)lister_proc.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_proc.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_proc.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_proc.o: callback.h
-$(OBJ)lister_idcmp.o: lister_idcmp.c galileofm.h /Library/galileofmbase.h
-$(OBJ)lister_idcmp.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)lister_idcmp.o: lister_idcmp.c galileofm.h /Include/galileo/os.h
+$(OBJ)lister_idcmp.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)lister_idcmp.o: /Library/galileofmpragmas.h
 $(OBJ)lister_idcmp.o: /Modules/Config/galileoconfig.h
 $(OBJ)lister_idcmp.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)lister_idcmp.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1139,7 +1179,7 @@ $(OBJ)lister_idcmp.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_idcmp.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_idcmp.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_idcmp.o: callback.h
-$(OBJ)lister_function.o: lister_function.c galileofm.h
+$(OBJ)lister_function.o: lister_function.c galileofm.h /Include/galileo/os.h
 $(OBJ)lister_function.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)lister_function.o: /Library/galileofmpragmas.h
 $(OBJ)lister_function.o: /Modules/Config/galileoconfig.h
@@ -1156,8 +1196,9 @@ $(OBJ)lister_function.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_function.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_function.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_function.o: callback.h
-$(OBJ)lister_window.o: lister_window.c galileofm.h /Library/galileofmbase.h
-$(OBJ)lister_window.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)lister_window.o: lister_window.c galileofm.h /Include/galileo/os.h
+$(OBJ)lister_window.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)lister_window.o: /Library/galileofmpragmas.h
 $(OBJ)lister_window.o: /Modules/Config/galileoconfig.h
 $(OBJ)lister_window.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)lister_window.o: main_commands.h galileo.strings function_select.h
@@ -1172,7 +1213,7 @@ $(OBJ)lister_window.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_window.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_window.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_window.o: callback.h
-$(OBJ)lister_diskinfo.o: lister_diskinfo.c galileofm.h
+$(OBJ)lister_diskinfo.o: lister_diskinfo.c galileofm.h /Include/galileo/os.h
 $(OBJ)lister_diskinfo.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)lister_diskinfo.o: /Library/galileofmpragmas.h
 $(OBJ)lister_diskinfo.o: /Modules/Config/galileoconfig.h
@@ -1189,8 +1230,9 @@ $(OBJ)lister_diskinfo.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_diskinfo.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_diskinfo.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_diskinfo.o: callback.h
-$(OBJ)lister_display.o: lister_display.c galileofm.h /Library/galileofmbase.h
-$(OBJ)lister_display.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)lister_display.o: lister_display.c galileofm.h /Include/galileo/os.h
+$(OBJ)lister_display.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)lister_display.o: /Library/galileofmpragmas.h
 $(OBJ)lister_display.o: /Modules/Config/galileoconfig.h
 $(OBJ)lister_display.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)lister_display.o: main_commands.h galileo.strings function_select.h
@@ -1205,8 +1247,9 @@ $(OBJ)lister_display.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_display.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_display.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_display.o: callback.h
-$(OBJ)lister_busy.o: lister_busy.c galileofm.h /Library/galileofmbase.h
-$(OBJ)lister_busy.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)lister_busy.o: lister_busy.c galileofm.h /Include/galileo/os.h
+$(OBJ)lister_busy.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)lister_busy.o: /Library/galileofmpragmas.h
 $(OBJ)lister_busy.o: /Modules/Config/galileoconfig.h
 $(OBJ)lister_busy.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)lister_busy.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1220,8 +1263,9 @@ $(OBJ)lister_busy.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_busy.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_busy.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_busy.o: callback.h
-$(OBJ)lister_title.o: lister_title.c galileofm.h /Library/galileofmbase.h
-$(OBJ)lister_title.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)lister_title.o: lister_title.c galileofm.h /Include/galileo/os.h
+$(OBJ)lister_title.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)lister_title.o: /Library/galileofmpragmas.h
 $(OBJ)lister_title.o: /Modules/Config/galileoconfig.h
 $(OBJ)lister_title.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)lister_title.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1235,7 +1279,7 @@ $(OBJ)lister_title.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_title.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_title.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_title.o: callback.h
-$(OBJ)lister_activate.o: lister_activate.c galileofm.h
+$(OBJ)lister_activate.o: lister_activate.c galileofm.h /Include/galileo/os.h
 $(OBJ)lister_activate.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)lister_activate.o: /Library/galileofmpragmas.h
 $(OBJ)lister_activate.o: /Modules/Config/galileoconfig.h
@@ -1252,8 +1296,9 @@ $(OBJ)lister_activate.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_activate.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_activate.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_activate.o: callback.h
-$(OBJ)lister_buffers.o: lister_buffers.c galileofm.h /Library/galileofmbase.h
-$(OBJ)lister_buffers.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)lister_buffers.o: lister_buffers.c galileofm.h /Include/galileo/os.h
+$(OBJ)lister_buffers.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)lister_buffers.o: /Library/galileofmpragmas.h
 $(OBJ)lister_buffers.o: /Modules/Config/galileoconfig.h
 $(OBJ)lister_buffers.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)lister_buffers.o: main_commands.h galileo.strings function_select.h
@@ -1268,8 +1313,9 @@ $(OBJ)lister_buffers.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_buffers.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_buffers.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_buffers.o: callback.h
-$(OBJ)lister_dir.o: lister_dir.c galileofm.h /Library/galileofmbase.h
-$(OBJ)lister_dir.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)lister_dir.o: lister_dir.c galileofm.h /Include/galileo/os.h
+$(OBJ)lister_dir.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)lister_dir.o: /Library/galileofmpragmas.h
 $(OBJ)lister_dir.o: /Modules/Config/galileoconfig.h
 $(OBJ)lister_dir.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)lister_dir.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1283,8 +1329,9 @@ $(OBJ)lister_dir.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_dir.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_dir.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_dir.o: callback.h /Modules/modules.h /Modules/modules_pragmas.h
-$(OBJ)lister_show.o: lister_show.c galileofm.h /Library/galileofmbase.h
-$(OBJ)lister_show.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)lister_show.o: lister_show.c galileofm.h /Include/galileo/os.h
+$(OBJ)lister_show.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)lister_show.o: /Library/galileofmpragmas.h
 $(OBJ)lister_show.o: /Modules/Config/galileoconfig.h
 $(OBJ)lister_show.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)lister_show.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1298,8 +1345,9 @@ $(OBJ)lister_show.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_show.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_show.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_show.o: callback.h
-$(OBJ)lister_toolbar.o: lister_toolbar.c galileofm.h /Library/galileofmbase.h
-$(OBJ)lister_toolbar.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)lister_toolbar.o: lister_toolbar.c galileofm.h /Include/galileo/os.h
+$(OBJ)lister_toolbar.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)lister_toolbar.o: /Library/galileofmpragmas.h
 $(OBJ)lister_toolbar.o: /Modules/Config/galileoconfig.h
 $(OBJ)lister_toolbar.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)lister_toolbar.o: main_commands.h galileo.strings function_select.h
@@ -1314,8 +1362,9 @@ $(OBJ)lister_toolbar.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_toolbar.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_toolbar.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_toolbar.o: callback.h
-$(OBJ)lister_drop.o: lister_drop.c galileofm.h /Library/galileofmbase.h
-$(OBJ)lister_drop.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)lister_drop.o: lister_drop.c galileofm.h /Include/galileo/os.h
+$(OBJ)lister_drop.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)lister_drop.o: /Library/galileofmpragmas.h
 $(OBJ)lister_drop.o: /Modules/Config/galileoconfig.h
 $(OBJ)lister_drop.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)lister_drop.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1329,8 +1378,9 @@ $(OBJ)lister_drop.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_drop.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_drop.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_drop.o: callback.h
-$(OBJ)lister_icons.o: lister_icons.c galileofm.h /Library/galileofmbase.h
-$(OBJ)lister_icons.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)lister_icons.o: lister_icons.c galileofm.h /Include/galileo/os.h
+$(OBJ)lister_icons.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)lister_icons.o: /Library/galileofmpragmas.h
 $(OBJ)lister_icons.o: /Modules/Config/galileoconfig.h
 $(OBJ)lister_icons.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)lister_icons.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1344,7 +1394,7 @@ $(OBJ)lister_icons.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_icons.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_icons.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_icons.o: callback.h
-$(OBJ)lister_progress.o: lister_progress.c galileofm.h
+$(OBJ)lister_progress.o: lister_progress.c galileofm.h /Include/galileo/os.h
 $(OBJ)lister_progress.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)lister_progress.o: /Library/galileofmpragmas.h
 $(OBJ)lister_progress.o: /Modules/Config/galileoconfig.h
@@ -1361,8 +1411,9 @@ $(OBJ)lister_progress.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_progress.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_progress.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_progress.o: callback.h
-$(OBJ)lister_clip.o: lister_clip.c galileofm.h /Library/galileofmbase.h
-$(OBJ)lister_clip.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)lister_clip.o: lister_clip.c galileofm.h /Include/galileo/os.h
+$(OBJ)lister_clip.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)lister_clip.o: /Library/galileofmpragmas.h
 $(OBJ)lister_clip.o: /Modules/Config/galileoconfig.h
 $(OBJ)lister_clip.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)lister_clip.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1376,8 +1427,9 @@ $(OBJ)lister_clip.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_clip.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_clip.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_clip.o: callback.h
-$(OBJ)lister_menus.o: lister_menus.c galileofm.h /Library/galileofmbase.h
-$(OBJ)lister_menus.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)lister_menus.o: lister_menus.c galileofm.h /Include/galileo/os.h
+$(OBJ)lister_menus.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)lister_menus.o: /Library/galileofmpragmas.h
 $(OBJ)lister_menus.o: /Modules/Config/galileoconfig.h
 $(OBJ)lister_menus.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)lister_menus.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1391,8 +1443,9 @@ $(OBJ)lister_menus.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_menus.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_menus.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_menus.o: callback.h
-$(OBJ)lister_hotname.o: lister_hotname.c galileofm.h /Library/galileofmbase.h
-$(OBJ)lister_hotname.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)lister_hotname.o: lister_hotname.c galileofm.h /Include/galileo/os.h
+$(OBJ)lister_hotname.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)lister_hotname.o: /Library/galileofmpragmas.h
 $(OBJ)lister_hotname.o: /Modules/Config/galileoconfig.h
 $(OBJ)lister_hotname.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)lister_hotname.o: main_commands.h galileo.strings function_select.h
@@ -1407,8 +1460,9 @@ $(OBJ)lister_hotname.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_hotname.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_hotname.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_hotname.o: callback.h
-$(OBJ)lister_edit.o: lister_edit.c galileofm.h /Library/galileofmbase.h
-$(OBJ)lister_edit.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)lister_edit.o: lister_edit.c galileofm.h /Include/galileo/os.h
+$(OBJ)lister_edit.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)lister_edit.o: /Library/galileofmpragmas.h
 $(OBJ)lister_edit.o: /Modules/Config/galileoconfig.h
 $(OBJ)lister_edit.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)lister_edit.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1422,8 +1476,9 @@ $(OBJ)lister_edit.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_edit.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_edit.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_edit.o: callback.h
-$(OBJ)lister_ftp.o: lister_ftp.c galileofm.h /Library/galileofmbase.h
-$(OBJ)lister_ftp.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)lister_ftp.o: lister_ftp.c galileofm.h /Include/galileo/os.h
+$(OBJ)lister_ftp.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)lister_ftp.o: /Library/galileofmpragmas.h
 $(OBJ)lister_ftp.o: /Modules/Config/galileoconfig.h
 $(OBJ)lister_ftp.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)lister_ftp.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1437,9 +1492,9 @@ $(OBJ)lister_ftp.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)lister_ftp.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)lister_ftp.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)lister_ftp.o: callback.h
-$(OBJ)buttons.o: buttons.c galileofm.h /Library/galileofmbase.h
-$(OBJ)buttons.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)buttons.o: /Modules/Config/galileoconfig.h
+$(OBJ)buttons.o: buttons.c galileofm.h /Include/galileo/os.h
+$(OBJ)buttons.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)buttons.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)buttons.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)buttons.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)buttons.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -1451,8 +1506,9 @@ $(OBJ)buttons.o: desktop.h groups.h help.h scripts.h start_menu.h position.h
 $(OBJ)buttons.o: galileodata.h palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)buttons.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)buttons.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)buttons_data.o: buttons_data.c galileofm.h /Library/galileofmbase.h
-$(OBJ)buttons_data.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)buttons_data.o: buttons_data.c galileofm.h /Include/galileo/os.h
+$(OBJ)buttons_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)buttons_data.o: /Library/galileofmpragmas.h
 $(OBJ)buttons_data.o: /Modules/Config/galileoconfig.h
 $(OBJ)buttons_data.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)buttons_data.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1466,8 +1522,9 @@ $(OBJ)buttons_data.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)buttons_data.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)buttons_data.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)buttons_data.o: callback.h
-$(OBJ)buttons_proc.o: buttons_proc.c galileofm.h /Library/galileofmbase.h
-$(OBJ)buttons_proc.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)buttons_proc.o: buttons_proc.c galileofm.h /Include/galileo/os.h
+$(OBJ)buttons_proc.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)buttons_proc.o: /Library/galileofmpragmas.h
 $(OBJ)buttons_proc.o: /Modules/Config/galileoconfig.h
 $(OBJ)buttons_proc.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)buttons_proc.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1481,8 +1538,9 @@ $(OBJ)buttons_proc.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)buttons_proc.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)buttons_proc.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)buttons_proc.o: callback.h
-$(OBJ)buttons_draw.o: buttons_draw.c galileofm.h /Library/galileofmbase.h
-$(OBJ)buttons_draw.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)buttons_draw.o: buttons_draw.c galileofm.h /Include/galileo/os.h
+$(OBJ)buttons_draw.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)buttons_draw.o: /Library/galileofmpragmas.h
 $(OBJ)buttons_draw.o: /Modules/Config/galileoconfig.h
 $(OBJ)buttons_draw.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)buttons_draw.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1496,8 +1554,9 @@ $(OBJ)buttons_draw.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)buttons_draw.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)buttons_draw.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)buttons_draw.o: callback.h
-$(OBJ)buttons_window.o: buttons_window.c galileofm.h /Library/galileofmbase.h
-$(OBJ)buttons_window.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)buttons_window.o: buttons_window.c galileofm.h /Include/galileo/os.h
+$(OBJ)buttons_window.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)buttons_window.o: /Library/galileofmpragmas.h
 $(OBJ)buttons_window.o: /Modules/Config/galileoconfig.h
 $(OBJ)buttons_window.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)buttons_window.o: main_commands.h galileo.strings function_select.h
@@ -1512,7 +1571,7 @@ $(OBJ)buttons_window.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)buttons_window.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)buttons_window.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)buttons_window.o: callback.h
-$(OBJ)buttons_display.o: buttons_display.c galileofm.h
+$(OBJ)buttons_display.o: buttons_display.c galileofm.h /Include/galileo/os.h
 $(OBJ)buttons_display.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)buttons_display.o: /Library/galileofmpragmas.h
 $(OBJ)buttons_display.o: /Modules/Config/galileoconfig.h
@@ -1529,8 +1588,9 @@ $(OBJ)buttons_display.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)buttons_display.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)buttons_display.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)buttons_display.o: callback.h
-$(OBJ)buttons_idcmp.o: buttons_idcmp.c galileofm.h /Library/galileofmbase.h
-$(OBJ)buttons_idcmp.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)buttons_idcmp.o: buttons_idcmp.c galileofm.h /Include/galileo/os.h
+$(OBJ)buttons_idcmp.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)buttons_idcmp.o: /Library/galileofmpragmas.h
 $(OBJ)buttons_idcmp.o: /Modules/Config/galileoconfig.h
 $(OBJ)buttons_idcmp.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)buttons_idcmp.o: main_commands.h galileo.strings function_select.h
@@ -1546,7 +1606,8 @@ $(OBJ)buttons_idcmp.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)buttons_idcmp.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)buttons_idcmp.o: callback.h
 $(OBJ)buttons_function.o: buttons_function.c galileofm.h
-$(OBJ)buttons_function.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)buttons_function.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)buttons_function.o: /Program/galileo_config.h
 $(OBJ)buttons_function.o: /Library/galileofmpragmas.h
 $(OBJ)buttons_function.o: /Modules/Config/galileoconfig.h
 $(OBJ)buttons_function.o: /Modules/Config/galileoconfig_pragmas.h
@@ -1562,8 +1623,9 @@ $(OBJ)buttons_function.o: start_menu.h position.h galileodata.h
 $(OBJ)buttons_function.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)buttons_function.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)buttons_function.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)buttons_run.o: buttons_run.c galileofm.h /Library/galileofmbase.h
-$(OBJ)buttons_run.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)buttons_run.o: buttons_run.c galileofm.h /Include/galileo/os.h
+$(OBJ)buttons_run.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)buttons_run.o: /Library/galileofmpragmas.h
 $(OBJ)buttons_run.o: /Modules/Config/galileoconfig.h
 $(OBJ)buttons_run.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)buttons_run.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1577,8 +1639,9 @@ $(OBJ)buttons_run.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)buttons_run.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)buttons_run.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)buttons_run.o: callback.h
-$(OBJ)buttons_io.o: buttons_io.c galileofm.h /Library/galileofmbase.h
-$(OBJ)buttons_io.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)buttons_io.o: buttons_io.c galileofm.h /Include/galileo/os.h
+$(OBJ)buttons_io.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)buttons_io.o: /Library/galileofmpragmas.h
 $(OBJ)buttons_io.o: /Modules/Config/galileoconfig.h
 $(OBJ)buttons_io.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)buttons_io.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1592,8 +1655,9 @@ $(OBJ)buttons_io.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)buttons_io.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)buttons_io.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)buttons_io.o: callback.h
-$(OBJ)buttons_edit.o: buttons_edit.c galileofm.h /Library/galileofmbase.h
-$(OBJ)buttons_edit.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)buttons_edit.o: buttons_edit.c galileofm.h /Include/galileo/os.h
+$(OBJ)buttons_edit.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)buttons_edit.o: /Library/galileofmpragmas.h
 $(OBJ)buttons_edit.o: /Modules/Config/galileoconfig.h
 $(OBJ)buttons_edit.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)buttons_edit.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1607,8 +1671,9 @@ $(OBJ)buttons_edit.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)buttons_edit.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)buttons_edit.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)buttons_edit.o: callback.h
-$(OBJ)buttons_popup.o: buttons_popup.c galileofm.h /Library/galileofmbase.h
-$(OBJ)buttons_popup.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)buttons_popup.o: buttons_popup.c galileofm.h /Include/galileo/os.h
+$(OBJ)buttons_popup.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)buttons_popup.o: /Library/galileofmpragmas.h
 $(OBJ)buttons_popup.o: /Modules/Config/galileoconfig.h
 $(OBJ)buttons_popup.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)buttons_popup.o: main_commands.h galileo.strings function_select.h
@@ -1623,8 +1688,9 @@ $(OBJ)buttons_popup.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)buttons_popup.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)buttons_popup.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)buttons_popup.o: callback.h
-$(OBJ)start_menu.o: start_menu.c galileofm.h /Library/galileofmbase.h
-$(OBJ)start_menu.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)start_menu.o: start_menu.c galileofm.h /Include/galileo/os.h
+$(OBJ)start_menu.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)start_menu.o: /Library/galileofmpragmas.h
 $(OBJ)start_menu.o: /Modules/Config/galileoconfig.h
 $(OBJ)start_menu.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)start_menu.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1638,8 +1704,9 @@ $(OBJ)start_menu.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)start_menu.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)start_menu.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)start_menu.o: callback.h
-$(OBJ)dirlist_read.o: dirlist_read.c galileofm.h /Library/galileofmbase.h
-$(OBJ)dirlist_read.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)dirlist_read.o: dirlist_read.c galileofm.h /Include/galileo/os.h
+$(OBJ)dirlist_read.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)dirlist_read.o: /Library/galileofmpragmas.h
 $(OBJ)dirlist_read.o: /Modules/Config/galileoconfig.h
 $(OBJ)dirlist_read.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)dirlist_read.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1653,8 +1720,9 @@ $(OBJ)dirlist_read.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)dirlist_read.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)dirlist_read.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)dirlist_read.o: callback.h
-$(OBJ)dirlist_scroll.o: dirlist_scroll.c galileofm.h /Library/galileofmbase.h
-$(OBJ)dirlist_scroll.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)dirlist_scroll.o: dirlist_scroll.c galileofm.h /Include/galileo/os.h
+$(OBJ)dirlist_scroll.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)dirlist_scroll.o: /Library/galileofmpragmas.h
 $(OBJ)dirlist_scroll.o: /Modules/Config/galileoconfig.h
 $(OBJ)dirlist_scroll.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)dirlist_scroll.o: main_commands.h galileo.strings function_select.h
@@ -1670,8 +1738,9 @@ $(OBJ)dirlist_scroll.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)dirlist_scroll.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)dirlist_scroll.o: callback.h
 
-$(OBJ)dirlist_util.o: dirlist_util.c galileofm.h /Library/galileofmbase.h
-$(OBJ)dirlist_util.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)dirlist_util.o: dirlist_util.c galileofm.h /Include/galileo/os.h
+$(OBJ)dirlist_util.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)dirlist_util.o: /Library/galileofmpragmas.h
 $(OBJ)dirlist_util.o: /Modules/Config/galileoconfig.h
 $(OBJ)dirlist_util.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)dirlist_util.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1685,7 +1754,7 @@ $(OBJ)dirlist_util.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)dirlist_util.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)dirlist_util.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)dirlist_util.o: callback.h
-$(OBJ)function_launch.o: function_launch.c galileofm.h
+$(OBJ)function_launch.o: function_launch.c galileofm.h /Include/galileo/os.h
 $(OBJ)function_launch.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)function_launch.o: /Library/galileofmpragmas.h
 $(OBJ)function_launch.o: /Modules/Config/galileoconfig.h
@@ -1702,8 +1771,9 @@ $(OBJ)function_launch.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)function_launch.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_launch.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_launch.o: callback.h
-$(OBJ)function_paths.o: function_paths.c galileofm.h /Library/galileofmbase.h
-$(OBJ)function_paths.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)function_paths.o: function_paths.c galileofm.h /Include/galileo/os.h
+$(OBJ)function_paths.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_paths.o: /Library/galileofmpragmas.h
 $(OBJ)function_paths.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_paths.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)function_paths.o: main_commands.h galileo.strings function_select.h
@@ -1719,7 +1789,8 @@ $(OBJ)function_paths.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_paths.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_paths.o: callback.h
 $(OBJ)function_readdir.o: function_readdir.c galileofm.h
-$(OBJ)function_readdir.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_readdir.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)function_readdir.o: /Program/galileo_config.h
 $(OBJ)function_readdir.o: /Library/galileofmpragmas.h
 $(OBJ)function_readdir.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_readdir.o: /Modules/Config/galileoconfig_pragmas.h
@@ -1735,8 +1806,9 @@ $(OBJ)function_readdir.o: start_menu.h position.h galileodata.h
 $(OBJ)function_readdir.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)function_readdir.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)function_readdir.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)function_run.o: function_run.c galileofm.h /Library/galileofmbase.h
-$(OBJ)function_run.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)function_run.o: function_run.c galileofm.h /Include/galileo/os.h
+$(OBJ)function_run.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_run.o: /Library/galileofmpragmas.h
 $(OBJ)function_run.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_run.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)function_run.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1750,8 +1822,9 @@ $(OBJ)function_run.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)function_run.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_run.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_run.o: callback.h
-$(OBJ)function_parse.o: function_parse.c galileofm.h /Library/galileofmbase.h
-$(OBJ)function_parse.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)function_parse.o: function_parse.c galileofm.h /Include/galileo/os.h
+$(OBJ)function_parse.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_parse.o: /Library/galileofmpragmas.h
 $(OBJ)function_parse.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_parse.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)function_parse.o: main_commands.h galileo.strings function_select.h
@@ -1767,7 +1840,8 @@ $(OBJ)function_parse.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_parse.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_parse.o: callback.h
 $(OBJ)function_internal.o: function_internal.c galileofm.h
-$(OBJ)function_internal.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_internal.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)function_internal.o: /Program/galileo_config.h
 $(OBJ)function_internal.o: /Library/galileofmpragmas.h
 $(OBJ)function_internal.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_internal.o: /Modules/Config/galileoconfig_pragmas.h
@@ -1785,6 +1859,7 @@ $(OBJ)function_internal.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)function_internal.o: menu_data.h tile.h protos.h text.h callback.h
 $(OBJ)function_internal.o: /Modules/modules.h /Modules/modules_pragmas.h
 $(OBJ)function_internal_async.o: function_internal_async.c galileofm.h
+$(OBJ)function_internal_async.o: /Include/galileo/os.h
 $(OBJ)function_internal_async.o: /Library/galileofmbase.h
 $(OBJ)function_internal_async.o: /Program/galileo_config.h
 $(OBJ)function_internal_async.o: /Library/galileofmpragmas.h
@@ -1808,7 +1883,8 @@ $(OBJ)function_internal_async.o: menu_data.h tile.h protos.h text.h
 $(OBJ)function_internal_async.o: callback.h /Modules/modules.h
 $(OBJ)function_internal_async.o: /Modules/modules_pragmas.h
 $(OBJ)function_external.o: function_external.c galileofm.h
-$(OBJ)function_external.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_external.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)function_external.o: /Program/galileo_config.h
 $(OBJ)function_external.o: /Library/galileofmpragmas.h
 $(OBJ)function_external.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_external.o: /Modules/Config/galileoconfig_pragmas.h
@@ -1824,7 +1900,7 @@ $(OBJ)function_external.o: scripts.h start_menu.h position.h galileodata.h
 $(OBJ)function_external.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)function_external.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)function_external.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)function_script.o: function_script.c galileofm.h
+$(OBJ)function_script.o: function_script.c galileofm.h /Include/galileo/os.h
 $(OBJ)function_script.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)function_script.o: /Library/galileofmpragmas.h
 $(OBJ)function_script.o: /Modules/Config/galileoconfig.h
@@ -1842,7 +1918,8 @@ $(OBJ)function_script.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_script.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_script.o: callback.h
 $(OBJ)function_support.o: function_support.c galileofm.h
-$(OBJ)function_support.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_support.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)function_support.o: /Program/galileo_config.h
 $(OBJ)function_support.o: /Library/galileofmpragmas.h
 $(OBJ)function_support.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_support.o: /Modules/Config/galileoconfig_pragmas.h
@@ -1860,7 +1937,7 @@ $(OBJ)function_support.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)function_support.o: menu_data.h tile.h protos.h text.h callback.h
 $(OBJ)function_support.o: replace.h
 $(OBJ)function_filechange.o: function_filechange.c galileofm.h
-$(OBJ)function_filechange.o: /Library/galileofmbase.h
+$(OBJ)function_filechange.o: /Include/galileo/os.h /Library/galileofmbase.h
 $(OBJ)function_filechange.o: /Program/galileo_config.h
 $(OBJ)function_filechange.o: /Library/galileofmpragmas.h
 $(OBJ)function_filechange.o: /Modules/Config/galileoconfig.h
@@ -1879,7 +1956,8 @@ $(OBJ)function_filechange.o: notify.h graphics.h file_select.h
 $(OBJ)function_filechange.o: window_activate.h cleanup.h icons.h menu_data.h
 $(OBJ)function_filechange.o: tile.h protos.h text.h callback.h
 $(OBJ)function_filetype.o: function_filetype.c galileofm.h
-$(OBJ)function_filetype.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_filetype.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)function_filetype.o: /Program/galileo_config.h
 $(OBJ)function_filetype.o: /Library/galileofmpragmas.h
 $(OBJ)function_filetype.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_filetype.o: /Modules/Config/galileoconfig_pragmas.h
@@ -1895,8 +1973,9 @@ $(OBJ)function_filetype.o: scripts.h start_menu.h position.h galileodata.h
 $(OBJ)function_filetype.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)function_filetype.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)function_filetype.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)function_files.o: function_files.c galileofm.h /Library/galileofmbase.h
-$(OBJ)function_files.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)function_files.o: function_files.c galileofm.h /Include/galileo/os.h
+$(OBJ)function_files.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_files.o: /Library/galileofmpragmas.h
 $(OBJ)function_files.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_files.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)function_files.o: main_commands.h galileo.strings function_select.h
@@ -1911,8 +1990,9 @@ $(OBJ)function_files.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)function_files.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_files.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_files.o: callback.h
-$(OBJ)function_all.o: function_all.c galileofm.h /Library/galileofmbase.h
-$(OBJ)function_all.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)function_all.o: function_all.c galileofm.h /Include/galileo/os.h
+$(OBJ)function_all.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_all.o: /Library/galileofmpragmas.h
 $(OBJ)function_all.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_all.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)function_all.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -1926,8 +2006,9 @@ $(OBJ)function_all.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)function_all.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_all.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_all.o: callback.h
-$(OBJ)function_none.o: function_none.c galileofm.h /Library/galileofmbase.h
-$(OBJ)function_none.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)function_none.o: function_none.c galileofm.h /Include/galileo/os.h
+$(OBJ)function_none.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_none.o: /Library/galileofmpragmas.h
 $(OBJ)function_none.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_none.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)function_none.o: main_commands.h galileo.strings function_select.h
@@ -1942,7 +2023,7 @@ $(OBJ)function_none.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)function_none.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_none.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_none.o: callback.h
-$(OBJ)function_toggle.o: function_toggle.c galileofm.h
+$(OBJ)function_toggle.o: function_toggle.c galileofm.h /Include/galileo/os.h
 $(OBJ)function_toggle.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)function_toggle.o: /Library/galileofmpragmas.h
 $(OBJ)function_toggle.o: /Modules/Config/galileoconfig.h
@@ -1959,8 +2040,9 @@ $(OBJ)function_toggle.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)function_toggle.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_toggle.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_toggle.o: callback.h
-$(OBJ)function_copy.o: function_copy.c galileofm.h /Library/galileofmbase.h
-$(OBJ)function_copy.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)function_copy.o: function_copy.c galileofm.h /Include/galileo/os.h
+$(OBJ)function_copy.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_copy.o: /Library/galileofmpragmas.h
 $(OBJ)function_copy.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_copy.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)function_copy.o: main_commands.h galileo.strings function_select.h
@@ -1975,7 +2057,7 @@ $(OBJ)function_copy.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)function_copy.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_copy.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_copy.o: callback.h
-$(OBJ)function_delete.o: function_delete.c galileofm.h
+$(OBJ)function_delete.o: function_delete.c galileofm.h /Include/galileo/os.h
 $(OBJ)function_delete.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)function_delete.o: /Library/galileofmpragmas.h
 $(OBJ)function_delete.o: /Modules/Config/galileoconfig.h
@@ -1993,7 +2075,8 @@ $(OBJ)function_delete.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_delete.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_delete.o: callback.h
 $(OBJ)function_makedir.o: function_makedir.c galileofm.h
-$(OBJ)function_makedir.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_makedir.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)function_makedir.o: /Program/galileo_config.h
 $(OBJ)function_makedir.o: /Library/galileofmpragmas.h
 $(OBJ)function_makedir.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_makedir.o: /Modules/Config/galileoconfig_pragmas.h
@@ -2009,7 +2092,7 @@ $(OBJ)function_makedir.o: start_menu.h position.h galileodata.h
 $(OBJ)function_makedir.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)function_makedir.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)function_makedir.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)function_rename.o: function_rename.c galileofm.h
+$(OBJ)function_rename.o: function_rename.c galileofm.h /Include/galileo/os.h
 $(OBJ)function_rename.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)function_rename.o: /Library/galileofmpragmas.h
 $(OBJ)function_rename.o: /Modules/Config/galileoconfig.h
@@ -2027,7 +2110,7 @@ $(OBJ)function_rename.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_rename.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_rename.o: callback.h
 $(OBJ)function_stopsniff.o: function_stopsniff.c galileofm.h
-$(OBJ)function_stopsniff.o: /Library/galileofmbase.h
+$(OBJ)function_stopsniff.o: /Include/galileo/os.h /Library/galileofmbase.h
 $(OBJ)function_stopsniff.o: /Program/galileo_config.h
 $(OBJ)function_stopsniff.o: /Library/galileofmpragmas.h
 $(OBJ)function_stopsniff.o: /Modules/Config/galileoconfig.h
@@ -2045,7 +2128,7 @@ $(OBJ)function_stopsniff.o: galileodata.h palette_routines.h envoy.h notify.h
 $(OBJ)function_stopsniff.o: graphics.h file_select.h window_activate.h
 $(OBJ)function_stopsniff.o: cleanup.h icons.h menu_data.h tile.h protos.h
 $(OBJ)function_stopsniff.o: text.h callback.h
-$(OBJ)function_select.o: function_select.c galileofm.h
+$(OBJ)function_select.o: function_select.c galileofm.h /Include/galileo/os.h
 $(OBJ)function_select.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)function_select.o: /Library/galileofmpragmas.h
 $(OBJ)function_select.o: /Modules/Config/galileoconfig.h
@@ -2063,7 +2146,7 @@ $(OBJ)function_select.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_select.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_select.o: callback.h
 $(OBJ)function_select_data.o: function_select_data.c galileofm.h
-$(OBJ)function_select_data.o: /Library/galileofmbase.h
+$(OBJ)function_select_data.o: /Include/galileo/os.h /Library/galileofmbase.h
 $(OBJ)function_select_data.o: /Program/galileo_config.h
 $(OBJ)function_select_data.o: /Library/galileofmpragmas.h
 $(OBJ)function_select_data.o: /Modules/Config/galileoconfig.h
@@ -2082,7 +2165,7 @@ $(OBJ)function_select_data.o: notify.h graphics.h file_select.h
 $(OBJ)function_select_data.o: window_activate.h cleanup.h icons.h menu_data.h
 $(OBJ)function_select_data.o: tile.h protos.h text.h callback.h
 $(OBJ)function_devicelist.o: function_devicelist.c galileofm.h
-$(OBJ)function_devicelist.o: /Library/galileofmbase.h
+$(OBJ)function_devicelist.o: /Include/galileo/os.h /Library/galileofmbase.h
 $(OBJ)function_devicelist.o: /Program/galileo_config.h
 $(OBJ)function_devicelist.o: /Library/galileofmpragmas.h
 $(OBJ)function_devicelist.o: /Modules/Config/galileoconfig.h
@@ -2100,7 +2183,7 @@ $(OBJ)function_devicelist.o: galileodata.h palette_routines.h envoy.h
 $(OBJ)function_devicelist.o: notify.h graphics.h file_select.h
 $(OBJ)function_devicelist.o: window_activate.h cleanup.h icons.h menu_data.h
 $(OBJ)function_devicelist.o: tile.h protos.h text.h callback.h
-$(OBJ)function_change.o: function_change.c galileofm.h
+$(OBJ)function_change.o: function_change.c galileofm.h /Include/galileo/os.h
 $(OBJ)function_change.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)function_change.o: /Library/galileofmpragmas.h
 $(OBJ)function_change.o: /Modules/Config/galileoconfig.h
@@ -2118,7 +2201,7 @@ $(OBJ)function_change.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_change.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_change.o: callback.h function_change.h
 $(OBJ)function_change_data.o: function_change_data.c galileofm.h
-$(OBJ)function_change_data.o: /Library/galileofmbase.h
+$(OBJ)function_change_data.o: /Include/galileo/os.h /Library/galileofmbase.h
 $(OBJ)function_change_data.o: /Program/galileo_config.h
 $(OBJ)function_change_data.o: /Library/galileofmpragmas.h
 $(OBJ)function_change_data.o: /Modules/Config/galileoconfig.h
@@ -2138,7 +2221,8 @@ $(OBJ)function_change_data.o: window_activate.h cleanup.h icons.h menu_data.h
 $(OBJ)function_change_data.o: tile.h protos.h text.h callback.h
 $(OBJ)function_change_data.o: function_change.h
 $(OBJ)function_scandir.o: function_scandir.c galileofm.h
-$(OBJ)function_scandir.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_scandir.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)function_scandir.o: /Program/galileo_config.h
 $(OBJ)function_scandir.o: /Library/galileofmpragmas.h
 $(OBJ)function_scandir.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_scandir.o: /Modules/Config/galileoconfig_pragmas.h
@@ -2155,7 +2239,7 @@ $(OBJ)function_scandir.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)function_scandir.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)function_scandir.o: menu_data.h tile.h protos.h text.h callback.h
 $(OBJ)function_clearbuffers.o: function_clearbuffers.c galileofm.h
-$(OBJ)function_clearbuffers.o: /Library/galileofmbase.h
+$(OBJ)function_clearbuffers.o: /Include/galileo/os.h /Library/galileofmbase.h
 $(OBJ)function_clearbuffers.o: /Program/galileo_config.h
 $(OBJ)function_clearbuffers.o: /Library/galileofmpragmas.h
 $(OBJ)function_clearbuffers.o: /Modules/Config/galileoconfig.h
@@ -2174,8 +2258,9 @@ $(OBJ)function_clearbuffers.o: position.h galileodata.h palette_routines.h
 $(OBJ)function_clearbuffers.o: envoy.h notify.h graphics.h file_select.h
 $(OBJ)function_clearbuffers.o: window_activate.h cleanup.h icons.h
 $(OBJ)function_clearbuffers.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)function_show.o: function_show.c galileofm.h /Library/galileofmbase.h
-$(OBJ)function_show.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)function_show.o: function_show.c galileofm.h /Include/galileo/os.h
+$(OBJ)function_show.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_show.o: /Library/galileofmpragmas.h
 $(OBJ)function_show.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_show.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)function_show.o: main_commands.h galileo.strings function_select.h
@@ -2191,8 +2276,9 @@ $(OBJ)function_show.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_show.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_show.o: callback.h /Modules/modules.h
 $(OBJ)function_show.o: /Modules/modules_pragmas.h
-$(OBJ)function_disk.o: function_disk.c galileofm.h /Library/galileofmbase.h
-$(OBJ)function_disk.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)function_disk.o: function_disk.c galileofm.h /Include/galileo/os.h
+$(OBJ)function_disk.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_disk.o: /Library/galileofmpragmas.h
 $(OBJ)function_disk.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_disk.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)function_disk.o: main_commands.h galileo.strings function_select.h
@@ -2209,7 +2295,7 @@ $(OBJ)function_disk.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_disk.o: callback.h /Modules/modules.h
 $(OBJ)function_disk.o: /Modules/modules_pragmas.h
 $(OBJ)function_loadbuttons.o: function_loadbuttons.c galileofm.h
-$(OBJ)function_loadbuttons.o: /Library/galileofmbase.h
+$(OBJ)function_loadbuttons.o: /Include/galileo/os.h /Library/galileofmbase.h
 $(OBJ)function_loadbuttons.o: /Program/galileo_config.h
 $(OBJ)function_loadbuttons.o: /Library/galileofmpragmas.h
 $(OBJ)function_loadbuttons.o: /Modules/Config/galileoconfig.h
@@ -2228,6 +2314,7 @@ $(OBJ)function_loadbuttons.o: notify.h graphics.h file_select.h
 $(OBJ)function_loadbuttons.o: window_activate.h cleanup.h icons.h menu_data.h
 $(OBJ)function_loadbuttons.o: tile.h protos.h text.h callback.h
 $(OBJ)function_loadenvironment.o: function_loadenvironment.c galileofm.h
+$(OBJ)function_loadenvironment.o: /Include/galileo/os.h
 $(OBJ)function_loadenvironment.o: /Library/galileofmbase.h
 $(OBJ)function_loadenvironment.o: /Program/galileo_config.h
 $(OBJ)function_loadenvironment.o: /Library/galileofmpragmas.h
@@ -2250,7 +2337,7 @@ $(OBJ)function_loadenvironment.o: window_activate.h cleanup.h icons.h
 $(OBJ)function_loadenvironment.o: menu_data.h tile.h protos.h text.h
 $(OBJ)function_loadenvironment.o: callback.h
 $(OBJ)function_loadfonts.o: function_loadfonts.c galileofm.h
-$(OBJ)function_loadfonts.o: /Library/galileofmbase.h
+$(OBJ)function_loadfonts.o: /Include/galileo/os.h /Library/galileofmbase.h
 $(OBJ)function_loadfonts.o: /Program/galileo_config.h
 $(OBJ)function_loadfonts.o: /Library/galileofmpragmas.h
 $(OBJ)function_loadfonts.o: /Modules/Config/galileoconfig.h
@@ -2269,7 +2356,8 @@ $(OBJ)function_loadfonts.o: graphics.h file_select.h window_activate.h
 $(OBJ)function_loadfonts.o: cleanup.h icons.h menu_data.h tile.h protos.h
 $(OBJ)function_loadfonts.o: text.h callback.h
 $(OBJ)function_leaveout.o: function_leaveout.c galileofm.h
-$(OBJ)function_leaveout.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_leaveout.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)function_leaveout.o: /Program/galileo_config.h
 $(OBJ)function_leaveout.o: /Library/galileofmpragmas.h
 $(OBJ)function_leaveout.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_leaveout.o: /Modules/Config/galileoconfig_pragmas.h
@@ -2286,7 +2374,8 @@ $(OBJ)function_leaveout.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)function_leaveout.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)function_leaveout.o: menu_data.h tile.h protos.h text.h callback.h
 $(OBJ)function_runprog.o: function_runprog.c galileofm.h
-$(OBJ)function_runprog.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_runprog.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)function_runprog.o: /Program/galileo_config.h
 $(OBJ)function_runprog.o: /Library/galileofmpragmas.h
 $(OBJ)function_runprog.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_runprog.o: /Modules/Config/galileoconfig_pragmas.h
@@ -2303,7 +2392,8 @@ $(OBJ)function_runprog.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)function_runprog.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)function_runprog.o: menu_data.h tile.h protos.h text.h callback.h
 $(OBJ)function_addicon.o: function_addicon.c galileofm.h
-$(OBJ)function_addicon.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_addicon.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)function_addicon.o: /Program/galileo_config.h
 $(OBJ)function_addicon.o: /Library/galileofmpragmas.h
 $(OBJ)function_addicon.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_addicon.o: /Modules/Config/galileoconfig_pragmas.h
@@ -2319,7 +2409,7 @@ $(OBJ)function_addicon.o: start_menu.h position.h galileodata.h
 $(OBJ)function_addicon.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)function_addicon.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)function_addicon.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)function_search.o: function_search.c galileofm.h
+$(OBJ)function_search.o: function_search.c galileofm.h /Include/galileo/os.h
 $(OBJ)function_search.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)function_search.o: /Library/galileofmpragmas.h
 $(OBJ)function_search.o: /Modules/Config/galileoconfig.h
@@ -2338,7 +2428,8 @@ $(OBJ)function_search.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_search.o: callback.h
 
 $(OBJ)function_getsizes.o: function_getsizes.c galileofm.h
-$(OBJ)function_getsizes.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_getsizes.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)function_getsizes.o: /Program/galileo_config.h
 $(OBJ)function_getsizes.o: /Library/galileofmpragmas.h
 $(OBJ)function_getsizes.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_getsizes.o: /Modules/Config/galileoconfig_pragmas.h
@@ -2354,8 +2445,9 @@ $(OBJ)function_getsizes.o: scripts.h start_menu.h position.h galileodata.h
 $(OBJ)function_getsizes.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)function_getsizes.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)function_getsizes.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)function_hunt.o: function_hunt.c galileofm.h /Library/galileofmbase.h
-$(OBJ)function_hunt.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)function_hunt.o: function_hunt.c galileofm.h /Include/galileo/os.h
+$(OBJ)function_hunt.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_hunt.o: /Library/galileofmpragmas.h
 $(OBJ)function_hunt.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_hunt.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)function_hunt.o: main_commands.h galileo.strings function_select.h
@@ -2370,7 +2462,7 @@ $(OBJ)function_hunt.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)function_hunt.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_hunt.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_hunt.o: callback.h
-$(OBJ)function_parent.o: function_parent.c galileofm.h
+$(OBJ)function_parent.o: function_parent.c galileofm.h /Include/galileo/os.h
 $(OBJ)function_parent.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)function_parent.o: /Library/galileofmpragmas.h
 $(OBJ)function_parent.o: /Modules/Config/galileoconfig.h
@@ -2387,8 +2479,9 @@ $(OBJ)function_parent.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)function_parent.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_parent.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_parent.o: callback.h
-$(OBJ)function_user.o: function_user.c galileofm.h /Library/galileofmbase.h
-$(OBJ)function_user.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)function_user.o: function_user.c galileofm.h /Include/galileo/os.h
+$(OBJ)function_user.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_user.o: /Library/galileofmpragmas.h
 $(OBJ)function_user.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_user.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)function_user.o: main_commands.h galileo.strings function_select.h
@@ -2403,7 +2496,7 @@ $(OBJ)function_user.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)function_user.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_user.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_user.o: callback.h
-$(OBJ)function_verify.o: function_verify.c galileofm.h
+$(OBJ)function_verify.o: function_verify.c galileofm.h /Include/galileo/os.h
 $(OBJ)function_verify.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)function_verify.o: /Library/galileofmpragmas.h
 $(OBJ)function_verify.o: /Modules/Config/galileoconfig.h
@@ -2420,8 +2513,9 @@ $(OBJ)function_verify.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)function_verify.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_verify.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_verify.o: callback.h
-$(OBJ)function_cli.o: function_cli.c galileofm.h /Library/galileofmbase.h
-$(OBJ)function_cli.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)function_cli.o: function_cli.c galileofm.h /Include/galileo/os.h
+$(OBJ)function_cli.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_cli.o: /Library/galileofmpragmas.h
 $(OBJ)function_cli.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_cli.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)function_cli.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -2436,7 +2530,8 @@ $(OBJ)function_cli.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_cli.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_cli.o: callback.h eliza.h
 $(OBJ)function_printdir.o: function_printdir.c galileofm.h
-$(OBJ)function_printdir.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_printdir.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)function_printdir.o: /Program/galileo_config.h
 $(OBJ)function_printdir.o: /Library/galileofmpragmas.h
 $(OBJ)function_printdir.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_printdir.o: /Modules/Config/galileoconfig_pragmas.h
@@ -2453,8 +2548,9 @@ $(OBJ)function_printdir.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)function_printdir.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)function_printdir.o: menu_data.h tile.h protos.h text.h callback.h
 $(OBJ)function_printdir.o: /Modules/modules.h /Modules/modules_pragmas.h
-$(OBJ)function_set.o: function_set.c galileofm.h /Library/galileofmbase.h
-$(OBJ)function_set.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)function_set.o: function_set.c galileofm.h /Include/galileo/os.h
+$(OBJ)function_set.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_set.o: /Library/galileofmpragmas.h
 $(OBJ)function_set.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_set.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)function_set.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -2469,7 +2565,7 @@ $(OBJ)function_set.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_set.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_set.o: callback.h
 $(OBJ)function_closebuttons.o: function_closebuttons.c galileofm.h
-$(OBJ)function_closebuttons.o: /Library/galileofmbase.h
+$(OBJ)function_closebuttons.o: /Include/galileo/os.h /Library/galileofmbase.h
 $(OBJ)function_closebuttons.o: /Program/galileo_config.h
 $(OBJ)function_closebuttons.o: /Library/galileofmpragmas.h
 $(OBJ)function_closebuttons.o: /Modules/Config/galileoconfig.h
@@ -2489,7 +2585,8 @@ $(OBJ)function_closebuttons.o: envoy.h notify.h graphics.h file_select.h
 $(OBJ)function_closebuttons.o: window_activate.h cleanup.h icons.h
 $(OBJ)function_closebuttons.o: menu_data.h tile.h protos.h text.h callback.h
 $(OBJ)function_special.o: function_special.c galileofm.h
-$(OBJ)function_special.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_special.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)function_special.o: /Program/galileo_config.h
 $(OBJ)function_special.o: /Library/galileofmpragmas.h
 $(OBJ)function_special.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_special.o: /Modules/Config/galileoconfig_pragmas.h
@@ -2506,7 +2603,8 @@ $(OBJ)function_special.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)function_special.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)function_special.o: menu_data.h tile.h protos.h text.h callback.h
 $(OBJ)function_reselect.o: function_reselect.c galileofm.h
-$(OBJ)function_reselect.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_reselect.o: /Include/galileo/os.h /Library/galileofmbase.h
+$(OBJ)function_reselect.o: /Program/galileo_config.h
 $(OBJ)function_reselect.o: /Library/galileofmpragmas.h
 $(OBJ)function_reselect.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_reselect.o: /Modules/Config/galileoconfig_pragmas.h
@@ -2522,7 +2620,7 @@ $(OBJ)function_reselect.o: scripts.h start_menu.h position.h galileodata.h
 $(OBJ)function_reselect.o: palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)function_reselect.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)function_reselect.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)function_assign.o: function_assign.c galileofm.h
+$(OBJ)function_assign.o: function_assign.c galileofm.h /Include/galileo/os.h
 $(OBJ)function_assign.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)function_assign.o: /Library/galileofmpragmas.h
 $(OBJ)function_assign.o: /Modules/Config/galileoconfig.h
@@ -2540,7 +2638,7 @@ $(OBJ)function_assign.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_assign.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_assign.o: callback.h
 $(OBJ)function_configure.o: function_configure.c galileofm.h
-$(OBJ)function_configure.o: /Library/galileofmbase.h
+$(OBJ)function_configure.o: /Include/galileo/os.h /Library/galileofmbase.h
 $(OBJ)function_configure.o: /Program/galileo_config.h
 $(OBJ)function_configure.o: /Library/galileofmpragmas.h
 $(OBJ)function_configure.o: /Modules/Config/galileoconfig.h
@@ -2560,6 +2658,7 @@ $(OBJ)function_configure.o: cleanup.h icons.h menu_data.h tile.h protos.h
 $(OBJ)function_configure.o: text.h callback.h /Modules/modules.h
 $(OBJ)function_configure.o: /Modules/modules_pragmas.h
 $(OBJ)function_setbackground.o: function_setbackground.c galileofm.h
+$(OBJ)function_setbackground.o: /Include/galileo/os.h
 $(OBJ)function_setbackground.o: /Library/galileofmbase.h
 $(OBJ)function_setbackground.o: /Program/galileo_config.h
 $(OBJ)function_setbackground.o: /Library/galileofmpragmas.h
@@ -2580,7 +2679,7 @@ $(OBJ)function_setbackground.o: envoy.h notify.h graphics.h file_select.h
 $(OBJ)function_setbackground.o: window_activate.h cleanup.h icons.h
 $(OBJ)function_setbackground.o: menu_data.h tile.h protos.h text.h callback.h
 $(OBJ)function_runcommand.o: function_runcommand.c galileofm.h
-$(OBJ)function_runcommand.o: /Library/galileofmbase.h
+$(OBJ)function_runcommand.o: /Include/galileo/os.h /Library/galileofmbase.h
 $(OBJ)function_runcommand.o: /Program/galileo_config.h
 $(OBJ)function_runcommand.o: /Library/galileofmpragmas.h
 $(OBJ)function_runcommand.o: /Modules/Config/galileoconfig.h
@@ -2598,8 +2697,9 @@ $(OBJ)function_runcommand.o: galileodata.h palette_routines.h envoy.h
 $(OBJ)function_runcommand.o: notify.h graphics.h file_select.h
 $(OBJ)function_runcommand.o: window_activate.h cleanup.h icons.h menu_data.h
 $(OBJ)function_runcommand.o: tile.h protos.h text.h callback.h
-$(OBJ)function_reset.o: function_reset.c galileofm.h /Library/galileofmbase.h
-$(OBJ)function_reset.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)function_reset.o: function_reset.c galileofm.h /Include/galileo/os.h
+$(OBJ)function_reset.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)function_reset.o: /Library/galileofmpragmas.h
 $(OBJ)function_reset.o: /Modules/Config/galileoconfig.h
 $(OBJ)function_reset.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)function_reset.o: main_commands.h galileo.strings function_select.h
@@ -2614,8 +2714,9 @@ $(OBJ)function_reset.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)function_reset.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)function_reset.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)function_reset.o: callback.h
-$(OBJ)clock_task.o: clock_task.c galileofm.h /Library/galileofmbase.h
-$(OBJ)clock_task.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)clock_task.o: clock_task.c galileofm.h /Include/galileo/os.h
+$(OBJ)clock_task.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)clock_task.o: /Library/galileofmpragmas.h
 $(OBJ)clock_task.o: /Modules/Config/galileoconfig.h
 $(OBJ)clock_task.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)clock_task.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -2629,8 +2730,9 @@ $(OBJ)clock_task.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)clock_task.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)clock_task.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)clock_task.o: callback.h
-$(OBJ)environment.o: environment.c galileofm.h /Library/galileofmbase.h
-$(OBJ)environment.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)environment.o: environment.c galileofm.h /Include/galileo/os.h
+$(OBJ)environment.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)environment.o: /Library/galileofmpragmas.h
 $(OBJ)environment.o: /Modules/Config/galileoconfig.h
 $(OBJ)environment.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)environment.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -2644,9 +2746,9 @@ $(OBJ)environment.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)environment.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)environment.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)environment.o: callback.h
-$(OBJ)app_msg.o: app_msg.c galileofm.h /Library/galileofmbase.h
-$(OBJ)app_msg.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)app_msg.o: /Modules/Config/galileoconfig.h
+$(OBJ)app_msg.o: app_msg.c galileofm.h /Include/galileo/os.h
+$(OBJ)app_msg.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)app_msg.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)app_msg.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)app_msg.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)app_msg.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -2658,9 +2760,9 @@ $(OBJ)app_msg.o: desktop.h groups.h help.h scripts.h start_menu.h position.h
 $(OBJ)app_msg.o: galileodata.h palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)app_msg.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)app_msg.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)icons.o: icons.c galileofm.h /Library/galileofmbase.h
-$(OBJ)icons.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)icons.o: /Modules/Config/galileoconfig.h
+$(OBJ)icons.o: icons.c galileofm.h /Include/galileo/os.h
+$(OBJ)icons.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)icons.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)icons.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)icons.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)icons.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -2672,8 +2774,9 @@ $(OBJ)icons.o: start_menu.h position.h galileodata.h palette_routines.h
 $(OBJ)icons.o: envoy.h notify.h graphics.h file_select.h window_activate.h
 $(OBJ)icons.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)icons.o: callback.h
-$(OBJ)icon_function.o: icon_function.c galileofm.h /Library/galileofmbase.h
-$(OBJ)icon_function.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)icon_function.o: icon_function.c galileofm.h /Include/galileo/os.h
+$(OBJ)icon_function.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)icon_function.o: /Library/galileofmpragmas.h
 $(OBJ)icon_function.o: /Modules/Config/galileoconfig.h
 $(OBJ)icon_function.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)icon_function.o: main_commands.h galileo.strings function_select.h
@@ -2688,8 +2791,9 @@ $(OBJ)icon_function.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)icon_function.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)icon_function.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)icon_function.o: callback.h
-$(OBJ)file_select.o: file_select.c galileofm.h /Library/galileofmbase.h
-$(OBJ)file_select.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)file_select.o: file_select.c galileofm.h /Include/galileo/os.h
+$(OBJ)file_select.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)file_select.o: /Library/galileofmpragmas.h
 $(OBJ)file_select.o: /Modules/Config/galileoconfig.h
 $(OBJ)file_select.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)file_select.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -2703,8 +2807,9 @@ $(OBJ)file_select.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)file_select.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)file_select.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)file_select.o: callback.h
-$(OBJ)file_openwith.o: file_openwith.c galileofm.h /Library/galileofmbase.h
-$(OBJ)file_openwith.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)file_openwith.o: file_openwith.c galileofm.h /Include/galileo/os.h
+$(OBJ)file_openwith.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)file_openwith.o: /Library/galileofmpragmas.h
 $(OBJ)file_openwith.o: /Modules/Config/galileoconfig.h
 $(OBJ)file_openwith.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)file_openwith.o: main_commands.h galileo.strings function_select.h
@@ -2719,7 +2824,7 @@ $(OBJ)file_openwith.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)file_openwith.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)file_openwith.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)file_openwith.o: callback.h
-$(OBJ)window_activate.o: window_activate.c galileofm.h
+$(OBJ)window_activate.o: window_activate.c galileofm.h /Include/galileo/os.h
 $(OBJ)window_activate.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)window_activate.o: /Library/galileofmpragmas.h
 $(OBJ)window_activate.o: /Modules/Config/galileoconfig.h
@@ -2736,9 +2841,9 @@ $(OBJ)window_activate.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)window_activate.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)window_activate.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)window_activate.o: callback.h
-$(OBJ)cleanup.o: cleanup.c galileofm.h /Library/galileofmbase.h
-$(OBJ)cleanup.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)cleanup.o: /Modules/Config/galileoconfig.h
+$(OBJ)cleanup.o: cleanup.c galileofm.h /Include/galileo/os.h
+$(OBJ)cleanup.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)cleanup.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)cleanup.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)cleanup.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)cleanup.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -2750,9 +2855,9 @@ $(OBJ)cleanup.o: desktop.h groups.h help.h scripts.h start_menu.h position.h
 $(OBJ)cleanup.o: galileodata.h palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)cleanup.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)cleanup.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)tile.o: tile.c galileofm.h /Library/galileofmbase.h
-$(OBJ)tile.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)tile.o: /Modules/Config/galileoconfig.h
+$(OBJ)tile.o: tile.c galileofm.h /Include/galileo/os.h
+$(OBJ)tile.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)tile.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)tile.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)tile.o: galileo.strings function_select.h pattern.h toolbar.h display.h
 $(OBJ)tile.o: reselect.h lister.h popup.h buttons.h dirlist.h app_msg.h
@@ -2763,9 +2868,9 @@ $(OBJ)tile.o: backdrop.h desktop.h groups.h help.h scripts.h start_menu.h
 $(OBJ)tile.o: position.h galileodata.h palette_routines.h envoy.h notify.h
 $(OBJ)tile.o: graphics.h file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)tile.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)display.o: display.c galileofm.h /Library/galileofmbase.h
-$(OBJ)display.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)display.o: /Modules/Config/galileoconfig.h
+$(OBJ)display.o: display.c galileofm.h /Include/galileo/os.h
+$(OBJ)display.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)display.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)display.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)display.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)display.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -2777,7 +2882,7 @@ $(OBJ)display.o: desktop.h groups.h help.h scripts.h start_menu.h position.h
 $(OBJ)display.o: galileodata.h palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)display.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)display.o: menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)display_pattern.o: display_pattern.c galileofm.h
+$(OBJ)display_pattern.o: display_pattern.c galileofm.h /Include/galileo/os.h
 $(OBJ)display_pattern.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)display_pattern.o: /Library/galileofmpragmas.h
 $(OBJ)display_pattern.o: /Modules/Config/galileoconfig.h
@@ -2794,8 +2899,9 @@ $(OBJ)display_pattern.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)display_pattern.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)display_pattern.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)display_pattern.o: callback.h
-$(OBJ)rexx_proc.o: rexx_proc.c galileofm.h /Library/galileofmbase.h
-$(OBJ)rexx_proc.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)rexx_proc.o: rexx_proc.c galileofm.h /Include/galileo/os.h
+$(OBJ)rexx_proc.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)rexx_proc.o: /Library/galileofmpragmas.h
 $(OBJ)rexx_proc.o: /Modules/Config/galileoconfig.h
 $(OBJ)rexx_proc.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)rexx_proc.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -2809,8 +2915,9 @@ $(OBJ)rexx_proc.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)rexx_proc.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)rexx_proc.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)rexx_proc.o: callback.h
-$(OBJ)rexx_lister.o: rexx_lister.c galileofm.h /Library/galileofmbase.h
-$(OBJ)rexx_lister.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)rexx_lister.o: rexx_lister.c galileofm.h /Include/galileo/os.h
+$(OBJ)rexx_lister.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)rexx_lister.o: /Library/galileofmpragmas.h
 $(OBJ)rexx_lister.o: /Modules/Config/galileoconfig.h
 $(OBJ)rexx_lister.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)rexx_lister.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -2824,8 +2931,9 @@ $(OBJ)rexx_lister.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)rexx_lister.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)rexx_lister.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)rexx_lister.o: callback.h
-$(OBJ)rexx_files.o: rexx_files.c galileofm.h /Library/galileofmbase.h
-$(OBJ)rexx_files.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)rexx_files.o: rexx_files.c galileofm.h /Include/galileo/os.h
+$(OBJ)rexx_files.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)rexx_files.o: /Library/galileofmpragmas.h
 $(OBJ)rexx_files.o: /Modules/Config/galileoconfig.h
 $(OBJ)rexx_files.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)rexx_files.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -2839,8 +2947,9 @@ $(OBJ)rexx_files.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)rexx_files.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)rexx_files.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)rexx_files.o: callback.h
-$(OBJ)rexx_util.o: rexx_util.c galileofm.h /Library/galileofmbase.h
-$(OBJ)rexx_util.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)rexx_util.o: rexx_util.c galileofm.h /Include/galileo/os.h
+$(OBJ)rexx_util.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)rexx_util.o: /Library/galileofmpragmas.h
 $(OBJ)rexx_util.o: /Modules/Config/galileoconfig.h
 $(OBJ)rexx_util.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)rexx_util.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -2854,8 +2963,9 @@ $(OBJ)rexx_util.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)rexx_util.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)rexx_util.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)rexx_util.o: callback.h
-$(OBJ)rexx_data.o: rexx_data.c galileofm.h /Library/galileofmbase.h
-$(OBJ)rexx_data.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)rexx_data.o: rexx_data.c galileofm.h /Include/galileo/os.h
+$(OBJ)rexx_data.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)rexx_data.o: /Library/galileofmpragmas.h
 $(OBJ)rexx_data.o: /Modules/Config/galileoconfig.h
 $(OBJ)rexx_data.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)rexx_data.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -2869,8 +2979,9 @@ $(OBJ)rexx_data.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)rexx_data.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)rexx_data.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)rexx_data.o: callback.h
-$(OBJ)rexx_traps.o: rexx_traps.c galileofm.h /Library/galileofmbase.h
-$(OBJ)rexx_traps.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)rexx_traps.o: rexx_traps.c galileofm.h /Include/galileo/os.h
+$(OBJ)rexx_traps.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)rexx_traps.o: /Library/galileofmpragmas.h
 $(OBJ)rexx_traps.o: /Modules/Config/galileoconfig.h
 $(OBJ)rexx_traps.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)rexx_traps.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -2884,8 +2995,9 @@ $(OBJ)rexx_traps.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)rexx_traps.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)rexx_traps.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)rexx_traps.o: callback.h
-$(OBJ)rexx_apps.o: rexx_apps.c galileofm.h /Library/galileofmbase.h
-$(OBJ)rexx_apps.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)rexx_apps.o: rexx_apps.c galileofm.h /Include/galileo/os.h
+$(OBJ)rexx_apps.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)rexx_apps.o: /Library/galileofmpragmas.h
 $(OBJ)rexx_apps.o: /Modules/Config/galileoconfig.h
 $(OBJ)rexx_apps.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)rexx_apps.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -2899,8 +3011,9 @@ $(OBJ)rexx_apps.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)rexx_apps.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)rexx_apps.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)rexx_apps.o: callback.h
-$(OBJ)rexx_handler.o: rexx_handler.c galileofm.h /Library/galileofmbase.h
-$(OBJ)rexx_handler.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)rexx_handler.o: rexx_handler.c galileofm.h /Include/galileo/os.h
+$(OBJ)rexx_handler.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)rexx_handler.o: /Library/galileofmpragmas.h
 $(OBJ)rexx_handler.o: /Modules/Config/galileoconfig.h
 $(OBJ)rexx_handler.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)rexx_handler.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -2914,9 +3027,9 @@ $(OBJ)rexx_handler.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)rexx_handler.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)rexx_handler.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)rexx_handler.o: callback.h
-$(OBJ)rexx_cmd.o: rexx_cmd.c galileofm.h /Library/galileofmbase.h
-$(OBJ)rexx_cmd.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)rexx_cmd.o: /Modules/Config/galileoconfig.h
+$(OBJ)rexx_cmd.o: rexx_cmd.c galileofm.h /Include/galileo/os.h
+$(OBJ)rexx_cmd.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)rexx_cmd.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)rexx_cmd.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)rexx_cmd.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)rexx_cmd.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -2928,8 +3041,9 @@ $(OBJ)rexx_cmd.o: desktop.h groups.h help.h scripts.h start_menu.h position.h
 $(OBJ)rexx_cmd.o: galileodata.h palette_routines.h envoy.h notify.h
 $(OBJ)rexx_cmd.o: graphics.h file_select.h window_activate.h cleanup.h
 $(OBJ)rexx_cmd.o: icons.h menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)rexx_galileo.o: rexx_galileo.c galileofm.h /Library/galileofmbase.h
-$(OBJ)rexx_galileo.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)rexx_galileo.o: rexx_galileo.c galileofm.h /Include/galileo/os.h
+$(OBJ)rexx_galileo.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)rexx_galileo.o: /Library/galileofmpragmas.h
 $(OBJ)rexx_galileo.o: /Modules/Config/galileoconfig.h
 $(OBJ)rexx_galileo.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)rexx_galileo.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -2943,8 +3057,9 @@ $(OBJ)rexx_galileo.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)rexx_galileo.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)rexx_galileo.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)rexx_galileo.o: callback.h
-$(OBJ)dos_notify.o: dos_notify.c galileofm.h /Library/galileofmbase.h
-$(OBJ)dos_notify.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)dos_notify.o: dos_notify.c galileofm.h /Include/galileo/os.h
+$(OBJ)dos_notify.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)dos_notify.o: /Library/galileofmpragmas.h
 $(OBJ)dos_notify.o: /Modules/Config/galileoconfig.h
 $(OBJ)dos_notify.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)dos_notify.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -2958,9 +3073,9 @@ $(OBJ)dos_notify.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)dos_notify.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)dos_notify.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)dos_notify.o: callback.h
-$(OBJ)replace.o: replace.c galileofm.h /Library/galileofmbase.h
-$(OBJ)replace.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)replace.o: /Modules/Config/galileoconfig.h
+$(OBJ)replace.o: replace.c galileofm.h /Include/galileo/os.h
+$(OBJ)replace.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)replace.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)replace.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)replace.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)replace.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -2972,9 +3087,9 @@ $(OBJ)replace.o: desktop.h groups.h help.h scripts.h start_menu.h position.h
 $(OBJ)replace.o: galileodata.h palette_routines.h envoy.h notify.h graphics.h
 $(OBJ)replace.o: file_select.h window_activate.h cleanup.h icons.h
 $(OBJ)replace.o: menu_data.h tile.h protos.h text.h callback.h replace.h
-$(OBJ)position.o: position.c galileofm.h /Library/galileofmbase.h
-$(OBJ)position.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)position.o: /Modules/Config/galileoconfig.h
+$(OBJ)position.o: position.c galileofm.h /Include/galileo/os.h
+$(OBJ)position.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)position.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)position.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)position.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)position.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h
@@ -2986,8 +3101,9 @@ $(OBJ)position.o: desktop.h groups.h help.h scripts.h start_menu.h position.h
 $(OBJ)position.o: galileodata.h palette_routines.h envoy.h notify.h
 $(OBJ)position.o: graphics.h file_select.h window_activate.h cleanup.h
 $(OBJ)position.o: icons.h menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)callback_main.o: callback_main.c galileofm.h /Library/galileofmbase.h
-$(OBJ)callback_main.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)callback_main.o: callback_main.c galileofm.h /Include/galileo/os.h
+$(OBJ)callback_main.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)callback_main.o: /Library/galileofmpragmas.h
 $(OBJ)callback_main.o: /Modules/Config/galileoconfig.h
 $(OBJ)callback_main.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)callback_main.o: main_commands.h galileo.strings function_select.h
@@ -3002,8 +3118,9 @@ $(OBJ)callback_main.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)callback_main.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)callback_main.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)callback_main.o: callback.h
-$(OBJ)callback_dir.o: callback_dir.c galileofm.h /Library/galileofmbase.h
-$(OBJ)callback_dir.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)callback_dir.o: callback_dir.c galileofm.h /Include/galileo/os.h
+$(OBJ)callback_dir.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)callback_dir.o: /Library/galileofmpragmas.h
 $(OBJ)callback_dir.o: /Modules/Config/galileoconfig.h
 $(OBJ)callback_dir.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)callback_dir.o: galileo.strings function_select.h pattern.h toolbar.h
@@ -3017,8 +3134,9 @@ $(OBJ)callback_dir.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)callback_dir.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)callback_dir.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)callback_dir.o: callback.h
-$(OBJ)callback_help.o: callback_help.c galileofm.h /Library/galileofmbase.h
-$(OBJ)callback_help.o: /Program/galileo_config.h /Library/galileofmpragmas.h
+$(OBJ)callback_help.o: callback_help.c galileofm.h /Include/galileo/os.h
+$(OBJ)callback_help.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)callback_help.o: /Library/galileofmpragmas.h
 $(OBJ)callback_help.o: /Modules/Config/galileoconfig.h
 $(OBJ)callback_help.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)callback_help.o: main_commands.h galileo.strings function_select.h
@@ -3033,7 +3151,7 @@ $(OBJ)callback_help.o: position.h galileodata.h palette_routines.h envoy.h
 $(OBJ)callback_help.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)callback_help.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)callback_help.o: callback.h
-$(OBJ)callback_lister.o: callback_lister.c galileofm.h
+$(OBJ)callback_lister.o: callback_lister.c galileofm.h /Include/galileo/os.h
 $(OBJ)callback_lister.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)callback_lister.o: /Library/galileofmpragmas.h
 $(OBJ)callback_lister.o: /Modules/Config/galileoconfig.h
@@ -3051,9 +3169,9 @@ $(OBJ)callback_lister.o: notify.h graphics.h file_select.h window_activate.h
 $(OBJ)callback_lister.o: cleanup.h icons.h menu_data.h tile.h protos.h text.h
 $(OBJ)callback_lister.o: callback.h replace.h /Modules/modules.h
 $(OBJ)callback_lister.o: /Modules/modules_pragmas.h
-$(OBJ)about.o: about.c galileofm.h /Library/galileofmbase.h
-$(OBJ)about.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)about.o: /Modules/Config/galileoconfig.h
+$(OBJ)about.o: about.c galileofm.h /Include/galileo/os.h
+$(OBJ)about.o: /Library/galileofmbase.h /Program/galileo_config.h
+$(OBJ)about.o: /Library/galileofmpragmas.h /Modules/Config/galileoconfig.h
 $(OBJ)about.o: /Modules/Config/galileoconfig_pragmas.h main_commands.h
 $(OBJ)about.o: galileo.strings function_select.h pattern.h toolbar.h
 $(OBJ)about.o: display.h reselect.h lister.h popup.h buttons.h dirlist.h

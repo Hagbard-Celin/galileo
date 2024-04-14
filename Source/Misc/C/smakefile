@@ -83,6 +83,7 @@ clean:
 # DO NOT DELETE THIS LINE makedepend needs it
 
 $(OBJ)GalileoRT.o: GalileoRT.c //Library/galileofmbase.h
-$(OBJ)GalileoRT.o: //Program/galileo_config.h //Library/galileofmpragmas.h
-$(OBJ)LoadGB.o: LoadGB.c //Library/galileofmbase.h //Program/galileo_config.h
-$(OBJ)LoadGB.o: //Library/galileofmpragmas.h
+$(OBJ)GalileoRT.o: //Include/galileo/os.h //Program/galileo_config.h
+$(OBJ)GalileoRT.o: //Library/galileofmpragmas.h
+$(OBJ)LoadGB.o: LoadGB.c //Library/galileofmbase.h //Include/galileo/os.h
+$(OBJ)LoadGB.o: //Program/galileo_config.h //Library/galileofmpragmas.h

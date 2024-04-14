@@ -52,8 +52,11 @@ clean:
 # DO NOT DELETE THIS LINE makedepend needs it
 
 $(OBJ)font.o: font.c font.h font.strings //Library/galileofmbase.h
-$(OBJ)font.o: //Program/galileo_config.h //Library/galileofmpragmas.h
+$(OBJ)font.o: //Include/galileo/os.h //Program/galileo_config.h
+$(OBJ)font.o: //Library/galileofmpragmas.h
 $(OBJ)font_data.o: font_data.c font.h font.strings //Library/galileofmbase.h
-$(OBJ)font_data.o: //Program/galileo_config.h //Library/galileofmpragmas.h
+$(OBJ)font_data.o: //Include/galileo/os.h //Program/galileo_config.h
+$(OBJ)font_data.o: //Library/galileofmpragmas.h
 $(OBJ)font_strings.o: font_strings.c font.strings //Library/galileofmbase.h
-$(OBJ)font_strings.o: //Program/galileo_config.h //Library/galileofmpragmas.h
+$(OBJ)font_strings.o: //Include/galileo/os.h //Program/galileo_config.h
+$(OBJ)font_strings.o: //Library/galileofmpragmas.h

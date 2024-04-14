@@ -113,240 +113,254 @@ clean:
 # DO NOT DELETE THIS LINE makedepend needs it
 
 $(OBJ)libinit.o: libinit.c galileofmlib.h galileofmbase.h
-$(OBJ)libinit.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)libinit.o: wb.h filetypes.h images.h dos_patch.h galileofmlib.strings
-$(OBJ)libinit.o: pools.h boopsi.h
-$(OBJ)data.o: data.c galileofmlib.h galileofmbase.h /Program/galileo_config.h
-$(OBJ)data.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
-$(OBJ)data.o: dos_patch.h galileofmlib.strings pools.h
+$(OBJ)libinit.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)libinit.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)libinit.o: dos_patch.h galileofmlib.strings pools.h boopsi.h
+$(OBJ)data.o: data.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
+$(OBJ)data.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
+$(OBJ)data.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
 $(OBJ)string_data.o: string_data.c galileofmlib.strings galileofmbase.h
-$(OBJ)string_data.o: /Program/galileo_config.h galileofmpragmas.h
-$(OBJ)timer.o: timer.c galileofmlib.h galileofmbase.h
+$(OBJ)string_data.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)string_data.o: galileofmpragmas.h
+$(OBJ)timer.o: timer.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
 $(OBJ)timer.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
 $(OBJ)timer.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
 $(OBJ)pathlist.o: pathlist.c galileofmlib.h galileofmbase.h
-$(OBJ)pathlist.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)pathlist.o: wb.h filetypes.h images.h dos_patch.h galileofmlib.strings
-$(OBJ)pathlist.o: pools.h
-$(OBJ)gui.o: gui.c galileofmlib.h galileofmbase.h /Program/galileo_config.h
-$(OBJ)gui.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
-$(OBJ)gui.o: dos_patch.h galileofmlib.strings pools.h
+$(OBJ)pathlist.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)pathlist.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)pathlist.o: dos_patch.h galileofmlib.strings pools.h
+$(OBJ)gui.o: gui.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
+$(OBJ)gui.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
+$(OBJ)gui.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
 $(OBJ)list_management.o: list_management.c galileofmlib.h galileofmbase.h
-$(OBJ)list_management.o: /Program/galileo_config.h galileofmpragmas.h
-$(OBJ)list_management.o: read_ilbm.h wb.h filetypes.h images.h dos_patch.h
-$(OBJ)list_management.o: galileofmlib.strings pools.h
-$(OBJ)misc.o: misc.c galileofmlib.h galileofmbase.h /Program/galileo_config.h
-$(OBJ)misc.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
-$(OBJ)misc.o: dos_patch.h galileofmlib.strings pools.h
+$(OBJ)list_management.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)list_management.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
+$(OBJ)list_management.o: images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)misc.o: misc.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
+$(OBJ)misc.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
+$(OBJ)misc.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
 $(OBJ)misc.o: /Modules/Config/galileoconfig.h
 $(OBJ)misc.o: /Modules/Config/galileoconfig_pragmas.h
 $(OBJ)simplerequest.o: simplerequest.c simplerequest.h galileofmlib.h
-$(OBJ)simplerequest.o: galileofmbase.h /Program/galileo_config.h
-$(OBJ)simplerequest.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
-$(OBJ)simplerequest.o: images.h dos_patch.h galileofmlib.strings pools.h
-$(OBJ)simplerequest.o: layout_routines.h boopsi.h
+$(OBJ)simplerequest.o: galileofmbase.h /Include/galileo/os.h
+$(OBJ)simplerequest.o: /Program/galileo_config.h galileofmpragmas.h
+$(OBJ)simplerequest.o: read_ilbm.h wb.h filetypes.h images.h dos_patch.h
+$(OBJ)simplerequest.o: galileofmlib.strings pools.h layout_routines.h
+$(OBJ)simplerequest.o: boopsi.h
 $(OBJ)selection_list.o: selection_list.c galileofmlib.h galileofmbase.h
-$(OBJ)selection_list.o: /Program/galileo_config.h galileofmpragmas.h
-$(OBJ)selection_list.o: read_ilbm.h wb.h filetypes.h images.h dos_patch.h
-$(OBJ)selection_list.o: galileofmlib.strings pools.h layout_routines.h
-$(OBJ)selection_list.o: boopsi.h
+$(OBJ)selection_list.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)selection_list.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
+$(OBJ)selection_list.o: images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)selection_list.o: layout_routines.h boopsi.h
 $(OBJ)strings.o: strings.c galileofmlib.h galileofmbase.h
-$(OBJ)strings.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)strings.o: wb.h filetypes.h images.h dos_patch.h galileofmlib.strings
-$(OBJ)strings.o: pools.h
+$(OBJ)strings.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)strings.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)strings.o: dos_patch.h galileofmlib.strings pools.h
 $(OBJ)drag_routines.o: drag_routines.c galileofmlib.h galileofmbase.h
-$(OBJ)drag_routines.o: /Program/galileo_config.h galileofmpragmas.h
-$(OBJ)drag_routines.o: read_ilbm.h wb.h filetypes.h images.h dos_patch.h
-$(OBJ)drag_routines.o: galileofmlib.strings pools.h
+$(OBJ)drag_routines.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)drag_routines.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
+$(OBJ)drag_routines.o: images.h dos_patch.h galileofmlib.strings pools.h
 $(OBJ)palette_routines.o: palette_routines.c galileofmlib.h galileofmbase.h
-$(OBJ)palette_routines.o: /Program/galileo_config.h galileofmpragmas.h
-$(OBJ)palette_routines.o: read_ilbm.h wb.h filetypes.h images.h dos_patch.h
-$(OBJ)palette_routines.o: galileofmlib.strings pools.h config.h
+$(OBJ)palette_routines.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)palette_routines.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
+$(OBJ)palette_routines.o: images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)palette_routines.o: config.h
 $(OBJ)layout_routines.o: layout_routines.c galileofmlib.h galileofmbase.h
-$(OBJ)layout_routines.o: /Program/galileo_config.h galileofmpragmas.h
-$(OBJ)layout_routines.o: read_ilbm.h wb.h filetypes.h images.h dos_patch.h
-$(OBJ)layout_routines.o: galileofmlib.strings pools.h layout_routines.h
-$(OBJ)layout_routines.o: boopsi.h string_hook.h /Program/pattern.h
+$(OBJ)layout_routines.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)layout_routines.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
+$(OBJ)layout_routines.o: images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)layout_routines.o: layout_routines.h boopsi.h string_hook.h
+$(OBJ)layout_routines.o: /Program/pattern.h
 $(OBJ)layout_support.o: layout_support.c galileofmlib.h galileofmbase.h
-$(OBJ)layout_support.o: /Program/galileo_config.h galileofmpragmas.h
-$(OBJ)layout_support.o: read_ilbm.h wb.h filetypes.h images.h dos_patch.h
-$(OBJ)layout_support.o: galileofmlib.strings pools.h layout_routines.h
-$(OBJ)layout_support.o: boopsi.h
+$(OBJ)layout_support.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)layout_support.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
+$(OBJ)layout_support.o: images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)layout_support.o: layout_routines.h boopsi.h
 $(OBJ)layout_utils.o: layout_utils.c galileofmlib.h galileofmbase.h
-$(OBJ)layout_utils.o: /Program/galileo_config.h galileofmpragmas.h
-$(OBJ)layout_utils.o: read_ilbm.h wb.h filetypes.h images.h dos_patch.h
-$(OBJ)layout_utils.o: galileofmlib.strings pools.h layout_routines.h boopsi.h
+$(OBJ)layout_utils.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)layout_utils.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
+$(OBJ)layout_utils.o: images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)layout_utils.o: layout_routines.h boopsi.h
 $(OBJ)layout_resize.o: layout_resize.c galileofmlib.h galileofmbase.h
-$(OBJ)layout_resize.o: /Program/galileo_config.h galileofmpragmas.h
-$(OBJ)layout_resize.o: read_ilbm.h wb.h filetypes.h images.h dos_patch.h
-$(OBJ)layout_resize.o: galileofmlib.strings pools.h layout_routines.h
-$(OBJ)layout_resize.o: boopsi.h
-$(OBJ)boopsi.o: boopsi.c galileofmlib.h galileofmbase.h
+$(OBJ)layout_resize.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)layout_resize.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
+$(OBJ)layout_resize.o: images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)layout_resize.o: layout_routines.h boopsi.h
+$(OBJ)boopsi.o: boopsi.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
 $(OBJ)boopsi.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
 $(OBJ)boopsi.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
 $(OBJ)boopsi.o: boopsi.h
 $(OBJ)image_class.o: image_class.c galileofmlib.h galileofmbase.h
-$(OBJ)image_class.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)image_class.o: wb.h filetypes.h images.h dos_patch.h
-$(OBJ)image_class.o: galileofmlib.strings pools.h boopsi.h
+$(OBJ)image_class.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)image_class.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)image_class.o: dos_patch.h galileofmlib.strings pools.h boopsi.h
 $(OBJ)button_class.o: button_class.c galileofmlib.h galileofmbase.h
-$(OBJ)button_class.o: /Program/galileo_config.h galileofmpragmas.h
-$(OBJ)button_class.o: read_ilbm.h wb.h filetypes.h images.h dos_patch.h
-$(OBJ)button_class.o: galileofmlib.strings pools.h boopsi.h
+$(OBJ)button_class.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)button_class.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
+$(OBJ)button_class.o: images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)button_class.o: boopsi.h
 $(OBJ)listview_class.o: listview_class.c galileofmlib.h galileofmbase.h
-$(OBJ)listview_class.o: /Program/galileo_config.h galileofmpragmas.h
-$(OBJ)listview_class.o: read_ilbm.h wb.h filetypes.h images.h dos_patch.h
-$(OBJ)listview_class.o: galileofmlib.strings pools.h boopsi.h
+$(OBJ)listview_class.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)listview_class.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
+$(OBJ)listview_class.o: images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)listview_class.o: boopsi.h
 $(OBJ)palette_class.o: palette_class.c galileofmlib.h galileofmbase.h
-$(OBJ)palette_class.o: /Program/galileo_config.h galileofmpragmas.h
-$(OBJ)palette_class.o: read_ilbm.h wb.h filetypes.h images.h dos_patch.h
-$(OBJ)palette_class.o: galileofmlib.strings pools.h boopsi.h
+$(OBJ)palette_class.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)palette_class.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
+$(OBJ)palette_class.o: images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)palette_class.o: boopsi.h
 $(OBJ)dos_patch.o: dos_patch.c galileofmlib.h galileofmbase.h
-$(OBJ)dos_patch.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)dos_patch.o: wb.h filetypes.h images.h dos_patch.h galileofmlib.strings
-$(OBJ)dos_patch.o: pools.h
-$(OBJ)notify.o: notify.c galileofmlib.h galileofmbase.h
+$(OBJ)dos_patch.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)dos_patch.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)dos_patch.o: dos_patch.h galileofmlib.strings pools.h
+$(OBJ)notify.o: notify.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
 $(OBJ)notify.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
 $(OBJ)notify.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
 $(OBJ)menu_routines.o: menu_routines.c galileofmlib.h galileofmbase.h
-$(OBJ)menu_routines.o: /Program/galileo_config.h galileofmpragmas.h
-$(OBJ)menu_routines.o: read_ilbm.h wb.h filetypes.h images.h dos_patch.h
-$(OBJ)menu_routines.o: galileofmlib.strings pools.h layout_routines.h
-$(OBJ)menu_routines.o: boopsi.h
-$(OBJ)bitmap.o: bitmap.c galileofmlib.h galileofmbase.h
+$(OBJ)menu_routines.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)menu_routines.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
+$(OBJ)menu_routines.o: images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)menu_routines.o: layout_routines.h boopsi.h
+$(OBJ)bitmap.o: bitmap.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
 $(OBJ)bitmap.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
 $(OBJ)bitmap.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
-$(OBJ)args.o: args.c galileofmlib.h galileofmbase.h /Program/galileo_config.h
-$(OBJ)args.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
-$(OBJ)args.o: dos_patch.h galileofmlib.strings pools.h
-$(OBJ)rexx.o: rexx.c galileofmlib.h galileofmbase.h /Program/galileo_config.h
-$(OBJ)rexx.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
-$(OBJ)rexx.o: dos_patch.h galileofmlib.strings pools.h rexx.h
+$(OBJ)args.o: args.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
+$(OBJ)args.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
+$(OBJ)args.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)rexx.o: rexx.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
+$(OBJ)rexx.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
+$(OBJ)rexx.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)rexx.o: rexx.h
 $(OBJ)popup_menus.o: popup_menus.c galileofmlib.h galileofmbase.h
-$(OBJ)popup_menus.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)popup_menus.o: wb.h filetypes.h images.h dos_patch.h
-$(OBJ)popup_menus.o: galileofmlib.strings pools.h boopsi.h popup.h
-$(OBJ)ipc.o: ipc.c galileofmlib.h galileofmbase.h /Program/galileo_config.h
-$(OBJ)ipc.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
-$(OBJ)ipc.o: dos_patch.h galileofmlib.strings pools.h
-$(OBJ)images.o: images.c galileofmlib.h galileofmbase.h
+$(OBJ)popup_menus.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)popup_menus.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)popup_menus.o: dos_patch.h galileofmlib.strings pools.h boopsi.h
+$(OBJ)popup_menus.o: popup.h
+$(OBJ)ipc.o: ipc.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
+$(OBJ)ipc.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
+$(OBJ)ipc.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)images.o: images.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
 $(OBJ)images.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
 $(OBJ)images.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
-$(OBJ)memory.o: memory.c galileofmlib.h galileofmbase.h
+$(OBJ)memory.o: memory.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
 $(OBJ)memory.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
 $(OBJ)memory.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
 $(OBJ)popup_support.o: popup_support.c galileofmlib.h galileofmbase.h
-$(OBJ)popup_support.o: /Program/galileo_config.h galileofmpragmas.h
-$(OBJ)popup_support.o: read_ilbm.h wb.h filetypes.h images.h dos_patch.h
-$(OBJ)popup_support.o: galileofmlib.strings pools.h
+$(OBJ)popup_support.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)popup_support.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
+$(OBJ)popup_support.o: images.h dos_patch.h galileofmlib.strings pools.h
 $(OBJ)config_new.o: config_new.c galileofmlib.h galileofmbase.h
-$(OBJ)config_new.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)config_new.o: wb.h filetypes.h images.h dos_patch.h
-$(OBJ)config_new.o: galileofmlib.strings pools.h
+$(OBJ)config_new.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)config_new.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)config_new.o: dos_patch.h galileofmlib.strings pools.h
 $(OBJ)config_open.o: config_open.c galileofmlib.h galileofmbase.h
-$(OBJ)config_open.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)config_open.o: wb.h filetypes.h images.h dos_patch.h
-$(OBJ)config_open.o: galileofmlib.strings pools.h config.h
+$(OBJ)config_open.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)config_open.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)config_open.o: dos_patch.h galileofmlib.strings pools.h config.h
 $(OBJ)config_default.o: config_default.c galileofmlib.h galileofmbase.h
-$(OBJ)config_default.o: /Program/galileo_config.h galileofmpragmas.h
-$(OBJ)config_default.o: read_ilbm.h wb.h filetypes.h images.h dos_patch.h
-$(OBJ)config_default.o: galileofmlib.strings pools.h config.h configflags.h
+$(OBJ)config_default.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)config_default.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
+$(OBJ)config_default.o: images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)config_default.o: config.h configflags.h
 $(OBJ)config_save.o: config_save.c galileofmlib.h galileofmbase.h
-$(OBJ)config_save.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)config_save.o: wb.h filetypes.h images.h dos_patch.h
-$(OBJ)config_save.o: galileofmlib.strings pools.h config.h
+$(OBJ)config_save.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)config_save.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)config_save.o: dos_patch.h galileofmlib.strings pools.h config.h
 $(OBJ)config_close.o: config_close.c galileofmlib.h galileofmbase.h
-$(OBJ)config_close.o: /Program/galileo_config.h galileofmpragmas.h
-$(OBJ)config_close.o: read_ilbm.h wb.h filetypes.h images.h dos_patch.h
-$(OBJ)config_close.o: galileofmlib.strings pools.h config.h
+$(OBJ)config_close.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)config_close.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
+$(OBJ)config_close.o: images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)config_close.o: config.h
 $(OBJ)config_copy.o: config_copy.c galileofmlib.h galileofmbase.h
-$(OBJ)config_copy.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)config_copy.o: wb.h filetypes.h images.h dos_patch.h
-$(OBJ)config_copy.o: galileofmlib.strings pools.h config.h
+$(OBJ)config_copy.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)config_copy.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)config_copy.o: dos_patch.h galileofmlib.strings pools.h config.h
 $(OBJ)config_misc.o: config_misc.c galileofmlib.h galileofmbase.h
-$(OBJ)config_misc.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)config_misc.o: wb.h filetypes.h images.h dos_patch.h
-$(OBJ)config_misc.o: galileofmlib.strings pools.h config.h
+$(OBJ)config_misc.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)config_misc.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)config_misc.o: dos_patch.h galileofmlib.strings pools.h config.h
 $(OBJ)status_window.o: status_window.c galileofmlib.h galileofmbase.h
-$(OBJ)status_window.o: /Program/galileo_config.h galileofmpragmas.h
-$(OBJ)status_window.o: read_ilbm.h wb.h filetypes.h images.h dos_patch.h
-$(OBJ)status_window.o: galileofmlib.strings pools.h
+$(OBJ)status_window.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)status_window.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
+$(OBJ)status_window.o: images.h dos_patch.h galileofmlib.strings pools.h
 $(OBJ)read_ilbm.o: read_ilbm.c galileofmlib.h galileofmbase.h
-$(OBJ)read_ilbm.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)read_ilbm.o: wb.h filetypes.h images.h dos_patch.h galileofmlib.strings
-$(OBJ)read_ilbm.o: pools.h
-$(OBJ)anim.o: anim.c galileofmlib.h galileofmbase.h /Program/galileo_config.h
-$(OBJ)anim.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
-$(OBJ)anim.o: dos_patch.h galileofmlib.strings pools.h
+$(OBJ)read_ilbm.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)read_ilbm.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)read_ilbm.o: dos_patch.h galileofmlib.strings pools.h
+$(OBJ)anim.o: anim.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
+$(OBJ)anim.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
+$(OBJ)anim.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
 $(OBJ)buffered_io.o: buffered_io.c galileofmlib.h galileofmbase.h
-$(OBJ)buffered_io.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)buffered_io.o: wb.h filetypes.h images.h dos_patch.h
-$(OBJ)buffered_io.o: galileofmlib.strings pools.h
-$(OBJ)diskio.o: diskio.c galileofmlib.h galileofmbase.h
+$(OBJ)buffered_io.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)buffered_io.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)buffered_io.o: dos_patch.h galileofmlib.strings pools.h
+$(OBJ)diskio.o: diskio.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
 $(OBJ)diskio.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
 $(OBJ)diskio.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
-$(OBJ)wb.o: wb.c galileofmlib.h galileofmbase.h /Program/galileo_config.h
-$(OBJ)wb.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
-$(OBJ)wb.o: dos_patch.h galileofmlib.strings pools.h /Modules/modules.h
-$(OBJ)wb.o: /Modules/modules_pragmas.h
+$(OBJ)wb.o: wb.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
+$(OBJ)wb.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
+$(OBJ)wb.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)wb.o: /Modules/modules.h /Modules/modules_pragmas.h
 $(OBJ)launcher.o: launcher.c galileofmlib.h galileofmbase.h
-$(OBJ)launcher.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)launcher.o: wb.h filetypes.h images.h dos_patch.h galileofmlib.strings
-$(OBJ)launcher.o: pools.h clipboard.h
-$(OBJ)iff.o: iff.c galileofmlib.h galileofmbase.h /Program/galileo_config.h
-$(OBJ)iff.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
-$(OBJ)iff.o: dos_patch.h galileofmlib.strings pools.h async.h
+$(OBJ)launcher.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)launcher.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)launcher.o: dos_patch.h galileofmlib.strings pools.h clipboard.h
+$(OBJ)iff.o: iff.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
+$(OBJ)iff.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
+$(OBJ)iff.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)iff.o: async.h
 $(OBJ)string_hook.o: string_hook.c galileofmlib.h galileofmbase.h
-$(OBJ)string_hook.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)string_hook.o: wb.h filetypes.h images.h dos_patch.h
-$(OBJ)string_hook.o: galileofmlib.strings pools.h string_hook.h clipboard.h
+$(OBJ)string_hook.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)string_hook.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)string_hook.o: dos_patch.h galileofmlib.strings pools.h string_hook.h
+$(OBJ)string_hook.o: clipboard.h
 $(OBJ)clipboard.o: clipboard.c galileofmlib.h galileofmbase.h
-$(OBJ)clipboard.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)clipboard.o: wb.h filetypes.h images.h dos_patch.h galileofmlib.strings
-$(OBJ)clipboard.o: pools.h clipboard.h
+$(OBJ)clipboard.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)clipboard.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)clipboard.o: dos_patch.h galileofmlib.strings pools.h clipboard.h
 $(OBJ)semaphores.o: semaphores.c galileofmlib.h galileofmbase.h
-$(OBJ)semaphores.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)semaphores.o: wb.h filetypes.h images.h dos_patch.h
-$(OBJ)semaphores.o: galileofmlib.strings pools.h
+$(OBJ)semaphores.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)semaphores.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)semaphores.o: dos_patch.h galileofmlib.strings pools.h
 $(OBJ)requesters.o: requesters.c galileofmlib.h galileofmbase.h
-$(OBJ)requesters.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)requesters.o: wb.h filetypes.h images.h dos_patch.h
-$(OBJ)requesters.o: galileofmlib.strings pools.h
+$(OBJ)requesters.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)requesters.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)requesters.o: dos_patch.h galileofmlib.strings pools.h
 $(OBJ)progress_win.o: progress_win.c galileofmlib.h galileofmbase.h
-$(OBJ)progress_win.o: /Program/galileo_config.h galileofmpragmas.h
-$(OBJ)progress_win.o: read_ilbm.h wb.h filetypes.h images.h dos_patch.h
-$(OBJ)progress_win.o: galileofmlib.strings pools.h progress.h
-$(OBJ)progress_win.o: /Program/pattern.h
-$(OBJ)appmsg.o: appmsg.c galileofmlib.h galileofmbase.h
+$(OBJ)progress_win.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)progress_win.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
+$(OBJ)progress_win.o: images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)progress_win.o: progress.h /Program/pattern.h
+$(OBJ)appmsg.o: appmsg.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
 $(OBJ)appmsg.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
 $(OBJ)appmsg.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
-$(OBJ)search.o: search.c galileofmlib.h galileofmbase.h
+$(OBJ)search.o: search.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
 $(OBJ)search.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
 $(OBJ)search.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
 $(OBJ)search.o: search.h
-$(OBJ)dates.o: dates.c galileofmlib.h galileofmbase.h
+$(OBJ)dates.o: dates.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
 $(OBJ)dates.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
 $(OBJ)dates.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
 $(OBJ)filetypes.o: filetypes.c galileofmlib.h galileofmbase.h
-$(OBJ)filetypes.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)filetypes.o: wb.h filetypes.h images.h dos_patch.h galileofmlib.strings
-$(OBJ)filetypes.o: pools.h
-$(OBJ)icons.o: icons.c galileofmlib.h galileofmbase.h
+$(OBJ)filetypes.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)filetypes.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)filetypes.o: dos_patch.h galileofmlib.strings pools.h
+$(OBJ)icons.o: icons.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
 $(OBJ)icons.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
 $(OBJ)icons.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
 $(OBJ)icon_cache.o: icon_cache.c galileofmlib.h galileofmbase.h
-$(OBJ)icon_cache.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)icon_cache.o: wb.h filetypes.h images.h dos_patch.h
-$(OBJ)icon_cache.o: galileofmlib.strings pools.h
+$(OBJ)icon_cache.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)icon_cache.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)icon_cache.o: dos_patch.h galileofmlib.strings pools.h
 $(OBJ)devices.o: devices.c galileofmlib.h galileofmbase.h
-$(OBJ)devices.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)devices.o: wb.h filetypes.h images.h dos_patch.h galileofmlib.strings
-$(OBJ)devices.o: pools.h
+$(OBJ)devices.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)devices.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)devices.o: dos_patch.h galileofmlib.strings pools.h
 $(OBJ)version.o: version.c galileofmlib.h galileofmbase.h
-$(OBJ)version.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)version.o: wb.h filetypes.h images.h dos_patch.h galileofmlib.strings
-$(OBJ)version.o: pools.h
+$(OBJ)version.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)version.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)version.o: dos_patch.h galileofmlib.strings pools.h
 $(OBJ)savepos.o: savepos.c galileofmlib.h galileofmbase.h
-$(OBJ)savepos.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h
-$(OBJ)savepos.o: wb.h filetypes.h images.h dos_patch.h galileofmlib.strings
-$(OBJ)savepos.o: pools.h
+$(OBJ)savepos.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)savepos.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)savepos.o: dos_patch.h galileofmlib.strings pools.h
