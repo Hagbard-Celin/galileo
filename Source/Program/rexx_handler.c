@@ -159,6 +159,9 @@ short __stdargs rexx_handler_msg_args(
 		DeleteRexxMsg(msg);
 	}
 
+    // Free the replyport
+    DeleteMsgPort(reply_port);
+
 	// Free despatch
 	FreeVec(desp);
 	return res;
