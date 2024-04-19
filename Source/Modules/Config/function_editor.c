@@ -1890,6 +1890,10 @@ void funced_appmsg(FuncEdData *data,struct AppMessage *msg)
 	}
 }
 
+#if RESOURCE_TRACKING
+#undef ResTrackBase
+#define ResTrackBase    (struct Library *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"restrack.library")
+#endif
 
 // See if an app argument is ok
 short funced_appmsg_arg(struct WBArg *arg,char *buffer,struct Library *DOSBase)
@@ -1962,6 +1966,10 @@ short funced_appmsg_arg(struct WBArg *arg,char *buffer,struct Library *DOSBase)
 	return type;
 }
 
+#if RESOURCE_TRACKING
+#undef ResTrackBase
+#define ResTrackBase    (data->startup->restrack_base)
+#endif
 
 // End drag
 void functioned_end_drag(FuncEdData *data,short ok)
