@@ -38,6 +38,8 @@ For more information on Directory Opus for Windows please see:
 #ifndef _GALILEOFM_MODULES
 #define _GALILEOFM_MODULES
 
+#include "/Include/galileo/os.h"
+
 #include "/Library/galileofmbase.h"
 #include "/Modules/modules_pragmas.h"
 
