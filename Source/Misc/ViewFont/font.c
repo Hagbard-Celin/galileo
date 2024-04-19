@@ -60,10 +60,10 @@ void main(int argc,char **argv)
 	if (LocaleBase)
 	{
 		BPTR lock;
-        
+
 		// Change PROGDIR: to Galileo
 		if (lock=Lock("Galileo:",ACCESS_READ))
-			UnLock(SetProgramDir(lock));
+			data->lock=SetProgramDir(lock);
 
 		// Initialise
 		data->locale.li_LocaleBase=LocaleBase;
@@ -451,6 +451,10 @@ void font_free(font_data *data)
 			CloseLocale(data->locale.li_Locale);
 			CloseCatalog(data->locale.li_Catalog);
 		}
+
+        // Change PROGDIR: back and unlock Galileo:
+		if (data->lock)
+			UnLock(SetProgramDir(data->lock));
 
 		// Free args
 		FreeArgs(data->args);

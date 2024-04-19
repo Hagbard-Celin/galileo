@@ -55,6 +55,8 @@ typedef struct
 	char			**size_labels;
 
 	struct Window		*about;
+
+    BPTR 			lock;
 } font_data;
 
 BOOL font_open(font_data *data);
