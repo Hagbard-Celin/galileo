@@ -811,6 +811,9 @@ void start_hide(StartMenu *menu)
 		menu->x=menu->window->LeftEdge;
 		menu->y=menu->window->TopEdge;
 
+        // Free DrawInfo
+        FreeScreenDrawInfo(menu->window->WScreen, menu->drawinfo);
+
 		// Remove AppWindow
 		if (menu->app_window)
 			RemoveAppWindow(menu->app_window);	

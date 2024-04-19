@@ -199,6 +199,9 @@ void __saveds clock_proc(void)
 										// Use short message
 										mem_msg=MSG_MEMORY_COUNTER_CLOCK;
 									}
+
+                                    // Free DrawInfo
+                                    FreeScreenDrawInfo(screen, drawinfo);
 								}
 
 								// Otherwise, open window
