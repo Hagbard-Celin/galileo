@@ -1364,6 +1364,11 @@ void __asm __saveds L_FreeDiskObjectCopy(
 	// Valid icon?
 	if (!icon) return;
 
+#if RESOURCE_TRACKING
+#undef ResTrackBase
+#define ResTrackBase (data->restrack_base)
+#endif
+
 #define IconBase	(data->icon_base)
 	if	(IconBase->lib_Version>=44)
 	{
@@ -1379,10 +1384,6 @@ void __asm __saveds L_FreeDiskObjectCopy(
 		short count;
 		DiskObjectCopy *copy=(DiskObjectCopy *)icon;
 
-#if RESOURCE_TRACKING
-#undef ResTrackBase
-#define ResTrackBase (data->restrack_base)
-#endif
 		// Free images
 		FreeVec(copy->doc_Image1);
 		FreeVec(copy->doc_Image2);
