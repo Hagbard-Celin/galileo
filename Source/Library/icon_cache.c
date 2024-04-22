@@ -403,8 +403,13 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObjectNew(
 		Examine(lock,&fib);
 
 		// Drawer?
-		if (fib.fib_DirEntryType>0) type=WBDRAWER;
+		if (fib.fib_DirEntryType>0)
+		{
+        	type=WBDRAWER;
 
+			// Unlock lock
+			UnLock(lock);
+		}
 		// Otherwise, open file
 		else
 		if (file=OpenFromLock(lock))
@@ -417,11 +422,9 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObjectNew(
 
 			// Close file
 			Close(file);
-			lock=0;
 		}
-
 		// Unlock lock
-		UnLock(lock);
+		else UnLock(lock);
 	}
 
 	// Couldn't lock; is it "Disk"?
