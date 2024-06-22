@@ -60,17 +60,4 @@ enum
 extern ConfigWindow search_window;
 extern ObjectDef search_objects[];
 
-// Data to store search results
-typedef struct
-{
-	char	*v_search_found_position;	// Position of match in buffer
-	long	v_search_found_size;		// Number of bytes searched
-	long	v_search_found_lines;		// Number of lines searched
-	long	v_search_last_line_pos;		// Last line position searched
-} search_handle;
-
-// Prototypes
-search_file(APTR,UBYTE *,ULONG,UBYTE *,ULONG);
-search_buffer(search_handle *,UBYTE *,ULONG,UBYTE *,ULONG,ULONG);
-
 #endif

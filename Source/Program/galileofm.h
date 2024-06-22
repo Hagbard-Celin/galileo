@@ -110,7 +110,6 @@ enum {
 #include "rexx.h"
 #include "requesters.h"
 #include "file_op.h"
-#include "search.h"
 #include "filetypes.h"
 #include "buffers.h"
 #include "path_routines.h"

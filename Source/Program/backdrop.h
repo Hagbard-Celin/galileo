@@ -469,9 +469,6 @@ void backdrop_get_font(BackdropInfo *info);
 #define BRENDERF_LABEL	(1<<2)
 #define BRENDERF_REAL	(1<<3)
 
-void backdrop_init_space(BackdropInfo *info);
-void backdrop_add_space(BackdropInfo *info,BackdropObject *icon);
-
 unsigned short *backdrop_space_array(BackdropInfo *info,Point *size);
 void backdrop_space_add_icon(BackdropInfo *,unsigned short *array,BackdropObject *icon,Point *size);
 short backdrop_find_space(BackdropInfo *info,BackdropObject *icon,unsigned short *array,Point *size);

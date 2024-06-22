@@ -706,7 +706,6 @@ void lister_build_icon_name(Lister *lister);
 
 void lister_fix_menus(Lister *lister,BOOL);
 
-void lister_handle_notify(Lister *lister,GalileoNotify *notify,char *name);
 void lister_fix_cd(Lister *lister);
 
 void lister_add_hotname(Lister *lister,char);
