@@ -904,6 +904,10 @@ if	(rp = CreateMsgPort())
 					kprintf( "\n");
 					}
 #endif
+
+                // Free the result
+                if( rxmsg->rm_Result1 == 0 && rxmsg->rm_Result2 != NULL )
+            	    DeleteArgstring( (char *) rxmsg->rm_Result2 );
 				}
 
 			DeleteArgstring( argstr );

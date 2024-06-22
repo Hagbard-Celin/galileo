@@ -178,6 +178,10 @@ long __asm __saveds HookRexxCommand(
 				stccpy(result,(char *)msg->rm_Result2,length);
 			rc=msg->rm_Result1;
 
+            // Free the result
+            if( msg->rm_Result1 == 0 && msg->rm_Result2 != NULL )
+        	    DeleteArgstring( (char *) msg->rm_Result2 );
+
 			// Free message
 			FreeRexxMsgEx(msg);
 		}

@@ -155,6 +155,9 @@ short __stdargs rexx_handler_msg_args(
 		// Get result
 		res=msg->rm_Result1;
 
+        // Clear message
+        ClearRexxMsg(msg,count);
+
 		// Free message
 		DeleteRexxMsg(msg);
 	}
