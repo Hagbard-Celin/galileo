@@ -64,6 +64,16 @@ For more information on Directory Opus for Windows please see:
 #include "ftp_arexx.h"
 #include "ftp_galileoftp.h"
 
+#if RESOURCE_TRACKING
+#include <restrack_protos.h>
+#include <restrack_pragmas.h>
+
+extern char *callerid;
+
+extern struct Library *ResTrackBase;
+
+#endif
+
 /*
 	#define	DEBUG
 	#define LOUD 1
@@ -823,7 +833,7 @@ return retval;
 /********************************/
 
 //
-//	Send a command to Dgalileo
+//	Send a command to Galileo
 //	 Will return a LONG from result1 for numeric results
 //	 or a char* from result2 for string results
 //	 or -1 if it couldn't even be sent

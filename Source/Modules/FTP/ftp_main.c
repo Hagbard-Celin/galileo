@@ -892,7 +892,7 @@ return result;
 //
 //	Receive an galileo 'active' from cachlist command
 //
-//	get active msg when our buffer is changed by Dgalileo
+//	get active msg when our buffer is changed by Galileo
 //
 //		a) when Galileo displays an entry from the cache
 //		b) when user accesses an item from the CachList

@@ -967,7 +967,7 @@ else
 
 /********************************/
 
-// Taken from dgalileosrc:Program/misc.c
+// Taken from galileosrc:Program/misc.c
 // Get final path from a pathname
 void final_path(char *path,char *buf)
 {
@@ -1491,7 +1491,7 @@ return bits;
 
 /********************************/
 
-// Taken from dgalileosrc:Program/misc.c
+// Taken from galileosrc:Program/misc.c
 // Get protection value from a string
 long prot_from_string(char *buf)
 {
