@@ -860,6 +860,9 @@ void lister_zoom_window(Lister *lister)
 			lister->win_limits.Top,
 			(UWORD)~0,
 			(UWORD)~0);
+
+		// Set pointer to current lister
+		GUI->current_lister=lister;
 	}
 
 	// Ben Vost zoom mode?
@@ -896,6 +899,12 @@ void lister_zoom_window(Lister *lister)
 
 		// Set flag
 		lister->more_flags|=LISTERF_TITLEBARRED;
+
+    	// Clear pointer to current lister
+    	Forbid();
+    	if (GUI->current_lister==lister)
+    		GUI->current_lister=0;
+    	Permit();
 	}
 
 	// Normal mode

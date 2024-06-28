@@ -776,8 +776,9 @@ void __asm __saveds lister_process_msg(
 		// Window activated
 		case IDCMP_ACTIVEWINDOW:
 
-			// Set pointer to current lister
-			GUI->current_lister=lister;
+			// Set pointer to current lister only if not minimized to titlebar
+            if (!(lister->more_flags&LISTERF_TITLEBARRED))
+				GUI->current_lister=lister;
 
 /*
 			// Is lister busy, and do we have a known locker?
