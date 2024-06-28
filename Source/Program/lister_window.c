@@ -63,7 +63,7 @@ struct Window *lister_open(Lister *lister,struct Screen *screen)
 
 struct Window *lister_open_window(Lister *lister,struct Screen *screen)
 {
-	struct Gadget *gadget,*lock_gad;
+	struct Gadget *gadget=0,*lock_gad,*iconify_gad;
 	struct IBox *dims;
 	ULONG mode;
 
@@ -135,12 +135,69 @@ struct Window *lister_open_window(Lister *lister,struct Screen *screen)
 	// Initialise boopsi list
 	NewList(&lister->backdrop_info->boopsi_list);
 
+    // Locked lister?
+    // Create placeholder for size gadget to keep window borders consistent
+    if (lister->flags&LISTERF_LOCK_POS)
+    {
+        struct Image *image=0;
+
+        lister->drawinfo=GetScreenDrawInfo(screen);
+
+        // Get size gadget image
+		if (image=NewObject(
+					0,
+					"sysiclass",
+					SYSIA_DrawInfo,lister->drawinfo,
+					SYSIA_Which,SIZEIMAGE,
+					TAG_END))
+		{
+            // Fill out gadget border border
+            lister->size_gadget_border_coords[0]=0;
+            lister->size_gadget_border_coords[1]=image->Height;
+            lister->size_gadget_border_coords[2]=0;
+            lister->size_gadget_border_coords[3]=0;
+            lister->size_gadget_border_coords[4]=image->Width;
+            lister->size_gadget_border_coords[5]=0;
+            lister->size_gadget_border.LeftEdge=0;
+            lister->size_gadget_border.TopEdge=0;
+            lister->size_gadget_border.FrontPen=lister->drawinfo->dri_Pens[SHINEPEN];
+            lister->size_gadget_border.BackPen=0;
+            lister->size_gadget_border.DrawMode=JAM1;
+            lister->size_gadget_border.Count=3;
+            lister->size_gadget_border.XY=&lister->size_gadget_border_coords[0];
+            lister->size_gadget_border.NextBorder=0;
+
+            // Create size gadget placeholder
+            lister->size_cover_gadget.NextGadget=0;
+            lister->size_cover_gadget.Flags=GFLG_RELBOTTOM|GFLG_RELRIGHT|GFLG_DISABLED;
+            lister->size_cover_gadget.Activation=GACT_RIGHTBORDER|GACT_BOTTOMBORDER;
+            lister->size_cover_gadget.GadgetType=GTYP_BOOLGADGET;
+            lister->size_cover_gadget.GadgetRender=&lister->size_gadget_border;
+            lister->size_cover_gadget.SelectRender=0;
+            lister->size_cover_gadget.Width=image->Width;
+            lister->size_cover_gadget.Height=image->Height;
+            lister->size_cover_gadget.LeftEdge=-image->Width+1;
+            lister->size_cover_gadget.TopEdge=-image->Height+1;
+
+            gadget=&lister->size_cover_gadget;
+
+			// Free image
+			DisposeObject(image);
+		}
+
+        FreeScreenDrawInfo(screen,lister->drawinfo);
+        lister->drawinfo=0;
+    }
+
 	// Create iconify gadget
-	gadget=
-		create_iconify_gadget(
-			screen,
-			&lister->backdrop_info->boopsi_list,
-			(lister->flags&LISTERF_LOCK_POS)?TRUE:FALSE);
+	if (iconify_gad=create_iconify_gadget(screen,
+                        			 &lister->backdrop_info->boopsi_list,
+                        			 (lister->flags&LISTERF_LOCK_POS)?TRUE:FALSE))
+    {
+        // Chain gadgets
+        if (gadget) gadget->NextGadget=iconify_gad;
+        else gadget=iconify_gad;
+    }
 
 	// Create lock gadget
 	if (!(GUI->flags2&GUIF2_NO_PADLOCK) &&
@@ -154,7 +211,8 @@ struct Window *lister_open_window(Lister *lister,struct Screen *screen)
 					GAD_LOCK)))
 	{
 		// Chain gadgets
-		if (gadget) gadget->NextGadget=lock_gad;
+		if (iconify_gad) iconify_gad->NextGadget=lock_gad;
+        else if (gadget) gadget->NextGadget=lock_gad;
 		else gadget=lock_gad;
 
 		// Fix selection flags
@@ -173,7 +231,8 @@ struct Window *lister_open_window(Lister *lister,struct Screen *screen)
 		WA_MinHeight,lister->win_limits.Top,
 		WA_MaxWidth,(ULONG)~0,
 		WA_MaxHeight,(ULONG)~0,
-		(lister->dimensions.wd_Flags&WDF_VALID)?WA_Zoom:TAG_IGNORE,(ULONG)&lister->dimensions.wd_Zoomed,
+		((lister->dimensions.wd_Flags&WDF_VALID) &&
+        (!(lister->flags&LISTERF_LOCK_POS)))?WA_Zoom:TAG_IGNORE,(ULONG)&lister->dimensions.wd_Zoomed,
 		WA_IDCMP,
 				IDCMP_ACTIVEWINDOW|
 				IDCMP_CHANGEWINDOW|
@@ -195,9 +254,9 @@ struct Window *lister_open_window(Lister *lister,struct Screen *screen)
 		WA_DepthGadget,TRUE,
 		WA_MenuHelp,TRUE,
 		WA_NewLookMenus,TRUE,
-		WA_SizeGadget,TRUE,
-		WA_SizeBRight,TRUE,
-		WA_SizeBBottom,TRUE,
+		WA_SizeGadget,!(lister->flags&LISTERF_LOCK_POS),
+		(lister->flags&LISTERF_LOCK_POS)?TAG_IGNORE:WA_SizeBRight,TRUE,
+		(lister->flags&LISTERF_LOCK_POS)?TAG_IGNORE:WA_SizeBBottom,TRUE,
 		WA_CustomScreen,screen,
 		WA_ScreenTitle,GUI->screen_title,
 		WA_Gadgets,gadget,
@@ -266,54 +325,48 @@ struct Window *lister_open_window(Lister *lister,struct Screen *screen)
 	// Turn on gauge if needed
 	lister_set_gauge(lister,FALSE);
 
-	// Fill out size covering gadget
-	if (gadget=FindGadgetType(lister->window->FirstGadget,GTYP_SIZING))
-	{
-		// Copy size gadget
-		fill_out_cover_gadget(gadget,&lister->size_cover_gadget);
-
-		// Clear image in original gadget if lister is locked
-		if (lister->flags&LISTERF_LOCK_POS)
-		{
-			gadget->Flags&=~GFLG_GADGIMAGE;
-			gadget->GadgetRender=0;
-		}
-	}
-
 	// Fill out zoom covering gadget
-	if (gadget=FindGadgetType(lister->window->FirstGadget,GTYP_WZOOM))
+	if ((gadget=FindGadgetType(lister->window->FirstGadget,GTYP_WZOOM)) &&
+        (!(lister->flags&LISTERF_LOCK_POS)))
 	{
-		// Copy zoom gadget
-		fill_out_cover_gadget(gadget,&lister->zoom_cover_gadget);
+        struct Image *image;
+        struct Gadget *zgadget;
 
-		// Clear image in original gadget if lister is locked
-		if (lister->flags&LISTERF_LOCK_POS)
+		// Get zoom gadget image
+		if (image=NewObject(
+					0,
+					"sysiclass",
+					SYSIA_DrawInfo,lister->drawinfo,
+					SYSIA_Which,ZOOMIMAGE,
+					TAG_END))
 		{
-			// Clear image in original gadget
-			gadget->Flags&=~GFLG_GADGIMAGE;
-			gadget->GadgetRender=0;
+            // Create gadget
+    		if (zgadget=NewObject(0,"galileobuttongclass",
+    			GA_ID,GAD_ZOOM,
+    			GA_RelRight,gadget->LeftEdge,
+    			GA_Top,gadget->TopEdge,
+    			GA_Width,gadget->Width,
+    			GA_Height,gadget->Height,
+    			GA_RelVerify,TRUE,
+    			GA_TopBorder,TRUE,
+    			GA_Image,image,
+    			TAG_END))
+    		{
+    			// Add to window
+                AddGList(lister->window,zgadget,0,1,0);
+        		RefreshWindowFrame(lister->window);
+
+                // Add to boopsi list
+    			DoMethod((Object *)image,OM_ADDTAIL,&lister->backdrop_info->boopsi_list);
+    			DoMethod((Object *)zgadget,OM_ADDTAIL,&lister->backdrop_info->boopsi_list);
+
+    		}
+            else
+    		// Failed
+    		DisposeObject(image);
 		}
 
-		// Otherwise, change gadget type
-		else
-		{
-			// Clear zoom flag, set ID
-			gadget->GadgetType&=~(GTYP_SYSTYPEMASK|GTYP_SYSGADGET);
-			gadget->GadgetID=GAD_ZOOM;
-		}
 	}
-
-	// Is lister locked?
-	if (lister->flags&LISTERF_LOCK_POS)
-	{
-		// Add to window
-		lister->size_cover_gadget.NextGadget=0;
-		AddGList(lister->window,&lister->size_cover_gadget,0,1,0);
-		RefreshWindowFrame(lister->window);
-	}
-
-	// Fix next pointer
-	else lister->size_cover_gadget.NextGadget=&lister->zoom_cover_gadget;
 
 	// Create edit hook
 	lister->path_edit_hook=

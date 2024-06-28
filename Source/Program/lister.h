@@ -449,6 +449,9 @@ typedef struct ListerWindow
 	ColourRecord			lst_Colours[ENVCOL_MAX];
 
 	struct RastPort			render_rast;
+
+    struct Border       size_gadget_border;
+    WORD                size_gadget_border_coords[6];
 } Lister;	
 
 

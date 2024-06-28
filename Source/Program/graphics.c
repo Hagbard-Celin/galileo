@@ -178,11 +178,11 @@ void fill_out_cover_gadget(struct Gadget *gadget,struct Gadget *cover)
 
 	// Fix flags, etc
 	cover->NextGadget=0;
-	cover->Flags&=GFLG_RELBOTTOM|GFLG_RELRIGHT;
-	cover->Activation=0;
-	cover->GadgetType=GTYP_BOOLGADGET;
-	cover->GadgetRender=0;
-	cover->SelectRender=0;
+	//cover->Flags&=GFLG_RELBOTTOM|GFLG_RELRIGHT;
+	//cover->Activation=0;
+	//cover->GadgetType=GTYP_BOOLGADGET;
+	//cover->GadgetRender=0;
+	//cover->SelectRender=0;
 }
 
 
