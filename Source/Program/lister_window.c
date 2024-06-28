@@ -408,7 +408,7 @@ struct Window *lister_open_window(Lister *lister,struct Screen *screen)
 	lister->parent_button.Width=lister->window->BorderLeft;
 	lister->parent_button.Height=-(lister->window->BorderTop+lister->window->BorderBottom);
 	lister->parent_button.Flags=GFLG_GADGHCOMP|GFLG_RELHEIGHT;
-	lister->parent_button.Activation=GACT_RELVERIFY;
+	lister->parent_button.Activation=GACT_RELVERIFY|GACT_LEFTBORDER;
 	lister->parent_button.GadgetType=GTYP_BOOLGADGET;
 	lister->parent_button.GadgetID=GAD_PARENT;
 

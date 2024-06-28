@@ -151,6 +151,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 				GA_Immediate,TRUE,
 				GA_FollowMouse,TRUE,
 				GA_RelVerify,TRUE,
+                GA_RightBorder,TRUE,
 				PGA_Freedom,FREEVERT,
 				PGA_NewLook,TRUE,
 				PGA_Borderless,TRUE,
@@ -173,6 +174,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 				GA_Height,image[1]->Height,
 				GA_Immediate,TRUE,
 				GA_RelVerify,TRUE,
+                GA_RightBorder,TRUE,
 				(flags&SCROLL_NOIDCMP)?TAG_IGNORE:ICA_TARGET,ICTARGET_IDCMP,
 				TAG_END))) return 0;
 		DoMethod((Object *)gadget,OM_ADDTAIL,list);
@@ -189,6 +191,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 				GA_Height,image[0]->Height,
 				GA_Immediate,TRUE,
 				GA_RelVerify,TRUE,
+                GA_RightBorder,TRUE,
 				(flags&SCROLL_NOIDCMP)?TAG_IGNORE:ICA_TARGET,ICTARGET_IDCMP,
 				TAG_END))) return 0;
 		DoMethod((Object *)gadget,OM_ADDTAIL,list);
@@ -209,6 +212,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 				GA_Immediate,TRUE,
 				GA_FollowMouse,TRUE,
 				GA_RelVerify,TRUE,
+                GA_BottomBorder,TRUE,
 				PGA_Freedom,FREEHORIZ,
 				PGA_NewLook,TRUE,
 				PGA_Borderless,TRUE,
@@ -231,6 +235,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 				GA_Height,window->BorderBottom,
 				GA_Immediate,TRUE,
 				GA_RelVerify,TRUE,
+                GA_BottomBorder,TRUE,
 				(flags&SCROLL_NOIDCMP)?TAG_IGNORE:ICA_TARGET,ICTARGET_IDCMP,
 				TAG_END))) return 0;
 		DoMethod((Object *)gadget,OM_ADDTAIL,list);
@@ -247,6 +252,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 				GA_Height,window->BorderBottom,
 				GA_Immediate,TRUE,
 				GA_RelVerify,TRUE,
+                GA_BottomBorder,TRUE,
 				(flags&SCROLL_NOIDCMP)?TAG_IGNORE:ICA_TARGET,ICTARGET_IDCMP,
 				TAG_END))) return 0;
 		DoMethod((Object *)gadget,OM_ADDTAIL,list);
