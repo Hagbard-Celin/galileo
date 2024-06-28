@@ -508,14 +508,6 @@ void lister_close_window(Lister *lister,BOOL run_script)
 	// Fix current directory
 	UnLock(CurrentDir(0));
 
-    // Must do this, or some commands will make MuForce hit if run before
-    // opening/activating new lister
-	// Clear pointer to current lister
-	Forbid();
-	if (GUI->current_lister==lister)
-		GUI->current_lister=0;
-	Permit();
-
 	// Free icon remapping
 	backdrop_free_remap(lister->backdrop_info,lister->window);
 

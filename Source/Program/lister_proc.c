@@ -1553,6 +1553,14 @@ void __saveds lister_code(void)
 	// Set flag to indicate closing
 	lister->flags|=LISTERF_CLOSING;
 
+    // Must do this, or some commands will make MuForce hit if run before
+    // opening/activating new lister
+	// Clear pointer to current lister
+	Forbid();
+	if (GUI->current_lister==lister)
+		GUI->current_lister=0;
+	Permit();
+
 	// Close display
 	lister_close(lister,1);
 

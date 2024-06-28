@@ -528,6 +528,14 @@ int lister_do_function(Lister *lister,ULONG func)
 			// Try to iconify
 			if (lister_iconify(lister))
 			{
+                // Must do this, or some commands will make MuForce hit if run before
+                // opening/activating new lister
+            	// Clear pointer to current lister
+            	Forbid();
+            	if (GUI->current_lister==lister)
+            		GUI->current_lister=0;
+            	Permit();
+
 				// Close window
 				lister_close(lister,0);
 			}
