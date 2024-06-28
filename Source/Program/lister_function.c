@@ -272,6 +272,9 @@ int lister_do_function(Lister *lister,ULONG func)
 			// Close lister and re-open it
 			lister_close(lister,0);
 			lister_open(lister,GUI->screen_pointer);
+
+            // Activate the window
+            ActivateWindow(lister->window);
 			break;
 
 
