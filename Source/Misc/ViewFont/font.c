@@ -468,6 +468,10 @@ void font_free(font_data *data)
 
 	// Close library
 	CloseLibrary(GalileoFMBase);
+
+#if RESOURCE_TRACKING
+    REALL_CloseLibrary(ResTrackBase);
+#endif
 }
 
 

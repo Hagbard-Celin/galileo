@@ -794,7 +794,7 @@ AppEntry *new_app_entry(
 	else entry->object=object;
 
 #if RESOURCE_TRACKING
-    KPrintF("!!!!!!wb.c line: 794 ADDING app_entry \n");
+    KPrintF("!!!!!!wb.c line: %ld ADDING app_entry \n", __LINE__);
 #endif
 	// Lock patch list
 	L_GetSemaphore(&wb_data->patch_lock,SEMF_EXCLUSIVE,0);
@@ -803,7 +803,7 @@ AppEntry *new_app_entry(
 	if ((IsListEmpty((struct List *)&wb_data->app_list))&&(!(dejaVu)))
 	{
 #if RESOURCE_TRACKING
-    	KPrintF("!!!!!!wb.c line: 804 INCREASING before %ld \n", wb_data->galileofm_base->ml_Lib.lib_OpenCnt);
+    	KPrintF("!!!!!!wb.c line: %ld INCREASING before %ld \n", __LINE__, wb_data->galileofm_base->ml_Lib.lib_OpenCnt);
 #endif
 		dejaVu=TRUE;
 
@@ -811,12 +811,9 @@ AppEntry *new_app_entry(
 		++wb_data->galileofm_base->ml_Lib.lib_OpenCnt;
 
 #if RESOURCE_TRACKING
-    	KPrintF("!!!!!!wb.c line: 811 INCREASING after %ld \n", wb_data->galileofm_base->ml_Lib.lib_OpenCnt);
+    	KPrintF("!!!!!!wb.c line: %ld INCREASING after %ld \n", __LINE__, wb_data->galileofm_base->ml_Lib.lib_OpenCnt);
 #endif
 	}
-
-	// Add to list
-	AddTail((struct List *)&wb_data->app_list,(struct Node *)entry);
 
 #if RESOURCE_TRACKING
     if (IsListEmpty((struct List *)&wb_data->app_list))
@@ -824,6 +821,9 @@ AppEntry *new_app_entry(
     else
         KPrintF("!!!!!!wb.c  List NOT empty at %lx \n", &wb_data->app_list);
 #endif
+
+	// Add to list
+	AddTail((struct List *)&wb_data->app_list,(struct Node *)entry);
 
 	// Unlock list
 	L_FreeSemaphore(&wb_data->patch_lock);
@@ -844,7 +844,7 @@ APTR rem_app_entry(
 	retval=entry;
 
 #if RESOURCE_TRACKING
-    KPrintF("!!!!!!wb.c line: 844 REMOVING app_entry \n");
+    KPrintF("!!!!!!wb.c line: %ld REMOVING app_entry \n",__LINE__);
 #endif
 
 	// Clear local flag

@@ -152,8 +152,12 @@ void __saveds __UserLibCleanup()
 
 #if RESOURCE_TRACKING
     KPrintF("Config Quitting......\n");
+    if (ResTrackBase->lib_OpenCnt==1)
+	    EndResourceTracking(); /* Generate a memory usage report */
+
     PrintTrackedResources();
     //EndResourceTracking(); /* Generate a memory usage report */
+    REALS_CloseLibrary(ResTrackBase);
 #endif
 
 }

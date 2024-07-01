@@ -168,6 +168,10 @@ void __saveds __UserLibCleanup()
  
 #if RESOURCE_TRACKING
     KPrintF("%s Quitting......\n", module_info.name);
+    if (ResTrackBase->lib_OpenCnt==1)
+	    EndResourceTracking(); /* Generate a memory usage report */
+
+    REALS_CloseLibrary(ResTrackBase);
 //    PrintTrackedResources();
     //EndResourceTracking(); /* Generate a memory usage report */
 #endif

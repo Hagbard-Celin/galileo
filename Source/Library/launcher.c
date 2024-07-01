@@ -404,12 +404,12 @@ void __saveds launcher_proc(void)
 					IsListEmpty((struct List *)&data->wb_data.rem_app_list))
 				{
 #if RESOURCE_TRACKING
-                    KPrintF("!!!Launcher.c line: 410 DECREASING before %ld \n", GalileoFMBase->ml_Lib.lib_OpenCnt);
+                    KPrintF("!!!Launcher.c line: %ld DECREASING before %ld \n", __LINE__, GalileoFMBase->ml_Lib.lib_OpenCnt);
 #endif
 					// Decrement library open count so we can get expunged
 					--GalileoFMBase->ml_Lib.lib_OpenCnt;
 #if RESOURCE_TRACKING
-                    KPrintF("!!!Launcher.c line: 416 DECREASING after %ld \n", GalileoFMBase->ml_Lib.lib_OpenCnt);
+                    KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, GalileoFMBase->ml_Lib.lib_OpenCnt);
 #endif
 				}
 
@@ -556,12 +556,12 @@ void __saveds launcher_proc(void)
 
 					// Zero count? Decrement library open count
 #if RESOURCE_TRACKING
-                    KPrintF("!!!Launcher.c line: 563 DECREASING if %ld = 0 before %ld \n", data->launch_count, GalileoFMBase->ml_Lib.lib_OpenCnt);
+                    KPrintF("!!!Launcher.c line: %ld DECREASING if %ld = 0 before %ld \n", __LINE__, data->launch_count, GalileoFMBase->ml_Lib.lib_OpenCnt);
 #endif
 					if (data->launch_count==0) --GalileoFMBase->ml_Lib.lib_OpenCnt;
 #if RESOURCE_TRACKING
                     {
-                    	KPrintF("!!!Launcher.c line: 568 DECREASING after %ld \n", GalileoFMBase->ml_Lib.lib_OpenCnt);
+                    	KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, GalileoFMBase->ml_Lib.lib_OpenCnt);
                         break;
                     }
 #else
@@ -669,13 +669,13 @@ void __saveds launcher_proc(void)
 							++data->launch_count;
 
 #if RESOURCE_TRACKING
-                    		KPrintF("!!!Launcher.c line: 676 INCREASING if %ld = 1 before %ld \n", data->launch_count, GalileoFMBase->ml_Lib.lib_OpenCnt);
+                    		KPrintF("!!!Launcher.c line: %ld INCREASING if %ld = 1 before %ld \n", __LINE__, data->launch_count, GalileoFMBase->ml_Lib.lib_OpenCnt);
 #endif
 							// First program? Increment open count so we can't be flushed
 							if (data->launch_count==1)
 								++GalileoFMBase->ml_Lib.lib_OpenCnt;
 #if RESOURCE_TRACKING
-                    		KPrintF("!!!Launcher.c line: 682 INCREASING after %ld \n", GalileoFMBase->ml_Lib.lib_OpenCnt);
+                    		KPrintF("!!!Launcher.c line: %ld INCREASING after %ld \n", __LINE__, GalileoFMBase->ml_Lib.lib_OpenCnt);
 #endif
 
 							// Unlock launch list
@@ -711,7 +711,7 @@ void __saveds launcher_proc(void)
 						++data->launch_count;
 
 #if RESOURCE_TRACKING
-                		KPrintF("!!!Launcher.c line: 718 INCREASING if %ld = 1 before %ld \n", data->launch_count, GalileoFMBase->ml_Lib.lib_OpenCnt);
+                		KPrintF("!!!Launcher.c line: %ld INCREASING if %ld = 1 before %ld \n", __LINE__, data->launch_count, GalileoFMBase->ml_Lib.lib_OpenCnt);
 #endif
 
 						// First program? Increment open count so we can't be flushed
@@ -719,7 +719,7 @@ void __saveds launcher_proc(void)
 							++GalileoFMBase->ml_Lib.lib_OpenCnt;
 
 #if RESOURCE_TRACKING
-                		KPrintF("!!!Launcher.c line: 726 INCREASING after %ld \n", GalileoFMBase->ml_Lib.lib_OpenCnt);
+                		KPrintF("!!!Launcher.c line: %ld INCREASING after %ld \n", __LINE__, GalileoFMBase->ml_Lib.lib_OpenCnt);
 #endif
 
 						// Wait for reply?
@@ -1353,7 +1353,7 @@ long __saveds __asm launch_exit_code(
 	GetSemaphore(&data->launch_lock,SEMF_EXCLUSIVE,0);
 
 #if RESOURCE_TRACKING
-    KPrintF("!!!Launcher.c line: 1362 DECREASING if %ld = 0 before %ld \n", data->launch_count, GalileoFMBase->ml_Lib.lib_OpenCnt);
+    KPrintF("!!!Launcher.c line: %ld DECREASING if %ld = 0 before %ld \n", __LINE__, data->launch_count, GalileoFMBase->ml_Lib.lib_OpenCnt);
 #endif
 
 	// Decrement launch count, check for zero count
@@ -1363,7 +1363,7 @@ long __saveds __asm launch_exit_code(
 		--GalileoFMBase->ml_Lib.lib_OpenCnt;
 
 #if RESOURCE_TRACKING
-        KPrintF("!!!Launcher.c line: 416 DECREASING after %ld \n", GalileoFMBase->ml_Lib.lib_OpenCnt);
+        KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, GalileoFMBase->ml_Lib.lib_OpenCnt);
 #endif
 
 		// Signal to check for pending quit
@@ -1371,7 +1371,7 @@ long __saveds __asm launch_exit_code(
 	}
 #if RESOURCE_TRACKING
     else
-		KPrintF("!!!Launcher.c line: 416 DECREASING after %ld \n", GalileoFMBase->ml_Lib.lib_OpenCnt);
+		KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, GalileoFMBase->ml_Lib.lib_OpenCnt);
 #endif
 
 	// Unlock launch list

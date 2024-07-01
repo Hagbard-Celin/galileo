@@ -98,7 +98,7 @@ BPTR __asm __saveds L_GetDosPathList(register __a0 BPTR copy_list)
         {
 
         	// Add Galileo:C before returning
-#if RESOURCE_TRACKINGP
+#if RESOURCE_TRACKING
         	if (new_entry=NRT_AllocVec(sizeof(PathListEntry),0))
 #else
 			if (new_entry=AllocVec(sizeof(PathListEntry),0))
@@ -138,7 +138,7 @@ BPTR __asm __saveds L_GetDosPathList(register __a0 BPTR copy_list)
 				path=BADDR(path->next))
 			{
 				// Allocate a new entry
-#if RESOURCE_TRACKINGP
+#if RESOURCE_TRACKING
                 if (new_entry=NRT_AllocVec(sizeof(PathListEntry),0))
 #else
 				if (new_entry=AllocVec(sizeof(PathListEntry),0))
@@ -151,7 +151,11 @@ BPTR __asm __saveds L_GetDosPathList(register __a0 BPTR copy_list)
 					new_entry->next=0;
 
 					// Duplicate lock
+#if RESOURCE_TRACKING
+					new_entry->lock=NRT_DupLock(path->lock);
+#else
 					new_entry->lock=DupLock(path->lock);
+#endif
 				}
 			}
 
@@ -165,7 +169,7 @@ BPTR __asm __saveds L_GetDosPathList(register __a0 BPTR copy_list)
 	            // If not duplicating, add Galileo:C
     	        if (!duplicate)
         	    {
-#if RESOURCE_TRACKINGP
+#if RESOURCE_TRACKING
             		if (new_entry=NRT_AllocVec(sizeof(PathListEntry),0))
 #else
 					if (new_entry=AllocVec(sizeof(PathListEntry),0))
@@ -174,7 +178,11 @@ BPTR __asm __saveds L_GetDosPathList(register __a0 BPTR copy_list)
                         // Add to head of list
                 		new_entry->next=new_path;
                 		new_path=MKBADDR(new_entry);
+#if RESOURCE_TRACKING
+                		new_entry->lock=NRT_Lock("Galileo:C",ACCESS_READ);
+#else
                 		new_entry->lock=Lock("Galileo:C",ACCESS_READ);
+#endif
             		}
             	}
 
@@ -286,10 +294,14 @@ void __asm __saveds L_FreeDosPathList(register __a0 BPTR list)
 		PathListEntry *next=(PathListEntry *)BADDR(path->next);
 
 		// Unlock this lock
+#if RESOURCE_TRACKING
+		NRT_UnLock(path->lock);
+#else
 		UnLock(path->lock);
+#endif
 
 		// Free this entry
-#if RESOURCE_TRACKINGP
+#if RESOURCE_TRACKING
         NRT_FreeVec(path);
 #else
         FreeVec(path);
