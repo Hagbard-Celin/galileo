@@ -153,6 +153,7 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 
 	// Initialise stuff
 	data->low_mem_signal=-1;
+    data->wb_data.first_app_entry=TRUE;
 	data->wb_data.wb_base=WorkbenchBase;
 	data->wb_data.int_base=(struct Library *)IntuitionBase;
 	data->wb_data.galileofm_base=libbase;

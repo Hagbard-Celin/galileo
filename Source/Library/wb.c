@@ -755,7 +755,6 @@ AppEntry *new_app_entry(
 {
 	AppEntry *entry;
 
-    static BOOL dejaVu=FALSE;
 
 	// Allocate new entry
 	if (!(entry=AllocVec(sizeof(AppEntry),MEMF_CLEAR)))
@@ -800,12 +799,13 @@ AppEntry *new_app_entry(
 	L_GetSemaphore(&wb_data->patch_lock,SEMF_EXCLUSIVE,0);
 
 	// Is this the first entry?
-	if ((IsListEmpty((struct List *)&wb_data->app_list))&&(!(dejaVu)))
+	if ((IsListEmpty((struct List *)&wb_data->app_list))&&(wb_data->first_app_entry))
 	{
 #if RESOURCE_TRACKING
     	KPrintF("!!!!!!wb.c line: %ld INCREASING before %ld \n", __LINE__, wb_data->galileofm_base->ml_Lib.lib_OpenCnt);
 #endif
-		dejaVu=TRUE;
+        // Set flag to avoid runaway opencount
+		wb_data->first_app_entry=FALSE;
 
         // Bump library open count so we won't get expunged
 		++wb_data->galileofm_base->ml_Lib.lib_OpenCnt;

@@ -408,6 +408,10 @@ void __saveds launcher_proc(void)
 #endif
 					// Decrement library open count so we can get expunged
 					--GalileoFMBase->ml_Lib.lib_OpenCnt;
+
+                    // Reset flag for wb.c:new_app_entry()
+                    data->wb_data.first_app_entry=TRUE;
+
 #if RESOURCE_TRACKING
                     KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, GalileoFMBase->ml_Lib.lib_OpenCnt);
 #endif

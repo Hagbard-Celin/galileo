@@ -49,7 +49,7 @@ typedef struct
 	APTR					*old_function;
 
 	UWORD					lock_count;
-	UWORD					pad;
+	BOOL 					first_app_entry;
 
 	struct Library			*utility_base;
 	struct MinList			rem_app_list;
