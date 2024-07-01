@@ -53,7 +53,6 @@ typedef struct
 	BPTR	lock;
 } PathListEntry;
 
-void add_galileo_c_to_pathlist(BPTR list);
 
 // Get a usable path list
 BPTR __asm __saveds L_GetDosPathList(register __a0 BPTR copy_list)
