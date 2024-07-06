@@ -322,7 +322,7 @@ ConfigWindow
 		{0,0,36,64+4}};
 
 // Labels
-static USHORT
+static const USHORT
 	allow_resume_labels[]={
 		MSG_REPLACE_ALWAYS,
 		MSG_REPLACE_NEVER,
@@ -347,7 +347,7 @@ static USHORT
 
 
 // Tags for gadgets
-static struct TagItem
+static const struct TagItem
 
 	// Option lister
 	ftp_lister_taglist[]={
@@ -1140,7 +1140,7 @@ ConfigWindow
 		{POS_CENTER,POS_CENTER,37,6},
 		{0,0,24,76}};
 
-static struct TagItem
+static const struct TagItem
 
 	ftp_connect_layout_tags[]={
 		{GTCustom_LayoutRel,GAD_CONNECT_LAYOUT},
@@ -1317,7 +1317,7 @@ USHORT	custom_options_labels[]={
 		MSG_CUSTOM_OPTIONS,
 		0};
 
-static struct TagItem
+static const struct TagItem
 
 	edit_custom_relative_tags[]={
 		{GTCustom_LayoutRel,GAD_EDIT_CUSTOM_LAYOUT},
@@ -1506,7 +1506,7 @@ ConfigWindow
 		{POS_CENTER,POS_CENTER,42,10},
 		{0,0,30,20}};
 
-static struct TagItem
+static const struct TagItem
 	ftp_lister_tags[]={
 		{GTLV_ShowSelected,0},
 		{TAG_END}};

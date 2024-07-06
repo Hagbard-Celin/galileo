@@ -39,7 +39,7 @@ For more information on Directory Opus for Windows please see:
 #include "Config/galileoconfig.h"
 #include "/Program/position.h"
 
-static char *version="$VER: pathformat.gfmmodule 0.1 "__AMIGADATE__" ";
+static const char *version="$VER: pathformat.gfmmodule 0.1 "__AMIGADATE__" ";
 
 int __asm __saveds L_Module_Entry(
 	register __a0 struct List *files,

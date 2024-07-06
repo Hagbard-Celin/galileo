@@ -508,7 +508,7 @@ ULONG __asm __saveds L_Module_Entry(
 	return success;
 }
 
-static char item_lookup[DISPLAY_LAST]={
+static const char item_lookup[DISPLAY_LAST]={
 	DISPLAY_NETPROT,
 	DISPLAY_GROUP,
 	DISPLAY_OWNER,
@@ -525,7 +525,7 @@ void _config_lister_init_format(config_lister_data *data)
 {
 	short a;
 	char *sort_ptr=0;
-	static short items[DISPLAY_LAST]={
+	static const short items[DISPLAY_LAST]={
 		MSG_LISTER_LIST_FILENAME,
 		MSG_LISTER_LIST_FILESIZE,
 		MSG_LISTER_LIST_DATE,

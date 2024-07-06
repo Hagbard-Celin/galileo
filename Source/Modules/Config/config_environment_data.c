@@ -120,7 +120,7 @@ USHORT
 
 
 // Tags for gadgets
-static struct TagItem
+static const struct TagItem
 
 	// Option lister
 	_environment_lister_taglist[]={

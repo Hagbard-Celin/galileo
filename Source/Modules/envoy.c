@@ -47,7 +47,7 @@ typedef struct _PathNode
 	USHORT			flags;
 } PathNode;
 
-static char *version="$VER: envoy.gfmmodule 0.1 "__AMIGADATE__" ";
+static const char *version="$VER: envoy.gfmmodule 0.1 "__AMIGADATE__" ";
 
 int __asm __saveds L_Module_Entry(
 	register __a0 struct List *files,

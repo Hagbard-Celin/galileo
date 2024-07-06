@@ -37,7 +37,7 @@ For more information on Directory Opus for Windows please see:
 
 #include "show.h"
 
-static unsigned short pens[1]={(unsigned short)~0};
+static const unsigned short pens[1]={(unsigned short)~0};
 char *version="$VER: show.gfmmodule 0.1 "__AMIGADATE__" ";
 
 int __asm __saveds L_Module_Entry(

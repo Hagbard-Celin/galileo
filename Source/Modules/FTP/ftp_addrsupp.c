@@ -63,7 +63,7 @@ enum	{
 static Att_List *do_import_amftp(struct display_globals *dg,char *path);
 
 
-static char *head1="#\
+static const char *head1="#\
 # Galileo 5.8 FTP client site list\n\
 #\n\
 # Site Template is	ANONYMOUS=ANON/S,USERACCOUNT=ACCT/S,ALIAS=NAME/K,HOST,\n\

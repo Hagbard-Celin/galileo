@@ -941,7 +941,7 @@ void play_cleanup(play_data *data)
 
 
 // Code table for delta unpacking
-static char codetodelta[16]={-34,-21,-13,-8,-5,-3,-2,-1,0,1,2,3,5,8,13,21};
+static const char codetodelta[16]={-34,-21,-13,-8,-5,-3,-2,-1,0,1,2,3,5,8,13,21};
 
 // Unpack a delta-compressed data stream
 void unpack_delta(char *source,unsigned long size,char *dest,unsigned char start)

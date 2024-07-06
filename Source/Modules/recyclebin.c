@@ -37,7 +37,7 @@ For more information on Directory Opus for Windows please see:
 
 #include "recyclebin.h"
 
-static char *version="$VER: recyclebin.gfmmodule 0.1 "__AMIGADATE__" ";
+static const char *version="$VER: recyclebin.gfmmodule 0.1 "__AMIGADATE__" ";
 
 int __asm __saveds L_Module_Entry(
 	register __a0 char *string,

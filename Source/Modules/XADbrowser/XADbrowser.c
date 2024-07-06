@@ -45,7 +45,7 @@
 
 //void KPrintF __ARGS((char *,...));
 
-static char *version="\0$VER: XADbrowser.gfmmodule 0.1 "__AMIGADATE__" Written by Mladen Milinkovic <max2@iname.com>\0";
+static const char *version="\0$VER: XADbrowser.gfmmodule 0.1 "__AMIGADATE__" Written by Mladen Milinkovic <max2@iname.com>\0";
 
 struct xadMasterBase *xadMasterBase = NULL;
 //extern struct xadMasterBase *xadMasterBase;

@@ -86,7 +86,7 @@ USHORT
 		MSG_PRINT_OUTPUT_FILE,
 		0};
 
-static struct TagItem
+static const struct TagItem
 	print_layout[]={
 		{GTCustom_LayoutRel,GAD_PRINT_LAYOUT},
 		{TAG_END}},

@@ -46,7 +46,7 @@ char *version="$VER: read.gfmmodule 0.1 "__AMIGADATE__" ";
 static struct IBox dims;
 static short tab_size=8;
 static short search_flags=SEARCHF_NOCASE;
-static char *mode_string[]={"normal","ansi","hex"};
+static const char *mode_string[]={"normal","ansi","hex"};
 static char run_once;
 static short use_screen;
 static ULONG modeid;
