@@ -45,7 +45,7 @@ struct qual_name
 	char *name;
 };
 
-static struct qual_name
+static const struct qual_name
 	qualifiers[]={
 		{IEQUALIFIER_LSHIFT,IXSYM_SHIFT|IXSYM_CAPS,"lshift"},
 		{IEQUALIFIER_RSHIFT,IXSYM_SHIFT|IXSYM_CAPS,"rshift"},
@@ -233,7 +233,7 @@ void __asm __saveds L_WriteFileIcon(
 }
 
 
-static struct TagItem
+static const struct TagItem
 	busytags[3]={
 		{WA_BusyPointer,1},
 		{WA_PointerDelay,TRUE},

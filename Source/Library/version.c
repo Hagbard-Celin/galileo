@@ -49,7 +49,7 @@ For more information on Directory Opus for Windows please see:
 
 short version_skip(char *,short,short);
 
-static char *month_str[]={"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+static const char *month_str[]={"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 
 BOOL __asm __saveds L_GetFileVersion(
 	register __a0 char *name,

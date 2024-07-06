@@ -116,7 +116,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 	struct Image *image[4]={0,0,0,0};
 	struct Gadget *gadget=0;
 	short a;
-	static struct TagItem
+	static const struct TagItem
 		map_tags[]={
 			{PGA_Top,ICSPECIAL_CODE},
 			{TAG_END}};

@@ -39,7 +39,7 @@ For more information on Directory Opus for Windows please see:
 #include "galileofmlib.h"
 
 // Places to look for a path
-static char __far
+static const char __far
 	*path_places[]={
 		"Workbench",
 		"Initial CLI",

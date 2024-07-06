@@ -39,7 +39,7 @@ For more information on Directory Opus for Windows please see:
 #define BOOPSI_LIBS
 #include "boopsi.h"
 
-static unsigned char __far
+static const unsigned char __far
 	palette_layout[8][3][2]={
 
 /* 2 */		{{2,1},{2,1},{1,2}},

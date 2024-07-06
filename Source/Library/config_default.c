@@ -40,7 +40,7 @@ For more information on Directory Opus for Windows please see:
 #include "/Program/galileo_config.h"
 #include "configflags.h"
 
-static ULONG default_palette[]={
+static const ULONG default_palette[]={
 	0xefffffff,0xafffffff,0x4fffffff,
 	0x7fffffff,0x00000000,0x7fffffff,
 	0xffffffff,0xffffffff,0x00000000,

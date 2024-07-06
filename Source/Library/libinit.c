@@ -47,7 +47,7 @@ char *_ProgramName="galileofm.library";
 void init_locale_data(struct GalileoLocale *locale);
 void free_locale_data(struct GalileoLocale *locale);
 
-static struct TextAttr topaz_attr={"topaz.font",8,0,0};
+static const struct TextAttr topaz_attr={"topaz.font",8,0,0};
 
 char *version="$VER: galileofm.library 0.1 "__AMIGADATE__" ";
 

@@ -53,7 +53,7 @@ For more information on Directory Opus for Windows please see:
 
 
 // Patch functions
-static PatchList
+static const PatchList
 	wb_patches[WB_PATCH_COUNT]={
 		{-0x30,L_WB_AddAppWindow,WB_PATCH_WORKBENCH},
 		{-0x36,L_WB_RemoveAppWindow,WB_PATCH_WORKBENCH},
