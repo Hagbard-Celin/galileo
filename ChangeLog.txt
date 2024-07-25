@@ -155,7 +155,7 @@ Galileo - ChangeLog
       - Imported XAD password support code by Szilard Biro from APL
         version with permission, and fixed it to compile on SAS/C.
 
-      - Changed RTG includes from Cybergraphics to Picasso96. Picasso96 is now required for RTG.
+      - Changed RTG includes from Cybergraphics to P96. P96 is now required for RTG.
 
       - Included original XADopus source from Aminet, renamed as XADbrowser.
 

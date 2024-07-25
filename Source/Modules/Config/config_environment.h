@@ -123,7 +123,7 @@ typedef struct
 
 	short			orig_colour_sel;
 	GL_Object		*palette_gadget;
-	short			picasso_flag;
+	short			p96_flag;
 	short			colour_number;
 
 	short			custom_pen[2];

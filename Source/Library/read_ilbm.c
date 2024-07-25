@@ -524,7 +524,7 @@ void __asm __saveds L_DecodeILBM(
 	// Allocate temporary bitmap if WritePixel needed
 	if (flags&DIF_WRITEPIX)
 	{
-		// Picasso96, 24bit?
+		// P96, 24bit?
 		if (P96Base && planes==24)
 			buffer=AllocVec((bufsize=bpr*24),0);
 
@@ -721,7 +721,7 @@ void __asm __saveds L_DecodeILBM(
 			if (flags&DIF_WRITEPIX)
 			{
 
-                // Picasso96?
+                // P96?
                 if (P96Base)
                 {
                     if (planes==24)

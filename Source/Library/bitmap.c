@@ -53,7 +53,7 @@ struct BitMap *__asm __saveds L_NewBitMap(
         // Got friend and P96?
         if (friend && P96Base)
         {
-            // Friend is Picasso bitmap?
+            // Friend is P96 bitmap?
             if (p96GetBitMapAttr(friend,P96BMA_ISP96))
             {
                 return p96AllocBitMap(sizex,sizey,depth,flags,friend,NULL);

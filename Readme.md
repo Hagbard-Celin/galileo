@@ -35,7 +35,7 @@ Some of the highlights are:
 - Changed "Copy", "CopyAs", "Encrypt", "MakeLink" and "MakeLinkAs" to
   single-destination commands. And added new commands with prefix "Multi" that
   preserves the original behavior.
-- Picasso96 is now the only supported RTG-system.
+- P96 is now the only supported RTG-system.
 
 
 Build instructions:

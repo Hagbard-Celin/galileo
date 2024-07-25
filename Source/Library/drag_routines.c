@@ -358,7 +358,7 @@ void __asm __saveds L_GetDragMask(register __a0 DragInfo *drag)
 		imagebm=(struct BitMap *)drag->sprite.ImageData;
 		depth=GetBitMapAttr(imagebm,BMA_DEPTH);
 
-		// Do we have Picasso96, and is it a P96 mode greater than 256 colours?
+		// Do we have P96, and is it a P96 mode greater than 256 colours?
 		if (P96Base &&
 			depth>8 &&
 			p96GetBitMapAttr(imagebm,P96BMA_ISP96))

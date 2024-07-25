@@ -106,8 +106,8 @@ void _config_env_palette_change_colour(
 	set_rgb32(data,data->sel_colour,data->config->palette+(data->sel_colour*3)+1);
 
 
-	// On a picasso screen we need to redraw the colour square
-	if (data->picasso_flag)
+	// On a P96 screen we need to redraw the colour square
+	if (data->p96_flag)
 		SetGadgetAttrs(GADGET(data->palette_gadget),data->window,0,
 			DPG_Redraw,data->orig_colour_sel,
 			TAG_END);

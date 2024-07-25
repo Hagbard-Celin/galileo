@@ -438,7 +438,7 @@ BOOL display_open(long flags)
 			if (GfxBase->LibNode.lib_Version>=39 &&
 				!(GetBitMapAttr(GUI->window->RPort->BitMap,BMA_FLAGS)&BMF_STANDARD))
 			{
-				// Picasso?
+				// P96?
 				if (FindName(&ExecLib->LibList,"rtg.library"))
 					strcpy(GUI->ver_chips,"P96");
 

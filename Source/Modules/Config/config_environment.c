@@ -1623,9 +1623,9 @@ BOOL _config_env_open(config_env_data *data,struct Screen *screen)
 	// Under 39?
 	if (GfxBase->LibNode.lib_Version>=39)
 	{
-		// See if we're on a picasso screen
 		if (p96GetBitMapAttr(data->window->WScreen->RastPort.BitMap,P96BMA_ISP96))
-			data->picasso_flag=1;
+		// See if we're on a P96 screen
+			data->p96_flag=1;
 	}
 
 
