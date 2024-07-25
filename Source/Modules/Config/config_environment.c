@@ -1623,8 +1623,8 @@ BOOL _config_env_open(config_env_data *data,struct Screen *screen)
 	// Under 39?
 	if (GfxBase->LibNode.lib_Version>=39)
 	{
-		if (p96GetBitMapAttr(data->window->WScreen->RastPort.BitMap,P96BMA_ISP96))
 		// See if we're on a P96 screen
+		if (P96Base && p96GetBitMapAttr(data->window->WScreen->RastPort.BitMap,P96BMA_ISP96))
 			data->p96_flag=1;
 	}
 
