@@ -451,13 +451,15 @@ void __asm __saveds __UserLibCleanup(register __a6 struct MyLibrary *libbase)
 	CloseLibrary((struct Library *)IntuitionBase);
 	CloseLibrary((struct Library *)DOSBase);
 
-#if RESOURCE_TRACKING
+#ifdef _DEBUG
     KPrintF("Main Library\n");
+#if RESOURCE_TRACKING
     //PrintTrackedResources();
     if (ResTrackBase->lib_OpenCnt==1)
 	    EndResourceTracking(); /* Generate a memory usage report */
 
     REALL_CloseLibrary(ResTrackBase);
+#endif
 
     KPrintF("Quitting......\n");
 #endif

@@ -254,12 +254,15 @@ void quit(BOOL script)
 	// Close the galileofm.library
 	CloseLibrary(GalileoFMBase);
 
-#if RESOURCE_TRACKING
+#ifdef _DEBUG
     KPrintF("Quitting......\n");
+#if RESOURCE_TRACKING
     PrintTrackedResources();
     //EndResourceTracking(); /* Generate a memory usage report */
+    REALL_CloseLibrary(ResTrackBase);
+    NRT_FreeVec(callerid);
 #endif
-
+#endif
 	// Outahere!
 	exit(0);
 }
