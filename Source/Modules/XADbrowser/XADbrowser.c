@@ -1339,6 +1339,10 @@ int __saveds __asm L_Module_Entry(
 
 //		ErrorReq(&data, data.lists); // *********************
 
+        // Block lister until we are ready to handle events
+		sprintf(buf, "lister set %s busy on wait", data.lists);
+		data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+
 		if(AllocPort(&data))
 		{
             struct _PathNode listp;
@@ -1346,9 +1350,6 @@ int __saveds __asm L_Module_Entry(
 
             // To avoid usless snapshot attempt when quitting
             data.hook.gc_FakeDir(data.listh,TRUE);
-
-			sprintf(buf, "lister wait %s quick", data.lists);
-			data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
 			strcpy(data.listpath, data.rootpath);
 			sprintf(buf, "lister set %s path %s", data.lists, data.listpath);
@@ -1366,13 +1367,6 @@ int __saveds __asm L_Module_Entry(
 			    data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
             }
 			data.hook.gc_RefreshLister(data.listh, HOOKREFRESH_FULL);
-
-			sprintf(buf, "lister wait %s quick", data.lists);
-			data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
-
-            // Block lister until we are ready to handle events
-			sprintf(buf, "lister set %s busy on wait", data.lists);
-			data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
             if(data.newlister)
             {
@@ -1513,6 +1507,12 @@ int __saveds __asm L_Module_Entry(
 			}
 			FreePort(&data);
 		}
+        else
+        {
+            // Unblock lister
+			sprintf(buf, "lister set %s busy off wait", data.lists);
+			data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+        }
 	}
 #ifdef _DEBUG
     KPrintF("XAD normal END!! \n");
