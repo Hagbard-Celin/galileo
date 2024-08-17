@@ -1370,6 +1370,10 @@ int __saveds __asm L_Module_Entry(
 			sprintf(buf, "lister wait %s quick", data.lists);
 			data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
+            // Block lister until we are ready to handle events
+			sprintf(buf, "lister set %s busy on wait", data.lists);
+			data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+
             if(data.newlister)
             {
                 // Did we have a destination lister to begin with?
@@ -1434,6 +1438,10 @@ int __saveds __asm L_Module_Entry(
 					data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
 					data.hook.gc_RefreshLister(data.listh, HOOKREFRESH_FULL);
+
+                    // Ready to handle input, unblock lister
+        			sprintf(buf, "lister set %s busy off wait", data.lists);
+        			data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
 					while(!over)
 					{
