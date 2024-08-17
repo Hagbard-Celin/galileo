@@ -422,7 +422,7 @@ struct Gadget *__asm __saveds L_CreateTitleGadget(
 	if (type==IM_GAUGE ||
 		(image=NewObject(0,"galileoiclass",
 			DIA_Type,type,
-			IA_Width,width,
+			IA_Width,width-1,
 			IA_Height,screen->WBorTop+screen->Font->ta_YSize+1,
 			TAG_END)))
 	{

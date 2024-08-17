@@ -207,7 +207,7 @@ struct Window *lister_open_window(Lister *lister,struct Screen *screen)
 					screen,
 					&lister->backdrop_info->boopsi_list,
 					(lister->flags&LISTERF_LOCK_POS)?TRUE:FALSE,
-					(gadget)?-gadget->Width:0,
+					(iconify_gad)?-iconify_gad->Width:0,
 					IM_LOCK,
 					GAD_LOCK)))
 	{
@@ -354,7 +354,7 @@ struct Window *lister_open_window(Lister *lister,struct Screen *screen)
             // Create gadget
     		if (zgadget=NewObject(0,"galileobuttongclass",
     			GA_ID,GAD_ZOOM,
-    			GA_RelRight,gadget->LeftEdge,
+    			GA_RelRight,gadget->LeftEdge-1,
     			GA_Top,gadget->TopEdge,
     			GA_Width,gadget->Width,
     			GA_Height,gadget->Height,
