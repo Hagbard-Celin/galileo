@@ -192,7 +192,7 @@ long __asm __saveds HookRexxCommand(
             struct Message *msg;
             while (msg=GetMsg(reply))
 			ReplyFreeMsg(msg);
-        DeleteMsgPort(reply);
+        	DeleteMsgPort(reply);
         }
 	}
 
