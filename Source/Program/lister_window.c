@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2024 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -264,6 +265,16 @@ struct Window *lister_open_window(Lister *lister,struct Screen *screen)
 		(lister->flags&LISTERF_LOCK_POS)?WA_Title:TAG_IGNORE,"",
 		WA_BackFill,&lister->pattern,
 		TAG_END))) return 0;
+
+	// Get sizing gadget
+	if (gadget=FindGadgetType(lister->window->FirstGadget,GTYP_SIZING))
+	{
+    	// Remove gadget from the list
+    	RemoveGList(lister->window,gadget,1);
+
+    	// Add to end of list
+    	AddGList(lister->window,gadget,-1,1,0);
+	}
 
 	// Fix title gadgets
 	FixTitleGadgets(lister->window);
