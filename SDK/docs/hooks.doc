@@ -638,7 +638,7 @@ Added in Galileo:
     'flags'.
 
 
-    BOOL gc_issourcedestlock(    ULONG lister)
+    BOOL gc_IsSourceDestLock(    ULONG lister)
 
     This function take a lister handle and returns TRUE if the lister is locked
     as source or destination or FLASE otherwise.
