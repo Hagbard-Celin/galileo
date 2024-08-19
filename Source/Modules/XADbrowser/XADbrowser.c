@@ -1502,6 +1502,11 @@ int __saveds __asm L_Module_Entry(
 					data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
 					ErrorReq(&data, xadGetErrorText(err));
+
+                    // unblock lister
+        			sprintf(buf, "lister set %s busy off wait", data.lists);
+        			data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+
 				}
 				xadFreeObject(data.ArcInf,NULL);
 			}
