@@ -1316,10 +1316,6 @@ int __saveds __asm L_Module_Entry(
 
     data.hook.gc_EndEntry(IPCDATA(ipc), Entry, TRUE);
     data.hook.gc_EndSource(IPCDATA(ipc), 1);
-    data.hook.gc_UnlockSource(IPCDATA(ipc));
-
-    // Free the FunctionHandle, detaching completely from originating lister
-    data.hook.gc_FreePointerDirect(IPCDATA(ipc),MODPTR_HANDLE,POINTERF_DELPORT);
 
     if(data.newlister)
     {
@@ -1342,6 +1338,12 @@ int __saveds __asm L_Module_Entry(
 		if(AllocPort(&data))
 		{
             struct _PathNode listp;
+
+            data.hook.gc_UnlockSource(IPCDATA(ipc));
+
+            // Free the FunctionHandle, detaching completely from originating lister
+            data.hook.gc_FreePointerDirect(IPCDATA(ipc),MODPTR_HANDLE,POINTERF_DELPORT);
+
             data.listp=&listp;
 
             // To avoid usless snapshot attempt when quitting
@@ -1362,6 +1364,22 @@ int __saveds __asm L_Module_Entry(
                 sprintf(buf, "lister set %s source", data.lists);
 			    data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
             }
+
+            // Quit and cleanup if user closed window
+            while (pkt = (struct MyPacket *)GetMsg(data.mp))
+            {
+                if (!strcmp((char *)pkt->sp_Pkt.dp_Arg1, "inactive"))
+                {
+        			sprintf(buf, "galileo remtrap * %s", data.mp_name);
+        			data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+
+    				ReplyMsg((struct Message *)pkt);
+
+                    goto end_3;
+                }
+                else ReplyMsg((struct Message *)pkt);
+            }
+
 			data.hook.gc_RefreshLister(data.listh, HOOKREFRESH_FULL);
 
             sprintf(buf, "lister wait %s quick", data.lists);
@@ -1515,6 +1533,13 @@ int __saveds __asm L_Module_Entry(
 			}
 			FreePort(&data);
 		}
+        else
+        {
+            data.hook.gc_UnlockSource(IPCDATA(ipc));
+
+            // Free the FunctionHandle, detaching completely from originating lister
+            data.hook.gc_FreePointerDirect(IPCDATA(ipc),MODPTR_HANDLE,POINTERF_DELPORT);
+        }
 	}
 #ifdef _DEBUG
     KPrintF("XAD normal END!! \n");
@@ -1531,6 +1556,12 @@ int __saveds __asm L_Module_Entry(
 	return(1);
 
     //Error Handling
+    end_3:
+
+    FreePort(&data);
+    if(xadMasterBase) CloseLibrary((struct Library *)xadMasterBase);
+    return (0);
+
     end_2:
 #ifdef _DEBUG
     KPrintF("XAD fail2 END!! \n");
