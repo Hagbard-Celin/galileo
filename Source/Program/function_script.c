@@ -106,7 +106,7 @@ static char
 	*script_type_intro[]={
 		0,				// INST_COMMAND
 		0,				// INST_AMIGADOS
-		"galileort5 ",	// INST_WORKBENCH
+		"galileort ", 	// INST_WORKBENCH
 		"execute ",		// INST_SCRIPT
 		"rx ",			// INST_AREXX
 	};

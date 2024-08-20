@@ -19,7 +19,7 @@ Galileo - ChangeLog
       - Added commandline switch NEWLISTER/S to XADOpen. It will now open in a new lister
         if this switch is specified, and takeover the originating lister if not.
 
-      - Added callback function gc_issourcedestlock and corresponding AREXX command
+      - Added callback function gc_IsSourceDestLock and corresponding AREXX command
         "lister query <handle> sourcedestlock" to check if a lister is locked either as
         source or destination lister.
 
