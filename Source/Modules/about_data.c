@@ -2587,8 +2587,8 @@ __far USHORT
 		0x0000,0x0000,0x0000,0x0000
 		}};
 
-unsigned char about_message[]="The original Directory Opus 5 was written by Jonathan Potter, and designed by Jonathan Potter "
-"and Greg Perry. The original FTP module were written by Andrew Dunbar. "
+unsigned char about_message[]="The original Directory Opus 5 was written by Jonathan Potter, and designed by Jonathan Potter and Greg Perry.\n"
+"The original FTP module and Automatic Filetype Creator were written by Andrew Dunbar.\n"
 "The original XAD module was written by Mladen Milinkovic.\n\n"
 "The spinning Galileo animation was made from a low resolution render.\n"
 "Before the following required credit, i must state:\n"
