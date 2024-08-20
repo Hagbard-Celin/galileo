@@ -76,6 +76,9 @@ function_parse_function(FunctionHandle *handle)
 		// Internal command?
 		if (instruction->type==INST_COMMAND)
 		{
+            // Only once?
+            if (*ptr=='#') ++ptr;
+
 			// Get command
 			if (command=function_find_internal(&ptr,(handle->function->function.flags2&FUNCF2_ORIGINAL)?1:0))
 			{
@@ -144,8 +147,8 @@ function_parse_function(FunctionHandle *handle)
 				// Initialise
 				parse->type=instruction->type;
 
-				// Internal command?
-				parse->command=command;
+				// Internal command? Set count if to run only once
+				if ((parse->command=command) && (*instruction->string=='#')) parse->count=1;
 
 				// Parse instruction
 				function_parse_instruction(handle,ptr,buf,&flags);

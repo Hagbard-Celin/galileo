@@ -1232,6 +1232,9 @@ BOOL funced_end_edit(
 				ptr=entry->buffer;
 				while (*ptr && *ptr==' ') ++ptr;
 
+                // Allow for #
+                if (*ptr && *ptr=='#') ++ptr;
+
 				// Go through list of commands
 				list=(struct MinList *)data->startup->func_list;
 				for (command=(CommandList *)list->mlh_Head;
@@ -1617,6 +1620,9 @@ BOOL funced_command_req(FuncEdData *data,char *buffer,short type)
 			// Get command pointer
 			cmd=(char *)GetGadgetValue(data->objlist,GAD_FUNCED_EDIT);
 			while (*cmd==' ') ++cmd;
+
+            // Allow for #
+            if (*cmd && *cmd=='#') ++cmd;
 
 			// Go through list of commands
 			list=(struct MinList *)data->startup->func_list;

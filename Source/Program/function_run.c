@@ -159,8 +159,16 @@ short function_run(FunctionHandle *handle)
 				instruction->node.mln_Succ;
 				instruction=(InstructionParsed *)instruction->node.mln_Succ)
 			{
-				// Once only?
-				if (instruction->string && *instruction->string=='#')
+                // Once only?
+				if (instruction->command && instruction->count>0)
+                {
+					// Check count; skip if already used
+					if (instruction->count>1) continue;
+
+					// Increment count
+					++instruction->count;
+                }
+                else if (instruction->string && *instruction->string=='#')
 				{
 					// Check count; skip if already used
 					if (instruction->count>0) continue;

@@ -1,0 +1,10 @@
+Function Editor Changes:
+
+- Made #-prefix, for running a command only a single time even if "Do all files"
+  is checked, work with internal commands.
+
+Command Changes:
+
+- Copy, CopyAs, Encrypt, MakeLink and MakeLinkAs are no longer multi-destination.
+  The new commands MultiCopy, MultiCopyAs, MultiEncrypt, MultiMakeLink and
+  MultiMakeLinkAs preserves the orignal behaviour.
