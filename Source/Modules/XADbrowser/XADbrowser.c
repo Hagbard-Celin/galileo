@@ -1090,6 +1090,8 @@ int __saveds __asm L_Module_Entry(
 	char arcname[512];
 	char buf[512];
     char result[100];
+    char **archives=0;
+    short archnum=0;
 
 	struct ModuleData data;
 	BOOL async=FALSE;
@@ -1098,10 +1100,10 @@ int __saveds __asm L_Module_Entry(
 
     int openwinret;
 	
-    struct function_entry *Entry;
+    struct function_entry *Entry=0;
 
 	ULONG err, total;
-	STRPTR filename;
+	STRPTR filename=0;
 	
 	struct MyPacket *pkt;
 	BOOL over = FALSE;
@@ -1121,6 +1123,8 @@ int __saveds __asm L_Module_Entry(
 
     data.screen = screen;
 
+    arcname[0]=0;
+
     if (memhandlep && *memhandlep)
     {
         async=TRUE;
@@ -1129,6 +1133,47 @@ int __saveds __asm L_Module_Entry(
     {
         ErrorReq(&data,GetString(locale,MSG_NEEDS_ASYNC_ERR));
         return 0;
+    }
+
+    if(mod_id == 1)
+    {
+        if (data.args=ParseArgs(XADEXTRACT_ARGS,args))
+        {
+            if (data.args->FA_Arguments[0])
+            {
+                archives=(char **)data.args->FA_Arguments[0];
+                KPrintF("%s\n",archives[archnum]);
+                strcpy(arcname,archives[archnum]);
+                archnum=1;
+            }
+
+            if (data.args->FA_Arguments[1])
+            {
+                strcpy(data.listpath,(char *)data.args->FA_Arguments[1]);
+            }
+    	}
+    }
+    else
+    {
+        if (data.args=ParseArgs(XADOPEN_ARGS,args))
+        {
+            if (data.args->FA_Arguments[0])
+            {
+                strcpy(arcname, (char *)data.args->FA_Arguments[0]);
+                strcpy(data.rootpath, FilePart((char *)data.args->FA_Arguments[0]));
+
+                // Always use new listerwindow when archivename comes from commandline
+                data.newlister=TRUE;
+            }
+            else
+            {
+                if (data.args->FA_Arguments[1])
+                    data.newlister=TRUE;
+                else
+                    data.newlister=FALSE;
+            }
+            DisposeArgs(data.args);
+        }
     }
 
 	NewList((struct List *)&data.Temp);
@@ -1153,37 +1198,57 @@ int __saveds __asm L_Module_Entry(
 
     data.xadMasterBase = xadMasterBase;
 
-	if( !(data.listp2 = data.hook.gc_GetSource(IPCDATA(ipc), data.orgpath)) ) goto end_2;
+    // Ignore selected files in listers if archivenames on commandline
+	if (!(arcname[0]))
+    {
+        KPrintF("Shuld not be here 1\n");
+        if( !(data.listp2 = data.hook.gc_GetSource(IPCDATA(ipc), data.orgpath)) ) goto end_2;
 
-	data.hook.gc_FirstEntry(IPCDATA(ipc));
+    	data.hook.gc_FirstEntry(IPCDATA(ipc));
 
-	if( !(Entry=data.hook.gc_GetEntry(IPCDATA(ipc))) ) goto end_2;
+    	if( !(Entry=data.hook.gc_GetEntry(IPCDATA(ipc))) ) goto end_2;
 
-	filename = (STRPTR)data.hook.gc_ExamineEntry(Entry, EE_NAME);
-	
-    strcpy(arcname, data.orgpath);
+    	filename = (STRPTR)data.hook.gc_ExamineEntry(Entry, EE_NAME);
 
-	AddPart(arcname, filename, 512);
+        strcpy(arcname, data.orgpath);
 
-	strcpy(data.rootpath, filename);
+    	AddPart(arcname, filename, 512);
+    }
 
-	strcat(data.rootpath, ":");
 /// Main Extract
 	if(mod_id == 1)
 	{
-		if(!(data.destp = data.hook.gc_GetDest(IPCDATA(ipc), data.listpath))) goto end_2;
- 
-		data.hook.gc_EndDest(IPCDATA(ipc), 0);
-		
-		data.listh = (ULONG)data.listp2->lister;
-		data.listw = data.hook.gc_GetWindow(data.listp2);
-		sprintf(data.lists, "%lu", data.listh);
-		
-		sprintf(buf,"lister query %s numselentries", data.lists);
-		total=data.hook.gc_SendCommand(IPCDATA(ipc),buf,NULL,NULL);
-		
+        if (!(data.listpath[0]))
+        {
+            KPrintF("Shuld not be here 3\n");
+    		if(!(data.destp = data.hook.gc_GetDest(IPCDATA(ipc), data.listpath))) goto end_2;
+
+    		data.hook.gc_EndDest(IPCDATA(ipc), 0);
+		}
+
+        if (data.listp2)
+        {
+    		data.listh = (ULONG)data.listp2->lister;
+    		data.listw = data.hook.gc_GetWindow(data.listp2);
+    		sprintf(data.lists, "%lu", data.listh);
+
+    		sprintf(buf,"lister query %s numselentries", data.lists);
+    		total=data.hook.gc_SendCommand(IPCDATA(ipc),buf,NULL,NULL);
+		}
+        else
+        {
+        	short a=archnum;
+
+            while (archives[a+1])
+            {
+                a++;
+            }
+            total=a;
+        }
+
 		data.ptr=OpenProgressWindowTags(
-				PW_Window,	data.listw,
+				PW_Window, data.listw,
+                (data.listw)?TAG_IGNORE:PW_Screen,data.screen,
 				PW_Title,	GetString(locale,MSG_EXTRACTING),
 				PW_FileCount,	total,
 				PW_Flags,	PWF_FILENAME|PWF_FILESIZE|PWF_GRAPH|PWF_ABORT|PWF_INFO,
@@ -1191,7 +1256,8 @@ int __saveds __asm L_Module_Entry(
 
 		if(data.ArcInf=xadAllocObject(XADOBJ_ARCHIVEINFO,NULL)) {
 			ULONG count=0;
-			while(Entry && (!over)) {
+			while((Entry || archnum) && (!over))
+            {
 				SetProgressWindowTags(data.ptr,
 					PW_Info,	FilePart(arcname),
 					PW_FileName,	GetString(locale,MSG_OPENING_ARC),
@@ -1202,24 +1268,30 @@ int __saveds __asm L_Module_Entry(
 				if(!(err=xadGetInfo(data.ArcInf,XAD_INFILENAME, arcname, TAG_DONE)))
 					data.ArcMode=data.ArcInf->xai_Client->xc_Flags & XADCF_DISKARCHIVER;
 				
-				if(err == XADERR_FILETYPE) { 			
+				if(err == XADERR_FILETYPE)
+                {
 					// *** DISKIMAGE
-					if(!(err=xadGetDiskInfo(data.ArcInf, XAD_INFILENAME, arcname, TAG_DONE))) {
+					if(!(err=xadGetDiskInfo(data.ArcInf, XAD_INFILENAME, arcname, TAG_DONE)))
+                    {
 						data.ArcMode=XADCF_DISKARCHIVER;
 						over=ExtractF(&data);
 						xadFreeInfo(data.ArcInf);
 					}
-				} else if((!err) && (data.ArcMode == XADCF_DISKARCHIVER)) {
+				}
+            	else if((!err) && (data.ArcMode == XADCF_DISKARCHIVER))
+                {
 					// *** DISKARCHIVE
 					struct TagItem ti[2];
 					switch(AsyncRequestTags(ipc,REQTYPE_SIMPLE,NULL,NULL,NULL,
-								AR_Window,data.listw,
+								(data.listw)?AR_Window:TAG_IGNORE,data.listw,
+								(data.listw)?TAG_IGNORE:AR_Screen,data.screen,
 								AR_Message,GetString(locale,MSG_DISKARC_EXTRACT),
 								AR_Button,GetString(locale,MSG_FILES),
 								AR_Button,GetString(locale,MSG_DISK),
 								AR_Button,GetString(locale,MSG_ABORT),
 								AR_Flags,SRF_PATH_FILTER,
-								TAG_END)) {
+								TAG_END))
+                    {
 						case 0:
 							break;
 						case 2:
@@ -1234,7 +1306,8 @@ int __saveds __asm L_Module_Entry(
 								over=ExtractF(&data);
 							break;
 					}
-				} else if(!err)
+				}
+            	else if(!err)
 				// *** FILEARCHIVE
 					over=ExtractF(&data);
 				
@@ -1242,21 +1315,39 @@ int __saveds __asm L_Module_Entry(
 					xadFreeInfo(data.ArcInf);
 				else
 					ErrorReq(&data,xadGetErrorText(err));
-				data.hook.gc_EndEntry(IPCDATA(ipc),Entry,TRUE);
-				Entry=data.hook.gc_GetEntry(IPCDATA(ipc));
-                if (Entry) {
-					*((char *)PathPart(arcname))=0;
-					AddPart(arcname,Entry->name,512);
+
+                if (filename)
+                {
+    				data.hook.gc_EndEntry(IPCDATA(ipc),Entry,TRUE);
+    				Entry=data.hook.gc_GetEntry(IPCDATA(ipc));
+                    if (Entry)
+                    {
+    					*((char *)PathPart(arcname))=0;
+    					AddPart(arcname,Entry->name,512);
+                    }
+                }
+                else
+                {
+                    if (archives[archnum])
+                    {
+                        strcpy(arcname,archives[archnum]);
+                        archnum++;
+                    }
+                    else archnum=0;
                 }
 			}
 
-            // Needed for the following scandir not to open a new window
-            sprintf(buf,"lister set %lu busy off wait",data.destp->lister);
-            data.hook.gc_SendCommand(IPCDATA(ipc),buf,NULL,NULL);
+            if (data.args) DisposeArgs(data.args);
 
-  		    sprintf(buf,"command source %lu ScanDir %s",data.destp->lister,data.destp->path);
-			data.hook.gc_SendCommand(IPCDATA(ipc),buf,NULL,NULL);
+            if (data.destp)
+            {
+                // Needed for the following scandir not to open a new window
+                sprintf(buf,"lister set %lu busy off wait",data.destp->lister);
+                data.hook.gc_SendCommand(IPCDATA(ipc),buf,NULL,NULL);
 
+      		    sprintf(buf,"command source %lu ScanDir %s",data.destp->lister,data.destp->path);
+    			data.hook.gc_SendCommand(IPCDATA(ipc),buf,NULL,NULL);
+            }
 			xadFreeObject(data.ArcInf,NULL);
 		}
 		
@@ -1272,15 +1363,10 @@ int __saveds __asm L_Module_Entry(
 
 /// Main Open
 
-    data.args=ParseArgs(XADOPEN_ARGS,args);
+    if (!(data.rootpath[0]))
+		strcpy(data.rootpath, filename);
 
-    if (data.args && data.args->FA_Arguments[0])
-        data.newlister=TRUE;
-    else
-        data.newlister=FALSE;
-
-    if (data.args)
-        DisposeArgs(data.args);
+	strcat(data.rootpath, ":");
 
     // Do we have a destination lister?
     if(data.destp=data.hook.gc_GetDest(IPCDATA(ipc), data.listpath))
@@ -1295,16 +1381,23 @@ int __saveds __asm L_Module_Entry(
         data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
     }
 
-    data.listh2=(ULONG)data.listp2->lister;
-    if(!data.newlister)
+    if (data.listp2)
     {
-         sprintf(data.lists, "%lu", data.listh2);
-         data.listh=data.listh2;
-         data.listw=data.hook.gc_GetWindow(data.listp2);
+        data.listh2=(ULONG)data.listp2->lister;
+
+        if(!data.newlister)
+        {
+             sprintf(data.lists, "%lu", data.listh2);
+             data.listh=data.listh2;
+             data.listw=data.hook.gc_GetWindow(data.listp2);
+        }
     }
 
-    data.hook.gc_EndEntry(IPCDATA(ipc), Entry, TRUE);
-    data.hook.gc_EndSource(IPCDATA(ipc), 1);
+    if (filename)
+    {
+        data.hook.gc_EndEntry(IPCDATA(ipc), Entry, TRUE);
+        data.hook.gc_EndSource(IPCDATA(ipc), 1);
+    }
 
     if(data.newlister)
     {

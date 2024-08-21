@@ -28,7 +28,8 @@
 // FIXME: This makes a mix of internal and external interfaces.
 #include <galileofm/hooks.h>
 
-#define XADOPEN_ARGS  "NEWLISTER/S"
+#define XADOPEN_ARGS  "ARCHIVE,NEWLISTER/S"
+#define XADEXTRACT_ARGS "ARCHIVE/M,TO/K"
 
 extern struct DosLibrary *DOSBase;
 extern struct Library *GalileoFMBase;
