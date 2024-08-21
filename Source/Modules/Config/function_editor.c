@@ -1235,6 +1235,9 @@ BOOL funced_end_edit(
                 // Allow for #
                 if (*ptr && *ptr=='#') ++ptr;
 
+                // Allow for &
+                if (*ptr && *ptr=='&') ++ptr;
+
 				// Go through list of commands
 				list=(struct MinList *)data->startup->func_list;
 				for (command=(CommandList *)list->mlh_Head;
@@ -1623,6 +1626,9 @@ BOOL funced_command_req(FuncEdData *data,char *buffer,short type)
 
             // Allow for #
             if (*cmd && *cmd=='#') ++cmd;
+
+            //Allow for &
+            if (*cmd && *cmd=='&') ++cmd;
 
 			// Go through list of commands
 			list=(struct MinList *)data->startup->func_list;

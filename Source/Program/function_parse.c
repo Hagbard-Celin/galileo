@@ -79,6 +79,9 @@ function_parse_function(FunctionHandle *handle)
             // Only once?
             if (*ptr=='#') ++ptr;
 
+            // Async?
+            if (*ptr=='&') ++ptr;
+
 			// Get command
 			if (command=function_find_internal(&ptr,(handle->function->function.flags2&FUNCF2_ORIGINAL)?1:0))
 			{
@@ -154,7 +157,13 @@ function_parse_function(FunctionHandle *handle)
 				function_parse_instruction(handle,ptr,buf,&flags);
 
 				// Get command flags
-				if (parse->command) flags|=parse->command->flags;
+				if (parse->command)
+                {
+                	if ((instruction->string[0]=='&') || ((instruction->string[0]=='#') && (instruction->string[1]=='&')))
+                    	flags|=FUNCF_RUN_ASYNC;
+
+                    flags|=parse->command->flags;
+                }
 
 				// External command
 				else extflag=1;

@@ -205,6 +205,19 @@ function_internal_command(
 
 			// Add a newline
 			if (*buffer) strcat(buffer,"\n");
+            // Async by '&'? Set appropriate flags
+            if ((handle) && (instruction->flags&FUNCF_RUN_ASYNC))
+            {
+                handle->func_parameters.flags|=FUNCF_RUN_ASYNC;
+                handle->func_parameters.flags&=~(FUNCF_RELOAD_FILES|FUNCF_RESCAN_SOURCE|FUNCF_RESCAN_DEST);
+
+                // If output to file is on, change to window
+    			if (handle->func_parameters.flags&FUNCF_OUTPUT_FILE)
+    			{
+    				handle->func_parameters.flags&=~FUNCF_OUTPUT_FILE;
+    				handle->func_parameters.flags|=FUNCF_OUTPUT_WINDOW;
+    			}
+            }
 
             // Do we want async
         	if ((handle) && (handle->func_parameters.flags&FUNCF_RUN_ASYNC) && (!(handle->func_flags&FUNCF_SYNC)))

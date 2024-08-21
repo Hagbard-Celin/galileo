@@ -324,7 +324,8 @@ typedef struct _FunctionReturn {
 #define FUNCF_NEED_FILES		(1<<2)	// Needs some files to work with
 #define FUNCF_NEED_DIRS			(1<<3)	// Needs some files to work with
 #define FUNCF_NEED_ENTRIES	(FUNCF_NEED_FILES|FUNCF_NEED_DIRS)
-#define FUNCF_SCRIPT_OVERRIDE		(1<<4)	// Can be overridden by a script
+/* DO NOT define flag with value (1<<4) here, it will clash with FUNCF_RUN_ASYNC */
+#define FUNCF_SCRIPT_OVERRIDE	(1<<5)	// Can be overridden by a script
 #define FUNCF_CAN_DO_ICONS		(1<<6)	// Function can do icons
 #define FUNCF_SINGLE_SOURCE		(1<<8)	// Only a single source needed
 #define FUNCF_SINGLE_DEST		(1<<9)	// Only a single destination needed
