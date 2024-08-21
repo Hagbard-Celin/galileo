@@ -3,7 +3,7 @@
   Copyright (C) 1999,2000 Mladen Milinkovic <mladen.milinkovic@ri.tel.hr>
   Copyright 2013 Roman Kargin <kas1e@yandex.ru>
   Copyright 2013 Szilard Biro
-  Copyright 2023 Hagbard Celine
+  Copyright 2023,2024 Hagbard Celine
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -79,9 +79,6 @@ BOOL PasswordReq(struct ModuleData *data)
 	int retval;
     BOOL result=TRUE;
 
-#if 0
-	*data->password = 0; // clear the password string FIXME!!!!
-#endif
     memset(data->password,0,512);
 
 
@@ -105,9 +102,6 @@ BOOL PasswordReq(struct ModuleData *data)
     {
         result=FALSE;
         memset(data->password,0,512);
-#if 0
-		*data->password = 0;
-#endif
     }
 
 	return (result);
@@ -1167,7 +1161,6 @@ int __saveds __asm L_Module_Entry(
 
 	filename = (STRPTR)data.hook.gc_ExamineEntry(Entry, EE_NAME);
 	
-//	if( (!(data.listp2 = data.hook.gc_GetSource(IPCDATA(ipc), arcname))) || (!(Entry=data.hook.gc_GetEntry(IPCDATA(ipc)))) )
     strcpy(arcname, data.orgpath);
 
 	AddPart(arcname, filename, 512);
@@ -1278,10 +1271,6 @@ int __saveds __asm L_Module_Entry(
 ///
 
 /// Main Open
-/*	  data.hook.gc_EndSource(IPCDATA(ipc), 0);
-	data.hook.gc_EndEntry(IPCDATA(ipc), Entry, TRUE);
-	data.hook.gc_UnlockSource(IPCDATA(ipc));
-*/
 
     data.args=ParseArgs(XADOPEN_ARGS,args);
 

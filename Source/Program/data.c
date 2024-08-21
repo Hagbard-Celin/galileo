@@ -120,7 +120,7 @@ char *galileo_name="Galileo";
 char *about_1="© 1998 Jonathan Potter & GPSoftware";
 char *about_2="© 1999-2000 Mladen Milinkovic, © 2012-2013 Roman Kargin";
 char *about_3="© 2013-2014 Szilard Biro, © 2020 Mathias Heyer";
-char *about_4="© 2023 Hagbard Celine";
+char *about_4="© 2023-2024 Hagbard Celine";
 
 char *string_no_owner;
 char *string_no_group;

@@ -333,18 +333,18 @@ typedef struct _FunctionReturn {
 #define FUNCF_WANT_DEST			(1<<11)	// Want destinations, don't need them
 #define FUNCF_WANT_SOURCE		(1<<12)	// Want source, don't need it
 #define FUNCF_CREATE_SOURCE		(1<<13)	// Can create our own source
-#define FUNCF_EXTERNAL_FUNCTION		(1<<14)	// Function is external
+#define FUNCF_EXTERNAL_FUNCTION	(1<<14)	// Function is external
 #define FUNCF_ARG_ENTRIES		(1<<15) // Entries in arguments
 #define FUNCF_ASK_FILTER		(1<<16)	// Can ask for a file filter
 #define FUNCF_ASK_PATH			(1<<17)	// Allowed to ask for paths
 #define FUNCF_SPECIAL_OK		(1<<18)	// Ok if special buffer
 #define FUNCF_WANT_ENTRIES		(1<<19)	// Want entries
 #define FUNCF_NO_SOURCE			(1<<20)	// Can't use lister sources
-#define FUNCF_RESCAN_DESKTOP		(1<<21)	// Rescan the desktop
+#define FUNCF_RESCAN_DESKTOP	(1<<21)	// Rescan the desktop
 
 #define FUNCF_ASK_DEST			(1<<22)	// Must ask for destination
-#define FUNCF_ICONS			(1<<23)	// Function running on icons
-#define FUNCF_SYNC			(1<<24)	// Function wants to be synchronous
+#define FUNCF_ICONS				(1<<23)	// Function running on icons
+#define FUNCF_SYNC				(1<<24)	// Function wants to be synchronous
 #define FUNCF_DRAG_DROP			(1<<25)	// Called by drag'n'drop
 #define FUNCF_PRIVATE			(1<<26) // Function is private
 
@@ -353,7 +353,7 @@ typedef struct _FunctionReturn {
 #define FUNCF_RUN_NO_ICONS		(1<<28)	// Don't run using icons (double-click kludge)
 #define FUNCF_COPY_NO_MOVE		(1<<28)	// Don't move even if on same volume (drag'n'drop kludge)
 
-#define FUNCF_LAST_FILE_FLAG		(1<<29)	// Still using last file
+#define FUNCF_LAST_FILE_FLAG	(1<<29)	// Still using last file
 #define FUNCF_GOT_SOURCE		(1<<30)	// Got a source
 #define FUNCF_GOT_DEST			(1<<31)	// Got a destination
 
@@ -368,9 +368,9 @@ typedef struct _FunctionReturn {
 #define INSTF_RECURSE_DIRS		(1<<0)	// Enter directories recursively
 #define INSTF_WANT_DIRS			(1<<1)	// Want directories as well as the contents
 #define INSTF_WANT_DIRS_END		(1<<2)	// Want directories at the end
-#define INSTF_DELETE_UNPROTECT		(1<<3)	// Unprotect all
+#define INSTF_DELETE_UNPROTECT	(1<<3)	// Unprotect all
 #define INSTF_DIR_NO_SIZES		(1<<4)	// Don't count directory sizes
-#define INSTF_DIR_CLEAR_SIZES		(1<<5)	// Clear directory sizes
+#define INSTF_DIR_CLEAR_SIZES	(1<<5)	// Clear directory sizes
 #define INSTF_REPEAT			(1<<6)	// Repeating this instruction
 #define INSTF_ABORT_DIR			(1<<7)	// Abort this directory
 
