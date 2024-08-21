@@ -1,10 +1,45 @@
 Function Editor Changes:
 
-- Made #-prefix, for running a command only a single time even if "Do all files"
-  is checked, work with internal commands.
+- The #-prefix, for running a command only a single time even if "Do all files"
+  is checked, now works with internal commands.
+
+- A new &-prefix for internal commands forces the command to run in asynchronous
+  mode even if "Run asynchronously" is not enabled.
+  This MUST ONLY be used on the last command in the function, no other commands
+  of any type can follow this command.
+  It can be combined with the #-prefix if the #-prefix comes first.
+  At the moment of writhing, only XADOpen needs this.
+
+  It makes Functions like this (useless) example possible:
+    AmigaDOS    C:Copy Work:somefile.lha RAM:
+    AmigaDOS    C:Rename RAM:somfile.lha RAM:otherfile.lha
+    Command     &XADOpen RAM:otherfile.lha
+
+- Experienced users might have noticed the lack of a "Command FinishSection"
+  line in the example above.
+  The need for this command to make the the function run "in order" when mixing
+  "Command" with "AmigaDos"/"Workbench"/"Script"/"ARexx" is counter-intuitive.
+  For this reason the functionality of this command is made automatic each
+  time a "Command" follows one of the other types, and the command itself is
+  removed.
 
 Command Changes:
 
 - Copy, CopyAs, Encrypt, MakeLink and MakeLinkAs are no longer multi-destination.
   The new commands MultiCopy, MultiCopyAs, MultiEncrypt, MultiMakeLink and
-  MultiMakeLinkAs preserves the orignal behaviour.
+  MultiMakeLinkAs preserves the original behavior.
+
+- XADOpen and XADExtract have new commandline options.
+  For XADopen they are:
+  		ARCHIVE		Filename of archive to open with full path.
+                    If supplied selected files in source Listers are ignored.
+                    Implies "NEWLISTER".
+        NEWLISTER/S Open in new Lister Window.
+                    If not supplied the current Source/Active Window is used.
+  And for XADExtract:
+  		ARCHIVE/M   Filename(s) of archive(s) to extract.
+                    If supplied selected files in source Listers are ignored.
+        TO/K        Destination directory.
+                    If supplied any destination Listers present will be ignored.
+
+- FinishSection is removed. see note in "Function Editor Changes" above.
