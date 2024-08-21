@@ -269,13 +269,6 @@ CommandList
 		0,0},
 
 	{{0,0},
-		FUNC_ENDFUNCTION,
-		"FinishSection",MSG_FUNC_DESC_FINISHSECTION,
-		0,
-		0,
-		0,0},
-
-	{{0,0},
 		FUNC_FORMAT,
 		"Format",MSG_FUNC_DESC_FORMAT,
 		0,

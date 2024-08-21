@@ -297,58 +297,54 @@ function_run_instruction(
 	// Is the instruction an internal function?
 	if (instruction->type==INST_COMMAND)
 	{
+		char *args;
+		short limit;
+
 		// Invalid command?
 		if (!instruction->command) return 1;
 
-		// Is this the end of a section?
-		if (instruction->command->function==FUNC_ENDFUNCTION)
+		// Run preceding external commands
+		if (handle->script_file)
 		{
 			function_close_script(handle,1);
 		}
 
-		// Otherwise, normal internal command
-		else
+		// Get cll limit
+		if ((limit=environment->env->settings.command_line_length)<256)
+			limit=256;
+
+		// Allocate space for arguments
+		if (args=AllocMemH(handle->memory,limit+1))
 		{
-			char *args;
-			short limit;
+			ret=0;
 
-			// Get cll limit
-			if ((limit=environment->env->settings.command_line_length)<256)
-				limit=256;
-
-			// Allocate space for arguments
-			if (args=AllocMemH(handle->memory,limit+1))
+			// Build function string
+			if ((function_build_instruction(handle,instruction,0,args))!=PARSE_ABORT)
 			{
-				ret=0;
+				// Check arguments
+				function_parse_arguments(handle,instruction);
 
-				// Build function string
-				if ((function_build_instruction(handle,instruction,0,args))!=PARSE_ABORT)
+				// If we needs files, check there are some
+				if (!(instruction->flags&FUNCF_NEED_ENTRIES) ||
+					instruction->flags&FUNCF_WANT_ENTRIES ||
+					(function_current_entry(handle)))
 				{
-					// Check arguments
-					function_parse_arguments(handle,instruction);
-
-					// If we needs files, check there are some
-					if (!(instruction->flags&FUNCF_NEED_ENTRIES) ||
-						instruction->flags&FUNCF_WANT_ENTRIES ||
-						(function_current_entry(handle)))
+					// Don't need a source path, or have one already?
+					if (!(handle->func_flags&FUNCF_NEED_SOURCE) ||
+						(handle->func_flags&FUNCF_GOT_SOURCE))
 					{
-						// Don't need a source path, or have one already?
-						if (!(handle->func_flags&FUNCF_NEED_SOURCE) ||
-							(handle->func_flags&FUNCF_GOT_SOURCE))
-						{
-							// Run the command
-							ret=function_internal_command(
-								instruction->command,
-								args,
-								handle,
-								instruction);
-						}
+						// Run the command
+						ret=function_internal_command(
+							instruction->command,
+							args,
+							handle,
+							instruction);
 					}
 				}
-
-				// Free args
-				FreeMemH(args);
 			}
+
+			// Free args
+			FreeMemH(args);
 		}
 	}
 
