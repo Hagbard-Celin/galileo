@@ -260,14 +260,26 @@ ObjectDef
 			icon_layout},
 
 		// Location
-		{OD_GADGET,
-			FIELD_KIND,
-			{20,8,SIZE_MAXIMUM,1},
-			{4,10,-4,4},
+		{OD_TEXT,
+			TEXTPEN,
+			{19,8,0,1},
+			/*{0,POS_RIGHT_JUSTIFY,0,1},*/
+			{4,10,0,0},
+			/*{0,0,0,0},*/
 			MSG_LOCATION,
+			TEXTFLAG_RIGHT_JUSTIFY,
+			0,
+			icon_layout},
+
+		// Location field
+		{OD_TEXT,
+			TEXTPEN,
+			{20,8,0,1},
+			{4,10,0,0},
+			0,
 			0,
 			GAD_ICON_LOCATION,
-			icon_location_tags},
+			icon_layout},
 
 		// Comment
 		{OD_GADGET,
