@@ -520,8 +520,8 @@ ObjectDef
 		// Created
 		{OD_TEXT,
 			TEXTPEN,
-			{19,7,0,1},
-			{4,6,0,0},
+			{19,6,0,1},
+			{4,12,0,0},
 			MSG_CREATED,
 			TEXTFLAG_RIGHT_JUSTIFY,
 			0,
@@ -530,8 +530,8 @@ ObjectDef
 		// Created field
 		{OD_TEXT,
 			TEXTPEN,
-			{20,7,0,1},
-			{4,6,0,0},
+			{20,6,0,1},
+			{4,12,0,0},
 			0,
 			0,
 			GAD_ICON_LAST_CHANGED,
@@ -540,8 +540,8 @@ ObjectDef
 		// Default tool glass
 		{OD_GADGET,
 			FILE_BUTTON_KIND,
-			{20,8,0,1},
-			{4,10,28,4},
+			{20,7,0,1},
+			{4,16,28,4},
 			MSG_DEFAULT_TOOL,
 			0,
 			GAD_ICON_DEFAULT_TOOL_GLASS,
@@ -550,8 +550,8 @@ ObjectDef
 		// Default tool
 		{OD_GADGET,
 			STRING_KIND,
-			{20,8,SIZE_MAXIMUM,1},
-			{32,10,-4,4},
+			{20,7,SIZE_MAXIMUM,1},
+			{32,16,-4,4},
 			0,
 			0,
 			GAD_ICON_DEFAULT_TOOL,
