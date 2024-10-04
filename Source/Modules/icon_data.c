@@ -32,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+				 http://www.gpsoft.com.au
 
 */
 
@@ -563,8 +563,8 @@ ObjectDef
 short
 	protect_lookup[]={
 		FIBF_HOLD,
-        FIBF_SCRIPT,
-        FIBF_PURE,
+		FIBF_SCRIPT,
+		FIBF_PURE,
 		FIBF_ARCHIVE,
 		FIBF_READ,
 		FIBF_WRITE,
@@ -581,7 +581,7 @@ unsigned long
 		ID_AFS_MULTI,MSG_AFS,
 		ID_PFS_FLOPPY,MSG_PFS,
 		ID_PFS_HARD,MSG_PFS,
-        ID_SFS0_HARD,MSG_SFS,
+		ID_SFS0_HARD,MSG_SFS,
 		ID_SFS2_HARD,MSG_SFS,
 		ID_DOS_DISK,MSG_OFS,
 		ID_FFS_DISK,MSG_FFS,
@@ -589,8 +589,8 @@ unsigned long
 		ID_INTER_FFS_DISK,MSG_IFFS,
 		ID_FASTDIR_DOS_DISK,MSG_COFS,
 		ID_FASTDIR_FFS_DISK,MSG_CFFS,
-        ID_LONG_DOS_DISK,MSG_LOFS,
-        ID_LONG_FFS_DISK,MSG_LFFS,
+		ID_LONG_DOS_DISK,MSG_LOFS,
+		ID_LONG_FFS_DISK,MSG_LFFS,
 		0,MSG_UNKNOWN};
 
 

@@ -32,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+				 http://www.gpsoft.com.au
 
 */
 
@@ -75,7 +75,7 @@ BOOL display_open(long flags)
 		environment->env->screen_mode!=MODE_PUBLICSCREEN)
 	{
 		USHORT pens[1];
-        struct TagItem *tags;
+		struct TagItem *tags;
 
 		// Screen mode
 		ULONG screen_mode;
@@ -119,110 +119,110 @@ BOOL display_open(long flags)
 		}
 
 #if 1
-        if (!(tags=AllocVec(sizeof(struct TagItem)*15,MEMF_CLEAR)))
-            return 0;
+		if (!(tags=AllocVec(sizeof(struct TagItem)*15,MEMF_CLEAR)))
+			return 0;
 
-        if (environment->env->screen_mode==MODE_WORKBENCHCLONE)
+		if (environment->env->screen_mode==MODE_WORKBENCHCLONE)
 		{
-            tags[0].ti_Tag=SA_LikeWorkbench;
+			tags[0].ti_Tag=SA_LikeWorkbench;
 			tags[0].ti_Data=TRUE;
-            tags[1].ti_Tag=SA_Overscan;
+			tags[1].ti_Tag=SA_Overscan;
 			tags[1].ti_Data=OSCAN_TEXT;
-            tags[2].ti_Tag=SA_Title;
+			tags[2].ti_Tag=SA_Title;
 			tags[2].ti_Data=(ULONG)galileo_name;
-            tags[3].ti_Tag=SA_PubName;
+			tags[3].ti_Tag=SA_PubName;
 			tags[3].ti_Data=(ULONG)GUI->rexx_port_name;
-            tags[4].ti_Tag=SA_AutoScroll;
+			tags[4].ti_Tag=SA_AutoScroll;
 			tags[4].ti_Data=TRUE;
-            tags[5].ti_Tag=SA_Interleaved;
+			tags[5].ti_Tag=SA_Interleaved;
 			tags[5].ti_Data=TRUE;
-            tags[6].ti_Tag=SA_SharePens;
+			tags[6].ti_Tag=SA_SharePens;
 			tags[6].ti_Data=TRUE;
-            if (font)
-            {
-            	tags[7].ti_Tag=SA_Font;
+			if (font)
+			{
+				tags[7].ti_Tag=SA_Font;
 				tags[7].ti_Data=(ULONG)&GUI->screen_font;
-            }
-            else
-            {
-            	tags[7].ti_Tag=SA_SysFont;
+			}
+			else
+			{
+				tags[7].ti_Tag=SA_SysFont;
 				tags[7].ti_Data=1;
-            }
-            tags[8].ti_Tag=SA_Pens;
+			}
+			tags[8].ti_Tag=SA_Pens;
 			tags[8].ti_Data=(ULONG)pens;
-            tags[9].ti_Tag=SA_PubSig;
+			tags[9].ti_Tag=SA_PubSig;
 			tags[9].ti_Data=GUI->screen_signal;
-            tags[10].ti_Tag=TAG_END;
-            if (GfxBase->LibNode.lib_Version>=45)
-        	{
-            	tags[10].ti_Tag=SA_OffScreenDragging;
-            	if (TRUE)
+			tags[10].ti_Tag=TAG_END;
+			if (GfxBase->LibNode.lib_Version>=45)
+			{
+				tags[10].ti_Tag=SA_OffScreenDragging;
+				if (TRUE)
 					tags[10].ti_Data=TRUE;
-            	else
-                	tags[01].ti_Data=FALSE;
-                tags[11].ti_Tag=TAG_END;
-        	}
+				else
+					tags[01].ti_Data=FALSE;
+				tags[11].ti_Tag=TAG_END;
+			}
 
-        }
-        else
-        {
-            tags[0].ti_Tag=SA_Width;
-            if (environment->env->screen_flags&SCRFLAGS_DEFWIDTH)
+		}
+		else
+		{
+			tags[0].ti_Tag=SA_Width;
+			if (environment->env->screen_flags&SCRFLAGS_DEFWIDTH)
 				tags[0].ti_Data=STDSCREENWIDTH;
-            else
-            	tags[0].ti_Data=environment->env->screen_width;
-            tags[1].ti_Tag=SA_Height;
-            if (environment->env->screen_flags&SCRFLAGS_DEFHEIGHT)
+			else
+				tags[0].ti_Data=environment->env->screen_width;
+			tags[1].ti_Tag=SA_Height;
+			if (environment->env->screen_flags&SCRFLAGS_DEFHEIGHT)
 				tags[1].ti_Data=STDSCREENHEIGHT;
-            else
-            	tags[1].ti_Data=environment->env->screen_height;
-            tags[2].ti_Tag=SA_Depth;
+			else
+				tags[1].ti_Data=environment->env->screen_height;
+			tags[2].ti_Tag=SA_Depth;
 			tags[2].ti_Data=environment->env->screen_depth;
-            tags[3].ti_Tag=SA_Overscan;
+			tags[3].ti_Tag=SA_Overscan;
 			tags[3].ti_Data=OSCAN_TEXT;
-            tags[4].ti_Tag=SA_Title;
+			tags[4].ti_Tag=SA_Title;
 			tags[4].ti_Data=(ULONG)galileo_name;
-            tags[5].ti_Tag=SA_DisplayID;
+			tags[5].ti_Tag=SA_DisplayID;
 			tags[5].ti_Data=screen_mode;
-            tags[6].ti_Tag=SA_PubName;
+			tags[6].ti_Tag=SA_PubName;
 			tags[6].ti_Data=(ULONG)GUI->rexx_port_name;
-            tags[7].ti_Tag=SA_AutoScroll;
+			tags[7].ti_Tag=SA_AutoScroll;
 			tags[7].ti_Data=TRUE;
-            tags[8].ti_Tag=SA_Interleaved;
+			tags[8].ti_Tag=SA_Interleaved;
 			tags[8].ti_Data=TRUE;
-            tags[9].ti_Tag=SA_SharePens;
+			tags[9].ti_Tag=SA_SharePens;
 			tags[9].ti_Data=TRUE;
-            if (font)
-            {
-            	tags[10].ti_Tag=SA_Font;
+			if (font)
+			{
+				tags[10].ti_Tag=SA_Font;
 				tags[10].ti_Data=(ULONG)&GUI->screen_font;
-            }
-            else
-            {
-            	tags[10].ti_Tag=SA_SysFont;
+			}
+			else
+			{
+				tags[10].ti_Tag=SA_SysFont;
 				tags[10].ti_Data=1;
-            }
-            tags[11].ti_Tag=SA_Pens;
+			}
+			tags[11].ti_Tag=SA_Pens;
 			tags[11].ti_Data=(ULONG)pens;
-            tags[12].ti_Tag=SA_PubSig;
+			tags[12].ti_Tag=SA_PubSig;
 			tags[12].ti_Data=GUI->screen_signal;
-            tags[13].ti_Tag=TAG_END;
+			tags[13].ti_Tag=TAG_END;
 
-        	if (GfxBase->LibNode.lib_Version>=45)
-        	{
-            	tags[13].ti_Tag=SA_OffScreenDragging;
-            	if (TRUE)
+			if (GfxBase->LibNode.lib_Version>=45)
+			{
+				tags[13].ti_Tag=SA_OffScreenDragging;
+				if (TRUE)
 					tags[13].ti_Data=TRUE;
-            	else
-                	tags[13].ti_Data=FALSE;
+				else
+					tags[13].ti_Data=FALSE;
 				tags[14].ti_Tag=TAG_END;
-        	}
+			}
 		}
 
-        // Open screen
+		// Open screen
 		GUI->screen=OpenScreenTagList(0,tags);
 
-        // Free tags now
+		// Free tags now
 		FreeVec(tags);
 #else
 		// Open screen
@@ -759,7 +759,7 @@ void close_display(int close_flags,BOOL quit_all)
 			// Open timer
 			if (handle=AllocTimer(UNIT_VBLANK,0))
 			{
-                // Wait for a second or so
+				// Wait for a second or so
 				StartTimer(handle,1,0);
 
 				// Wait for timer or screen signal

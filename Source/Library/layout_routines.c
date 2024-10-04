@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+				 http://www.gpsoft.com.au
 
 */
 
@@ -41,7 +41,7 @@ For more information on Directory Opus for Windows please see:
 #include "/Program/pattern.h"
 
 /****************************************************************************
-                         Open a configuration window
+						 Open a configuration window
  ****************************************************************************/
 
 struct Window *__asm __saveds L_OpenConfigWindow(
@@ -317,7 +317,7 @@ struct Window *__asm __saveds L_OpenConfigWindow(
 
 
 /****************************************************************************
-                         Close a configuration window
+						 Close a configuration window
  ****************************************************************************/
 
 void __asm __saveds L_CloseConfigWindow(
@@ -377,7 +377,7 @@ void __asm __saveds L_CloseConfigWindow(
 
 
 /****************************************************************************
-                   Calculate an object's position and size
+				   Calculate an object's position and size
  ****************************************************************************/
 
 __asm __saveds L_CalcObjectDims(
@@ -643,7 +643,7 @@ __asm __saveds L_CalcObjectDims(
 		if (pos[0].Height<SIZE_MAX_LESS)
 		{
 			div=pos[0].Height-SIZE_MAX_LESS;
-			dest_pos->Height+=(font->tf_YSize*div);
+			dest_pos->Height+=((font->tf_YSize*div));
 		}
 	}
 	else
@@ -728,7 +728,7 @@ __asm __saveds L_CalcObjectDims(
 
 
 /****************************************************************************
-                    Calculate a window's position and size
+					Calculate a window's position and size
  ****************************************************************************/
 
 __asm __saveds L_CalcWindowDims(
@@ -800,7 +800,7 @@ __asm __saveds L_CalcWindowDims(
 
 
 /****************************************************************************
-                      Add a list of objects to a window
+					  Add a list of objects to a window
  ****************************************************************************/
 
 ObjectList *__asm __saveds L_AddObjectList(
@@ -1635,7 +1635,7 @@ ObjectList *__asm __saveds L_AddObjectList(
 
 
 /****************************************************************************
-                                Free an object
+								Free an object
  ****************************************************************************/
 
 void __asm __saveds L_FreeObject(
@@ -1685,7 +1685,7 @@ void __asm __saveds L_FreeObject(
 	}
 
 	// Free object memory
-    if (object->memory)
+	if (object->memory)
 		L_FreeMemHandle(object->memory);
 
 	// Free tags
@@ -1714,7 +1714,7 @@ void __asm __saveds L_FreeObject(
 
 
 /****************************************************************************
-                            Free a list of objects
+							Free a list of objects
  ****************************************************************************/
 
 void __asm __saveds L_FreeObjectList(register __a0 ObjectList *objlist)
@@ -1736,7 +1736,7 @@ void __asm __saveds L_FreeObjectList(register __a0 ObjectList *objlist)
 
 
 /****************************************************************************
-                        Get an object by ID from a list
+						Get an object by ID from a list
  ****************************************************************************/
 
 GL_Object *__asm __saveds L_GetObject(
@@ -1768,7 +1768,7 @@ GL_Object *__asm __saveds L_GetObject(
 
 
 /****************************************************************************
-                              Display an object
+							  Display an object
  ****************************************************************************/
 
 void __asm __saveds L_DisplayObject(
@@ -1815,7 +1815,7 @@ void __asm __saveds L_DisplayObject(
 		(object->text==0 || (strcmp(txt,object->text)!=0)))
 	{
 		// Free existing text
-        if (object->text)
+		if (object->text)
 			L_FreeMemH(object->text);
 
 		// Copy text
@@ -2220,7 +2220,7 @@ void __asm __saveds L_DisplayObject(
 
 
 /****************************************************************************
-                          Attach a menu to a window
+						  Attach a menu to a window
  ****************************************************************************/
 
 void __asm __saveds L_AddWindowMenus(
@@ -2257,7 +2257,7 @@ void __asm __saveds L_AddWindowMenus(
 
 
 /****************************************************************************
-                          Free a window's menus
+						  Free a window's menus
  ****************************************************************************/
 
 void __asm __saveds L_FreeWindowMenus(
@@ -2277,7 +2277,7 @@ void __asm __saveds L_FreeWindowMenus(
 
 
 /****************************************************************************
-                              Refresh a list of objects
+							  Refresh a list of objects
  ****************************************************************************/
 
 void __asm __saveds L_RefreshObjectList(
@@ -2307,7 +2307,7 @@ void __asm __saveds L_RefreshObjectList(
 
 
 /****************************************************************************
-                             Misc. local routines
+							 Misc. local routines
  ****************************************************************************/
 
 // Add image to a gadget
