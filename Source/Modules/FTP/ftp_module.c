@@ -501,10 +501,13 @@ char                       *oldtaskname;
 oldtaskname = FindTask(0)->tc_Node.ln_Name;
 FindTask(0)->tc_Node.ln_Name = "galileo_ftp_function";
 
+// This seems to have no effect. Commenting out for now.
+/*
 {
 void *m = AllocMem( 101, MEMF_ANY );
 FreeMem( m, 101 );
 }
+*/
 
 // Screen may be different because of mode change or hide/show
 // Screen pointer should not be global to support multiple Galileos
