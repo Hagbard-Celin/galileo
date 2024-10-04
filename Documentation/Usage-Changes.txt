@@ -43,3 +43,10 @@ Command Changes:
                     If supplied any destination Listers present will be ignored.
 
 - FinishSection is removed. see note in "Function Editor Changes" above.
+
+LoadGB Changes:
+
+- The qualifier for fallback to LoadWB is canged to the Amiga keys.
+- Updated to support passtrough of all LoadWB arguments as of LoadWB version
+  47.1.
+

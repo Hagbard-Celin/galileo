@@ -55,6 +55,9 @@ enum
 	ARG_DELAY,
 	ARG_CLEANUP,
 	ARG_NEWPATH,
+    ARG_SKIP,
+    ARG_SIMPLEGELS,
+    ARG_LEGACY,
 	ARG_COUNT
 };
 
@@ -90,7 +93,7 @@ void __stdargs __main(char *arg_string)
 		arg_array[a]=0;
 
 	// Parse arguments
-	if (args=ReadArgs("-DEBUG/S,DELAY/S,CLEANUP/S,NEWPATH/S",(long *)arg_array,0))
+	if (args=ReadArgs("-DEBUG/S,DELAY/S,CLEANUP/S,NEWPATH/S,SKIP=SKIPWBSTARTUP/S,SIMPLEGELS/S,LEGACY/S",(long *)arg_array,0))
 	{
 		// Free arguments
 		FreeArgs(args);
@@ -145,8 +148,8 @@ void __stdargs __main(char *arg_string)
 		// Get input base
 		InputBase=(struct Library *)input_req.io_Device;
 
-		// See if shift is held down
-		if (PeekQualifier()&(IEQUALIFIER_LSHIFT|IEQUALIFIER_RSHIFT))
+		// See if either Amiga-key is held down
+		if (PeekQualifier()&(IEQUALIFIER_LCOMMAND|IEQUALIFIER_RCOMMAND))
 		{
 			// Run Workbench instead
 			run_wb=1;
@@ -173,6 +176,9 @@ void __stdargs __main(char *arg_string)
 	{
 		// See if Workbench is already running; if so, we don't do WBStartup again
 		if (wb_running) wb_startup=0;
+
+        // Respect SKIPWBSTARTUP
+        if (arg_array[ARG_SKIP]) wb_startup=0;
 
 		// Get this process, turn off requesters
 		proc=(struct Process *)FindTask(0);
@@ -219,6 +225,9 @@ void __stdargs __main(char *arg_string)
 		if (arg_array[ARG_DELAY]) strcat(buf," DELAY");
 		if (arg_array[ARG_CLEANUP]) strcat(buf," CLEANUP");
 		if (arg_array[ARG_NEWPATH]) strcat(buf," NEWPATH");
+		if (arg_array[ARG_SKIP]) strcat(buf," SKIP");
+		if (arg_array[ARG_SIMPLEGELS]) strcat(buf," SIMPLEGELS");
+		if (arg_array[ARG_LEGACY]) strcat(buf," LEGACY");
 
 		// Run it
 		Execute(buf,0,0);
