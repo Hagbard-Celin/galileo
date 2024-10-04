@@ -77,9 +77,9 @@ ErrorReq(struct ModuleData *data, char *Mess)
 BOOL PasswordReq(struct ModuleData *data)
 {
 	int retval;
-    BOOL result=TRUE;
+	BOOL result=TRUE;
 
-    memset(data->password,0,512);
+	memset(data->password,0,512);
 
 
 	retval = AsyncRequestTags(
@@ -99,10 +99,10 @@ BOOL PasswordReq(struct ModuleData *data)
 			TAG_END);
 
 	if (!retval)
-    {
-        result=FALSE;
-        memset(data->password,0,512);
-    }
+	{
+		result=FALSE;
+		memset(data->password,0,512);
+	}
 
 	return (result);
 }
@@ -193,18 +193,18 @@ void BuildTree(struct ModuleData *data)
 	xfi = data->ArcInf->xai_FileInfo;
 
 	while(xfi)
-    {
+	{
 		tree=FindDrw(data, xfi->xfi_FileName);
 		name=FilePart(xfi->xfi_FileName);
 		dup=FALSE;
 
 		if(tree->Child)
-        {
+		{
 			tmp=tree->Child;
 			while(tmp)
-            {
+			{
 				if(!strcmp(name,tmp->fib.fib_FileName))
-                {
+				{
 					dup=TRUE;
 					break;
 				}
@@ -213,14 +213,14 @@ void BuildTree(struct ModuleData *data)
 		}
 
 		if(!dup)
-        {
+		{
 			if(tree->Child==NULL)
-            {
+			{
 				tree->Child=AllocMemH(data->memhandle,sizeof(struct Tree));
 				tree=tree->Child;
 			}
-        	else
-            {
+			else
+			{
 				tree=tree->Child;
 				while(tree->Next!=NULL) tree=tree->Next;
 				tree->Next=AllocMemH(data->memhandle,sizeof(struct Tree));
@@ -229,13 +229,13 @@ void BuildTree(struct ModuleData *data)
 
 			strcpy(tree->fib.fib_FileName,name);
 			if(xfi->xfi_Comment)
-            {
+			{
 				strcpy(tree->fib.fib_Comment,xfi->xfi_Comment);
-            }
+			}
 			else
-            {
+			{
 				*tree->fib.fib_Comment=0;
-            }
+			}
 			xadConvertDates(XAD_DATEXADDATE,	&xfi->xfi_Date,
 					XAD_GETDATEDATESTAMP,	&tree->fib.fib_Date,
 					TAG_DONE);
@@ -266,8 +266,8 @@ AllocPort(struct ModuleData *data)
 	if(data->mp=CreateMsgPort()) {
 		(data->mp->mp_Node.ln_Pri) = 2;
 		(data->mp->mp_Node.ln_Name) = data->mp_name;  
-        sprintf(data->mp_name,"XADbrowser_%p",data->mp); // this is guaranteed to be unique
-        AddPort(data->mp);
+		sprintf(data->mp_name,"XADbrowser_%p",data->mp); // this is guaranteed to be unique
+		AddPort(data->mp);
 
 		sprintf(data->buf,"lister set %s handler %s quotes",data->lists,data->mp_name);
 		data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
@@ -335,7 +335,7 @@ LaunchCommand(struct ModuleData *data, char *cmd, char *name, char *qual)
 	sprintf(data->buf,"galileo remtrap %s %s",cmd,data->mp_name);
 	data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
-    // Need data->lists here or command might end at wrong XADbrowser lister
+	// Need data->lists here or command might end at wrong XADbrowser lister
 	sprintf(data->buf,"command wait source %s %s %s %s", data->lists, cmd, qual, name);
 	data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
@@ -352,7 +352,7 @@ _scandir(struct ModuleData *data, char *listh, char *path)
 {
 	sprintf(data->buf,"command source %s ScanDir %s",listh,path);
 	data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
-            //data->hook.gc_SendCommand(IPCDATA(data->ipc),data->buf,NULL,NULL);
+			//data->hook.gc_SendCommand(IPCDATA(data->ipc),data->buf,NULL,NULL);
 }
 
 void
@@ -368,26 +368,26 @@ void _doubleclick(struct ModuleData *data, char *name, char *qual)
 {
 	struct Tree *tmp=data->cur->Child;
 	struct TempFile *tf;
-    xadERROR err;
+	xadERROR err;
 	BOOL retry;
 
-    data->over=FALSE;
+	data->over=FALSE;
 
 	while(strcmp(tmp->fib.fib_FileName,name) && !data->over) tmp=tmp->Next;
 
 	if(tmp->fib.fib_DirEntryType>0)
-    {
+	{
 		AddPart(data->listpath, tmp->fib.fib_FileName, 512);
 		_cd(data,tmp);
 	}
 	else if(tf=AllocVec(sizeof(struct TempFile),NULL))
-    {
+	{
 		AddTail((struct List *)&data->Temp,(struct Node *)tf);
 		sprintf(tf->FileName,"T:%s",name);
-    	if ((tmp->xfi->xfi_Flags & XADFIF_CRYPTED) && (*data->password == 0))
-        	PasswordReq(data);
+		if ((tmp->xfi->xfi_Flags & XADFIF_CRYPTED) && (*data->password == 0))
+			PasswordReq(data);
 
-    	do
+		do
 		{
 			retry = FALSE;
 
@@ -399,10 +399,10 @@ void _doubleclick(struct ModuleData *data, char *name, char *qual)
 							   TAG_DONE);
 
 			if (err == XADERR_PASSWORD)
-            {
+			{
 				retry = PasswordReq(data);
-                data->over=!retry;
-            }
+				data->over=!retry;
+			}
 		} while (retry && !data->over);
 
 
@@ -419,23 +419,23 @@ _parent(struct ModuleData *data)
 	struct Tree *tmp;
 	char *path=data->listpath;
 
-    if ((!data->newlister) && ((strlen(data->listpath))==(strlen(data->rootpath))) &&
-       (!stricmp(data->listpath,data->rootpath)))
-    {
-        sprintf(data->buf,"lister read %s %s",data->lists,data->orgpath);
+	if ((!data->newlister) && ((strlen(data->listpath))==(strlen(data->rootpath))) &&
+	   (!stricmp(data->listpath,data->rootpath)))
+	{
+		sprintf(data->buf,"lister read %s %s",data->lists,data->orgpath);
 		data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
-    }
-    else
-    {
+	}
+	else
+	{
 	    while(*path++!=':');
 
 	    if(*path)
-        {
+		{
 		    tmp=FindDrw(data,path);
 		    *((char *)PathPart(path))=0;
 		    _cd(data,tmp);
 	    }
-    }
+	}
 }
 
 void
@@ -453,26 +453,26 @@ _viewcommand(struct ModuleData *data,char *com,char *name)
 {
 	struct Tree *tmp=data->cur->Child;
 	struct TempFile *tf;
-    xadERROR err;
+	xadERROR err;
 	BOOL retry;
 
-    data->over=FALSE;
+	data->over=FALSE;
 
 	while(tmp && !data->over)
-    {
+	{
 		while(tmp && (sprintf(data->buf,"\"%s\"",tmp->fib.fib_FileName)) && (!strstr(name,data->buf)) )
 			tmp=tmp->Next;
 
 		if(tmp && !data->over)
-        {
+		{
 			if(tf=AllocVec(sizeof(struct TempFile),NULL))
-            {
+			{
 				AddTail((struct List *)&data->Temp,(struct Node *)tf);
 				sprintf(tf->FileName,"T:%s",tmp->fib.fib_FileName);
-        		if ((tmp->xfi->xfi_Flags & XADFIF_CRYPTED) && (*data->password == 0))
-            		PasswordReq(data);
+				if ((tmp->xfi->xfi_Flags & XADFIF_CRYPTED) && (*data->password == 0))
+					PasswordReq(data);
 
-                do
+				do
 				{
 					retry = FALSE;
 
@@ -484,10 +484,10 @@ _viewcommand(struct ModuleData *data,char *com,char *name)
 									   TAG_DONE);
 
 					if (err == XADERR_PASSWORD)
-                    {
+					{
 						retry = PasswordReq(data);
-                        data->over=!retry;
-                    }
+						data->over=!retry;
+					}
 				} while (retry && !data->over);
 
 				sprintf(data->buf,"lister select %s \"%s\" off",data->lists,tmp->fib.fib_FileName);
@@ -525,16 +525,16 @@ _copy(struct ModuleData *data,char *name, char *Dest, BOOL CopyAs)
 	BPTR dir;    
 	xadERROR err;
 	BOOL retry;
-    struct DirDate *toSet;
+	struct DirDate *toSet;
 
-    BPTR parent;
+	BPTR parent;
 
 	char dirtest[256];
 
 	FileName=AllocVec(1024,0);
 	TreeName=AllocVec(1024,0);
 	Drawer=AllocVec(1024,0);
-    Drawer2=AllocVec(1024,0);
+	Drawer2=AllocVec(1024,0);
 	
 	prhk.h_Entry=(ULONG (*)()) ProgressHook;
 	prhk.h_Data=data;
@@ -542,7 +542,7 @@ _copy(struct ModuleData *data,char *name, char *Dest, BOOL CopyAs)
 	total=countchar(name)/2;
 
 	data->All=5;
-    data->over=FALSE;
+	data->over=FALSE;
 
 	data->ptr=OpenProgressWindowTags(
 		PW_Window,	data->listw,
@@ -552,20 +552,20 @@ _copy(struct ModuleData *data,char *name, char *Dest, BOOL CopyAs)
 		PW_Flags,	PWF_FILENAME|PWF_FILESIZE|PWF_GRAPH|PWF_ABORT|PWF_INFO,
 		TAG_DONE);
 
-    // Init list for storing dates of directories
-    NewList((struct List *)&data->DirDates);
+	// Init list for storing dates of directories
+	NewList((struct List *)&data->DirDates);
 
 	while(tmp && (!data->over))
-    {
+	{
 		while(tmp && (sprintf(data->buf,"\"%s\"",tmp->fib.fib_FileName)) && (!strstr(name,data->buf)) )
 			tmp=tmp->Next;
 
 		if(tmp)
-        {
+		{
 			strcpy(FileName,Dest);
 			skip=FALSE;
 			if(CopyAs)
-            {
+			{
 				sprintf(TreeName,GetString(locale,MSG_RENAME_FORM),tmp->fib.fib_FileName);
 				strcpy(Drawer,tmp->fib.fib_FileName);
 				switch(AsyncRequestTags(data->ipc,REQTYPE_SIMPLE,NULL,NULL,NULL,
@@ -578,7 +578,7 @@ _copy(struct ModuleData *data,char *name, char *Dest, BOOL CopyAs)
 							AR_Button,GetString(locale,MSG_ABORT),
 							AR_Flags,SRF_PATH_FILTER,
 							TAG_END))
-                {
+				{
 					case 0:
 						data->over=TRUE;
 					case 2:
@@ -591,10 +591,10 @@ _copy(struct ModuleData *data,char *name, char *Dest, BOOL CopyAs)
 			} else AddPart(FileName,tmp->fib.fib_FileName,1024);
 
 			if(!skip)
-            {
+			{
 
 				if(tmp->fib.fib_DirEntryType<0)
-                {
+				{
 					SetProgressWindowTags(data->ptr,
 						PW_FileName,   tmp->fib.fib_FileName,
 						PW_FileNum,		++count,
@@ -602,13 +602,13 @@ _copy(struct ModuleData *data,char *name, char *Dest, BOOL CopyAs)
 						PW_FileSize,   tmp->xfi->xfi_Size,
 						PW_Info,			"",
 						TAG_DONE);
-                            if ((tmp->xfi->xfi_Flags & XADFIF_CRYPTED) && (*data->password == 0))
-            						PasswordReq(data);
-                        	do
+							if ((tmp->xfi->xfi_Flags & XADFIF_CRYPTED) && (*data->password == 0))
+									PasswordReq(data);
+							do
 							{
 								retry = FALSE;
 
-                                err=xadFileUnArc(data->ArcInf,
+								err=xadFileUnArc(data->ArcInf,
 									XAD_ENTRYNUMBER,	tmp->xfi->xfi_EntryNumber,
 									XAD_OUTFILENAME,	FileName,
 									XAD_MAKEDIRECTORY, TRUE,
@@ -617,118 +617,118 @@ _copy(struct ModuleData *data,char *name, char *Dest, BOOL CopyAs)
 									(*data->password)?XAD_PASSWORD:TAG_IGNORE, data->password,
 									TAG_DONE);
 
-                                if (!err)
-                                {
-                                    struct DateStamp date;
+								if (!err)
+								{
+									struct DateStamp date;
 
-                                    if (!(tmp->xfi->xfi_Flags & XADFIF_NODATE) &&
-                                    	!xadConvertDates(XAD_DATEXADDATE,
-                                    				 	 &tmp->xfi->xfi_Date,
-                                                     	 XAD_GETDATEDATESTAMP,
-                                                     	 &date,
-                                                     	 TAG_DONE))
-                                	{
+									if (!(tmp->xfi->xfi_Flags & XADFIF_NODATE) &&
+										!xadConvertDates(XAD_DATEXADDATE,
+													 	 &tmp->xfi->xfi_Date,
+													 	 XAD_GETDATEDATESTAMP,
+													 	 &date,
+													 	 TAG_DONE))
+									{
 	                        			SetFileDate(FileName, &date);
-                                	}
+									}
 
-                                	SetProtection(FileName, tmp->xfi->xfi_Protection);
+									SetProtection(FileName, tmp->xfi->xfi_Protection);
 
-                                	if (tmp->xfi->xfi_Comment)
+									if (tmp->xfi->xfi_Comment)
 	                        			SetComment(FileName, tmp->xfi->xfi_Comment);
-                                }
-                                if(err==XADERR_BREAK || CheckProgressAbort(data->ptr))
-                                {
+								}
+								if(err==XADERR_BREAK || CheckProgressAbort(data->ptr))
+								{
 									data->over=TRUE;
-                                }
-                            	else if (err == XADERR_PASSWORD)
-                                {
+								}
+								else if (err == XADERR_PASSWORD)
+								{
 									retry = PasswordReq(data);
-                                	data->over=!retry;
-                                }
+									data->over=!retry;
+								}
 							} while (retry && !data->over);
 				}
-            	else
-                {
+				else
+				{
 
-                    if((parent = Lock(FileName, SHARED_LOCK)))
-          		    {
-                    	UnLock(parent);
+					if((parent = Lock(FileName, SHARED_LOCK)))
+		  		    {
+						UnLock(parent);
 
-                    }
+					}
 
 					xfi=data->ArcInf->xai_FileInfo;
 					strcpy(Drawer,&data->listpath[strlen(data->rootpath)]);  
 					AddPart(Drawer,tmp->fib.fib_FileName,1024);
-                    strcat(Drawer,"/");                  
-                    total=strlen(Drawer);
-                    
+					strcat(Drawer,"/");                  
+					total=strlen(Drawer);
+					
 					SetProgressWindowTags(data->ptr,
 						PW_FileName,   tmp->fib.fib_FileName,
 						PW_FileNum,		++count,
 						TAG_DONE);
 					while(xfi && (!data->over)) {
-                  
-                        strcpy(TreeName,FileName);
-                        if(!strncmp(Drawer,xfi->xfi_FileName,total))
-                        {
-                        	AddPart(TreeName,&xfi->xfi_FileName[total],1024);
-                        }
+				  
+						strcpy(TreeName,FileName);
+						if(!strncmp(Drawer,xfi->xfi_FileName,total))
+						{
+							AddPart(TreeName,&xfi->xfi_FileName[total],1024);
+						}
 						
-                        SetProgressWindowTags(data->ptr,
+						SetProgressWindowTags(data->ptr,
 							PW_Info,   	&xfi->xfi_FileName[total],
 							PW_FileDone,	0,
 							PW_FileSize,	xfi->xfi_Size,
 							TAG_DONE);
 						
-                        if(!(xfi->xfi_Flags & (XADFIF_INFOTEXT | XADFIF_NOFILENAME))
+						if(!(xfi->xfi_Flags & (XADFIF_INFOTEXT | XADFIF_NOFILENAME))
 							&& (xfi->xfi_Flags & XADFIF_DIRECTORY))
-                        {
-                            strcpy(dirtest, TreeName);
-                            /* path=PathPart(dirtest);
-                            path='\0'; */
+						{
+							strcpy(dirtest, TreeName);
+							/* path=PathPart(dirtest);
+							path='\0'; */
 
 							if((parent = Lock(dirtest, SHARED_LOCK)))
-          		        	{
-                            	UnLock(parent);
-                            }
-                      
-                            if(dir=CreateDir(TreeName))
-                            {
-                                UnLock(dir);
-                           
-                                // Allocate memory to store directoryname and date for setting later
-                                if (toSet=AllocMemH(data->memhandle, sizeof(struct DirDate)+strlen(TreeName)))
-                                {
-                                	// Get date
-                                	if (!(xfi->xfi_Flags & XADFIF_NODATE) &&
-                            	    	!(xadConvertDates(XAD_DATEXADDATE,
-                                    					  &xfi->xfi_Date,
-                                            	          XAD_GETDATEDATESTAMP,
-                                                	      &toSet->date,
-                                                    	  TAG_DONE)))
-                            		{                                           	
+		  		        	{
+								UnLock(parent);
+							}
+					  
+							if(dir=CreateDir(TreeName))
+							{
+								UnLock(dir);
+						   
+								// Allocate memory to store directoryname and date for setting later
+								if (toSet=AllocMemH(data->memhandle, sizeof(struct DirDate)+strlen(TreeName)))
+								{
+									// Get date
+									if (!(xfi->xfi_Flags & XADFIF_NODATE) &&
+								    	!(xadConvertDates(XAD_DATEXADDATE,
+														  &xfi->xfi_Date,
+												          XAD_GETDATEDATESTAMP,
+													      &toSet->date,
+														  TAG_DONE)))
+									{                                           	
 										// Fill inn directory name
 										strcpy(toSet->name,TreeName);
 
-    									// Add to list for setting date later
+										// Add to list for setting date later
 										AddTail((struct List *)&data->DirDates,(struct Node *)toSet);
-                            		}
-                                    
+									}
+									
 	                    		}
 
-                                SetProtection(TreeName, xfi->xfi_Protection);
+								SetProtection(TreeName, xfi->xfi_Protection);
 	                    		
-                                if (xfi->xfi_Comment)
+								if (xfi->xfi_Comment)
 	                    			SetComment(TreeName, xfi->xfi_Comment);
-                            }
-                   		}
-                        else
-                        if(!strncmp(Drawer,xfi->xfi_FileName,total))
-                        {
-                            if ((xfi->xfi_Flags & XADFIF_CRYPTED) && (*data->password == 0))
-            					PasswordReq(data);
+							}
+				   		}
+						else
+						if(!strncmp(Drawer,xfi->xfi_FileName,total))
+						{
+							if ((xfi->xfi_Flags & XADFIF_CRYPTED) && (*data->password == 0))
+								PasswordReq(data);
 
-                            do
+							do
 							{
 								retry = FALSE;
 
@@ -740,37 +740,37 @@ _copy(struct ModuleData *data,char *name, char *Dest, BOOL CopyAs)
 												 XAD_OVERWRITE,		 FALSE,
 												 (*data->password)?XAD_PASSWORD:TAG_IGNORE, data->password,
 												 TAG_DONE);
-                                if (!err)
-                                {
-                                    struct DateStamp date;
+								if (!err)
+								{
+									struct DateStamp date;
 
-                                    if (!(xfi->xfi_Flags & XADFIF_NODATE) &&
-                            	    	!xadConvertDates(XAD_DATEXADDATE,
-                                    				 	 &xfi->xfi_Date,
-                                                     	 XAD_GETDATEDATESTAMP,
-                                                     	 &date,
-                                                     	 TAG_DONE))
-                            		{
+									if (!(xfi->xfi_Flags & XADFIF_NODATE) &&
+								    	!xadConvertDates(XAD_DATEXADDATE,
+													 	 &xfi->xfi_Date,
+													 	 XAD_GETDATEDATESTAMP,
+													 	 &date,
+													 	 TAG_DONE))
+									{
 	                    				SetFileDate(TreeName, &date);
-                            		}
+									}
 
-                                	SetProtection(TreeName, xfi->xfi_Protection);
+									SetProtection(TreeName, xfi->xfi_Protection);
 
-                                	if (xfi->xfi_Comment)
+									if (xfi->xfi_Comment)
 	                    				SetComment(TreeName, xfi->xfi_Comment);
-                            	}
-                                if(err==XADERR_BREAK || CheckProgressAbort(data->ptr))
-                                {
+								}
+								if(err==XADERR_BREAK || CheckProgressAbort(data->ptr))
+								{
 									data->over=TRUE;
-                                }
-                            	else if (err == XADERR_PASSWORD)
-                                {
+								}
+								else if (err == XADERR_PASSWORD)
+								{
 									retry = PasswordReq(data);
-                                    data->over=!retry;
-                                }
+									data->over=!retry;
+								}
 
 							} while (retry && !data->over);
-                        }
+						}
 
 						xfi=xfi->xfi_Next;
 					}
@@ -782,23 +782,23 @@ _copy(struct ModuleData *data,char *name, char *Dest, BOOL CopyAs)
 			}
 			tmp=tmp->Next;
 		}
-      
-      	// Go throug list of created directories
+	  
+	  	// Go throug list of created directories
 		for (toSet=(struct DirDate *)data->DirDates.mlh_Head;
 					toSet->node.mln_Succ;)
 		{
-            struct DirDate *tmpd;
+			struct DirDate *tmpd;
 
 			// Set dete from archive info
-            SetFileDate(toSet->name, &toSet->date);
+			SetFileDate(toSet->name, &toSet->date);
 
-            // Store next node
-            tmpd=(struct DirDate *)toSet->node.mln_Succ;
+			// Store next node
+			tmpd=(struct DirDate *)toSet->node.mln_Succ;
 
-            Remove((struct Node *)toSet);
-            FreeMemH(toSet);
+			Remove((struct Node *)toSet);
+			FreeMemH(toSet);
 
-            toSet=tmpd;
+			toSet=tmpd;
 		}
 	}
 
@@ -811,8 +811,8 @@ _copy(struct ModuleData *data,char *name, char *Dest, BOOL CopyAs)
 		FreeVec(TreeName);
 	if(Drawer)
 		FreeVec(Drawer);
-    if(Drawer2)
-        FreeVec(Drawer2);
+	if(Drawer2)
+		FreeVec(Drawer2);
 }
 ///
 /// Path
@@ -855,9 +855,9 @@ _path(struct ModuleData *data, char *path)
 				if(cur->Next)
 					cur=cur->Next;
 				else {
-                    // Do not show requester if the path is the archive root
-                    if (!(((strlen(data->listpath))==(strlen(data->rootpath))) &&
-                       (!stricmp(data->listpath,data->rootpath))))
+					// Do not show requester if the path is the archive root
+					if (!(((strlen(data->listpath))==(strlen(data->rootpath))) &&
+					   (!stricmp(data->listpath,data->rootpath))))
 					    ErrorReq(data,GetString(locale,MSG_NO_PATH_ERR));
 
 					_cd(data,tmp);
@@ -933,9 +933,9 @@ ExtractF(struct ModuleData *data)
 	char FileName[1024];
 	BPTR dir;
 	ULONG total=1;
-    xadERROR err;
+	xadERROR err;
 	BOOL retry;
-    struct DirDate *toSet;
+	struct DirDate *toSet;
 
 	prhk.h_Entry=(ULONG (*)()) ProgressHook;
 	prhk.h_Data=data;
@@ -957,7 +957,7 @@ ExtractF(struct ModuleData *data)
 
 	total=0;
 
-    NewList((struct List *)&data->DirDates);
+	NewList((struct List *)&data->DirDates);
 
 	while(xfi && (!data->over)) {
 		strcpy(FileName,xfi->xfi_FileName);
@@ -974,46 +974,46 @@ ExtractF(struct ModuleData *data)
 		strcpy(FileName,data->listpath);
 		AddPart(FileName,xfi->xfi_FileName,1024);
 
-        if ((xfi->xfi_Flags & XADFIF_CRYPTED) && (*data->password == 0))
-            PasswordReq(data);
+		if ((xfi->xfi_Flags & XADFIF_CRYPTED) && (*data->password == 0))
+			PasswordReq(data);
 
 		if(xfi->xfi_Flags & (XADFIF_INFOTEXT | XADFIF_NOFILENAME))
 			;
 		else if(xfi->xfi_Flags & XADFIF_DIRECTORY) {
 			if(dir=CreateDir(FileName))
-            {
+			{
 				UnLock(dir);
 
-                // Allocate memory to store directoryname and date for setting later
-                if (toSet=AllocMemH(data->memhandle, sizeof(struct DirDate)+strlen(FileName)))
-                {
-                	// Get date
-                	if (!(xfi->xfi_Flags & XADFIF_NODATE) &&
-                    	!(xadConvertDates(XAD_DATEXADDATE,
-                    					  &xfi->xfi_Date,
-                            	          XAD_GETDATEDATESTAMP,
-                                	      &toSet->date,
-                                    	  TAG_DONE)))
-                	{
+				// Allocate memory to store directoryname and date for setting later
+				if (toSet=AllocMemH(data->memhandle, sizeof(struct DirDate)+strlen(FileName)))
+				{
+					// Get date
+					if (!(xfi->xfi_Flags & XADFIF_NODATE) &&
+						!(xadConvertDates(XAD_DATEXADDATE,
+										  &xfi->xfi_Date,
+								          XAD_GETDATEDATESTAMP,
+									      &toSet->date,
+										  TAG_DONE)))
+					{
 						// Fill inn directory name
 						strcpy(toSet->name,FileName);
 
-    					// Add to list for setting date later
+						// Add to list for setting date later
 						AddTail((struct List *)&data->DirDates,(struct Node *)toSet);
-                	}
+					}
 
 	            }
 
-                if (xfi->xfi_Protection)
-                	SetProtection(FileName, xfi->xfi_Protection);
+				if (xfi->xfi_Protection)
+					SetProtection(FileName, xfi->xfi_Protection);
 
-                if (xfi->xfi_Comment)
+				if (xfi->xfi_Comment)
 	            	SetComment(FileName, xfi->xfi_Comment);
-            }
+			}
  		} else do {
 			retry = FALSE;
 
-            err=xadFileUnArc(data->ArcInf,
+			err=xadFileUnArc(data->ArcInf,
 					XAD_ENTRYNUMBER,	xfi->xfi_EntryNumber,
 					XAD_OUTFILENAME,	FileName,
 					XAD_MAKEDIRECTORY, TRUE,
@@ -1022,55 +1022,55 @@ ExtractF(struct ModuleData *data)
 					(*data->password)?XAD_PASSWORD:TAG_IGNORE, data->password,
 					TAG_DONE);
 
-            if (!err)
+			if (!err)
 			{
-                struct DateStamp date;
+				struct DateStamp date;
 
 				if (!(xfi->xfi_Flags & XADFIF_NODATE) &&
-                	!xadConvertDates(XAD_DATEXADDATE,
-                    				 &xfi->xfi_Date,
-                    				 XAD_GETDATEDATESTAMP,
-                                 	 &date,
-                                 	 TAG_DONE))
-        		{
+					!xadConvertDates(XAD_DATEXADDATE,
+									 &xfi->xfi_Date,
+									 XAD_GETDATEDATESTAMP,
+								 	 &date,
+								 	 TAG_DONE))
+				{
 
 					SetFileDate(FileName, &date);
-        		}
+				}
 
 				SetProtection(FileName, xfi->xfi_Protection);
 
 				if (xfi->xfi_Comment)
 				SetComment(FileName, xfi->xfi_Comment);
 			}
-            if(err==XADERR_BREAK || CheckProgressAbort(data->ptr))
-            {
+			if(err==XADERR_BREAK || CheckProgressAbort(data->ptr))
+			{
 				data->over=TRUE;
-            }
+			}
 			else if (err == XADERR_PASSWORD)
-            {
+			{
 				retry = PasswordReq(data);
-                data->over=!retry;
-            }
+				data->over=!retry;
+			}
 		} while (retry && !data->over);
 		xfi=xfi->xfi_Next;
 	}
 
-    // Go through list of created directories
+	// Go through list of created directories
 	for (toSet=(struct DirDate *)data->DirDates.mlh_Head;
 				toSet->node.mln_Succ;)
 	{
-        struct DirDate *tmpd;
+		struct DirDate *tmpd;
 
 		// Set dete from archive info
-        SetFileDate(toSet->name, &toSet->date);
+		SetFileDate(toSet->name, &toSet->date);
 
-        // Store next node
-        tmpd=(struct DirDate *)toSet->node.mln_Succ;
+		// Store next node
+		tmpd=(struct DirDate *)toSet->node.mln_Succ;
 
-        Remove((struct Node *)toSet);
-        FreeMemH(toSet);
+		Remove((struct Node *)toSet);
+		FreeMemH(toSet);
 
-        toSet=tmpd;
+		toSet=tmpd;
 	}
 
 	return(data->over);
@@ -1079,28 +1079,28 @@ ExtractF(struct ModuleData *data)
 
 int __saveds __asm L_Module_Entry(
 	register __a0 char *args,
-    register __a1 struct Screen *screen,
-    register __a2 IPCData *ipc,
-    register __a3 IPCData *main_ipc,
-    register __a4 APTR *memhandlep,
-    register __d0 ULONG mod_id,
-    register __d1 EXT_FUNC(func_callback)
-    )
+	register __a1 struct Screen *screen,
+	register __a2 IPCData *ipc,
+	register __a3 IPCData *main_ipc,
+	register __a4 APTR *memhandlep,
+	register __d0 ULONG mod_id,
+	register __d1 EXT_FUNC(func_callback)
+	)
 {
 	char arcname[512];
 	char buf[512];
-    char result[100];
-    char **archives=0;
-    short archnum=0;
+	char result[100];
+	char **archives=0;
+	short archnum=0;
 
 	struct ModuleData data;
 	BOOL async=FALSE;
 
-    struct Tree root;
+	struct Tree root;
 
-    int openwinret;
+	int openwinret;
 	
-    struct function_entry *Entry=0;
+	struct function_entry *Entry=0;
 
 	ULONG err, total;
 	STRPTR filename=0;
@@ -1121,60 +1121,60 @@ int __saveds __asm L_Module_Entry(
 	data.DOSBase = DOSBase;
 	data.UtilityBase = UtilityBase;
 
-    data.screen = screen;
+	data.screen = screen;
 
-    arcname[0]=0;
+	arcname[0]=0;
 
-    if (memhandlep && *memhandlep)
-    {
-        async=TRUE;
-    }
+	if (memhandlep && *memhandlep)
+	{
+		async=TRUE;
+	}
 	else if (mod_id == 0)
-    {
-        ErrorReq(&data,GetString(locale,MSG_NEEDS_ASYNC_ERR));
-        return 0;
-    }
+	{
+		ErrorReq(&data,GetString(locale,MSG_NEEDS_ASYNC_ERR));
+		return 0;
+	}
 
-    if(mod_id == 1)
-    {
-        if (data.args=ParseArgs(XADEXTRACT_ARGS,args))
-        {
-            if (data.args->FA_Arguments[0])
-            {
-                archives=(char **)data.args->FA_Arguments[0];
-                KPrintF("%s\n",archives[archnum]);
-                strcpy(arcname,archives[archnum]);
-                archnum=1;
-            }
+	if(mod_id == 1)
+	{
+		if (data.args=ParseArgs(XADEXTRACT_ARGS,args))
+		{
+			if (data.args->FA_Arguments[0])
+			{
+				archives=(char **)data.args->FA_Arguments[0];
 
-            if (data.args->FA_Arguments[1])
-            {
-                strcpy(data.listpath,(char *)data.args->FA_Arguments[1]);
-            }
-    	}
-    }
-    else
-    {
-        if (data.args=ParseArgs(XADOPEN_ARGS,args))
-        {
-            if (data.args->FA_Arguments[0])
-            {
-                strcpy(arcname, (char *)data.args->FA_Arguments[0]);
-                strcpy(data.rootpath, FilePart((char *)data.args->FA_Arguments[0]));
+				strcpy(arcname,archives[archnum]);
+				archnum=1;
+			}
 
-                // Always use new listerwindow when archivename comes from commandline
-                data.newlister=TRUE;
-            }
-            else
-            {
-                if (data.args->FA_Arguments[1])
-                    data.newlister=TRUE;
-                else
-                    data.newlister=FALSE;
-            }
-            DisposeArgs(data.args);
-        }
-    }
+			if (data.args->FA_Arguments[1])
+			{
+				strcpy(data.listpath,(char *)data.args->FA_Arguments[1]);
+			}
+		}
+	}
+	else
+	{
+		if (data.args=ParseArgs(XADOPEN_ARGS,args))
+		{
+			if (data.args->FA_Arguments[0])
+			{
+				strcpy(arcname, (char *)data.args->FA_Arguments[0]);
+				strcpy(data.rootpath, FilePart((char *)data.args->FA_Arguments[0]));
+
+				// Always use new listerwindow when archivename comes from commandline
+				data.newlister=TRUE;
+			}
+			else
+			{
+				if (data.args->FA_Arguments[1])
+					data.newlister=TRUE;
+				else
+					data.newlister=FALSE;
+			}
+			DisposeArgs(data.args);
+		}
+	}
 
 	NewList((struct List *)&data.Temp);
 
@@ -1186,69 +1186,67 @@ int __saveds __asm L_Module_Entry(
 		return 0;
 	}
 
-    if(async)
-    	data.memhandle = *memhandlep;
-    else
+	if(async)
+		data.memhandle = *memhandlep;
+	else
 		if(!(data.memhandle = NewMemHandle(NULL, NULL, MEMF_CLEAR))) return(0);
 
-    if (!(data.password=AllocMemH(data.memhandle,512))) goto end_1;
+	if (!(data.password=AllocMemH(data.memhandle,512))) goto end_1;
 
-    // Open xadmaster.library
+	// Open xadmaster.library
 	if (!(xadMasterBase=(struct xadMasterBase *)OpenLibrary(XADNAME,13))) goto end_1;
 
-    data.xadMasterBase = xadMasterBase;
+	data.xadMasterBase = xadMasterBase;
 
-    // Ignore selected files in listers if archivenames on commandline
+	// Ignore selected files in listers if archivenames on commandline
 	if (!(arcname[0]))
-    {
-        KPrintF("Shuld not be here 1\n");
-        if( !(data.listp2 = data.hook.gc_GetSource(IPCDATA(ipc), data.orgpath)) ) goto end_2;
+	{
+		if( !(data.listp2 = data.hook.gc_GetSource(IPCDATA(ipc), data.orgpath)) ) goto end_2;
 
-    	data.hook.gc_FirstEntry(IPCDATA(ipc));
+		data.hook.gc_FirstEntry(IPCDATA(ipc));
 
-    	if( !(Entry=data.hook.gc_GetEntry(IPCDATA(ipc))) ) goto end_2;
+		if( !(Entry=data.hook.gc_GetEntry(IPCDATA(ipc))) ) goto end_2;
 
-    	filename = (STRPTR)data.hook.gc_ExamineEntry(Entry, EE_NAME);
+		filename = (STRPTR)data.hook.gc_ExamineEntry(Entry, EE_NAME);
 
-        strcpy(arcname, data.orgpath);
+		strcpy(arcname, data.orgpath);
 
-    	AddPart(arcname, filename, 512);
-    }
+		AddPart(arcname, filename, 512);
+	}
 
 /// Main Extract
 	if(mod_id == 1)
 	{
-        if (!(data.listpath[0]))
-        {
-            KPrintF("Shuld not be here 3\n");
-    		if(!(data.destp = data.hook.gc_GetDest(IPCDATA(ipc), data.listpath))) goto end_2;
+		if (!(data.listpath[0]))
+		{
+			if(!(data.destp = data.hook.gc_GetDest(IPCDATA(ipc), data.listpath))) goto end_2;
 
-    		data.hook.gc_EndDest(IPCDATA(ipc), 0);
+			data.hook.gc_EndDest(IPCDATA(ipc), 0);
 		}
 
-        if (data.listp2)
-        {
-    		data.listh = (ULONG)data.listp2->lister;
-    		data.listw = data.hook.gc_GetWindow(data.listp2);
-    		sprintf(data.lists, "%lu", data.listh);
+		if (data.listp2)
+		{
+			data.listh = (ULONG)data.listp2->lister;
+			data.listw = data.hook.gc_GetWindow(data.listp2);
+			sprintf(data.lists, "%lu", data.listh);
 
-    		sprintf(buf,"lister query %s numselentries", data.lists);
-    		total=data.hook.gc_SendCommand(IPCDATA(ipc),buf,NULL,NULL);
+			sprintf(buf,"lister query %s numselentries", data.lists);
+			total=data.hook.gc_SendCommand(IPCDATA(ipc),buf,NULL,NULL);
 		}
-        else
-        {
-        	short a=archnum;
+		else
+		{
+			short a=archnum;
 
-            while (archives[a+1])
-            {
-                a++;
-            }
-            total=a;
-        }
+			while (archives[a+1])
+			{
+				a++;
+			}
+			total=a;
+		}
 
 		data.ptr=OpenProgressWindowTags(
 				PW_Window, data.listw,
-                (data.listw)?TAG_IGNORE:PW_Screen,data.screen,
+				(data.listw)?TAG_IGNORE:PW_Screen,data.screen,
 				PW_Title,	GetString(locale,MSG_EXTRACTING),
 				PW_FileCount,	total,
 				PW_Flags,	PWF_FILENAME|PWF_FILESIZE|PWF_GRAPH|PWF_ABORT|PWF_INFO,
@@ -1257,7 +1255,7 @@ int __saveds __asm L_Module_Entry(
 		if(data.ArcInf=xadAllocObject(XADOBJ_ARCHIVEINFO,NULL)) {
 			ULONG count=0;
 			while((Entry || archnum) && (!over))
-            {
+			{
 				SetProgressWindowTags(data.ptr,
 					PW_Info,	FilePart(arcname),
 					PW_FileName,	GetString(locale,MSG_OPENING_ARC),
@@ -1269,17 +1267,17 @@ int __saveds __asm L_Module_Entry(
 					data.ArcMode=data.ArcInf->xai_Client->xc_Flags & XADCF_DISKARCHIVER;
 				
 				if(err == XADERR_FILETYPE)
-                {
+				{
 					// *** DISKIMAGE
 					if(!(err=xadGetDiskInfo(data.ArcInf, XAD_INFILENAME, arcname, TAG_DONE)))
-                    {
+					{
 						data.ArcMode=XADCF_DISKARCHIVER;
 						over=ExtractF(&data);
 						xadFreeInfo(data.ArcInf);
 					}
 				}
-            	else if((!err) && (data.ArcMode == XADCF_DISKARCHIVER))
-                {
+				else if((!err) && (data.ArcMode == XADCF_DISKARCHIVER))
+				{
 					// *** DISKARCHIVE
 					struct TagItem ti[2];
 					switch(AsyncRequestTags(ipc,REQTYPE_SIMPLE,NULL,NULL,NULL,
@@ -1291,7 +1289,7 @@ int __saveds __asm L_Module_Entry(
 								AR_Button,GetString(locale,MSG_ABORT),
 								AR_Flags,SRF_PATH_FILTER,
 								TAG_END))
-                    {
+					{
 						case 0:
 							break;
 						case 2:
@@ -1307,7 +1305,7 @@ int __saveds __asm L_Module_Entry(
 							break;
 					}
 				}
-            	else if(!err)
+				else if(!err)
 				// *** FILEARCHIVE
 					over=ExtractF(&data);
 				
@@ -1316,46 +1314,46 @@ int __saveds __asm L_Module_Entry(
 				else
 					ErrorReq(&data,xadGetErrorText(err));
 
-                if (filename)
-                {
-    				data.hook.gc_EndEntry(IPCDATA(ipc),Entry,TRUE);
-    				Entry=data.hook.gc_GetEntry(IPCDATA(ipc));
-                    if (Entry)
-                    {
-    					*((char *)PathPart(arcname))=0;
-    					AddPart(arcname,Entry->name,512);
-                    }
-                }
-                else
-                {
-                    if (archives[archnum])
-                    {
-                        strcpy(arcname,archives[archnum]);
-                        archnum++;
-                    }
-                    else archnum=0;
-                }
+				if (filename)
+				{
+					data.hook.gc_EndEntry(IPCDATA(ipc),Entry,TRUE);
+					Entry=data.hook.gc_GetEntry(IPCDATA(ipc));
+					if (Entry)
+					{
+						*((char *)PathPart(arcname))=0;
+						AddPart(arcname,Entry->name,512);
+					}
+				}
+				else
+				{
+					if (archives[archnum])
+					{
+						strcpy(arcname,archives[archnum]);
+						archnum++;
+					}
+					else archnum=0;
+				}
 			}
 
-            if (data.args) DisposeArgs(data.args);
+			if (data.args) DisposeArgs(data.args);
 
-            if (data.destp)
-            {
-                // Needed for the following scandir not to open a new window
-                sprintf(buf,"lister set %lu busy off wait",data.destp->lister);
-                data.hook.gc_SendCommand(IPCDATA(ipc),buf,NULL,NULL);
+			if (data.destp)
+			{
+				// Needed for the following scandir not to open a new window
+				sprintf(buf,"lister set %lu busy off wait",data.destp->lister);
+				data.hook.gc_SendCommand(IPCDATA(ipc),buf,NULL,NULL);
 
-      		    sprintf(buf,"command source %lu ScanDir %s",data.destp->lister,data.destp->path);
-    			data.hook.gc_SendCommand(IPCDATA(ipc),buf,NULL,NULL);
-            }
+	  		    sprintf(buf,"command source %lu ScanDir %s",data.destp->lister,data.destp->path);
+				data.hook.gc_SendCommand(IPCDATA(ipc),buf,NULL,NULL);
+			}
 			xadFreeObject(data.ArcInf,NULL);
 		}
 		
 		if(data.ptr)
 			CloseProgressWindow(data.ptr);
 
-        // Plug memory leak
-        FreeMemHandle(data.memhandle);
+		// Plug memory leak
+		FreeMemHandle(data.memhandle);
 
 		return(1);
 	}
@@ -1363,73 +1361,73 @@ int __saveds __asm L_Module_Entry(
 
 /// Main Open
 
-    if (!(data.rootpath[0]))
+	if (!(data.rootpath[0]))
 		strcpy(data.rootpath, filename);
 
 	strcat(data.rootpath, ":");
 
-    // Do we have a destination lister?
-    if(data.destp=data.hook.gc_GetDest(IPCDATA(ipc), data.listpath))
-    {
-        // Store lister for restoring deststination status later
-        data.desth=(ULONG)data.destp->lister;
+	// Do we have a destination lister?
+	if(data.destp=data.hook.gc_GetDest(IPCDATA(ipc), data.listpath))
+	{
+		// Store lister for restoring deststination status later
+		data.desth=(ULONG)data.destp->lister;
 
-        data.hook.gc_EndDest(IPCDATA(ipc), 0);
+		data.hook.gc_EndDest(IPCDATA(ipc), 0);
 
-        // Have to do this, or destination lister will be locked busy
-        sprintf(buf,"lister set %lu busy off wait",data.desth);
-        data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
-    }
+		// Have to do this, or destination lister will be locked busy
+		sprintf(buf,"lister set %lu busy off wait",data.desth);
+		data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+	}
 
-    if (data.listp2)
-    {
-        data.listh2=(ULONG)data.listp2->lister;
+	if (data.listp2)
+	{
+		data.listh2=(ULONG)data.listp2->lister;
 
-        if(!data.newlister)
-        {
-             sprintf(data.lists, "%lu", data.listh2);
-             data.listh=data.listh2;
-             data.listw=data.hook.gc_GetWindow(data.listp2);
-        }
-    }
+		if(!data.newlister)
+		{
+			 sprintf(data.lists, "%lu", data.listh2);
+			 data.listh=data.listh2;
+			 data.listw=data.hook.gc_GetWindow(data.listp2);
+		}
+	}
 
-    if (filename)
-    {
-        data.hook.gc_EndEntry(IPCDATA(ipc), Entry, TRUE);
-        data.hook.gc_EndSource(IPCDATA(ipc), 1);
-    }
+	if (filename)
+	{
+		data.hook.gc_EndEntry(IPCDATA(ipc), Entry, TRUE);
+		data.hook.gc_EndSource(IPCDATA(ipc), 1);
+	}
 
-    if(data.newlister)
-    {
+	if(data.newlister)
+	{
 		openwinret=data.hook.gc_RexxCommand("lister new", result, sizeof(result), NULL, NULL);
 #ifdef _DEBUG
-        KPrintF("lister new returned: %ld result: %s\n", openwinret, result);
+		KPrintF("lister new returned: %ld result: %s\n", openwinret, result);
 #endif
-    }
+	}
 
-    if (result || !data.newlister)
+	if (result || !data.newlister)
 	{
-        if(data.newlister)
-        {
-            strcpy(data.lists, result);
+		if(data.newlister)
+		{
+			strcpy(data.lists, result);
 		    data.listh = strtoul(result,NULL,10);
-        }
+		}
 
 //		ErrorReq(&data, data.lists); // *********************
 
 		if(AllocPort(&data))
 		{
-            struct _PathNode listp;
+			struct _PathNode listp;
 
-            data.hook.gc_UnlockSource(IPCDATA(ipc));
+			data.hook.gc_UnlockSource(IPCDATA(ipc));
 
-            // Free the FunctionHandle, detaching completely from originating lister
-            data.hook.gc_FreePointerDirect(IPCDATA(ipc),MODPTR_HANDLE,POINTERF_DELPORT);
+			// Free the FunctionHandle, detaching completely from originating lister
+			data.hook.gc_FreePointerDirect(IPCDATA(ipc),MODPTR_HANDLE,POINTERF_DELPORT);
 
-            data.listp=&listp;
+			data.listp=&listp;
 
-            // To avoid usless snapshot attempt when quitting
-            data.hook.gc_FakeDir(data.listh,TRUE);
+			// To avoid usless snapshot attempt when quitting
+			data.hook.gc_FakeDir(data.listh,TRUE);
 
 			strcpy(data.listpath, data.rootpath);
 			sprintf(buf, "lister set %s path %s", data.lists, data.listpath);
@@ -1441,65 +1439,65 @@ int __saveds __asm L_Module_Entry(
 			sprintf(buf, "lister set %s title %s", data.lists, GetString(locale, MSG_READING_ARCHIVE));
 			data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
-            if(data.newlister)
-            {
-                sprintf(buf, "lister set %s source", data.lists);
+			if(data.newlister)
+			{
+				sprintf(buf, "lister set %s source", data.lists);
 			    data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
-            }
+			}
 
-            // Quit and cleanup if user closed window
-            while (pkt = (struct MyPacket *)GetMsg(data.mp))
-            {
-                if (!strcmp((char *)pkt->sp_Pkt.dp_Arg1, "inactive"))
-                {
-        			sprintf(buf, "galileo remtrap * %s", data.mp_name);
-        			data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+			// Quit and cleanup if user closed window
+			while (pkt = (struct MyPacket *)GetMsg(data.mp))
+			{
+				if (!strcmp((char *)pkt->sp_Pkt.dp_Arg1, "inactive"))
+				{
+					sprintf(buf, "galileo remtrap * %s", data.mp_name);
+					data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
-    				ReplyMsg((struct Message *)pkt);
+					ReplyMsg((struct Message *)pkt);
 
-                    goto end_3;
-                }
-                else ReplyMsg((struct Message *)pkt);
-            }
+					goto end_3;
+				}
+				else ReplyMsg((struct Message *)pkt);
+			}
 
 			data.hook.gc_RefreshLister(data.listh, HOOKREFRESH_FULL);
 
-            sprintf(buf, "lister wait %s quick", data.lists);
-    		data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+			sprintf(buf, "lister wait %s quick", data.lists);
+			data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
-            // Block lister until we are ready to handle events
-    		sprintf(buf, "lister set %s busy on wait", data.lists);
-    		data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+			// Block lister until we are ready to handle events
+			sprintf(buf, "lister set %s busy on wait", data.lists);
+			data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
-            if(data.newlister)
-            {
-                // Did we have a destination lister to begin with?
-                if(data.desth)
-                {
+			if(data.newlister)
+			{
+				// Did we have a destination lister to begin with?
+				if(data.desth)
+				{
 #ifdef _DEBUG
-                    KPrintF("4 org: %lu dst: %lu\n", data.listh2, data.desth);
+					KPrintF("4 org: %lu dst: %lu\n", data.listh2, data.desth);
 #endif
-                    // Turn originating lister off
-                    if (!(data.hook.gc_IsSourceDestLock(data.listh2)))
-                    {
-                        sprintf(buf, "lister set %lu off", data.listh2);
+					// Turn originating lister off
+					if (!(data.hook.gc_IsSourceDestLock(data.listh2)))
+					{
+						sprintf(buf, "lister set %lu off", data.listh2);
 			            data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
-                    }
+					}
 
-                    // Restore destination status
-                    if (!(data.hook.gc_IsSourceDestLock(data.desth)))
-                    {
-                        sprintf(buf, "lister set %lu dest", data.desth);
+					// Restore destination status
+					if (!(data.hook.gc_IsSourceDestLock(data.desth)))
+					{
+						sprintf(buf, "lister set %lu dest", data.desth);
 			            data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
-                    }
-                }
+					}
+				}
 
 
 			    data.listp->lister = (APTR)data.listh;
 			    *data.listp->path_buf = data.listp->flags = 0;
 			    data.listp->path = data.listp->path_buf;
 			    data.listw = data.hook.gc_GetWindow(data.listp);
-            }
+			}
 
 			if(data.ArcInf = xadAllocObject(XADOBJ_ARCHIVEINFO, NULL))
 			{
@@ -1536,9 +1534,9 @@ int __saveds __asm L_Module_Entry(
 
 					data.hook.gc_RefreshLister(data.listh, HOOKREFRESH_FULL);
 
-                    // Ready to handle input, unblock lister
-        			sprintf(buf, "lister set %s busy off wait", data.lists);
-        			data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+					// Ready to handle input, unblock lister
+					sprintf(buf, "lister set %s busy off wait", data.lists);
+					data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
 					while(!over)
 					{
@@ -1606,61 +1604,61 @@ int __saveds __asm L_Module_Entry(
 
 					ErrorReq(&data, xadGetErrorText(err));
 
-                    // unblock lister
-        			sprintf(buf, "lister set %s busy off wait", data.lists);
-        			data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+					// unblock lister
+					sprintf(buf, "lister set %s busy off wait", data.lists);
+					data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
 				}
 				xadFreeObject(data.ArcInf,NULL);
 			}
 			FreePort(&data);
 		}
-        else
-        {
-            data.hook.gc_UnlockSource(IPCDATA(ipc));
+		else
+		{
+			data.hook.gc_UnlockSource(IPCDATA(ipc));
 
-            // Free the FunctionHandle, detaching completely from originating lister
-            data.hook.gc_FreePointerDirect(IPCDATA(ipc),MODPTR_HANDLE,POINTERF_DELPORT);
-        }
+			// Free the FunctionHandle, detaching completely from originating lister
+			data.hook.gc_FreePointerDirect(IPCDATA(ipc),MODPTR_HANDLE,POINTERF_DELPORT);
+		}
 	}
 #ifdef _DEBUG
-    KPrintF("XAD normal END!! \n");
+	KPrintF("XAD normal END!! \n");
 #endif
 	RemoveTemp(&data);
 
-    // Do not leave password in memory.
-    memset(data.password,0,512);
+	// Do not leave password in memory.
+	memset(data.password,0,512);
 
-    if(xadMasterBase) CloseLibrary((struct Library *)xadMasterBase);
+	if(xadMasterBase) CloseLibrary((struct Library *)xadMasterBase);
  	
-    if(!async)
-    	FreeMemHandle(data.memhandle);
+	if(!async)
+		FreeMemHandle(data.memhandle);
 	return(1);
 
-    //Error Handling
-    end_3:
+	//Error Handling
+	end_3:
 
-    FreePort(&data);
-    if(xadMasterBase) CloseLibrary((struct Library *)xadMasterBase);
-    return (0);
+	FreePort(&data);
+	if(xadMasterBase) CloseLibrary((struct Library *)xadMasterBase);
+	return (0);
 
-    end_2:
+	end_2:
 #ifdef _DEBUG
-    KPrintF("XAD fail2 END!! \n");
+	KPrintF("XAD fail2 END!! \n");
 #endif
-    if(xadMasterBase) CloseLibrary((struct Library *)xadMasterBase);
+	if(xadMasterBase) CloseLibrary((struct Library *)xadMasterBase);
 
-    end_1:
+	end_1:
 #ifdef _DEBUG
-    KPrintF("XAD fail1 END!! \n");
+	KPrintF("XAD fail1 END!! \n");
 #endif
-    if (async)
-        data.hook.gc_FreePointerDirect(IPCDATA(ipc),GETPTR_HANDLE,NULL);
+	if (async)
+		data.hook.gc_FreePointerDirect(IPCDATA(ipc),GETPTR_HANDLE,NULL);
 
-    if(!async)
+	if(!async)
 		FreeMemHandle(data.memhandle);
-    end_0:
+	end_0:
 
-    return (0);
+	return (0);
 }
 ///
