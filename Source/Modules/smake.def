@@ -9,4 +9,4 @@ SOBJ = //SDK/lib/
 DEBUGLIB =
 STRIPDEBUG = stripdebug
 ADDSYM =
-SCFLAGS = nodebug define RESOURCE_TRACKING=0
+SCFLAGS =
