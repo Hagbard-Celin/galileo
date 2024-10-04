@@ -349,6 +349,7 @@ struct Window *lister_open_window(Lister *lister,struct Screen *screen)
 					"sysiclass",
 					SYSIA_DrawInfo,lister->drawinfo,
 					SYSIA_Which,ZOOMIMAGE,
+					IA_Height,screen->WBorTop+screen->Font->ta_YSize+1,
 					TAG_END))
 		{
 			// Create gadget
