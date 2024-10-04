@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+				 http://www.gpsoft.com.au
 
 */
 
@@ -72,12 +72,12 @@ __saveds __UserLibInit()
 {
 
 #ifdef RESOURCE_TRACKING
-    callerid=(ULONG)&__UserLibInit;
+	callerid=(ULONG)&__UserLibInit;
 
-    if (ResTrackBase=REALS_OpenLibrary("g_restrack.library",0))
-    {
-    	StartResourceTracking (RTL_ALL);
-    }
+	if (ResTrackBase=REALS_OpenLibrary("g_restrack.library",0))
+	{
+		StartResourceTracking (RTL_ALL);
+	}
 #endif
 
 	// Initialise
@@ -154,11 +154,11 @@ void __saveds __UserLibCleanup()
 	}
 
 #ifdef RESOURCE_TRACKING
-    KPrintF("galileofm.library opencount: %ld: ",GalileoFMBase->lib_OpenCnt);
+	KPrintF("galileofm.library opencount: %ld: ",GalileoFMBase->lib_OpenCnt);
 #endif
 	// Close libraries
 	CloseLibrary(GalileoFMBase);
-    CloseLibrary(GadToolsBase);
+	CloseLibrary(GadToolsBase);
 	CloseLibrary((struct Library *)IntuitionBase);
 	CloseLibrary((struct Library *)GfxBase);
 	CloseLibrary(IconBase);
@@ -171,13 +171,13 @@ void __saveds __UserLibCleanup()
 	CloseLibrary((struct Library *)DOSBase);
  
 #ifdef RESOURCE_TRACKING
-    KPrintF("%s Quitting......\n", module_info.name);
-    if (ResTrackBase->lib_OpenCnt==2)
+	KPrintF("%s Quitting......\n", module_info.name);
+	if (ResTrackBase->lib_OpenCnt==2)
 	    EndResourceTracking(); /* Generate a memory usage report */
 
-    REALS_CloseLibrary(ResTrackBase);
+	REALS_CloseLibrary(ResTrackBase);
 //    PrintTrackedResources();
-    //EndResourceTracking(); /* Generate a memory usage report */
+	//EndResourceTracking(); /* Generate a memory usage report */
 #endif
 
 }

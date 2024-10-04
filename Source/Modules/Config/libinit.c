@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+				 http://www.gpsoft.com.au
 
 */
 
@@ -76,7 +76,7 @@ __saveds __UserLibInit()
    callerid=(ULONG)&__UserLibInit;
 
    if (ResTrackBase=REALS_OpenLibrary("g_restrack.library",0))
-        StartResourceTracking (RTL_ALL);
+		StartResourceTracking (RTL_ALL);
 #endif
 
 	// DOS
@@ -95,11 +95,11 @@ __saveds __UserLibInit()
 		!(CxBase=OpenLibrary("commodities.library",37)) ||
 		!(UtilityBase=OpenLibrary("utility.library",37))) return 1;
 
-    // Under 39?
+	// Under 39?
 	if (GfxBase->LibNode.lib_Version>=39)
 	{
 	    P96Base=OpenLibrary("Picasso96API.library",0);
-    }
+	}
 
 	// Allocate and open locale data
 	if (!(locale=AllocVec(sizeof(struct GalileoLocale),MEMF_CLEAR)))
@@ -133,8 +133,8 @@ void __saveds __UserLibCleanup()
 		FreeVec(locale);
 	}
 
-    if (P96Base)
-        CloseLibrary(P96Base);
+	if (P96Base)
+		CloseLibrary(P96Base);
 
 	// Close libraries
 	CloseLibrary(GalileoFMBase);
@@ -151,10 +151,10 @@ void __saveds __UserLibCleanup()
 	CloseLibrary((struct Library *)DOSBase);
 
 #ifdef RESOURCE_TRACKING
-    KPrintF("Config Quitting......\n");
-    if (ResTrackBase->lib_OpenCnt==2)
+	KPrintF("Config Quitting......\n");
+	if (ResTrackBase->lib_OpenCnt==2)
 	    EndResourceTracking(); /* Generate a memory usage report */
-    REALS_CloseLibrary(ResTrackBase);
+	REALS_CloseLibrary(ResTrackBase);
 #endif
 
 }

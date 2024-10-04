@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+				 http://www.gpsoft.com.au
 
 */
 
@@ -487,7 +487,7 @@ int __asm __saveds L_Module_Entry(
 	register __a1 struct Screen *screen,
 	register __a2 IPCData       *function_ipc,	// 'galileo_function' - the spawned module process
 	register __a3 IPCData       *galileo_ipc,		// 'Galileo' - the main Galileo process
-    register __a4 APTR 			*memhandlep,
+	register __a4 APTR 			*memhandlep,
 	register __d0 ULONG          mod_id,
 	register __d1 EXT_FUNC(func_callback))
 {

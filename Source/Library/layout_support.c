@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+				 http://www.gpsoft.com.au
 
 */
 
@@ -39,7 +39,7 @@ For more information on Directory Opus for Windows please see:
 #include "layout_routines.h"
 
 /****************************************************************************
-                       Strip IntuiMessages for a window
+					   Strip IntuiMessages for a window
  ****************************************************************************/
 
 void __asm __saveds L_StripIntuiMessages(register __a0 struct Window *window)
@@ -100,7 +100,7 @@ void __asm __saveds L_StripWindowMessages(
 
 
 /****************************************************************************
-                   Close a window using a shared IDCMP port
+				   Close a window using a shared IDCMP port
  ****************************************************************************/
 
 void __asm __saveds L_CloseWindowSafely(register __a0 struct Window *window)
@@ -128,7 +128,7 @@ void __asm __saveds L_CloseWindowSafely(register __a0 struct Window *window)
 
 
 /****************************************************************************
-                     Store the value of a GadTools gadget
+					 Store the value of a GadTools gadget
  ****************************************************************************/
 
 void __asm __saveds L_StoreGadgetValue(
@@ -470,7 +470,7 @@ void __asm __saveds L_UpdateGadgetList(
 
 
 /****************************************************************************
-                      Set the value of a GadTools gadget
+					  Set the value of a GadTools gadget
  ****************************************************************************/
 
 void __asm __saveds L_SetGadgetValue(
@@ -713,7 +713,7 @@ void __asm __saveds L_SetGadgetValue(
 
 
 /****************************************************************************
-                      Get the value of a GadTools gadget
+					  Get the value of a GadTools gadget
  ****************************************************************************/
 
 long __asm __saveds L_GetGadgetValue(
@@ -746,7 +746,7 @@ long __asm __saveds L_GetGadgetValue(
 
 
 /****************************************************************************
-                   Check a point is within an object's area
+				   Check a point is within an object's area
  ****************************************************************************/
 
 __asm __saveds L_CheckObjectArea(
@@ -774,7 +774,7 @@ __asm __saveds L_CheckObjectArea(
 
 
 /****************************************************************************
-                              Make a window busy
+							  Make a window busy
  ****************************************************************************/
 
 void __asm __saveds L_SetWindowBusy(register __a0 struct Window *window)
@@ -801,7 +801,7 @@ void __asm __saveds L_SetWindowBusy(register __a0 struct Window *window)
 
 
 /****************************************************************************
-                              Make a window unbusy
+							  Make a window unbusy
  ****************************************************************************/
 
 void __asm __saveds L_ClearWindowBusy(register __a0 struct Window *window)
@@ -824,7 +824,7 @@ void __asm __saveds L_ClearWindowBusy(register __a0 struct Window *window)
 
 
 /****************************************************************************
-                             Get a Locale string
+							 Get a Locale string
  ****************************************************************************/
 
 STRPTR __asm __saveds L_GetString(
@@ -861,7 +861,7 @@ STRPTR __asm __saveds L_GetString(
 
 
 /****************************************************************************
-          Scan object list looking for a key equivalent for a gadget
+		  Scan object list looking for a key equivalent for a gadget
  ****************************************************************************/
 
 struct Gadget *__asm __saveds L_FindKeyEquivalent(
@@ -1359,7 +1359,7 @@ struct Gadget *__asm __saveds L_FindKeyEquivalent(
 
 
 /****************************************************************************
-                     Do a progress bar in an area object
+					 Do a progress bar in an area object
  ****************************************************************************/
 
 void __asm __saveds L_ShowProgressBar(
@@ -1372,7 +1372,7 @@ void __asm __saveds L_ShowProgressBar(
 
 
 /****************************************************************************
-                         Change the kind of an object
+						 Change the kind of an object
  ****************************************************************************/
 
 void __asm __saveds L_SetObjectKind(
@@ -1391,7 +1391,7 @@ void __asm __saveds L_SetObjectKind(
 
 
 /****************************************************************************
-                         Disable or enable an object
+						 Disable or enable an object
  ****************************************************************************/
 
 void __asm __saveds L_DisableObject(
@@ -1427,7 +1427,7 @@ void __asm __saveds L_DisableObject(
 
 
 /****************************************************************************
-                        Bounds check an integer gadget
+						Bounds check an integer gadget
  ****************************************************************************/
 
 __asm __saveds L_BoundsCheckGadget(
@@ -1468,7 +1468,7 @@ __asm __saveds L_BoundsCheckGadget(
 
 
 /****************************************************************************
-                        Get a message from the window
+						Get a message from the window
  ****************************************************************************/
 
 struct IntuiMessage *__asm __saveds L_GetWindowMsg(
@@ -1543,7 +1543,7 @@ struct IntuiMessage *__asm __saveds L_GetWindowMsg(
 
 
 /****************************************************************************
-                          Reply to a window message
+						  Reply to a window message
  ****************************************************************************/
 
 void __asm __saveds L_ReplyWindowMsg(
@@ -1554,7 +1554,7 @@ void __asm __saveds L_ReplyWindowMsg(
 
 
 /****************************************************************************
-                        Set the "choices" for a gadget
+						Set the "choices" for a gadget
  ****************************************************************************/
 
 void __asm __saveds L_SetGadgetChoices(
@@ -1701,7 +1701,7 @@ void __asm __saveds L_SetGadgetChoices(
 
 
 /****************************************************************************
-                           Initialise a window's ID
+						   Initialise a window's ID
  ****************************************************************************/
 
 void __asm __saveds L_SetWindowID(
@@ -1731,7 +1731,7 @@ void __asm __saveds L_SetWindowID(
 
 
 /****************************************************************************
-                              Get a window's ID
+							  Get a window's ID
  ****************************************************************************/
 
 ULONG __asm __saveds L_GetWindowID(register __a0 struct Window *window)
@@ -1754,7 +1754,7 @@ ULONG __asm __saveds L_GetWindowID(register __a0 struct Window *window)
 
 
 /****************************************************************************
-                       Get a window's application port
+					   Get a window's application port
  ****************************************************************************/
 
 struct MsgPort *__asm __saveds L_GetWindowAppPort(register __a0 struct Window *window)
@@ -1776,7 +1776,7 @@ struct MsgPort *__asm __saveds L_GetWindowAppPort(register __a0 struct Window *w
 
 
 /****************************************************************************
-                          Get an objects's rectangle
+						  Get an objects's rectangle
  ****************************************************************************/
 
 BOOL __asm __saveds L_GetObjectRect(
