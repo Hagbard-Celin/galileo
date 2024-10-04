@@ -56,9 +56,9 @@ void LibExpunge(void);
 
 extern struct Library		   *ConsoleDevice;
 
-#if RESOURCE_TRACKING
-#define CALLER_ID "MainExe"
-char *callerid=0; // "MainExe";
+#ifdef RESOURCE_TRACKING
+
+ULONG callerid;
 
 #endif
 
@@ -69,13 +69,11 @@ void main(int argc,char **argv)
 	IPCData *startup_pic;
 
 
-#if RESOURCE_TRACKING
-    if (ResTrackBase=REALL_OpenLibrary("restrack.library",0))
+#ifdef RESOURCE_TRACKING
+    if (ResTrackBase=REALL_OpenLibrary("g_restrack.library",0))
          StartResourceTracking (RTL_ALL);
 
-    callerid=NRT_AllocVec(strlen(CALLER_ID)+1,MEMF_PUBLIC|MEMF_CLEAR);
-    strcpy(callerid,CALLER_ID);
-    //*callerid=CALLER_ID;
+    callerid=(ULONG)&main;
 #endif
 
 #ifdef _DEBUG_IPCPROC

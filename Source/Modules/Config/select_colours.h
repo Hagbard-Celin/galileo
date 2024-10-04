@@ -77,7 +77,7 @@ typedef struct
 	struct Window			*window;
 	ObjectList			*list;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     struct Library          *ResTrackBase;
 
     ULONG               pad1;

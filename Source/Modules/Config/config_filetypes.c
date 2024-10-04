@@ -616,7 +616,7 @@ void filetype_edit(
 	eddata->func_startup.asl_base=AslBase;
 	eddata->func_startup.layers_base=LayersBase;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     eddata->func_startup.restrack_base=ResTrackBase;
 #endif
 

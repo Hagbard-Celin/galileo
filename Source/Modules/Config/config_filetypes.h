@@ -149,7 +149,7 @@ typedef struct
 
 	struct Library		*asl_base;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     struct Library      *restrack_base;
 #endif
 

@@ -59,10 +59,10 @@ struct Device  *TimerBase;
 struct RxsLib  *RexxSysBase;
 struct GalileoLocale *locale;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 struct Library *ResTrackBase;
 
-char *callerid;
+ULONG callerid;
 #endif
 
 //extern struct ModuleData data;
@@ -71,12 +71,13 @@ char *callerid;
 __saveds __UserLibInit()
 {
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
+    callerid=(ULONG)&__UserLibInit;
 
-   callerid=module_info.name;
-
-   if (ResTrackBase=REALS_OpenLibrary("restrack.library",0))
-        StartResourceTracking (RTL_ALL);
+    if (ResTrackBase=REALS_OpenLibrary("g_restrack.library",0))
+    {
+    	StartResourceTracking (RTL_ALL);
+    }
 #endif
 
 	// Initialise
@@ -152,6 +153,9 @@ void __saveds __UserLibCleanup()
 		FreeVec(locale);
 	}
 
+#ifdef RESOURCE_TRACKING
+    KPrintF("galileofm.library opencount: %ld: ",GalileoFMBase->lib_OpenCnt);
+#endif
 	// Close libraries
 	CloseLibrary(GalileoFMBase);
     CloseLibrary(GadToolsBase);
@@ -166,9 +170,9 @@ void __saveds __UserLibCleanup()
 	CloseLibrary(AslBase);
 	CloseLibrary((struct Library *)DOSBase);
  
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     KPrintF("%s Quitting......\n", module_info.name);
-    if (ResTrackBase->lib_OpenCnt==1)
+    if (ResTrackBase->lib_OpenCnt==2)
 	    EndResourceTracking(); /* Generate a memory usage report */
 
     REALS_CloseLibrary(ResTrackBase);

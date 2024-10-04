@@ -1306,7 +1306,7 @@ BPTR launcher_get_parent(struct LibData *data,char *name)
 	return lock;
 }
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #define ResTrackBase    (data->restrack_base)
 #endif
 // Free launch packet
@@ -1320,7 +1320,7 @@ void free_launch_packet(struct LibData *data,LaunchPacket *packet)
 		FreeVec(packet);
 	}
 }
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #undef ResTrackBase
 #endif
 

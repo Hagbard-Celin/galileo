@@ -43,9 +43,9 @@ For more information on Directory Opus for Windows please see:
 #define CATCOMP_NUMBERS
 #include "config.strings"
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #include <restrack_protos.h>
-#include <restrack_pragmas.h>
+#include <g_restrack_pragmas.h>
 #endif
 
 extern struct Library		*GalileoFMBase;
@@ -61,10 +61,10 @@ extern struct Library       *P96Base;
 extern struct LocaleBase	*LocaleBase;
 extern struct GalileoLocale	*locale;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 extern struct Library *ResTrackBase;
 
-extern char *callerid;
+extern ULONG callerid;
 #endif
 
 typedef struct

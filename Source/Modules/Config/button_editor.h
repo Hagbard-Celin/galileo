@@ -105,7 +105,7 @@ typedef struct _ButtonEdData
 	struct Library		*GfxBase;
 	struct Library		*LayersBase;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     struct Library      *ResTrackBase;
 #endif
 

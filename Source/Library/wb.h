@@ -53,7 +53,7 @@ typedef struct
 
 	struct Library			*utility_base;
 	struct MinList			rem_app_list;
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     struct Library          *restrack_base;
     ULONG                   pad1[2];
 #else

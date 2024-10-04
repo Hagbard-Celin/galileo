@@ -61,7 +61,9 @@ extern struct Library			*AmigaGuideBase;
 extern struct Library 			*P96Base;
 extern struct NewIconBase		*NewIconBase;
 extern struct muBase			*muBase;
+#ifdef RESOURCE_TRACKING
 extern struct Library           *ResTrackBase;
+#endif
 
 extern struct Process			*main_proc;			// Main process pointer
 extern struct MsgPort			*arexx_port;			// ARexx port

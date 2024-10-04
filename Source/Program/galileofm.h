@@ -140,13 +140,13 @@ enum {
 
 #include "callback.h"
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #include <restrack_protos.h>
-#include <restrack_pragmas.h>
+#include <g_restrack_pragmas.h>
 
 extern struct Library *ResTrackBase;
 
-extern char *callerid;
+extern ULONG callerid;
 #endif
 
 #define REQ_OFF(save) { save=main_proc->pr_WindowPtr; main_proc->pr_WindowPtr=(APTR)-1; }

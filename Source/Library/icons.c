@@ -87,7 +87,7 @@ BOOL __asm __saveds L_WB_DeleteDiskObject(register __a0 char *name)
 	struct MyLibrary *libbase;
 	BOOL result;
 	char *full_name;
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     struct Library *ResTrackBase;
 #endif
 
@@ -98,7 +98,7 @@ BOOL __asm __saveds L_WB_DeleteDiskObject(register __a0 char *name)
 	// Get data pointer
 	data=(struct LibData *)libbase->ml_UserData;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 	ResTrackBase=data->restrack_base;
 #endif
 
@@ -126,7 +126,7 @@ BOOL __asm __saveds L_WB_DeleteDiskObject(register __a0 char *name)
 void icon_notify(struct LibData *data,char *name,ULONG flags,short delete)
 {
 	char *full_name;
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     struct Library *ResTrackBase;
 	ResTrackBase=data->restrack_base;
 #endif
@@ -154,7 +154,7 @@ char *icon_fullname(struct LibData *data,char *name)
 	char *full_name,*ptr;
 	BPTR lock;
 	short len;
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     struct Library *ResTrackBase;
 	ResTrackBase=data->restrack_base;
 #endif

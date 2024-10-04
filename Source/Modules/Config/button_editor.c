@@ -56,11 +56,11 @@ void ButtonEditor(void)
 	IPCData *ipc;
 	short success=0,pending_quit=0;
 	BOOL open_window=1;
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     struct Library *ResTrackBase;
     struct ExecBase *Exec=(struct ExecBase *)*((ULONG *)4);
 
-    ResTrackBase=(struct Library *)FindName(&Exec->LibList,"restrack.library");
+    ResTrackBase=(struct Library *)FindName(&Exec->LibList,"g_restrack.library");
 #endif
 
 
@@ -787,12 +787,12 @@ ULONG __asm _buttoned_init(
 {
 	ButtonEdData *data;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #undef ResTrackBase
     struct Library *ResTrackBase;
     struct ExecBase *Exec=(struct ExecBase *)*((ULONG *)4);
 
-    ResTrackBase=(struct Library *)FindName(&Exec->LibList,"restrack.library");
+    ResTrackBase=(struct Library *)FindName(&Exec->LibList,"g_restrack.library");
 #endif
 
 	// Allocate data
@@ -808,7 +808,7 @@ ULONG __asm _buttoned_init(
 	data->button=startup->button;
 	data->locale=startup->func_startup.locale;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     data->ResTrackBase=ResTrackBase;
 #endif
 
@@ -839,7 +839,7 @@ ULONG __asm _buttoned_init(
 	return 1;
 }
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #define ResTrackBase    (data->ResTrackBase)
 #endif
 

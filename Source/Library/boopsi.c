@@ -64,7 +64,7 @@ Class *init_class(
 	libs->GfxBase=(struct GfxBase *)GfxBase;
 	libs->UtilityBase=UtilityBase;
 	libs->LayersBase=LayersBase;
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     libs->ResTrackBase=ResTrackBase;
 #endif
 	libs->data=data;

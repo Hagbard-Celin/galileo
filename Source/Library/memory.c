@@ -37,7 +37,7 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofmlib.h"
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #ifdef L_NewMemHandle
 #undef L_NewMemHandle
 #endif
@@ -76,7 +76,7 @@ void *__asm __saveds L_NewMemHandle(
 	register struct Library *SysBase=(struct Library *)*((ULONG *)4);
 
 	// Allocate handle
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     if (!(handle=NRT_AllocVec(sizeof(MemHandle),MEMF_CLEAR)))
 #else
 	if (!(handle=AllocVec(sizeof(MemHandle),MEMF_CLEAR)))
@@ -158,7 +158,7 @@ void __asm __saveds L_FreeMemHandle(register __a0 MemHandle *handle)
 		else L_ClearMemHandle(handle);
 
 		// Free the handle
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
         NRT_FreeVec(handle);
 #else
 		FreeVec(handle);
@@ -212,7 +212,7 @@ void __asm __saveds L_ClearMemHandle(register __a0 MemHandle *handle)
 
 				// Free this entry
 				ptr=(ULONG *)node;
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
                 NRT_FreeMem(node,ptr[3]);
 #else
 				FreeMem(node,ptr[3]);
@@ -273,7 +273,7 @@ void *__asm __saveds L_AllocMemH(
 	// If no handle supplied, use AllocMem()
 	if (!handle)
     {
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
         mem=NRT_AllocMem(size,MEMF_CLEAR);
 #else
         mem=AllocMem(size,MEMF_CLEAR);
@@ -317,7 +317,7 @@ void *__asm __saveds L_AllocMemH(
 			size+=sizeof(struct MinNode);
 
 			// Allocate extra, for a node
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
             if (mem=NRT_AllocMem(size,handle->type))
 #else
 			if (mem=AllocMem(size,handle->type))
@@ -409,7 +409,7 @@ void __asm __saveds L_FreeMemH(register __a0 void *memory)
 					Remove((struct Node *)node);
 
 					// Free allocation
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
                     NRT_FreeMem(node,mem[1]);
 #else
 					FreeMem(node,mem[1]);
@@ -424,7 +424,7 @@ void __asm __saveds L_FreeMemH(register __a0 void *memory)
 		// Free with FreeMem()
 		else
         {
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
             NRT_FreeMem(mem,mem[1]);
 #else
         	FreeMem(mem,mem[1]);

@@ -45,7 +45,7 @@ For more information on Directory Opus for Windows please see:
 #define RexxSysBase		(data->rexx_base)
 #define AslBase			(data->asl_base)
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #define ResTrackBase    (data->restrack_base)
 #endif
 

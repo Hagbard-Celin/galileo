@@ -38,9 +38,9 @@ For more information on Directory Opus for Windows please see:
 #include "galileofmbase.h"
 #include "galileofmpragmas.h"
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #include <restrack_protos.h>
-#include <restrack_pragmas.h>
+#include <g_restrack_pragmas.h>
 #endif
 
 struct Library *ResTrackBase;
@@ -49,17 +49,17 @@ struct Library *GalileoFMBase;
 
 void main(void);
 
-#if RESOURCE_TRACKING
-    char *callerid="Memtest";
+#ifdef RESOURCE_TRACKING
+    ULONG callerid=(ULONG)&main;
 #endif
 
 void main(void)
 {
     ResTrackBase=0;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 
-    if (ResTrackBase=REALL_OpenLibrary("restrack.library",0))
+    if (ResTrackBase=REALL_OpenLibrary("g_restrack.library",0))
          StartResourceTracking (RTL_ALL);
 #endif
 
@@ -167,7 +167,7 @@ void main(void)
 
 		CloseLibrary(GalileoFMBase);
 	}
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     KPrintF("Quitting......\n");
     PrintTrackedResources();
     //EndResourceTracking(); /* Generate a memory usage report */

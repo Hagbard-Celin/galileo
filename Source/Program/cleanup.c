@@ -255,12 +255,16 @@ void quit(BOOL script)
 	CloseLibrary(GalileoFMBase);
 
 #ifdef _DEBUG
-    KPrintF("Quitting......\n");
-#if RESOURCE_TRACKING
+    {
+        unsigned char clock[8];
+
+        getclk(clock);
+        KPrintF("Main program finished at: %02.ld/%02.ld %02.ld:%02.ld:%02.ld,%02.ld\n", clock[3], clock[2], clock[4], clock[5], clock[6], clock[7]);
+    }
+#ifdef RESOURCE_TRACKING
     PrintTrackedResources();
     //EndResourceTracking(); /* Generate a memory usage report */
     REALL_CloseLibrary(ResTrackBase);
-    NRT_FreeVec(callerid);
 #endif
 #endif
 	// Outahere!

@@ -64,11 +64,11 @@ For more information on Directory Opus for Windows please see:
 #include "ftp_arexx.h"
 #include "ftp_galileoftp.h"
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #include <restrack_protos.h>
-#include <restrack_pragmas.h>
+#include <g_restrack_pragmas.h>
 
-extern char *callerid;
+extern ULONG callerid;
 
 extern struct Library *ResTrackBase;
 

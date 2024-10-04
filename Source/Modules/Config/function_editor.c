@@ -43,7 +43,7 @@ For more information on Directory Opus for Windows please see:
 
 #define GalileoFMBase		(data->startup->galileofm_base)
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #define ResTrackBase    (data->startup->restrack_base)
 #endif
 
@@ -902,7 +902,7 @@ void FunctionEditor(void)
 	FreeVec(startup);
 }
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #undef ResTrackBase
 //#define ResTrackBase    (startup->restrack_base)
 #endif
@@ -913,14 +913,14 @@ ULONG __asm funced_init(
 {
 	FuncEdData *data;
 
-//#if RESOURCE_TRACKING
+//#ifdef RESOURCE_TRACKING
 //    ResTrackBase=startup->restrack_base;
 //#endif
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     struct Library *ResTrackBase;
     struct ExecBase *Exec=(struct ExecBase *)*((ULONG *)4);
 
-    ResTrackBase=(struct Library *)FindName(&Exec->LibList,"restrack.library");
+    ResTrackBase=(struct Library *)FindName(&Exec->LibList,"g_restrack.library");
 #endif
 
 
@@ -936,7 +936,7 @@ ULONG __asm funced_init(
 	data->function=startup->function;
 	data->locale=startup->locale;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     data->startup->restrack_base=ResTrackBase;
 #endif
 
@@ -960,11 +960,11 @@ void funced_cleanup(FuncEdData *data)
 	if (data)
 	{
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     	struct Library *ResTrackBase;
         struct ExecBase *Exec=(struct ExecBase *)*((ULONG *)4);
 
-    	ResTrackBase=(struct Library *)FindName(&Exec->LibList,"restrack.library");
+    	ResTrackBase=(struct Library *)FindName(&Exec->LibList,"g_restrack.library");
 #endif
 
 		// Free timer
@@ -980,7 +980,7 @@ void funced_cleanup(FuncEdData *data)
 	}
 }
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 //#undef ResTrackBase
 #define ResTrackBase    (data->startup->restrack_base)
 #endif
@@ -1902,9 +1902,9 @@ void funced_appmsg(FuncEdData *data,struct AppMessage *msg)
 	}
 }
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #undef ResTrackBase
-#define ResTrackBase    (struct Library *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"restrack.library")
+#define ResTrackBase    (struct Library *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"g_restrack.library")
 #endif
 
 // See if an app argument is ok
@@ -1978,7 +1978,7 @@ short funced_appmsg_arg(struct WBArg *arg,char *buffer,struct Library *DOSBase)
 	return type;
 }
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #undef ResTrackBase
 #define ResTrackBase    (data->startup->restrack_base)
 #endif
@@ -2273,7 +2273,7 @@ void funced_edit_insertstring(
 	ActivateGadget(gadget,list->window,0);
 }
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #undef ResTrackBase
 #endif
 
@@ -2285,11 +2285,11 @@ BOOL funced_rexx_args(char *name,char *buffer)
 	short size,len=0;
 	short got_rexx=0;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     struct Library *ResTrackBase;
     struct ExecBase *Exec=(struct ExecBase *)*((ULONG *)4);
 
-    ResTrackBase=(struct Library *)FindName(&Exec->LibList,"restrack.library");
+    ResTrackBase=(struct Library *)FindName(&Exec->LibList,"g_restrack.library");
 #endif
 
 	// Allocate buffer

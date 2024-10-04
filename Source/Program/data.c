@@ -65,8 +65,9 @@ struct Library			*AmigaGuideBase=0;
 struct Library 			*P96Base=0;
 struct NewIconBase		*NewIconBase=0;
 struct muBase			*muBase=0;
-struct Library 			*ResTrackBase=0;
-
+#ifdef RESOURCE_TRACKING
+struct Library 		    *ResTrackBase=0;
+#endif
 struct Process			*main_proc;				// Main process pointer
 IPCData					main_ipc={0};			// Main IPC data
 APTR					global_memory_pool=0;	// Global memory pool for anything to use

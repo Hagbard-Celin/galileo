@@ -136,7 +136,7 @@ struct LibData
 
 	struct ListLock		allocbitmap_patch;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     struct Library          *restrack_base;
 #endif
 
@@ -1132,11 +1132,11 @@ void __asm L_SetConfigWindowLimits(
 	register __a1 ConfigWindow *mindims,
 	register __a2 ConfigWindow *maxdims);
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #include <restrack_protos.h>
-#include <restrack_pragmas.h>
+#include <g_restrack_pragmas.h>
 
-extern char *callerid;
+extern ULONG callerid;
 #endif
 
 

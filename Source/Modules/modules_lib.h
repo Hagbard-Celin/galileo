@@ -40,11 +40,11 @@ For more information on Directory Opus for Windows please see:
 #include "/Program/galileo_config.h"
 #include "modules.h"
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #include <restrack_protos.h>
-#include <restrack_pragmas.h>
+#include <g_restrack_pragmas.h>
 
-extern char *callerid;
+extern ULONG callerid;
 #endif
 
 #define VALID_QUALIFIERS (IEQUALIFIER_LCOMMAND|IEQUALIFIER_RCOMMAND|\
@@ -63,8 +63,8 @@ extern struct RxsLib  *RexxSysBase;
 extern struct GalileoLocale *locale;
 extern ModuleInfo module_info;
 
-#if RESOURCE_TRACKING
-extern struct Library *ResTrackBase;
+#ifdef RESOURCE_TRACKING
+extern struct Library * ResTrackBase;
 #endif
 
 void init_locale_data(struct GalileoLocale *);

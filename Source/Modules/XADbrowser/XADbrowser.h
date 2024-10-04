@@ -52,8 +52,8 @@ void init_locale_data(struct GalileoLocale *);
 //extern ModuleInfo module_info;
 //extern ModuleFunction module_func;
 
-#if RESOURCE_TRACKING
-extern char *callerid;
+#ifdef RESOURCE_TRACKING
+extern ULONG callerid;
 #endif
 
 typedef struct _PathNode

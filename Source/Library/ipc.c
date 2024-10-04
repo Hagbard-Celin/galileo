@@ -57,7 +57,7 @@ __asm L_IPC_Launch(
 	BOOL path=0;
 	struct TagItem *tags;
     BPTR pathlist=0;
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     struct Library *ResTrackBase=0;
 #endif
 
@@ -74,7 +74,7 @@ __asm L_IPC_Launch(
 	// Clear storage
 	if (storage) *storage=0;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 	ResTrackBase=libdata->restrack_base;
 #endif
 
@@ -172,8 +172,8 @@ __asm L_IPC_Startup(
 	struct MsgPort *port=0;
 	IPCMessage startup;
 
-#if RESOURCE_TRACKING
-#define ResTrackBase (struct Library *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"restrack.library")
+#ifdef RESOURCE_TRACKING
+#define ResTrackBase (struct Library *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"g_restrack.library")
 #endif
 
 	// If no message port supplied, create one
@@ -308,7 +308,7 @@ void __asm __saveds L_IPC_Flush(register __a0 IPCData *ipc)
 	}
 }
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #undef ResTrackBase
 #endif
 
@@ -328,22 +328,16 @@ ULONG __asm __saveds L_IPC_Command(
 	struct Task *task;
 	APTR memory=0;
 
-#if RESOURCE_TRACKING
-    struct Library *RTlib, *Glib;
+#ifdef RESOURCE_TRACKING
+    struct Library *RTlib;
     //if (!ResTrackBase)
-        RTlib=(struct Library *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"restrack.library");
+        RTlib=(struct Library *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"g_restrack.library");
     //else
         //RTlib=ResTrackBase;
 #ifdef _DEBUG_IPCCOMMAND
     KPrintF("IPC_Command: ResTrackBase: %lx RTlib: %lx \n", ResTrackBase, RTlib);
 #endif
-    //if (!GalileoFMBase)
-        Glib=(struct Library *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"galileofm.library");
-    //else
-        //Glib=GalileoFMBase;
-
 #define ResTrackBase RTlib
-#define GalileoFMBase Glib
 #endif
 
 	// Valid IPC?
@@ -363,11 +357,7 @@ ULONG __asm __saveds L_IPC_Command(
 	}
 
 	// Allocate message
-#if RESOURCE_TRACKING
-    if (!(msg=AllocMemH(memory,sizeof(IPCMessage))))
-#else
 	if (!(msg=L_AllocMemH(memory,sizeof(IPCMessage))))
-#endif
 		return 0;
 
 	// Get reply port from IPC if necessary
@@ -473,11 +463,8 @@ mes->command,mes->flags,mes->data);
 		// Free message
         if (data_free)
 			FreeVec(data_free);
-#if RESOURCE_TRACKING
-        FreeMemH(msg);
-#else
+
 		L_FreeMemH(msg);
-#endif
 
 		// Free port if we created one
 		if (port) DeleteMsgPort(port);
@@ -485,7 +472,7 @@ mes->command,mes->flags,mes->data);
 
 	return result;
 }
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #undef ResTrackBase
 #undef GalileoFMBase
 #endif

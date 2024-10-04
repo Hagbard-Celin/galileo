@@ -1109,7 +1109,7 @@ void palette_editor_init(PaletteBoxData *data)
 	data->GalileoFMBase=GalileoFMBase;
 	data->IntuitionBase=(struct Library *)IntuitionBase;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     data->ResTrackBase=ResTrackBase;
 #endif
 
@@ -1131,7 +1131,7 @@ void function_editor_init(FunctionStartup *startup,ULONG command_list)
 	startup->asl_base=AslBase;
 	startup->layers_base=LayersBase;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     startup->restrack_base=ResTrackBase;
 #endif
 

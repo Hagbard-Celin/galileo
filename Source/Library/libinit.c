@@ -51,8 +51,8 @@ static const struct TextAttr topaz_attr={"topaz.font",8,0,0};
 
 char *version="$VER: galileofm.library 0.1 "__AMIGADATE__" ";
 
-#if RESOURCE_TRACKING
-char *callerid;
+#ifdef RESOURCE_TRACKING
+ULONG callerid;
 
 #endif
 
@@ -66,12 +66,15 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 	struct LibData *data;
 	char buf[16];
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 
-   callerid=_ProgramName;
+    callerid=(ULONG)&__UserLibInit;
 
-   if (ResTrackBase=REALL_OpenLibrary("restrack.library",0))
-        StartResourceTracking (RTL_ALL);
+    if (ResTrackBase=REALL_OpenLibrary("g_restrack.library",0))
+    {
+    	StartResourceTracking (RTL_ALL);
+        SetMyLibBase ((struct Library *)libbase);
+    }
 #endif
 
 #ifdef _DEBUG_IPCPROC
@@ -167,7 +170,7 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 //    if (P96Base)
 //        data->p96_base=P96Base;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     data->wb_data.restrack_base=ResTrackBase;
     data->restrack_base=ResTrackBase;
 #endif
@@ -233,19 +236,10 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 	// Save a4
 	data->a4=getreg(REG_A4);
 
-#if RESOURCE_TRACKING
-#define GalileoFMBase libbase
-	// Create some memory handles
-	data->memory=NewMemHandle(sizeof(IPCMessage)<<5,sizeof(IPCMessage)<<4,MEMF_CLEAR|MEMF_PUBLIC);
-	data->dos_list_memory=NewMemHandle(1024,512,MEMF_CLEAR);
-
-#undef GalileoFMBase
-#else
 	// Create some memory handles
 	data->memory=L_NewMemHandle(sizeof(IPCMessage)<<5,sizeof(IPCMessage)<<4,MEMF_CLEAR|MEMF_PUBLIC);
 	data->dos_list_memory=L_NewMemHandle(1024,512,MEMF_CLEAR);
 
-#endif
 	// Initialise boopsi classes
 	if (!(image_class=
 			init_class(
@@ -409,17 +403,9 @@ void __asm __saveds __UserLibCleanup(register __a6 struct MyLibrary *libbase)
 		// Free locale stuff
 		free_locale_data(&data->locale);
 
-#if RESOURCE_TRACKING
-#define GalileoFMBase libbase
-		// Free memory
-		FreeMemHandle(data->memory);
-		FreeMemHandle(data->dos_list_memory);
-#undef GalileoFMBase
-#else
 		// Free memory
 		L_FreeMemHandle(data->memory);
 		L_FreeMemHandle(data->dos_list_memory);
-#endif
 		// Close timer
 		if (data->TimerBase) CloseDevice(&data->timer_io);
 
@@ -453,9 +439,9 @@ void __asm __saveds __UserLibCleanup(register __a6 struct MyLibrary *libbase)
 
 #ifdef _DEBUG
     KPrintF("Main Library\n");
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     //PrintTrackedResources();
-    if (ResTrackBase->lib_OpenCnt==1)
+    if (ResTrackBase->lib_OpenCnt==2)
 	    EndResourceTracking(); /* Generate a memory usage report */
 
     REALL_CloseLibrary(ResTrackBase);

@@ -42,7 +42,7 @@ For more information on Directory Opus for Windows please see:
 #define GalileoFMBase		(data->func_startup.galileofm_base)
 #define Locale			(data->func_startup.locale)
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #define ResTrackBase    (data->func_startup.restrack_base)
 #endif
 
@@ -846,7 +846,7 @@ void filetypeed_edit_definition(filetype_ed_data *data)
 	startup->gfx_base=(struct Library *)GfxBase;
 	startup->asl_base=AslBase;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     startup->restrack_base=ResTrackBase;
 #endif
 

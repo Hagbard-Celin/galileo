@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+				 http://www.gpsoft.com.au
 
 */
 
@@ -44,28 +44,30 @@ int __asm __saveds L_Module_Entry(
 	register __a1 struct Screen *screen,
 	register __a2 IPCData *ipc,
 	register __a3 IPCData *main_ipc,
-    register __a4 APTR *memhandlep,
+	register __a4 APTR *memhandlep,
 	register __d0 ULONG mod_id,
 	register __d1 ULONG mod_data)
 {
-#if RESOURCE_TRACKING
-    switch(mod_id)
-    {
-        case 0:
-    		PrintTrackedResourcesCompact();
-            break;
-        case 1:
-            PrintTrackedMemHandles();
-            break;
-        case 2:
-            PrintTrackedResources();
-            break;
-        case 3:
-            PrintTrackedResourcesByType(0x00000009);
-            break;
-        default:
-            break;
-    }
+#ifdef RESOURCE_TRACKING
+	switch(mod_id)
+	{
+		case 0:
+			PrintTrackedResourcesCompact();
+			break;
+		case 1:
+			PrintTrackedResourceGroups(RTLRT_NewMemHandle, RTLRT_AllocMemH);
+			break;
+		case 2:
+			PrintTrackedResources();
+			break;
+		case 3:
+			PrintTrackedResourcesByType(0x00000009);
+			break;
+		case 4:
+			PrintTrackedResourcesByType(0x00000016);
+		default:
+			break;
+	}
 #endif
 	return 1;
 }

@@ -47,7 +47,7 @@ For more information on Directory Opus for Windows please see:
 
 #define UtilityBase	(wb_data->utility_base)
 #define ExecLib		((struct ExecBase *)*((ULONG *)4))
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #define ResTrackBase (wb_data->restrack_base)
 #endif
 
@@ -792,7 +792,7 @@ AppEntry *new_app_entry(
 	// Otherwise, save object pointer
 	else entry->object=object;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     KPrintF("!!!!!!wb.c line: %ld ADDING app_entry \n", __LINE__);
 #endif
 	// Lock patch list
@@ -801,7 +801,7 @@ AppEntry *new_app_entry(
 	// Is this the first entry?
 	if ((IsListEmpty((struct List *)&wb_data->app_list))&&(wb_data->first_app_entry))
 	{
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     	KPrintF("!!!!!!wb.c line: %ld INCREASING before %ld \n", __LINE__, wb_data->galileofm_base->ml_Lib.lib_OpenCnt);
 #endif
         // Set flag to avoid runaway opencount
@@ -810,12 +810,12 @@ AppEntry *new_app_entry(
         // Bump library open count so we won't get expunged
 		++wb_data->galileofm_base->ml_Lib.lib_OpenCnt;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     	KPrintF("!!!!!!wb.c line: %ld INCREASING after %ld \n", __LINE__, wb_data->galileofm_base->ml_Lib.lib_OpenCnt);
 #endif
 	}
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     if (IsListEmpty((struct List *)&wb_data->app_list))
     	KPrintF("!!!!!!wb.c  Claims List empty at %lx \n", &wb_data->app_list);
     else
@@ -843,7 +843,7 @@ APTR rem_app_entry(
 	// Save pointer
 	retval=entry;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     KPrintF("!!!!!!wb.c line: %ld REMOVING app_entry \n",__LINE__);
 #endif
 
@@ -1364,7 +1364,7 @@ void __asm __saveds L_FreeDiskObjectCopy(
 	// Valid icon?
 	if (!icon) return;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #undef ResTrackBase
 #define ResTrackBase (data->restrack_base)
 #endif

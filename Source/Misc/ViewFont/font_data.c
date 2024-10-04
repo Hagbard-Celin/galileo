@@ -149,7 +149,7 @@ ObjectDef
 
 struct Library *GalileoFMBase=0;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 struct Library *ResTrackBase=0;
 #endif
 

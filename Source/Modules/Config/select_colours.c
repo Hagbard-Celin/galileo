@@ -40,7 +40,7 @@ For more information on Directory Opus for Windows please see:
 #define GalileoFMBase		(data->GalileoFMBase)
 #define IntuitionBase	(data->IntuitionBase)
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #define ResTrackBase    (data->ResTrackBase)
 #endif
 
@@ -263,7 +263,7 @@ struct Window *palette_box_open(
 #undef GalileoFMBase
 #undef IntuitionBase
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #undef ResTrackBase
 #endif
 
@@ -333,7 +333,7 @@ long __asm __saveds L_ShowPaletteBox(
 	data->GalileoFMBase=GalileoFMBase;
 	data->IntuitionBase=(struct Library *)IntuitionBase;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     data->ResTrackBase=ResTrackBase;
 #endif
 

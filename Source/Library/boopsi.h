@@ -50,7 +50,7 @@ typedef struct
 	struct GfxBase		*GfxBase;
 	struct Library		*UtilityBase;
 	struct Library		*LayersBase;
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     struct Library      *ResTrackBase;
 #endif
 	struct LibData		*data;
@@ -271,7 +271,7 @@ void palette_render(Class *,struct Gadget *,PaletteData *,struct gpRender *);
 #define GfxBase		((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->GfxBase
 #define UtilityBase	((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->UtilityBase
 #define LayersBase	((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->LayersBase
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #define ResTrackBase ((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->ResTrackBase
 #endif
 #define DOSBase		((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->data->dos_base

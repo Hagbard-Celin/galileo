@@ -3,9 +3,9 @@
 #include "//Library/galileofmbase.h"
 #include "//Library/galileofmpragmas.h"
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #include <restrack_protos.h>
-#include <restrack_pragmas.h>
+#include <g_restrack_pragmas.h>
 #endif
 
 enum
@@ -101,7 +101,7 @@ extern struct Library *DiskfontBase;
 extern struct LocaleBase *LocaleBase;
 extern struct Library *WorkbenchBase;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 extern struct Library *ResTrackBase;
 #endif
 

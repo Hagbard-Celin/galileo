@@ -38,13 +38,13 @@ For more information on Directory Opus for Windows please see:
 #include "//Library/galileofmbase.h"
 #include "//Library/galileofmpragmas.h"
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #include <restrack_protos.h>
-#include <restrack_pragmas.h>
+#include <g_restrack_pragmas.h>
 
 struct Library *ResTrackBase;
 
-char *callerid;
+ULONG callerid;
 #endif
 
 char *version="$VER: LoadDB 0.1 "__AMIGADATE__" ";
@@ -58,9 +58,8 @@ enum
 	ARG_COUNT
 };
 
-#if RESOURCE_TRACKING
-#define CALLER_ID "LoadGB"
-char *callerid=0; // "MainExe";
+#ifdef RESOURCE_TRACKING
+ULONG callerid=(ULONG)&__main; // "MainExe";
 
 #endif
 
@@ -81,13 +80,9 @@ void __stdargs __main(char *arg_string)
 	struct RDArgs *args;
 	ULONG arg_array[ARG_COUNT];
 
-#if RESOURCE_TRACKING
-    if (ResTrackBase=REALL_OpenLibrary("restrack.library",0))
+#ifdef RESOURCE_TRACKING
+    if (ResTrackBase=REALL_OpenLibrary("Galileo:g_restrack.library",0))
          StartResourceTracking (RTL_ALL);
-
-    callerid=NRT_AllocVec(strlen(CALLER_ID)+1,MEMF_PUBLIC|MEMF_CLEAR);
-    strcpy(callerid,CALLER_ID);
-    //*callerid=CALLER_ID;
 #endif
 
 	// Initialise arguments
@@ -228,6 +223,14 @@ void __stdargs __main(char *arg_string)
 		// Run it
 		Execute(buf,0,0);
 	}
+
+#ifdef _DEBUG
+#ifdef RESOURCE_TRACKING
+    //PrintTrackedResources();
+    //EndResourceTracking(); /* Generate a memory usage report */
+    REALL_CloseLibrary(ResTrackBase);
+#endif
+#endif
 
 	exit(0);
 }

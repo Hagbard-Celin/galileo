@@ -63,7 +63,7 @@ struct DosList *__saveds __asm L_DeviceFromHandler(
 	DeviceNode *node,*match_node=0;
 	struct LibData *data=(struct LibData *)libbase->ml_UserData;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #define GalileoFMBase		(data->galileofm_base)
 #endif
 
@@ -110,11 +110,7 @@ struct DosList *__saveds __asm L_DeviceFromHandler(
 			if (!(node=(DeviceNode *)FindName(&data->device_list.list,namebuf)))
 			{
 				// Allocate new device node
-#if RESOURCE_TRACKING
-                if (node=AllocMemH(data->memory,sizeof(DeviceNode)))
-#else
 				if (node=L_AllocMemH(data->memory,sizeof(DeviceNode)))
-#endif
 				{
 					// Fill out node
 					node->node.ln_Name=node->dol_Name;
@@ -150,18 +146,14 @@ struct DosList *__saveds __asm L_DeviceFromHandler(
 				Remove((struct Node *)node);
 
 				// Free entry
-#if RESOURCE_TRACKING
-                FreeMemH(node);
-#else
 				L_FreeMemH(node);
-#endif
 			}
 
 			// Get next entry
 			node=next;
 		}
 	}
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 #undef GalileoFMBase
 #endif
 	// Got a match?

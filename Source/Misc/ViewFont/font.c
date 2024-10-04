@@ -1,9 +1,8 @@
 #include "font.h"
 
-#if RESOURCE_TRACKING
-char *residstring="ViewFont";
+#ifdef RESOURCE_TRACKING
 
-char *callerid;
+ULONG callerid;
 
 
 //callerid=(UBYTE *)&residstring[0];
@@ -13,10 +12,10 @@ void main(int argc,char **argv)
 {
 	font_data *data;
 
-#if RESOURCE_TRACKING
-   callerid=residstring;
+#ifdef RESOURCE_TRACKING
+   callerid=(ULONG)&main;
 
-   if (ResTrackBase=REALL_OpenLibrary("restrack.library",0))
+   if (ResTrackBase=REALL_OpenLibrary("g_restrack.library",0))
         StartResourceTracking (RTL_ALL);
 #endif
 
@@ -469,7 +468,7 @@ void font_free(font_data *data)
 	// Close library
 	CloseLibrary(GalileoFMBase);
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     REALL_CloseLibrary(ResTrackBase);
 #endif
 }

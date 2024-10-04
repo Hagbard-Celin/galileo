@@ -61,10 +61,10 @@ struct Library *P96Base=0;
 struct LocaleBase *LocaleBase=0;
 struct GalileoLocale *locale=0;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 struct Library *ResTrackBase;
 
-char *callerid;
+ULONG callerid;
 
 #endif
 
@@ -72,10 +72,10 @@ char *callerid;
 // Initialise libraries we need
 __saveds __UserLibInit()
 {
-#if RESOURCE_TRACKING
-   callerid=_ProgramName;
+#ifdef RESOURCE_TRACKING
+   callerid=(ULONG)&__UserLibInit;
 
-   if (ResTrackBase=REALS_OpenLibrary("restrack.library",0))
+   if (ResTrackBase=REALS_OpenLibrary("g_restrack.library",0))
         StartResourceTracking (RTL_ALL);
 #endif
 
@@ -150,13 +150,10 @@ void __saveds __UserLibCleanup()
 	CloseLibrary(UtilityBase);
 	CloseLibrary((struct Library *)DOSBase);
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     KPrintF("Config Quitting......\n");
-    if (ResTrackBase->lib_OpenCnt==1)
+    if (ResTrackBase->lib_OpenCnt==2)
 	    EndResourceTracking(); /* Generate a memory usage report */
-
-    PrintTrackedResources();
-    //EndResourceTracking(); /* Generate a memory usage report */
     REALS_CloseLibrary(ResTrackBase);
 #endif
 

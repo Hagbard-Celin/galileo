@@ -78,7 +78,7 @@ typedef struct
 
 	ULONG			a4;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
     struct Library      *restrack_base;
 #else
 	ULONG			pad;
