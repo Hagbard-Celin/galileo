@@ -32,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+				 http://www.gpsoft.com.au
 
 */
 
@@ -136,15 +136,15 @@ struct Window *lister_open_window(Lister *lister,struct Screen *screen)
 	// Initialise boopsi list
 	NewList(&lister->backdrop_info->boopsi_list);
 
-    // Locked lister?
-    // Create placeholder for size gadget to keep window borders consistent
-    if (lister->flags&LISTERF_LOCK_POS)
-    {
-        struct Image *image=0;
+	// Locked lister?
+	// Create placeholder for size gadget to keep window borders consistent
+	if (lister->flags&LISTERF_LOCK_POS)
+	{
+		struct Image *image=0;
 
-        lister->drawinfo=GetScreenDrawInfo(screen);
+		lister->drawinfo=GetScreenDrawInfo(screen);
 
-        // Get size gadget image
+		// Get size gadget image
 		if (image=NewObject(
 					0,
 					"sysiclass",
@@ -152,53 +152,53 @@ struct Window *lister_open_window(Lister *lister,struct Screen *screen)
 					SYSIA_Which,SIZEIMAGE,
 					TAG_END))
 		{
-            // Fill out gadget border border
-            lister->size_gadget_border_coords[0]=0;
-            lister->size_gadget_border_coords[1]=image->Height;
-            lister->size_gadget_border_coords[2]=0;
-            lister->size_gadget_border_coords[3]=0;
-            lister->size_gadget_border_coords[4]=image->Width;
-            lister->size_gadget_border_coords[5]=0;
-            lister->size_gadget_border.LeftEdge=0;
-            lister->size_gadget_border.TopEdge=0;
-            lister->size_gadget_border.FrontPen=lister->drawinfo->dri_Pens[SHINEPEN];
-            lister->size_gadget_border.BackPen=0;
-            lister->size_gadget_border.DrawMode=JAM1;
-            lister->size_gadget_border.Count=3;
-            lister->size_gadget_border.XY=&lister->size_gadget_border_coords[0];
-            lister->size_gadget_border.NextBorder=0;
+			// Fill out gadget border border
+			lister->size_gadget_border_coords[0]=0;
+			lister->size_gadget_border_coords[1]=image->Height;
+			lister->size_gadget_border_coords[2]=0;
+			lister->size_gadget_border_coords[3]=0;
+			lister->size_gadget_border_coords[4]=image->Width;
+			lister->size_gadget_border_coords[5]=0;
+			lister->size_gadget_border.LeftEdge=0;
+			lister->size_gadget_border.TopEdge=0;
+			lister->size_gadget_border.FrontPen=lister->drawinfo->dri_Pens[SHINEPEN];
+			lister->size_gadget_border.BackPen=0;
+			lister->size_gadget_border.DrawMode=JAM1;
+			lister->size_gadget_border.Count=3;
+			lister->size_gadget_border.XY=&lister->size_gadget_border_coords[0];
+			lister->size_gadget_border.NextBorder=0;
 
-            // Create size gadget placeholder
-            lister->size_cover_gadget.NextGadget=0;
-            lister->size_cover_gadget.Flags=GFLG_RELBOTTOM|GFLG_RELRIGHT|GFLG_DISABLED;
-            lister->size_cover_gadget.Activation=GACT_RIGHTBORDER|GACT_BOTTOMBORDER;
-            lister->size_cover_gadget.GadgetType=GTYP_BOOLGADGET;
-            lister->size_cover_gadget.GadgetRender=&lister->size_gadget_border;
-            lister->size_cover_gadget.SelectRender=0;
-            lister->size_cover_gadget.Width=image->Width;
-            lister->size_cover_gadget.Height=image->Height;
-            lister->size_cover_gadget.LeftEdge=-image->Width+1;
-            lister->size_cover_gadget.TopEdge=-image->Height+1;
+			// Create size gadget placeholder
+			lister->size_cover_gadget.NextGadget=0;
+			lister->size_cover_gadget.Flags=GFLG_RELBOTTOM|GFLG_RELRIGHT|GFLG_DISABLED;
+			lister->size_cover_gadget.Activation=GACT_RIGHTBORDER|GACT_BOTTOMBORDER;
+			lister->size_cover_gadget.GadgetType=GTYP_BOOLGADGET;
+			lister->size_cover_gadget.GadgetRender=&lister->size_gadget_border;
+			lister->size_cover_gadget.SelectRender=0;
+			lister->size_cover_gadget.Width=image->Width;
+			lister->size_cover_gadget.Height=image->Height;
+			lister->size_cover_gadget.LeftEdge=-image->Width+1;
+			lister->size_cover_gadget.TopEdge=-image->Height+1;
 
-            gadget=&lister->size_cover_gadget;
+			gadget=&lister->size_cover_gadget;
 
 			// Free image
 			DisposeObject(image);
 		}
 
-        FreeScreenDrawInfo(screen,lister->drawinfo);
-        lister->drawinfo=0;
-    }
+		FreeScreenDrawInfo(screen,lister->drawinfo);
+		lister->drawinfo=0;
+	}
 
 	// Create iconify gadget
 	if (iconify_gad=create_iconify_gadget(screen,
-                        			 &lister->backdrop_info->boopsi_list,
-                        			 (lister->flags&LISTERF_LOCK_POS)?TRUE:FALSE))
-    {
-        // Chain gadgets
-        if (gadget) gadget->NextGadget=iconify_gad;
-        else gadget=iconify_gad;
-    }
+									 &lister->backdrop_info->boopsi_list,
+									 (lister->flags&LISTERF_LOCK_POS)?TRUE:FALSE))
+	{
+		// Chain gadgets
+		if (gadget) gadget->NextGadget=iconify_gad;
+		else gadget=iconify_gad;
+	}
 
 	// Create lock gadget
 	if (!(GUI->flags2&GUIF2_NO_PADLOCK) &&
@@ -213,7 +213,7 @@ struct Window *lister_open_window(Lister *lister,struct Screen *screen)
 	{
 		// Chain gadgets
 		if (iconify_gad) iconify_gad->NextGadget=lock_gad;
-        else if (gadget) gadget->NextGadget=lock_gad;
+		else if (gadget) gadget->NextGadget=lock_gad;
 		else gadget=lock_gad;
 
 		// Fix selection flags
@@ -233,7 +233,7 @@ struct Window *lister_open_window(Lister *lister,struct Screen *screen)
 		WA_MaxWidth,(ULONG)~0,
 		WA_MaxHeight,(ULONG)~0,
 		((lister->dimensions.wd_Flags&WDF_VALID) &&
-        (!(lister->flags&LISTERF_LOCK_POS)))?WA_Zoom:TAG_IGNORE,(ULONG)&lister->dimensions.wd_Zoomed,
+		(!(lister->flags&LISTERF_LOCK_POS)))?WA_Zoom:TAG_IGNORE,(ULONG)&lister->dimensions.wd_Zoomed,
 		WA_IDCMP,
 				IDCMP_ACTIVEWINDOW|
 				IDCMP_CHANGEWINDOW|
@@ -269,11 +269,11 @@ struct Window *lister_open_window(Lister *lister,struct Screen *screen)
 	// Get sizing gadget
 	if (gadget=FindGadgetType(lister->window->FirstGadget,GTYP_SIZING))
 	{
-    	// Remove gadget from the list
-    	RemoveGList(lister->window,gadget,1);
+		// Remove gadget from the list
+		RemoveGList(lister->window,gadget,1);
 
-    	// Add to end of list
-    	AddGList(lister->window,gadget,-1,1,0);
+		// Add to end of list
+		AddGList(lister->window,gadget,-1,1,0);
 	}
 
 	// Fix title gadgets
@@ -338,10 +338,10 @@ struct Window *lister_open_window(Lister *lister,struct Screen *screen)
 
 	// Fill out zoom covering gadget
 	if ((gadget=FindGadgetType(lister->window->FirstGadget,GTYP_WZOOM)) &&
-        (!(lister->flags&LISTERF_LOCK_POS)))
+		(!(lister->flags&LISTERF_LOCK_POS)))
 	{
-        struct Image *image;
-        struct Gadget *zgadget;
+		struct Image *image;
+		struct Gadget *zgadget;
 
 		// Get zoom gadget image
 		if (image=NewObject(
@@ -351,30 +351,30 @@ struct Window *lister_open_window(Lister *lister,struct Screen *screen)
 					SYSIA_Which,ZOOMIMAGE,
 					TAG_END))
 		{
-            // Create gadget
-    		if (zgadget=NewObject(0,"galileobuttongclass",
-    			GA_ID,GAD_ZOOM,
-    			GA_RelRight,gadget->LeftEdge-1,
-    			GA_Top,gadget->TopEdge,
-    			GA_Width,gadget->Width,
-    			GA_Height,gadget->Height,
-    			GA_RelVerify,TRUE,
-    			GA_TopBorder,TRUE,
-    			GA_Image,image,
-    			TAG_END))
-    		{
-    			// Add to window
-                AddGList(lister->window,zgadget,0,1,0);
-        		RefreshWindowFrame(lister->window);
+			// Create gadget
+			if (zgadget=NewObject(0,"galileobuttongclass",
+				GA_ID,GAD_ZOOM,
+				GA_RelRight,gadget->LeftEdge-1,
+				GA_Top,gadget->TopEdge,
+				GA_Width,gadget->Width,
+				GA_Height,gadget->Height,
+				GA_RelVerify,TRUE,
+				GA_TopBorder,TRUE,
+				GA_Image,image,
+				TAG_END))
+			{
+				// Add to window
+				AddGList(lister->window,zgadget,0,1,0);
+				RefreshWindowFrame(lister->window);
 
-                // Add to boopsi list
-    			DoMethod((Object *)image,OM_ADDTAIL,&lister->backdrop_info->boopsi_list);
-    			DoMethod((Object *)zgadget,OM_ADDTAIL,&lister->backdrop_info->boopsi_list);
+				// Add to boopsi list
+				DoMethod((Object *)image,OM_ADDTAIL,&lister->backdrop_info->boopsi_list);
+				DoMethod((Object *)zgadget,OM_ADDTAIL,&lister->backdrop_info->boopsi_list);
 
-    		}
-            else
-    		// Failed
-    		DisposeObject(image);
+			}
+			else
+			// Failed
+			DisposeObject(image);
 		}
 
 	}
