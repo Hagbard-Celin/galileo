@@ -71,7 +71,7 @@ static const struct qual_name
 		{0x5f,0,"help"},
 		{0xff,0,0}};
 
-extern long GetCPUUsage(void);
+extern long __asm GetCPUUsage(void);
 
 void __asm __saveds L_BuildKeyString(
 	register __d0 unsigned short code,

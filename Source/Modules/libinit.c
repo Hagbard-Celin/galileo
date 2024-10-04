@@ -39,8 +39,8 @@ For more information on Directory Opus for Windows please see:
 
 #define LIB_VER	0
 
-int __saveds __UserLibInit(void);
-void __saveds __UserLibCleanup(void);
+int __asm __saveds __UserLibInit(void);
+void __asm __saveds __UserLibCleanup(void);
 
 struct DosLibrary *DOSBase;
 struct IntuitionBase *IntuitionBase;
@@ -68,7 +68,7 @@ ULONG callerid;
 //extern struct ModuleData data;
 
 // Initialise libraries we need
-__saveds __UserLibInit()
+__asm __saveds __UserLibInit()
 {
 
 #ifdef RESOURCE_TRACKING
@@ -139,7 +139,7 @@ __saveds __UserLibInit()
 
 
 // Clean up
-void __saveds __UserLibCleanup()
+void __asm  __saveds __UserLibCleanup()
 {
 	// Free locale stuff
 	if (locale)
