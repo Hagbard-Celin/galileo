@@ -93,9 +93,9 @@ struct TagItem
 		{TAG_END}},
 
 	finder_listview_tags[]={
-		{DLV_ShowSelected,0},
-		{DLV_ShowChecks,2},
-		{DLV_ReadOnly,1},
+		{GLV_ShowSelected,0},
+		{GLV_ShowChecks,2},
+		{GLV_ReadOnly,1},
 		{TAG_MORE,(ULONG)finder_layout}};
 
 ConfigWindow
@@ -314,7 +314,7 @@ struct TagItem
 		{TAG_END}},
 
 	creator_listview_tags[]={
-		{DLV_ShowSelected,0},
+		{GLV_ShowSelected,0},
 		{TAG_MORE,(ULONG)creator_layout}},
 
 	creator_cycle_tags[]={

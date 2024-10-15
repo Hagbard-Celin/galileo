@@ -87,9 +87,9 @@ struct TagItem
 		{TAG_END}},
 
 	_button_editor_functions[]={
-		{DLV_ShowSelected,TRUE},
-		{DLV_DragNotify,1},
-		{DLV_ShowChecks,2},
+		{GLV_ShowSelected,TRUE},
+		{GLV_DragNotify,1},
+		{GLV_ShowChecks,2},
 		{TAG_MORE,(ULONG)_button_editor_function_layout}},
 
 	_button_editor_name[]={
@@ -106,7 +106,7 @@ struct TagItem
 
 	_button_editor_image[]={
 		{GTCustom_Control,GAD_BUTTONED_LABEL},
-		{DFB_DefPath,(ULONG)"PROGDIR:images/"},
+		{GFB_DefPath,(ULONG)"PROGDIR:images/"},
 		{TAG_MORE,(ULONG)_button_editor_function_layout}};
 
 

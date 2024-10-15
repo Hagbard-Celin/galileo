@@ -665,21 +665,21 @@ void iconclock_init(iconclock_data *data,struct Screen *screen)
 			SetIconFlags(&data->clock_icon,ICONF_BORDER_ON);
 
 			// AppIcon tags
-			tags[0].ti_Tag=DAE_SnapShot;
+			tags[0].ti_Tag=GAE_SnapShot;
 			tags[0].ti_Data=1;
-			tags[1].ti_Tag=DAE_Close;
+			tags[1].ti_Tag=GAE_Close;
 			tags[1].ti_Data=2;
-			tags[2].ti_Tag=DAE_Local;
+			tags[2].ti_Tag=GAE_Local;
 			tags[2].ti_Data=1;
-			tags[3].ti_Tag=DAE_Info;
+			tags[3].ti_Tag=GAE_Info;
 			tags[3].ti_Data=1;
 
 			// Under 39 we can use colour
 			if (GfxBase->LibNode.lib_Version>=39)
 			{
-				tags[4].ti_Tag=(data->pen>-1)?DAE_Background:TAG_IGNORE;
+				tags[4].ti_Tag=(data->pen>-1)?GAE_Background:TAG_IGNORE;
 				tags[4].ti_Data=1;
-				tags[5].ti_Tag=(data->colour)?DAE_ToggleMenuSel:DAE_ToggleMenu;
+				tags[5].ti_Tag=(data->colour)?GAE_ToggleMenuSel:GAE_ToggleMenu;
 				tags[5].ti_Data=(ULONG)GetString(locale,MSG_ICONCLOCK_COLOUR);
 				tags[6].ti_Tag=TAG_END;
 			}

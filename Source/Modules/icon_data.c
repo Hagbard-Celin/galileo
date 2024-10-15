@@ -79,8 +79,8 @@ struct TagItem
 		{TAG_MORE,(ULONG)icon_layout}},
 
 	icon_protection_tags[]={
-		{DLV_MultiSelect,1},
-		{DLV_NoScroller,1},
+		{GLV_MultiSelect,1},
+		{GLV_NoScroller,1},
 		{TAG_MORE,(ULONG)icon_layout}},
 
 	icon_comment_tags[]={
@@ -88,9 +88,9 @@ struct TagItem
 		{TAG_MORE,(ULONG)icon_layout}},
 
 	icon_tooltypes_tags[]={
-		{DLV_ShowSelected,0},
-		{DLV_Flags,PLACETEXT_LEFT},
-		{DLV_DragNotify,2},
+		{GLV_ShowSelected,0},
+		{GLV_Flags,PLACETEXT_LEFT},
+		{GLV_DragNotify,2},
 		{GTST_MaxChars,255},
 		{GTCustom_NoSelectNext,TRUE},
 		{TAG_MORE,(ULONG)icon_layout}},

@@ -253,7 +253,7 @@ ULONG __asm __saveds palette_dispatch(
 				if (data->pen_array && data->pen_count>0)
 				{
 					// Pen selection
-					if (tag=FindTagItem(DPG_Pen,tags))
+					if (tag=FindTagItem(GPG_Pen,tags))
 					{
 						unsigned long rem;
 						short old_pen;
@@ -302,7 +302,7 @@ ULONG __asm __saveds palette_dispatch(
 
 					// Select next
 					else
-					if (FindTagItem(DPG_SelectNext,tags))
+					if (FindTagItem(GPG_SelectNext,tags))
 					{
 						short old;
 
@@ -328,7 +328,7 @@ ULONG __asm __saveds palette_dispatch(
 
 					// Select previous
 					else
-					if (FindTagItem(DPG_SelectPrevious,tags))
+					if (FindTagItem(GPG_SelectPrevious,tags))
 					{
 						short old;
 
@@ -370,7 +370,7 @@ ULONG __asm __saveds palette_dispatch(
 				}
 
 				// Redraw one?
-				if (tag=FindTagItem(DPG_Redraw,tags))
+				if (tag=FindTagItem(GPG_Redraw,tags))
 				{
 					// Get pen to redraw
 					which=tag->ti_Data;
@@ -421,7 +421,7 @@ ULONG __asm __saveds palette_dispatch(
 						break;
 
 					// Selected pen
-					case DPG_Pen:
+					case GPG_Pen:
 						*get->opg_Storage=(ULONG)data->pen_sel;
 						break;
 
@@ -567,7 +567,7 @@ ULONG __asm __saveds palette_dispatch(
 		case OM_NOTIFY:
 
 			// Fill out tags
-			data->notify_tags[0].ti_Tag=DPG_Pen;
+			data->notify_tags[0].ti_Tag=GPG_Pen;
 			data->notify_tags[0].ti_Data=data->pen_sel;
 			data->notify_tags[1].ti_Tag=GA_ID;
 			data->notify_tags[1].ti_Data=gadget->GadgetID;

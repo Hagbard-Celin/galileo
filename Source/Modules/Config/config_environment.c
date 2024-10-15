@@ -433,7 +433,7 @@ unsigned long __asm __saveds L_Config_Environment(
 								short item;
 
 								// Get item
-								if ((item=GetTagData(DLV_DragNotify,-1,tags))!=-1)
+								if ((item=GetTagData(GLV_DragNotify,-1,tags))!=-1)
 								{
 									// Start the drag
 									config_drag_start(
@@ -450,7 +450,7 @@ unsigned long __asm __saveds L_Config_Environment(
 							if (GetTagData(GA_ID,0,tags)==GAD_SETTINGS_SOUNDLIST)
 							{
 								// Double-click on sound listview edits entry
-								if (GetTagData(DLV_DoubleClick,0,tags))
+								if (GetTagData(GLV_DoubleClick,0,tags))
 								{
 									struct IntuiMessage msg;
 									msg.Class=IDCMP_GADGETUP;

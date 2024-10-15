@@ -389,7 +389,7 @@ void FiletypeEditor(void)
 							if (GetTagData(GA_ID,0,tags)!=GAD_FILETYPES_ICON_MENU) break;
 
 							// Get item
-							if ((item=GetTagData(DLV_DragNotify,-1,tags))!=-1)
+							if ((item=GetTagData(GLV_DragNotify,-1,tags))!=-1)
 							{
 								// Handle selection
 								filetypeed_sel_icon(data,item);
@@ -1295,7 +1295,7 @@ BOOL filetypeed_end_drag(filetype_ed_data *data,BOOL ok)
 			return 0;
 
 		// Get top item
-		GetAttr(DLV_Top,(Object *)GADGET(lister),(ULONG *)&top);
+		GetAttr(GLV_Top,(Object *)GADGET(lister),(ULONG *)&top);
 
 		// Get item we dropped over
 		item=UDivMod32((data->drag.drag_y-lister->dims.Top),data->window->RPort->TxHeight)+top;

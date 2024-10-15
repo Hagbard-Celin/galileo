@@ -124,7 +124,7 @@ void config_drag_start(CfgDragInfo *drag,Att_List *list,short item,struct TagIte
 
 	// Draw image
 	ptr=(ULONG)&draw;
-	GetAttr(DLV_DrawLine,(Object *)GetTagData(DLV_Object,0,tags),&ptr);
+	GetAttr(GLV_DrawLine,(Object *)GetTagData(GLV_Object,0,tags),&ptr);
 
 	// Build drag mask
 	GetDragMask(drag->drag);

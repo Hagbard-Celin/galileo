@@ -353,7 +353,7 @@ void ButtonEditor(void)
 						if (GetTagData(GA_ID,0,tags)!=GAD_BUTTONED_FUNCTIONS) break;
 
 						// Get item
-						if ((item=GetTagData(DLV_DragNotify,-1,tags))!=-1)
+						if ((item=GetTagData(GLV_DragNotify,-1,tags))!=-1)
 						{
 							// Start the drag
 							config_drag_start(&data->drag,data->func_list,item,tags,TRUE);
@@ -1217,7 +1217,7 @@ short buttoned_get_drop(ButtonEdData *data,short x,short y)
 	if (!(CheckObjectArea(data->lister,x,y))) return -1;
 
 	// Get top item
-	GetAttr(DLV_Top,(Object *)GADGET(data->lister),(ULONG *)&top);
+	GetAttr(GLV_Top,(Object *)GADGET(data->lister),(ULONG *)&top);
 
 	// Get item we dropped over
 	item=UDivMod32((y-data->lister->dims.Top),data->window->RPort->TxHeight)+top;

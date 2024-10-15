@@ -996,7 +996,7 @@ if	(obj = GetObject( data->list, GAD_ICON_TOOLTYPES ))
 		{
 		drop_item = (x << 16) | y;
 
-		GetAttr( DLV_GetLine, GADGET(obj), &drop_item );
+		GetAttr( GLV_GetLine, GADGET(obj), &drop_item );
 
 		// Item dragged onto itself?
 		if	(data->drag_item == drop_item)
@@ -2141,7 +2141,7 @@ FOREVER
 					{
 					drop_item = (p->x << 16) | p->y;
 
-					GetAttr( DLV_GetLine, GADGET(obj), &drop_item );
+					GetAttr( GLV_GetLine, GADGET(obj), &drop_item );
 
 					// Find drop node
 					if	(drop_item != -1)
@@ -2675,7 +2675,7 @@ FOREVER
 						break;
 
 					// Get item
-					if	((item = GetTagData( DLV_DragNotify, -1, tags )) != -1)
+					if	((item = GetTagData( GLV_DragNotify, -1, tags )) != -1)
 					{
 						// Start the drag
 						drag_start(

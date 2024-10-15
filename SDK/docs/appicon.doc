@@ -17,14 +17,14 @@ galileofm.library/AppXXX routines                 galileofm.library/AppXXX routi
 
     The tags are as follows :
 
-        DAE_Local
+        GAE_Local
 
         This tag causes the icon to only be added to Galileo. If Workbench is
         running as well, it will not see this icon. Supplying this tag
         is probably a good idea if your AppIcon depends on some of the other
         Galileo-specific functions.
 
-        DAE_Snapshot
+        GAE_Snapshot
 
         Indicates that this icon can support the Snapshot function. If this
         tag is specified, the Snapshot item in the icon popup menu will be
@@ -32,19 +32,19 @@ galileofm.library/AppXXX routines                 galileofm.library/AppXXX routi
         Use of this tag generates AppSnapshotMsgs, see below for more
         information.
 
-        DAE_Close
+        GAE_Close
 
         Turns the 'Open' item in the icon popup menu into a 'Close' item.
         APPSNAPF_CLOSE will be set in the AppSnapshotMsg that is
         generated.
 
-        DAE_Info
+        GAE_Info
 
         Indicates that this icon can support the Information function.
-        This is similar in operation to the DAE_Snapshot tag. The
+        This is similar in operation to the GAE_Snapshot tag. The
         APPSNAPF_INFO flag will be set in the AppSnapshotMsg.
 
-        DAE_Menu
+        GAE_Menu
 
         This tag can be used several times for one icon. It allows you to
         specify additional entries for the icon popup menu. ti_Data points
@@ -52,31 +52,31 @@ galileofm.library/AppXXX routines                 galileofm.library/AppXXX routi
         tags are supplied specifies the order they are displayed, and
         also controls the ID that is returned in AppSnapshotMsgs.
 
-        DAE_ToggleMenu
+        GAE_ToggleMenu
 
-        Similar to DAE_Menu, this allows you to specify a menu item for
+        Similar to GAE_Menu, this allows you to specify a menu item for
         the icon popup menu. The only difference is that the menu item
         is a toggle-select item (analagous to CHECKIT for Intuition menus).
 
-        DAE_ToggleMenuSel
+        GAE_ToggleMenuSel
 
-        The same as DAE_ToggleMenu, but specifies that the item is to be
+        The same as GAE_ToggleMenu, but specifies that the item is to be
         selected by default (analagous to CHECKED for Intuition menus).
 
-        DAE_MenuBase
+        GAE_MenuBase
 
         This tag allows you to specify a base ID for menu IDs that
-        are generated via the DAE_Menu, DAE_ToggleMenu and DAE_ToggleMenuSel
+        are generated via the GAE_Menu, GAE_ToggleMenu and GAE_ToggleMenuSel
         tags. Menu IDs usually start at 0 for the first menu and increase
-        from there. If you specify the DAE_MenuBase tag, the menu IDs will
+        from there. If you specify the GAE_MenuBase tag, the menu IDs will
         start from your supplied value.
 
-        DAE_Background
+        GAE_Background
 
         This allows you to specify a pen to use to render the background
         colour of the icon. If not supplied, the default is pen 0.
 
-        DAE_Locked
+        GAE_Locked
 
         This tag specifies that the icon position is to be locked.
         That is, the user will be unable to reposition the icon from the
@@ -92,7 +92,7 @@ galileofm.library/AppXXX routines                 galileofm.library/AppXXX routi
 
         Snapshot
 
-        If the DAE_Snapshot tag was specified and the user snapshots your
+        If the GAE_Snapshot tag was specified and the user snapshots your
         icon, you will receive a message containing the icon position
         (AppSnapshotMsg->position_x and AppSnapshotMsg->position_y).
         It is your responsibility to save these values, and use them
@@ -103,25 +103,25 @@ galileofm.library/AppXXX routines                 galileofm.library/AppXXX routi
 
         Un-Snapshot
 
-        If the DAE_Snapshot tag was specified and the user unsnapshots
+        If the GAE_Snapshot tag was specified and the user unsnapshots
         your icon, you will receive a message with the APPSNAPF_UNSNAPSHOT
         flag set.
 
         Close
 
-        If DAE_Close was specified, and the user selects the Close item
+        If GAE_Close was specified, and the user selects the Close item
         in the icon popup menu, you will receive a message with the
         APPSNAPF_CLOSE flag set.
 
         Information
 
         You will receive a message with the APPSNAPF_INFO flag set if you
-        specified the DAE_Info tag, and the user selects Information on your
+        specified the GAE_Info tag, and the user selects Information on your
         icon.
 
         Menu
 
-        If menus were added with the DAE_Menu tags, you will receive a
+        If menus were added with the GAE_Menu tags, you will receive a
         message with the APPSNAPF_MENU flag set when the user selects one
         of your menu items. The AppSnapshotMsg->id field contains the
         item ID. If the user pressed the help key on one of the items,
@@ -149,7 +149,7 @@ galileofm.library/AppXXX routines                 galileofm.library/AppXXX routi
 
         da_Flags
 
-        The only flag supported so far is DAPPF_ICON_DROP. This indicates
+        The only flag supported so far is GAPPF_ICON_DROP. This indicates
         that the files dropped were in fact icons (ie from an icon mode
         lister).
 
@@ -260,7 +260,7 @@ galileofm.library/AppXXX routines                 galileofm.library/AppXXX routi
     FUNCTION
         This function allows you to make changes to an AppIcon that
         was previously added to Galileo. It has no effect on the icon
-        on Workbench, so you should use the DAE_Local tag when adding
+        on Workbench, so you should use the GAE_Local tag when adding
         the icon if your program depends on this function.
 
         You are able to change both frames of the icon's image and the
@@ -450,7 +450,7 @@ galileofm.library/AppXXX routines                 galileofm.library/AppXXX routi
     FUNCTION
         This allows you to set the state of a toggle-select menu item in
         the icon popup menu of AppIcons. These menu items would have been
-        added with the DAE_ToggleMenu and DAE_ToggleMenuSel tags.
+        added with the GAE_ToggleMenu and GAE_ToggleMenuSel tags.
 
     INPUTS
         icon - icon to act on, as returned by AddAppIcon()
@@ -462,7 +462,7 @@ galileofm.library/AppXXX routines                 galileofm.library/AppXXX routi
 
     NOTES
         This routine uses 0 as a base ID for the menu items, even if you
-        specified a new base with DAE_MenuBase.
+        specified a new base with GAE_MenuBase.
 
     SEE ALSO
         ChangeAppIcon(), workbench.library/AddAppIcon

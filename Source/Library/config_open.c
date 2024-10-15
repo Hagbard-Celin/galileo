@@ -124,13 +124,13 @@ Cfg_Lister *__asm __saveds L_ReadListerDef(
 	if (lister=L_NewLister(0))
 	{
 		string_handle handle;
-		CFG_DLST old;
+		CFG_GLST old;
 
 		// Old style?
-		if (id==ID_DLST)
+		if (id==ID_GLST)
 		{
 			// Read lister data
-			L_IFFReadChunkBytes(iff,&old,sizeof(CFG_DLST));
+			L_IFFReadChunkBytes(iff,&old,sizeof(CFG_GLST));
 
 			// Convert to new
 			lister->lister.pos[0]=old.pos;
@@ -913,7 +913,7 @@ BOOL __asm __saveds L_OpenEnvironment(
 
 			// Lister to open
 			case ID_LSTR:
-			case ID_DLST:
+			case ID_GLST:
 				if (!(data->flags&OEDF_LSTR)) break;
 				env_read_open_lister(iff,data,chunk);
 				break;

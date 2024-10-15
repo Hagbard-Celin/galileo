@@ -1305,9 +1305,9 @@ BOOL read_view(read_data *data)
 								!(data->app_diskobj=GetDefDiskObject(WBPROJECT))) break;
 
 							// Fill out tags
-							tags[0].ti_Tag=DAE_SnapShot;
+							tags[0].ti_Tag=GAE_SnapShot;
 							tags[0].ti_Data=0;
-							tags[1].ti_Tag=DAE_Menu;
+							tags[1].ti_Tag=GAE_Menu;
 							tags[1].ti_Data=(ULONG)GetString(locale,MSG_CLOSE);
 							tags[2].ti_Tag=TAG_END;
 

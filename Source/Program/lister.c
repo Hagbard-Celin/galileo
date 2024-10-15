@@ -201,48 +201,48 @@ void lister_update(Lister *lister)
 
 		// Show device list?
 		if (lister->flags&LISTERF_DEVICE_LIST)
-			lister->lister->lister.flags|=DLSTF_DEVICE_LIST;
-		else lister->lister->lister.flags&=~DLSTF_DEVICE_LIST;
+			lister->lister->lister.flags|=GLSTF_DEVICE_LIST;
+		else lister->lister->lister.flags&=~GLSTF_DEVICE_LIST;
 
 		// Locked?
 		if (lister->flags&LISTERF_LOCK_POS)
-			lister->lister->lister.flags|=DLSTF_LOCK_POS;
-		else lister->lister->lister.flags&=~DLSTF_LOCK_POS;
+			lister->lister->lister.flags|=GLSTF_LOCK_POS;
+		else lister->lister->lister.flags&=~GLSTF_LOCK_POS;
 
 		// Iconified?
 		if (lister->flags&LISTERF_ICONIFIED)
-			lister->lister->lister.flags|=DLSTF_ICONIFIED;
-		else lister->lister->lister.flags&=~DLSTF_ICONIFIED;
+			lister->lister->lister.flags|=GLSTF_ICONIFIED;
+		else lister->lister->lister.flags&=~GLSTF_ICONIFIED;
 
 		// Source?
 		if (lister->flags&LISTERF_SOURCE)
-			lister->lister->lister.flags|=DLSTF_SOURCE;
-		else lister->lister->lister.flags&=~DLSTF_SOURCE;
+			lister->lister->lister.flags|=GLSTF_SOURCE;
+		else lister->lister->lister.flags&=~GLSTF_SOURCE;
 
 		// Destination?
 		if (lister->flags&LISTERF_DEST)
-			lister->lister->lister.flags|=DLSTF_DEST;
-		else lister->lister->lister.flags&=~DLSTF_DEST;
+			lister->lister->lister.flags|=GLSTF_DEST;
+		else lister->lister->lister.flags&=~GLSTF_DEST;
 
 		// Source/dest locked?
 		if (lister->flags&LISTERF_SOURCEDEST_LOCK)
-			lister->lister->lister.flags|=DLSTF_LOCKED;
-		else lister->lister->lister.flags&=~DLSTF_LOCKED;
+			lister->lister->lister.flags|=GLSTF_LOCKED;
+		else lister->lister->lister.flags&=~GLSTF_LOCKED;
 
 		// Icon mode?
 		if (lister->flags&LISTERF_VIEW_ICONS)
-			lister->lister->lister.flags|=DLSTF_ICON;
-		else lister->lister->lister.flags&=~DLSTF_ICON;
+			lister->lister->lister.flags|=GLSTF_ICON;
+		else lister->lister->lister.flags&=~GLSTF_ICON;
 
 		// Icon action mdoe?
 		if (lister->flags&LISTERF_ICON_ACTION)
-			lister->lister->lister.flags|=DLSTF_ICON_ACTION;
-		else lister->lister->lister.flags&=~DLSTF_ICON_ACTION;
+			lister->lister->lister.flags|=GLSTF_ICON_ACTION;
+		else lister->lister->lister.flags&=~GLSTF_ICON_ACTION;
 
 		// Show all?
 		if (lister->flags&LISTERF_SHOW_ALL)
-			lister->lister->lister.flags|=DLSTF_SHOW_ALL;
-		else lister->lister->lister.flags&=~DLSTF_SHOW_ALL;
+			lister->lister->lister.flags|=GLSTF_SHOW_ALL;
+		else lister->lister->lister.flags&=~GLSTF_SHOW_ALL;
 
 		// Update position in configuration structure
 		lister->lister->lister.pos[0]=lister->dimensions.wd_Normal;
@@ -389,15 +389,15 @@ void lister_init_new(Cfg_Lister *cfg,Lister *lister)
 	{
 		// Icon mode?
 		if (lister->flags&LISTERF_VIEW_ICONS)
-			cfg->lister.flags|=DLSTF_ICON;
+			cfg->lister.flags|=GLSTF_ICON;
 
 		// Action mode?
 		if (lister->flags&LISTERF_ICON_ACTION)
-			cfg->lister.flags|=DLSTF_ICON_ACTION;
+			cfg->lister.flags|=GLSTF_ICON_ACTION;
 
 		// Show all?
 		if (lister->flags&LISTERF_SHOW_ALL)
-			cfg->lister.flags|=DLSTF_SHOW_ALL;
+			cfg->lister.flags|=GLSTF_SHOW_ALL;
 	}
 }
 

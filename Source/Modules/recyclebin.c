@@ -312,7 +312,7 @@ void __saveds recycle_bin(void)
 					if (CheckAppMessage(amsg))
 					{
 						// Icon mode?
-						if (amsg->da_Flags&DAPPF_ICON_DROP) icon=1;
+						if (amsg->da_Flags&GAPPF_ICON_DROP) icon=1;
 					}
 
 					// Go through arguments
@@ -517,9 +517,9 @@ void recycle_bin_install(RecyclePacket *packet,recyclebin_data *data)
 		!(trash_icon=GetDefDiskObject(WBTOOL))) return;
 
 	// AppIcon tags
-	tags[0].ti_Tag=DAE_SnapShot;
+	tags[0].ti_Tag=GAE_SnapShot;
 	tags[0].ti_Data=1;
-	tags[1].ti_Tag=DAE_Menu;
+	tags[1].ti_Tag=GAE_Menu;
 	tags[1].ti_Data=(ULONG)GetString(locale,MSG_EMPTY_TRASH);
 	tags[2].ti_Tag=TAG_END;
 

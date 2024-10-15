@@ -171,7 +171,7 @@ ULONG __asm __saveds button_dispatch(
 					((CheckData *)data)->check_image=
 						NewObject(
 							0,"galileoiclass",
-							DIA_Type,IM_CHECK,
+							GIA_Type,IM_CHECK,
 							IA_Width,13, // (gadget->Height>13)?gadget->Height-6:gadget->Height-4,
 							IA_Height,gadget->Height-5, // (gadget->Height>13)?gadget->Height-6:gadget->Height-4,
 							TAG_END);
@@ -207,7 +207,7 @@ ULONG __asm __saveds button_dispatch(
 					data->flags|=BUTTONF_GAUGE;
 
 					// Get flags
-					data->value=GetTagData(DGG_Flags,0,tags);
+					data->value=GetTagData(GGG_Flags,0,tags);
 
 					// Initial pens
 					((GaugeData *)data)->fillpen=-1;
@@ -409,7 +409,7 @@ ULONG __asm __saveds button_dispatch(
 				BOOL redraw=0;
 
 				// New total
-				if (tag=FindTagItem(DGG_Total,((struct opSet *)msg)->ops_AttrList))
+				if (tag=FindTagItem(GGG_Total,((struct opSet *)msg)->ops_AttrList))
 				{
 					// Set new total, trigger redraw
 					((GaugeData *)data)->total=tag->ti_Data;
@@ -417,7 +417,7 @@ ULONG __asm __saveds button_dispatch(
 				}
 
 				// New free
-				if (tag=FindTagItem(DGG_Free,((struct opSet *)msg)->ops_AttrList))
+				if (tag=FindTagItem(GGG_Free,((struct opSet *)msg)->ops_AttrList))
 				{
 					// Set new free, trigger redraw
 					((GaugeData *)data)->free=tag->ti_Data;
@@ -425,7 +425,7 @@ ULONG __asm __saveds button_dispatch(
 				}
 
 				// New fill pen
-				if (tag=FindTagItem(DGG_FillPen,((struct opSet *)msg)->ops_AttrList))
+				if (tag=FindTagItem(GGG_FillPen,((struct opSet *)msg)->ops_AttrList))
 				{
 					// Set new pen, trigger redraw
 					if (((GaugeData *)data)->fillpen!=tag->ti_Data)
@@ -436,7 +436,7 @@ ULONG __asm __saveds button_dispatch(
 				}
 
 				// New fill alert pen
-				if (tag=FindTagItem(DGG_FillPenAlert,((struct opSet *)msg)->ops_AttrList))
+				if (tag=FindTagItem(GGG_FillPenAlert,((struct opSet *)msg)->ops_AttrList))
 				{
 					// Set new pen, trigger redraw
 					if (((GaugeData *)data)->fillpen_alert!=tag->ti_Data)

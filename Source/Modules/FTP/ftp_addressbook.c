@@ -402,7 +402,7 @@ if	(obj = GetObject( dg->dg_addrwp->wp_objlist, GAD_FTP_SITES ))
 
 		kprintf("x %ld y %ld di %ld\n  ",x,y,drop_item);
 
-		GetAttr( DLV_GetLine, GADGET(obj), &drop_item );
+		GetAttr( GLV_GetLine, GADGET(obj), &drop_item );
 
 		kprintf("di %ld\n  ",drop_item);
 
@@ -3776,7 +3776,7 @@ while	(TRUE)
 						{
 						if	(GetTagData(GA_ID,0,tags)==GAD_LIST_SITES)
 							{
-							if	(GetTagData(DLV_DoubleClick,0,tags))
+							if	(GetTagData(GLV_DoubleClick,0,tags))
 								{
 								// reply to the msg since we are about to close the winwow
 								ReplyWindowMsg(msg);
@@ -3793,7 +3793,7 @@ while	(TRUE)
 			if	(GetTagData(GA_ID,0,tags)==GAD_FTP_SITES)
 				{
 				// Double-click?
-				if	(GetTagData(DLV_DoubleClick,0,tags))
+				if	(GetTagData(GLV_DoubleClick,0,tags))
 					{
 					if	(!dg->dg_edit_count)
 						{
@@ -3821,7 +3821,7 @@ while	(TRUE)
 						}
 					}
 				// Drag?
-				else if	((item = GetTagData( DLV_DragNotify, -1, tags )) != -1)
+				else if	((item = GetTagData( GLV_DragNotify, -1, tags )) != -1)
 					{
 					address_drag_start(
 						dg,

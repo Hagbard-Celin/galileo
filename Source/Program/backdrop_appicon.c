@@ -325,7 +325,7 @@ GalileoAppMessage *backdrop_appmessage(BackdropInfo *info,BOOL need_obj)
 		return 0;
 
 	// Set icon flag
-	msg->da_Flags|=DAPPF_ICON_DROP;
+	msg->da_Flags|=GAPPF_ICON_DROP;
 
 	// Pointer to first selected object
 	if (first=info->last_sel_object)

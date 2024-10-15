@@ -70,7 +70,7 @@ struct TagItem
 
 	// Path lister
 	path_lister_taglist[]={
-		{DLV_ShowSelected,0},
+		{GLV_ShowSelected,0},
 		{TAG_MORE,(ULONG)path_relative_taglist}},
 
 	// Path folder

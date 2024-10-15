@@ -80,16 +80,16 @@ GALILEOFM_FUNC(function_scandir)
 			char *ptr=(char *)instruction->funcargs->FA_Arguments[SCANDIR_MODE];
 
 			// Icon?
-			if (stricmp(ptr,mode_keys[1])==0) mode_flags=DLSTF_ICON;
+			if (stricmp(ptr,mode_keys[1])==0) mode_flags=GLSTF_ICON;
 
 			// Action?
 			else
-			if (stricmp(ptr,mode_keys[3])==0) mode_flags=DLSTF_ICON|DLSTF_ICON_ACTION;
+			if (stricmp(ptr,mode_keys[3])==0) mode_flags=GLSTF_ICON|GLSTF_ICON_ACTION;
 		}
 
 		// Show all?
 		if (instruction->funcargs->FA_Arguments[SCANDIR_SHOWALL])
-			mode_flags|=DLSTF_SHOW_ALL;
+			mode_flags|=GLSTF_SHOW_ALL;
 
 		// Container?
 		if (instruction->funcargs->FA_Arguments[SCANDIR_CONTAINER])
@@ -210,8 +210,8 @@ GALILEOFM_FUNC(function_scandir)
 				AddPart(lister->work_buffer,"",512);
 
 				// Get mode flags
-				if (mode_flags&DLSTF_ICON) mode|=LISTERMODE_ICON;
-				if (mode_flags&DLSTF_ICON_ACTION) mode|=LISTERMODE_ICON_ACTION;
+				if (mode_flags&GLSTF_ICON) mode|=LISTERMODE_ICON;
+				if (mode_flags&GLSTF_ICON_ACTION) mode|=LISTERMODE_ICON_ACTION;
 
 				// Get position
 				lister->pos_rec=

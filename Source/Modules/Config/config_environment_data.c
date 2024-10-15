@@ -124,9 +124,9 @@ static const struct TagItem
 
 	// Option lister
 	_environment_lister_taglist[]={
-		{DLV_ShowSelected,0},
-//		{DLV_ScrollLeft,1},
-		{DLV_TopJustify,1},
+		{GLV_ShowSelected,0},
+//		{GLV_ScrollLeft,1},
+		{GLV_TopJustify,1},
 		{TAG_END,0}},
 
 	// Relative to area tags[]={
@@ -136,7 +136,7 @@ static const struct TagItem
 
 	// Screenmode selector
 	_environment_screenmode_taglist[]={
-		{DLV_ShowSelected,0},
+		{GLV_ShowSelected,0},
 		{TAG_MORE,(ULONG)_environment_relative_taglist}},
 
 	// Screen colours taglist
@@ -172,13 +172,13 @@ static const struct TagItem
 
 	// Lister colour items
 	_environment_lister_colour_taglist[]={
-		{DLV_ShowSelected,0},
+		{GLV_ShowSelected,0},
 		{TAG_MORE,(ULONG)_environment_relative_taglist}},
 
 	// Backdrop preferences
 	_environment_buttons[]={
 		{GTCustom_Control,GAD_ENVIRONMENT_MAIN_WINDOW_FIELD},
-		{DFB_DefPath,(ULONG)"env:sys/WBPattern.prefs"},
+		{GFB_DefPath,(ULONG)"env:sys/WBPattern.prefs"},
 		{TAG_MORE,(ULONG)_environment_relative_taglist}},
 
 	// Backdrop prefs file
@@ -189,7 +189,7 @@ static const struct TagItem
 	// Themes preferences
 	_environment_themes_location[]={
 		{GTCustom_Control,GAD_ENVIRONMENT_THEMES_FIELD},
-		{DFB_DefPath,(ULONG)"PROGDIR:Themes/"},
+		{GFB_DefPath,(ULONG)"PROGDIR:Themes/"},
 		{TAG_MORE,(ULONG)_environment_relative_taglist}},
 
 	// Themes location field
@@ -243,8 +243,8 @@ static const struct TagItem
 
 	// Hidden drives lister
 	_environment_hidden_drives[]={
-		{DLV_MultiSelect,TRUE},
-		{DLV_TopJustify,1},
+		{GLV_MultiSelect,TRUE},
+		{GLV_TopJustify,1},
 		{TAG_MORE,(ULONG)_environment_relative_taglist}},
 
 	// Lister editing
@@ -342,23 +342,23 @@ static const struct TagItem
 
 	// Icon settings
 	_environment_icon_settings_taglist[]={
-		{DLV_MultiSelect,1},
+		{GLV_MultiSelect,1},
 		{TAG_MORE,(ULONG)_environment_relative_taglist}},
 
 	// Path list
 	_environment_pathlist_taglist[]={
-		{DLV_ShowSelected,0},
-		{DLV_DragNotify,2},
+		{GLV_ShowSelected,0},
+		{GLV_DragNotify,2},
 		{TAG_MORE,(ULONG)_environment_relative_taglist}},
 
 	// Sounds
 	_environment_soundlist_taglist[]={
-		{DLV_ShowSelected,0},
+		{GLV_ShowSelected,0},
 		{TAG_MORE,(ULONG)_environment_relative_taglist}},
 
 	_environment_soundlist_popup_taglist[]={
 		{GTCustom_Control,GAD_SETTINGS_SOUNDLIST_PATH},
-		{DFB_DefPath,(ULONG)"PROGDIR:Sounds/"},
+		{GFB_DefPath,(ULONG)"PROGDIR:Sounds/"},
 		{TAG_MORE,(ULONG)_environment_relative_taglist}},
 
 	_environment_soundlist_path_taglist[]={

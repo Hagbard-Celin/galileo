@@ -58,12 +58,12 @@ struct TagItem
 		{TAG_DONE}},
 
 	diskcopy_source_tags[]={
-		{DLV_ShowSelected,0},
-		{DLV_Check,1},
+		{GLV_ShowSelected,0},
+		{GLV_Check,1},
 		{TAG_MORE,(ULONG)&diskcopy_layout_tags}},
 
 	diskcopy_dest_tags[]={
-		{DLV_MultiSelect,1},
+		{GLV_MultiSelect,1},
 		{TAG_MORE,(ULONG)&diskcopy_layout_tags}};
 
 

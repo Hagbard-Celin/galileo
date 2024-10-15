@@ -52,14 +52,14 @@ struct TagItem
 		{TAG_DONE}},
 
 	config_menu_list_tags[]={
-		{DLV_ShowSelected,0},
-		{DLV_DragNotify,2},
-		{DLV_ShowSeparators,1},
+		{GLV_ShowSelected,0},
+		{GLV_DragNotify,2},
+		{GLV_ShowSeparators,1},
 		{TAG_MORE,(ULONG)config_menu_layout_tags}},
 
 	config_menukeys_list_tags[]={
-		{DLV_ShowSelected,0},
-		{DLV_ShowSeparators,1},
+		{GLV_ShowSelected,0},
+		{GLV_ShowSeparators,1},
 		{TAG_MORE,(ULONG)config_menu_layout_tags}},
 
 	config_menu_name_tags[]={

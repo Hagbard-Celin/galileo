@@ -458,11 +458,11 @@ void __saveds lister_code(void)
 								lister->format=cfg->lister.format;
 
 								// Is lister locked?
-								if (cfg->lister.flags&DLSTF_LOCK_POS)
+								if (cfg->lister.flags&GLSTF_LOCK_POS)
 									lister->flags|=LISTERF_LOCK_POS;
 
 								// Lister is iconified?
-								if (cfg->lister.flags&DLSTF_ICONIFIED)
+								if (cfg->lister.flags&GLSTF_ICONIFIED)
 								{
 									// Try to iconify
 									if (lister_iconify(lister)) open=0;
@@ -470,24 +470,24 @@ void __saveds lister_code(void)
 
 								// Or invisible?
 								else
-								if (cfg->lister.flags&DLSTF_INVISIBLE)
+								if (cfg->lister.flags&GLSTF_INVISIBLE)
 								{
 									// Don't open
 									open=0;
 								}
 
 								// View as icons?
-								if (cfg->lister.flags&DLSTF_ICON)
+								if (cfg->lister.flags&GLSTF_ICON)
 								{
 									lister->flags|=LISTERF_VIEW_ICONS;
-									if (cfg->lister.flags&DLSTF_ICON_ACTION)
+									if (cfg->lister.flags&GLSTF_ICON_ACTION)
 										lister->flags|=LISTERF_ICON_ACTION;
-									if (cfg->lister.flags&DLSTF_SHOW_ALL)
+									if (cfg->lister.flags&GLSTF_SHOW_ALL)
 										lister->flags|=LISTERF_SHOW_ALL;
 								}
 
 								// No activate?
-								if (cfg->lister.flags&DLSTF_NOACTIVE)
+								if (cfg->lister.flags&GLSTF_NOACTIVE)
 									lister->more_flags|=LISTERF_NO_ACTIVE;
 
 								// Need to open?
@@ -503,10 +503,10 @@ void __saveds lister_code(void)
 								}
 
 								// Make source?
-								if (cfg->lister.flags&DLSTF_SOURCE)
+								if (cfg->lister.flags&GLSTF_SOURCE)
 								{
 									lister_do_function(lister,
-										(cfg->lister.flags&DLSTF_LOCKED)?
+										(cfg->lister.flags&GLSTF_LOCKED)?
 											MENU_LISTER_LOCK_SOURCE:MENU_LISTER_SOURCE);
 								}
 								else
@@ -515,10 +515,10 @@ void __saveds lister_code(void)
 
 								// Make dest?
 								else
-								if (cfg->lister.flags&DLSTF_DEST)
+								if (cfg->lister.flags&GLSTF_DEST)
 								{
 									lister_do_function(lister,
-										(cfg->lister.flags&DLSTF_LOCKED)?
+										(cfg->lister.flags&GLSTF_LOCKED)?
 											MENU_LISTER_LOCK_DEST:MENU_LISTER_DEST);
 								}
 
@@ -534,7 +534,7 @@ void __saveds lister_code(void)
 
 								// Do we need to read a path?
 								if (cfg->path &&
-									!(cfg->lister.flags&(DLSTF_DEVICE_LIST|DLSTF_CACHE_LIST)))
+									!(cfg->lister.flags&(GLSTF_DEVICE_LIST|GLSTF_CACHE_LIST)))
 								{
 									read_directory(
 										lister,
@@ -549,15 +549,15 @@ void __saveds lister_code(void)
 								}
 
 								// Device list?
-								if (cfg->lister.flags&DLSTF_DEVICE_LIST)
+								if (cfg->lister.flags&GLSTF_DEVICE_LIST)
 								{
 									Cfg_Function *func;
 
 									// Get function pointer
-									if (cfg->lister.flags&DLSTF_DEV_FULL)
+									if (cfg->lister.flags&GLSTF_DEV_FULL)
 										func=def_function_devicelist_full;
 									else
-									if (cfg->lister.flags&DLSTF_DEV_BRIEF)
+									if (cfg->lister.flags&GLSTF_DEV_BRIEF)
 										func=def_function_devicelist_brief;
 									else
 										func=def_function_devicelist;
@@ -571,7 +571,7 @@ void __saveds lister_code(void)
 
 								// Cache list?
 								else
-								if (cfg->lister.flags&DLSTF_CACHE_LIST)
+								if (cfg->lister.flags&GLSTF_CACHE_LIST)
 								{
 									function_launch_quick(
 										FUNCTION_RUN_FUNCTION,

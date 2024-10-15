@@ -808,7 +808,7 @@ void FunctionEditor(void)
 								break;
 
 							// Get item
-							if ((item=GetTagData(DLV_DragNotify,-1,tags))!=-1)
+							if ((item=GetTagData(GLV_DragNotify,-1,tags))!=-1)
 							{
 								// Start the drag
 								config_drag_start(&data->drag,data->func_display_list,item,tags,TRUE);

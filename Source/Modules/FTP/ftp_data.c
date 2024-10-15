@@ -74,10 +74,10 @@ struct TagItem
 		{TAG_DONE}},
 
 	ftp_sites_tags[]={
-		{DLV_ShowSelected,0},
+		{GLV_ShowSelected,0},
 		// The docs say 1 for drag in all directions, 2 for sideways only
 		// In reality, it's the other way around
-		{DLV_DragNotify,2},
+		{GLV_DragNotify,2},
 		{TAG_MORE,(ULONG)ftp_main_layout_tags}},
 
 	ftp_rhs_layout_tags[]={
@@ -351,9 +351,9 @@ static const struct TagItem
 
 	// Option lister
 	ftp_lister_taglist[]={
-		{DLV_ShowSelected,0},
-		{DLV_NoScroller,1},
-		{DLV_TopJustify,1},
+		{GLV_ShowSelected,0},
+		{GLV_NoScroller,1},
+		{GLV_TopJustify,1},
 		{TAG_END,0}},
 
 	// Relative to area tags[]={

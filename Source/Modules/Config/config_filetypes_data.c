@@ -89,17 +89,17 @@ struct TagItem
 		{TAG_END}},
 
 	_config_filetype_list_tags[]={
-		{DLV_ShowSelected,0},
+		{GLV_ShowSelected,0},
 		{TAG_END}},
 
 	_filetype_action_list_tags[]={
-		{DLV_ShowChecks,2},
-		{DLV_ShowSelected,0},
+		{GLV_ShowChecks,2},
+		{GLV_ShowSelected,0},
 		{TAG_MORE,(ULONG)_filetype_function_rel}},
 
 	_filetype_icon_menu_tags[]={
-		{DLV_ShowSelected,1},
-		{DLV_DragNotify,1},
+		{GLV_ShowSelected,1},
+		{GLV_DragNotify,1},
 		{TAG_MORE,(ULONG)_filetype_function_rel}},
 
 	_classed_name_tags[]={
@@ -116,7 +116,7 @@ struct TagItem
 		{TAG_END}},
 
 	_classed_definition_tags[]={
-		{DLV_ShowSelected,0},
+		{GLV_ShowSelected,0},
 		{TAG_END}},
 
 	_classed_matchdata_tags[]={

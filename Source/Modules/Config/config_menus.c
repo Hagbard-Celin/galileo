@@ -657,7 +657,7 @@ ULONG __asm __saveds L_Config_Menus(
 							id=GetTagData(GA_ID,0,tags);
 
 							// Drag?
-							if ((item=GetTagData(DLV_DragNotify,-1,tags))!=-1)
+							if ((item=GetTagData(GLV_DragNotify,-1,tags))!=-1)
 							{
 								// Start the drag
 								config_drag_start(&data->drag,data->menu_list[id-GAD_MENUS_MENU],item,tags,TRUE);
@@ -673,7 +673,7 @@ ULONG __asm __saveds L_Config_Menus(
 								case GAD_MENUS_SUB:
 
 									// Double-click?
-									if (GetTagData(DLV_DoubleClick,0,tags))
+									if (GetTagData(GLV_DoubleClick,0,tags))
 									{
 										// Edit it
 										config_menus_edit_item(data,id-GAD_MENUS_MENU);

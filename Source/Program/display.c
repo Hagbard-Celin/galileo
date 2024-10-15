@@ -1012,7 +1012,7 @@ void hide_display(void)
 	close_display(CLOSE_ALL|CLOSE_STOREPOS,0);
 
 	// Iconification tags
-	tags[0].ti_Tag=DAE_Local;
+	tags[0].ti_Tag=GAE_Local;
 	tags[0].ti_Data=0;
 	tags[1].ti_Tag=TAG_END;
 

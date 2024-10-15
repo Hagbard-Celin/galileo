@@ -120,7 +120,7 @@ void config_env_path_add(config_env_data *data)
 			SetGadgetAttrs(
 				GADGET(GetObject(data->option_list,GAD_SETTINGS_PATHLIST)),
 				data->window,0,
-				DLV_MakeVisible,Att_FindNodeNumber(data->path_list,node),
+				GLV_MakeVisible,Att_FindNodeNumber(data->path_list,node),
 				TAG_END);
 		}
 		else DisplayBeep(data->window->WScreen);

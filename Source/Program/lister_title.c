@@ -181,8 +181,8 @@ void lister_show_name(Lister *lister)
 					lister->gauge_gadget,
 					lister->window,
 					0,
-					DGG_Total,buffer->buf_TotalDiskSpace,
-					DGG_Free,buffer->buf_TotalDiskSpace-buffer->buf_FreeDiskSpace,
+					GGG_Total,buffer->buf_TotalDiskSpace,
+					GGG_Free,buffer->buf_TotalDiskSpace-buffer->buf_FreeDiskSpace,
 					TAG_END);
 			}
 		}

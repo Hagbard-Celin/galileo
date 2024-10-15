@@ -83,14 +83,14 @@ struct TagItem
 
 	// Selected display items lister
 	lister_selitems_taglist[]={
-		{DLV_ShowSelected,0},
-		{DLV_Check,1},
-		{DLV_DragNotify,2},
+		{GLV_ShowSelected,0},
+		{GLV_Check,1},
+		{GLV_DragNotify,2},
 		{TAG_MORE,(ULONG)lister_relative_taglist}},
 
 	// Available display items lister
 	lister_items_taglist[]={
-		{DLV_DragNotify,2},
+		{GLV_DragNotify,2},
 		{TAG_MORE,(ULONG)lister_relative_taglist}},
 
 	// Filter

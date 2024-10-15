@@ -74,11 +74,11 @@ ULONG __asm __saveds image_dispatch(
 				tags=((struct opSet *)msg)->ops_AttrList;
 
 				// Initialise data
-				data->type=GetTagData(DIA_Type,0,tags);
-				data->fpen=GetTagData(DIA_FrontPen,-1,tags);
+				data->type=GetTagData(GIA_Type,0,tags);
+				data->fpen=GetTagData(GIA_FrontPen,-1,tags);
 				data->data=((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->data;
 				data->flags=0;
-				if (GetTagData(DIA_ThinBorders,0,tags))
+				if (GetTagData(GIA_ThinBorders,0,tags))
 					data->flags|=BIF_THIN_BORDERS;
 			}
 			break;

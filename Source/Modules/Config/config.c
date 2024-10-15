@@ -70,7 +70,7 @@ short functioned_get_line(
 	storage=(x<<16)|y;
 
 	// Get selection
-	GetAttr(DLV_GetLine,GADGET(object),&storage);
+	GetAttr(GLV_GetLine,GADGET(object),&storage);
 
 	return (short)storage;
 }

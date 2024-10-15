@@ -197,17 +197,17 @@ long rexx_add_appicon(char *str,struct RexxMsg *msg)
 	if (tags=AllocMemH(memory,sizeof(struct TagItem)*count))
 	{
 		// Initialise tags
-		tags[0].ti_Tag=DAE_SnapShot;
+		tags[0].ti_Tag=GAE_SnapShot;
 		tags[0].ti_Data=(app->flags&RATF_SNAP)?1:0;
-		tags[1].ti_Tag=DAE_Info;
+		tags[1].ti_Tag=GAE_Info;
 		tags[1].ti_Data=(app->flags&RATF_INFO)?1:0;
-		tags[2].ti_Tag=DAE_Close;
+		tags[2].ti_Tag=GAE_Close;
 		tags[2].ti_Data=(app->flags&RATF_CLOSE)?1:0;
-		tags[3].ti_Tag=(app->flags&RATF_LOCAL)?DAE_Local:TAG_IGNORE;
+		tags[3].ti_Tag=(app->flags&RATF_LOCAL)?GAE_Local:TAG_IGNORE;
 		tags[3].ti_Data=1;
-		tags[4].ti_Tag=DAE_Locked;
+		tags[4].ti_Tag=GAE_Locked;
 		tags[4].ti_Data=(app->flags&RATF_LOCKED)?1:0;
-		tags[5].ti_Tag=DAE_MenuBase;
+		tags[5].ti_Tag=GAE_MenuBase;
 		tags[5].ti_Data=base;
 
 		// Go through menus
@@ -228,7 +228,7 @@ long rexx_add_appicon(char *str,struct RexxMsg *msg)
 					strcpy((char *)tags[count+6].ti_Data,buffer);
 
 					// Set tag ID
-					tags[count+6].ti_Tag=DAE_Menu;
+					tags[count+6].ti_Tag=GAE_Menu;
 				}
 				else tags[count+6].ti_Tag=TAG_IGNORE;
 			}

@@ -562,7 +562,7 @@ void start_show(StartMenu *menu,struct Screen *screen)
 	// Get image for button
 	menu->drag.GadgetRender=
 		NewObject(0,"galileoiclass",
-			DIA_Type,IM_BBOX,
+			GIA_Type,IM_BBOX,
 			IA_Width,DRAG_WIDTH,
 			IA_Height,0,
 			TAG_END);

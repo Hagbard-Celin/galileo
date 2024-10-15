@@ -329,7 +329,7 @@ ILBMHandle *__asm __saveds L_ReadILBM(
 					ilbm->header.h,
 					ilbm->header.nPlanes,
 					ilbm->image.bitmap.bitmap,
-					(ilbm->header.masking==1)?DIF_MASK:0,
+					(ilbm->header.masking==1)?GILBMF_MASK:0,
 					ilbm->header.compression);
 			}
 		}
@@ -404,7 +404,7 @@ ILBMHandle *__asm __saveds L_ReadILBM(
 						ilbm->header.h,
 						ilbm->header.nPlanes,
 						&fake,
-						(ilbm->header.masking==1)?DIF_MASK:0,
+						(ilbm->header.masking==1)?GILBMF_MASK:0,
 						ilbm->header.compression);
 
 					// Set flag to say we've got planes
@@ -496,7 +496,7 @@ void __asm __saveds L_DecodeILBM(
 	if (!source || !dest) return;
 
 	// Masking?
-	if (flags&DIF_MASK) ++planes;
+	if (flags&GILBMF_MASK) ++planes;
 
 	// Get bytes per row for source
 	bpr=((width+15)>>4)<<1;
@@ -522,7 +522,7 @@ void __asm __saveds L_DecodeILBM(
 	if (height>dest_rows) height=dest_rows;
 
 	// Allocate temporary bitmap if WritePixel needed
-	if (flags&DIF_WRITEPIX)
+	if (flags&GILBMF_WRITEPIX)
 	{
 		// P96, 24bit?
 		if (P96Base && planes==24)
@@ -562,7 +562,7 @@ void __asm __saveds L_DecodeILBM(
 				temprp.BitMap=tempbm;
 			}
 		}
-		else flags&=~DIF_WRITEPIX;
+		else flags&=~GILBMF_WRITEPIX;
 	}
 
 	// Run-length encoding?
@@ -572,7 +572,7 @@ void __asm __saveds L_DecodeILBM(
 		for (row=0;row<height;row++)
 		{
 			// Write pixel?
-			if (flags&DIF_WRITEPIX)
+			if (flags&GILBMF_WRITEPIX)
 			{
 				short col;
 
@@ -585,14 +585,14 @@ void __asm __saveds L_DecodeILBM(
 			for (plane=0;plane<planes;plane++)
 			{
 				// Check this plane is ok to decode into
-				if (plane<dest_depth && (flags&DIF_WRITEPIX || dest->Planes[plane]))
+				if (plane<dest_depth && (flags&GILBMF_WRITEPIX || dest->Planes[plane]))
 				{
 					register char *ptr;
 					register short copy,col,count;
 					short pnum=0;
 
 					// Get destination pointer
-					if (flags&DIF_WRITEPIX)
+					if (flags&GILBMF_WRITEPIX)
 					{
 						// 24 bit?
 						if (planes==24)
@@ -627,7 +627,7 @@ void __asm __saveds L_DecodeILBM(
 						{
 							copy=count+1;
 							col+=copy;
-							if (flags&DIF_WRITEPIX)
+							if (flags&GILBMF_WRITEPIX)
 							{
 								while (copy--)
 								{
@@ -661,7 +661,7 @@ void __asm __saveds L_DecodeILBM(
 						{
 							copy=1-count;
 							col+=copy;
-							if (flags&DIF_WRITEPIX)
+							if (flags&GILBMF_WRITEPIX)
 							{
 								register unsigned char val;
 
@@ -718,7 +718,7 @@ void __asm __saveds L_DecodeILBM(
 			}
 
 			// Writepixel?
-			if (flags&DIF_WRITEPIX)
+			if (flags&GILBMF_WRITEPIX)
 			{
 
                 // P96?

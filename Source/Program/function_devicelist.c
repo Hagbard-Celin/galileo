@@ -81,24 +81,24 @@ GALILEOFM_FUNC(function_devicelist)
 			if (command->function==FUNC_DEVICELIST)
 			{
 				// Set device list flag
-				lister->lister->lister.flags|=DLSTF_DEVICE_LIST;
+				lister->lister->lister.flags|=GLSTF_DEVICE_LIST;
 
 				// Which sort of device-list?
 				if (instruction->funcargs)
 				{
 					// Full?
 					if (instruction->funcargs->FA_Arguments[ARG_FULL])
-						lister->lister->lister.flags|=DLSTF_DEV_FULL;
+						lister->lister->lister.flags|=GLSTF_DEV_FULL;
 
 					// Brief?
 					else
 					if (instruction->funcargs->FA_Arguments[ARG_BRIEF])
-						lister->lister->lister.flags|=DLSTF_DEV_BRIEF;
+						lister->lister->lister.flags|=GLSTF_DEV_BRIEF;
 				}
 			}
 
 			// Or cache list
-			else lister->lister->lister.flags|=DLSTF_CACHE_LIST;
+			else lister->lister->lister.flags|=GLSTF_CACHE_LIST;
 
 			// Tell it to open
 			IPC_Command(lister->ipc,LISTER_INIT,0,GUI->screen_pointer,0,0);

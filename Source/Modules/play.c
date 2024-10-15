@@ -1145,11 +1145,11 @@ void play_iconify(play_data *data)
 		!(data->icon=GetDefDiskObject(WBPROJECT))) return;
 
 	// Fill out tags
-	tags[0].ti_Tag=DAE_SnapShot;
+	tags[0].ti_Tag=GAE_SnapShot;
 	tags[0].ti_Data=1;
-	tags[1].ti_Tag=DAE_Menu;
+	tags[1].ti_Tag=GAE_Menu;
 	tags[1].ti_Data=(ULONG)GetString(locale,MSG_PLAY_NEXT);
-	tags[2].ti_Tag=DAE_Menu;
+	tags[2].ti_Tag=GAE_Menu;
 	tags[2].ti_Data=(ULONG)GetString(locale,MSG_PLAY_ABORT);
 	tags[3].ti_Tag=TAG_END;
 

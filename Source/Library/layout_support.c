@@ -590,8 +590,8 @@ void __asm __saveds L_SetGadgetValue(
 
 			// Set selection
 			SetGadgetAttrs(gadget,list->window,0,
-				DLV_Selected,value,
-				(value!=(ULONG)~0)?DLV_MakeVisible:TAG_IGNORE,value,
+				GLV_Selected,value,
+				(value!=(ULONG)~0)?GLV_MakeVisible:TAG_IGNORE,value,
 				TAG_END);
 			break;
 
@@ -675,7 +675,7 @@ void __asm __saveds L_SetGadgetValue(
 
 			// Set selection
 			SetGadgetAttrs(gadget,list->window,0,
-				DPG_Pen,value,
+				GPG_Pen,value,
 				TAG_END);
 			break;
 
@@ -1240,7 +1240,7 @@ struct Gadget *__asm __saveds L_FindKeyEquivalent(
 								// Custom listview
 								case MY_LISTVIEW_KIND:
 									{
-										Tag tag=DLV_SelectNext;
+										Tag tag=GLV_SelectNext;
 										ULONG sel,old;
 
 										// Pressed key equivalent?
@@ -1248,7 +1248,7 @@ struct Gadget *__asm __saveds L_FindKeyEquivalent(
 										{
 											// With shift means previous
 											if (msg->Qualifier&(IEQUALIFIER_LSHIFT|IEQUALIFIER_RSHIFT))
-												tag=DLV_SelectPrevious;
+												tag=GLV_SelectPrevious;
 										}
 
 										// Pressed cursor key?
@@ -1257,31 +1257,31 @@ struct Gadget *__asm __saveds L_FindKeyEquivalent(
 										{
 											// Page up?
 											if (msg->Code==PAGEUP)
-												tag=DLV_PageUp;
+												tag=GLV_PageUp;
 
 											// Home?
 											else
 											if (msg->Code==HOME)
-												tag=DLV_Home;
+												tag=GLV_Home;
 
 											// Page down
 											else
 											if (msg->Code==PAGEDOWN)
-												tag=DLV_PageDown;
+												tag=GLV_PageDown;
 
 											// End
 											else
 											if (msg->Code==END)
-												tag=DLV_End;
+												tag=GLV_End;
 
 											// Line up
 											else
 											if (msg->Code==CURSORUP)
-												tag=DLV_SelectPrevious;
+												tag=GLV_SelectPrevious;
 										}
 
 										// Get old selection
-										GetAttr(DLV_Selected,gadget,&old);
+										GetAttr(GLV_Selected,gadget,&old);
 
 										// Change selection
 										SetGadgetAttrs(gadget,list->window,0,
@@ -1289,14 +1289,14 @@ struct Gadget *__asm __saveds L_FindKeyEquivalent(
 											TAG_END);
 
 										// Get current selection
-										GetAttr(DLV_Selected,gadget,&sel);
+										GetAttr(GLV_Selected,gadget,&sel);
 
 										// Has it changed?
 										if (sel!=old)
 										{
 											// Make it visible
 											SetGadgetAttrs(gadget,list->window,0,
-												DLV_MakeVisible,sel,
+												GLV_MakeVisible,sel,
 												TAG_END);
 
 											// Store selection in message code
@@ -1316,8 +1316,8 @@ struct Gadget *__asm __saveds L_FindKeyEquivalent(
 										// Select previous?
 										if ((msg->Class==IDCMP_RAWKEY && msg->Code==CURSORUP) ||
 											(msg->Class==IDCMP_VANILLAKEY && msg->Qualifier&(IEQUALIFIER_LSHIFT|IEQUALIFIER_RSHIFT)))
-											tag=DPG_SelectPrevious;
-										else tag=DPG_SelectNext;
+											tag=GPG_SelectPrevious;
+										else tag=GPG_SelectNext;
 
 										// Change selection
 										SetGadgetAttrs(gadget,list->window,0,
@@ -1325,7 +1325,7 @@ struct Gadget *__asm __saveds L_FindKeyEquivalent(
 											TAG_END);
 
 										// Get selection
-										GetAttr(DPG_Pen,gadget,&sel);
+										GetAttr(GPG_Pen,gadget,&sel);
 										msg->Code=sel;
 									}
 									break;
@@ -1661,7 +1661,7 @@ void __asm __saveds L_SetGadgetChoices(
 		// Custom listview
 		case MY_LISTVIEW_KIND:
 			SetGadgetAttrs(gadget,list->window,0,
-				DLV_Labels,(ULONG)choices,
+				GLV_Labels,(ULONG)choices,
 				TAG_END);
 			break;
 

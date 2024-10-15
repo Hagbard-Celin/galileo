@@ -60,8 +60,8 @@ struct TagItem
 		{TAG_END}},
 
 	recyclebin_storage_tags[]={
-		{DLV_ShowSelected,1},
-		{DLV_DragNotify,1},
+		{GLV_ShowSelected,1},
+		{GLV_DragNotify,1},
 		{TAG_MORE,(ULONG)recyclebin_layout_tags}};		
 
 

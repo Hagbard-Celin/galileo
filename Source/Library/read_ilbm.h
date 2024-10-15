@@ -168,5 +168,5 @@ ILBMHandle *FakeILBM(
 	short depth,
 	ULONG flags);
 
-#define DIF_MASK	(1<<0)
-#define DIF_WRITEPIX	(1<<6)
+#define GILBMF_MASK	(1<<0)
+#define GILBMF_WRITEPIX	(1<<6)

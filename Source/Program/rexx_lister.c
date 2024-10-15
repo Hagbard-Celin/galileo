@@ -97,17 +97,17 @@ void rexx_lister_new(struct RexxMsg *msg,char *args)
 		// Invisible
 		else
 		if (key==NL_NOVISIBLE)
-			flags|=DLSTF_INVISIBLE;
+			flags|=GLSTF_INVISIBLE;
 
 		// Iconfied
 		else
 		if (key==NL_ICONIFIED)
-			flags|=DLSTF_ICONIFIED;
+			flags|=GLSTF_ICONIFIED;
 
 		// No activate
 		else
 		if (key==NL_NOACTIVE)
-			flags|=DLSTF_NOACTIVE;
+			flags|=GLSTF_NOACTIVE;
 
 		// From icon
 		else
@@ -124,17 +124,17 @@ void rexx_lister_new(struct RexxMsg *msg,char *args)
 			{
 				// Icon?
 				if (key==1)
-					flags|=DLSTF_ICON;
+					flags|=GLSTF_ICON;
 
 				// Icon Action?
 				else
 				if (key==3)
-					flags|=DLSTF_ICON|DLSTF_ICON_ACTION;
+					flags|=GLSTF_ICON|GLSTF_ICON_ACTION;
 
 				// Show All
 				else
 				if (key==2)
-					flags|=DLSTF_SHOW_ALL;
+					flags|=GLSTF_SHOW_ALL;
 
 				// Skip spaces
 				rexx_skip_space(&args);
@@ -214,11 +214,11 @@ void rexx_lister_new(struct RexxMsg *msg,char *args)
 				if (!nomode && mode)
 				{
 					if (mode&LISTERMODE_ICON)
-						flags|=DLSTF_ICON;
+						flags|=GLSTF_ICON;
 					if (mode&LISTERMODE_ICON_ACTION)
-						flags|=DLSTF_ICON_ACTION;
+						flags|=GLSTF_ICON_ACTION;
 					if (mode&LISTERMODE_SHOW_ALL)
-						flags|=DLSTF_SHOW_ALL;
+						flags|=GLSTF_SHOW_ALL;
 
 					// Store additional flags
 					cfg->lister.flags|=flags;

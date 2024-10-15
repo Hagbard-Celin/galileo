@@ -147,13 +147,13 @@ Lister *read_new_lister(char *path,Lister *parent,USHORT qual)
 			if (mode&LISTERMODE_ICON)
 			{
 				// Force new lister into icon view mode
-				cfg->lister.flags|=DLSTF_ICON;
+				cfg->lister.flags|=GLSTF_ICON;
 				if (mode&LISTERMODE_ICON_ACTION)
-					cfg->lister.flags|=DLSTF_ICON_ACTION;
+					cfg->lister.flags|=GLSTF_ICON_ACTION;
 
 				// Show all?
 				if (mode&LISTERMODE_SHOW_ALL)
-					cfg->lister.flags|=DLSTF_SHOW_ALL;
+					cfg->lister.flags|=GLSTF_SHOW_ALL;
 			}
 
 			// Initialise lister

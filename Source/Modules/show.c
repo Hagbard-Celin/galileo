@@ -344,11 +344,11 @@ int __asm __saveds L_Module_Entry(
 				{
 					// Get bitmap flags
 					if (!(GetBitMapAttr(data->display_screen->RastPort.BitMap,BMA_FLAGS)&BMF_STANDARD))
-						flags=DIF_WRITEPIX;
+						flags=GILBMF_WRITEPIX;
 				}
 
 				// Masking?
-				if (data->ilbm->header.masking==1) flags|=DIF_MASK;
+				if (data->ilbm->header.masking==1) flags|=GILBMF_MASK;
 
 				// Decode data into display
 				DecodeILBM(

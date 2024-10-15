@@ -279,7 +279,7 @@ ULONG __asm __saveds L_Config_Scripts(
 								short item;
 
 								// Get item
-								if ((item=GetTagData(DLV_DragNotify,-1,tags))!=-1)
+								if ((item=GetTagData(GLV_DragNotify,-1,tags))!=-1)
 								{
 									short width,height;
 
@@ -315,7 +315,7 @@ ULONG __asm __saveds L_Config_Scripts(
 
 										// Draw image
 										ptr=(ULONG)&draw;
-										GetAttr(DLV_DrawLine,(Object *)GetTagData(DLV_Object,0,tags),&ptr);
+										GetAttr(GLV_DrawLine,(Object *)GetTagData(GLV_Object,0,tags),&ptr);
 										GetDragMask(data->drag);
 
 										// Get drag offsets

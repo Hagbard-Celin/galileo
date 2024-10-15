@@ -66,7 +66,7 @@ as recessed.
     This class allows you to access several predefined images. The image
 you receive is controlled by the following tags:
 
-        DIA_Type
+        GIA_Type
 
         This sets the image type. Current valid types are:
 
@@ -80,7 +80,7 @@ you receive is controlled by the following tags:
             IM_LOCK         - a lock gadget image
 
 
-        DIA_FrontPen
+        GIA_FrontPen
 
         This sets the front pen for the image. Currently, only the IM_CHECK
         image supports this tag.
@@ -113,45 +113,45 @@ IM_Width, IM_Height, etc, tags. Images are scaled to the supplied sizes.
     integral multiple of the item height (ie, the size you specify is the size
     you get). It is controlled by the following tags:
 
-    DLV_Top (WORD) (ISG) - Top item visible in the listview.  This value
+    GLV_Top (WORD) (ISG) - Top item visible in the listview.  This value
         will be made reasonable if out-of-range (defaults to 0).
 
-    DLV_MakeVisible (WORD) (IS) - Number of an item that should be forced
+    GLV_MakeVisible (WORD) (IS) - Number of an item that should be forced
         within the visible area of the listview by doing minimal scrolling.
-        This tag overrides DLV_Top.
+        This tag overrides GLV_Top.
 
-    DLV_Labels (struct List * or Att_List *) (ISG) - List of nodes whose
+    GLV_Labels (struct List * or Att_List *) (ISG) - List of nodes whose
         ln_Name fields are to be displayed in the listview. Calling
         SetGadgetAttrs() and specifying 0 will remove the current list.
         Specifying ~0 will remove the list but will not disturb the display,
         allowing you to make changes to the contents and selection status.
 
-    DLV_ReadOnly (BOOL) (I) - If TRUE, then listview is read-only
+    GLV_ReadOnly (BOOL) (I) - If TRUE, then listview is read-only
         (defaults to FALSE).
 
-    DLV_ScrollWidth (UWORD) (I) - Width of scroll bar for listview.
+    GLV_ScrollWidth (UWORD) (I) - Width of scroll bar for listview.
         Must be greater than zero (defaults to 16).
 
-    DLV_ShowSelected (void) (I) - Specify this tag to have the currently
+    GLV_ShowSelected (void) (I) - Specify this tag to have the currently
         selected item displayed with a highlight bar (or another method).
         Note that this tag does not support the automatic copying to
         a string gadget that gadtools does. You should specify ti_Data
         as 0 for future compatibility.
 
-    DLV_Selected (UWORD) (ISG) - Ordinal number of currently selected
+    GLV_Selected (UWORD) (ISG) - Ordinal number of currently selected
         item, or ~0 to have no current selection (defaults to ~0).
 
-    DLV_TextAttr (struct TextAttr *) (I) - Allows you to specify a font to
+    GLV_TextAttr (struct TextAttr *) (I) - Allows you to specify a font to
         use in the lister. Must have previously been opened.
 
-    DLV_MultiSelect (BOOL) (I) - If TRUE, the listview allows multiple-
+    GLV_MultiSelect (BOOL) (I) - If TRUE, the listview allows multiple-
         selection of items (see below for details).
 
-    DLV_Check (BOOL) (I) - If TRUE, and DLV_ShowSelected is TRUE, the
+    GLV_Check (BOOL) (I) - If TRUE, and GLV_ShowSelected is TRUE, the
         current selection will be indicated with a checkmark. Note that
-        this tag has no meaning in conjunction with DLV_MultiSelect.
+        this tag has no meaning in conjunction with GLV_MultiSelect.
 
-    DLV_ShowChecks (ULONG) (I) - If set to something other than zero,
+    GLV_ShowChecks (ULONG) (I) - If set to something other than zero,
         checkmarks will be shown for selected items (see below for
         details), but the user will not be able to alter their state.
 
@@ -159,57 +159,57 @@ IM_Width, IM_Height, etc, tags. Images are scaled to the supplied sizes.
         pen colour. If set to 2, they will be rendered in the normal
         text colour.
 
-    DLV_Highlight (BOOL) (I) - If TRUE, and DLV_ShowSelected is TRUE, the
+    GLV_Highlight (BOOL) (I) - If TRUE, and GLV_ShowSelected is TRUE, the
         current selection will be displayed in a different colour.
 
-    DLV_NoScroller (BOOL) (I) - If TRUE, the lister will not have a scroller
+    GLV_NoScroller (BOOL) (I) - If TRUE, the lister will not have a scroller
         attached. The gadget will still support scrolling by "dragging"
         the selection highlight.
 
-    DLV_TopJustify (BOOL) (I) - If TRUE, items displayed in the lister will
+    GLV_TopJustify (BOOL) (I) - If TRUE, items displayed in the lister will
         be aligned to the top of the gadget, rather than being centered
         vertically.
 
-    DLV_Flags (ULONG) (I) - Allows you to specify layout flags for the lister.
+    GLV_Flags (ULONG) (I) - Allows you to specify layout flags for the lister.
         Currently the only flags supported are :
 
                 PLACETEXT_ABOVE - display title above gadget (default)
                 PLACETEXT_LEFT  - display title at top-left of gadget
 
-    DLV_RightJustify (BOOL) (I) - If TRUE, items displayed in the lister
+    GLV_RightJustify (BOOL) (I) - If TRUE, items displayed in the lister
         will be aligned to the right of the gadget, rather than to the
         left.
 
-    DLV_ShowFilenames (BOOL) (I) - If TRUE, items in the lister are taken to
+    GLV_ShowFilenames (BOOL) (I) - If TRUE, items in the lister are taken to
         be pathnames to files, and only the filename component (ie the
         result of a FilePart() call) is displayed. This allows you to keep
         the full pathname in ln_Name but only display the filename.
 
-    DLV_DragNotify (ULONG) (I) - If this is set to something other than zero,
+    GLV_DragNotify (ULONG) (I) - If this is set to something other than zero,
         the gadget will notify you when the user tries to drag an item
         out of it. See the section on DragNotify below.
 
-    DLV_ScrollUp (void) (S) - Use this tag with SetGadgetAttrs() to make the
+    GLV_ScrollUp (void) (S) - Use this tag with SetGadgetAttrs() to make the
         lister scroll up one line.
 
-    DLV_ScrollDown (void) (S) - Use this tag with SetGadgetAttrs() to make the
+    GLV_ScrollDown (void) (S) - Use this tag with SetGadgetAttrs() to make the
         lister scroll down one line.
 
-    DLV_SelectPrevious (void) (S) - Use this tag with SetGadgetAttrs() to make
+    GLV_SelectPrevious (void) (S) - Use this tag with SetGadgetAttrs() to make
         the previous entry become selected.
 
-    DLV_SelectNext (void) (S) - Use this tag with SetGadgetAttrs() to make
+    GLV_SelectNext (void) (S) - Use this tag with SetGadgetAttrs() to make
         the next entry become selected.
 
-    DLV_Lines (void) (G) - returns number of visible lines displayed in lister.
+    GLV_Lines (void) (G) - returns number of visible lines displayed in lister.
 
-    DLV_Object (void) (G) - returns the address of the Object * structure.
+    GLV_Object (void) (G) - returns the address of the Object * structure.
 
-    DLV_GetLine (void) (G) - this allows you to get the line number in the
+    GLV_GetLine (void) (G) - this allows you to get the line number in the
         lister from window-relative mouse coordinates. StoragePtr should be
         initialised to the mouse coordinates ((x<<16)|y).
 
-    DLV_DrawLine (void) (G) - this allows you to render a line of the listview
+    GLV_DrawLine (void) (G) - this allows you to render a line of the listview
         into your own RastPort. See the section on DragNotify below
         for more information.
 
@@ -222,7 +222,7 @@ IM_Width, IM_Height, etc, tags. Images are scaled to the supplied sizes.
    MULTIPLE SELECTION
 
     The galileolistviewgclass gadget supports multiple-selection of items.
-    This feature is enabled by passing {DLV_MultiSelect,TRUE} on creation.
+    This feature is enabled by passing {GLV_MultiSelect,TRUE} on creation.
     The ln_Type field of each of the node structures is used to
     indicate whether an item is selected or not. For convenience, this
     field has been renamed lve_Flags.
@@ -277,10 +277,10 @@ IM_Width, IM_Height, etc, tags. Images are scaled to the supplied sizes.
 
    DRAG NOTIFICATION
 
-    To enable drag notification, pass {DLV_DragNotify,1} on creation.
+    To enable drag notification, pass {GLV_DragNotify,1} on creation.
     You will then be sent an extended taglist via the IDCMP_IDCMPUPDATE
     message when the user attempts to drag an item out of the list.
-    If you pass {DLV_DragNotify,2} the user will only be able to drag
+    If you pass {GLV_DragNotify,2} the user will only be able to drag
     out of the list sideways; dragging up or down will scroll the list
     as usual.
 
@@ -295,11 +295,11 @@ IM_Width, IM_Height, etc, tags. Images are scaled to the supplied sizes.
         GA_Height           size of the item as displayed
         GA_RelRight
         GA_RelBottom        offset mouse position in item
-        DLV_Top             top item number
-        DLV_DragNotify      ordinal number of item dragged
+        GLV_Top             top item number
+        GLV_DragNotify      ordinal number of item dragged
 
     To see if an IDCMP_IDCMPUDPATE message is from a drag, just test
-    for the presence of the DLV_DragNotify tag in the taglist.
+    for the presence of the GLV_DragNotify tag in the taglist.
 
     Once you get a drag notification, the actual dragging of the item
     is your responsibility. The easiest way is using the drag routines
@@ -312,7 +312,7 @@ IM_Width, IM_Height, etc, tags. Images are scaled to the supplied sizes.
     This is the easiest way, but will also copy the checkmark if there is
     one, and you may not want that.
 
-    The second way is to use the DLV_DrawLine tag with the GetAttr()
+    The second way is to use the GLV_DrawLine tag with the GetAttr()
     call, and have the listview render the item into your bitmap for you.
 
     To do this, you need to initialise a ListViewDraw structure :
@@ -330,9 +330,9 @@ IM_Width, IM_Height, etc, tags. Images are scaled to the supplied sizes.
     StoragePtr for the GetAttr call. Eg,
 
         ULONG *ptr=(ULONG)&lvdraw;
-        Object *obj=GetTagData(DLV_Object,0,tags);
+        Object *obj=GetTagData(GLV_Object,0,tags);
 
-        GetAttr(DLV_DrawLine,obj,&ptr);
+        GetAttr(GLV_DrawLine,obj,&ptr);
 
     The GA_RelRight and GA_RelBottom tags are used to indicate where
     in the item the user clicked. When you display the drag image on
@@ -342,8 +342,8 @@ IM_Width, IM_Height, etc, tags. Images are scaled to the supplied sizes.
    DOUBLE-CLICK NOTIFICATION
 
     If you get an IDCMP_IDCMPUPDATE message from the gadget, and the
-    DLV_DragNotify tag is not set, it is a normal selection message.
-    An additional tag is sent in this situation; DLV_DoubleClick.
+    GLV_DragNotify tag is not set, it is a normal selection message.
+    An additional tag is sent in this situation; GLV_DoubleClick.
     The ti_Data field is a boolean indicating whether the selection
     is a double-click or a normal single click.
 
@@ -352,8 +352,8 @@ IM_Width, IM_Height, etc, tags. Images are scaled to the supplied sizes.
         Tag                 Data
 
         GA_ID               Gadget ID
-        DLV_Selected        Ordinal number of selection
-        DLV_DoubleClick     BOOL
+        GLV_Selected        Ordinal number of selection
+        GLV_DoubleClick     BOOL
 
 
    RESIZING
@@ -395,14 +395,14 @@ using GadTools. This class supports the following tags:
         gadget. This overrides GTPA_Depth and allows numbers which aren't
         powers of 2. (defaults to 2)
 
-    DPG_Pen (UWORD) (ISG) - the currently selected colour of the palette.
+    GPG_Pen (UWORD) (ISG) - the currently selected colour of the palette.
         This is similar to GTPA_Color but referes to the ordinal colour
         number and not the pen number itself.
 
-    DPG_SelectNext (void) (S) - use this tag with SetGadgetAttrs() to cause
+    GPG_SelectNext (void) (S) - use this tag with SetGadgetAttrs() to cause
         the next colour in the gadget to be selected.
 
-    DPG_SelectPrevious (void) (S) - use this tag with SetGadgetAttrs() to
+    GPG_SelectPrevious (void) (S) - use this tag with SetGadgetAttrs() to
         cause the previous colour in the gadget to be selected.
 
 galileofm.library/galileostrgclass                   galileofm.library/galileostrgclass

@@ -440,9 +440,9 @@ struct gpResize
 #define JUSTIFY_RIGHT		1
 #define JUSTIFY_CENTER		2
 
-#define DIA_Type		TAG_USER + 5	// Image type
-#define DIA_FrontPen		TAG_USER + 7	// Image front pen
-#define DIA_ThinBorders		TAG_USER + 27	// Thin borders
+#define GIA_Type		TAG_USER + 5	// Image type
+#define GIA_FrontPen		TAG_USER + 7	// Image front pen
+#define GIA_ThinBorders		TAG_USER + 27	// Thin borders
 
 #define IM_ARROW_UP	0
 #define IM_ARROW_DOWN	1
@@ -465,39 +465,39 @@ struct gpResize
 #define POPUP_BUTTON_KIND	120		// File button gadget (no popup)
 
 // Listview tags
-#define DLV_ScrollUp		TAG_USER + 7		// Scroll list up
-#define DLV_ScrollDown		TAG_USER + 8		// Scroll list down
-#define DLV_SelectPrevious	TAG_USER + 11		// Select previous item
-#define DLV_SelectNext		TAG_USER + 12		// Select next item
-#define DLV_Labels		GTLV_Labels		// Labels
-#define DLV_Top			GTLV_Top		// Top item
-#define DLV_MakeVisible		GTLV_MakeVisible	// Make visible
-#define DLV_Selected		GTLV_Selected		// Selected
-#define DLV_ScrollWidth		GTLV_ScrollWidth	// Scroller width
-#define DLV_ShowSelected	GTLV_ShowSelected	// Show selected
-#define DLV_Check		TAG_USER + 10		// Check selection
-#define DLV_Highlight		TAG_USER + 14		// Highlight selection
-#define DLV_MultiSelect		TAG_USER + 9		// Multi-selection
-#define DLV_ReadOnly		GTLV_ReadOnly		// Read only
-#define DLV_Lines		TAG_USER + 13		// Visible lines (get only)
-#define DLV_ShowChecks		TAG_USER + 15		// Show checkmarks
-#define DLV_Flags		TAG_USER + 16		// Layout flags
-#define DLV_NoScroller		TAG_USER + 17		// No scroller necessary
-#define DLV_TopJustify		TAG_USER + 18		// Top-justify items
-#define DLV_RightJustify	TAG_USER + 19		// Right-justify items
-#define DLV_DragNotify		TAG_USER + 20		// Notify of drags
-#define DLV_GetLine		TAG_USER + 25		// Get line from coordinate
-#define DLV_DrawLine		TAG_USER + 26		// Draw a line from the listview
-#define DLV_Object		TAG_USER + 27		// Pointer to object
-#define DLV_DoubleClick		TAG_USER + 28		// Indicates double-click
-#define DLV_ShowFilenames	TAG_USER + 48		// Show filenames only
-#define DLV_ShowSeparators	TAG_USER + 52		// Show --- as separator
-#define DLV_PageUp		TAG_USER + 53
-#define DLV_PageDown		TAG_USER + 54
-#define DLV_Home		TAG_USER + 55
-#define DLV_End			TAG_USER + 56
-#define DLV_ScrollLeft		TAG_USER + 57
-#define DLV_ThinBorder		TAG_USER + 58		// Thin borders
+#define GLV_ScrollUp		TAG_USER + 7		// Scroll list up
+#define GLV_ScrollDown		TAG_USER + 8		// Scroll list down
+#define GLV_SelectPrevious	TAG_USER + 11		// Select previous item
+#define GLV_SelectNext		TAG_USER + 12		// Select next item
+#define GLV_Labels		GTLV_Labels		// Labels
+#define GLV_Top			GTLV_Top		// Top item
+#define GLV_MakeVisible		GTLV_MakeVisible	// Make visible
+#define GLV_Selected		GTLV_Selected		// Selected
+#define GLV_ScrollWidth		GTLV_ScrollWidth	// Scroller width
+#define GLV_ShowSelected	GTLV_ShowSelected	// Show selected
+#define GLV_Check		TAG_USER + 10		// Check selection
+#define GLV_Highlight		TAG_USER + 14		// Highlight selection
+#define GLV_MultiSelect		TAG_USER + 9		// Multi-selection
+#define GLV_ReadOnly		GTLV_ReadOnly		// Read only
+#define GLV_Lines		TAG_USER + 13		// Visible lines (get only)
+#define GLV_ShowChecks		TAG_USER + 15		// Show checkmarks
+#define GLV_Flags		TAG_USER + 16		// Layout flags
+#define GLV_NoScroller		TAG_USER + 17		// No scroller necessary
+#define GLV_TopJustify		TAG_USER + 18		// Top-justify items
+#define GLV_RightJustify	TAG_USER + 19		// Right-justify items
+#define GLV_DragNotify		TAG_USER + 20		// Notify of drags
+#define GLV_GetLine		TAG_USER + 25		// Get line from coordinate
+#define GLV_DrawLine		TAG_USER + 26		// Draw a line from the listview
+#define GLV_Object		TAG_USER + 27		// Pointer to object
+#define GLV_DoubleClick		TAG_USER + 28		// Indicates double-click
+#define GLV_ShowFilenames	TAG_USER + 48		// Show filenames only
+#define GLV_ShowSeparators	TAG_USER + 52		// Show --- as separator
+#define GLV_PageUp		TAG_USER + 53
+#define GLV_PageDown		TAG_USER + 54
+#define GLV_Home		TAG_USER + 55
+#define GLV_End			TAG_USER + 56
+#define GLV_ScrollLeft		TAG_USER + 57
+#define GLV_ThinBorder		TAG_USER + 58		// Thin borders
 
 typedef struct
 {
@@ -516,20 +516,20 @@ typedef struct
 #define LVEF_TEMP		(1<<2)			// Temporary flag for something
 
 // Gauge tags
-#define DGG_Total		( TAG_USER + 0x64 )	// Total size
-#define DGG_Free		( TAG_USER + 0x65 )	// Free size
-#define DGG_Flags		( TAG_USER + 0x66 )	// Flags
-#define DGG_FillPen		( TAG_USER + 0x67 )	// Pen to fill gauge with
-#define DGG_FillPenAlert	( TAG_USER + 0x68 )	// Pen when space is running out
+#define GGG_Total		( TAG_USER + 0x64 )	// Total size
+#define GGG_Free		( TAG_USER + 0x65 )	// Free size
+#define GGG_Flags		( TAG_USER + 0x66 )	// Flags
+#define GGG_FillPen		( TAG_USER + 0x67 )	// Pen to fill gauge with
+#define GGG_FillPenAlert	( TAG_USER + 0x68 )	// Pen when space is running out
 
 // File button tags
-#define DFB_DefPath		TAG_USER + 19		// Default path
+#define GFB_DefPath		TAG_USER + 19		// Default path
 
 // Palette tags
-#define DPG_Redraw		TAG_USER + 20		// Redraw a pen
-#define DPG_Pen			TAG_USER + 21		// Ordinal selected pen
-#define DPG_SelectPrevious	TAG_USER + 22		// Select previous pen
-#define DPG_SelectNext		TAG_USER + 23		// Select next pen
+#define GPG_Redraw		TAG_USER + 20		// Redraw a pen
+#define GPG_Pen			TAG_USER + 21		// Ordinal selected pen
+#define GPG_SelectPrevious	TAG_USER + 22		// Select previous pen
+#define GPG_SelectNext		TAG_USER + 23		// Select next pen
 
 // Some useful macros
 #define GADGET(obj) (obj->gl_info.gl_gadget.gadget)
@@ -1345,17 +1345,17 @@ typedef struct
 	long			menu_id_base;	// Base ID for menu
 }  AppEntry;
 
-#define DAE_Local		TAG_USER + 0		// Local entry
-#define DAE_SnapShot		TAG_USER + 1		// Supports snapshot
-#define DAE_Menu		TAG_USER + 2		// Menu item
-#define DAE_Close		TAG_USER + 3		// Close item
-#define DAE_Background		TAG_USER + 4		// Background colour
-#define DAE_ToggleMenu		TAG_USER + 5		// Toggle item
-#define DAE_ToggleMenuSel	TAG_USER + 6		// Toggle item (selected)
-#define DAE_Info		TAG_USER + 7		// Supports Information
-#define DAE_Locked		TAG_USER + 8		// Position locked
-#define DAE_MenuBase		TAG_USER + 9		// Menu ID base
-#define DAE_Special		TAG_USER + 10		// Special
+#define GAE_Local		TAG_USER + 0		// Local entry
+#define GAE_SnapShot		TAG_USER + 1		// Supports snapshot
+#define GAE_Menu		TAG_USER + 2		// Menu item
+#define GAE_Close		TAG_USER + 3		// Close item
+#define GAE_Background		TAG_USER + 4		// Background colour
+#define GAE_ToggleMenu		TAG_USER + 5		// Toggle item
+#define GAE_ToggleMenuSel	TAG_USER + 6		// Toggle item (selected)
+#define GAE_Info		TAG_USER + 7		// Supports Information
+#define GAE_Locked		TAG_USER + 8		// Position locked
+#define GAE_MenuBase		TAG_USER + 9		// Menu ID base
+#define GAE_Special		TAG_USER + 10		// Special
 
 #define ln_MenuFlags		ln_Type
 
@@ -1458,7 +1458,7 @@ typedef struct _GalileoAppMessage
 	ULONG			da_Pad[2];
 } GalileoAppMessage;
 
-#define DAPPF_ICON_DROP		(1<<16)		// Dropped with icon
+#define GAPPF_ICON_DROP		(1<<16)		// Dropped with icon
 
 GalileoAppMessage *AllocAppMessage(APTR,struct MsgPort *,short);
 void FreeAppMessage(GalileoAppMessage *);

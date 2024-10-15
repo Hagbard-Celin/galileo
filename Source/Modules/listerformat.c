@@ -237,7 +237,7 @@ ULONG __asm __saveds L_Module_Entry(
 							data->drag_from=id;
 
 							// Get item
-							if ((item=GetTagData(DLV_DragNotify,-1,tags))!=-1 &&
+							if ((item=GetTagData(GLV_DragNotify,-1,tags))!=-1 &&
 								(data->drag_node=Att_FindNode(list,item)))
 							{
 								// Allocate drag info
@@ -384,7 +384,7 @@ ULONG __asm __saveds L_Module_Entry(
 									SetGadgetChoices(data->objlist,GAD_LISTER_FORMAT_SELITEMS,data->item_sel_list);
 
 									// Move selected list to the end
-									tags[0].ti_Tag=DLV_Top;
+									tags[0].ti_Tag=GLV_Top;
 									tags[0].ti_Data=100;
 									tags[1].ti_Tag=TAG_END;
 									SetGadgetAttrsA(GADGET(data->sel_lister),data->window,0,tags);
@@ -796,7 +796,7 @@ void listerformat_position(config_lister_data *data,Att_Node *node)
 	Att_Node *pos;
 
 	// Get top item
-	GetAttr(DLV_Top,(Object *)GADGET(data->sel_lister),&top);
+	GetAttr(GLV_Top,(Object *)GADGET(data->sel_lister),&top);
 
 	// Get item we dropped over
 	item=(data->drag_y-data->sel_lister->dims.Top)/data->window->RPort->TxHeight;

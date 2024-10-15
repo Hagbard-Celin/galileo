@@ -165,7 +165,7 @@ enum
 #define ID_HKEY		MAKE_ID('H','K','E','Y')	// Hotkey definition
 #define ID_SETS		MAKE_ID('S','E','T','S')	// Settings
 #define ID_LSTR		MAKE_ID('L','S','T','R')	// Lister definition
-#define ID_DLST		MAKE_ID('D','L','S','T')	// Lister definition
+#define ID_GLST		MAKE_ID('G','L','S','T')	// Lister definition
 #define ID_LBUT		MAKE_ID('L','B','U','T')	// Lister buttons
 #define ID_ENVR		MAKE_ID('E','N','V','R')	// Environment definition
 #define ID_TBAR		MAKE_ID('T','B','A','R')	// Toolbar pathname
@@ -633,23 +633,23 @@ typedef struct {
 	ULONG			flags;		// Flags
 
 // Followed by path to load
-} CFG_DLST;
+} CFG_GLST;
 
-#define DLSTF_ICONIFIED		(1<<0)		// Lister opens iconified
-#define DLSTF_DEVICE_LIST	(1<<1)		// Lister shows device list
-#define DLSTF_NO_POSITION	(1<<2)		// No position set
-#define DLSTF_LOCK_POS		(1<<3)		// Position is locked
-#define DLSTF_SOURCE		(1<<4)		// Lister starts as a source
-#define DLSTF_DEST		(1<<5)		// Starts as destination
-#define DLSTF_LOCKED		(1<<6)		// Source/dest locked
-#define DLSTF_ICON		(1<<7)		// View as icons
-#define DLSTF_SHOW_ALL		(1<<8)		// Show all
-#define DLSTF_CACHE_LIST	(1<<9)		// Cache list
-#define DLSTF_ICON_ACTION	(1<<10)		// Icon action
-#define DLSTF_DEV_FULL		(1<<11)		// Full device list
-#define DLSTF_DEV_BRIEF		(1<<12)		// Brief device list
-#define DLSTF_INVISIBLE		(1<<13)		// Opens invisible
-#define DLSTF_NOACTIVE		(1<<14)		// No activate
+#define GLSTF_ICONIFIED		(1<<0)		// Lister opens iconified
+#define GLSTF_DEVICE_LIST	(1<<1)		// Lister shows device list
+#define GLSTF_NO_POSITION	(1<<2)		// No position set
+#define GLSTF_LOCK_POS		(1<<3)		// Position is locked
+#define GLSTF_SOURCE		(1<<4)		// Lister starts as a source
+#define GLSTF_DEST		(1<<5)		// Starts as destination
+#define GLSTF_LOCKED		(1<<6)		// Source/dest locked
+#define GLSTF_ICON		(1<<7)		// View as icons
+#define GLSTF_SHOW_ALL		(1<<8)		// Show all
+#define GLSTF_CACHE_LIST	(1<<9)		// Cache list
+#define GLSTF_ICON_ACTION	(1<<10)		// Icon action
+#define GLSTF_DEV_FULL		(1<<11)		// Full device list
+#define GLSTF_DEV_BRIEF		(1<<12)		// Brief device list
+#define GLSTF_INVISIBLE		(1<<13)		// Opens invisible
+#define GLSTF_NOACTIVE		(1<<14)		// No activate
 
 // Error codes
 #define ERROR_OLD_CONFIG	(-1)

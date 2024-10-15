@@ -665,11 +665,11 @@ BOOL lister_iconify(Lister *lister)
 	lister_build_icon_name(lister);
 
 	// Tags
-	tags[0].ti_Tag=DAE_Local;
+	tags[0].ti_Tag=GAE_Local;
 	tags[0].ti_Data=1;
-	tags[1].ti_Tag=DAE_Menu;
+	tags[1].ti_Tag=GAE_Menu;
 	tags[1].ti_Data=(ULONG)GetString(&locale,MSG_CLOSE);
-	tags[2].ti_Tag=DAE_Special;
+	tags[2].ti_Tag=GAE_Special;
 	tags[2].ti_Data=1;
 	tags[3].ti_Tag=TAG_END;
 
@@ -939,8 +939,8 @@ void lister_set_gauge(Lister *lister,BOOL refresh)
 					GA_Width,lister->window->BorderRight,
 					GA_RelHeight,-lister->window->BorderTop-lister->window->BorderBottom+3,
 					GA_LeftBorder,TRUE,
-					DGG_FillPen,lister->lst_Colours[ENVCOL_GAUGE].cr_Pen[0],
-					DGG_FillPenAlert,lister->lst_Colours[ENVCOL_GAUGE].cr_Pen[1],
+					GGG_FillPen,lister->lst_Colours[ENVCOL_GAUGE].cr_Pen[0],
+					GGG_FillPenAlert,lister->lst_Colours[ENVCOL_GAUGE].cr_Pen[1],
 					TAG_END))
 		{
 			// Fix border width

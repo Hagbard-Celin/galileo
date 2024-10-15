@@ -644,6 +644,6 @@ void palette_box_colour(PaletteBoxData *data,GL_Object *gadget,short gun,ULONG *
 
 	// Redraw square
 	SetGadgetAttrs(GADGET(gadget),data->window,0,
-		DPG_Redraw,data->pen_count+((IntuitionBase->LibNode.lib_Version>=39)?8:4)-1,
+		GPG_Redraw,data->pen_count+((IntuitionBase->LibNode.lib_Version>=39)?8:4)-1,
 		TAG_END);
 }

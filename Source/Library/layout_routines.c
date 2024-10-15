@@ -1160,7 +1160,7 @@ ObjectList *__asm __saveds L_AddObjectList(
 								BOOL thin=0;
 
 								// Thin borders?
-								if (GetTagData(DLV_ThinBorder,0,taglist) ||
+								if (GetTagData(GLV_ThinBorder,0,taglist) ||
 									ldata->flags&LIBDF_THIN_BORDERS) thin=1;
 
 								new_object->gl_info.gl_gadget.gadget=
@@ -1176,7 +1176,7 @@ ObjectList *__asm __saveds L_AddObjectList(
 										GA_RelVerify,TRUE,
 										GA_Text,newgad.ng_GadgetText,
 										GTCustom_TextAttr,&list->attr,
-										DLV_ThinBorder,thin,
+										GLV_ThinBorder,thin,
 										ICA_TARGET,ICTARGET_IDCMP,
 										TAG_MORE,(ULONG)taglist);
 							}
@@ -1365,7 +1365,7 @@ ObjectList *__asm __saveds L_AddObjectList(
 										"galileoiclass",
 										IA_Width,newgad.ng_Width,
 										IA_Height,newgad.ng_Height,
-										DIA_Type,IM_DRAWER,
+										GIA_Type,IM_DRAWER,
 										TAG_DONE);
 
 								new_object->gl_info.gl_gadget.gadget=
@@ -1387,7 +1387,7 @@ ObjectList *__asm __saveds L_AddObjectList(
 										TAG_MORE,(ULONG)taglist);
 
 								// Default path?
-								if (tag=FindTagItem(DFB_DefPath,taglist))
+								if (tag=FindTagItem(GFB_DefPath,taglist))
 									new_object->data_ptr=tag->ti_Data;
 							}
 							break;

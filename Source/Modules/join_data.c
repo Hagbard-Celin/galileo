@@ -83,13 +83,13 @@ struct TagItem
 		{TAG_END}},
 
 	join_lister_tags[]={
-		{DLV_ShowSelected,0},
-		{DLV_ShowFilenames,1},
+		{GLV_ShowSelected,0},
+		{GLV_ShowFilenames,1},
 		{TAG_MORE,(ULONG)join_layout_tags}},
 
 	join_popup_tags[]={
 		{GTCustom_Control,GAD_JOIN_TO_FIELD},
-		{DFB_DefPath,(ULONG)"ram:"},
+		{GFB_DefPath,(ULONG)"ram:"},
 		{TAG_MORE,(ULONG)join_layout_tags}},
 
 	join_to_tags[]={

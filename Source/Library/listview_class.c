@@ -84,62 +84,62 @@ ULONG __asm __saveds listview_dispatch(
 
 				// Initialise mapping tags
 				data->scroll_map[0].ti_Tag=PGA_Top;
-				data->scroll_map[0].ti_Data=DLV_Top;
+				data->scroll_map[0].ti_Data=GLV_Top;
 				data->scroll_map[1].ti_Tag=TAG_END;
 				data->arrow_up_map[0].ti_Tag=GA_ID;
-				data->arrow_up_map[0].ti_Data=DLV_ScrollUp;
+				data->arrow_up_map[0].ti_Data=GLV_ScrollUp;
 				data->arrow_up_map[1].ti_Tag=TAG_END;
 				data->arrow_down_map[0].ti_Tag=GA_ID;
-				data->arrow_down_map[0].ti_Data=DLV_ScrollDown;
+				data->arrow_down_map[0].ti_Data=GLV_ScrollDown;
 				data->arrow_down_map[1].ti_Tag=TAG_END;
 
 				// Get taglist
 				tags=((struct opSet *)msg)->ops_AttrList;
 
 				// Get width of scroller
-				data->scroller_width=GetTagData(DLV_ScrollWidth,16,tags);
+				data->scroller_width=GetTagData(GLV_ScrollWidth,16,tags);
 
 				// Flags
-				if (FindTagItem(DLV_ShowSelected,tags))
+				if (FindTagItem(GLV_ShowSelected,tags))
 					data->flags|=LVF_SHOW_SELECTED;
-				if (GetTagData(DLV_ThinBorder,0,tags))
+				if (GetTagData(GLV_ThinBorder,0,tags))
 					data->flags|=LVF_THIN_BORDER;
-				if (GetTagData(DLV_MultiSelect,0,tags))
+				if (GetTagData(GLV_MultiSelect,0,tags))
 					data->flags|=LVF_MULTI_SELECT;
 				else
-				if (GetTagData(DLV_Check,0,tags))
+				if (GetTagData(GLV_Check,0,tags))
 					data->flags|=LVF_SELECTED_CHECK;
 				else
-				if (a=GetTagData(DLV_ShowChecks,0,tags))
+				if (a=GetTagData(GLV_ShowChecks,0,tags))
 				{
 					data->flags|=LVF_SHOW_CHECKS;
 					if (a==2) data->flags|=LVF_NO_HIGHLIGHT;
 				}
-				if (GetTagData(DLV_Highlight,0,tags))
+				if (GetTagData(GLV_Highlight,0,tags))
 					data->flags|=LVF_SELECTED_HIGH;
-				if (GetTagData(DLV_ReadOnly,0,tags))
+				if (GetTagData(GLV_ReadOnly,0,tags))
 					data->flags|=LVF_READ_ONLY;
-				if (GetTagData(DLV_NoScroller,0,tags))
+				if (GetTagData(GLV_NoScroller,0,tags))
 				{
 					data->flags|=LVF_NO_SCROLLER;
 					data->scroller_width=0;
 				}
 				else
-				if (GetTagData(DLV_ScrollLeft,0,tags))
+				if (GetTagData(GLV_ScrollLeft,0,tags))
 					data->flags|=LVF_SCROLLER_LEFT;
-				if (GetTagData(DLV_TopJustify,0,tags))
+				if (GetTagData(GLV_TopJustify,0,tags))
 					data->flags|=LVF_TOP_JUSTIFY;
-				if (GetTagData(DLV_RightJustify,0,tags))
+				if (GetTagData(GLV_RightJustify,0,tags))
 					data->flags|=LVF_RIGHT_JUSTIFY;
-				if (a=GetTagData(DLV_DragNotify,0,tags))
+				if (a=GetTagData(GLV_DragNotify,0,tags))
 				{
 					data->flags|=LVF_DRAG_NOTIFY;
 					if (a==2) data->flags|=LVF_NO_VERT_SCROLL;
 				}
-				data->layout_flags=GetTagData(DLV_Flags,PLACETEXT_ABOVE,tags);
-				if (GetTagData(DLV_ShowFilenames,0,tags))
+				data->layout_flags=GetTagData(GLV_Flags,PLACETEXT_ABOVE,tags);
+				if (GetTagData(GLV_ShowFilenames,0,tags))
 					data->flags|=LVF_SHOW_FILENAMES;
-				if (GetTagData(DLV_ShowSeparators,0,tags))
+				if (GetTagData(GLV_ShowSeparators,0,tags))
 					data->flags|=LVF_SHOW_SEPARATORS;
 
 				// Get title
@@ -194,7 +194,7 @@ ULONG __asm __saveds listview_dispatch(
 					// Create check image
 					if (data->check=NewObject(
 						0,"galileoiclass",
-						DIA_Type,IM_CHECK,
+						GIA_Type,IM_CHECK,
 						IA_Width,13,
 						IA_Height,data->text_height-1,
 						TAG_END))
@@ -236,8 +236,8 @@ ULONG __asm __saveds listview_dispatch(
 						0,"galileoiclass",
 						IA_Width,data->scroller_dims.Width,
 						IA_Height,data->arrow_height,
-						DIA_Type,IM_ARROW_UP,
-						DIA_ThinBorders,(data->flags&LVF_THIN_BORDER)?TRUE:FALSE,
+						GIA_Type,IM_ARROW_UP,
+						GIA_ThinBorders,(data->flags&LVF_THIN_BORDER)?TRUE:FALSE,
 						TAG_END))
 					{
 						// Add to boopsi list
@@ -268,8 +268,8 @@ ULONG __asm __saveds listview_dispatch(
 						0,"galileoiclass",
 						IA_Width,data->scroller_dims.Width,
 						IA_Height,data->arrow_height,
-						DIA_Type,IM_ARROW_DOWN,
-						DIA_ThinBorders,(data->flags&LVF_THIN_BORDER)?TRUE:FALSE,
+						GIA_Type,IM_ARROW_DOWN,
+						GIA_ThinBorders,(data->flags&LVF_THIN_BORDER)?TRUE:FALSE,
 						TAG_END))
 					{
 						// Add to boopsi list
@@ -315,7 +315,7 @@ ULONG __asm __saveds listview_dispatch(
 				tags=((struct opSet *)msg)->ops_AttrList;
 
 				// Make visible?
-				if (tag=FindTagItem(DLV_MakeVisible,tags))
+				if (tag=FindTagItem(GLV_MakeVisible,tags))
 				{
 					short scroll;
 
@@ -352,7 +352,7 @@ ULONG __asm __saveds listview_dispatch(
 
 				// New top?
 				else
-				if (tag=FindTagItem(DLV_Top,tags))
+				if (tag=FindTagItem(GLV_Top,tags))
 				{
 					// Remember old top
 					old=data->top;
@@ -375,7 +375,7 @@ ULONG __asm __saveds listview_dispatch(
 
 				// Scroll up
 				else
-				if (tag=FindTagItem(DLV_ScrollUp,tags))
+				if (tag=FindTagItem(GLV_ScrollUp,tags))
 				{
 					// Is this the gadgetup?
 					if (msg->MethodID==OM_UPDATE &&
@@ -413,7 +413,7 @@ ULONG __asm __saveds listview_dispatch(
 
 				// Scroll down
 				else
-				if (tag=FindTagItem(DLV_ScrollDown,tags))
+				if (tag=FindTagItem(GLV_ScrollDown,tags))
 				{
 					// Is this the gadgetup?
 					if (msg->MethodID==OM_UPDATE &&
@@ -450,7 +450,7 @@ ULONG __asm __saveds listview_dispatch(
 				}
 
 				// New labels
-				if (tag=FindTagItem(DLV_Labels,tags))
+				if (tag=FindTagItem(GLV_Labels,tags))
 				{
 					// clear top item
 					data->top_item=0;
@@ -495,34 +495,34 @@ ULONG __asm __saveds listview_dispatch(
 				}
 
 				// Selected
-				if ((tag=FindTagItem(DLV_Selected,tags)) ||
-					(tag=FindTagItem(DLV_SelectPrevious,tags)) ||
-					(tag=FindTagItem(DLV_SelectNext,tags)) ||
-					(tag=FindTagItem(DLV_PageUp,tags)) ||
-					(tag=FindTagItem(DLV_PageDown,tags)) ||
-					(tag=FindTagItem(DLV_Home,tags)) ||
-					(tag=FindTagItem(DLV_End,tags)))
+				if ((tag=FindTagItem(GLV_Selected,tags)) ||
+					(tag=FindTagItem(GLV_SelectPrevious,tags)) ||
+					(tag=FindTagItem(GLV_SelectNext,tags)) ||
+					(tag=FindTagItem(GLV_PageUp,tags)) ||
+					(tag=FindTagItem(GLV_PageDown,tags)) ||
+					(tag=FindTagItem(GLV_Home,tags)) ||
+					(tag=FindTagItem(GLV_End,tags)))
 				{
 					// Store old
 					old=data->sel;
 
 					// Get new selected
-					if (tag->ti_Tag==DLV_Selected)
+					if (tag->ti_Tag==GLV_Selected)
 					{
 						data->sel=tag->ti_Data;
 					}
 					else
-					if (tag->ti_Tag==DLV_SelectPrevious)
+					if (tag->ti_Tag==GLV_SelectPrevious)
 					{
 						if (data->sel>0) --data->sel;
 					}
 					else
-					if (tag->ti_Tag==DLV_SelectNext)
+					if (tag->ti_Tag==GLV_SelectNext)
 					{
 						++data->sel;
 					}
 					else
-					if (tag->ti_Tag==DLV_PageUp)
+					if (tag->ti_Tag==GLV_PageUp)
 					{
 						if (data->sel==data->top)
 							data->sel-=data->lines-1;
@@ -531,7 +531,7 @@ ULONG __asm __saveds listview_dispatch(
 						if (data->sel<0) data->sel=0;
 					}
 					else
-					if (tag->ti_Tag==DLV_PageDown)
+					if (tag->ti_Tag==GLV_PageDown)
 					{
 						if (data->sel==data->top+data->lines-1)
 							data->sel+=data->lines-1;
@@ -539,12 +539,12 @@ ULONG __asm __saveds listview_dispatch(
 							data->sel=data->top+data->lines-1;
 					}
 					else
-					if (tag->ti_Tag==DLV_Home)
+					if (tag->ti_Tag==GLV_Home)
 					{
 						data->sel=0;
 					}
 					else
-					if (tag->ti_Tag==DLV_End)
+					if (tag->ti_Tag==GLV_End)
 					{
 						data->sel=data->count-1;
 					}
@@ -664,27 +664,27 @@ ULONG __asm __saveds listview_dispatch(
 				switch (get->opg_AttrID)
 				{
 					// Selected
-					case DLV_Selected:
+					case GLV_Selected:
 						*get->opg_Storage=(ULONG)data->last_selection;
 						break;
 
 					// Top
-					case DLV_Top:
+					case GLV_Top:
 						*get->opg_Storage=(ULONG)data->top;
 						break;
 
 					// Lines
-					case DLV_Lines:
+					case GLV_Lines:
 						*get->opg_Storage=(ULONG)data->lines;
 						break;
 
 					// Labels
-					case DLV_Labels:
+					case GLV_Labels:
 						*get->opg_Storage=(ULONG)data->labels;
 						break;
 
 					// Get line from coordinates
-					case DLV_GetLine:
+					case GLV_GetLine:
 						{
 							unsigned short x,y;
 							struct gpInput fake;
@@ -703,7 +703,7 @@ ULONG __asm __saveds listview_dispatch(
 						break;
 
 					// Draw a line from the listview
-					case DLV_DrawLine:
+					case GLV_DrawLine:
 						{
 							ListViewDraw *draw=(ListViewDraw *)*get->opg_Storage;
 
@@ -791,7 +791,7 @@ ULONG __asm __saveds listview_dispatch(
 			if (data->flags&LVF_DRAG_FLAG)
 			{
 				// Fill out tags
-				data->notify_tags[0].ti_Tag=DLV_DragNotify;
+				data->notify_tags[0].ti_Tag=GLV_DragNotify;
 				data->notify_tags[0].ti_Data=data->drag_sel;
 				data->notify_tags[1].ti_Tag=GA_ID;
 				data->notify_tags[1].ti_Data=gadget->GadgetID;
@@ -808,9 +808,9 @@ ULONG __asm __saveds listview_dispatch(
 				data->notify_tags[6].ti_Data=data->drag_x_position;
 				data->notify_tags[7].ti_Tag=GA_RelBottom;
 				data->notify_tags[7].ti_Data=data->drag_y_position;
-				data->notify_tags[8].ti_Tag=DLV_Top;
+				data->notify_tags[8].ti_Tag=GLV_Top;
 				data->notify_tags[8].ti_Data=data->top;
-				data->notify_tags[9].ti_Tag=DLV_Object;
+				data->notify_tags[9].ti_Tag=GLV_Object;
 				data->notify_tags[9].ti_Data=(ULONG)gadget;
 				data->notify_tags[10].ti_Tag=TAG_END;
 
@@ -824,7 +824,7 @@ ULONG __asm __saveds listview_dispatch(
 				ULONG seconds,micros;
 
 				// Fill out tags
-				data->notify_tags[0].ti_Tag=DLV_Selected;
+				data->notify_tags[0].ti_Tag=GLV_Selected;
 				data->notify_tags[0].ti_Data=data->last_selection;
 				data->notify_tags[1].ti_Tag=GA_ID;
 				data->notify_tags[1].ti_Data=gadget->GadgetID;
@@ -838,7 +838,7 @@ ULONG __asm __saveds listview_dispatch(
 					DoubleClick(data->seconds,data->micros,seconds,micros))
 				{
 					// Set double-click flag
-					data->notify_tags[2].ti_Tag=DLV_DoubleClick;
+					data->notify_tags[2].ti_Tag=GLV_DoubleClick;
 					data->notify_tags[2].ti_Data=TRUE;
 					data->notify_tags[3].ti_Tag=TAG_END;
 

@@ -67,9 +67,9 @@ struct TagItem
 
 	// Option lister
 	_settings_lister_taglist[]={
-		{DLV_ShowSelected,0},
-		{DLV_NoScroller,1},
-		{DLV_TopJustify,1},
+		{GLV_ShowSelected,0},
+		{GLV_NoScroller,1},
+		{GLV_TopJustify,1},
 		{TAG_END,0}},
 
 	_settings_relative_taglist[]={

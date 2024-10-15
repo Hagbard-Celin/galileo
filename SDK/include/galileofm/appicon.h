@@ -11,16 +11,16 @@
 #include <workbench/workbench.h>
 #endif
 
-#define DAE_Local		TAG_USER + 0	// Add to Galileo only, not WB
-#define DAE_SnapShot		TAG_USER + 1	// Supports snapshot
-#define DAE_Menu		TAG_USER + 2	// Menu item
-#define DAE_Close		TAG_USER + 3	// Close item
-#define DAE_Background		TAG_USER + 4	// Background colour
-#define DAE_ToggleMenu		TAG_USER + 5	// Toggle item
-#define DAE_ToggleMenuSel	TAG_USER + 6	// Toggle item (selected)
-#define DAE_Info		TAG_USER + 7	// Supports Information
-#define DAE_Locked		TAG_USER + 8	// Position locked
-#define DAE_MenuBase		TAG_USER + 9	// Menu ID base
+#define GAE_Local		TAG_USER + 0	// Add to Galileo only, not WB
+#define GAE_SnapShot		TAG_USER + 1	// Supports snapshot
+#define GAE_Menu		TAG_USER + 2	// Menu item
+#define GAE_Close		TAG_USER + 3	// Close item
+#define GAE_Background		TAG_USER + 4	// Background colour
+#define GAE_ToggleMenu		TAG_USER + 5	// Toggle item
+#define GAE_ToggleMenuSel	TAG_USER + 6	// Toggle item (selected)
+#define GAE_Info		TAG_USER + 7	// Supports Information
+#define GAE_Locked		TAG_USER + 8	// Position locked
+#define GAE_MenuBase		TAG_USER + 9	// Menu ID base
 
 
 APTR FindAppWindow(struct Window *);
@@ -74,7 +74,7 @@ typedef struct _GalileoAppMessage
 	ULONG			da_Pad[2];
 } GalileoAppMessage;
 
-#define DAPPF_ICON_DROP		(1<<16)		// Dropped with icon
+#define GAPPF_ICON_DROP		(1<<16)		// Dropped with icon
 
 GalileoAppMessage *AllocAppMessage(APTR,struct MsgPort *,short);
 BOOL CheckAppMessage(GalileoAppMessage *);

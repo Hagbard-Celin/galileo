@@ -84,13 +84,13 @@ struct TagItem
 		{TAG_MORE,(ULONG)_function_edit_layout}},
 
 	_function_lister_taglist[]={
-		{DLV_ShowSelected,0},
-		{DLV_DragNotify,2},
+		{GLV_ShowSelected,0},
+		{GLV_DragNotify,2},
 		{TAG_MORE,(ULONG)_function_edit_layout}},
 
 	_function_flags_lister_taglist[]={
-		{DLV_MultiSelect,1},
-		{DLV_Flags,PLACETEXT_LEFT},
+		{GLV_MultiSelect,1},
+		{GLV_Flags,PLACETEXT_LEFT},
 		{TAG_MORE,(ULONG)_function_edit_layout}},
 
 	_function_edit_taglist[]={
@@ -100,7 +100,7 @@ struct TagItem
 
 	_function_editor_image[]={
 		{GTCustom_Control,GAD_FUNCED_LABEL},
-		{DFB_DefPath,(ULONG)"PROGDIR:images/"},
+		{GFB_DefPath,(ULONG)"PROGDIR:images/"},
 		{GTCustom_LayoutRel,GAD_FUNCED_LAYOUT_1},
 		{TAG_END}};
 

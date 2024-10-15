@@ -1110,8 +1110,8 @@ void lister_refresh_display(Lister *lister,ULONG flags)
 				lister->gauge_gadget,
 				lister->window,
 				0,
-				DGG_FillPen,lister->lst_Colours[ENVCOL_GAUGE].cr_Pen[0],
-				DGG_FillPenAlert,lister->lst_Colours[ENVCOL_GAUGE].cr_Pen[1],
+				GGG_FillPen,lister->lst_Colours[ENVCOL_GAUGE].cr_Pen[0],
+				GGG_FillPenAlert,lister->lst_Colours[ENVCOL_GAUGE].cr_Pen[1],
 				TAG_END);
 		}
 	}

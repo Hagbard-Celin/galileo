@@ -250,7 +250,7 @@ struct AppWindow *__asm __saveds L_WB_AddAppWindow(
 	if (app_entry=new_app_entry(APP_WINDOW,id,userdata,window,0,port,wb_data))
 	{
 		// Local AppThing?
-		if (tags && GetTagData(DAE_Local,0,tags))
+		if (tags && GetTagData(GAE_Local,0,tags))
 		{
 			// Set local flag
 			app_entry->flags|=APPENTF_LOCAL;
@@ -309,7 +309,7 @@ struct AppIcon *__asm __saveds L_WB_AddAppIcon(
 	wb_data=&data->wb_data;
 
 	// Pass straight through to OS?
-	if (tags && (local=GetTagData(DAE_Local,2,tags))==0) osonly=1;
+	if (tags && (local=GetTagData(GAE_Local,2,tags))==0) osonly=1;
 
 	// Otherwise, if it's not a local icon and the redirection flag is set, send to Tools menu
 	else
@@ -336,28 +336,28 @@ struct AppIcon *__asm __saveds L_WB_AddAppIcon(
 			struct TagItem *tstate;
 
 			// Support snapshot?
-			if (GetTagData(DAE_SnapShot,0,tags))
+			if (GetTagData(GAE_SnapShot,0,tags))
 			{
 				// Set flag
 				app_entry->flags|=APPENTF_SNAPSHOT;
 			}
 
 			// Support info?
-			if (GetTagData(DAE_Info,0,tags))
+			if (GetTagData(GAE_Info,0,tags))
 			{
 				// Set flag
 				app_entry->flags|=APPENTF_INFO;
 			}
 
 			// Locked?
-			if (GetTagData(DAE_Locked,0,tags))
+			if (GetTagData(GAE_Locked,0,tags))
 			{
 				// Set flag
 				app_entry->flags|=APPENTF_LOCKED;
 			}
 
 			// Close item?
-			if (a=GetTagData(DAE_Close,0,tags))
+			if (a=GetTagData(GAE_Close,0,tags))
 			{
 				// Set flag
 				app_entry->flags|=APPENTF_CLOSE;
@@ -367,7 +367,7 @@ struct AppIcon *__asm __saveds L_WB_AddAppIcon(
 			}
 
 			// Background colour?
-			if (tag=FindTagItem(DAE_Background,tags))
+			if (tag=FindTagItem(GAE_Background,tags))
 			{
 				// Set flag
 				app_entry->flags|=APPENTF_BACKGROUND;
@@ -377,23 +377,23 @@ struct AppIcon *__asm __saveds L_WB_AddAppIcon(
 			}
 
 			// Special?
-			if (GetTagData(DAE_Special,0,tags))
+			if (GetTagData(GAE_Special,0,tags))
 			{
 				// Set flag
 				app_entry->flags|=APPENTF_SPECIAL;
 			}
 
 			// Set menu base
-			app_entry->menu_id_base=GetTagData(DAE_MenuBase,0,tags);
+			app_entry->menu_id_base=GetTagData(GAE_MenuBase,0,tags);
 
 			// Go through tags
 			tstate=tags;
 			while (tag=NextTagItem(&tstate))
 			{
 				// Menu item?
-				if ((tag->ti_Tag==DAE_Menu ||
-					 tag->ti_Tag==DAE_ToggleMenu ||
-					 tag->ti_Tag==DAE_ToggleMenuSel) && tag->ti_Data)
+				if ((tag->ti_Tag==GAE_Menu ||
+					 tag->ti_Tag==GAE_ToggleMenu ||
+					 tag->ti_Tag==GAE_ToggleMenuSel) && tag->ti_Data)
 				{
 					struct Node *node;
 
@@ -405,9 +405,9 @@ struct AppIcon *__asm __saveds L_WB_AddAppIcon(
 						strcpy(node->ln_Name,(char *)tag->ti_Data);
 
 						// Set flags
-						if (tag->ti_Tag==DAE_ToggleMenu) node->ln_MenuFlags=MNF_TOGGLE;
+						if (tag->ti_Tag==GAE_ToggleMenu) node->ln_MenuFlags=MNF_TOGGLE;
 						else
-						if (tag->ti_Tag==DAE_ToggleMenuSel) node->ln_MenuFlags=MNF_TOGGLE|MNF_SEL;
+						if (tag->ti_Tag==GAE_ToggleMenuSel) node->ln_MenuFlags=MNF_TOGGLE|MNF_SEL;
 
 						// Add to list
 						AddTail((struct List *)&app_entry->menu,(struct Node *)node);
@@ -475,13 +475,13 @@ struct AppMenuItem *__asm __saveds L_WB_AddAppMenuItem(
 	wb_data=&((struct LibData *)libbase->ml_UserData)->wb_data;
 
 	// Pass straight through?
-	if (tags && !(GetTagData(DAE_Local,1,tags))) osonly=1;
+	if (tags && !(GetTagData(GAE_Local,1,tags))) osonly=1;
 
 	// Get new AppEntry
 	if (osonly || (app_entry=new_app_entry(APP_MENU,id,userdata,0,text,port,wb_data)))
 	{
 		// Local AppThing?
-		if (tags && GetTagData(DAE_Local,0,tags))
+		if (tags && GetTagData(GAE_Local,0,tags))
 		{
 			// Set local flag
 			app_entry->flags|=APPENTF_LOCAL;

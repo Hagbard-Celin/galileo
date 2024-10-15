@@ -49,8 +49,8 @@ struct TagItem
 		{TAG_END}},
 
 	_keyfinder_func_taglist[]={
-		{DLV_ReadOnly,TRUE},
-		{DLV_ShowSeparators,TRUE},
+		{GLV_ReadOnly,TRUE},
+		{GLV_ShowSeparators,TRUE},
 		{TAG_END}};
 
 ObjectDef

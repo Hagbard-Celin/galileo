@@ -357,9 +357,9 @@ typedef struct
 
 
 // Additional file requester flags
-#define DCRFF_PATTERN		(1<<29)
-#define DCRFF_SCREENPARENT	(1<<30)
-#define DCRFF_REJECTICONS	(1<<31)
+#define GCRFF_PATTERN		(1<<29)
+#define GCRFF_SCREENPARENT	(1<<30)
+#define GCRFF_REJECTICONS	(1<<31)
 
 #ifndef _GALILEOFM_DIRLIST
 // Holds version information (used by HFFS_VERSION)

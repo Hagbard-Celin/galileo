@@ -59,7 +59,7 @@ struct TagItem
 		{TAG_DONE}},
 
 	format_devices_tags[]={
-		{DLV_ShowSelected,0},
+		{GLV_ShowSelected,0},
 		{TAG_MORE,(ULONG)&format_layout_tags}},
 
 	format_name_tags[]={
