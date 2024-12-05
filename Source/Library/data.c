@@ -63,7 +63,7 @@ APTR					image_memory;
 
 Class
 	*listview_class,*image_class,*button_class,*palette_class,*string_class,
-	*check_class,*view_class,*frame_class,*gauge_class;
+	*check_class,*view_class,*frame_class,*gauge_class,*propgadget_class;
 
 __far WB_Data *wb_data;
 

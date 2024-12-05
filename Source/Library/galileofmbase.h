@@ -515,6 +515,9 @@ typedef struct
 #define LVEF_USE_PEN		(1<<1)			// Use pen to render entry
 #define LVEF_TEMP		(1<<2)			// Temporary flag for something
 
+// Propgadget tags
+#define GPGA_SpringLoaded   	TAG_USER + 60
+
 // Gauge tags
 #define GGG_Total		( TAG_USER + 0x64 )	// Total size
 #define GGG_Free		( TAG_USER + 0x65 )	// Free size

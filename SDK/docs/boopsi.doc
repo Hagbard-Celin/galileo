@@ -405,6 +405,39 @@ using GadTools. This class supports the following tags:
     GPG_SelectPrevious (void) (S) - use this tag with SetGadgetAttrs() to
         cause the previous colour in the gadget to be selected.
 
+galileofm.library/galileopropgclass                 galileofm.library/galileopropgclass
+
+    The galileopropgadgetclass provides a drop-in replacement for propgclass
+gadgets. Opposed to propgclass it always uses an AUTOKNOB with the same pens as
+other NewLook gadgets. The tags GA_Image, GA_Border, GA_HighLight,
+PGA_Borderless and PGA_NewLook will be ignored if present. GA_SpecialInfo is
+not used. This class adds one additional tag:
+
+    GPGA_SpringLoaded (BOOL) (I) - if set to TRUE, the knob will "snap"
+        into the middle position of the current PGA_Top value when the
+        mouse-button is released after dragging the knob.
+
+   Other than that it behaves approximately like propgclass gadgets with the
+following exceptions:
+
+    The minimum width/height the AUTOKNOB can shrink to is six pixels. This
+is also the minimum supported width/height of any gadgets of this class.
+
+    Scrolling by dragging the knob can be canceled by pressing the
+menu-button.
+
+    NOTES
+
+     Gadgets of this class is not suited for use in window borders.
+
+
+    BUGS
+
+     Creating or shrinking gadgets of this class smaller than the
+     minimum supported size will create undefined behavior, and might
+     crash the system.
+
+
 galileofm.library/galileostrgclass                   galileofm.library/galileostrgclass
 
     This galileostrgclass provides a replacement for GadTools STRING_KIND
@@ -460,3 +493,4 @@ use the GTTX_Text or GTNM_Number tags (a view gadget can be used to display
 either text or a number interchangeably).
 
 
+

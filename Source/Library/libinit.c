@@ -92,6 +92,7 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 	NewList(&image_list);
 	InitSemaphore(&image_lock);
 	image_memory=0;
+	propgadget_class=0;
 	listview_class=0;
 	image_class=0;
 	button_class=0;
@@ -193,13 +194,14 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 	data->NewIconsPrecision=16;
 
 	// See if SysIHack is running
-	if (FindTask("Â« sysihack Â»")) data->flags|=LIBDF_3DLOOK;
+	Forbid();
+	if (FindTask("« sysihack »")) data->flags|=LIBDF_3DLOOK;
 
 	// Or variable is set for 3d gadgets
 	else
 	if (GetVar("Galileo/3DLook",buf,2,GVF_GLOBAL_ONLY)>-1)
 		data->flags|=LIBDF_3DLOOK;
-    Permit();
+	Permit();
 
 	// Variable set for no stippling of requesters
 	if (GetVar("Galileo/OuEstLeMinibar",buf,2,GVF_GLOBAL_ONLY)>-1)
@@ -292,6 +294,14 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 				"gadgetclass",
 				(unsigned long (*)())button_dispatch,
 				sizeof(GaugeData))) ||
+
+		!(propgadget_class=
+			init_class(
+				data,
+				"galileopropgclass",
+				"gadgetclass",
+				(unsigned long (*)())propgadget_dispatch,
+				sizeof(PropGadgetData))) ||
 
 		!(listview_class=
 			init_class(
@@ -402,6 +412,7 @@ void __asm __saveds __UserLibCleanup(register __a6 struct MyLibrary *libbase)
 	}
 
 	class_free(listview_class);
+	class_free(propgadget_class);
 	class_free(button_class);
 	class_free(string_class);
 	class_free(check_class);

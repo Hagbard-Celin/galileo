@@ -146,6 +146,31 @@ typedef struct
 
 typedef struct
 {
+    WORD	        Top;
+    WORD	        Total;
+    WORD	        Visible;
+    WORD	        OrgTop;
+    WORD	        RelSize;
+    WORD	        Height;
+    WORD	        Width;
+    WORD	        KnobSize;
+    struct Rectangle    PropGadget;
+    struct Rectangle    Knob;
+    BOOL	        Scrolling;
+    WORD                JumpSize;
+    WORD                HalfStep;
+    WORD                OrgKnobPos;
+    WORD                OldKnobPos;
+    WORD                MouseOffset;
+    UWORD 	        Flags;
+} PropGadgetData;
+
+#define GPROPG_FREEVERT     (1<<0)
+#define GPROPG_FREEHORIZ    (1<<1)
+#define GPROPG_SPRINGLOADED (1<<2)
+
+typedef struct
+{
     short		    type;
     short		    fpen;
     struct LibData	    *data;
@@ -241,12 +266,16 @@ typedef struct
 
 ULONG __asm image_dispatch(register __a0 Class *cl,register __a2 Object *obj,register __a1 Msg msg);
 ULONG __asm button_dispatch(register __a0 Class *cl,register __a2 Object *obj,register __a1 Msg msg);
+ULONG __asm propgadget_dispatch(register __a0 Class *cl, register __a2 Object *obj, register __a1 Msg msg);
 ULONG __asm listview_dispatch(register __a0 Class *cl,register __a2 Object *obj,register __a1 Msg msg);
 ULONG __asm palette_dispatch(register __a0 Class *cl,register __a2 Object *obj,register __a1 Msg msg);
 
 
 void image_draw(Class *,struct Image *,BoopsiImageData *,struct impDraw *);
 void button_render(Class *,struct Gadget *,ButtonData *,struct gpRender *);
+void propgadget_calc_coords(Class *cl, PropGadgetData *data, struct Gadget *gadget, struct GadgetInfo *gi, BOOL vert, BOOL full);
+ULONG propgadget_render(Class *cl, struct Gadget *gadget, struct GadgetInfo *GInfo, struct gpRender *msg);
+void propgadget_notify(Class *cl, Object *obj, struct opUpdate *msg, PropGadgetData *data, struct GadgetInfo *GInfo, ULONG flags);
 void listview_render(Class *,struct Gadget *,ListViewData *,struct gpRender *);
 void listview_border(Class *,struct RastPort *,UWORD *,struct IBox *,ULONG,short);
 void listview_draw_items(Class *,struct Gadget *,struct RastPort *,struct DrawInfo *,ListViewData *,short);

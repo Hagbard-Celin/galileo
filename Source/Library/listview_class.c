@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -211,7 +211,7 @@ ULONG __asm __saveds listview_dispatch(
 				{
 					// Create scroller
 					if ((data->scroller=NewObject(
-						0,"propgclass",
+						0,"galileopropgclass",
 						GA_Previous,gadget,
 						GA_ID,LVGID_SCROLLER,
 						GA_Left,(data->flags&LVF_SCROLLER_LEFT)?data->dims.Left+4:data->dims.Left+data->dims.Width-data->scroller_width+4,
@@ -220,9 +220,9 @@ ULONG __asm __saveds listview_dispatch(
 						GA_Height,data->dims.Height-4-(data->arrow_height<<1),
 						GA_Disabled,(gadget->Flags&GFLG_DISABLED)?TRUE:FALSE,
 						PGA_Freedom,FREEVERT,
-						PGA_Borderless,TRUE,
 						PGA_Visible,1,
 						PGA_Total,1,
+						GPGA_SpringLoaded,TRUE,
 						ICA_TARGET,gadget,
 						ICA_MAP,data->scroll_map,
 						TAG_END)))

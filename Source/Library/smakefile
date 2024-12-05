@@ -10,7 +10,8 @@ OBJS = $(OBJ)libinit.o $(OBJ)data.o $(OBJ)string_data.o \
 	$(OBJ)drag_routines.o $(OBJ)palette_routines.o \
 	$(OBJ)layout_routines.o $(OBJ)layout_support.o $(OBJ)layout_utils.o \
 	$(OBJ)layout_resize.o \
-	$(OBJ)boopsi.o $(OBJ)image_class.o $(OBJ)button_class.o $(OBJ)listview_class.o $(OBJ)palette_class.o \
+	$(OBJ)boopsi.o $(OBJ)image_class.o $(OBJ)button_class.o $(OBJ)listview_class.o \
+	$(OBJ)propgadget_class.o $(OBJ)palette_class.o \
 	$(OBJ)dos_patch.o \
 	$(OBJ)notify.o \
 	$(OBJ)menu_routines.o \
@@ -204,6 +205,11 @@ $(OBJ)listview_class.o: /Include/galileo/os.h /Program/galileo_config.h
 $(OBJ)listview_class.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
 $(OBJ)listview_class.o: images.h dos_patch.h galileofmlib.strings pools.h
 $(OBJ)listview_class.o: boopsi.h
+$(OBJ)propgadget_class.o: propgadget_class.c galileofmlib.h galileofmbase.h
+$(OBJ)propgadget_class.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)propgadget_class.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
+$(OBJ)propgadget_class.o: images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)propgadget_class.o: boopsi.h
 $(OBJ)palette_class.o: palette_class.c galileofmlib.h galileofmbase.h
 $(OBJ)palette_class.o: /Include/galileo/os.h /Program/galileo_config.h
 $(OBJ)palette_class.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
