@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -46,14 +46,14 @@ For more information on Directory Opus for Windows please see:
 
 typedef struct
 {
-	struct Library		*IntuitionBase;
-	struct GfxBase		*GfxBase;
-	struct Library		*UtilityBase;
-	struct Library		*LayersBase;
+    struct Library	    *IntuitionBase;
+    struct GfxBase	    *GfxBase;
+    struct Library	    *UtilityBase;
+    struct Library	    *LayersBase;
 #ifdef RESOURCE_TRACKING
-    struct Library      *ResTrackBase;
+    struct Library          *ResTrackBase;
 #endif
-	struct LibData		*data;
+    struct LibData	    *data;
 } BoopsiLibs;
 
 Class *init_class(struct LibData *,char *,char *,unsigned long (*)(),long);
@@ -62,62 +62,62 @@ void class_free(Class *);
 
 typedef struct
 {
-	struct IBox	dims;			// Gadget dimensions (total)
-	struct IBox	list_dims;		// List dimensions
-	struct IBox	scroller_dims;		// Scroller dimensions
-	struct IBox	text_dims;		// Dimensions to render text within
-	short		arrow_height;		// Height of arrows
+    struct IBox	    dims;		    // Gadget dimensions (total)
+    struct IBox	    list_dims;		    // List dimensions
+    struct IBox	    scroller_dims;	    // Scroller dimensions
+    struct IBox	    text_dims;		    // Dimensions to render text within
+    short	    arrow_height;	    // Height of arrows
 
-	struct Gadget	*scroller;		// Scroller gadget
-	struct Image	*check;			// Checkmark
-	struct List	boopsi_list;		// List of BOOPSI gadgets
+    struct Gadget   *scroller;		    // Scroller gadget
+    struct Image    *check;		    // Checkmark
+    struct List	    boopsi_list;	    // List of BOOPSI gadgets
 
-	unsigned short	text_width;		// Text display width
-	unsigned short	text_height;		// Text display height
-	unsigned short	text_offset;		// Text display offset
+    unsigned short  text_width;		    // Text display width
+    unsigned short  text_height;	    // Text display height
+    unsigned short  text_offset;	    // Text display offset
 
 
-	struct TextFont	*list_font;		// Font to use in lister
+    struct TextFont *list_font;		    // Font to use in lister
 
-	short		top;			// Top item
-	short		count;			// Item count
-	short		lines;			// Number of visible lines
-	short		sel;			// Selected item
-	short		last_sel;		// Previously selected item
-	short		last_top;		// Previously selected top
+    short	    top;		    // Top item
+    short	    count;		    // Item count
+    short	    lines;		    // Number of visible lines
+    short	    sel;		    // Selected item
+    short	    last_sel;		    // Previously selected item
+    short	    last_top;		    // Previously selected top
 
-	struct List	*labels;		// Items
-	struct Node	*top_item;		// Current top item
+    struct List	    *labels;		    // Items
+    struct Node	    *top_item;		    // Current top item
 
-	ULONG		flags;			// Flags
-	ULONG		layout_flags;		// Layout flags
+    ULONG	    flags;		    // Flags
+    ULONG	    layout_flags;	    // Layout flags
 
-	struct TagItem	scroll_map[2];		// Scroller mapping tags
-	struct TagItem	arrow_up_map[2];	// Arrow mapping tags
-	struct TagItem	arrow_down_map[2];	// Arrow mapping tags
+    struct TagItem  scroll_map[2];	    // Scroller mapping tags
+    struct TagItem  arrow_up_map[2];	    // Arrow mapping tags
+    struct TagItem  arrow_down_map[2];	    // Arrow mapping tags
 
-	long		last_selection;		// Return value for handle input
+    long	    last_selection;	    // Return value for handle input
 
-	char		title[80];		// Listview title
-	short		title_uscore;		// Underscore position
+    char	    title[80];		    // Listview title
+    short	    title_uscore;	    // Underscore position
 
-	unsigned short	scroll_count;		// Number of scroll events for arrows
+    unsigned short  scroll_count;	    // Number of scroll events for arrows
 
-	struct Gadget	*arrows[2];		// Arrow gadgets
+    struct Gadget   *arrows[2];		    // Arrow gadgets
 
-	short		drag_x_position;	// Positions for reporting drag
-	short		drag_y_position;
-	short		drag_sel;		// Drag-selected item
+    short	    drag_x_position;	    // Positions for reporting drag
+    short	    drag_y_position;
+    short	    drag_sel;		    // Drag-selected item
 
-	struct TagItem	notify_tags[11];	// Tags for OM_NOTIFY
+    struct TagItem  notify_tags[11];	    // Tags for OM_NOTIFY
 
-	struct DrawInfo	*draw_info;		// Cached DrawInfo
+    struct DrawInfo *draw_info;		    // Cached DrawInfo
 
-	ULONG		seconds;		// For double-click
-	ULONG		micros;
-	short		click_sel;
+    ULONG	    seconds;		    // For double-click
+    ULONG	    micros;
+    short	    click_sel;
 
-	short 		scroller_width;
+    short 	    scroller_width;
 } ListViewData;
 
 #define LVF_SHOW_SELECTED		(1<<0)		// Show selected
@@ -146,10 +146,10 @@ typedef struct
 
 typedef struct
 {
-	short			type;
-	short			fpen;
-	struct LibData		*data;
-	unsigned short		flags;
+    short		    type;
+    short		    fpen;
+    struct LibData	    *data;
+    unsigned short	    flags;
 } BoopsiImageData;
 
 #define BIF_THIN_BORDERS		(1<<0)
@@ -159,39 +159,39 @@ typedef struct
 
 typedef struct
 {
-	char		title[80];	// Button text
-	short		title_uscore;	// Underscore position
-	struct TextFont	*font;		// Font to use
-	unsigned long	flags;		// Flags
-	short		place;		// Text placement
-	long		value;
-	char		*data;
-	short		justify;	// Justification
+    char	    title[80];	    // Button text
+    short	    title_uscore;   // Underscore position
+    struct TextFont *font;	    // Font to use
+    unsigned long   flags;	    // Flags
+    short	    place;	    // Text placement
+    long	    value;
+    char	    *data;
+    short	    justify;	    // Justification
 } ButtonData;
 
 typedef struct
 {
-	ButtonData	data;
-	struct IBox	border;
-	struct TextFont	*string_font;
-	char		*buffer;
-	struct Task	*change_task;
-	short		change_bit;
+    ButtonData	    data;
+    struct IBox	    border;
+    struct TextFont *string_font;
+    char	    *buffer;
+    struct Task	    *change_task;
+    short	    change_bit;
 } StringData;
 
 typedef struct
 {
-	ButtonData	data;
-	struct Image	*check_image;
+    ButtonData	    data;
+    struct Image    *check_image;
 } CheckData;
 
 typedef struct
 {
-	ButtonData	data;
-	long		total;
-	long		free;
-	short		fillpen;
-	short		fillpen_alert;
+    ButtonData	    data;
+    long	    total;
+    long	    free;
+    short	    fillpen;
+    short	    fillpen_alert;
 } GaugeData;
 
 #define BUTTONF_THIN		(1<<0)	// Thin border
@@ -214,29 +214,29 @@ typedef struct
 
 typedef struct
 {
-	struct IBox		box;		// Internal display box
-	short			pen_width;	// Width of each pen selector
-	short			pen_height;	// Height of each pen selector
-	short			pen_cols;	// Number of columns
-	short			pen_rows;	// Number of rows
-	short			pen_count;	// Number of pens
-	short			*pen_array;	// Pen array
-	short			pen_sel;	// Selected pen
+    struct IBox		    box;	    // Internal display box
+    short		    pen_width;	    // Width of each pen selector
+    short		    pen_height;	    // Height of each pen selector
+    short		    pen_cols;	    // Number of columns
+    short		    pen_rows;	    // Number of rows
+    short		    pen_count;	    // Number of pens
+    short		    *pen_array;	    // Pen array
+    short		    pen_sel;	    // Selected pen
 
-	short			*def_pen_array;
-	short			old_sel;
-	BOOL			done_first;
-	short			last_row,last_col;
-	short			last_sel;
-	struct Rectangle	selection_box;
+    short		    *def_pen_array;
+    short		    old_sel;
+    BOOL		    done_first;
+    short		    last_row,last_col;
+    short		    last_sel;
+    struct Rectangle	    selection_box;
 
-	char			title[80];	// Title
-	short			title_uscore;	// Underscore position
-	struct TextFont		*font;		// Font to use
+    char		    title[80];	    // Title
+    short		    title_uscore;   // Underscore position
+    struct TextFont	    *font;	    // Font to use
 
-	short			flags;		// Flags
+    short		    flags;	    // Flags
 
-	struct TagItem		notify_tags[3];	// Tags for OM_NOTIFY
+    struct TagItem	    notify_tags[3]; // Tags for OM_NOTIFY
 } PaletteData;
 
 ULONG __asm image_dispatch(register __a0 Class *cl,register __a2 Object *obj,register __a1 Msg msg);
@@ -279,8 +279,8 @@ void palette_render(Class *,struct Gadget *,PaletteData *,struct gpRender *);
 
 struct gpRenderExt
 {
-	struct gpRender	render;
-	long		value;
+    struct gpRender render;
+    long	    value;
 };
 
 #define GREDRAW_EXTRA	(0x380)

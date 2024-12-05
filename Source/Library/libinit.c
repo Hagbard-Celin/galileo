@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -72,8 +72,8 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 
     if (ResTrackBase=REALL_OpenLibrary("g_restrack.library",0))
     {
-    	StartResourceTracking (RTL_ALL);
-        SetMyLibBase ((struct Library *)libbase);
+	StartResourceTracking (RTL_ALL);
+	SetMyLibBase ((struct Library *)libbase);
     }
 #endif
 
@@ -119,7 +119,7 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 	// Get non-necessary libraries
 	DataTypesBase=OpenLibrary("datatypes.library",39);
 	RexxSysBase=(struct RxsLib *)OpenLibrary("rexxsyslib.library",0);
-    P96Base=OpenLibrary("Picasso96API.library",0);
+	P96Base=OpenLibrary("Picasso96API.library",0);
 
 	// Get library data
 	if (!(data=AllocVec(sizeof(struct LibData),MEMF_CLEAR)))
@@ -142,21 +142,12 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 		return 1;
 	data->TimerBase=(struct Library *)data->timer_io.io_Device;
 
-/*
-	// Is CyberGfx library already in system? If so, open it for ourselves
-	if (FindName(&ExecLib->LibList,"cybergraphics.library"))
-		CyberGfxBase=OpenLibrary("cybergraphics.library",0);
-*/
-/*
-    if (FindName(&ExecLib->LibList,"Picasso96API.library"))
-		P96Base=OpenLibrary("Picasso96API.library",0);
-*/
 	// Get topaz font
 	if (!(topaz_font=OpenFont(&topaz_attr))) return 1;
 
 	// Initialise stuff
 	data->low_mem_signal=-1;
-    data->wb_data.first_app_entry=TRUE;
+	data->wb_data.first_app_entry=TRUE;
 	data->wb_data.wb_base=WorkbenchBase;
 	data->wb_data.int_base=(struct Library *)IntuitionBase;
 	data->wb_data.galileofm_base=libbase;
@@ -167,12 +158,10 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 	data->int_base=(struct Library *)IntuitionBase;
 	data->galileofm_base=libbase;
 	data->gfx_base=(struct Library *)GfxBase;
-//    if (P96Base)
-//        data->p96_base=P96Base;
 
 #ifdef RESOURCE_TRACKING
-    data->wb_data.restrack_base=ResTrackBase;
-    data->restrack_base=ResTrackBase;
+	data->wb_data.restrack_base=ResTrackBase;
+	data->restrack_base=ResTrackBase;
 #endif
 
 	NewList((struct List *)&data->wb_data.app_list);
@@ -204,8 +193,7 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 	data->NewIconsPrecision=16;
 
 	// See if SysIHack is running
-    Forbid();
-	if (FindTask("« sysihack »")) data->flags|=LIBDF_3DLOOK;
+	if (FindTask("Â« sysihack Â»")) data->flags|=LIBDF_3DLOOK;
 
 	// Or variable is set for 3d gadgets
 	else
@@ -425,7 +413,7 @@ void __asm __saveds __UserLibCleanup(register __a6 struct MyLibrary *libbase)
 	if (topaz_font) CloseFont(topaz_font);
 	if (NewIconBase) CloseLibrary((struct Library *)NewIconBase);
 	if (RexxSysBase) CloseLibrary((struct Library *)RexxSysBase);
-    if (P96Base) CloseLibrary(P96Base);
+	if (P96Base) CloseLibrary(P96Base);
 	if (DataTypesBase) CloseLibrary(DataTypesBase);
 	CloseLibrary(IconBase);
 	CloseLibrary(LayersBase);
@@ -438,16 +426,16 @@ void __asm __saveds __UserLibCleanup(register __a6 struct MyLibrary *libbase)
 	CloseLibrary((struct Library *)DOSBase);
 
 #ifdef _DEBUG
-    KPrintF("Main Library\n");
+	KPrintF("Main Library\n");
 #ifdef RESOURCE_TRACKING
-    //PrintTrackedResources();
-    if (ResTrackBase->lib_OpenCnt==2)
+	//PrintTrackedResources();
+	if (ResTrackBase->lib_OpenCnt==2)
 	    EndResourceTracking(); /* Generate a memory usage report */
 
-    REALL_CloseLibrary(ResTrackBase);
+	REALL_CloseLibrary(ResTrackBase);
 #endif
 
-    KPrintF("Quitting......\n");
+	KPrintF("Quitting......\n");
 #endif
 }
 

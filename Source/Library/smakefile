@@ -102,7 +102,7 @@ depend:
 #########################################################################
 
 clean:
-	-delete $(OBJ)\#?.o quiet
+    -delete $(OBJ)\#?.o quiet
     -delete $(LBIN)galileofm.library
     -delete $(TESTBIN)memtest
     -delete $(BIN)galileofmlib.lib
