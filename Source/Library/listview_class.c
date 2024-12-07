@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2024 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -119,9 +120,10 @@ ULONG __asm __saveds listview_dispatch(
 					data->flags|=LVF_SELECTED_HIGH;
 				if (GetTagData(GLV_ReadOnly,0,tags))
 					data->flags|=LVF_READ_ONLY;
-				if (GetTagData(GLV_NoScroller,0,tags))
+				if (a=GetTagData(GLV_NoScroller,0,tags))
 				{
 					data->flags|=LVF_NO_SCROLLER;
+					if (a==2) data->flags|=LVF_NO_SCROLLING;
 					data->scroller_width=0;
 				}
 				else
@@ -926,6 +928,9 @@ ULONG __asm __saveds listview_dispatch(
 				else
 				if (msg->MethodID==GM_GOINACTIVE)
 				{
+					// Skip if noting to do
+					if (gadget->Flags&GFLG_SELECTED)
+					{
 					// Clear selected flag
 					gadget->Flags&=~GFLG_SELECTED;
 
@@ -937,11 +942,18 @@ ULONG __asm __saveds listview_dispatch(
 					// Save this selection
 					data->last_selection=data->sel;
 
+						// Clear scroll flag
+						data->flags&=~LVF_SCROLL_FLAG;
+
+						// Clear cancel flag
+						data->flags&=~LVF_CANCEL;
+
 					// Send notify
 					DoMethod(obj,OM_NOTIFY,0,((struct gpInput *)msg)->gpi_GInfo,0);
 
 					// Clear cancel flag
 					data->flags&=~LVF_CANCEL;
+					}
 				}
 
 				// Handle input
@@ -959,6 +971,38 @@ ULONG __asm __saveds listview_dispatch(
 							// Left button up
 							case SELECTUP:
 								{
+									// Cancel if mouse outside gadget
+									if (data->sel == -1)
+									{
+										// Gadget processing finished
+										retval=GMR_NOREUSE;
+										data->flags|=LVF_CANCEL;
+
+										// Show selected?
+										if (data->flags&LVF_SHOW_SELECTED)
+										{
+											// Restore last selection
+											data->last_sel=data->sel;
+											data->sel=data->last_selection;
+
+											// Does top need to change?
+											if (data->top!=data->last_top)
+											{
+												short item;
+
+												data->top=data->last_top;
+												data->last_sel=-1;
+
+												for (data->top_item=data->labels->lh_Head,item=0;
+													data->top_item->ln_Succ && item<data->top;
+													data->top_item=data->top_item->ln_Succ,item++);
+											}
+
+											redraw=1;
+										}
+									}
+									else
+									{
 									// Set return code
 									*input->gpi_Termination=data->sel;
 
@@ -967,7 +1011,7 @@ ULONG __asm __saveds listview_dispatch(
 									data->flags|=LVF_CANCEL;
 
 									// Multi-selection?
-									if (data->flags&LVF_MULTI_SELECT)
+										if ((data->flags&LVF_MULTI_SELECT) && (data->sel>-1))
 									{
 										struct Node *node;
 										short count;
@@ -989,12 +1033,14 @@ ULONG __asm __saveds listview_dispatch(
 										}
 									}
 								}
+								}
 								break;
 
 							// No button; mouse moved
 							case IECODE_NOBUTTON:
 								{
 									short sel;
+									BOOL outside_y = FALSE;
 
 									// Is mouse outside of lister?
 									if (input->gpi_Mouse.X<0 ||
@@ -1020,7 +1066,28 @@ ULONG __asm __saveds listview_dispatch(
 											}
 											else break;
 										}
+										else
+										if ((data->flags&LVF_NO_SCROLLING) || (!(data->flags&LVF_SCROLL_FLAG)))
+										{
+
+											data->last_sel=data->sel;
+											data->sel=-1;
+											redraw=1;
+
+											break;
+										}
 										else break;
+									}
+									else
+									// Is mouse outside of lister?
+									if ( ((outside_y = (input->gpi_Mouse.Y<0 ||	input->gpi_Mouse.Y>=data->list_dims.Height)) &&
+										!(data->flags&LVF_DRAG_NOTIFY)) && ((data->flags&LVF_NO_SCROLLING) || (!(data->flags&LVF_SCROLL_FLAG))) )
+									{
+										data->last_sel=data->sel;
+										data->sel=-1;
+										redraw=1;
+
+										break;
 									}
 
 									// Get selection
@@ -1028,6 +1095,10 @@ ULONG __asm __saveds listview_dispatch(
 									if ((sel=listview_get_sel(cl,gadget,data,input,1))>-1 ||
 										(sel==-1 && (data->flags&LVF_NO_VERT_SCROLL)))
 									{
+										// Are we scrolling?
+										if (outside_y)
+											data->flags|=LVF_SCROLL_FLAG;
+
 										// Change?
 										if (data->sel!=sel || sel==-1)
 										{
@@ -1063,7 +1134,6 @@ ULONG __asm __saveds listview_dispatch(
 										}
 										else break;
 									}
-
 									else break;
 								}
 
@@ -1106,9 +1176,16 @@ ULONG __asm __saveds listview_dispatch(
 					if (input->gpi_IEvent->ie_Class==IECLASS_TIMER)
 					{
 						short sel;
+						WORD outside_ok=0;
+
+						if (data->flags&LVF_DRAG_NOTIFY)
+							outside_ok=3;
+						else
+						if (!(data->flags&LVF_NO_SCROLLING))
+							outside_ok=2;
 
 						// Get selection
-						if ((sel=listview_get_sel(cl,gadget,data,input,2))>-1)
+						if ((sel=listview_get_sel(cl,gadget,data,input,outside_ok))>-1)
 						{
 							// Change?
 							if (data->sel!=sel)
@@ -1128,6 +1205,8 @@ ULONG __asm __saveds listview_dispatch(
 										--data->top;
 										data->top_item=data->top_item->ln_Pred;
 
+										data->flags|=LVF_SCROLL_FLAG;
+
 										// Redraw the list
 										data->last_sel=-1;
 										redraw=1;
@@ -1141,6 +1220,8 @@ ULONG __asm __saveds listview_dispatch(
 										// Scroll down
 										++data->top;
 										data->top_item=data->top_item->ln_Succ;
+
+										data->flags|=LVF_SCROLL_FLAG;
 
 										// Redraw the list
 										data->last_sel=-1;
@@ -1895,13 +1976,13 @@ short listview_get_sel(
 		y>=data->text_dims.Top+data->text_dims.Height)
 	{
 		// Not allowed that?
-		if (outside_ok!=2) return -1;
+		if (!(outside_ok&2)) return -1;
 	}
 	if (x<data->text_dims.Left ||
 		x>=data->text_dims.Left+data->text_dims.Width)
 	{
 		// Not allowed that?
-		if (!outside_ok) return -1;
+		if (!(outside_ok&1)) return -1;
 	}
 
 	// Get the line we're over

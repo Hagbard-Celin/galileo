@@ -144,6 +144,9 @@ typedef struct
 #define LVF_DISABLE_CHANGE		(1<<21)		// Disable state changed
 #define LVF_THIN_BORDER			(1<<22)		// Thin borders
 
+#define LVF_NO_SCROLLING        (1<<27)
+#define LVF_SCROLL_FLAG			(1<<28)
+
 typedef struct
 {
     WORD	        Top;
