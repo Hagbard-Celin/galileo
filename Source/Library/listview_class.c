@@ -185,7 +185,7 @@ ULONG __asm __saveds listview_dispatch(
 
 				// Fix dimensions
 				listview_get_dims(cl,data);
-				data->text_height=data->list_font->tf_YSize;
+				data->text_height=data->list_font->tf_YSize+1;
 
 				// Need check mark?
 				if (data->flags&(LVF_MULTI_SELECT|LVF_SHOW_CHECKS) ||
@@ -196,13 +196,13 @@ ULONG __asm __saveds listview_dispatch(
 						0,"galileoiclass",
 						GIA_Type,IM_CHECK,
 						IA_Width,13,
-						IA_Height,data->text_height-1,
+						IA_Height,data->text_height-2,
 						TAG_END))
 					{
 						// Add to boopsi list
 						DoMethod((Object *)data->check,OM_ADDTAIL,&data->boopsi_list);
 					}
-					data->text_offset=23;
+					data->text_offset=19;
 				}
 				else data->text_offset=2;
 
@@ -1665,7 +1665,7 @@ void listview_draw_item(
 				&extent,
 				0,-1,
 				data->text_width,
-				data->text_height);
+				data->text_height-1);
 
 			// Won't all fit?
 			if (len<textlen)
@@ -1681,7 +1681,7 @@ void listview_draw_item(
 					&extent,
 					0,-1,
 					data->text_width-dotlen,
-					data->text_height);
+					data->text_height-1);
 			}
 
 			// Draw text
@@ -1791,7 +1791,7 @@ void listview_draw_item(
 				else
 				if (len>0)
 				{
-					Move(rp,box->Left+x,y+rp->TxBaseline);
+					Move(rp,box->Left+x,y+1+rp->TxBaseline);
 					Text(rp,name+pos,len);
 				}
 
@@ -1840,6 +1840,10 @@ void listview_draw_item(
 		box->Left+data->text_offset-1,
 		y+data->text_height-1);
 
+	// Fill the line above the text
+	Move(rp,box->Left+data->text_offset,y);
+	Draw(rp,box->Left+last_x-1,y);
+
 	// Fill end of line?
 	if (last_x<box->Width)
 	{
@@ -1861,7 +1865,7 @@ void listview_draw_item(
 			DrawImageState(
 				rp,
 				data->check,
-				box->Left+6,y,
+				box->Left+3,y+1,
 				IDS_NORMAL,
 				drawinfo);
 		}
@@ -1937,11 +1941,11 @@ void listview_get_dims(Class *cl,ListViewData *data)
 	data->scroller_dims.Height=data->dims.Height-(data->arrow_height<<1);
 
 	// Get number of lines in lister
-	data->lines=UDivMod32((data->list_dims.Height-2),data->list_font->tf_YSize);
+	data->lines=UDivMod32((data->list_dims.Height-2),data->list_font->tf_YSize + 1);
 
 	// Calculate text area
 	data->text_dims.Width=data->list_dims.Width-((data->flags&LVF_THIN_BORDER)?2:4);
-	data->text_dims.Height=(unsigned short)(data->lines)*data->list_font->tf_YSize;
+	data->text_dims.Height=(unsigned short)(data->lines)*(data->list_font->tf_YSize + 1);
 	data->text_dims.Left=data->list_dims.Left+((data->flags&LVF_THIN_BORDER)?1:2);
 	if (data->flags&LVF_TOP_JUSTIFY)
 	{
