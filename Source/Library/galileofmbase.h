@@ -32,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -46,38 +46,38 @@ For more information on Directory Opus for Windows please see:
 
 typedef struct _DragInfo
 {
-	struct RastPort	*rastport;	// Stores RastPort this bob belongs to
-	struct ViewPort	*viewport;	// Stores ViewPort
+    struct RastPort	*rastport;	// Stores RastPort this bob belongs to
+    struct ViewPort	*viewport;	// Stores ViewPort
 
-	WORD		width;		// Bob width
-	WORD		height;		// Bob height
+    WORD		width;		// Bob width
+    WORD		height;		// Bob height
 
-	struct VSprite	sprite;		// VSprite structure
-	struct Bob	bob;		// BOB structure
+    struct VSprite	sprite;		// VSprite structure
+    struct Bob		bob;		// BOB structure
 
-	unsigned long	flags;		// Flags
+    unsigned long	flags;		// Flags
 
-	struct RastPort	drag_rp;	// RastPort we can draw into
-	struct BitMap	drag_bm;	// BitMap we can draw into
+    struct RastPort	drag_rp;	// RastPort we can draw into
+    struct BitMap	drag_bm;	// BitMap we can draw into
 
-	struct Window	*window;	// Window pointer
+    struct Window	*window;	// Window pointer
 
-	long		offset_x;
-	long		offset_y;
-	long		userdata;
-	long		pad[4];
+    long		offset_x;
+    long		offset_y;
+    long		userdata;
+    long		pad[4];
 
-	struct DBufPacket	*dbuf;	// Double-buffering packet
+    struct DBufPacket	*dbuf;		// Double-buffering packet
 
-	long		dest_width;
-	long		dest_height;
+    long		dest_width;
+    long		dest_height;
 } DragInfo;
 
 typedef struct
 {
-	struct VSprite	head;		// GEL list head sprite
-	struct VSprite	tail;		// GEL list tail sprite
-	struct GelsInfo	info;		// GEL info
+    struct VSprite  head;   // GEL list head sprite
+    struct VSprite  tail;   // GEL list tail sprite
+    struct GelsInfo info;   // GEL info
 } DragInfoExtra;
 
 #define DRAGF_VALID		(1<<0)	// Bob is valid
@@ -127,42 +127,42 @@ BOOL DragCustomOk(struct BitMap *);
 
 // Defines a window
 typedef struct _ConfigWindow {
-	struct IBox char_dim;
-	struct IBox fine_dim;
+    struct IBox char_dim;
+    struct IBox	 fine_dim;
 } ConfigWindow;
 
 // Opens a window
 typedef struct _NewConfigWindow {
-	void			*parent;		// Parent to open on
-	ConfigWindow		*dims;			// Window dimensions
-	char			*title;			// Window title
-	struct GalileoLocale	*locale;		// Locale to use
-	struct MsgPort		*port;			// Message port to use
-	ULONG			flags;			// Flags
-	struct TextFont		*font;			// Alternative font to use
+    void		    *parent;	// Parent to open on
+    ConfigWindow	    *dims;	// Window dimensions
+    char		    *title;	// Window title
+    struct GalileoLocale    *locale;	// Locale to use
+    struct MsgPort	    *port;	// Message port to use
+    ULONG		    flags;	// Flags
+    struct TextFont	    *font;	// Alternative font to use
 } NewConfigWindow;
 
 // Set by the user
-#define WINDOW_SCREEN_PARENT	(1<<0)		// Parent is a screen
-#define WINDOW_NO_CLOSE		(1<<1)		// No close gadget
-#define WINDOW_NO_BORDER	(1<<2)		// No border
-#define WINDOW_LAYOUT_ADJUST	(1<<3)		// Adjust window size to fit objects
-#define WINDOW_SIMPLE		(1<<4)		// Simple refresh
-#define WINDOW_AUTO_REFRESH	(1<<5)		// Refresh window automatically
-#define WINDOW_AUTO_KEYS	(1<<6)		// Handle keys automatically
-#define WINDOW_OBJECT_PARENT	(1<<7)		// Parent is an existing object
-#define WINDOW_REQ_FILL		(1<<8)		// Backfill as a requester
-#define WINDOW_NO_ACTIVATE	(1<<9)		// Don't activate
-#define WINDOW_VISITOR		(1<<10)		// Open as visitor window
-#define WINDOW_SIZE_RIGHT	(1<<11)		// Size gadget, in right border
-#define WINDOW_SIZE_BOTTOM	(1<<12)		// Size gadget, in bottom border
-#define WINDOW_ICONIFY		(1<<13)		// Iconify gadget
+#define WINDOW_SCREEN_PARENT	(1<<0)	// Parent is a screen
+#define WINDOW_NO_CLOSE		(1<<1)	// No close gadget
+#define WINDOW_NO_BORDER	(1<<2)	// No border
+#define WINDOW_LAYOUT_ADJUST	(1<<3)	// Adjust window size to fit objects
+#define WINDOW_SIMPLE		(1<<4)	// Simple refresh
+#define WINDOW_AUTO_REFRESH	(1<<5)	// Refresh window automatically
+#define WINDOW_AUTO_KEYS	(1<<6)	// Handle keys automatically
+#define WINDOW_OBJECT_PARENT	(1<<7)	// Parent is an existing object
+#define WINDOW_REQ_FILL		(1<<8)	// Backfill as a requester
+#define WINDOW_NO_ACTIVATE	(1<<9)	// Don't activate
+#define WINDOW_VISITOR		(1<<10)	// Open as visitor window
+#define WINDOW_SIZE_RIGHT	(1<<11)	// Size gadget, in right border
+#define WINDOW_SIZE_BOTTOM	(1<<12)	// Size gadget, in bottom border
+#define WINDOW_ICONIFY		(1<<13)	// Iconify gadget
 
 // Set by the system
-#define OPEN_USED_DEFAULT	(1<<16)		// To open had to use default font
-#define OPEN_USED_TOPAZ		(1<<17)		// To open had to use topaz
-#define OPEN_SHRUNK_VERT	(1<<18)		// Window is not full vertical size requested
-#define OPEN_SHRUNK_HORIZ	(1<<19)		// Window is not full horizontal size requested
+#define OPEN_USED_DEFAULT	(1<<16)	// To open had to use default font
+#define OPEN_USED_TOPAZ		(1<<17)	// To open had to use topaz
+#define OPEN_SHRUNK_VERT	(1<<18)	// Window is not full vertical size requested
+#define OPEN_SHRUNK_HORIZ	(1<<19)	// Window is not full horizontal size requested
 #define OPEN_SHRUNK		(OPEN_SHRUNK_VERT|OPEN_SHRUNK_HORIZ)
 
 
@@ -224,92 +224,105 @@ typedef struct _ObjectDef {
 
 typedef struct _GL_Object
 {
-	struct _GL_Object	*next;		// Next object
-	short			type;		// Type of object
-	unsigned char		key;		// Key equivalent
+    struct _GL_Object	    *next;	    // Next object
+    short		    type;	    // Type of object
+    unsigned char	    key;	    // Key equivalent
 
-	unsigned char		flags2;		// Additional flags
+    unsigned char	    flags2;	    // Additional flags
 
-	unsigned short		id;		// Object ID
-	unsigned short		control_id;	// Object that this controls
-	struct IBox		dims;		// Object dimensions
-	ULONG			flags;		// Object flags
-	char			*text;		// Text
-	USHORT			object_kind;	// Object kind
+    unsigned short	    id;		    // Object ID
+    unsigned short	    control_id;	    // Object that this controls
+    struct IBox		    dims;	    // Object dimensions
+    ULONG		    flags;	    // Object flags
+    char		    *text;	    // Text
+    USHORT		    object_kind;    // Object kind
 
-	union
+    union
+    {
+	struct _gl_gadget
 	{
-		struct _gl_gadget
-		{
-			struct Gadget *context;	// Context data for the gadget
-			struct Gadget *gadget;	// The gadget itself
-			int components;		// Number of component gadgets
-			LONG data;		// Some data for the gadget
-			short choice_max;	// Number of choices
-			short choice_min;	// Minimum choice
-			struct Image *image;	// Gadget image
-		} gl_gadget;
+	    struct Gadget *context; // Context data for the gadget
+	    struct Gadget *gadget;  // The gadget itself
+	    int components;	    // Number of component gadgets
+	    LONG data;		    // Some data for the gadget
+	    short choice_max;	    // Number of choices
+	    short choice_min;	    // Minimum choice
+	    struct Image *image;    // Gadget image
+	} gl_gadget;
 
-		struct _gl_text
-		{
-			struct IBox text_pos;	// Text position
-			WORD base_pos;		// Baseline position
-			short uscore_pos;	// Underscore position
-		} gl_text;
+	struct _gl_text
+	{
+	    struct IBox text_pos;   // Text position
+	    WORD base_pos;	    // Baseline position
+	    short uscore_pos;	    // Underscore position
+	} gl_text;
 
-		struct _gl_area
-		{
-			struct IBox text_pos;	// Text position within area
-			struct IBox area_pos;	// Area position
-			int frametype;		// Frame type
-		} gl_area;
+	struct _gl_area
+	{
+	    struct IBox text_pos;   // Text position within area
+	    struct IBox area_pos;   // Area position
+	    int frametype;	    // Frame type
+	} gl_area;
 
-		struct _gl_image
-		{
-			struct IBox image_pos;	// Image position
-			struct Image *image;	// Image
-		} gl_image;
-	} gl_info;
+	struct _gl_image
+	{
+	    struct IBox image_pos;  // Image position
+	    struct Image *image;    // Image
+	} gl_image;
+    } gl_info;
 
-	APTR memory;				// Any other memory
+    APTR memory;			    // Any other memory
 
-	char *original_text;			// Original text string
-	char fg,bg;				// Current pen colours
+    char *original_text;		    // Original text string
+    char fg,bg;				    // Current pen colours
 
-	ULONG	data_ptr;			// Pointer to other data
+    ULONG   data_ptr;			    // Pointer to other data
 
-	struct TagItem	*tags;			// Copy of tags
+    struct TagItem  *tags;		    // Copy of tags
 
-	struct IBox char_dims;			// Original dimensions
-	struct IBox fine_dims;
+    struct IBox char_dims;		    // Original dimensions
+    struct IBox fine_dims;
 } GL_Object;
 
 typedef struct _ObjectList {
-	struct MinNode		node;
-	GL_Object		*firstobject;	// First object
-	struct TextAttr		attr;		// Font used
-	struct Window		*window;	// Window used
+    struct MinNode	    node;
+    GL_Object		    *firstobject;   // First object
+    struct TextAttr	    attr;	    // Font used
+    struct Window	    *window;	    // Window used
 } ObjectList;
 
-#define OBJECTF_NO_SELECT_NEXT	(1<<0)		// Don't select next field
-#define OBJECTF_PATH_FILTER	(1<<1)		// Filter path characters
-#define OBJECTF_SECURE		(1<<2)		// Hide string
-#define OBJECTF_INTEGER		(1<<3)		// Integer gadget
-#define OBJECTF_READ_ONLY	(1<<4)		// Read-only
-#define OBJECTF_HOTKEY		(1<<5)		// Hotkey string
-#define OBJECTF_UPPERCASE	(1<<6)		// Uppercase string
+typedef struct _CompoundObjectList {
+    struct MinNode	    node;
+    struct MinList      objects;
+    UWORD	            id;
+} CompoundObjectList;
+
+typedef struct _CompoundObject {
+    struct MinNode	    node;
+    struct Rectangle    coords;
+    struct Gadget      *object;
+    UWORD			    id;
+} CompoundObject;
+
+#define OBJECTF_NO_SELECT_NEXT	(1<<0)	    // Don't select next field
+#define OBJECTF_PATH_FILTER	(1<<1)	    // Filter path characters
+#define OBJECTF_SECURE		(1<<2)	    // Hide string
+#define OBJECTF_INTEGER		(1<<3)	    // Integer gadget
+#define OBJECTF_READ_ONLY	(1<<4)	    // Read-only
+#define OBJECTF_HOTKEY		(1<<5)	    // Hotkey string
+#define OBJECTF_UPPERCASE	(1<<6)	    // Uppercase string
 
 typedef struct _MenuData {
-	UBYTE	type;				// Menu type
-	ULONG	id;				// Menu ID
-	ULONG	name;				// Menu name
-	ULONG	flags;				// Menu flags
+    UBYTE   type;			    // Menu type
+    ULONG   id;				    // Menu ID
+    ULONG   name;			    // Menu name
+    ULONG   flags;			    // Menu flags
 } MenuData;
 
-#define MENUFLAG_TEXT_STRING	(1<<16)		// Menu name is a real string
-#define MENUFLAG_COMM_SEQ	(1<<17)		// Give menu a command sequence
-#define MENUFLAG_AUTO_MUTEX	(1<<18)		// Automatic mutual exclusion
-#define MENUFLAG_USE_SEQ	(1<<19)		// Use command sequence supplied
+#define MENUFLAG_TEXT_STRING	(1<<16)	    // Menu name is a real string
+#define MENUFLAG_COMM_SEQ	(1<<17)	    // Give menu a command sequence
+#define MENUFLAG_AUTO_MUTEX	(1<<18)	    // Automatic mutual exclusion
+#define MENUFLAG_USE_SEQ	(1<<19)	    // Use command sequence supplied
 
 #define MENUFLAG_MAKE_SEQ(c)	((ULONG)(c)<<24)
 #define MENUFLAG_GET_SEQ(fl)	((char)((fl)>>24))
@@ -321,10 +334,10 @@ typedef struct _MenuData {
 
 typedef struct
 {
-	ULONG			magic;		// Magic ID
-	struct Window		*window;	// Pointer back to window
-	ULONG			window_id;	// User window ID
-	struct MsgPort		*app_port;	// "Window's" application port
+    ULONG	    magic;	// Magic ID
+    struct Window   *window;	// Pointer back to window
+    ULONG	    window_id;	// User window ID
+    struct MsgPort  *app_port;	// "Window's" application port
 } WindowID;
 
 #define WINDOW_MAGIC		0x83224948
@@ -348,32 +361,33 @@ typedef struct
 
 typedef struct _WindowData
 {
-	WindowID		id;		// Window ID information
+    WindowID		    id;		    // Window ID information
 
-	ULONG			pad3;
-	struct FileRequester	*request;	// Window's file requester
-	APTR			visinfo;	// Visual info
-	struct DrawInfo		*drawinfo;	// Draw info
-	struct GalileoLocale	*locale;	// Locale info
-	struct MsgPort		*window_port;	// Window message port (if supplied)
-	struct NewMenu		*new_menu;	// NewMenu structure allocated
-	struct Menu		*menu_strip;	// Menu strip allocated
-	struct Requester	*busy_req;	// Window busy requester
-	ULONG			data;		// Window-specific data
-	ULONG			flags;		// Flags
-	APTR			memory;		// User memory chain, freed when window closes
+    ULONG		    pad3;
+    struct FileRequester    *request;	    // Window's file requester
+    APTR		    visinfo;	    // Visual info
+    struct DrawInfo	    *drawinfo;	    // Draw info
+    struct GalileoLocale    *locale;	    // Locale info
+    struct MsgPort	    *window_port;   // Window message port (if supplied)
+    struct NewMenu	    *new_menu;	    // NewMenu structure allocated
+    struct Menu		    *menu_strip;    // Menu strip allocated
+    struct Requester	    *busy_req;	    // Window busy requester
+    ULONG		    data;	    // Window-specific data
+    ULONG		    flags;	    // Flags
+    APTR		    memory;	    // User memory chain, freed when window closes
 
-	ULONG			pad;
-	struct FontRequester	*font_request;	// Window's font requester
+    ULONG		    pad;
+    struct FontRequester    *font_request;  // Window's font requester
 
-	ULONG			userdata;
-	struct TagItem		*user_tags;
+    ULONG		    userdata;
+    struct TagItem	    *user_tags;
 
-	struct List		boopsi_list;	// BOOPSI list
+    struct List		    boopsi_list;    // BOOPSI list
 
-	struct Hook		*backfill;	// Backfill hook
+    struct Hook		    *backfill;	    // Backfill hook
 
-	struct MinList		object_list;
+    struct MinList	    object_list;
+    struct MinList	    compound_gadgets;
 } WindowData;
 
 #define FILE_GLASS_KIND	1000
@@ -383,13 +397,13 @@ typedef struct _WindowData
 
 struct gpResize
 {
-	ULONG			MethodID;
-	struct GadgetInfo	*gpr_GInfo;
-	struct RastPort		*gpr_RPort;
-	struct IBox		gpr_Size;
-	long			gpr_Redraw;
-	struct Window		*gpr_Window;
-	struct Requester	*gpr_Requester;
+    ULONG		    MethodID;
+    struct GadgetInfo	    *gpr_GInfo;
+    struct RastPort	    *gpr_RPort;
+    struct IBox		    gpr_Size;
+    long		    gpr_Redraw;
+    struct Window	    *gpr_Window;
+    struct Requester	    *gpr_Requester;
 };
 
 // Custom tags
@@ -501,11 +515,11 @@ struct gpResize
 
 typedef struct
 {
-	struct RastPort		*rp;
-	struct DrawInfo		*drawinfo;
-	struct Node		*node;
-	unsigned short		line;
-	struct IBox		box;
+    struct RastPort	    *rp;
+    struct DrawInfo	    *drawinfo;
+    struct Node		    *node;
+    unsigned short	    line;
+    struct IBox		    box;
 } ListViewDraw;
 
 // Listview node data
@@ -560,9 +574,9 @@ typedef struct
 // Window dimensions
 typedef struct
 {
-	struct IBox	wd_Normal;
-	struct IBox	wd_Zoomed;
-	unsigned short	wd_Flags;
+    struct IBox	    wd_Normal;
+    struct IBox	    wd_Zoomed;
+    unsigned short  wd_Flags;
 } WindowDimensions;
 
 #define WDF_VALID	(1<<0)
@@ -576,21 +590,21 @@ BOOL CheckWindowDims(struct Window *,WindowDimensions *);
 // Locale marker
 struct GalileoLocale
 {
-	APTR		li_LocaleBase;
-	APTR		li_Catalog;
-	char		*li_BuiltIn;
-	struct Locale	*li_Locale;
+    APTR	    li_LocaleBase;
+    APTR	    li_Catalog;
+    char	    *li_BuiltIn;
+    struct Locale   *li_Locale;
 };
 
 
 // List management stuff
 typedef struct _Att_List
 {
-	struct List		list;		// List structure
-	struct SignalSemaphore	lock;		// Semaphore for locking
-	ULONG			flags;		// Flags
-	APTR			memory;		// Memory pool
-	struct _Att_Node	*current;	// Current node (application use)
+    struct List		    list;	    // List structure
+    struct SignalSemaphore  lock;	    // Semaphore for locking
+    ULONG		    flags;	    // Flags
+    APTR		    memory;	    // Memory pool
+    struct _Att_Node	    *current;	    // Current node (application use)
 } Att_List;
 
 #define LISTF_LOCK	(1<<0)
@@ -635,10 +649,10 @@ BOOL IsListLockEmpty(struct ListLock *);
 // Timer handle
 typedef struct TimerHandle
 {
-	struct MsgPort		*port;
-	struct timerequest	req;
-	struct MsgPort		*my_port;
-	short			active;
+    struct MsgPort	    *port;
+    struct timerequest	    req;
+    struct MsgPort	    *my_port;
+    short		    active;
 } TimerHandle;
 
 TimerHandle *AllocTimer(ULONG,struct MsgPort *);
@@ -653,16 +667,16 @@ struct Library *GetTimerBase(void);
 // Notification message
 typedef struct
 {
-	struct Message		gn_Msg;
-	ULONG			gn_Type;
-	ULONG			gn_UserData;
-	ULONG			gn_Data;
-	ULONG			gn_Flags;
-	struct FileInfoBlock	*gn_Fib;
-	char			gn_Name[1];
+    struct Message	    gn_Msg;
+    ULONG		    gn_Type;
+    ULONG		    gn_UserData;
+    ULONG		    gn_Data;
+    ULONG		    gn_Flags;
+    struct FileInfoBlock    *gn_Fib;
+    char		    gn_Name[1];
 } GalileoNotify;
 
-#define NT_GALILEOFM_NOTIFY		199
+#define NT_GALILEOFM_NOTIFY	199
 #define GN_WRITE_ICON		(1<<0)		// Icon written
 #define GN_APP_ICON_LIST	(1<<1)		// AppIcon added/removed
 #define GN_APP_MENU_LIST	(1<<2)		// AppMenu added/removed
@@ -670,10 +684,10 @@ typedef struct
 #define GN_OPEN_WORKBENCH	(1<<4)		// Workbench opened
 #define GN_RESET_WORKBENCH	(1<<5)		// Workbench reset
 #define GN_DISKCHANGE		(1<<6)		// Disk inserted/removed
-#define GN_GALILEOFM_QUIT		(1<<7)		// Main program quit
-#define GN_GALILEOFM_HIDE		(1<<8)		// Main program hide
-#define GN_GALILEOFM_SHOW		(1<<9)		// Main program show
-#define GN_GALILEOFM_START		(1<<10)		// Main program start
+#define GN_GALILEOFM_QUIT	(1<<7)		// Main program quit
+#define GN_GALILEOFM_HIDE	(1<<8)		// Main program hide
+#define GN_GALILEOFM_SHOW	(1<<9)		// Main program show
+#define GN_GALILEOFM_START	(1<<10)		// Main program start
 #define GN_DOS_ACTION		(1<<11)		// DOS action
 #define GN_REXX_UP		(1<<12)		// REXX started
 #define GN_FLUSH_MEM		(1<<13)		// Flush memory
@@ -702,12 +716,12 @@ void SetNotifyRequest(APTR,ULONG,ULONG);
 
 // Inter-Process Communication
 typedef struct {
-	struct Message	msg;			// Exec message
-	ULONG		command;		// Message command
-	ULONG		flags;			// Message flags
-	APTR		data;			// Message data
-	APTR		data_free;		// Data to be FreeVec()ed automatically
-	struct _IPC	*sender;		// Sender IPC
+    struct Message  msg;		    // Exec message
+    ULONG	    command;		    // Message command
+    ULONG	    flags;		    // Message flags
+    APTR	    data;		    // Message data
+    APTR	    data_free;		    // Data to be FreeVec()ed automatically
+    struct _IPC	    *sender;		    // Sender IPC
 } IPCMessage;
 
 
@@ -718,21 +732,21 @@ typedef struct {
 #define NO_PORT_IPC		(struct MsgPort *)-3
 
 typedef struct _IPC {
-	struct MinNode		node;
-	struct Process		*proc;		// Process pointer
-	IPCMessage		startup_msg;	// Startup message
-	struct MsgPort		*command_port;	// Port to send commands to
-	struct ListLock		*list;		// List we're a member of
-	APTR			userdata;
-	APTR			memory;		// Memory
-	struct MsgPort		*reply_port;	// Port for replies
-	ULONG			flags;		// Flags
+    struct MinNode	    node;
+    struct Process	    *proc;	    // Process pointer
+    IPCMessage		    startup_msg;    // Startup message
+    struct MsgPort	    *command_port;  // Port to send commands to
+    struct ListLock	    *list;	    // List we're a member of
+    APTR		    userdata;
+    APTR		    memory;	    // Memory
+    struct MsgPort	    *reply_port;    // Port for replies
+    ULONG		    flags;	    // Flags
 } IPCData;
 
 #define IPCF_INVALID		(1<<0)
 #define IPCF_LISTED		(1<<1)
 #define IPCF_STARTED		(1<<2)
-#define IPCF_DETACHEDCHILD (1<<3) // running asynchronous
+#define IPCF_DETACHEDCHILD	(1<<3) // running asynchronous
 
 #define IPCDATA(ipc)		((APTR)ipc->userdata)
 #define SET_IPCDATA(ipc,data)	ipc->userdata=(APTR)data
@@ -742,23 +756,23 @@ typedef struct _IPC {
 #define IPCM_STACK(s)		(s&0xffffff)
 
 enum {
-	IPC_COMMAND_BASE=0x8000000,
-	IPC_STARTUP,
-	IPC_ABORT,
-	IPC_QUIT,
-	IPC_ACTIVATE,
-	IPC_HELLO,
-	IPC_GOODBYE,
-	IPC_HIDE,
-	IPC_SHOW,
-	IPC_RESET,
-	IPC_HELP,
-	IPC_NEW,
-	IPC_GOT_GOODBYE,
-	IPC_IDENTIFY,
-	IPC_PRIORITY,
-	IPC_REMOVE,
-	IPC_OPEN,
+    IPC_COMMAND_BASE=0x8000000,
+    IPC_STARTUP,
+    IPC_ABORT,
+    IPC_QUIT,
+    IPC_ACTIVATE,
+    IPC_HELLO,
+    IPC_GOODBYE,
+    IPC_HIDE,
+    IPC_SHOW,
+    IPC_RESET,
+    IPC_HELP,
+    IPC_NEW,
+    IPC_GOT_GOODBYE,
+    IPC_IDENTIFY,
+    IPC_PRIORITY,
+    IPC_REMOVE,
+    IPC_OPEN,
 };
 
 #define IPCSIG_HIDE		SIGBREAKF_CTRL_D
@@ -775,8 +789,8 @@ struct IntuiMessage *CheckRefreshMsg(struct Window *,ULONG);
 
 enum
 {
-	REQTYPE_FILE,
-	REQTYPE_SIMPLE,
+    REQTYPE_FILE,
+    REQTYPE_SIMPLE,
 };
 
 
@@ -801,13 +815,13 @@ enum
 
 // Pop-up menu stuff
 typedef struct {
-	struct MinNode	node;
-	char		*item_name;		// Menu item name
-	USHORT		id;			// Menu ID
-	USHORT		flags;			// Menu item flags
-	APTR		data;			// Menu item data
-	APTR		image;			// Menu item image
-	APTR		userdata;		// Menu item user data
+    struct MinNode  node;
+    char	    *item_name;		    // Menu item name
+    USHORT	    id;			    // Menu ID
+    USHORT	    flags;		    // Menu item flags
+    APTR	    data;		    // Menu item data
+    APTR	    image;		    // Menu item image
+    APTR	    userdata;		    // Menu item user data
 } PopUpItem;
 
 #define POPUPF_LOCALE		(1<<0)	// Item name is a locale ID
@@ -822,13 +836,13 @@ typedef struct {
 #define POPUP_BARLABEL		(char *)-1
 
 typedef struct {
-	struct MinList		item_list;	// List of menu items
-	struct GalileoLocale	*locale;	// Locale data
-	ULONG			flags;		// Flags
-	ULONG			userdata;	// User data
-	REF_CALLBACK		(callback);	// Refresh callback
-	struct TextFont		*font;		// Font to use
-	struct Hook		*backfill;	// Backfill hook
+    struct MinList	    item_list;	    // List of menu items
+    struct GalileoLocale    *locale;	    // Locale data
+    ULONG		    flags;	    // Flags
+    ULONG		    userdata;	    // User data
+    REF_CALLBACK	    (callback);	    // Refresh callback
+    struct TextFont	    *font;	    // Font to use
+    struct Hook		    *backfill;	    // Backfill hook
 } PopUpMenu;
 
 #define POPUPMF_HELP		(1<<0)		// Supports help
@@ -850,17 +864,17 @@ void SetPopUpDelay(short);
 
 typedef struct _PopUpHandle
 {
-	PopUpMenu		ph_Menu;
-	APTR			ph_Memory;
-	ULONG			ph_Flags;
-	struct List		*ph_List;
-	struct MinList		ph_SubStack;
+    PopUpMenu	    ph_Menu;
+    APTR	    ph_Memory;
+    ULONG	    ph_Flags;
+    struct List	    *ph_List;
+    struct MinList  ph_SubStack;
 } PopUpHandle;
 
 typedef struct
 {
-	struct MinNode		ss_Node;
-	struct List		*ss_List;
+	struct MinNode	ss_Node;
+	struct List	*ss_List;
 } SubStack;
 
 #define POPHF_SEP	(1<<0)
@@ -874,8 +888,8 @@ void PopUpEndSub(PopUpHandle *);
 ULONG PopUpSetFlags(PopUpMenu *,USHORT,ULONG,ULONG);
 
 struct ListLock {
-	struct List		list;
-	struct SignalSemaphore	lock;
+    struct List		    list;
+    struct SignalSemaphore  lock;
 };
 
 long GetSemaphore(struct SignalSemaphore *,long,char *);
@@ -904,21 +918,21 @@ void InitListLock(struct ListLock *,char *);
 /* SimpleRequest structure */
 
 struct GalileoSimpleRequest {
-	char		*title;			// Title
-	char		*message;		// Text to display
-	char		**gadgets;		// Gadget names
-	int		*return_values;		// Gadget return values
-	char		*string_buffer;		// Buffer for string gadget
-	int		string_len;		// Maximum string length
-	int		flags;			// Flags, see below
-	struct TextFont	*font;			// Font to use
-	IPCData		*ipc;			// IPC port to listen to
-	Att_List	*history;		// History list
-	char		*check_text;		// Text for checkmark
-	short		*check_ptr;		// Result of checkmark
-	APTR		filereq;		// File requester
-	char		*string_buffer_2;
-	int		string_len_2;
+    char	    *title;		    // Title
+    char	    *message;		    // Text to display
+    char	    **gadgets;		    // Gadget names
+    int		    *return_values;	    // Gadget return values
+    char	    *string_buffer;	    // Buffer for string gadget
+    int		    string_len;		    // Maximum string length
+    int		    flags;		    // Flags, see below
+    struct TextFont *font;		    // Font to use
+    IPCData	    *ipc;		    // IPC port to listen to
+    Att_List	    *history;		    // History list
+    char	    *check_text;	    // Text for checkmark
+    short	    *check_ptr;		    // Result of checkmark
+    APTR	    filereq;		    // File requester
+    char	    *string_buffer_2;
+    int		    string_len_2;
 };
 
 #define SRF_LONGINT		(1<<0)	// Integer gadget
@@ -947,27 +961,27 @@ struct GalileoSimpleRequest {
 // Disk IO stuff
 typedef struct
 {
-	struct MsgPort			*dh_port;	// Message port
-	struct IOExtTD			*dh_io;		// IO request
-	struct FileSysStartupMsg	*dh_startup;	// Startup message
-	struct DosEnvec			*dh_geo;	// Disk geometry
-	char				dh_name[32];	// Disk name
-	char				dh_device[32];	// Device name
-	struct InfoData			dh_info;	// Disk information
-	unsigned long			dh_result;
-	unsigned long			dh_root;	// Root block
-	unsigned long			dh_blocksize;	// Block size
-	struct DateStamp		dh_stamp;	// DateStamp
+    struct MsgPort		    *dh_port;	    // Message port
+    struct IOExtTD		    *dh_io;	    // IO request
+    struct FileSysStartupMsg	    *dh_startup;    // Startup message
+    struct DosEnvec		    *dh_geo;	    // Disk geometry
+    char			    dh_name[32];    // Disk name
+    char			    dh_device[32];  // Device name
+    struct InfoData		    dh_info;	    // Disk information
+    unsigned long		    dh_result;
+    unsigned long		    dh_root;	    // Root block
+    unsigned long		    dh_blocksize;   // Block size
+    struct DateStamp		    dh_stamp;	    // DateStamp
 } DiskHandle;
 
-#define ID_AFS_PRO		0x41465301
-#define ID_AFS_USER		0x41465302
-#define ID_AFS_MULTI	0x6D754146
-#define ID_PFS_FLOPPY	0x50465300
-#define ID_PFS_HARD		0x50465301
-#define ID_SFS0_HARD    0x53455300
-#define ID_SFS2_HARD    0x53455302
-#define ID_ENVOY_DISK	0x444F5380
+#define ID_AFS_PRO		    0x41465301
+#define ID_AFS_USER		    0x41465302
+#define ID_AFS_MULTI	            0x6D754146
+#define ID_PFS_FLOPPY	            0x50465300
+#define ID_PFS_HARD		    0x50465301
+#define ID_SFS0_HARD		    0x53455300
+#define ID_SFS2_HARD		    0x53455302
+#define ID_ENVOY_DISK		    0x444F5380
 
 DiskHandle *OpenDisk(char *,struct MsgPort *);
 void CloseDisk(DiskHandle *);
@@ -995,10 +1009,10 @@ ULONG ScreenInfo(struct Screen *);
 // Images
 typedef struct
 {
-	struct Screen	*ir_Screen;
-	unsigned short	*ir_PenArray;
-	short		ir_PenCount;
-	unsigned long	ir_Flags;
+    struct Screen   *ir_Screen;
+    unsigned short  *ir_PenArray;
+    short	    ir_PenCount;
+    unsigned long   ir_Flags;
 } ImageRemap;
 
 #define IRF_REMAP_COL0		(1<<0)
@@ -1008,11 +1022,11 @@ typedef struct
 
 typedef struct
 {
-	USHORT	*oi_ImageData;
-	ULONG	*oi_Palette;
-	short	oi_Width;
-	short	oi_Height;
-	short	oi_Depth;
+    USHORT  *oi_ImageData;
+    ULONG   *oi_Palette;
+    short   oi_Width;
+    short   oi_Height;
+    short   oi_Depth;
 } OpenImageInfo;
 
 APTR OpenImage(char *name,OpenImageInfo *);
@@ -1306,46 +1320,46 @@ BOOL GetDeviceUnit(BPTR,char *,short *);
 
 enum
 {
-	GAD_xxx=1,
+    GAD_xxx=1,
 
-	GAD_VERT_SCROLLER,
-	GAD_VERT_ARROW_UP,
-	GAD_VERT_ARROW_DOWN,
+    GAD_VERT_SCROLLER,
+    GAD_VERT_ARROW_UP,
+    GAD_VERT_ARROW_DOWN,
 
-	GAD_HORIZ_SCROLLER,
-	GAD_HORIZ_ARROW_LEFT,
-	GAD_HORIZ_ARROW_RIGHT,
+    GAD_HORIZ_SCROLLER,
+    GAD_HORIZ_ARROW_LEFT,
+    GAD_HORIZ_ARROW_RIGHT,
 };
 
 
 // Workbench patch stuff
 enum
 {
-	APP_ICON,
-	APP_WINDOW,
-	APP_MENU
+    APP_ICON,
+    APP_WINDOW,
+    APP_MENU
 };
 
 typedef struct
 {
-	struct MinNode		node;
-	ULONG			type;		// Type of entry
+    struct MinNode	node;
+    ULONG		type;		// Type of entry
 
-	ULONG			id;		// ID
-	ULONG			userdata;	// User data
+    ULONG		id;		// ID
+    ULONG		userdata;	// User data
 
-	APTR			object;		// Type-specific object
-	char			*text;		// If text is needed
-	struct MsgPort		*port;		// Message port
+    APTR		object;		// Type-specific object
+    char		*text;		// If text is needed
+    struct MsgPort	*port;		// Message port
 
-	APTR			os_object;	// Object from OS routine
+    APTR		os_object;	// Object from OS routine
 
-	unsigned short		flags;		// Some flags
+    unsigned short	flags;		// Some flags
 
-	struct MinList		menu;		// Menu items
+    struct MinList	menu;		// Menu items
 
-	unsigned short		data;
-	long			menu_id_base;	// Base ID for menu
+    unsigned short	data;
+    long		menu_id_base;	// Base ID for menu
 }  AppEntry;
 
 #define GAE_Local		TAG_USER + 0		// Local entry
@@ -1395,12 +1409,12 @@ void UnlockAppList(void);
 
 struct AppSnapshotMsg
 {
-	struct AppMessage	ap_msg;		// Message
-	long			position_x;	// Icon x-position
-	long			position_y;	// Icon y-position
-	struct IBox		window_pos;	// Window position
-	unsigned long		flags;		// Flags
-	long			id;		// ID
+    struct AppMessage	    ap_msg;	    // Message
+    long		    position_x;	    // Icon x-position
+    long		    position_y;	    // Icon y-position
+    struct IBox		    window_pos;	    // Window position
+    unsigned long	    flags;	    // Flags
+    long		    id;		    // ID
 };
 
 #define APPSNAPF_UNSNAPSHOT	(1<<0)		// Set "no position"
@@ -1454,11 +1468,11 @@ long SetAppIconMenuState(APTR,long,long);
 
 typedef struct _GalileoAppMessage
 {
-	struct AppMessage	da_Msg;
-	Point			*da_DropPos;
-	Point			da_DragOffset;
-	ULONG			da_Flags;
-	ULONG			da_Pad[2];
+    struct AppMessage	    da_Msg;
+    Point		    *da_DropPos;
+    Point		    da_DragOffset;
+    ULONG		    da_Flags;
+    ULONG		    da_Pad[2];
 } GalileoAppMessage;
 
 #define GAPPF_ICON_DROP		(1<<16)		// Dropped with icon
@@ -1566,13 +1580,13 @@ void DisposeBitMap(struct BitMap *);
 // Args
 typedef struct
 {
-	struct RDArgs	*FA_RDArgs;	// RDArgs structure
-	struct RDArgs	*FA_RDArgsRes;	// Return from ReadArgs()
-	char		*FA_ArgString;	// Copy of argument string (with newline)
-	LONG		*FA_ArgArray;	// Argument array pointer
-	LONG		*FA_Arguments;	// Argument array you should use
-	short		FA_Count;	// Number of arguments
-	short		FA_DoneArgs;	// Galileo uses this flag for its own purposes
+    struct RDArgs   *FA_RDArgs;	    // RDArgs structure
+    struct RDArgs   *FA_RDArgsRes;  // Return from ReadArgs()
+    char	    *FA_ArgString;  // Copy of argument string (with newline)
+    LONG	    *FA_ArgArray;   // Argument array pointer
+    LONG	    *FA_Arguments;  // Argument array you should use
+    short	    FA_Count;	    // Number of arguments
+    short	    FA_DoneArgs;    // Galileo uses this flag for its own purposes
 } FuncArgs;
 
 FuncArgs *ParseArgs(char *,char *);
@@ -1628,10 +1642,10 @@ struct RexxMsg *BuildRexxMsgExTags(struct MsgPort *,UBYTE *,UBYTE *,Tag,...);
 
 typedef struct
 {
-	struct Node	dle_Node;
-	struct DosList	dle_DosList;
-	char		dle_DeviceName[40];
-	short		dle_DeviceUnit;
+    struct Node	    dle_Node;
+    struct DosList  dle_DosList;
+    char	    dle_DeviceName[40];
+    short	    dle_DeviceUnit;
 } DosListEntry;
 
 void NotifyDiskChange(void);
@@ -1657,44 +1671,44 @@ void FreeDosListCopy(struct List *);
 
 struct NewIconDiskObject
 {
-	struct DiskObject	nido_DiskObject;
-	struct NewDiskObject	*nido_NewDiskObject;
-	short			nido_Flags;
+    struct DiskObject	    nido_DiskObject;
+    struct NewDiskObject    *nido_NewDiskObject;
+    short		    nido_Flags;
 };
 
 #define NIDOF_REMAPPED		(1<<0)
 
 enum
 {
-	ICON_NORMAL,
-	ICON_CACHED,
-	ICON_NEWICON
+    ICON_NORMAL,
+    ICON_CACHED,
+    ICON_NEWICON
 };
 
 short GetIconType(struct DiskObject *);
 
 typedef struct
 {
-	ULONG	cs_Red;
-	ULONG	cs_Green;
-	ULONG	cs_Blue;
+    ULONG   cs_Red;
+    ULONG   cs_Green;
+    ULONG   cs_Blue;
 } ColourSpec32;
 
 
-void SetNewIconsFlags(ULONG,short);
+void SetColorIconFlags(ULONG,short);
 void SetReqBackFill(struct Hook *hook,struct Screen **);
 
 struct BackFillInfo {
-	struct Layer *layer;
-	struct Rectangle bounds;
-	LONG offsetx;
-	LONG offsety;
+    struct Layer *layer;
+    struct Rectangle bounds;
+    LONG offsetx;
+    LONG offsety;
 };
 
 struct GalileoSemaphore {
-	struct SignalSemaphore	sem;
-	APTR			main_ipc;
-	struct ListLock		modules;
+    struct SignalSemaphore  sem;
+    APTR		    main_ipc;
+    struct ListLock	    modules;
 };
 
 
@@ -1706,17 +1720,17 @@ long GetStatistics(long id);
 
 typedef struct
 {
-	struct Node			node;
-	struct IBox			pos;
-	ULONG				flags;
-	ULONG				icon_pos_x;
-	ULONG				icon_pos_y;
+    struct Node	    node;
+    struct IBox	    pos;
+    ULONG	    flags;
+    ULONG	    icon_pos_x;
+    ULONG	    icon_pos_y;
 } ButtonBankNode;
 
 typedef struct
 {
-	struct Node			node;
-	APTR				*lister;
+    struct Node	    node;
+    APTR	    *lister;
 } OpenListerNode;
 
 
@@ -1737,31 +1751,31 @@ typedef struct
 
 struct OpenEnvironmentData
 {
-	APTR		memory;
-	APTR		volatile_memory;
-	ULONG		flags;
+    APTR	    memory;
+    APTR	    volatile_memory;
+    ULONG	    flags;
 
-	CFG_ENVR	env;
-	struct MinList	desktop;
-	struct MinList	pathlist;
-	struct MinList	soundlist;
-	struct MinList	startmenus;
-	struct MinList	buttons;
-	struct MinList	listers;
-	char		toolbar_path[256];
-	char		menu_path[256];
-	char		user_menu_path[256];
-	char		scripts_path[256];
-	char		hotkeys_path[256];
+    CFG_ENVR	    env;
+    struct MinList  desktop;
+    struct MinList  pathlist;
+    struct MinList  soundlist;
+    struct MinList  startmenus;
+    struct MinList  buttons;
+    struct MinList  listers;
+    char	    toolbar_path[256];
+    char	    menu_path[256];
+    char	    user_menu_path[256];
+    char	    scripts_path[256];
+    char	    hotkeys_path[256];
 };
 
 BOOL OpenEnvironment(char *,struct OpenEnvironmentData *);
 
 struct AllocBitmapPatchNode
 {
-	struct MinNode	abp_Node;
-	struct Screen	*abp_Screen;
-	struct Task	*abp_Task;
+    struct MinNode  abp_Node;
+    struct Screen   *abp_Screen;
+    struct Task	    *abp_Task;
 };
 
 #ifndef GALILEOFM_PRAG

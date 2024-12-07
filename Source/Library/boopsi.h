@@ -51,7 +51,7 @@ typedef struct
     struct Library	    *UtilityBase;
     struct Library	    *LayersBase;
 #ifdef RESOURCE_TRACKING
-    struct Library          *ResTrackBase;
+    struct Library	    *ResTrackBase;
 #endif
     struct LibData	    *data;
 } BoopsiLibs;
@@ -59,18 +59,18 @@ typedef struct
 Class *init_class(struct LibData *,char *,char *,unsigned long (*)(),long);
 void class_free(Class *);
 
-
 typedef struct
 {
     struct IBox	    dims;		    // Gadget dimensions (total)
     struct IBox	    list_dims;		    // List dimensions
     struct IBox	    scroller_dims;	    // Scroller dimensions
     struct IBox	    text_dims;		    // Dimensions to render text within
-    short	    arrow_height;	    // Height of arrows
 
     struct Gadget   *scroller;		    // Scroller gadget
     struct Image    *check;		    // Checkmark
     struct List	    boopsi_list;	    // List of BOOPSI gadgets
+
+    short	    arrow_height;	    // Height of arrows
 
     unsigned short  text_width;		    // Text display width
     unsigned short  text_height;	    // Text display height
@@ -105,10 +105,6 @@ typedef struct
 
     struct Gadget   *arrows[2];		    // Arrow gadgets
 
-    short	    drag_x_position;	    // Positions for reporting drag
-    short	    drag_y_position;
-    short	    drag_sel;		    // Drag-selected item
-
     struct TagItem  notify_tags[11];	    // Tags for OM_NOTIFY
 
     struct DrawInfo *draw_info;		    // Cached DrawInfo
@@ -116,6 +112,10 @@ typedef struct
     ULONG	    seconds;		    // For double-click
     ULONG	    micros;
     short	    click_sel;
+
+    short	    drag_x_position;	    // Positions for reporting drag
+    short	    drag_y_position;
+    short	    drag_sel;		    // Drag-selected item
 
     short 	    scroller_width;
 } ListViewData;
@@ -180,7 +180,7 @@ typedef struct
     unsigned short	    flags;
 } BoopsiImageData;
 
-#define BIF_THIN_BORDERS		(1<<0)
+#define BIF_THIN_BORDERS	(1<<0)
 
 #define LVGID_SCROLLER		65535
 #define LVGID_ARROW		65534
@@ -304,7 +304,7 @@ void palette_render(Class *,struct Gadget *,PaletteData *,struct gpRender *);
 #define UtilityBase	((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->UtilityBase
 #define LayersBase	((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->LayersBase
 #ifdef RESOURCE_TRACKING
-#define ResTrackBase ((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->ResTrackBase
+#define ResTrackBase	((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->ResTrackBase
 #endif
 #define DOSBase		((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->data->dos_base
 #endif
