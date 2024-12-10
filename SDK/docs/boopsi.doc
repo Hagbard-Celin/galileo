@@ -225,8 +225,9 @@ IM_Width, IM_Height, etc, tags. Images are scaled to the supplied sizes.
         GLVNBF_ALL    - Disable all borders, equal to:
                         (GLVNBF_LEFT|GLVNBF_TOP|GLVNBF_RIGHT|GLVNBF_BOTTOM)
 
-    GLV_CompoundGadget (ULONG) (I) - alias for GTCustom_CompoundGadget. See
-        layout.doc
+    GLV_CompoundGadget (ULONG) (I) - alias for GTCustom_CompoundGadget.
+        Currently supported only when using the build-in layout routines.
+        See layout.doc.
 
     The gadget is a subclass of gadgetclass and as such supports the
     standard gadgetclass tags (including GA_Disabled). The title of
