@@ -562,11 +562,17 @@ __asm __saveds L_CalcObjectDims(
 		if (this_ob->flags&POSFLAG_ADJUST_POS_X)
 			dest_pos->Left+=parent_ob->dims.Left+parent_ob->dims.Width-inner.Left;
 		else
+		if (this_ob->flags&POSFLAG_CENTER_POS_X)
+			dest_pos->Left+=parent_ob->dims.Left+(parent_ob->dims.Width>>1)-inner.Left;
+		else
 		if (this_ob->flags&POSFLAG_ALIGN_POS_X)
 			dest_pos->Left+=parent_ob->dims.Left-inner.Left;
 
 		if (this_ob->flags&POSFLAG_ADJUST_POS_Y)
 			dest_pos->Top+=parent_ob->dims.Top+parent_ob->dims.Height-inner.Top;
+		else
+		if (this_ob->flags&POSFLAG_CENTER_POS_Y)
+			dest_pos->Top+=parent_ob->dims.Top+(parent_ob->dims.Height>>1)-inner.Top;
 		else
 		if (this_ob->flags&POSFLAG_ALIGN_POS_Y)
 			dest_pos->Top+=parent_ob->dims.Top-inner.Top;

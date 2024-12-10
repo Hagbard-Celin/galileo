@@ -290,6 +290,21 @@ structure is defined as follows:
 
                 POSFLAG_ALIGN_Y         - Align Y-position with other object
 
+                POSFLAG_CENTER_POS_X    - X-position is relative to centre of
+                                          other object
+
+                POSFLAG_CENTER_POS_Y    - Y-position is relative to centre of
+                                          other object
+
+            The magic position value POS_CENTER can be used to modify these
+            tags, to make this objects center aligned to the selected position.
+            For example to align a object of 1x1 character size dead-center on
+            top of another, set od_CharDims to {POS_CENTER,POS_CENTER,1,1) and
+            od_Flags to POSFLAG_CENTER_POS_X|POSFLAG_CENTER_POS_Y. To place
+            the same object centered on top fg the right edege of the other
+            object, change od_Flags to
+            POSFLAG_ADJUST_POS_X|POSFLAG_CENTER_POS_Y.
+
             If the window is resizeable, you must supply the GTCustom_CopyTags
             tag when you supply this tag.
 

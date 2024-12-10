@@ -201,6 +201,8 @@ typedef struct _ObjectDef {
 #define POSFLAG_ADJUST_POS_Y		(1<<25)		// Position adjustor
 #define POSFLAG_ALIGN_POS_X		(1<<26)		// Align
 #define POSFLAG_ALIGN_POS_Y		(1<<27)		// Align
+#define POSFLAG_CENTER_POS_X	 	(1<<28)	        // Center
+#define POSFLAG_CENTER_POS_Y	 	(1<<29)	        // Center
 
 #define AREAFLAG_RAISED			(1<<8)		// Raised rectangle
 #define AREAFLAG_RECESSED		(1<<9)		// Recessed rectangle
