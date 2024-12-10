@@ -1947,7 +1947,7 @@ void __asm __saveds L_DisplayObject(
 				{
 					SetAPen(&rp,bg);
 					RectFill(&rp,
-						box.Left-1,
+						box.Left,
 						box.Top,
 						box.Left+box.Width-1,
 						box.Top+box.Height-1);
@@ -1955,7 +1955,7 @@ void __asm __saveds L_DisplayObject(
 				else
 				{
 					EraseRect(&rp,
-						box.Left-1,
+						box.Left,
 						box.Top,
 						box.Left+box.Width-1,
 						box.Top+box.Height-1);
