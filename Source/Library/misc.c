@@ -430,11 +430,11 @@ void __asm __saveds L_BytesToString(
 	if (bytes<1024)
 	{
 		// Nothing?
-		if (bytes<1) strcpy(string,"0K");
+		if (bytes<1) strcpy(string,"0B");
 		else
 		{
 			L_ItoaU(bytes,string,sep);
-			strcat(string,"b");
+			strcat(string,"B");
 		}
 		return;
 	}
@@ -464,7 +464,7 @@ void __asm __saveds L_BytesToString(
 	else
 	{
 		L_ItoaU(bytes,string,sep);
-		strcat(string,"K");
+		strcat(string,"KB");
 	}
 
 	// Need to do a division?
@@ -478,7 +478,8 @@ void __asm __saveds L_BytesToString(
 		// Tack on character
 		len=strlen(string);
 		string[len]=size_ch;
-		string[len+1]=0;
+		string[len+1]='B';
+		string[len+2]=0;
 	}
 }
 

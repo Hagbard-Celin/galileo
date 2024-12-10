@@ -84,9 +84,9 @@ galileofm.library/Atoh                                       galileofm.library/A
         This routine takes a long value and creates a string to represent
         that value as an expression of size. Some examples are :
 
-                 102       ->    102b
-                 5804      ->    5K
-                 1829382   ->    1.8M
+                 102       ->    102B
+                 5804      ->    5KB
+                 1829382   ->    1.8MB
 
     INPUTS
         bytes - byte value
