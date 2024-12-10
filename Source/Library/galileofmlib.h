@@ -169,6 +169,7 @@ extern struct Library 		*AslBase;
 extern struct Library 		*UtilityBase;
 extern struct LocaleBase 	*LocaleBase;
 extern struct Library 		*LayersBase;
+extern struct Library 		*CxBase;
 extern struct Library 		*IconBase;
 extern struct Library 		*WorkbenchBase;
 extern struct Library 		*DataTypesBase;
