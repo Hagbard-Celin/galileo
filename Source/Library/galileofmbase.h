@@ -1695,7 +1695,7 @@ typedef struct
 } ColourSpec32;
 
 
-void SetColorIconFlags(ULONG,short);
+void SetNewIconsFlags(ULONG,short);
 void SetReqBackFill(struct Hook *hook,struct Screen **);
 
 struct BackFillInfo {
