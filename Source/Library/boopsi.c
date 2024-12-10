@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -64,6 +64,7 @@ Class *init_class(
 	libs->GfxBase=(struct GfxBase *)GfxBase;
 	libs->UtilityBase=UtilityBase;
 	libs->LayersBase=LayersBase;
+	libs->CxBase=CxBase;
 #ifdef RESOURCE_TRACKING
     libs->ResTrackBase=ResTrackBase;
 #endif

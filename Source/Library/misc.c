@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2024 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -194,6 +195,25 @@ BOOL __asm __saveds L_ConvertRawKey(
 	return ret;
 }
 
+// Get address of one-shot left mouse-button up/down injector
+CxObj *__asm __saveds L_GetCxSelectUpDown(register __a6 struct MyLibrary *libbase)
+{
+    struct LibData *data;
+
+    // Get data pointer
+    data=(struct LibData *)libbase->ml_UserData;
+    return data->cx_select_up_down;
+}
+
+// Set address of one-shot left mouse-button up/down injector
+void __asm __saveds L_SetCxSelectUpDown(register __a1 CxObj * cxo,register __a6 struct MyLibrary *libbase)
+{
+	struct LibData *data;
+
+	// Get data pointer
+	data=(struct LibData *)libbase->ml_UserData;
+	data->cx_select_up_down = cxo;
+}
 
 // Write an icon for a file
 void __asm __saveds L_WriteFileIcon(

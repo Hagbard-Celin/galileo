@@ -503,6 +503,8 @@ PopUpSetFlags(menu,id,value,mask)(a0,d0/d1/d2)
 LoadPos(name,pos,font)(a0/a1,d0)
 SavePos(name,pos,font)(a0/a1,d0)
 *
+SetCxSelectUpDown(cxo)(a1)
+GetCxSelectUpDown()()
 *
 *
 *

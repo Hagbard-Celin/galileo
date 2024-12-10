@@ -495,6 +495,17 @@ structure is defined as follows:
             in the gadget. Valid values are JUSTIFY_CENTER (the default),
             JUSTIFY_LEFT and JUSTIFY_RIGHT.
 
+            GTCustom_CompoundGadget - ULONG
+
+            Used with : GALILEO_LISTVIEW_KIND
+
+            This tag lets you create fake multi-column listers. By assigning
+            the same value for this tag to multiple listers, the focus will
+            change from one lister to the next if you move the mouse-pointer
+            between them with the left button held down. This should be
+            combined with GLV_NoScroller set to LVF_NO_SCROLLING, otherwise
+            the resulting behavior might be confusing.
+
         In addition to these tags, GALILEO_LISTVIEW_KIND gadgets (via the Galileo
         BOOPSI listview class) supports several additional tags. See the
         section on the listview class for information on these.

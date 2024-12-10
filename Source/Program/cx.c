@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2024 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -40,6 +41,7 @@ For more information on Directory Opus for Windows please see:
 
 void cx_right_button(register CxMsg *cxm,CxObj *co);
 BOOL cx_over_icon(BackdropInfo *info,short x,short y);
+void cx_lmb_up_down(register CxMsg *cxm, CxObj *co);
 
 // Install commodity
 void cx_install(CxData *cx)
@@ -53,7 +55,7 @@ void cx_install(CxData *cx)
 	// Initialise broker
 	cx->nb.nb_Version=NB_VERSION;
 	cx->nb.nb_Name="Galileo";
-	cx->nb.nb_Title="©1998 Jonathan Potter & GPSoftware";
+	cx->nb.nb_Title="Galileo File Manager 0.1";
 	cx->nb.nb_Descr=GetString(&locale,MSG_CX_DESC);
 	cx->nb.nb_Unique=0;
 	cx->nb.nb_Flags=COF_SHOW_HIDE;
@@ -64,6 +66,36 @@ void cx_install(CxData *cx)
 	// Install commodity
 	if (!(cx->broker=CxBroker(&cx->nb,0)))
 		return;
+
+	// Make a custom one-shot filter
+	if (cx->lmb_up_down = CxCustom(cx_lmb_up_down, (long)cx))
+	{
+	    AttachCxObj(cx->broker,cx->lmb_up_down);
+
+	    // Disable by default as it reacts to any incoming CxMessage
+	    ActivateCxObj(cx->lmb_up_down,0);
+
+	    // Make a translator
+	    if (cx->lmb_up_down_translator=CxTranslate(0))
+	    {
+		    AttachCxObj(cx->lmb_up_down,cx->lmb_up_down_translator);
+
+		    // Set up events to be sent in reverse:
+		    // 	1. Copy of the original event
+		    //	2. Left mouse button down
+		    //	3. Left mouse button up
+		    cx->lmb_up_down_ie2.ie_NextEvent = &cx->lmb_up_down_ie3;
+		    cx->lmb_up_down_ie1.ie_NextEvent = &cx->lmb_up_down_ie2;
+		    cx->lmb_up_down_ie3.ie_Class = cx->lmb_up_down_ie2.ie_Class = IECLASS_RAWMOUSE;
+		    cx->lmb_up_down_ie3.ie_Code = SELECTUP;
+		    cx->lmb_up_down_ie2.ie_Code = SELECTDOWN;
+		    cx->lmb_up_down_ie3.ie_Qualifier = IEQUALIFIER_RELATIVEMOUSE;
+		    cx->lmb_up_down_ie2.ie_Qualifier = IEQUALIFIER_LEFTBUTTON|IEQUALIFIER_RELATIVEMOUSE;
+	    }
+
+	    // Store the address for activation on demand
+	    SetCxSelectUpDown(cx->lmb_up_down);
+	}
 
 	// Install pop-up filter
 	cx_install_popup(cx);
@@ -824,6 +856,32 @@ BOOL cx_mouse_outside(struct Window *window,short x,short y)
 		y>=window->Height-window->BorderBottom);
 }
 
+// Oneshot left-button up/down injector
+void __saveds cx_lmb_up_down(register CxMsg *cxm, CxObj *co)
+{
+    struct InputEvent *ie;
+    CxData *data;
+
+    // Get InputEvent from CxMsg
+    ie=(struct InputEvent *)CxMsgData(cxm);
+
+    // Get data pointer
+    data=(CxData *)CxMsgID(cxm);
+    
+    // Deactivate self
+    ActivateCxObj(data->lmb_up_down,0);
+
+    // Copy original event
+    data->lmb_up_down_ie1.ie_Class = ie->ie_Class;
+    data->lmb_up_down_ie1.ie_SubClass = ie->ie_SubClass;
+    data->lmb_up_down_ie1.ie_Code = ie->ie_Code;
+    data->lmb_up_down_ie1.ie_Qualifier = ie->ie_Qualifier;
+    data->lmb_up_down_ie1.ie_position.ie_addr = ie->ie_position.ie_addr;
+
+    // Upate and run translator
+    SetTranslate(data->lmb_up_down_translator,&data->lmb_up_down_ie1);
+    RouteCxMsg(cxm, data->lmb_up_down_translator);
+}
 
 // Install pop-up filter
 void cx_install_popup(CxData *cx)

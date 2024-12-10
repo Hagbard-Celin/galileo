@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2024 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -940,6 +941,8 @@ ObjectList *__asm __saveds L_AddObjectList(
 					struct TagItem *taglist;
 					struct TagItem *tag,*lasttag;
 					struct Gadget *firstgad;
+					CompoundObjectList *clist=0;
+					CompoundObject *cgadget=0;
 					HookData *hook=0;
 					short place;
 
@@ -1001,7 +1004,51 @@ ObjectList *__asm __saveds L_AddObjectList(
 							}
 						}
 					}
+					// List?
+					if (new_object->object_kind==MY_LISTVIEW_KIND)
+					{
+					    // Part of coumpond-gadget?
+					    if (tag=FindTagItem(GLV_CompoundGadget,taglist))
+					    {
+						    UWORD clistid;
 
+						    if ((clistid = (UWORD)tag->ti_Data) &&
+							(cgadget=L_AllocMemH(data->memory,sizeof(CompoundObject))))
+						    {
+							    BOOL gotlist = FALSE;
+
+							    if (data->compound_gadgets.mlh_Head)
+							    {	     
+								    // Walk through list of coumpound-gadgets
+								    for (clist = (CompoundObjectList *)data->compound_gadgets.mlh_Head;clist->node.mln_Succ;
+									 clist = (CompoundObjectList *)clist->node.mln_Succ)
+								    {
+									    // Is this compound-gadget already on the list?
+									    if (clist->id == clistid)
+									    {
+										    gotlist = TRUE;
+										    break;
+									    }   
+								    }
+							    }
+
+							    // If not, allocate new object list
+							    if (gotlist || (clist=L_AllocMemH(data->memory,sizeof(CompoundObjectList))))
+							    {
+								    if (!gotlist)
+								    {
+									    NewList((struct List *)&data->compound_gadgets);
+									    AddTail((struct List *)&data->compound_gadgets,(struct Node *)clist);
+									    NewList((struct List *)&clist->objects);
+									    clist->id = clistid;
+								    }
+
+								    // Add this gadget to the object list of the compound gadget
+								    AddTail((struct List *)&clist->objects,(struct Node *)cgadget);
+							    }
+						    }
+					    }
+					}
 					// If this is a CYCLE_KIND or MX_KIND gadget, search tag list
 					// for GTCustom_LocaleLabels (to handle Locale)
 					if (new_object->object_kind==CYCLE_KIND || new_object->object_kind==MX_KIND)
@@ -1177,6 +1224,9 @@ ObjectList *__asm __saveds L_AddObjectList(
 										GA_Text,newgad.ng_GadgetText,
 										GTCustom_TextAttr,&list->attr,
 										GLV_ThinBorder,thin,
+										GLV_CompoundGadget,clist?&clist->objects:0,
+										GLV_CompoundObject,clist?cgadget:0,
+										GLV_CompoundCx,clist?ldata->cx_select_up_down:0,
 										ICA_TARGET,ICTARGET_IDCMP,
 										TAG_MORE,(ULONG)taglist);
 							}
@@ -1412,6 +1462,12 @@ ObjectList *__asm __saveds L_AddObjectList(
 								}
 							}
 							break;
+					}
+
+					// Save address of gadget
+					if (cgadget)
+					{
+						cgadget->object = new_object->gl_info.gl_gadget.gadget;
 					}
 
 					// Want to keep the taglist?

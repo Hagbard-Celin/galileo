@@ -51,6 +51,7 @@ typedef struct
     struct GfxBase	    *GfxBase;
     struct Library	    *UtilityBase;
     struct Library	    *LayersBase;
+    struct Library	    *CxBase;
 #ifdef RESOURCE_TRACKING
     struct Library	    *ResTrackBase;
 #endif
@@ -110,6 +111,10 @@ typedef struct
 
     struct DrawInfo *draw_info;		    // Cached DrawInfo
 
+    struct MinList  *compoundgadget;
+    CompoundObject  *compound_object;
+    CxObj	    *compound_cx;
+
     ULONG	    seconds;		    // For double-click
     ULONG	    micros;
     short	    click_sel;
@@ -151,6 +156,7 @@ typedef struct
 #define LVF_NOBORDER			(LVF_NO_LEFTBORDER|LVF_NO_TOPBORDER|LVF_NO_RIGHTBORDER|LVF_NO_BOTTOMBORDER)
 #define LVF_NO_SCROLLING		(1<<27)     // Completely disable scrolling
 #define LVF_SCROLL_FLAG			(1<<28)     // Currently auto-scrolling
+#define LVF_COMPOUND_ACTIVATE		(1<<29)     // Activate other compound-gadget menber
 
 typedef struct
 {
@@ -308,6 +314,7 @@ void palette_render(Class *,struct Gadget *,PaletteData *,struct gpRender *);
 #define GfxBase		((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->GfxBase
 #define UtilityBase	((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->UtilityBase
 #define LayersBase	((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->LayersBase
+#define CxBase		((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->CxBase
 #ifdef RESOURCE_TRACKING
 #define ResTrackBase	((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->ResTrackBase
 #endif

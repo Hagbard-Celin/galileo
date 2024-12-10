@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2024 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -46,17 +47,25 @@ typedef struct _CxData
 
 	CxObj			*popup_filter;
 	CxObj			*rmb_hook;
+	CxObj			*lmb_up_down;
+	CxObj			*lmb_up_down_translator;
+
+	struct InputEvent       lmb_up_down_ie1;
+	struct InputEvent       lmb_up_down_ie2;
+	struct InputEvent       lmb_up_down_ie3;
+
+	struct Window		*button_window;
+	struct Window		*popup_window;
 
 	unsigned short		right_down;
 	unsigned short		qual_down;
-	struct Window		*button_window;
-	struct Window		*popup_window;
 	short			start_popped;
 } CxData;
 
 enum
 {
 	CXCODE_POPUP,
+	CXCODE_SELECT_UP_DOWN,
 	CXCODE_NEW_LISTER,
 
 	CXCODE_HOTKEY_BASE

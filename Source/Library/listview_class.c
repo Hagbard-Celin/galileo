@@ -150,6 +150,14 @@ ULONG __asm __saveds listview_dispatch(register __a0 Class *cl,
 		if (GetTagData(GLV_ShowSeparators,0,tags))
 		    data->flags|=LVF_SHOW_SEPARATORS;
 
+		// Part of compound-gadget?
+		if ((data->compoundgadget = (struct MinList *)GetTagData(GLV_CompoundGadget,0,tags)) &&
+		    (data->compound_object = (CompoundObject  *)GetTagData(GLV_CompoundObject, 0, tags)))
+		{
+		    // Get address of one-shot CxObject
+		    data->compound_cx = (LONG *)GetTagData(GLV_CompoundCx,0,tags);
+		}
+
 		// Get title
 		if (tag=FindTagItem(GA_Text,tags))
 		{
@@ -748,6 +756,29 @@ ULONG __asm __saveds listview_dispatch(register __a0 Class *cl,
 		if (data->flags&LVF_GOT_FONT)
 		    CloseFont(data->list_font);
 
+	        // Part of compound-gadget?
+	        if (data->compoundgadget)
+	        {
+		    CompoundObject * node;
+
+		    // Walk through gadgets in compound-gadget
+		    for (node = (CompoundObject *)data->compoundgadget->mlh_Head; node->node.mln_Succ;
+		         node = (CompoundObject *)node->node.mln_Succ)
+		    {
+			// This gadget?
+			if (node->object == gadget)
+		        {
+			    // Remove from list
+			    Remove((struct Node *)node);
+
+			    // Free node memory
+			    L_FreeMemH(node);
+
+			    break;
+		        }
+		    }
+	        }
+
 		retval=DoSuperMethodA(cl,obj,msg);
 	    }
 	    break;
@@ -953,6 +984,15 @@ ULONG __asm __saveds listview_dispatch(register __a0 Class *cl,
 			// Send notify
 			DoMethod(obj,OM_NOTIFY,0,((struct gpInput *)msg)->gpi_GInfo,0);
 
+			// Activate other coumpound-gadget member?
+			if (data->flags&LVF_COMPOUND_ACTIVATE)
+			{
+			    // Inject left mousebutton up followed by left mousebutton down
+			    ActivateCxObj(data->compound_cx,1);
+
+			    // Clear flag
+			    data->flags&=~LVF_COMPOUND_ACTIVATE;
+			}
 		    }
 		}
 
@@ -1040,7 +1080,7 @@ ULONG __asm __saveds listview_dispatch(register __a0 Class *cl,
 			    case IECODE_NOBUTTON:
 				{
 				    short sel;
-				    BOOL outside_y = FALSE;
+				    BOOL outside_y;
 
 				    // Is mouse outside of lister?
 				    if (input->gpi_Mouse.X<0 ||
@@ -1067,13 +1107,41 @@ ULONG __asm __saveds listview_dispatch(register __a0 Class *cl,
 					    else break;
 					}
 					else
+					// Not scrolling?
 					if ((data->flags&LVF_NO_SCROLLING) || (!(data->flags&LVF_SCROLL_FLAG)))
 					{
 
 					    data->last_sel=data->sel;
 					    data->sel=-1;
 					    redraw=1;
+											
+					    // Part of compound-gadget?
+					    if (data->compoundgadget)
+					    {
+						CompoundObject * node;
+						UWORD x,y;
 
+						x = input->gpi_Mouse.X + gadget->LeftEdge + input->gpi_GInfo->gi_Domain.Left;
+						y = input->gpi_Mouse.Y + gadget->TopEdge + input->gpi_GInfo->gi_Domain.Top;
+
+						// Walk through gadgets in compound-gadget
+						for (node = (CompoundObject *)data->compoundgadget->mlh_Head; node->node.mln_Succ;
+						     node = (CompoundObject *)node->node.mln_Succ)
+						{
+						    // In gadgets list-area?
+						    if ((x >= node->coords.MinX) &&
+						        (x <= node->coords.MaxX) &&
+						        (y >= node->coords.MinY) &&
+						        (y <= node->coords.MaxY))
+						    {
+							// Switch active gadget
+							data->flags|=LVF_CANCEL|LVF_COMPOUND_ACTIVATE;
+							retval=GMR_NOREUSE;
+
+							break;
+						    }
+						}
+					    }
 					    break;
 					}
 					else break;
@@ -1087,6 +1155,33 @@ ULONG __asm __saveds listview_dispatch(register __a0 Class *cl,
 					data->sel=-1;
 					redraw=1;
 
+					// Part of compound-gadget?
+					if (data->compoundgadget)
+					{
+					    CompoundObject * node;
+					    UWORD x,y;
+
+					    x = input->gpi_Mouse.X + gadget->LeftEdge + input->gpi_GInfo->gi_Domain.Left;
+					    y = input->gpi_Mouse.Y + gadget->TopEdge + input->gpi_GInfo->gi_Domain.Top;
+
+					    // Walk through gadgets in compound-gadget
+					    for (node = (CompoundObject *)data->compoundgadget->mlh_Head; node->node.mln_Succ;
+						 node = (CompoundObject *)node->node.mln_Succ)
+					    {
+						// In gadgets list-area?
+						if ((x >= node->coords.MinX) &&
+						    (x <= node->coords.MaxX) &&
+						    (y >= node->coords.MinY) &&
+						    (y <= node->coords.MaxY))
+						{
+						    // Switch active gadget
+						    data->flags|=LVF_CANCEL|LVF_COMPOUND_ACTIVATE;
+						    retval=GMR_NOREUSE;
+
+						    break;
+						}
+					    }
+					}
 					break;
 				    }
 
@@ -1177,6 +1272,9 @@ ULONG __asm __saveds listview_dispatch(register __a0 Class *cl,
 		    {
 			short sel;
 			WORD outside_ok=0;
+
+			if (data->flags&LVF_COMPOUND_ACTIVATE)
+				break;
 
 			if (data->flags&LVF_DRAG_NOTIFY)
 				outside_ok=3;
@@ -2073,6 +2171,16 @@ void listview_get_dims(Class *cl,ListViewData *data)
 	data->text_width=data->text_dims.Width-4;
     else
 	data->text_width=data->text_dims.Width;
+
+    // Part of compound-gadget?
+    if (data->compound_object)
+    {
+	// Fill in activation area
+	data->compound_object->coords.MinX = data->text_dims.Left;
+	data->compound_object->coords.MaxX = data->text_dims.Left + data->text_dims.Width - 1;
+	data->compound_object->coords.MinY = data->text_dims.Top;
+	data->compound_object->coords.MaxY = data->text_dims.Top + data->text_dims.Height - 1;
+    }
 }
 
 

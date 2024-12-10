@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2024 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -48,6 +49,7 @@ struct Library 		*UtilityBase;
 struct LocaleBase 	*LocaleBase;
 struct Library 		*IFFParseBase;
 struct Library 		*LayersBase;
+struct Library 		*CxBase;
 struct Library 		*IconBase;
 struct Library 		*WorkbenchBase;
 struct Library 		*DataTypesBase=0;

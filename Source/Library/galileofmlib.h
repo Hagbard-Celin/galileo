@@ -136,6 +136,8 @@ struct LibData
 
 	struct ListLock		allocbitmap_patch;
 
+	CxObj			*cx_select_up_down;
+
 #ifdef RESOURCE_TRACKING
     struct Library          *restrack_base;
 #endif

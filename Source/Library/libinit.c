@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2024 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -113,6 +114,7 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 		!(AslBase=OpenLibrary("asl.library",37)) ||
 		!(UtilityBase=OpenLibrary("utility.library",37)) ||
 		!(LayersBase=OpenLibrary("layers.library",37)) ||
+		!(CxBase=OpenLibrary("commodities.library",37)) ||
 		!(IconBase=OpenLibrary("icon.library",37)) ||
 		!(WorkbenchBase=OpenLibrary("workbench.library",37))) return 1;
 

@@ -3,6 +3,7 @@
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
 Copyright 2012 Roman Kargin <kas1e@yandex.ru>
+Copyright 2024 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -291,19 +292,6 @@ typedef struct _ObjectList {
     struct Window	    *window;	    // Window used
 } ObjectList;
 
-typedef struct _CompoundObjectList {
-    struct MinNode	    node;
-    struct MinList      objects;
-    UWORD	            id;
-} CompoundObjectList;
-
-typedef struct _CompoundObject {
-    struct MinNode	    node;
-    struct Rectangle    coords;
-    struct Gadget      *object;
-    UWORD			    id;
-} CompoundObject;
-
 #define OBJECTF_NO_SELECT_NEXT	(1<<0)	    // Don't select next field
 #define OBJECTF_PATH_FILTER	(1<<1)	    // Filter path characters
 #define OBJECTF_SECURE		(1<<2)	    // Hide string
@@ -442,6 +430,7 @@ struct gpResize
 #define GTCustom_UpperCase	TAG_USER + 53	// Uppercase
 #define GTCustom_Recessed	TAG_USER + 54	// Recessed border
 #define GTCustom_FixedWidthOnly	TAG_USER + 55	// Only show fixed-width fonts
+#define GTCustom_CompoundGadget TAG_USER + 60
 
 #define LAYOUTF_SAME_HEIGHT	(1<<0)
 #define LAYOUTF_SAME_WIDTH	(1<<1)
@@ -513,6 +502,9 @@ struct gpResize
 #define GLV_ScrollLeft		TAG_USER + 57
 #define GLV_ThinBorder		TAG_USER + 58		// Thin borders
 #define GLV_NoBorder		TAG_USER + 59
+#define GLV_CompoundGadget	TAG_USER + 60
+#define GLV_CompoundObject  	TAG_USER + 61
+#define GLV_CompoundCx		TAG_USER + 62
 
 // ListView noborder flags
 #define GLVNBF_LEFT	(1<<0)
@@ -529,6 +521,20 @@ typedef struct
     unsigned short	    line;
     struct IBox		    box;
 } ListViewDraw;
+
+typedef struct _CompoundObjectList
+{
+    struct MinNode	    node;
+    struct MinList          objects;
+    UWORD	            id;
+} CompoundObjectList;
+
+typedef struct _CompoundObject
+{
+    struct MinNode	node;
+    struct Rectangle	coords;
+    struct Gadget	*object;
+} CompoundObject;
 
 // Listview node data
 #define lve_Flags		ln_Type			// Listview entry flags
@@ -1086,6 +1092,9 @@ BytesToString(unsigned long,char *,short,char);
 DivideToString(char *,unsigned long,unsigned long,short,char);
 
 ULONG CompareListFormat(ListFormat *,ListFormat *);
+
+void SetCxSelectUpDown(CxObj * cxo);
+CxObj *GetCxSelectUpDown(void);
 
 void BtoCStr(BSTR,char *,int);
 
