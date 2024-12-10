@@ -80,7 +80,7 @@ struct TagItem
 
 	icon_protection_tags[]={
 		{GLV_MultiSelect,1},
-		{GLV_NoScroller,1},
+		{GLV_NoScroller,2},
 		{TAG_MORE,(ULONG)icon_layout}},
 
 	icon_comment_tags[]={
@@ -231,7 +231,7 @@ ObjectDef
 		{OD_GADGET,
 			MY_LISTVIEW_KIND,
 			{42,0,SIZE_MAXIMUM,8},
-			{20,4,-4,4},
+			{20,4,-4,12},
 			0,
 			0,
 			GAD_ICON_PROTECTION,
