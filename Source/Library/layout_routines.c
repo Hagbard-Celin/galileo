@@ -2117,10 +2117,10 @@ void __asm __saveds L_DisplayObject(
 
 			// Or a line
 			else
-			if (first && (object->flags&AREAFLAG_LINE))
+			if (first && ((object->flags&AREAFLAG_LINE) || (object->flags&AREAFLAG_GROOVE)))
 			{
 				// Shine (top line)
-				SetAPen(&rp,((WindowData *)window->UserData)->drawinfo->dri_Pens[SHINEPEN]);
+				SetAPen(&rp,((WindowData *)window->UserData)->drawinfo->dri_Pens[(object->flags&AREAFLAG_LINE)?SHINEPEN:SHADOWPEN]);
 				Move(&rp,
 					object->gl_info.gl_area.area_pos.Left,
 					object->gl_info.gl_area.area_pos.Top);
@@ -2129,7 +2129,7 @@ void __asm __saveds L_DisplayObject(
 					object->gl_info.gl_area.area_pos.Top);
 
 				// Shadow (bottom line)
-				SetAPen(&rp,((WindowData *)window->UserData)->drawinfo->dri_Pens[SHADOWPEN]);
+				SetAPen(&rp,((WindowData *)window->UserData)->drawinfo->dri_Pens[(object->flags&AREAFLAG_LINE)?SHADOWPEN:SHINEPEN]);
 				Move(&rp,
 					object->gl_info.gl_area.area_pos.Left,
 					object->gl_info.gl_area.area_pos.Top+1);

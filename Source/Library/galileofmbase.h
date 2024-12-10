@@ -213,6 +213,7 @@ typedef struct _ObjectDef {
 #define AREAFLAG_TITLE			(1<<16)		// Box with a title
 #define AREAFLAG_NOFILL			(1<<18)		// No fill
 #define AREAFLAG_FILL_COLOUR		(1<<19)		// Always fill with colour
+#define AREAFLAG_GROOVE         	(1<<20)     	// Recessed line (separator)
 
 #define OBJECTFLAG_DRAWN		(1<<31)		// Object has been drawn
 

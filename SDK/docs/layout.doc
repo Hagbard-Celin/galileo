@@ -204,6 +204,7 @@ structure is defined as follows:
             AREAFLAG_ICON - draw an icon drop box
             AREAFLAG_ERASE - erase the interior of the rectangle
             AREAFLAG_LINE - draw a separator line
+            AREAFLAG_GROOVE - draw a recessed separator line
             AREAFLAG_OPTIM - optimised refreshing when updating
             AREAFLAG_TITLE - draw a group box with a title
             AREAFLAG_NOFILL - don't fill interior
