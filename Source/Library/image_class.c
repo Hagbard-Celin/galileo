@@ -132,7 +132,7 @@ void image_draw(
 		case IM_ARROW_DOWN:
 
 			// Draw border around the box
-			listview_border(cl,rp,pens,&box,draw->imp_State,(data->flags&BIF_THIN_BORDERS)?THIN:THICK);
+			listview_border(cl,rp,pens,&box,draw->imp_State,(data->flags&BIF_THIN_BORDERS)?THIN:THICK, NULL);
 
 			// Fill background
 			SetAPen(rp,pens[(draw->imp_State==IDS_SELECTED)?FILLPEN:BACKGROUNDPEN]);

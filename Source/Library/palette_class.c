@@ -660,7 +660,7 @@ void palette_render(
 				pens,
 				(struct IBox *)&gadget->LeftEdge,
 				IDS_NORMAL,
-				(data->flags&BUTTONF_THIN)?THIN:THICK);
+				(data->flags&BUTTONF_THIN)?THIN:THICK, NULL);
 
 			// Set flag to say done the first draw
 			data->done_first=1;

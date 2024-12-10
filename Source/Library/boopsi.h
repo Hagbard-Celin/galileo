@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2024 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -120,32 +121,36 @@ typedef struct
     short 	    scroller_width;
 } ListViewData;
 
-#define LVF_SHOW_SELECTED		(1<<0)		// Show selected
-#define LVF_SELECTED_CHECK		(1<<1)		// Check selected
-#define LVF_MULTI_SELECT		(1<<2)		// Multiple selections
-#define LVF_DETACHED			(1<<3)		// List has been detached
-#define LVF_GOT_FONT			(1<<4)		// Got our own font
-#define LVF_READ_ONLY			(1<<5)		// Read-only listview
-#define LVF_SELECTED_HIGH		(1<<6)		// Highlight selected
-#define LVF_DONE_FIRST			(1<<7)		// Done first draw
-#define LVF_SHOW_CHECKS			(1<<8)		// Show checkmarks
-#define LVF_NO_SCROLLER			(1<<9)		// No scroller necessary
-#define LVF_TOP_JUSTIFY			(1<<10)		// Top-justify items
-#define LVF_RIGHT_JUSTIFY		(1<<11)		// Right-justify items
-#define LVF_DRAG_NOTIFY			(1<<12)		// Notify of drags
+#define LVF_SHOW_SELECTED		(1<<0)	    // Show selected
+#define LVF_SELECTED_CHECK		(1<<1)	    // Check selected
+#define LVF_MULTI_SELECT		(1<<2)	    // Multiple selections
+#define LVF_DETACHED			(1<<3)	    // List has been detached
+#define LVF_GOT_FONT			(1<<4)	    // Got our own font
+#define LVF_READ_ONLY			(1<<5)	    // Read-only listview
+#define LVF_SELECTED_HIGH		(1<<6)	    // Highlight selected
+#define LVF_DONE_FIRST			(1<<7)	    // Done first draw
+#define LVF_SHOW_CHECKS			(1<<8)	    // Show checkmarks
+#define LVF_NO_SCROLLER			(1<<9)	    // No scroller necessary
+#define LVF_TOP_JUSTIFY			(1<<10)	    // Top-justify items
+#define LVF_RIGHT_JUSTIFY		(1<<11)	    // Right-justify items
+#define LVF_DRAG_NOTIFY			(1<<12)	    // Notify of drags
 #define LVF_DRAG_FLAG			(1<<13)
 #define LVF_NO_VERT_SCROLL		(1<<14)
 #define LVF_CANCEL			(1<<15)
-#define LVF_NO_HIGHLIGHT		(1<<16)		// No highlighting with checkmarks
+#define LVF_NO_HIGHLIGHT		(1<<16)	    // No highlighting with checkmarks
 #define LVF_SHIFT_ARROWS		(1<<17)
-#define LVF_SHOW_FILENAMES		(1<<18)		// Only show filenames
-#define LVF_SHOW_SEPARATORS		(1<<19)		// Show --- as separator
-#define LVF_SCROLLER_LEFT		(1<<20)		// Scroller on left
-#define LVF_DISABLE_CHANGE		(1<<21)		// Disable state changed
-#define LVF_THIN_BORDER			(1<<22)		// Thin borders
-
-#define LVF_NO_SCROLLING        (1<<27)
-#define LVF_SCROLL_FLAG			(1<<28)
+#define LVF_SHOW_FILENAMES		(1<<18)	    // Only show filenames
+#define LVF_SHOW_SEPARATORS		(1<<19)	    // Show --- as separator
+#define LVF_SCROLLER_LEFT		(1<<20)	    // Scroller on left
+#define LVF_DISABLE_CHANGE		(1<<21)	    // Disable state changed
+#define LVF_THIN_BORDER			(1<<22)	    // Thin borders
+#define LVF_NO_LEFTBORDER		(1<<23)	    // No left border
+#define LVF_NO_TOPBORDER		(1<<24)	    // No top border
+#define LVF_NO_RIGHTBORDER		(1<<25)	    // No right border
+#define LVF_NO_BOTTOMBORDER		(1<<26)	    // No bottom border
+#define LVF_NOBORDER			(LVF_NO_LEFTBORDER|LVF_NO_TOPBORDER|LVF_NO_RIGHTBORDER|LVF_NO_BOTTOMBORDER)
+#define LVF_NO_SCROLLING		(1<<27)     // Completely disable scrolling
+#define LVF_SCROLL_FLAG			(1<<28)     // Currently auto-scrolling
 
 typedef struct
 {
@@ -280,7 +285,7 @@ void propgadget_calc_coords(Class *cl, PropGadgetData *data, struct Gadget *gadg
 ULONG propgadget_render(Class *cl, struct Gadget *gadget, struct GadgetInfo *GInfo, struct gpRender *msg);
 void propgadget_notify(Class *cl, Object *obj, struct opUpdate *msg, PropGadgetData *data, struct GadgetInfo *GInfo, ULONG flags);
 void listview_render(Class *,struct Gadget *,ListViewData *,struct gpRender *);
-void listview_border(Class *,struct RastPort *,UWORD *,struct IBox *,ULONG,short);
+void listview_border(Class *,struct RastPort *,UWORD *,struct IBox *,ULONG,short,ULONG);
 void listview_draw_items(Class *,struct Gadget *,struct RastPort *,struct DrawInfo *,ListViewData *,short);
 void listview_draw_item(Class *,struct Gadget *,struct RastPort *,struct DrawInfo *,ListViewData *,struct Node *,unsigned short,struct IBox *);
 short listview_get_sel(Class *,struct Gadget *,ListViewData *,struct gpInput *,short);

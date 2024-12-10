@@ -982,7 +982,7 @@ void button_render(
 				pens,
 				&box,
 				(data->value&AREAFLAG_RECESSED)?IDS_SELECTED:IDS_NORMAL,
-				(data->flags&BUTTONF_THIN)?THIN:THICK);
+				(data->flags&BUTTONF_THIN)?THIN:THICK, NULL);
 		}
 
 		// Shift box in
@@ -1048,7 +1048,7 @@ void button_render(
 			pens,
 			&box,
 			IDS_SELECTED,
-			THIN);
+			THIN, NULL);
 
 		// Shift box in again
 		box.Left++;
@@ -1107,7 +1107,7 @@ void button_render(
 				pens,
 				&box,
 				IDS_NORMAL,
-				THIN);
+				THIN, NULL);
 		}
 	}
 
@@ -1138,7 +1138,7 @@ void button_render(
 				pens,
 				&box,
 				state,
-				(data->flags&BUTTONF_THIN)?THIN:THICK);
+				(data->flags&BUTTONF_THIN)?THIN:THICK, NULL);
 
 			// Fill button interior
 			SetAPen(rp,

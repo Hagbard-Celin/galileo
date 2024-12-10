@@ -214,6 +214,17 @@ IM_Width, IM_Height, etc, tags. Images are scaled to the supplied sizes.
         into your own RastPort. See the section on DragNotify below
         for more information.
 
+    GLV_NoBorder (ULONG) (I) - this allows you to disable rendering of
+        the main border individually for each side of the gadget. Supported
+        flags are:
+
+        GLVNBF_LEFT   - Disable left border
+        GLVNBF_TOP    - Disable top border
+        GLVNBF_RIGHT  - Disable right border
+        GLVNBF_BOTTOM - Disable bottom border
+        GLVNBF_ALL    - Disable all borders, equal to:
+                        (GLVNBF_LEFT|GLVNBF_TOP|GLVNBF_RIGHT|GLVNBF_BOTTOM)
+
     The gadget is a subclass of gadgetclass and as such supports the
     standard gadgetclass tags (including GA_Disabled). The title of
     the gadget can be specified with GA_Text (GA_IntuiText and

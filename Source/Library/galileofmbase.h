@@ -512,6 +512,14 @@ struct gpResize
 #define GLV_End			TAG_USER + 56
 #define GLV_ScrollLeft		TAG_USER + 57
 #define GLV_ThinBorder		TAG_USER + 58		// Thin borders
+#define GLV_NoBorder		TAG_USER + 59
+
+// ListView noborder flags
+#define GLVNBF_LEFT	(1<<0)
+#define GLVNBF_TOP	(1<<1)
+#define GLVNBF_RIGHT	(1<<2)
+#define GLVNBF_BOTTOM	(1<<3)
+#define GLVNBF_ALL	(GLVNB_LEFT|GLVNB_TOP|GLVNB_RIGHT|GLVNB_BOTTOM)
 
 typedef struct
 {

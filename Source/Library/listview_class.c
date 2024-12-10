@@ -68,7 +68,7 @@ ULONG __asm __saveds listview_dispatch(register __a0 Class *cl,
 	    if (retval=DoSuperMethodA(cl,obj,msg))
 	    {
 		struct TagItem *tags,*tag;
-		short a;
+		ULONG a;
 		struct Image *image;
 		struct TextAttr *attr;
 
@@ -102,6 +102,13 @@ ULONG __asm __saveds listview_dispatch(register __a0 Class *cl,
 		// Flags
 		if (FindTagItem(GLV_ShowSelected,tags))
 		    data->flags|=LVF_SHOW_SELECTED;
+		if (a=GetTagData(GLV_NoBorder,0,tags))
+		{
+		    if (a & GLVNBF_LEFT) data->flags|=LVF_NO_LEFTBORDER;
+		    if (a & GLVNBF_TOP) data->flags|=LVF_NO_TOPBORDER;
+		    if (a & GLVNBF_RIGHT) data->flags|=LVF_NO_RIGHTBORDER;
+		    if (a & GLVNBF_BOTTOM) data->flags|=LVF_NO_BOTTOMBORDER;
+		}
 		if (GetTagData(GLV_ThinBorder,0,tags))
 		    data->flags|=LVF_THIN_BORDER;
 		if (GetTagData(GLV_MultiSelect,0,tags))
@@ -880,8 +887,8 @@ ULONG __asm __saveds listview_dispatch(register __a0 Class *cl,
 		    {
 			// Left button down and valid list?
 			if (input->gpi_IEvent->ie_Code==SELECTDOWN &&
-				data->labels &&
-				!(data->flags&(LVF_READ_ONLY|LVF_DETACHED)))
+			    data->labels &&
+			    !(data->flags&(LVF_READ_ONLY|LVF_DETACHED)))
 			{
 			    short sel;
 
@@ -1339,7 +1346,7 @@ void listview_render(Class *cl,
 			        pens,
 			        &data->list_dims,
 			        (data->flags&LVF_READ_ONLY)?IDS_SELECTED:IDS_NORMAL,
-			        (data->flags&LVF_THIN_BORDER)?THIN:THICK);
+			        (data->flags&LVF_THIN_BORDER)?THIN:THICK, data->flags&LVF_NOBORDER );
 
 		// Draw scroller border
 		if (data->scroller)
@@ -1349,7 +1356,7 @@ void listview_render(Class *cl,
 			            pens,
 			            &data->scroller_dims,
 			            IDS_NORMAL,
-			            (data->flags&LVF_THIN_BORDER)?THIN:THICK);
+			            (data->flags&LVF_THIN_BORDER)?THIN:THICK, NULL);
 
 		    // Draw blank area inside scroller border
 		    SetAPen(rp,pens[BACKGROUNDPEN]);
@@ -1531,23 +1538,42 @@ void listview_border(Class *cl,
 	             UWORD *pens,
 	             struct IBox *box,
 	             ULONG state,
-	             short single)
+	             short single,
+	             ULONG borderflags)
 {
     SetAPen(rp,pens[(state==IDS_SELECTED)?SHADOWPEN:SHINEPEN]);
-    Move(rp,box->Left+box->Width-((single)?1:2),box->Top);
-    Draw(rp,box->Left,box->Top);
-    Draw(rp,box->Left,box->Top+box->Height-1);
-    if (!single)
+    if (!(borderflags & LVF_NO_TOPBORDER))
+    {
+	Move(rp,box->Left+box->Width-((borderflags & LVF_NO_RIGHTBORDER)?0:(single)?1:2),box->Top);
+	Draw(rp,box->Left,box->Top);
+    }
+
+    if ((borderflags & LVF_NO_TOPBORDER) && !(borderflags & LVF_NO_LEFTBORDER))
+	Move(rp,box->Left,box->Top);
+
+    if (!(borderflags & LVF_NO_LEFTBORDER))
+	Draw(rp,box->Left,box->Top+box->Height-1);
+
+    if (!single && !(borderflags & LVF_NO_LEFTBORDER))
     {
 	Move(rp,box->Left+1,box->Top+box->Height-2);
 	Draw(rp,box->Left+1,box->Top+1);
     }
 
     SetAPen(rp,pens[(state==IDS_SELECTED)?SHINEPEN:SHADOWPEN]);
-    Move(rp,box->Left+1,box->Top+box->Height-1);
+    if (!(borderflags & LVF_NO_BOTTOMBORDER))
+    {
+    Move(rp,box->Left+((borderflags & LVF_NO_LEFTBORDER)?0:1),box->Top+box->Height-1);
     Draw(rp,box->Left+box->Width-1,box->Top+box->Height-1);
-    Draw(rp,box->Left+box->Width-1,box->Top);
-    if (!single)
+    }
+
+    if ((borderflags & LVF_NO_BOTTOMBORDER) && !(borderflags & LVF_NO_RIGHTBORDER))
+	Move(rp,box->Left+box->Width-1,box->Top+box->Height-1);
+
+    if (!(borderflags & LVF_NO_RIGHTBORDER))
+	Draw(rp,box->Left+box->Width-1,box->Top);
+
+    if (!single && !(borderflags & LVF_NO_RIGHTBORDER))
     {
 	Move(rp,box->Left+box->Width-2,box->Top+box->Height-2);
 	Draw(rp,box->Left+box->Width-2,box->Top+1);
@@ -1575,10 +1601,10 @@ void listview_draw_items(Class *cl,
     {
 	SetAPen(rp,drawinfo->dri_Pens[BACKGROUNDPEN]);
 	RectFill(rp,
-		 data->list_dims.Left+((data->flags&LVF_THIN_BORDER)?1:2),
-		 data->list_dims.Top+1,
-		 data->list_dims.Left+data->list_dims.Width-((data->flags&LVF_THIN_BORDER)?2:3),
-		 data->list_dims.Top+data->list_dims.Height-2);
+		 data->list_dims.Left+((data->flags & LVF_NO_LEFTBORDER)?0:(data->flags&LVF_THIN_BORDER)?1:2),
+		 data->list_dims.Top+((data->flags & LVF_NO_TOPBORDER)?0:1),
+		 data->list_dims.Left+data->list_dims.Width-((data->flags & LVF_NO_RIGHTBORDER)?1:(data->flags&LVF_THIN_BORDER)?2:3),
+		 data->list_dims.Top+data->list_dims.Height-((data->flags & LVF_NO_BOTTOMBORDER)?1:2));
 	return;
     }
 
@@ -1988,6 +2014,8 @@ short listview_get_sel(Class *cl,
 // Get dimensions
 void listview_get_dims(Class *cl,ListViewData *data)
 {
+    WORD borderflags=0;
+
     // Calculate list dimensions
     data->list_dims.Left=(data->flags&LVF_SCROLLER_LEFT)?data->dims.Left+data->scroller_width:data->dims.Left;
     data->list_dims.Top=data->dims.Top;
@@ -2001,23 +2029,50 @@ void listview_get_dims(Class *cl,ListViewData *data)
     data->scroller_dims.Height=data->dims.Height-(data->arrow_height<<1);
 
     // Get number of lines in lister
-    data->lines=UDivMod32((data->list_dims.Height-2),data->list_font->tf_YSize + 1);
+    if (data->flags&LVF_NO_TOPBORDER)
+	borderflags++;
+
+    if (data->flags&LVF_NO_BOTTOMBORDER)
+	borderflags++;
+
+    if (!borderflags)
+	data->lines=UDivMod32((data->list_dims.Height-3),data->list_font->tf_YSize+1);
+    else
+    if (borderflags == 1)
+	data->lines=UDivMod32((data->list_dims.Height-2),data->list_font->tf_YSize+1);
+    else
+	data->lines=UDivMod32((data->list_dims.Height-1),data->list_font->tf_YSize+1);
+
 
     // Calculate text area
-    data->text_dims.Width=data->list_dims.Width-((data->flags&LVF_THIN_BORDER)?2:4);
-    data->text_dims.Height=(unsigned short)(data->lines)*(data->list_font->tf_YSize + 1);
-    data->text_dims.Left=data->list_dims.Left+((data->flags&LVF_THIN_BORDER)?1:2);
-    if (data->flags&LVF_TOP_JUSTIFY)
-    {
-	data->text_dims.Top=data->list_dims.Top+1;
-    }
+    borderflags = 0;
+    if (data->flags&LVF_NO_LEFTBORDER)
+	borderflags++;
+
+    if (data->flags&LVF_NO_RIGHTBORDER)
+	borderflags++;
+
+    if (!borderflags)
+	data->text_dims.Width=data->list_dims.Width-((data->flags&LVF_THIN_BORDER)?2:4);
     else
-    {
+    if (borderflags == 1)
+	data->text_dims.Width=data->list_dims.Width-((data->flags&LVF_THIN_BORDER)?1:2);
+    else
+	data->text_dims.Width=data->list_dims.Width;
+
+    data->text_dims.Height=(unsigned short)(data->lines)*(data->list_font->tf_YSize + 1);
+    data->text_dims.Left=data->list_dims.Left + ((data->flags&LVF_NO_LEFTBORDER)?0:(data->flags&LVF_THIN_BORDER)?1:2);
+
+    if (data->flags&LVF_TOP_JUSTIFY)
+	data->text_dims.Top=data->list_dims.Top+((data->flags&LVF_NO_TOPBORDER)?0:1);
+    else
 	data->text_dims.Top=data->list_dims.Top+((data->list_dims.Height-data->text_dims.Height)>>1);
-    }
 
     // Get item width
-    data->text_width=data->text_dims.Width-4;
+    if (!borderflags)
+	data->text_width=data->text_dims.Width-4;
+    else
+	data->text_width=data->text_dims.Width;
 }
 
 
