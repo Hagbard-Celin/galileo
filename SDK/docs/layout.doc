@@ -267,6 +267,11 @@ structure is defined as follows:
             use the GTCustom_LayoutRel tag, and set char_dims.Left and
             char_dims.Top for the new object to POS_CENTER.
 
+            This was previously mutually-exclusive with GTCustom_LayoutPos
+            which when present, would lead to this tag beeing ignored. They
+            now work in combination, so each axis can be aligned to different
+            objects.
+
             If the window is resizeable, you must supply the GTCustom_CopyTags
             tag as well.
             
@@ -304,6 +309,10 @@ structure is defined as follows:
             the same object centered on top fg the right edege of the other
             object, change od_Flags to
             POSFLAG_ADJUST_POS_X|POSFLAG_CENTER_POS_Y.
+
+            This was previously mutually-exclusive with GTCustom_LayoutRel,
+            which was ignored if this tag was present. They now work in
+            combination, so each axis can be aligned to different objects.
 
             If the window is resizeable, you must supply the GTCustom_CopyTags
             tag when you supply this tag.

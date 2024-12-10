@@ -389,10 +389,11 @@ __asm __saveds L_CalcObjectDims(
  	register __a4 GL_Object *last_ob,
  	register __d0 ULONG flags,
  	register __d1 GL_Object *this_ob,
- 	register __d2 GL_Object *parent_ob)
+	register __d2 GL_Object *rel_ob,
+	register __d3 GL_Object *pos_ob)
 {
 	struct TextFont *font;
-	struct IBox inner;
+	struct IBox inner={0};
 	ULONG val,div;
 	int success=1;
 	struct Window *window=0;
@@ -416,22 +417,22 @@ __asm __saveds L_CalcObjectDims(
 	dest_pos->Height=0;
 
 	/* Calculate window's inner dimensions */
-	if (parent_ob && (flags&WINDOW_OBJECT_PARENT))
+	if (rel_ob)
 	{
 		// Title box?
-		if (parent_ob->type==OD_AREA && parent_ob->flags&AREAFLAG_TITLE)
+		if (rel_ob->type==OD_AREA && rel_ob->flags&AREAFLAG_TITLE)
 		{
-			inner.Left=parent_ob->dims.Left+2;
-			inner.Top=parent_ob->dims.Top+1+(font->tf_YSize>>1);
-			inner.Width=parent_ob->dims.Width-4;
-			inner.Height=parent_ob->dims.Height-2-(font->tf_YSize>>1);
+			inner.Left=rel_ob->dims.Left+2;
+			inner.Top=rel_ob->dims.Top+1+(font->tf_YSize>>1);
+			inner.Width=rel_ob->dims.Width-4;
+			inner.Height=rel_ob->dims.Height-2-(font->tf_YSize>>1);
 		}
 		else
 		{
-			inner.Left=parent_ob->dims.Left+2;
-			inner.Top=parent_ob->dims.Top+1;
-			inner.Width=parent_ob->dims.Width-4;
-			inner.Height=parent_ob->dims.Height-2;
+			inner.Left=rel_ob->dims.Left+2;
+			inner.Top=rel_ob->dims.Top+1;
+			inner.Width=rel_ob->dims.Width-4;
+			inner.Height=rel_ob->dims.Height-2;
 		}
 	}
 	else
@@ -554,148 +555,209 @@ __asm __saveds L_CalcObjectDims(
 		dest_pos->Top=inner.Top+(pos[0].Top*font->tf_YSize)+pos[1].Top;
 	}
 
-
-	// Adjust from parent object?
-	if (parent_ob && this_ob && !(flags&WINDOW_OBJECT_PARENT))
 	{
-		// Increment position
-		if (this_ob->flags&POSFLAG_ADJUST_POS_X)
-			dest_pos->Left+=parent_ob->dims.Left+parent_ob->dims.Width-inner.Left;
-		else
-		if (this_ob->flags&POSFLAG_CENTER_POS_X)
-			dest_pos->Left+=parent_ob->dims.Left+(parent_ob->dims.Width>>1)-inner.Left;
-		else
-		if (this_ob->flags&POSFLAG_ALIGN_POS_X)
-			dest_pos->Left+=parent_ob->dims.Left-inner.Left;
+		BOOL didx,didy;
+		didx=FALSE;
+		didy=FALSE;
 
-		if (this_ob->flags&POSFLAG_ADJUST_POS_Y)
-			dest_pos->Top+=parent_ob->dims.Top+parent_ob->dims.Height-inner.Top;
-		else
-		if (this_ob->flags&POSFLAG_CENTER_POS_Y)
-			dest_pos->Top+=parent_ob->dims.Top+(parent_ob->dims.Height>>1)-inner.Top;
-		else
-		if (this_ob->flags&POSFLAG_ALIGN_POS_Y)
-			dest_pos->Top+=parent_ob->dims.Top-inner.Top;
-	}
-
-
-
-	/* Calculate width */
-	if (pos[0].Width<=SIZE_MAXIMUM)
-	{
-		/* SIZE_MAXIMUM means from here to the maximum */
-		dest_pos->Width=(inner.Width-(dest_pos->Left-inner.Left))+pos[1].Width;
-
-		/* SIZE_MAX_LESS means from here to the maximum less some chars */
-		if (pos[0].Width<SIZE_MAX_LESS)
+		/* Calculate width */
+		if (pos[0].Width<=SIZE_MAXIMUM)
 		{
-			div=pos[0].Width-SIZE_MAX_LESS;
-			dest_pos->Width+=(font->tf_XSize*div);
-		}
-	}
-	else
-	{
-		// Square?
-		if (pos[0].Width==POS_SQUARE)
-			square_w=1;
+			if (pos_ob && this_ob)
+			{
+				// Increment position
+				if (this_ob->flags&POSFLAG_ADJUST_POS_X)
+					dest_pos->Left+=pos_ob->dims.Left+pos_ob->dims.Width-inner.Left;
+				else
+				if (this_ob->flags&POSFLAG_CENTER_POS_X)
+					dest_pos->Left+=pos_ob->dims.Left+(pos_ob->dims.Width>>1)-inner.Left;
+				else
+				if (this_ob->flags&POSFLAG_ALIGN_POS_X)
+					dest_pos->Left+=pos_ob->dims.Left-inner.Left;
 
-		/* a proportion of space */
-		else
-		if (pos[0].Width>=POS_PROPORTION)
-		{
-			div=(pos[0].Width-POS_PROPORTION)*(inner.Width-pos[1].Left);
-			val=UDivMod32(div,100);
-			dest_pos->Width=val+pos[1].Width;
-		}
+				didx=TRUE;
+			}
 
-		/* Normal operation */
+			/* SIZE_MAXIMUM means from here to the maximum */
+			dest_pos->Width=(inner.Width-(dest_pos->Left-inner.Left))+pos[1].Width;
+
+			/* SIZE_MAX_LESS means from here to the maximum less some chars */
+			if (pos[0].Width<SIZE_MAX_LESS)
+			{
+				div=pos[0].Width-SIZE_MAX_LESS;
+				dest_pos->Width+=(font->tf_XSize*div);
+			}
+		}
 		else
 		{
-			dest_pos->Width=(pos[0].Width*font->tf_XSize)+pos[1].Width;
+			// Square?
+			if (pos[0].Width==POS_SQUARE)
+				square_w=1;
+
+			/* a proportion of space */
+			else
+			if (pos[0].Width>=POS_PROPORTION)
+			{
+				div=(pos[0].Width-POS_PROPORTION)*(inner.Width-pos[1].Left);
+				val=UDivMod32(div,100);
+				dest_pos->Width=val+pos[1].Width;
+			}
+
+			/* Normal operation */
+			else
+			{
+				dest_pos->Width=(pos[0].Width*font->tf_XSize)+pos[1].Width;
+			}
 		}
-	}
 
-	/* Is this gadget to be left-positioned specially ? */
-	if (pos[0].Left==POS_CENTER)
-	{
-		/* Centered */
-		dest_pos->Left=((inner.Width-dest_pos->Width)>>1)+inner.Left;
-
-		// Offset by character base?
-		if (pos[1].Left>FPOS_TEXT_OFFSET)
-			dest_pos->Left-=(pos[1].Left-FPOS_TEXT_OFFSET)*font->tf_XSize;
-
-		// Fine positioning
-		else dest_pos->Left+=pos[1].Left;
-	}
-	else
-	if (pos[0].Left<=POS_RIGHT_JUSTIFY)
-	{
-		/* Right-justified */
-		dest_pos->Left=((inner.Left+inner.Width)-dest_pos->Width)+pos[1].Left;
-
-		/* Adjust by any character factor */
-		dest_pos->Left+=(pos[0].Left-POS_RIGHT_JUSTIFY)*font->tf_XSize;
-	}
-
-
-	/* Calculate height */
-
-	if (pos[0].Height<0)
-	{
-		/* SIZE_MAXIMUM means from here to the maximum */
-		dest_pos->Height=(inner.Height-(dest_pos->Top-inner.Top))+pos[1].Height;
-
-		/* SIZE_MAX_LESS means from here to the maximum less some chars */
-		if (pos[0].Height<SIZE_MAX_LESS)
+		/* Is this gadget to be left-positioned specially ? */
+		if (pos[0].Left==POS_CENTER)
 		{
-			div=pos[0].Height-SIZE_MAX_LESS;
-			dest_pos->Height+=((font->tf_YSize*div));
-		}
-	}
-	else
-	{
-		// Square?
-		if (pos[0].Height==POS_SQUARE)
-			square_h=1;
+			/* Centered */
+			dest_pos->Left=((inner.Width-dest_pos->Width)>>1)+inner.Left;
 
-		/* a proportion of space */
-		if (pos[0].Height>=POS_PROPORTION)
+			if (pos_ob && this_ob)
+			{
+				// Set position
+				if (this_ob->flags&POSFLAG_ADJUST_POS_X)
+					dest_pos->Left=pos_ob->dims.Left+pos_ob->dims.Width-(dest_pos->Width>>1);
+				else
+				if (this_ob->flags&POSFLAG_CENTER_POS_X)
+					dest_pos->Left=pos_ob->dims.Left+(pos_ob->dims.Width>>1)-(dest_pos->Width>>1);
+				else
+				if (this_ob->flags&POSFLAG_ALIGN_POS_X)
+					dest_pos->Left=pos_ob->dims.Left-(dest_pos->Width>>1);
+
+				didx=TRUE;
+			}
+			// Offset by character base?
+			if (pos[1].Left>FPOS_TEXT_OFFSET)
+				dest_pos->Left-=(pos[1].Left-FPOS_TEXT_OFFSET)*font->tf_XSize;
+
+			// Fine positioning
+			else dest_pos->Left+=pos[1].Left;
+		}
+		else
+		if (pos[0].Left<=POS_RIGHT_JUSTIFY)
 		{
-			div=(pos[0].Height-POS_PROPORTION)*inner.Height;
-			val=UDivMod32(div,100);
-			dest_pos->Height=val+pos[1].Height;
+			/* Right-justified */
+			dest_pos->Left=((inner.Left+inner.Width)-dest_pos->Width)+pos[1].Left;
+
+			/* Adjust by any character factor */
+			dest_pos->Left+=(pos[0].Left-POS_RIGHT_JUSTIFY)*font->tf_XSize;
 		}
 
-		/* Normal operation */
+		if ((!didx) && pos_ob && this_ob)
+		{
+			// Increment position
+			if (this_ob->flags&POSFLAG_ADJUST_POS_X)
+				dest_pos->Left+=pos_ob->dims.Left+pos_ob->dims.Width-inner.Left;
+			else
+			if (this_ob->flags&POSFLAG_CENTER_POS_X)
+				dest_pos->Left+=pos_ob->dims.Left+(pos_ob->dims.Width>>1)-inner.Left;
+			else
+			if (this_ob->flags&POSFLAG_ALIGN_POS_X)
+				dest_pos->Left+=pos_ob->dims.Left-inner.Left;
+		}
+
+		/* Calculate height */
+
+		if (pos[0].Height<0)
+		{
+			if (pos_ob && this_ob)
+			{
+				if (this_ob->flags&POSFLAG_ADJUST_POS_Y)
+					dest_pos->Top+=pos_ob->dims.Top+pos_ob->dims.Height-inner.Top;
+				else
+				if (this_ob->flags&POSFLAG_CENTER_POS_Y)
+					dest_pos->Top+=pos_ob->dims.Top+(pos_ob->dims.Height>>1)-inner.Top;
+				else
+				if (this_ob->flags&POSFLAG_ALIGN_POS_Y)
+					dest_pos->Top+=pos_ob->dims.Top-inner.Top;
+
+				didy=TRUE;
+			}
+			/* SIZE_MAXIMUM means from here to the maximum */
+			dest_pos->Height=(inner.Height-(dest_pos->Top-inner.Top))+pos[1].Height;
+
+			/* SIZE_MAX_LESS means from here to the maximum less some chars */
+			if (pos[0].Height<SIZE_MAX_LESS)
+			{
+				div=pos[0].Height-SIZE_MAX_LESS;
+				dest_pos->Height+=((font->tf_YSize*div));
+			}
+		}
 		else
 		{
-			dest_pos->Height=(pos[0].Height*font->tf_YSize)+pos[1].Height;
+			// Square?
+			if (pos[0].Height==POS_SQUARE)
+				square_h=1;
+
+			/* a proportion of space */
+			if (pos[0].Height>=POS_PROPORTION)
+			{
+				div=(pos[0].Height-POS_PROPORTION)*inner.Height;
+				val=UDivMod32(div,100);
+				dest_pos->Height=val+pos[1].Height;
+			}
+
+			/* Normal operation */
+			else
+			{
+				dest_pos->Height=(pos[0].Height*font->tf_YSize)+pos[1].Height;
+			}
+		}
+
+		/* Is this gadget to be top-positioned specially ? */
+		if (pos[0].Top==POS_CENTER)
+		{
+			/* Centered */
+			dest_pos->Top=((inner.Height-dest_pos->Height)>>1)+inner.Top+pos[1].Top;
+			if (pos_ob && this_ob)
+			{
+				// Set position
+				if (this_ob->flags&POSFLAG_ADJUST_POS_Y)
+					dest_pos->Top=pos_ob->dims.Top+pos_ob->dims.Height-(dest_pos->Height>>1);
+				else
+				if (this_ob->flags&POSFLAG_CENTER_POS_Y)
+					dest_pos->Top=pos_ob->dims.Top+(pos_ob->dims.Height>>1)-(dest_pos->Height>>1);
+				else
+				if (this_ob->flags&POSFLAG_ALIGN_POS_Y)
+					dest_pos->Top=pos_ob->dims.Top-(dest_pos->Height>>1);
+
+				didy=TRUE;
+			}
+
+		}
+		else
+		if (pos[0].Top<=POS_RIGHT_JUSTIFY)
+		{
+			/* Right-justified */
+			dest_pos->Top=((inner.Top+inner.Height)-dest_pos->Height)+pos[1].Top;
+
+			/* Adjust by any character factor */
+			dest_pos->Top+=(pos[0].Top-POS_RIGHT_JUSTIFY)*font->tf_YSize;
+		}
+
+		// Square width?
+		if (square_w)
+			dest_pos->Width=dest_pos->Height;
+		else
+		if (square_h)
+			dest_pos->Height=dest_pos->Width;
+
+		if ((!didy) && pos_ob && this_ob)
+		{
+			if (this_ob->flags&POSFLAG_ADJUST_POS_Y)
+				dest_pos->Top+=pos_ob->dims.Top+pos_ob->dims.Height-inner.Top;
+			else
+			if (this_ob->flags&POSFLAG_CENTER_POS_Y)
+				dest_pos->Top+=pos_ob->dims.Top+(pos_ob->dims.Height>>1)-inner.Top;
+			else
+			if (this_ob->flags&POSFLAG_ALIGN_POS_Y)
+				dest_pos->Top+=pos_ob->dims.Top-inner.Top;
 		}
 	}
-
-	/* Is this gadget to be top-positioned specially ? */
-	if (pos[0].Top==POS_CENTER)
-	{
-		/* Centered */
-		dest_pos->Top=((inner.Height-dest_pos->Height)>>1)+inner.Top+pos[1].Top;
-	}
-	else
-	if (pos[0].Top<=POS_RIGHT_JUSTIFY)
-	{
-		/* Right-justified */
-		dest_pos->Top=((inner.Top+inner.Height)-dest_pos->Height)+pos[1].Top;
-
-		/* Adjust by any character factor */
-		dest_pos->Top+=(pos[0].Top-POS_RIGHT_JUSTIFY)*font->tf_YSize;
-	}
-
-	// Square width?
-	if (square_w)
-		dest_pos->Width=dest_pos->Height;
-	else
-	if (square_h)
-		dest_pos->Height=dest_pos->Width;
 
 	/* Adjust size if too large */
 	if (!(flags&WINDOW_LAYOUT_ADJUST))
@@ -800,7 +862,7 @@ __asm __saveds L_CalcWindowDims(
 	pos[1].Height+=height;
 
 	// Calculate size for this object
-	ret=L_CalcObjectDims(screen,font,pos,dest_pos,0,WINDOW_SCREEN_PARENT,0,0);
+	ret=L_CalcObjectDims(screen,font,pos,dest_pos,0,WINDOW_SCREEN_PARENT,0,0,0);
 
 	return ret;
 }
@@ -846,8 +908,13 @@ ObjectList *__asm __saveds L_AddObjectList(
 	// Go through object list
 	for (num=0;objects[num].type!=OD_END;num++)
 	{
-		BOOL done=0;	
-		struct TagItem *tag;
+		//BOOL done=0;
+		struct TagItem *rel_tag, *pos_tag;
+		BOOL rel, pos;
+		GL_Object *rel_object=0, *pos_object=0;
+
+		rel=FALSE;
+		pos=FALSE;
 
 		// Skip?
 		if (objects[num].type==OD_SKIP) continue;
@@ -892,38 +959,27 @@ ObjectList *__asm __saveds L_AddObjectList(
 		dims[1]=objects[num].fine_dims;
 
 		// Relative to an existing object?
-		if ((tag=FindTagItem(GTCustom_LayoutPos,objects[num].taglist)) ||
-			(tag=FindTagItem(GTCustom_LayoutRel,objects[num].taglist)))
-		{
-			GL_Object *object;
+		if (pos_tag=FindTagItem(GTCustom_LayoutPos,objects[num].taglist))
+			if ( pos_tag && ((pos_object=L_GetObject(list,pos_tag->ti_Data)) ||
+				(pos_object=L_GetObject(OBJLIST(window),pos_tag->ti_Data))))
+				pos=TRUE;
 
-			if ((object=L_GetObject(list,tag->ti_Data)) ||
-				(object=L_GetObject(OBJLIST(window),tag->ti_Data)))
-			{
-				L_CalcObjectDims(
-					window,
-					window->RPort->Font,
-					dims,
-					(struct IBox *)&newgad,
-					last_object,
-					(tag->ti_Tag==GTCustom_LayoutRel)?WINDOW_OBJECT_PARENT:((WINFLAG(window)&WINDOW_LAYOUT_ADJUST)?WINDOW_LAYOUT_ADJUST:0),
-					new_object,
-					object);
-				done=1;
-			}
-		}
+		if (rel_tag=FindTagItem(GTCustom_LayoutRel,objects[num].taglist))
+			if ( rel_tag && ((rel_object=L_GetObject(list,rel_tag->ti_Data)) ||
+				(rel_object=L_GetObject(OBJLIST(window),rel_tag->ti_Data))))
+				rel=TRUE;
 
 		// Get object dimensions
-		if (!done)
-			L_CalcObjectDims(
-				window,
-				window->RPort->Font,
-				dims,
-				(struct IBox *)&newgad,
-				last_object,
-				(WINFLAG(window)&WINDOW_LAYOUT_ADJUST)?WINDOW_LAYOUT_ADJUST:0,
-				new_object,
-				0);
+		L_CalcObjectDims(
+			window,
+			window->RPort->Font,
+			dims,
+			(struct IBox *)&newgad,
+			last_object,
+			(rel_tag)?0:(WINFLAG(window)&WINDOW_LAYOUT_ADJUST)?WINDOW_LAYOUT_ADJUST:0,
+			new_object,
+			(rel)?rel_object:0,
+			(pos)?pos_object:0);
 
 		// Copy dimensions
 		new_object->dims.Left=newgad.ng_LeftEdge;

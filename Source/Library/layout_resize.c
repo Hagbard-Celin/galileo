@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2024 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -62,46 +63,31 @@ void __asm __saveds L_LayoutResize(register __a0 struct Window *window)
 		// Go through objects
 		for (object=list->firstobject,last_object=0;object;last_object=object,object=object->next)
 		{
-			struct TagItem *tag;
-			BOOL ok=0;
+			struct TagItem *rel_tag, *pos_tag;
+			BOOL rel=FALSE,pos=FALSE;
+			GL_Object *rel_obj=0, *pos_obj=0;
 
-			// Object is relative?
-			if ((tag=FindTagItem(GTCustom_LayoutPos,object->tags)) ||
-				(tag=FindTagItem(GTCustom_LayoutRel,object->tags)))
-			{
-				GL_Object *rel;
+			// Get position object
+			if (pos_tag=FindTagItem(GTCustom_LayoutPos,object->tags))
+				if (pos_obj=L_GetObject((ObjectList *)wdata->object_list.mlh_Head,pos_tag->ti_Data))
+					pos=TRUE;
 
-				// Get relative object
-				if (rel=L_GetObject((ObjectList *)wdata->object_list.mlh_Head,tag->ti_Data))
-				{
-					// Recalculate this object position
-					L_CalcObjectDims(
-						window,
-						window->RPort->Font,
-						&object->char_dims,
-						&box,
-						last_object,
-						(tag->ti_Tag==GTCustom_LayoutRel)?WINDOW_OBJECT_PARENT:0,
-						object,
-						rel);
-					ok=1;
-				}
-			}
+			// Get relative object
+			if (rel_tag=FindTagItem(GTCustom_LayoutRel,object->tags))
+				if (rel_obj=L_GetObject((ObjectList *)wdata->object_list.mlh_Head,rel_tag->ti_Data))
+					rel=TRUE;
 
-			// Need to do?
-			if (!ok)
-			{
-				// Recalculate position
-				L_CalcObjectDims(
-					window,
-					window->RPort->Font,
-					&object->char_dims,
-					&box,
-					last_object,
-					(wdata->flags&WINDOW_LAYOUT_ADJUST)?WINDOW_LAYOUT_ADJUST:0,
-					object,
-					0);
-			}
+			// Recalculate position
+			L_CalcObjectDims(
+				window,
+				window->RPort->Font,
+				&object->char_dims,
+				&box,
+				last_object,
+				(rel_tag)?0:(wdata->flags&WINDOW_LAYOUT_ADJUST)?WINDOW_LAYOUT_ADJUST:0,
+				object,
+				(rel)?rel_obj:0,
+				(pos)?pos_obj:0);
 
 			// Store new dimensions in object
 			object->dims=box;

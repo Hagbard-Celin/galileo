@@ -387,7 +387,8 @@ __asm L_CalcObjectDims(
  	register __a4 GL_Object *,
  	register __d0 ULONG flags,
  	register __d1 GL_Object *,
- 	register __d2 GL_Object *);
+	register __d2 GL_Object *,
+	register __d3 GL_Object *);
 __asm L_CalcWindowDims(
 	register __a0 struct Screen *screen,
 	register __a1 ConfigWindow *win_pos,

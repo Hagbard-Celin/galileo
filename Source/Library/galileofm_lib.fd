@@ -56,7 +56,7 @@ ReplyWindowMsg(msg)(a0)
 StripIntuiMessages(window)(a0)
 CloseWindowSafely(window)(a0)
 *
-CalcObjectDims(parent,font,pos,dest,last,flags,ob,ob)(a0/a1/a2/a3/a4,d0/d1/d2)
+CalcObjectDims(parent,font,pos,dest,last,flags,ob,ob,ob)(a0/a1/a2/a3/a4,d0/d1/d2/d3)
 CalcWindowDims(screen,pos,dest,font,flags)(a0/a1/a2/a3,d0)
 *
 AddObjectList(window,objects)(a0/a1)
