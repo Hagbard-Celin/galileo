@@ -490,6 +490,43 @@ void __asm __saveds L_SetGadgetValue(
 		// Text/Area?
 		if (object->type==OD_TEXT || object->type==OD_AREA)
 		{
+			// Do we have text?
+			if (value)
+			{
+			    int tlen,len;
+			    struct IBox dims;
+
+			    // Copy dimensions
+			    dims=object->dims;
+
+			    // Get string length
+			    len=TextLength(list->window->RPort,(char *)value,(tlen=strlen((char *)value)));
+
+			    // Fix justification
+			    if (object->flags&TEXTFLAG_RIGHT_JUSTIFY)
+				    dims.Left+=dims.Width-len;
+
+			    else
+			    if (object->flags&TEXTFLAG_CENTER)
+			    {
+				    dims.Left+=(dims.Width-len)>>1;
+
+				    // Center vertically too for areas
+				    if (object->type==OD_AREA)
+					    dims.Top+=(dims.Height-list->window->RPort->TxHeight)>>1;
+			    }
+
+			    // Store string size
+			    object->gl_info.gl_text.text_pos.Width=len;
+			    object->gl_info.gl_text.text_pos.Height=list->window->RPort->TxHeight;
+
+			    // Store string position
+			    object->gl_info.gl_text.text_pos.Left=dims.Left;
+			    object->gl_info.gl_text.text_pos.Top=dims.Top;
+			    if (object->type==OD_TEXT)
+				    object->gl_info.gl_text.base_pos=dims.Top+list->window->RPort->TxBaseline;
+			}
+
 			// Display new text
 			L_DisplayObject(list->window,object,-1,-1,(char *)value);
 		}
