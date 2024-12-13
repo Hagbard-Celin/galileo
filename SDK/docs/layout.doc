@@ -268,7 +268,7 @@ structure is defined as follows:
             char_dims.Top for the new object to POS_CENTER.
 
             This was previously mutually-exclusive with GTCustom_LayoutPos
-            which when present, would lead to this tag beeing ignored. They
+            which when present, would lead to this tag being ignored. They
             now work in combination, so each axis can be aligned to different
             objects.
 
@@ -306,7 +306,7 @@ structure is defined as follows:
             For example to align a object of 1x1 character size dead-center on
             top of another, set od_CharDims to {POS_CENTER,POS_CENTER,1,1) and
             od_Flags to POSFLAG_CENTER_POS_X|POSFLAG_CENTER_POS_Y. To place
-            the same object centered on top fg the right edege of the other
+            the same object centered on top of the right edge of the other
             object, change od_Flags to
             POSFLAG_ADJUST_POS_X|POSFLAG_CENTER_POS_Y.
 
