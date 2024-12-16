@@ -282,9 +282,15 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObject(
 			// Set SpecialInfo to tell us it's a NewIcon
 			nido->nido_DiskObject.do_Gadget.SpecialInfo=(APTR)(icon+1);
 
-			// Discourage NewIcons? See if size is less than 5x5
+			// Discourage NewIcons? See if size is 5x5 or less
+			// Check the image in GadgetRender, as the do_Gadget size is somtimes
+			// bigger than the image.
+			// And just in case, if it finds gadgetrender empty, go with the NewIcon.
 			if (!(data->NewIconsFlags&ENVNIF_DISCOURAGE) ||
-				(icon->do_Gadget.Width<5 && icon->do_Gadget.Height<5))
+			    (icon->do_Gadget.GadgetRender &&
+			    (((struct Image *)icon->do_Gadget.GadgetRender)->Width<=5 &&
+			    ((struct Image *)icon->do_Gadget.GadgetRender)->Height<=5)) ||
+			    !icon->do_Gadget.GadgetRender)
 			{
 				// New-style image? Use as is
 				if (ndo->ndo_NormalImage || ndo->ndo_SelectedImage)
