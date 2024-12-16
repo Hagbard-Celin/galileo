@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -97,17 +97,18 @@ struct DiskObject *__asm __saveds L_GetCachedDefDiskObject(
 	
 	if	(IconBase->lib_Version>=44)
 	{
-	// using the new calls here results in a failure when image is written! ??
-	// icon=(icon=GetIconTags(name,TAG_DONE) or GetIconTags(NULL,ICONGETA_GetDefaultType,type,TAG_DONE)
-	// changed 3/11/99 to do rempapping  Seems to work. Maybe old 44.471 library!
-
 		struct LibData *libdata;
 
 		// Get data pointer
 		libdata=(struct LibData *)libbase->ml_UserData;
 
-		if (libdata->backfill_screen)
+	        // There are several bugs in icon.library v44 revisions 506 and below that all add up to:
+		// Remapping after the fact breaks something.
+	        // So on those wersions we do remapping on open.
+		if (IconBase->lib_Version==44 && IconBase->lib_Revision<=506)
 		{
+		    if (libdata->backfill_screen)
+		    {
 			if (name) icon=GetIconTags(name,
 				ICONGETA_FailIfUnavailable,TRUE,
 				ICONGETA_Screen,*libdata->backfill_screen,
@@ -117,6 +118,19 @@ struct DiskObject *__asm __saveds L_GetCachedDefDiskObject(
 					ICONGETA_GetDefaultType,type,
 					ICONGETA_Screen,*libdata->backfill_screen,
 					TAG_DONE);
+		    }
+		}
+		else
+		{
+		    if (name) icon=GetIconTags(name,
+			    ICONGETA_FailIfUnavailable,TRUE,
+			    ICONGETA_RemapIcon,FALSE,
+			    TAG_DONE);
+
+		    if (!icon) icon=GetIconTags(NULL,
+				    ICONGETA_GetDefaultType,type,
+				    ICONGETA_RemapIcon,FALSE,
+				    TAG_DONE);
 		}
 		return icon;
 	}
@@ -217,22 +231,29 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObject(
 		// gjp If using OS 3.5
 
 	if (IconBase->lib_Version>=44)
-		{
-		icon=NULL;
+	{
+	    icon=NULL;
 
 		//old method with no remap. 
 		// icon=GetIconTags(name,ICONGETA_FailIfUnavailable,TRUE,ICONGETA_RemapIcon,FALSE,TAG_DONE);
 			
 
+	    // There are several bugs in icon.library v44 revisions 506 and below that all add up to:
+	    // Remapping after the fact breaks something.
+	    // So on those wersions we do remapping on open.
+	    if (IconBase->lib_Version==44 && IconBase->lib_Revision<=506)
+	    {
 		if (data->backfill_screen)
-			icon=GetIconTags(name,
-				ICONGETA_FailIfUnavailable,TRUE,
-				ICONGETA_Screen,*data->backfill_screen,
-				TAG_DONE);
+		    icon=GetIconTags(name,
+			    ICONGETA_FailIfUnavailable,TRUE,
+			    ICONGETA_Screen,*data->backfill_screen,
+			    TAG_DONE);
+	    }
+	    else
+		icon=GetIconTags(name,ICONGETA_FailIfUnavailable,TRUE,ICONGETA_RemapIcon,FALSE,TAG_DONE);
 
-
-		return icon;
-		}
+	    return icon;
+	}
 
 		
 
@@ -481,10 +502,19 @@ BOOL __asm __saveds L_RemapIcon(
 	// gjp OS 3.5 stuff Remap
 	if	(IconBase->lib_Version>=44)
 	{
+	    LONG pmi = 0, ni = 0;
+
+	    // Only remap if palette-mapped
+	    IconControl(icon, ICONCTRLA_IsPaletteMapped, &pmi, ICONCTRLA_IsNewIcon, &ni, TAG_DONE);
+
+	    if(pmi || ni)
+	    {
 		LayoutIcon(icon,free_remap ? NULL : screen,TAG_DONE);
 		return (BOOL) (free_remap ? 0 : TRUE);
+	    }
+	    else
+		return 0;
 	}
-
 
 
 	// Not a NewIcon?
