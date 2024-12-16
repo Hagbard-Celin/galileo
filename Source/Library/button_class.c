@@ -1156,10 +1156,10 @@ void button_render(
 		else
 		{
 			EraseRect(rp,
-				box.Left+((data->flags&BUTTONF_THIN)?1:2),
-				box.Top+1,
-				box.Left+box.Width-((data->flags&BUTTONF_THIN)?2:3),
-				box.Top+box.Height-2);
+				box.Left,
+				box.Top,
+				box.Left+box.Width-1,
+				box.Top+box.Height-1);
 		}
 
 		// Selected check gadget?

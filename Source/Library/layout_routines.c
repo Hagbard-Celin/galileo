@@ -428,11 +428,25 @@ __asm __saveds L_CalcObjectDims(
 			inner.Height=rel_ob->dims.Height-2-(font->tf_YSize>>1);
 		}
 		else
+		if (((rel_ob->type==OD_AREA || rel_ob->type==OD_TEXT) &&
+		    !(rel_ob->flags&AREAFLAG_RAISED || rel_ob->flags&AREAFLAG_RECESSED)))
 		{
-			inner.Left=rel_ob->dims.Left+2;
-			inner.Top=rel_ob->dims.Top+1;
-			inner.Width=rel_ob->dims.Width-4;
-			inner.Height=rel_ob->dims.Height-2;
+		    inner.Left=rel_ob->dims.Left;
+		    inner.Top=rel_ob->dims.Top;
+		    inner.Width=rel_ob->dims.Width;
+		    inner.Height=rel_ob->dims.Height;
+		}
+		else
+		{
+		    inner.Left=rel_ob->dims.Left+1;
+		    inner.Top=rel_ob->dims.Top+1;
+		    inner.Width=rel_ob->dims.Width-2;
+		    inner.Height=rel_ob->dims.Height-2;
+		    if (!(rel_ob->flags&AREAFLAG_THIN))
+		    {
+			inner.Left++;
+			inner.Width -= 2;
+		    }
 		}
 	}
 	else
@@ -2264,70 +2278,108 @@ void __asm __saveds L_DisplayObject(
 			// Optimised refresh?
 			if (optimref)
 			{
+				struct Rectangle rec;
+
 				SetAPen(&rp,bg);
 
 				// No text?
 				if (text_width==0)
 				{
+					rec.MinX = object->gl_info.gl_area.area_pos.Left;
+					rec.MinY = object->gl_info.gl_area.area_pos.Top;
+					rec.MaxX = rec.MinX + object->gl_info.gl_area.area_pos.Width - 1;
+					rec.MaxY = rec.MinY + object->gl_info.gl_area.area_pos.Height - 1;
+
+					if (object->flags&AREAFLAG_RAISED || object->flags&AREAFLAG_RECESSED)
+					{
+					    rec.MinX++;
+					    rec.MinY++;
+					    rec.MaxX--;
+					    rec.MaxY--;
+					    if (!(object->flags&AREAFLAG_THIN))
+					    {
+						rec.MinX++;
+						rec.MaxX--;
+					    }
+					}
+
 					if (bg>0 || object->flags&AREAFLAG_FILL_COLOUR)
 					{
 						RectFill(&rp,
-							object->gl_info.gl_area.area_pos.Left+2,
-							object->gl_info.gl_area.area_pos.Top+1,
-							object->gl_info.gl_area.area_pos.Left+object->gl_info.gl_area.area_pos.Width-3,
-							object->gl_info.gl_area.area_pos.Top+object->gl_info.gl_area.area_pos.Height-2);
+							 rec.MinX,
+							 rec.MinY,
+							 rec.MaxX,
+							 rec.MaxY);
 					}
 					else
 					{
 						EraseRect(&rp,
-							object->gl_info.gl_area.area_pos.Left+2,
-							object->gl_info.gl_area.area_pos.Top+1,
-							object->gl_info.gl_area.area_pos.Left+object->gl_info.gl_area.area_pos.Width-3,
-							object->gl_info.gl_area.area_pos.Top+object->gl_info.gl_area.area_pos.Height-2);
+							  rec.MinX,
+							  rec.MinY,
+							  rec.MaxX,
+							  rec.MaxY);
 					}
 				}
 
 				else
 				{
+					rec.MinX = area_pos.Left;
+					rec.MinY = area_pos.Top;
+					rec.MaxX = area_pos.Left+area_pos.Width - 1;
+					rec.MaxY = area_pos.Top+area_pos.Height - 1;
+
+					if (object->flags&AREAFLAG_RAISED || object->flags&AREAFLAG_RECESSED)
+					{
+					    rec.MinX++;
+					    rec.MinY++;
+					    rec.MaxX--;
+					    rec.MaxY--;
+					    if (!(object->flags&AREAFLAG_THIN))
+					    {
+						rec.MinX++;
+						rec.MaxX--;
+					    }
+					}
+
 					// Refresh to left of text
-					if (area_pos.Left+2<text_pos.Left)
+					if (rec.MinX<text_pos.Left)
 					{
 						if (bg>0 || object->flags&AREAFLAG_FILL_COLOUR)
 						{
 							RectFill(&rp,
-								area_pos.Left+2,
-								area_pos.Top+1,
+								rec.MinX,
+								rec.MinY,
 								text_pos.Left-1,
-								area_pos.Top+area_pos.Height-2);
+								rec.MaxY);
 						}
 						else
 						{
 							EraseRect(&rp,
-								area_pos.Left+2,
-								area_pos.Top+1,
+								rec.MinX,
+								rec.MinY,
 								text_pos.Left-1,
-								area_pos.Top+area_pos.Height-2);
+								rec.MaxY);
 						}
 					}
 
 					// Refresh to right of text
-					if (text_width<area_pos.Left+area_pos.Width-3)
+					if (text_width<rec.MaxX)
 					{
 						if (bg>0 || object->flags&AREAFLAG_FILL_COLOUR)
 						{
 							RectFill(&rp,
 								text_width,
-								area_pos.Top+1,
-								area_pos.Left+area_pos.Width-3,
-								area_pos.Top+area_pos.Height-2);
+								rec.MinY,
+								rec.MaxX,
+								rec.MaxY);
 						}
 						else
 						{
 							EraseRect(&rp,
 								text_width,
-								area_pos.Top+1,
-								area_pos.Left+area_pos.Width-3,
-								area_pos.Top+area_pos.Height-2);
+								rec.MinY,
+								rec.MaxX,
+								rec.MaxY);
 						}
 					}
 				}
