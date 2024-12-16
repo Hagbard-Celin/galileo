@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -354,7 +354,7 @@ ULONG __asm __saveds button_dispatch(
 					{
 						// Free existing text
 						if (data->data)
-                        	FreeVec(data->data);
+							FreeVec(data->data);
 
 						// Allocate new text
 						if (data->data=AllocVec(strlen((char *)tag->ti_Data)+1,0))
@@ -728,7 +728,7 @@ ULONG __asm __saveds button_dispatch(
 			if (data->flags&BUTTONF_STRING)
 			{
 				// Free our buffer
-                if (((StringData *)data)->buffer)
+				if (((StringData *)data)->buffer)
 					FreeVec(((StringData *)data)->buffer);
 			}
 
@@ -745,7 +745,7 @@ ULONG __asm __saveds button_dispatch(
 			if (data->flags&BUTTONF_VIEW)
 			{
 				// Free data
-                if (data->data)
+				if (data->data)
 					FreeVec(data->data);
 			}
 
