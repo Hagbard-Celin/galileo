@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -186,7 +186,7 @@ void _config_env_update_example(config_env_data *data,UBYTE *ptr)
 	}
 
 	// Update example
-	DisplayObject(data->window,data->example,fg,bg,0);
+	DisplayObject(data->window,data->example,fg,bg,(char *)-1);
 }
 
 

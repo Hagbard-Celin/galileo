@@ -257,6 +257,7 @@ typedef struct _GL_Object
 	struct _gl_text
 	{
 	    struct IBox text_pos;   // Text position
+	    struct IBox area_pos;   // Area position
 	    WORD base_pos;	    // Baseline position
 	    short uscore_pos;	    // Underscore position
 	} gl_text;

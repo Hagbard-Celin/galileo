@@ -185,7 +185,7 @@ void __asm __saveds L_LayoutResize(register __a0 struct Window *window)
 
 			// Or an area?
 			else
-			if (object->type==OD_AREA)
+			if (object->type==OD_AREA || object->type==OD_TEXT)
 			{
 				// Store area size
 				object->gl_info.gl_area.area_pos=object->dims;

@@ -1638,9 +1638,6 @@ ObjectList *__asm __saveds L_AddObjectList(
 					}
 				}
 
-				// Store area size
-				new_object->gl_info.gl_area.area_pos=new_object->dims;
-
 				// Derive frametype
 				if (objects[num].flags&AREAFLAG_ICON) new_object->gl_info.gl_area.frametype=BBFT_ICONDROPBOX;
 				else new_object->gl_info.gl_area.frametype=BBFT_BUTTON;
@@ -1651,6 +1648,9 @@ ObjectList *__asm __saveds L_AddObjectList(
 			case OD_TEXT:
 				{
 					struct IBox dims;
+
+					// Store area size
+					new_object->gl_info.gl_area.area_pos=new_object->dims;
 
 					// Copy dimensions
 					dims=new_object->dims;
@@ -1933,7 +1933,11 @@ void __asm __saveds L_DisplayObject(
 	else object->bg=bg;
 
 	// Use original text?
-	if (txt==(char *)-1) txt=object->original_text;
+	if (txt==(char *)-1)
+	{
+	    if (!(txt = object->original_text) && object->text)
+		txt = object->text;
+	}
 
 	// First draw?
 	if (!(object->flags&OBJECTFLAG_DRAWN))
@@ -1955,9 +1959,6 @@ void __asm __saveds L_DisplayObject(
 			strcpy(object->text,txt);
 	}
 
-	// Get text pointer
-	if (!(txt=object->text)) txt=object->original_text;
-
 	// Get text length
 	if (txt) text_len=strlen(txt);
 
@@ -1967,78 +1968,79 @@ void __asm __saveds L_DisplayObject(
 	// Get default text position
 	text_pos=object->gl_info.gl_text.text_pos;
 
+	// Erase interior if asked for
+	if (object->flags&AREAFLAG_ERASE || (object->type == OD_AREA && first && !(object->flags&AREAFLAG_NOFILL)))
+	{
+		struct IBox box;
+
+		// Get object box
+		box=object->gl_info.gl_area.area_pos;
+
+		// Border?
+		if ((object->flags&AREAFLAG_RAISED) || (object->flags&AREAFLAG_RECESSED))
+		{
+			// Move vertical borders
+			box.Top+=1;
+			box.Height-=2;
+
+			// Thin border?
+			if (object->flags&AREAFLAG_THIN)
+			{
+				box.Left+=1;
+				box.Width-=2;
+			}
+
+			// Thick border
+			else
+			{
+				box.Left+=2;
+				box.Width-=4;
+			}
+		}
+
+		// Got a title?
+		if (object->type == OD_AREA && object->flags&AREAFLAG_TITLE)
+		{
+			box.Top+=(rp.TxHeight>>1);
+			box.Height-=(rp.TxHeight>>1)+2;
+			box.Left+=2;
+			box.Width-=4;
+		}
+
+		// Erase background
+		if (bg>0 || object->flags&AREAFLAG_FILL_COLOUR)
+		{
+			SetAPen(&rp,bg);
+			RectFill(&rp,
+				box.Left,
+				box.Top,
+				box.Left+box.Width-1,
+				box.Top+box.Height-1);
+		}
+		else
+		{
+			EraseRect(&rp,
+				box.Left,
+				box.Top,
+				box.Left+box.Width-1,
+				box.Top+box.Height-1);
+		}
+	}
+
+	// Optimised refreshing?
+	else
+	if (object->flags&AREAFLAG_OPTIM)
+	{
+		area_pos=object->gl_info.gl_area.area_pos;
+		optimref=1;
+	}
+
+
 	// Get object type
 	switch (object->type)
 	{
 		// Area
 		case OD_AREA:
-
-			// Erase interior if asked for
-			if (object->flags&AREAFLAG_ERASE || (first && !(object->flags&AREAFLAG_NOFILL)))
-			{
-				struct IBox box;
-
-				// Get object box
-				box=object->gl_info.gl_area.area_pos;
-
-				// Border?
-				if ((object->flags&AREAFLAG_RAISED) || (object->flags&AREAFLAG_RECESSED))
-				{
-					// Move vertical borders
-					box.Top+=1;
-					box.Height-=2;
-
-					// Thin border?
-					if (object->flags&AREAFLAG_THIN)
-					{
-						box.Left+=1;
-						box.Width-=2;
-					}
-
-					// Thick border
-					else
-					{
-						box.Left+=2;
-						box.Width-=4;
-					}
-				}
-
-				// Got a title?
-				if (object->flags&AREAFLAG_TITLE)
-				{
-					box.Top+=(rp.TxHeight>>1);
-					box.Height-=(rp.TxHeight>>1)+2;
-					box.Left+=2;
-					box.Width-=4;
-				}
-
-				// Erase background
-				if (bg>0 || object->flags&AREAFLAG_FILL_COLOUR)
-				{
-					SetAPen(&rp,bg);
-					RectFill(&rp,
-						box.Left,
-						box.Top,
-						box.Left+box.Width-1,
-						box.Top+box.Height-1);
-				}
-				else
-				{
-					EraseRect(&rp,
-						box.Left,
-						box.Top,
-						box.Left+box.Width-1,
-						box.Top+box.Height-1);
-				}
-			}
-
-			// Optimised refreshing?
-			else
-			if (object->flags&AREAFLAG_OPTIM)
-			{
-				optimref=1;
-				area_pos=object->gl_info.gl_area.area_pos;
-			}
 
 			// Box with a title?
 			if (object->flags&AREAFLAG_TITLE)
@@ -2235,13 +2237,13 @@ void __asm __saveds L_DisplayObject(
 				}
 			}
 
-			// Need JAM2 for text if optimised refreshing
-			if (optimref) SetDrMd(&rp,JAM2);
-
 			// Fall through to display text
 
 		// Text
 		case OD_TEXT:
+
+			// Need JAM2 for text if optimised refreshing
+			if (optimref) SetDrMd(&rp,JAM2);
 
 			// If there's any text, we display the string
 			if (txt)
@@ -2468,7 +2470,7 @@ void __asm __saveds L_RefreshObjectList(
 		for (object=list->firstobject;object;object=object->next)
 
 			// Refresh the object
-			L_DisplayObject(window,object,-1,-1,0);
+			L_DisplayObject(window,object,-1,-1,(char*)-1);
 
 		// If one list was supplied, stop at this point
 		if (ref_list) break;
