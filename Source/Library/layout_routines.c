@@ -376,6 +376,114 @@ void __asm __saveds L_CloseConfigWindow(
 	}
 }
 
+void CalcObjectWidth(struct IBox *pos,
+		     struct IBox *dest_pos,
+		     GL_Object *this_ob,
+		     GL_Object *pos_ob,
+		     struct IBox *inner,
+		     struct TextFont *font)
+{
+    ULONG val, div;
+
+    if (pos[0].Width>=0)
+    {
+	/* a proportion of space */
+
+	if (pos[0].Width>=POS_PROPORTION)
+	{
+		div=(pos[0].Width-POS_PROPORTION)*(inner->Width-pos[1].Left);
+		val=UDivMod32(div,100);
+		dest_pos->Width=val+pos[1].Width;
+	}
+
+	/* Normal operation */
+	else
+	{
+		dest_pos->Width=(pos[0].Width*font->tf_XSize)+pos[1].Width;
+	}
+    }
+
+    // Adjust from GTCustom_LayoutPos object
+    if (pos_ob && this_ob && !(pos[0].Left==POS_CENTER))
+    {
+	    // Set position
+	    // Increment position
+	    if (this_ob->flags&POSFLAG_ADJUST_POS_X)
+		    dest_pos->Left+=pos_ob->dims.Left+pos_ob->dims.Width-inner->Left;
+	    else
+	    if (this_ob->flags&POSFLAG_CENTER_POS_X)
+		    dest_pos->Left+=pos_ob->dims.Left+(pos_ob->dims.Width>>1)-inner->Left;
+	    else
+	    if (this_ob->flags&POSFLAG_ALIGN_POS_X)
+		    dest_pos->Left+=pos_ob->dims.Left-inner->Left;
+    }
+
+    if (pos[0].Width<=SIZE_MAXIMUM)
+    {
+	    /* SIZE_MAXIMUM means from here to the maximum */
+	    dest_pos->Width=(inner->Width-(dest_pos->Left-inner->Left))+pos[1].Width;
+
+	    /* SIZE_MAX_LESS means from here to the maximum less some chars */
+	    if (pos[0].Width<SIZE_MAX_LESS)
+	    {
+		    div=pos[0].Width-SIZE_MAX_LESS;
+		    dest_pos->Width+=(font->tf_XSize*div);
+	    }
+    }
+}
+
+void CalcObjectHeight(struct IBox *pos,
+		      struct IBox *dest_pos,
+		      GL_Object *this_ob,
+		      GL_Object *pos_ob,
+		      struct IBox *inner,
+		      struct TextFont *font)
+{
+    ULONG val, div;
+
+    if (pos[0].Height>=0)
+    {
+	/* a proportion of space */
+	if (pos[0].Height>=POS_PROPORTION)
+	{
+		div=(pos[0].Height-POS_PROPORTION)*inner->Height;
+		val=UDivMod32(div,100);
+		dest_pos->Height=val+pos[1].Height;
+	}
+
+	/* Normal operation */
+	else
+	{
+		dest_pos->Height=(pos[0].Height*font->tf_YSize)+pos[1].Height;
+	}
+    }
+
+    // Adjust from GTCustom_LayoutPos object
+    if (pos_ob && this_ob && !(pos[0].Top==POS_CENTER))
+    {
+	    if (this_ob->flags&POSFLAG_ADJUST_POS_Y)
+		    dest_pos->Top+=pos_ob->dims.Top+pos_ob->dims.Height-inner->Top;
+	    else
+	    if (this_ob->flags&POSFLAG_CENTER_POS_Y)
+		    dest_pos->Top+=pos_ob->dims.Top+(pos_ob->dims.Height>>1)-inner->Top;
+	    else
+	    if (this_ob->flags&POSFLAG_ALIGN_POS_Y)
+		    dest_pos->Top+=pos_ob->dims.Top-inner->Top;
+    }
+
+    if (pos[0].Height<=SIZE_MAXIMUM)
+    {
+	    /* SIZE_MAXIMUM means from here to the maximum */
+	    dest_pos->Height=(inner->Height-(dest_pos->Top-inner->Top))+pos[1].Height;
+
+	    /* SIZE_MAX_LESS means from here to the maximum less some chars */
+	    if (pos[0].Height<SIZE_MAX_LESS)
+	    {
+		    div=pos[0].Height-SIZE_MAX_LESS;
+		    dest_pos->Height+=((font->tf_YSize*div));
+	    }
+    }
+}
 
 /****************************************************************************
 				   Calculate an object's position and size
@@ -399,7 +507,6 @@ __asm __saveds L_CalcObjectDims(
 	struct Window *window=0;
 	struct Screen *screen=0;
 	long sizex=0,sizey=0;
-	BOOL square_w=0,square_h=0;
 
 	if (flags&WINDOW_SCREEN_PARENT) screen=parent;
 	else window=parent;
@@ -477,42 +584,43 @@ __asm __saveds L_CalcObjectDims(
 
 	/****** Calculate left position *******/
 
-	// Relative to last object?
-	if (pos[0].Left&POS_REL_RIGHT)
-	{
-		short left=pos[0].Left&~POS_REL_RIGHT;
-
-		// Calculate relative pos
-		left*=font->tf_XSize;
-		left+=pos[1].Left;
-
-		// Got a last object?
-		if (last_ob)
-		{
-			// Add left from last object
-			left+=last_ob->dims.Left+last_ob->dims.Width;
-		}
-
-		// Store left
-		dest_pos->Left=left;
-	}
-
-	// Proportion of window space
-	else
-	if (pos[0].Left>=POS_PROPORTION)
-	{
-		div=(pos[0].Left-POS_PROPORTION)*(inner.Width-pos[1].Left);
-		val=UDivMod32(div,100);
-		dest_pos->Left=inner.Left+val+pos[1].Left;
-	}
-
-	// Normal positioning
-	else
 	if (pos[0].Left>=0)
 	{
-		dest_pos->Left=inner.Left+(pos[0].Left*font->tf_XSize)+pos[1].Left;
-	}
+	    // Relative to last object?
+	    if (pos[0].Left&POS_REL_RIGHT)
+	    {
+		    short left=pos[0].Left&~POS_REL_RIGHT;
 
+		    // Calculate relative pos
+		    left*=font->tf_XSize;
+		    left+=pos[1].Left;
+
+		    // Got a last object?
+		    if (last_ob)
+		    {
+			    // Add left from last object
+			    left+=last_ob->dims.Left+last_ob->dims.Width;
+		    }
+
+		    // Store left
+		    dest_pos->Left=left;
+	    }
+
+	    // Proportion of window space
+	    else
+	    if (pos[0].Left>=POS_PROPORTION)
+	    {
+		    div=(pos[0].Left-POS_PROPORTION)*(inner.Width-pos[1].Left);
+		    val=UDivMod32(div,100);
+		    dest_pos->Left=inner.Left+val+pos[1].Left;
+	    }
+
+	    // Normal positioning
+	    else
+	    {
+		    dest_pos->Left=inner.Left+(pos[0].Left*font->tf_XSize)+pos[1].Left;
+	    }
+	}
 	// Adjust for text size?
 	if (this_ob && this_ob->flags&TEXTFLAG_ADJUST_TEXT && this_ob->text)
 	{
@@ -533,244 +641,127 @@ __asm __saveds L_CalcObjectDims(
 
 	/************ Calculate top position ************/
 
-	// Relative to last object?
-	if (pos[0].Top&POS_REL_RIGHT)
-	{
-		short top=pos[0].Top&~POS_REL_RIGHT;
-
-		// Calculate relative pos
-		top*=font->tf_YSize;
-		top+=pos[1].Top;
-
-		// Got a last object?
-		if (last_ob)
-		{
-			// Add top from last object
-			top+=last_ob->dims.Top+last_ob->dims.Height;
-		}
-
-		// Store top
-		dest_pos->Top=top;
-	}
-
-	// Proportion of space across window
-	else
-	if (pos[0].Top>=POS_PROPORTION)
-	{
-		div=(pos[0].Top-POS_PROPORTION)*inner.Height;
-		val=UDivMod32(div,100);
-		dest_pos->Top=inner.Top+val+pos[1].Top;
-	}
-
-	// Normal positioning
-	else
 	if (pos[0].Top>=0)
 	{
-		dest_pos->Top=inner.Top+(pos[0].Top*font->tf_YSize)+pos[1].Top;
+	    // Relative to last object?
+	    if (pos[0].Top&POS_REL_RIGHT)
+	    {
+		    short top=pos[0].Top&~POS_REL_RIGHT;
+
+		    // Calculate relative pos
+		    top*=font->tf_YSize;
+		    top+=pos[1].Top;
+
+		    // Got a last object?
+		    if (last_ob)
+		    {
+			    // Add top from last object
+			    top+=last_ob->dims.Top+last_ob->dims.Height;
+		    }
+
+		    // Store top
+		    dest_pos->Top=top;
+	    }
+
+	    // Proportion of space across window
+	    else
+	    if (pos[0].Top>=POS_PROPORTION)
+	    {
+		    div=(pos[0].Top-POS_PROPORTION)*inner.Height;
+		    val=UDivMod32(div,100);
+		    dest_pos->Top=inner.Top+val+pos[1].Top;
+	    }
+
+	    // Normal positioning
+	    else
+	    {
+		    dest_pos->Top=inner.Top+(pos[0].Top*font->tf_YSize)+pos[1].Top;
+	    }
 	}
 
+	// Square?
+	if (pos[0].Width==POS_SQUARE)
 	{
-		BOOL didx,didy;
-		didx=FALSE;
-		didy=FALSE;
+	    CalcObjectHeight(pos, dest_pos, this_ob, pos_ob, &inner, font);
+	    dest_pos->Width=dest_pos->Height;
+	}
+	else
+	if (pos[0].Height==POS_SQUARE)
+	{
+	    CalcObjectWidth(pos, dest_pos, this_ob, pos_ob, &inner, font);
+	    dest_pos->Height=dest_pos->Width;
+	}
+	else
+	{
+	    CalcObjectWidth(pos, dest_pos, this_ob, pos_ob, &inner, font);
+	    CalcObjectHeight(pos, dest_pos, this_ob, pos_ob, &inner, font);
+	}
 
-		/* Calculate width */
-		if (pos[0].Width<=SIZE_MAXIMUM)
+	/* Is this gadget to be left-positioned specially ? */
+	if (pos[0].Left==POS_CENTER)
+	{
+		/* Centered */
+		dest_pos->Left+=((inner.Width-dest_pos->Width)>>1)+inner.Left;
+
+		// Center this object on pos?
+		if (pos_ob && this_ob)
 		{
-			if (pos_ob && this_ob)
-			{
-				// Increment position
-				if (this_ob->flags&POSFLAG_ADJUST_POS_X)
-					dest_pos->Left+=pos_ob->dims.Left+pos_ob->dims.Width-inner.Left;
-				else
-				if (this_ob->flags&POSFLAG_CENTER_POS_X)
-					dest_pos->Left+=pos_ob->dims.Left+(pos_ob->dims.Width>>1)-inner.Left;
-				else
-				if (this_ob->flags&POSFLAG_ALIGN_POS_X)
-					dest_pos->Left+=pos_ob->dims.Left-inner.Left;
-
-				didx=TRUE;
-			}
-
-			/* SIZE_MAXIMUM means from here to the maximum */
-			dest_pos->Width=(inner.Width-(dest_pos->Left-inner.Left))+pos[1].Width;
-
-			/* SIZE_MAX_LESS means from here to the maximum less some chars */
-			if (pos[0].Width<SIZE_MAX_LESS)
-			{
-				div=pos[0].Width-SIZE_MAX_LESS;
-				dest_pos->Width+=(font->tf_XSize*div);
-			}
-		}
-		else
-		{
-			// Square?
-			if (pos[0].Width==POS_SQUARE)
-				square_w=1;
-
-			/* a proportion of space */
-			else
-			if (pos[0].Width>=POS_PROPORTION)
-			{
-				div=(pos[0].Width-POS_PROPORTION)*(inner.Width-pos[1].Left);
-				val=UDivMod32(div,100);
-				dest_pos->Width=val+pos[1].Width;
-			}
-
-			/* Normal operation */
-			else
-			{
-				dest_pos->Width=(pos[0].Width*font->tf_XSize)+pos[1].Width;
-			}
-		}
-
-		/* Is this gadget to be left-positioned specially ? */
-		if (pos[0].Left==POS_CENTER)
-		{
-			/* Centered */
-			dest_pos->Left=((inner.Width-dest_pos->Width)>>1)+inner.Left;
-
-			if (pos_ob && this_ob)
-			{
-				// Set position
-				if (this_ob->flags&POSFLAG_ADJUST_POS_X)
-					dest_pos->Left=pos_ob->dims.Left+pos_ob->dims.Width-(dest_pos->Width>>1);
-				else
-				if (this_ob->flags&POSFLAG_CENTER_POS_X)
-					dest_pos->Left=pos_ob->dims.Left+(pos_ob->dims.Width>>1)-(dest_pos->Width>>1);
-				else
-				if (this_ob->flags&POSFLAG_ALIGN_POS_X)
-					dest_pos->Left=pos_ob->dims.Left-(dest_pos->Width>>1);
-
-				didx=TRUE;
-			}
-			// Offset by character base?
-			if (pos[1].Left>FPOS_TEXT_OFFSET)
-				dest_pos->Left-=(pos[1].Left-FPOS_TEXT_OFFSET)*font->tf_XSize;
-
-			// Fine positioning
-			else dest_pos->Left+=pos[1].Left;
-		}
-		else
-		if (pos[0].Left<=POS_RIGHT_JUSTIFY)
-		{
-			/* Right-justified */
-			dest_pos->Left=((inner.Left+inner.Width)-dest_pos->Width)+pos[1].Left;
-
-			/* Adjust by any character factor */
-			dest_pos->Left+=(pos[0].Left-POS_RIGHT_JUSTIFY)*font->tf_XSize;
-		}
-
-		if ((!didx) && pos_ob && this_ob)
-		{
-			// Increment position
-			if (this_ob->flags&POSFLAG_ADJUST_POS_X)
-				dest_pos->Left+=pos_ob->dims.Left+pos_ob->dims.Width-inner.Left;
-			else
-			if (this_ob->flags&POSFLAG_CENTER_POS_X)
-				dest_pos->Left+=pos_ob->dims.Left+(pos_ob->dims.Width>>1)-inner.Left;
-			else
-			if (this_ob->flags&POSFLAG_ALIGN_POS_X)
-				dest_pos->Left+=pos_ob->dims.Left-inner.Left;
-		}
-
-		/* Calculate height */
-
-		if (pos[0].Height<0)
-		{
-			if (pos_ob && this_ob)
-			{
-				if (this_ob->flags&POSFLAG_ADJUST_POS_Y)
-					dest_pos->Top+=pos_ob->dims.Top+pos_ob->dims.Height-inner.Top;
-				else
-				if (this_ob->flags&POSFLAG_CENTER_POS_Y)
-					dest_pos->Top+=pos_ob->dims.Top+(pos_ob->dims.Height>>1)-inner.Top;
-				else
-				if (this_ob->flags&POSFLAG_ALIGN_POS_Y)
-					dest_pos->Top+=pos_ob->dims.Top-inner.Top;
-
-				didy=TRUE;
-			}
-			/* SIZE_MAXIMUM means from here to the maximum */
-			dest_pos->Height=(inner.Height-(dest_pos->Top-inner.Top))+pos[1].Height;
-
-			/* SIZE_MAX_LESS means from here to the maximum less some chars */
-			if (pos[0].Height<SIZE_MAX_LESS)
-			{
-				div=pos[0].Height-SIZE_MAX_LESS;
-				dest_pos->Height+=((font->tf_YSize*div));
-			}
-		}
-		else
-		{
-			// Square?
-			if (pos[0].Height==POS_SQUARE)
-				square_h=1;
-
-			/* a proportion of space */
-			if (pos[0].Height>=POS_PROPORTION)
-			{
-				div=(pos[0].Height-POS_PROPORTION)*inner.Height;
-				val=UDivMod32(div,100);
-				dest_pos->Height=val+pos[1].Height;
-			}
-
-			/* Normal operation */
-			else
-			{
-				dest_pos->Height=(pos[0].Height*font->tf_YSize)+pos[1].Height;
-			}
-		}
-
-		/* Is this gadget to be top-positioned specially ? */
-		if (pos[0].Top==POS_CENTER)
-		{
-			/* Centered */
-			dest_pos->Top=((inner.Height-dest_pos->Height)>>1)+inner.Top+pos[1].Top;
-			if (pos_ob && this_ob)
-			{
-				// Set position
-				if (this_ob->flags&POSFLAG_ADJUST_POS_Y)
-					dest_pos->Top=pos_ob->dims.Top+pos_ob->dims.Height-(dest_pos->Height>>1);
-				else
-				if (this_ob->flags&POSFLAG_CENTER_POS_Y)
-					dest_pos->Top=pos_ob->dims.Top+(pos_ob->dims.Height>>1)-(dest_pos->Height>>1);
-				else
-				if (this_ob->flags&POSFLAG_ALIGN_POS_Y)
-					dest_pos->Top=pos_ob->dims.Top-(dest_pos->Height>>1);
-
-				didy=TRUE;
-			}
-
-		}
-		else
-		if (pos[0].Top<=POS_RIGHT_JUSTIFY)
-		{
-			/* Right-justified */
-			dest_pos->Top=((inner.Top+inner.Height)-dest_pos->Height)+pos[1].Top;
-
-			/* Adjust by any character factor */
-			dest_pos->Top+=(pos[0].Top-POS_RIGHT_JUSTIFY)*font->tf_YSize;
-		}
-
-		// Square width?
-		if (square_w)
-			dest_pos->Width=dest_pos->Height;
-		else
-		if (square_h)
-			dest_pos->Height=dest_pos->Width;
-
-		if ((!didy) && pos_ob && this_ob)
-		{
+			// Set position
 			if (this_ob->flags&POSFLAG_ADJUST_POS_Y)
-				dest_pos->Top+=pos_ob->dims.Top+pos_ob->dims.Height-inner.Top;
+				dest_pos->Top=pos_ob->dims.Top+pos_ob->dims.Height-(dest_pos->Height>>1);
 			else
 			if (this_ob->flags&POSFLAG_CENTER_POS_Y)
-				dest_pos->Top+=pos_ob->dims.Top+(pos_ob->dims.Height>>1)-inner.Top;
+				dest_pos->Top=pos_ob->dims.Top+(pos_ob->dims.Height>>1)-(dest_pos->Height>>1);
 			else
 			if (this_ob->flags&POSFLAG_ALIGN_POS_Y)
-				dest_pos->Top+=pos_ob->dims.Top-inner.Top;
+				dest_pos->Top=pos_ob->dims.Top-(dest_pos->Height>>1);
 		}
+
+		// Offset by character base?
+		if (pos[1].Left>FPOS_TEXT_OFFSET)
+			dest_pos->Left-=(pos[1].Left-FPOS_TEXT_OFFSET)*font->tf_XSize;
+
+		// Fine positioning
+		else dest_pos->Left+=pos[1].Left;
+	}
+	else
+	if (pos[0].Left<=POS_RIGHT_JUSTIFY)
+	{
+		/* Right-justified */
+		dest_pos->Left+=((inner.Left+inner.Width)-dest_pos->Width)+pos[1].Left;
+
+		/* Adjust by any character factor */
+		dest_pos->Left+=(pos[0].Left-POS_RIGHT_JUSTIFY)*font->tf_XSize;
+	}
+
+	/* Is this gadget to be top-positioned specially ? */
+	if (pos[0].Top==POS_CENTER)
+	{
+		/* Centered */
+		dest_pos->Top+=((inner.Height-dest_pos->Height)>>1)+inner.Top+pos[1].Top;
+
+		// Center this object on pos?
+		if (pos_ob && this_ob)
+		{
+			// Set position
+			if (this_ob->flags&POSFLAG_ADJUST_POS_Y)
+				dest_pos->Top=pos_ob->dims.Top+pos_ob->dims.Height-(dest_pos->Height>>1);
+			else
+			if (this_ob->flags&POSFLAG_CENTER_POS_Y)
+				dest_pos->Top=pos_ob->dims.Top+(pos_ob->dims.Height>>1)-(dest_pos->Height>>1);
+			else
+			if (this_ob->flags&POSFLAG_ALIGN_POS_Y)
+				dest_pos->Top=pos_ob->dims.Top-(dest_pos->Height>>1);
+		}
+	}
+	else
+	if (pos[0].Top<=POS_RIGHT_JUSTIFY)
+	{
+		/* Right-justified */
+		dest_pos->Top+=((inner.Top+inner.Height)-dest_pos->Height)+pos[1].Top;
+
+		/* Adjust by any character factor */
+		dest_pos->Top+=(pos[0].Top-POS_RIGHT_JUSTIFY)*font->tf_YSize;
 	}
 
 	/* Adjust size if too large */
