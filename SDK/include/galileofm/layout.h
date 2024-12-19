@@ -99,6 +99,8 @@ typedef struct {
 #define POSFLAG_ADJUST_POS_Y		(1<<25)		// Position adjustor
 #define POSFLAG_ALIGN_POS_X		(1<<26)		// Align
 #define POSFLAG_ALIGN_POS_Y		(1<<27)		// Align
+#define POSFLAG_CENTER_POS_X	 	(1<<28)	        // Center
+#define POSFLAG_CENTER_POS_Y	 	(1<<29)	        // Center
 
 #define TEXTFLAG_RIGHT_JUSTIFY		(1<<1)		// Right-justify text
 #define TEXTFLAG_CENTER			(1<<2)		// Center text
@@ -112,6 +114,7 @@ typedef struct {
 #define AREAFLAG_OPTIM			(1<<15)		// Optimised refreshing
 #define AREAFLAG_TITLE			(1<<16)		// Box with a title
 #define AREAFLAG_NOFILL			(1<<18)		// No fill
+#define AREAFLAG_GROOVE         	(1<<20)     	// Recessed line (separator)
 
 #define OBJECTFLAG_DRAWN		(1<<31)		// Object has been drawn
 
@@ -322,6 +325,7 @@ struct gpResize
 #define GTCustom_LayoutPos	TAG_USER + 49	// Use with the POSFLAGs
 #define GTCustom_Borderless	TAG_USER + 50	// Borderless
 #define GTCustom_Justify	TAG_USER + 51	// Justification
+#define GTCustom_CompoundGadget TAG_USER + 60
 
 #define LAYOUTF_SAME_HEIGHT	(1<<0)
 #define LAYOUTF_SAME_WIDTH	(1<<1)
@@ -383,6 +387,15 @@ struct gpResize
 #define GLV_Object		TAG_USER + 27		// Pointer to object
 #define GLV_DoubleClick		TAG_USER + 28		// Indicates double-click
 #define GLV_ShowFilenames	TAG_USER + 48		// Show filenames only
+#define GLV_NoBorder		TAG_USER + 59
+#define GLV_CompoundGadget	TAG_USER + 60
+
+// ListView noborder flags
+#define GLVNBF_LEFT	(1<<0)
+#define GLVNBF_TOP	(1<<1)
+#define GLVNBF_RIGHT	(1<<2)
+#define GLVNBF_BOTTOM	(1<<3)
+#define GLVNBF_ALL	(GLVNB_LEFT|GLVNB_TOP|GLVNB_RIGHT|GLVNB_BOTTOM)
 
 typedef struct
 {
@@ -399,6 +412,9 @@ typedef struct
 #define LVEF_SELECTED		(1<<0)			// Entry is selected
 #define LVEF_USE_PEN		(1<<1)			// Use pen to render entry
 #define LVEF_TEMP		(1<<2)			// Temporary flag for something
+
+// Propgadget tags
+#define GPGA_SpringLoaded   	TAG_USER + 61
 
 // File button tags
 #define GFB_DefPath		TAG_USER + 19		// Default path

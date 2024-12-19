@@ -228,7 +228,7 @@ extern struct Device 		*TimerBase;
 extern struct LocaleBase 	*LocaleBase;
 extern struct Library *WorkbenchBase;
 
-#if RESOURCE_TRACKING
+#ifdef RESOURCE_TRACKING
 extern struct Library       *ResTrackBase;
 #endif
 

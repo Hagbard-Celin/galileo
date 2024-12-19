@@ -548,7 +548,7 @@ typedef struct _CompoundObject
 #define LVEF_TEMP		(1<<2)			// Temporary flag for something
 
 // Propgadget tags
-#define GPGA_SpringLoaded   	TAG_USER + 60
+#define GPGA_SpringLoaded   	TAG_USER + 61
 
 // Gauge tags
 #define GGG_Total		( TAG_USER + 0x64 )	// Total size
