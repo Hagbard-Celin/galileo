@@ -3,6 +3,9 @@ Source/**/*.lib
 *.gst
 *.lnk
 *.bak
+*.h.bak
+*.c.bak
+*.doc.bak
 *.old
 *.o
 
