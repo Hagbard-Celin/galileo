@@ -162,10 +162,10 @@ IM_Width, IM_Height, etc, tags. Images are scaled to the supplied sizes.
     GLV_Highlight (BOOL) (I) - If TRUE, and GLV_ShowSelected is TRUE, the
         current selection will be displayed in a different colour.
 
-    GLV_NoScroller (ULONG) (I) - If TRUE, the lister will not have a scroller
-        attached. The gadget will still support scrolling by "dragging"
-        the selection highlight.
-        To completely disable scrolling, it should be set to LVF_NO_SCROLLING.
+    GLV_NoScroller (ULONG) (I) - If set to 1, the lister will not have a
+        scroller attached. The gadget will still support scrolling by
+        "dragging" the selection highlight.
+        To completely disable scrolling, it should be set to 2.
 
     GLV_TopJustify (BOOL) (I) - If TRUE, items displayed in the lister will
         be aligned to the top of the gadget, rather than being centered
