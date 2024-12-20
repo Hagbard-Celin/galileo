@@ -41,6 +41,8 @@ OBJS = $(OBJ)libinit.o $(OBJ)data.o $(OBJ)string_data.o \
 
 all: galileofmpragmas.h $(LBIN)galileofm.library $(BIN)galileofm.lib $(BIN)galileofmlib.lib
 
+SDK: $(BIN)galileofm.lib $(BIN)galileofmlib.lib
+
 #string_data.h : galileofmlib.cd
 #	 catcomp descriptor=galileofmlib.cd cfile=string_data.h
 
@@ -70,17 +72,17 @@ sc sd
 $(OBJ)galileofmlib.o : galileofmlib.c
 	sc galileofmlib.c nolibcode objname $@
 
-$(OBJ)galileofmliblib.o : galileofmlib.c
-	copy galileofmlib.c galileofmliblib.c
-	sc galileofmliblib.c libcode objname $@
-	-delete >nil: galileofmliblib.c
+galileofmliblib.c: galileofmlib.c
+    copy galileofmlib.c CLONE galileofmliblib.c FORCE
+
+$(OBJ)galileofmliblib.o : galileofmliblib.c
+    sc $(SCFLAGS) galileofmliblib.c libcode objname $@
 
 $(BIN)galileofmlib.lib: $(OBJ)galileofmliblib.o $(OBJ)lsprintf.o
-	oml $(BIN)galileofmlib.lib r $(OBJ)galileofmliblib.o $(OBJ)lsprintf.o
-	copy $(BIN)galileofmlib.lib /Modules/
+    oml $(BIN)galileofmlib.lib r $(OBJ)galileofmliblib.o $(OBJ)lsprintf.o
 
 $(BIN)galileofm.lib: $(OBJ)galileofmlib.o $(OBJ)lsprintf.o
-	oml $(BIN)galileofm.lib r $(OBJ)galileofmlib.o $(OBJ)lsprintf.o
+    oml $(BIN)galileofm.lib r $(OBJ)galileofmlib.o $(OBJ)lsprintf.o
 
 
 $(OBJ)functions.o: functions.asm
@@ -97,7 +99,7 @@ $(OBJ)lsprintf.o: lsprintf.asm
 
 #########################################################################
 
-depend:
+depend: galileofmliblib.c galileofmlib.strings
     makedepend -Y -DAMIGA -p$$(OBJ) -Q$(OBJ) $(OBJS)
 
 #########################################################################
@@ -108,6 +110,8 @@ clean:
     -delete $(TESTBIN)memtest
     -delete $(BIN)galileofmlib.lib
     -delete $(BIN)galileofm.lib
+    -delete galileofmliblib.c
+    -delete galileofmlib.strings
 #	 touch >nil: \#?.cd
 
 

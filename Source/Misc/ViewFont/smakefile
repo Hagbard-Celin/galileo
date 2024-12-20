@@ -16,7 +16,7 @@ $(BIN)ViewFont : $(OBJS)
 define __ctype=___ctype
 $(ADDSYM) from lib:c.o $(OBJS) 
 to $(BIN)ViewFont
-lib lib:sc.lib lib:amiga.lib lib:debug.lib lib:galileofm.lib  $(DEBUGLIB)
+lib lib:sc.lib lib:amiga.lib lib:debug.lib ///SDK/lib/galileofm.lib  $(DEBUGLIB)
 noicons
 $(STRIPDEBUG)
 sd
@@ -37,7 +37,7 @@ sc
 
 ################
 
-depend:
+depend: font.strings
     makedepend -Y -DAMIGA -p$$(OBJ) -Q$(OBJ) $(OBJS)
 
 ################
@@ -45,6 +45,7 @@ depend:
 clean:
     -delete $(OBJS) quiet
     -delete $(BIN)ViewFont quiet
+    -delete font.strings
 #    touch >nil: \#?.(cd|fd)
 
 

@@ -58,7 +58,14 @@ With this in place, these are the steps to compile and install:
     accordingly.
 
 2.  Open a shell and cd to the GalileoDist directory at the location where you
-    extracted archive.
+    extracted archive. For git-clones replace this with the repository-root
+    directory.
+
+2b. In v0.1 release archive there is an error in "Source/Program/smakefile"
+    and "Source/Misc/ViewFont/smakefile" where it tries to link with
+    "lib:galileofm.lib". This must be changed to "//SDK/lib/galileofm.lib"
+    and "///SDK/lib/galileofm.lib" respectively, or an assign must be made
+    with the command "assign lib: SDK/lib ADD".
 
 3.  Run the script "buildme".
 
@@ -71,6 +78,10 @@ With this in place, these are the steps to compile and install:
     Copy <install_location>/Galileo/LoadGB to c:LoadWB.
     Add "Assign Galileo: <install_location>/Galileo/" to s:User-Startup.
 
+For building the SDK only replace the script in step 3 with
+"buildme Only SDK". This will fill/update the directories "SDK/source" and
+"SDK/lib" from the current source. Until v0.2 is tagged this is only
+supported for git-clones.
 
 After installation you will have in your "Galilo/C" directory the command
 "IFFtoGalileo". This can be used to convert filetypes and button banks to/from

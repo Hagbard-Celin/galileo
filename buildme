@@ -1,3 +1,5 @@
+.KEY Only
+.DEF Only "All"
 ; Script for building release version of Galileo File Manager.
 ;
 ; To speed up buld time, copy the directory "Build" to another drive,
@@ -36,6 +38,14 @@ smake gstffp
 cd GalileoD:
 endif
 
+if <Only> EQ "SDK"
+cd GalileoS:Library
+smake SDK
+cd GalileoS:Modules
+smake SDK
+skip Cleanup
+endif
+
 cd GalileoS:Library
 smake all
 cd GalileoS:Program
@@ -48,6 +58,8 @@ cd GalileoS:Misc/ifftogalileo
 smake all
 cd GalileoS:Misc/viewfont
 smake all
+
+lab Cleanup
 cd GalileoD:
 assign GalileoD:
 

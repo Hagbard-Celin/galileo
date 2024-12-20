@@ -74,7 +74,7 @@ $(OBJS2)
 $(OBJS3)
 $(OBJS4)
 to $(BIN)Galileo
-lib lib:scm.lib lib:sc.lib lib:amiga.lib lib:galileofm.lib $(DEBUGLIB)
+lib lib:scm.lib lib:sc.lib lib:amiga.lib //SDK/lib/galileofm.lib $(DEBUGLIB)
 $(STRIPDEBUG)
 noicons
 maxhunk 51200
@@ -95,7 +95,7 @@ sd
 
 #########################################################################
 
-depend:
+depend: galileo.strings
     makedepend -Y -p$$(OBJ) -Q$(OBJ) $(OBJS1)
     makedepend -a -Y -p$$(OBJ) -Q$(OBJ) $(OBJS2)
     makedepend -a -Y -p$$(OBJ) -Q$(OBJ) $(OBJS3)
@@ -105,7 +105,8 @@ depend:
 
 clean:
 	-delete $(OBJ)\#?.o quiet
-    -delete $(BIN)Galileo
+    	-delete $(BIN)Galileo
+	-delete galileo.strings
 #	 touch >nil: \#?.cd
 
 

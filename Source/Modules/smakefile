@@ -82,10 +82,10 @@ ICONCLOCKVER    =   0
 ICONCLOCKREV    =   1
 
 FTPMYOBJS   = $(OBJ)$(FTPDIR)ftp_ver.o  $(OBJ)$(FTPDIR)ftp_main.o $(OBJ)$(FTPDIR)ftp_lister.o \
-			  $(OBJ)$(FTPDIR)ftp_lister_list.o $(OBJ)$(FTPDIR)ftp_lister_xfer.o \
-              $(OBJ)$(FTPDIR)ftp_lister_connect.o $(OBJ)$(FTPDIR)ftp.o $(OBJ)$(FTPDIR)ftp_arexx.o \
-              $(OBJ)$(FTPDIR)ftp_util.o $(OBJ)$(FTPDIR)ftp_recursive.o $(OBJ)$(FTPDIR)ftp_addressbook.o \
-              $(OBJ)$(FTPDIR)ftp_addrsupp.o $(OBJ)$(FTPDIR)ftp_addrformat.o $(OBJ)$(FTPDIR)ftp_protect.o
+	      $(OBJ)$(FTPDIR)ftp_lister_list.o $(OBJ)$(FTPDIR)ftp_lister_xfer.o \
+	      $(OBJ)$(FTPDIR)ftp_lister_connect.o $(OBJ)$(FTPDIR)ftp.o $(OBJ)$(FTPDIR)ftp_arexx.o \
+	      $(OBJ)$(FTPDIR)ftp_util.o $(OBJ)$(FTPDIR)ftp_recursive.o $(OBJ)$(FTPDIR)ftp_addressbook.o \
+	      $(OBJ)$(FTPDIR)ftp_addrsupp.o $(OBJ)$(FTPDIR)ftp_addrformat.o $(OBJ)$(FTPDIR)ftp_protect.o
 
 	
 FTPOBJS	    = $(OBJ)$(FTPDIR)ftp_module.o $(OBJ)$(FTPDIR)ftp_data.o $(OBJ)$(FTPDIR)ftp_strings.o $(FTPMYOBJS)
@@ -93,32 +93,32 @@ FTPVER 	    =  0
 FTPREV      =  1
 
 CONFIGMYOBJS = $(OBJ)$(CONFIGDIR)config_drag.o \
-		$(OBJ)$(CONFIGDIR)config_settings.o \
-		$(OBJ)$(CONFIGDIR)config_environment.o $(OBJ)$(CONFIGDIR)config_environment_data.o \
-		$(OBJ)$(CONFIGDIR)config_environment_lister.o \
-		$(OBJ)$(CONFIGDIR)config_environment_desktop.o \
-		$(OBJ)$(CONFIGDIR)config_environment_palette.o \
-		$(OBJ)$(CONFIGDIR)config_environment_output.o \
-		$(OBJ)$(CONFIGDIR)config_environment_sounds.o \
-		$(OBJ)$(CONFIGDIR)config_environment_display.o \
-		$(OBJ)$(CONFIGDIR)config_environment_icons.o \
-		$(OBJ)$(CONFIGDIR)config_environment_picture.o \
-		$(OBJ)$(CONFIGDIR)config_environment_paths.o \
-		$(OBJ)$(CONFIGDIR)config_buttons.o $(OBJ)$(CONFIGDIR)config_buttons_data.o \
-        $(OBJ)$(CONFIGDIR)config_buttons_god.o $(OBJ)$(CONFIGDIR)config_buttons_support.o \
-		$(OBJ)$(CONFIGDIR)button_editor.o $(OBJ)$(CONFIGDIR)button_editor_data.o \
-		$(OBJ)$(CONFIGDIR)function_editor.o $(OBJ)$(CONFIGDIR)function_editor_data.o \
-		$(OBJ)$(CONFIGDIR)select_colours.o $(OBJ)$(CONFIGDIR)select_colours_data.o \
-		$(OBJ)$(CONFIGDIR)config_convert.o $(OBJ)$(CONFIGDIR)config_convert_data.o \
-        $(OBJ)$(CONFIGDIR)old_config.o $(OBJ)$(CONFIGDIR)config_filetypes.o \
-        $(OBJ)$(CONFIGDIR)config_filetypes_data.o $(OBJ)$(CONFIGDIR)filetype_edit.o \
-		$(OBJ)$(CONFIGDIR)filetype_editor.o $(OBJ)$(CONFIGDIR)fileclass_editor.o \
-		$(OBJ)$(CONFIGDIR)lister_menu.o $(OBJ)$(CONFIGDIR)lister_menu_data.o \
-		$(OBJ)$(CONFIGDIR)config_menus.o $(OBJ)$(CONFIGDIR)config_menus_data.o \
-		$(OBJ)$(CONFIGDIR)config_menus_edit.o $(OBJ)$(CONFIGDIR)config_menus_io.o \
-		$(OBJ)$(CONFIGDIR)config_menus_drag.o $(OBJ)$(CONFIGDIR)function_export.o \
-		$(OBJ)$(CONFIGDIR)edit.o \
-		$(OBJ)$(CONFIGDIR)ipc.o
+	$(OBJ)$(CONFIGDIR)config_settings.o \
+	$(OBJ)$(CONFIGDIR)config_environment.o $(OBJ)$(CONFIGDIR)config_environment_data.o \
+	$(OBJ)$(CONFIGDIR)config_environment_lister.o \
+	$(OBJ)$(CONFIGDIR)config_environment_desktop.o \
+	$(OBJ)$(CONFIGDIR)config_environment_palette.o \
+	$(OBJ)$(CONFIGDIR)config_environment_output.o \
+	$(OBJ)$(CONFIGDIR)config_environment_sounds.o \
+	$(OBJ)$(CONFIGDIR)config_environment_display.o \
+	$(OBJ)$(CONFIGDIR)config_environment_icons.o \
+	$(OBJ)$(CONFIGDIR)config_environment_picture.o \
+	$(OBJ)$(CONFIGDIR)config_environment_paths.o \
+	$(OBJ)$(CONFIGDIR)config_buttons.o $(OBJ)$(CONFIGDIR)config_buttons_data.o \
+	$(OBJ)$(CONFIGDIR)config_buttons_god.o $(OBJ)$(CONFIGDIR)config_buttons_support.o \
+	$(OBJ)$(CONFIGDIR)button_editor.o $(OBJ)$(CONFIGDIR)button_editor_data.o \
+	$(OBJ)$(CONFIGDIR)function_editor.o $(OBJ)$(CONFIGDIR)function_editor_data.o \
+	$(OBJ)$(CONFIGDIR)select_colours.o $(OBJ)$(CONFIGDIR)select_colours_data.o \
+	$(OBJ)$(CONFIGDIR)config_convert.o $(OBJ)$(CONFIGDIR)config_convert_data.o \
+	$(OBJ)$(CONFIGDIR)old_config.o $(OBJ)$(CONFIGDIR)config_filetypes.o \
+	$(OBJ)$(CONFIGDIR)config_filetypes_data.o $(OBJ)$(CONFIGDIR)filetype_edit.o \
+	$(OBJ)$(CONFIGDIR)filetype_editor.o $(OBJ)$(CONFIGDIR)fileclass_editor.o \
+	$(OBJ)$(CONFIGDIR)lister_menu.o $(OBJ)$(CONFIGDIR)lister_menu_data.o \
+	$(OBJ)$(CONFIGDIR)config_menus.o $(OBJ)$(CONFIGDIR)config_menus_data.o \
+	$(OBJ)$(CONFIGDIR)config_menus_edit.o $(OBJ)$(CONFIGDIR)config_menus_io.o \
+	$(OBJ)$(CONFIGDIR)config_menus_drag.o $(OBJ)$(CONFIGDIR)function_export.o \
+	$(OBJ)$(CONFIGDIR)edit.o \
+	$(OBJ)$(CONFIGDIR)ipc.o
 
 CONFIGOBJS  = $(OBJ)$(CONFIGDIR)libinit.o $(OBJ)$(CONFIGDIR)config.o $(OBJ)$(CONFIGDIR)config_strings.o $(CONFIGMYOBJS)
 CONFIGVER   = 0
@@ -140,12 +140,17 @@ PATHFORMATOBJS = $(OBJ)pathformat.o $(OBJ)pathformat_data.o $(OBJ)pathformat_str
 PATHFORMATVER  = 0
 PATHFORMATREV  = 1
 
-MODINITOBJS = $(SOBJ)modinit.o
+MODINITOBJS = $(SOBJ)modinit.o $(SOBJ)modinitmffp.o
+
+STRINGS = cleanup.strings debug.strings diskcopy.strings diskinfo.strings filetype.strings fixicons.strings \
+     format.strings icon.strings iconclock.strings join.strings listerformat.strings misc.strings \
+     pathformat.strings play.strings print.strings read.strings recyclebin.strings show.strings themes.strings \
+     update.strings
 
 OBJS1 = $(STDOBJS) $(SHOWOBJS) $(PLAYOBJS) $(MISCOBJS) $(ICONOBJS) $(FORMATOBJS) $(DISKCOPYOBJS) \
-		$(READOBJS) $(JOINOBJS) $(PRINTOBJS) $(LISTFORMATOBJS) $(DISKINFOOBJS) $(FIXICONSOBJS) \
-        $(THEMESOBJS) $(FILETYPEOBJS) $(RECYCLEBINOBJS) $(ICONCLOCKOBJS) \
-        $(UPDATEOBJS) $(CLEANUPOBJS) $(ABOUTOBJS) $(PATHFORMATOBJS)
+	$(READOBJS) $(JOINOBJS) $(PRINTOBJS) $(LISTFORMATOBJS) $(DISKINFOOBJS) $(FIXICONSOBJS) \
+	$(THEMESOBJS) $(FILETYPEOBJS) $(RECYCLEBINOBJS) $(ICONCLOCKOBJS) \
+	$(UPDATEOBJS) $(CLEANUPOBJS) $(ABOUTOBJS) $(PATHFORMATOBJS)
 OBJS2 = $(ENVOYOBJS) $(FTPOBJS) $(XADOBJS)
 
 OBJS3 = $(CONFIGOBJS)
@@ -155,47 +160,50 @@ OBJS3 = $(CONFIGOBJS)
 #		ftp/ftp.strings ftp.gfmmodule \
 
 all:    modules_pragmas.h \
-		$(BIN)show.gfmmodule \
-		$(BIN)play.gfmmodule \
-		$(BIN)misc.gfmmodule \
-		$(BIN)icon.gfmmodule \
-		$(BIN)format.gfmmodule \
-		$(BIN)diskcopy.gfmmodule \
-		$(BIN)read.gfmmodule \
-		$(BIN)join.gfmmodule \
-		$(BIN)print.gfmmodule \
-		$(BIN)listerformat.gfmmodule \
-		$(BIN)diskinfo.gfmmodule \
-		$(BIN)fixicons.gfmmodule \
-		$(BIN)themes.gfmmodule \
-		$(BIN)filetype.gfmmodule \
-		$(BIN)cleanup.gfmmodule \
-        $(SBIN)recyclebin.gfmmodule \
-		$(BIN)about.gfmmodule \
-        $(BIN)ftp.gfmmodule \
-        $(BIN)pathformat.gfmmodule \
-        $(SBIN)iconclock.gfmmodule \
-        $(CONFIGDIR)galileoconfig_pragmas.h \
-        $(BIN)galileoconfig.gfmmodule \
-        $(BIN)XADbrowser.gfmmodule \
-        modinit
+	$(BIN)show.gfmmodule \
+	$(BIN)play.gfmmodule \
+	$(BIN)misc.gfmmodule \
+	$(BIN)icon.gfmmodule \
+	$(BIN)format.gfmmodule \
+	$(BIN)diskcopy.gfmmodule \
+	$(BIN)read.gfmmodule \
+	$(BIN)join.gfmmodule \
+	$(BIN)print.gfmmodule \
+	$(BIN)listerformat.gfmmodule \
+	$(BIN)diskinfo.gfmmodule \
+	$(BIN)fixicons.gfmmodule \
+	$(BIN)themes.gfmmodule \
+	$(BIN)filetype.gfmmodule \
+	$(BIN)cleanup.gfmmodule \
+	$(SBIN)recyclebin.gfmmodule \
+	$(BIN)about.gfmmodule \
+	$(BIN)ftp.gfmmodule \
+	$(BIN)pathformat.gfmmodule \
+	$(SBIN)iconclock.gfmmodule \
+	$(CONFIGDIR)galileoconfig_pragmas.h \
+	$(BIN)galileoconfig.gfmmodule \
+	$(BIN)XADbrowser.gfmmodule \
+	modinit
 
 core:   modules_pragmas.h \
-        misc.strings $(BIN)misc.gfmmodule \
-		icon.strings $(BIN)icon.gfmmodule \
-		format.strings $(BIN)format.gfmmodule \
-		diskcopy.strings $(BIN)diskcopy.gfmmodule \
-        listerformat.strings $(BIN)listerformat.gfmmodule \
-		diskinfo.strings $(BIN)diskinfo.gfmmodule \
-		fixicons.strings $(BIN)fixicons.gfmmodule \
-		themes.strings $(BIN)themes.gfmmodule \
-		filetype.strings $(BIN)filetype.gfmmodule \
-        cleanup.strings $(BIN)cleanup.gfmmodule \
-		$(BIN)about.gfmmodule \
-        pathformat.strings $(BIN)pathformat.gfmmodule \
-        $(CONFIGDIR)galileoconfig_pragmas.h $(CONFIGDIR)config.strings $(BIN)galileoconfig.gfmmodule
+	misc.strings $(BIN)misc.gfmmodule \
+	icon.strings $(BIN)icon.gfmmodule \
+	format.strings $(BIN)format.gfmmodule \
+	diskcopy.strings $(BIN)diskcopy.gfmmodule \
+	listerformat.strings $(BIN)listerformat.gfmmodule \
+	diskinfo.strings $(BIN)diskinfo.gfmmodule \
+	fixicons.strings $(BIN)fixicons.gfmmodule \
+	themes.strings $(BIN)themes.gfmmodule \
+	filetype.strings $(BIN)filetype.gfmmodule \
+	cleanup.strings $(BIN)cleanup.gfmmodule \
+	$(BIN)about.gfmmodule \
+	pathformat.strings $(BIN)pathformat.gfmmodule \
+	$(CONFIGDIR)galileoconfig_pragmas.h $(CONFIGDIR)config.strings $(BIN)galileoconfig.gfmmodule
 
 ftp:    ftp/ftp.strings $(BIN)ftp.gfmmodule
+
+sdk:	modinit
+
 #		envoy.strings envoy.gfmmodule \
 #		iconclock.strings iconclock.gfmmodule \
 #########################################################################
@@ -209,6 +217,18 @@ modules_pragmas.h: modules.fd
 
 $(OBJ)lsprintf.o: lsprintf.asm
 $(OBJ)$(FTPDIR)ftp_ver.o: $(FTPDIR)ftp_ver.c
+
+libinitmffp.c: libinit.c
+    copy libinit.c CLONE libinitmffp.c FORCE
+
+modinitmffp.c: modinit.c
+    copy modinit.c CLONE modinitmffp.c FORCE
+
+$(OBJ)libinitmffp.o: libinitmffp.c
+    sc libinitmffp.c $(SCFLAGS) math=ffp globalsymboltable=sc:include/include30ffp.gst objname $@
+
+$(SOBJ)modinitmffp.o: modinitmffp.c
+    sc modinitmffp.c $(SCFLAGS) math=ffp globalsymboltable=sc:include/include30ffp.gst objname $@
 
 #########################################################################
 
@@ -224,7 +244,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(SHOWOBJS) 
 to $(BIN)show.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(SHOWVER)
 librevision $(SHOWREV)
 $(STRIPDEBUG) noicons
@@ -240,7 +260,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(PLAYOBJS) 
 to $(BIN)play.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(PLAYVER)
 librevision $(PLAYREV)
 $(STRIPDEBUG) noicons
@@ -256,7 +276,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(MISCOBJS) 
 to $(BIN)misc.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(MISCVER)
 librevision $(MISCREV)
 $(STRIPDEBUG) noicons
@@ -272,7 +292,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(ICONOBJS) 
 to $(BIN)icon.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(ICONVER)
 librevision $(ICONREV)
 $(STRIPDEBUG) noicons
@@ -288,7 +308,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(FORMATOBJS)
 to $(BIN)format.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(FORMATVER)
 librevision $(FORMATREV)
 $(STRIPDEBUG) noicons
@@ -304,7 +324,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(DISKCOPYOBJS) 
 to $(BIN)diskcopy.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(DISKCOPYVER)
 librevision $(DISKCOPYREV)
 $(STRIPDEBUG) noicons
@@ -320,7 +340,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(READOBJS) 
 to $(BIN)read.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(READVER)
 librevision $(READREV)
 $(STRIPDEBUG) noicons
@@ -336,7 +356,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(JOINOBJS) 
 to $(BIN)join.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(JOINVER)
 librevision $(JOINREV)
 $(STRIPDEBUG) noicons
@@ -352,7 +372,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(PRINTOBJS) 
 to $(BIN)print.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(PRINTVER)
 librevision $(PRINTREV)
 $(STRIPDEBUG) noicons
@@ -368,7 +388,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(LISTFORMATOBJS) 
 to $(BIN)listerformat.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(LISTFORMATVER)
 librevision $(LISTFORMATREV)
 $(STRIPDEBUG) noicons
@@ -387,7 +407,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(DISKINFOOBJS) 
 to $(BIN)diskinfo.gfmmodule
-lib lib:scmffp.lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:scmffp.lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(DISKINFOVER)
 librevision $(DISKINFOREV)
 $(STRIPDEBUG) noicons
@@ -403,7 +423,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(FIXICONSOBJS) 
 to $(BIN)fixicons.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(FIXICONSVER)
 librevision $(FIXICONSREV)
 $(STRIPDEBUG) noicons
@@ -419,7 +439,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(THEMESOBJS) 
 to $(BIN)themes.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(THEMESVER)
 librevision $(THEMESREV)
 $(STRIPDEBUG) noicons
@@ -435,7 +455,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(FILETYPEOBJS) 
 to $(BIN)filetype.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(FILETYPEVER)
 librevision $(FILETYPEREV)
 $(STRIPDEBUG) noicons
@@ -451,7 +471,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(FTPOBJS)
 to $(BIN)ftp.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(FTPVER)
 librevision $(FTPREV)
 $(STRIPDEBUG) noicons
@@ -467,7 +487,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(RECYCLEBINOBJS)
 to $(SBIN)recyclebin.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(RECYCLEBINVER)
 librevision $(RECYCLEBINREV)
 $(STRIPDEBUG) noicons
@@ -483,7 +503,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(ICONCLOCKOBJS) 
 to $(SBIN)iconclock.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(ICONCLOCKVER)
 librevision $(ICONCLOCKREV)
 $(STRIPDEBUG) noicons
@@ -502,7 +522,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(UPDATEOBJS) 
 to $(SBIN)update.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(UPDATEVER)
 librevision $(UPDATEREV)
 $(STRIPDEBUG) noicons
@@ -520,7 +540,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(CLEANUPOBJS) 
 to $(BIN)cleanup.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(CLEANUPVER)
 librevision $(CLEANUPREV)
 $(STRIPDEBUG) noicons
@@ -536,7 +556,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(ABOUTOBJS)
 to $(BIN)about.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(ABOUTVER)
 librevision $(ABOUTREV)
 $(STRIPDEBUG) noicons
@@ -552,7 +572,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(ENVOYOBJS) 
 to $(BIN)envoy.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(ENVOYVER)
 librevision $(ENVOYREV)
 $(STRIPDEBUG) noicons
@@ -568,7 +588,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(PATHFORMATOBJS) 
 to $(BIN)pathformat.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(PATHFORMATVER)
 librevision $(PATHFORMATREV)
 $(STRIPDEBUG) noicons
@@ -584,7 +604,7 @@ libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(XADOBJS) 
 to $(BIN)XADbrowser.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(XADVER)
 librevision $(XADREV)
 $(STRIPDEBUG) noicons
@@ -600,7 +620,7 @@ libprefix _L_
 libfd $(CONFIGDIR)galileoconfig.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(CONFIGOBJS) $(OBJ)lsprintf.o
 to $(BIN)galileoconfig.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) galileofmlib.lib
+lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(CONFIGVER)
 librevision $(CONFIGREV)
 $(STRIPDEBUG) noicons
@@ -623,7 +643,7 @@ maxhunk 51200
 
 #########################################################################
 
-depend:
+depend: libinitmffp.c modinitmffp.c $(STRINGS)
     makedepend -Y//SDK/include/ -p$$(OBJ) -Q$(OBJ) $(OBJS1)
     makedepend -a -Y//SDK/include/ -p$$(OBJ) -Q$(OBJ)  $(OBJS2)
     makedepend -a -Y//SDK/include/ -p$$(OBJ) -Q$(OBJ)  $(OBJS3)
@@ -633,10 +653,13 @@ depend:
 
 
 clean: ftpclean xadclean configclean
-	-delete $(OBJ)\#?.o quiet
+    -delete $(OBJ)\#?.o quiet
     -delete $(BIN)\#?.gfmmodule
     -delete $(SBIN)\#?.gfmmodule
-#	 touch >nil: \#?.(cd|fd)
+    -delete libinitmffp.c
+    -delete modinitmffp.c
+    -delete $(STRINGS)
+#   touch >nil: \#?.(cd|fd)
     
 
 ftpclean:
@@ -1731,3 +1754,31 @@ $(SOBJ)modinit.o: //SDK/include/galileofm/dos.h
 $(SOBJ)modinit.o: //SDK/include/galileofm/rexx.h
 $(SOBJ)modinit.o: //SDK/include/galileofm/hooks.h
 $(SOBJ)modinit.o: //SDK/include/pragmas/galileofm_pragmas.h
+$(SOBJ)modinitmffp.o: modinitmffp.c //SDK/include/galileofm/modules.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/galileofmbase.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/args.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/bufferedio.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/gui.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/clipboard.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/images.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/iff.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/misc.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/progress.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/appicon.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/drag.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/locale.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/lists.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/timer.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/notify.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/ipc.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/requesters.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/layout.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/popup.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/diskio.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/edithook.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/icon.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/memory.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/dos.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/rexx.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/hooks.h
+$(SOBJ)modinitmffp.o: //SDK/include/pragmas/galileofm_pragmas.h
