@@ -57,6 +57,10 @@ struct Library *AslBase;
 struct Library *DiskfontBase;
 struct Device  *TimerBase;
 struct RxsLib  *RexxSysBase;
+#ifdef _FFP
+struct Library *MathBase;
+struct Library *MathTransBase;
+#endif
 struct GalileoLocale *locale;
 
 #ifdef RESOURCE_TRACKING
@@ -93,6 +97,10 @@ __asm __saveds __UserLibInit()
 	DiskfontBase=0;
 	AslBase=0;
 	RexxSysBase=0;
+#ifdef _FFP
+	MathBase=0;
+	MathTransBase=0;
+#endif
 	locale=0;
 
 	// DOS
@@ -108,6 +116,10 @@ __asm __saveds __UserLibInit()
 		!(AslBase=OpenLibrary("asl.library",37)) ||
 		!(DiskfontBase=OpenLibrary("diskfont.library",37)) ||
 		!(TimerBase=(struct Device *)GetTimerBase()) ||
+#ifdef _FFP
+		!(MathBase=OpenLibrary("mathffp.library",37)) ||
+		!(MathTransBase=OpenLibrary("mathtrans.library",37)) ||
+#endif
 		!(UtilityBase=OpenLibrary("utility.library",37))) return 1;
 
 	// Unnecessary libraries
@@ -157,17 +169,21 @@ void __asm  __saveds __UserLibCleanup()
 	KPrintF("galileofm.library opencount: %ld: ",GalileoFMBase->lib_OpenCnt);
 #endif
 	// Close libraries
-	CloseLibrary(GalileoFMBase);
-	CloseLibrary(GadToolsBase);
-	CloseLibrary((struct Library *)IntuitionBase);
-	CloseLibrary((struct Library *)GfxBase);
-	CloseLibrary(IconBase);
-	CloseLibrary(LayersBase);
-	CloseLibrary(UtilityBase);
-	if (WorkbenchBase) CloseLibrary(WorkbenchBase);
-	CloseLibrary(DiskfontBase);
 	if (RexxSysBase) CloseLibrary((struct Library *)RexxSysBase);
+	if (WorkbenchBase) CloseLibrary(WorkbenchBase);
+	CloseLibrary(UtilityBase);
+#ifdef _FFP
+	CloseLibrary(MathTransBase);
+	CloseLibrary(MathBase);
+#endif
+	CloseLibrary(DiskfontBase);
 	CloseLibrary(AslBase);
+	CloseLibrary(GadToolsBase);
+	CloseLibrary(LayersBase);
+	CloseLibrary(IconBase);
+	CloseLibrary((struct Library *)GfxBase);
+	CloseLibrary((struct Library *)IntuitionBase);
+	CloseLibrary(GalileoFMBase);
 	CloseLibrary((struct Library *)DOSBase);
  
 #ifdef RESOURCE_TRACKING

@@ -48,8 +48,8 @@ extern ULONG callerid;
 #endif
 
 #define VALID_QUALIFIERS (IEQUALIFIER_LCOMMAND|IEQUALIFIER_RCOMMAND|\
-                         IEQUALIFIER_CONTROL|IEQUALIFIER_LSHIFT|\
-                         IEQUALIFIER_RSHIFT|IEQUALIFIER_LALT|IEQUALIFIER_RALT)
+			 IEQUALIFIER_CONTROL|IEQUALIFIER_LSHIFT|\
+			 IEQUALIFIER_RSHIFT|IEQUALIFIER_LALT|IEQUALIFIER_RALT)
 
 extern struct Library *GalileoFMBase;
 extern struct Library *IconBase;
@@ -61,6 +61,10 @@ extern struct Library *DiskfontBase;
 extern struct Library *AslBase;
 extern struct RxsLib  *RexxSysBase;
 extern struct GalileoLocale *locale;
+#ifdef _FFP
+extern struct Library *MathBase;
+extern struct Library *MathTransBase;
+#endif
 extern ModuleInfo module_info;
 
 #ifdef RESOURCE_TRACKING

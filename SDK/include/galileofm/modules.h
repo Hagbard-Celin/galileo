@@ -34,7 +34,7 @@ typedef struct
 #define FUNCF_WANT_DEST			(1<<11)	// Want destinations, don't need them
 #define FUNCF_WANT_SOURCE		(1<<12)	// Want source, don't need it
 #define FUNCF_WANT_ENTRIES		(1<<19)	// Want entries
-#define FUNCF_SYNC				(1<<24)	// Function wants to be synchronous
+#define FUNCF_SYNC			(1<<24)	// Function wants to be synchronous
 #define FUNCF_PRIVATE			(1<<26) // Function is private
 
 
@@ -213,20 +213,24 @@ ULONG __asm __saveds function_external_hook(
 #ifdef _GALILEOFM_MODULE_DEF
 
 // These library bases are defined and made available automatically
-extern struct DosLibrary 	*DOSBase;
-extern struct Library *GalileoFMBase;
+extern struct DosLibrary    *DOSBase;
+extern struct Library	    *GalileoFMBase;
 extern struct IntuitionBase *IntuitionBase;
-extern struct GfxBase		*GfxBase;
-extern struct Library *IconBase;
-extern struct Library *UtilityBase;
-extern struct Library *LayersBase;
-extern struct Library *GadToolsBase;
-extern struct Library *AslBase;
-extern struct Library *DiskfontBase;
-extern struct RxsLib 		*RexxSysBase;
-extern struct Device 		*TimerBase;
-extern struct LocaleBase 	*LocaleBase;
-extern struct Library *WorkbenchBase;
+extern struct GfxBase	    *GfxBase;
+extern struct Library	    *IconBase;
+extern struct Library	    *UtilityBase;
+extern struct Library	    *LayersBase;
+extern struct Library	    *GadToolsBase;
+extern struct Library	    *AslBase;
+extern struct Library	    *DiskfontBase;
+extern struct RxsLib	    *RexxSysBase;
+extern struct Device	    *TimerBase;
+extern struct LocaleBase    *LocaleBase;
+extern struct Library	    *WorkbenchBase;
+#ifdef _FFP
+extern struct Library	    *MathBase;
+extern struct Library	    *MathTransBase;
+#endif
 
 #ifdef RESOURCE_TRACKING
 extern struct Library       *ResTrackBase;
