@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -86,7 +86,7 @@ USHORT
 
 	_environment_dateformat_labels[]={
 		MSG_SETTINGS_DATEFORMAT_DDMMMYY,
-		MSG_SETTINGS_DATEFORMAT_YYMMDD,
+		MSG_SETTINGS_DATEFORMAT_YYMMMDD,
 		MSG_SETTINGS_DATEFORMAT_MMDDYY,
 		MSG_SETTINGS_DATEFORMAT_DDMMYY,
 		0},
