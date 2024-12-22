@@ -40,5 +40,4 @@ Build/Binary/c/*
 !Build/Binary/Modules/.gitkeep
 !Build/Binary/Libs/.gitkeep
 !Build/Binary/C/.gitkeep
-makedepend
 
