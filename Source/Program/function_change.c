@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -783,7 +783,7 @@ function_change_get_date(
 	char *ptr,name[35];
 
 	// Get current datestamp string
-	date_to_strings(
+	DateToStrings(
 		date,
 		handle->work_buffer+512,
 		handle->work_buffer+540,
