@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2023 Hagbard Celine
+Copyright 2023, 2024 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -197,6 +197,12 @@ BOOL display_open(long flags)
 		// Screen open?
 		if (GUI->screen)
 		{
+			// Save actual size and depth to avoid redundant screen
+			// close and reopen from entering Environment->Display
+			environment->env->screen_width = GUI->screen->Width;
+			environment->env->screen_height = GUI->screen->Height;
+			environment->env->screen_depth = GUI->screen->RastPort.BitMap->Depth;
+
 			// Make it public
 			PubScreenStatus(GUI->screen,0);
 
