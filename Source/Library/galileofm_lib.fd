@@ -505,6 +505,9 @@ SavePos(name,pos,font)(a0/a1,d0)
 *
 SetCxSelectUpDown(cxo)(a1)
 GetCxSelectUpDown()()
+SetLocaleFlags(flags,dateformat)(d0/d1)
+GetLocaleFlags()()
+DateToStrings(date,date_buf,time_buf,flags)(a0/a1/a2,d0)
 *
 *
 *

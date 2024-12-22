@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -126,6 +126,29 @@ void main_handle_reset(ULONG *flags,APTR data)
 			backdrop_refresh_drives(GUI->backdrop,BDEVF_SHOW|BDEVF_FORCE_LOCK);
 		}
 
+		// Locale settings changed
+		if (flags[0]&CONFIG_CHANGE_LOCALE)
+		{
+			// Set library locale flags
+			SetLocaleFlags(environment->env->settings.date_flags, environment->env->settings.date_format);
+
+		        // Rescan listers
+		        IPC_ListCommand(
+			        &GUI->lister_list,
+			        LISTER_RESCAN,
+			        0,
+			        0,
+			        0);
+
+		        // Refresh listers
+		        IPC_ListCommand(
+			        &GUI->lister_list,
+			        LISTER_REFRESH_WINDOW,
+			        REFRESHF_UPDATE_NAME|REFRESHF_STATUS|REFRESHF_SLIDERS,
+			        0,
+			        0);
+		}
+
 		// Listers need resetting?
 		if (flags[0]&CONFIG_CHANGE_LIST_DISPLAY)
 		{
@@ -182,9 +205,9 @@ void main_handle_reset(ULONG *flags,APTR data)
 
 			// Load new menu
 			else
-            {
-            	GUI->lister_menu=OpenButtonBank(environment->menu_path);
-        	}
+			{
+			    GUI->lister_menu=OpenButtonBank(environment->menu_path);
+			}
 			// Got bank?
 			if (GUI->lister_menu)
 			{
@@ -202,19 +225,6 @@ void main_handle_reset(ULONG *flags,APTR data)
 
 			// Update listers
 			listers_update(0,0);
-		}
-
-		// Locale settings changed
-		if (flags[0]&CONFIG_CHANGE_LOCALE && !done_listers)
-		{
-			// Refresh listers
-			IPC_ListCommand(
-				&GUI->lister_list,
-				LISTER_REFRESH_WINDOW,
-				REFRESHF_UPDATE_NAME|REFRESHF_STATUS|REFRESHF_SLIDERS,
-				0,
-				0);
-			done_listers=1;
 		}
 
 		// Filetypes changed?

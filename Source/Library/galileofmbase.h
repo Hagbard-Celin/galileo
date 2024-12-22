@@ -1561,6 +1561,9 @@ long SearchFile(APTR,UBYTE *,ULONG,UBYTE *,ULONG);
 char *ParseDateStrings(char *,char *,char *,long *);
 BOOL DateFromStrings(char *,char *,struct DateStamp *);
 BOOL DateFromStringsNew(char *,char *,struct DateStamp *,ULONG);
+void SetLocaleFlags(USHORT,USHORT);
+ULONG GetLocaleFlags(void);
+void DateToStrings(struct DateStamp *date,char *date_buf,char *time_buf,int flags);
 
 #define RANGE_BETWEEN		1
 #define RANGE_AFTER		2

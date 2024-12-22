@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -272,3 +272,95 @@ BOOL __asm __saveds L_DateFromStringsNew(
 	*ds=datetime.dat_Stamp;
 	return ret;
 }
+
+// Convert a DateStamp to two strings
+void __asm __saveds L_DateToStrings(register __a0 struct DateStamp *date,
+				    register __a1 char *date_buf,
+				    register __a2 char *time_buf,
+				    register __d0 int flags,
+ 				    register __a6 struct MyLibrary *libbase)
+{
+	struct LibData *data;
+	struct DateTime datetime;
+
+	// Get data pointer
+	data=(struct LibData *)libbase->ml_UserData;
+
+	// Initialise DateTime structure
+	datetime.dat_Stamp=*date;
+	datetime.dat_Format=data->date_format;
+	datetime.dat_Flags=0;
+	datetime.dat_StrDay=0;
+	datetime.dat_StrDate=date_buf;
+	datetime.dat_StrTime=0;
+
+	// Sub-strings ok?
+	if (flags==-1 || (flags==1 && data->locale_flags&DATE_SUBST))
+		datetime.dat_Flags|=DTF_SUBST;
+
+	// Convert date to a string
+	DateToStr(&datetime);
+
+	// No time buffer?
+	if (!time_buf) return;
+
+	// Build time string. 12 hour clock?
+	if (flags>0 && data->locale_flags&DATE_12HOUR)
+	{
+		int hours;
+		char ampm='a';
+
+		// Get hours, convert to 12 hour clock
+		hours=datetime.dat_Stamp.ds_Minute/60;
+		if (hours>11)
+		{
+			ampm='p';
+			hours-=12;
+		}
+		if (hours==0) hours=12;
+
+		// Build time string
+		lsprintf(time_buf,
+			"%2ld:%02ld:%02ld%lc",
+			hours,
+			datetime.dat_Stamp.ds_Minute%60,
+			datetime.dat_Stamp.ds_Tick/TICKS_PER_SECOND,
+			ampm);
+	}
+
+	// 24 hour clock
+	else lsprintf(time_buf,
+		"%02ld:%02ld:%02ld",
+		datetime.dat_Stamp.ds_Minute/60,
+		datetime.dat_Stamp.ds_Minute%60,
+		datetime.dat_Stamp.ds_Tick/TICKS_PER_SECOND);
+}
+
+
+// Get locale flags from the library
+ULONG __asm __saveds L_GetLocaleFlags(register __a6 struct MyLibrary *libbase)
+{
+    struct LibData *data;
+
+    // Get data pointer
+    data=(struct LibData *)libbase->ml_UserData;
+
+    return data->locale_flags;
+}
+
+
+// Set locale flags in the library
+void __asm __saveds L_SetLocaleFlags(register __d0 USHORT flags,
+				     register __d1 USHORT dateformat,
+				     register __a6 struct MyLibrary *libbase)
+{
+	struct LibData *data;
+
+	// Get data pointer
+	data=(struct LibData *)libbase->ml_UserData;
+
+	data->date_format = dateformat;
+	data->locale_flags = flags;
+}
+
+

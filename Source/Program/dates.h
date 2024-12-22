@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -40,7 +40,6 @@ For more information on Directory Opus for Windows please see:
 
 // Prototypes
 void date_build_string(struct DateStamp *,char *,int);
-void date_to_strings(struct DateStamp *,char *,char *,int);
 char *date_parse_string(char *,char *,char *,int *);
 BOOL date_from_strings(char *,char *,struct DateStamp *);
 void date_string(long days,char *string,short format,BOOL paren);

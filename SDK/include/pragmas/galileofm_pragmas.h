@@ -216,5 +216,6 @@
 #pragma libcall GalileoFMBase SetPopUpDelay 83a 001
 #pragma libcall GalileoFMBase LaunchWBNotify 840 2CBA109808
 #pragma libcall GalileoFMBase AppWindowWindow 846 801
+#pragma libcall GalileoFMBase DateToStrings 8be 0A9804
 /**/
 /* end "galileofm.library" pragmas */

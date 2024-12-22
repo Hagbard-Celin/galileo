@@ -61,6 +61,41 @@ galileofm.library/DateFromStrings                 galileofm.library/DateFromStri
     SEE ALSO
         ParseDateStrings(), dos.library/StrToDate()
 
+galileofm.library/DateToStrings                     galileofm.library/DateToStrings
+
+    NAME
+        DateToStrings - convert a datestemp to date and time strings
+
+    SYNOPSIS
+        DateToStrings(date, date_buf, time_buf, flags)
+                       A0      A1        A2       D0
+
+        void DateToStrings(struct DateStamp *, char *, char *, ULONG);
+
+    FUNCTION
+        This routine takes a DOS DateStamp and converts it to a time string
+        and a date string. The DOS DateToStr() routine is used to perform
+        this conversion. It differs from this function in that it can output
+        12/24h time and use DTF_SUBST according to Environment->Locale
+        settings. And it uses outputs time as "hh:mm:ss" as opposed to
+        "hh.mm.ss". The flags input controls DTF_SUBST and 24/24h clock:
+         Set to -1 to use DTF_SUBST flag for DateToStr() call.
+         Set to >0 to use 12/24h setting from Environment->Locale.
+         Set to 1 to use/not-use DTF_SUBST according to Environment->Locale.
+
+    INPUTS
+        date - DateStamp to convert
+        date_buf - buffer to place date string
+        time_buf - buffer to place time string
+        flags - DTF_SUBST and 12/24h setting
+
+    NOTES
+	The string buffers date_buf and time_buf must be at minimum
+        LEN_DATSTRING bytes in size.
+
+    SEE ALSO
+        dos.library/DateToStr()
+
 galileofm.library/DeviceFromHandler             galileofm.library/DeviceFromHandler
 
     NAME
