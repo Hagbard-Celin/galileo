@@ -99,7 +99,7 @@ $(OBJ)lsprintf.o: lsprintf.asm
 
 #########################################################################
 
-depend: galileofmliblib.c galileofmlib.strings
+depend: galileofmliblib.c galileofmpragmas.h galileofmlib.strings
     makedepend -Y -DAMIGA -p$$(OBJ) -Q$(OBJ) $(OBJS)
 
 #########################################################################
@@ -111,6 +111,7 @@ clean:
     -delete $(BIN)galileofmlib.lib
     -delete $(BIN)galileofm.lib
     -delete galileofmliblib.c
+    -delete galileofmpragmas.h
     -delete galileofmlib.strings
 #	 touch >nil: \#?.cd
 

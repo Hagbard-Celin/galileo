@@ -643,7 +643,7 @@ maxhunk 51200
 
 #########################################################################
 
-depend: libinitmffp.c modinitmffp.c $(STRINGS)
+depend: libinitmffp.c modinitmffp.c modules_pragmas.h $(CONFIGDIR)galileoconfig_pragmas.h $(STRINGS)
     makedepend -Y//SDK/include/ -p$$(OBJ) -Q$(OBJ) $(OBJS1)
     makedepend -a -Y//SDK/include/ -p$$(OBJ) -Q$(OBJ)  $(OBJS2)
     makedepend -a -Y//SDK/include/ -p$$(OBJ) -Q$(OBJ)  $(OBJS3)
@@ -658,6 +658,7 @@ clean: ftpclean xadclean configclean
     -delete $(SBIN)\#?.gfmmodule
     -delete libinitmffp.c
     -delete modinitmffp.c
+    -delete modules_pragmas.h
     -delete $(STRINGS)
 #   touch >nil: \#?.(cd|fd)
     
@@ -672,6 +673,7 @@ xadclean:
 
 configclean:
     -delete $(OBJ)$(CONFIGDIR)\#?.o quiet
+    -delete $(CONFIGDIR)galileoconfig_pragmas.h
 #    touch >nil: $(CONFIGDIR)\#?.(cd|fd)
 
 
