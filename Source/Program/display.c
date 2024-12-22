@@ -75,25 +75,74 @@ BOOL display_open(long flags)
 		environment->env->screen_mode!=MODE_PUBLICSCREEN)
 	{
 		USHORT pens[1];
-		struct TagItem *tags;
-
-		// Screen mode
-		ULONG screen_mode;
+		ULONG screen_mode, width, height, depth, likewb = TAG_IGNORE;
+		BOOL offscr_drag = FALSE;
 
 		// Workbench clone?
 		if (environment->env->screen_mode==MODE_WORKBENCHCLONE)
 		{
+			struct DimensionInfo diminfo;
 			struct Screen *wbscreen;
 
 			// Get Workbench screen
 			if (wbscreen=LockPubScreen("Workbench"))
 			{
-				screen_mode=GetVPModeID(&wbscreen->ViewPort);
+				// Get wb screen mode
+				screen_mode = GetVPModeID(&wbscreen->ViewPort);
+
+				// Get wb screen size
+				width = wbscreen->Width;
+				height = wbscreen->Height;
+
 				UnlockPubScreen(0,wbscreen);
 			}
-			else screen_mode=HIRES_KEY;
+			else
+			{
+				screen_mode = HIRES_KEY;
+				width = STDSCREENWIDTH;
+				height = STDSCREENHEIGHT;
+			}
+
+			// Get mode info (if available)
+			if (GetDisplayInfoData(0,(char *)&diminfo,sizeof(diminfo),DTAG_DIMS,screen_mode))
+			{
+				// Do not ask for more colors then supported
+				if (environment->env->screen_depth > diminfo.MaxDepth)
+				    depth = diminfo.MaxDepth;
+				else
+				    depth = environment->env->screen_depth;
+			}
+			else
+			{
+			    // Just to stop compiler from complaining
+			    // Should not happen
+			    depth = environment->env->screen_depth;
+			}
+
+			likewb = SA_LikeWorkbench;
+
 		}
-		else screen_mode=environment->env->screen_mode;
+		else
+		{
+			// Set screen mode
+			screen_mode = environment->env->screen_mode;
+
+			// Set width
+			if (environment->env->screen_flags&SCRFLAGS_DEFWIDTH)
+			    width = STDSCREENWIDTH;
+			else
+			    width = environment->env->screen_width;
+
+			// Set height
+			if (environment->env->screen_flags&SCRFLAGS_DEFHEIGHT)
+			    height = STDSCREENHEIGHT;
+			else
+			    height = environment->env->screen_height;
+
+			// Set depth
+			depth = environment->env->screen_depth;
+		}
+
 
 		// Initialise pen array
 		pens[0]=(USHORT)~0;
@@ -118,125 +167,17 @@ BOOL display_open(long flags)
 			font=OpenDiskFont(&GUI->screen_font);
 		}
 
-#if 1
-		if (!(tags=AllocVec(sizeof(struct TagItem)*15,MEMF_CLEAR)))
-			return 0;
-
-		if (environment->env->screen_mode==MODE_WORKBENCHCLONE)
+		if (GfxBase->LibNode.lib_Version >= 45)
 		{
-			tags[0].ti_Tag=SA_LikeWorkbench;
-			tags[0].ti_Data=TRUE;
-			tags[1].ti_Tag=SA_Overscan;
-			tags[1].ti_Data=OSCAN_TEXT;
-			tags[2].ti_Tag=SA_Title;
-			tags[2].ti_Data=(ULONG)galileo_name;
-			tags[3].ti_Tag=SA_PubName;
-			tags[3].ti_Data=(ULONG)GUI->rexx_port_name;
-			tags[4].ti_Tag=SA_AutoScroll;
-			tags[4].ti_Data=TRUE;
-			tags[5].ti_Tag=SA_Interleaved;
-			tags[5].ti_Data=TRUE;
-			tags[6].ti_Tag=SA_SharePens;
-			tags[6].ti_Data=TRUE;
-			if (font)
-			{
-				tags[7].ti_Tag=SA_Font;
-				tags[7].ti_Data=(ULONG)&GUI->screen_font;
-			}
-			else
-			{
-				tags[7].ti_Tag=SA_SysFont;
-				tags[7].ti_Data=1;
-			}
-			tags[8].ti_Tag=SA_Pens;
-			tags[8].ti_Data=(ULONG)pens;
-			tags[9].ti_Tag=SA_PubSig;
-			tags[9].ti_Data=GUI->screen_signal;
-			tags[10].ti_Tag=TAG_END;
-			if (GfxBase->LibNode.lib_Version>=45)
-			{
-				tags[10].ti_Tag=SA_OffScreenDragging;
-				if (TRUE)
-					tags[10].ti_Data=TRUE;
-				else
-					tags[01].ti_Data=FALSE;
-				tags[11].ti_Tag=TAG_END;
-			}
-
-		}
-		else
-		{
-			tags[0].ti_Tag=SA_Width;
-			if (environment->env->screen_flags&SCRFLAGS_DEFWIDTH)
-				tags[0].ti_Data=STDSCREENWIDTH;
-			else
-				tags[0].ti_Data=environment->env->screen_width;
-			tags[1].ti_Tag=SA_Height;
-			if (environment->env->screen_flags&SCRFLAGS_DEFHEIGHT)
-				tags[1].ti_Data=STDSCREENHEIGHT;
-			else
-				tags[1].ti_Data=environment->env->screen_height;
-			tags[2].ti_Tag=SA_Depth;
-			tags[2].ti_Data=environment->env->screen_depth;
-			tags[3].ti_Tag=SA_Overscan;
-			tags[3].ti_Data=OSCAN_TEXT;
-			tags[4].ti_Tag=SA_Title;
-			tags[4].ti_Data=(ULONG)galileo_name;
-			tags[5].ti_Tag=SA_DisplayID;
-			tags[5].ti_Data=screen_mode;
-			tags[6].ti_Tag=SA_PubName;
-			tags[6].ti_Data=(ULONG)GUI->rexx_port_name;
-			tags[7].ti_Tag=SA_AutoScroll;
-			tags[7].ti_Data=TRUE;
-			tags[8].ti_Tag=SA_Interleaved;
-			tags[8].ti_Data=TRUE;
-			tags[9].ti_Tag=SA_SharePens;
-			tags[9].ti_Data=TRUE;
-			if (font)
-			{
-				tags[10].ti_Tag=SA_Font;
-				tags[10].ti_Data=(ULONG)&GUI->screen_font;
-			}
-			else
-			{
-				tags[10].ti_Tag=SA_SysFont;
-				tags[10].ti_Data=1;
-			}
-			tags[11].ti_Tag=SA_Pens;
-			tags[11].ti_Data=(ULONG)pens;
-			tags[12].ti_Tag=SA_PubSig;
-			tags[12].ti_Data=GUI->screen_signal;
-			tags[13].ti_Tag=TAG_END;
-
-			if (GfxBase->LibNode.lib_Version>=45)
-			{
-				tags[13].ti_Tag=SA_OffScreenDragging;
-				if (TRUE)
-					tags[13].ti_Data=TRUE;
-				else
-					tags[13].ti_Data=FALSE;
-				tags[14].ti_Tag=TAG_END;
-			}
+		    offscr_drag = TRUE;
 		}
 
-		// Open screen
-		GUI->screen=OpenScreenTagList(0,tags);
-
-		// Free tags now
-		FreeVec(tags);
-#else
 		// Open screen
 		GUI->screen=OpenScreenTags(0,
-			SA_LikeWorkbench,TRUE,
-			SA_Width,
-				(environment->env->screen_flags&SCRFLAGS_DEFWIDTH)?
-					STDSCREENWIDTH:
-					environment->env->screen_width,
-			SA_Height,
-				(environment->env->screen_flags&SCRFLAGS_DEFHEIGHT)?
-					STDSCREENHEIGHT:
-					environment->env->screen_height,
-			SA_Depth,environment->env->screen_depth,
+			likewb,TRUE,
+			SA_Width,width,
+			SA_Height,height,
+			SA_Depth,depth,
 			SA_Overscan,OSCAN_TEXT,
 			SA_Title,galileo_name,
 			SA_DisplayID,screen_mode,
@@ -247,8 +188,8 @@ BOOL display_open(long flags)
 			(font)?SA_Font:SA_SysFont,(font)?(ULONG)&GUI->screen_font:1,
 			SA_Pens,(ULONG)pens,
 			SA_PubSig,GUI->screen_signal,
+			(offscr_drag)?SA_OffScreenDragging:TAG_IGNORE,TRUE,
 			TAG_END);
-#endif
 
 		// Had a font?
 		if (font) CloseFont(font);
