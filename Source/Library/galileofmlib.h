@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2024 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -82,6 +83,8 @@ struct LibData
 	ULONG			error_wait;
 
 	struct GalileoLocale	locale;
+	USHORT			date_format;
+	USHORT			locale_flags;
 
 	struct ListLock		semaphores;
 
@@ -99,7 +102,6 @@ struct LibData
 	IPCData			*fake_wb;
 	struct MyLibrary	*galileofm_base;
 	struct Library		*gfx_base;
-//    struct Library      *p96_base
 
 	struct ListLock		file_list;
 	BPTR			last_file;
@@ -1009,6 +1011,19 @@ BOOL __asm L_DateFromStringsNew(
 	register __a2 struct DateStamp *ds,
 	register __d0 ULONG);
 
+void __asm L_DateToStrings(
+	register __a0 struct DateStamp *date,
+	register __a1 char *date_buf,
+	register __a2 char *time_buf,
+	register __d0 int flags,
+	register __a6 struct MyLibrary *libbase);
+
+ULONG __asm L_GetLocaleFlags(register __a6 struct MyLibrary *);
+
+void __asm L_SetLocaleFlags(
+	register __d0 USHORT flags,
+	register __d1 USHORT dateformat,
+	register __a6 struct MyLibrary *libbase);
 
 // filetypes
 APTR __asm L_GetMatchHandle(register __a0 char *name,register __a6 struct MyLibrary *);
