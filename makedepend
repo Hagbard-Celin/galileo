@@ -1,9 +1,4 @@
-.KEY Only
-.DEF Only "All"
-; Script for building release version of Galileo File Manager.
-;
-; To speed up buld time, copy the directory "Build" to another drive,
-; and change the path of the variable "$builddir" to point to this new location.
+; Script for updating dependencies for release version of Galileo File Manager.
 ;
 
 set builddir GalileoD:Build
@@ -26,43 +21,21 @@ assign GalileoB: $builddir
 set bassign made
 endif
 
-if NOT EXISTS 3rdPartyInclude/os.gst
-cd GalileoS:GST
-smake gst
-cd GalileoD:
-endif
-
-if NOT EXISTS 3rdPartyInclude/osffp.gst
-cd GalileoS:GST
-smake gstffp
-cd GalileoD:
-endif
-
-if <Only> EQ "SDK"
-cd GalileoS:Library
-smake SDK
-cd GalileoS:Modules
-smake SDK
-skip Cleanup
-endif
-
 cd GalileoS:Modules
 smake pragmas
 
 cd GalileoS:Library
-smake all
+smake depend
 cd GalileoS:Program
-smake all
+smake depend
 cd GalileoS:Modules
-smake all
+smake depend
 cd GalileoS:Misc/c
-smake all
+smake depend
 cd GalileoS:Misc/ifftogalileo
-smake all
+smake depend
 cd GalileoS:Misc/viewfont
-smake all
-
-lab Cleanup
+smake depend
 cd GalileoD:
 assign GalileoD:
 

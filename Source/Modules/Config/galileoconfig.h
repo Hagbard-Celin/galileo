@@ -31,14 +31,14 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #ifndef _GALILEOCONFIG
 #define _GALILEOCONFIG
 
-#include "/Modules/Config/galileoconfig_pragmas.h"
+#include "galileoconfig_pragmas.h"
 
 #define STACK_DEFAULT	8192
 

@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -41,7 +41,7 @@ For more information on Directory Opus for Windows please see:
 #include "/Include/galileo/os.h"
 
 #include "/Library/galileofmbase.h"
-#include "/Modules/modules_pragmas.h"
+#include "modules_pragmas.h"
 
 typedef struct
 {
