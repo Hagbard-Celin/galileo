@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -139,7 +139,12 @@ void _config_env_screenmode_init_mode(config_env_data *data,BOOL save_depth)
 
 						// Clone depth
 						if (!save_depth)
+						{
+						    if (GfxBase->LibNode.lib_Version>=39)
+							data->config->screen_depth=GetBitMapAttr(screen->RastPort.BitMap,BMA_DEPTH);
+						    else
 							data->config->screen_depth=screen->RastPort.BitMap->Depth;
+						}
 					}
 					else
 					{

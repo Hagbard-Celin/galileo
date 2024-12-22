@@ -201,7 +201,10 @@ BOOL display_open(long flags)
 			// close and reopen from entering Environment->Display
 			environment->env->screen_width = GUI->screen->Width;
 			environment->env->screen_height = GUI->screen->Height;
-			environment->env->screen_depth = GUI->screen->RastPort.BitMap->Depth;
+			if (GfxBase->LibNode.lib_Version>=39)
+			    environment->env->screen_depth = GetBitMapAttr(GUI->screen->RastPort.BitMap,BMA_DEPTH);
+			else
+			    environment->env->screen_depth = GUI->screen->RastPort.BitMap->Depth;
 
 			// Make it public
 			PubScreenStatus(GUI->screen,0);
