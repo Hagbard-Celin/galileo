@@ -121,7 +121,7 @@ CONFIGMYOBJS = $(OBJ)$(CONFIGDIR)config_drag.o \
 	$(OBJ)$(CONFIGDIR)edit.o \
 	$(OBJ)$(CONFIGDIR)ipc.o
 
-CONFIGOBJS  = $(OBJ)$(CONFIGDIR)libinit.o $(OBJ)$(CONFIGDIR)config.o $(OBJ)$(CONFIGDIR)config_strings.o $(CONFIGMYOBJS)
+CONFIGOBJS  = $(OBJ)$(CONFIGDIR)libinit.o $(OBJ)lsprintf.o $(OBJ)$(CONFIGDIR)config.o $(OBJ)$(CONFIGDIR)config_strings.o $(CONFIGMYOBJS)
 CONFIGVER   = 0
 CONFIGREV   = 1
 
