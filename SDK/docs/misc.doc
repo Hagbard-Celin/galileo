@@ -202,6 +202,41 @@ galileofm.library/Atoh                                       galileofm.library/A
     SEE ALSO
         utility.library/UDivMod32()
 
+galileofm.library/GeometryToString               galileofm.library/GeometryToString
+
+    NAME
+        GeometryToString - build a string representation of a disk size
+
+    SYNOPSIS
+        GeometryToString(blocks, blocksize, buffer, places, separator)
+                           D0        D1       A0      D2       D3
+
+        void GeometryToString(ULONG, ULONG, char *, short, char);
+
+    FUNCTION
+        This routine takes two long values and creates a string to represent
+        the producet of those values as an expression of size.
+        Some examples are :
+
+                 51*2           ->    102B
+                 1758*512       ->   879KB
+                 29281606*32768 -> 893.6GB
+
+    INPUTS
+        blocks - blocks value
+        blocksize- bytes pr block value.
+        buffer - buffer to store result
+        places - number of decimal places. This must be set to 1 currently.
+        separator - column separator (eg a comma could produce "1,193")
+
+    RESULT
+        The string is stored in the buffer. The buffer should be at least 8
+        bytes long.
+
+    NOTES
+        The result of this function is only reliable as long as blocks is
+        substantially larger than blocksize.
+
 galileofm.library/Itoa                                       galileofm.library/Itoa
 
     NAME
@@ -253,6 +288,38 @@ galileofm.library/Atoh                                       galileofm.library/A
 
     SEE ALSO
         Itoa()
+
+galileofm.library/QtoaU                                     galileofm.library/QtoaU
+
+    NAME
+        QtoaU - converts unsigned 64bit integer to a string
+
+    SYNOPSIS
+        QtoaU(num, string, separator)
+               A0     A1       D0
+
+        void QtoaU(UQUAD *, char *, char);
+
+    FUNCTION
+        This routine takes the supplied unsigned 64bit number and converts it to
+        an ASCII string. The number bust be supplied as a pointer to:
+
+        typedef struct {
+        	ULONG hi;
+        	ULONG lo;
+        } UQUAD;
+
+
+    INPUTS
+        num - number to convert
+        string - string to store result
+        separator - column separator character, or 0 for no separator.
+
+    RESULT
+        The string is stored in the supplied buffer.
+
+    SEE ALSO
+        ItoaU()
 
 galileofm.library/QualValid                             galileofm.library/QualValid
 

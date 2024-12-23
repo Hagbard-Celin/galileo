@@ -290,17 +290,38 @@ void __asm L_ItoaU(
 	register __d0 unsigned long num,
 	register __a0 char *str,
 	register __d1 char sep);
+void __asm L_QtoaU(
+	register __a0 const UQUAD * number,
+	register __a1 STRPTR string,
+	register __d0 char sep);
+void __asm L_GeometryToString(
+	register __d0 ULONG blocks,
+	register __d1 ULONG blocksize,
+	register __a0 char *string,
+	register __d2 short places,
+	register __d3 char sep);
 void __asm L_BytesToString(
 	register __d0 unsigned long bytes,
 	register __a0 char *string,
 	register __d1 short places,
 	register __d2 char sep);
+ULONG __asm __saveds L_LsrQtoUL(
+	register __a0 const UQUAD *number,
+	register __d0 BYTE steps);
+void __asm __saveds L_BytesToString64(
+	register __a0 const UQUAD *bytes,
+	register __a1 char *string,
+	register __d0 short places,
+	register __d1 char sep);
 void __asm L_DivideToString(
 	register __a0 char *string,
 	register __d0 unsigned long bytes,
 	register __d1 unsigned long div,
 	register __d2 short places,
 	register __d3 char sep);
+ULONG __asm L_GetFileSize64(
+	register __a0 BPTR lock,
+	register __a1 UQUAD * size);
 void __asm L_WriteFileIcon(
 	register __a0 char *source,
 	register __a1 char *dest,

@@ -1,6 +1,8 @@
 #ifndef _GALILEOFM_MISC
 #define _GALILEOFM_MISC
 
+#include <galileofm/64bit.h>
+
 /*****************************************************************************
 
  Miscellaneous functions
@@ -14,8 +16,17 @@ long Atoh(char *,long);
 void Itoa(long,char *,char);
 void ItoaU(unsigned long,char *,char);
 
+// 64bit unsigned to ascii
+QtoaU(UQUAD *,STRPTR,char);
+
 // Convert long value to byte string
 void BytesToString(unsigned long,char *,short,char);
+
+// Convert unsigned 64bit value to byte string
+void BytesToString64(UQUAD *,char *,short,char);
+
+// Disk geometry (blocks*blocksize) to byte string
+void GeometryToString(ULONG,ULONG,char,short,char);
 
 // Division to a string
 void DivideToString(char *,unsigned long,unsigned long,short,char);

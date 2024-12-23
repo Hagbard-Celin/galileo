@@ -202,6 +202,7 @@ CxObj *__asm __saveds L_GetCxSelectUpDown(register __a6 struct MyLibrary *libbas
 
     // Get data pointer
     data=(struct LibData *)libbase->ml_UserData;
+
     return data->cx_select_up_down;
 }
 
@@ -415,6 +416,189 @@ void __asm __saveds L_ItoaU(
 	*str=0;
 }
 
+ULONG quad_lookpup[][2] =
+{
+    {0,1},
+    {0,10},
+    {0,100},
+    {0,1000},
+    {0,10000},
+    {0,100000},
+    {0,1000000},
+    {0,10000000},
+    {0,100000000},
+    {0,1000000000},
+    {2,0x540BE400},
+    {0x17,0x4876E800},
+    {0xE8,0xD4A51000},
+    {0x918,0x4E72A000},
+    {0x5AF3,0x107A4000},
+    {0x38D7E,0xA4C68000},
+    {0x2386F2,0x6FC10000},
+    {0x1634578,0x5D8A0000},
+    {0xDE0B6B3,0xA7640000},
+    {0x8AC72304,0x89E80000}
+};
+
+#define HIGH 0
+#define LOW  1
+
+// Convert UQUAD to a string
+void __asm __saveds L_QtoaU(register __a0 const UQUAD * number, register __a1 STRPTR string, register __d0 char sep)
+{
+    BYTE i, j, l=0;
+    char buffer[21];
+    BYTE place = 20, current = 0, outpos = 0;
+    UBYTE leadingzero = TRUE;
+    ULONG high, low;
+
+    high = number->hi;
+    low = number->lo;
+
+    // Fallback
+    if (!high)
+    {
+	L_ItoaU(low, string, sep);
+    }
+
+    while (place >= 0)
+    {
+	LONG a = quad_lookpup[place][LOW] > low;
+
+	if (high >= quad_lookpup[place][HIGH] + a)
+	{
+	    high -= quad_lookpup[place][HIGH] + a;
+	    low = low - quad_lookpup[place][LOW];
+	    current++;
+	}
+	else
+	{
+	    // Strip leading zeros
+	    if (leadingzero && current)
+	    {
+		l = place + 1;
+		leadingzero = FALSE;
+	    }
+
+	    // Output current digit
+	    if (!leadingzero)
+	    {
+		buffer[outpos] = current + 48;
+		outpos++;
+	    }
+
+	    // Use sprintf for 32bit-remainder
+	    if (!high)
+	    {
+		if (place == 10)
+		    sprintf(&buffer[outpos], "%010lu", low);
+		else
+		    sprintf(&buffer[outpos], "%09lu", low);
+		break;
+
+	    }
+	    current = 0;
+	    place--;
+	}
+    }
+
+    // Thousands separator?
+    if (sep)
+    {
+	j = l;
+
+	     if (l > 18) j += 6;
+	else if (l > 15) j += 5;
+	else if (l > 12) j += 4;
+	else if (l > 9)  j += 3;
+	else if (l > 6)  j += 2;
+	else if (l > 3)  j++;
+
+	for (i = 0; l >= 0; i++ )
+	{
+	    string[j] = buffer[l];
+	    j--;
+	    l--;
+	    if ((i == 3) || (i == 6) || (i == 9) || (i == 12) || (i == 15) || (i == 18))
+	    {
+	        string[j]=sep;
+	        j--;
+	    }
+	}
+    }
+    else
+    {
+	for (i = 0; i<=l; i++)
+	    string[i] = buffer[i];
+    }
+}
+
+// Convert disk geometry to a size string
+void __asm __saveds L_GeometryToString(
+	register __d0 ULONG blocks,
+	register __d1 ULONG blocksize,
+	register __a0 char *string,
+	register __d2 short places,
+	register __d3 char sep)
+{
+	ULONG size;
+	short len;
+	char size_ch;
+
+	if ( (size = (blocks >> 20) * blocksize) >= 1073741824)
+	{
+		size_ch='P';
+		L_DivideToString(string,size,1073741824,1,sep);
+
+		// Tack on character
+		len=strlen(string);
+		string[len]=size_ch;
+		string[len+1]='B';
+		string[len+2]=0;
+		return;
+	}
+	else
+	if ( (size = (blocks >> 20) * blocksize) >= 1048576 )
+		size_ch='T';
+	else
+	if ( (size = (blocks >> 10) * blocksize) >= 1048576 )
+		size_ch='G';
+	else
+	if ( (size = blocks *blocksize)	>= 1048576 )
+		size_ch='M';
+	else
+	if ( size >= 1024 )
+	{
+		size_ch='K';
+
+		// Do division to string
+		L_DivideToString(string,size,1024,1,sep);
+
+		// Tack on character
+		len=strlen(string);
+		string[len]=size_ch;
+		string[len+1]='B';
+		string[len+2]=0;
+		return;
+	}
+	else
+	{
+		L_ItoaU(size,string,sep);
+		strcat(string,"B");
+		return;
+	}
+
+	// Do division to string
+	L_DivideToString(string,size,1048576,1,sep);
+
+	// Tack on character
+	len=strlen(string);
+	string[len]=size_ch;
+	string[len+1]='B';
+	string[len+2]=0;
+
+
+}
 
 // Return a disk size as a string
 void __asm __saveds L_BytesToString(
@@ -481,6 +665,107 @@ void __asm __saveds L_BytesToString(
 		string[len+1]='B';
 		string[len+2]=0;
 	}
+}
+
+// Logical shift right of UQUAD into ULONG
+ULONG __asm __saveds L_LsrQtoUL(register __a0 const UQUAD *number, register __d0 BYTE steps)
+{
+    ULONG ret;
+
+    if (steps >=64)
+    {
+	ret = 0;
+    }
+    else
+    if (!number->hi)
+    {
+	if (steps >=32)
+	{
+	    ret = 0;
+	}
+	else
+	{
+	    ret = number->lo >> steps;
+	}
+    }
+    else
+    if (steps > 32)
+    {
+	ret = number->hi >> (steps - 32);
+    }
+    else
+    if (steps == 32)
+    {
+	ret = number->hi;
+    }
+    else
+    {
+	ret = number->lo >> steps;
+	ret |= (number->hi << 32 - steps);
+    }
+    return ret;
+}
+
+// Return a disk size as a string
+void __asm __saveds L_BytesToString64(
+	register __a0 const UQUAD *bytes,
+	register __a1 char *string,
+	register __d0 short places,
+	register __d1 char sep)
+{
+	unsigned long div;
+	char size_ch;
+	ULONG tmp_bytes;
+	short len;
+
+	if (!bytes->hi)
+	{
+		// Fallback
+		L_BytesToString(bytes->lo, string, places, sep);
+		return;
+	}
+
+	if ((tmp_bytes = L_LsrQtoUL(bytes, 40)) >= 1048576)
+	{
+		// Exabytes
+		div = 1048576;
+		size_ch = 'E';
+	}
+	else
+	if (tmp_bytes >= 1024)
+	{
+		// Petabytes
+		div = 1024;
+		size_ch = 'P';
+	}
+	else
+	if ((tmp_bytes = L_LsrQtoUL(bytes, 20)) >= 1048576)
+	{
+		// Terabytes
+		div = 1048576;
+		size_ch = 'T';
+	}
+	else
+	if (tmp_bytes >= 1024)
+	{
+		// Gigabytes
+		div = 1024;
+		size_ch = 'G';
+	}
+	else
+	{
+		string[0]=0;
+		return;
+	}
+
+	// Do division to string
+	L_DivideToString(string,tmp_bytes,div,places,sep);
+
+	// Tack on character
+	len=strlen(string);
+	string[len]=size_ch;
+	string[len+1]='B';
+	string[len+2]=0;
 }
 
 
@@ -590,6 +875,90 @@ void __asm __saveds L_DivideToString(
 	else lsprintf(string,"%ld.%s",whole,rem_buf);
 }
 */
+
+// Get 64bit filesize using OS4 64bit dos packet, also supported by WinUAE filesystem.
+ULONG __asm __saveds L_GetFileSize64(register __a0 BPTR lock, register __a1 UQUAD * size)
+{
+    BPTR file;
+    struct FileLock *fl;
+    struct FileHandle *fh;
+    struct StandardPacket64 *sp;
+    struct MsgPort *myPort;
+    ULONG result=0;
+
+    // Get lock
+    fl = BADDR(lock);
+
+    if (file=OpenFromLock(lock))
+    {
+	// Get handle
+	fh = BADDR(file);
+
+	if (myPort = CreateMsgPort())
+	{
+	    if (sp = AllocVec(sizeof(struct StandardPacket64),MEMF_PUBLIC|MEMF_CLEAR))
+	    {
+		// Set up packet
+	        sp->sp_Msg.mn_Node.ln_Name = (UBYTE *)&(sp->sp_Pkt);
+		sp->sp_Pkt.dp_Link = &(sp->sp_Msg);
+		sp->sp_Pkt.dp_Res0 = DP64_INIT;
+		sp->sp_Pkt.dp_Port = myPort;
+		sp->sp_Pkt.dp_Type = ACTION_GET_FILE_SIZE64;
+		sp->sp_Pkt.dp_Arg1 = fh->fh_Arg1;
+
+		// Send it
+		#pragma msg 88 ignore push
+		SendPkt(&sp->sp_Pkt,fl->fl_Task,myPort);
+		#pragma msg 88 pop
+
+		// Get reply
+		WaitPort(myPort);
+		GetMsg(myPort);
+
+		// Did we get a valid reply?
+		if((DP64_INIT == sp->sp_Pkt.dp_Res0) && (sp->sp_Pkt.dp_Res2 == 0))
+		{
+		    // Was it really a 64bit value?
+		    if (!sp->sp_Pkt.dp_Res1.hi)
+		    {
+			result = 115;
+		    }
+		    else
+		    {
+			// Save size
+			size->hi = sp->sp_Pkt.dp_Res1.hi;
+			size->lo = sp->sp_Pkt.dp_Res1.lo;
+		    }
+		}
+		else
+		{
+		    // Get error code
+		    result = sp->sp_Pkt.dp_Res2;
+
+		    // Just in case, probably not needed
+		    if (!result)
+			result = 236;
+		}
+
+		FreeVec(sp);
+	    }
+	    else
+		result = 207;
+	    DeleteMsgPort(myPort);
+	}
+	else
+	    result = 207;
+
+	Close(file);
+    }
+    else
+    {
+	// Get error code
+	result = IoErr();
+	UnLock(lock);
+    }
+    return result;
+}
 
 // Reply or free a message
 void __saveds __asm L_ReplyFreeMsg(register __a0 struct Message *msg)

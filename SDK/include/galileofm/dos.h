@@ -1,6 +1,8 @@
 #ifndef _GALILEOFM_DOS
 #define _GALILEOFM_DOS
 
+#include <galileofm/64bit.h>
+
 /*****************************************************************************
 
  DOS functions
@@ -62,6 +64,40 @@ long SearchFile(APTR,UBYTE *,ULONG,UBYTE *,ULONG);
 // Copy and free DOS path list
 BPTR GetDosPathList(BPTR);
 void FreeDosPathList(BPTR);
+
+// 64bit dospacket
+struct DosPacket64
+{
+    struct Message  *dp_Link;    /* EXEC message                    */
+    struct MsgPort  *dp_Port;    /* Reply port for the packet,      */
+							    /* must be filled in on each send. */
+    LONG	    dp_Type;    /* See ACTION_... below            */
+    LONG	    dp_Res0;    /* Special compatibility field. [See below] */
+
+    LONG	    dp_Res2;    /* This is returned for IoErr()    */
+    ULONG	    Pad1;
+    UQUAD	    dp_Res1;    /* This is the 64 bit primary result */
+    LONG	    dp_Arg1;    /* 32 bit argument */
+    ULONG	    Pad2;
+    UQUAD	    dp_Arg2;    /* 64 bit argument */
+    LONG	    dp_Arg3;    /* 32 bit argument */
+    LONG	    dp_Arg4;    /* 32 bit argument */
+    UQUAD	    dp_Arg5;    /* 64 bit argument */
+};
+
+#define ACTION_GET_FILE_SIZE64	8004
+
+// The DosPacket64 dp_Res0 member initialisation value.
+#define DP64_INIT	-3L
+
+struct StandardPacket64
+{
+    struct Message      sp_Msg;
+    struct DosPacket64  sp_Pkt;
+};
+
+// Get 64bit filesize
+ULONG GetFileSize64(BPTR,UQUAD *);
 
 
 #endif

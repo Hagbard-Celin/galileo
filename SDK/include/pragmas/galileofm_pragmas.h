@@ -216,6 +216,10 @@
 #pragma libcall GalileoFMBase SetPopUpDelay 834 001
 #pragma libcall GalileoFMBase LaunchWBNotify 83a 2CBA109808
 #pragma libcall GalileoFMBase AppWindowWindow 840 801
+#pragma libcall GalileoFMBase QtoaU 882 09803
+#pragma libcall GalileoFMBase GetFileSize64 888 9802
+#pragma libcall GalileoFMBase GeometryToString 88e 3281005
+#pragma libcall GalileoFMBase BytesToString64 894 109804
 #pragma libcall GalileoFMBase GetLocaleSettings 8b2 001
 #pragma libcall GalileoFMBase DateToStrings 8b8 0A9804
 /**/

@@ -214,6 +214,47 @@
     SEE ALSO
         FreeDosPathList()
 
+galileofm.library/GetFileSize64                     galileofm.library/GetFileSize64
+
+    NAME
+        GetFileSize64 - get a files size using ACTION_GET_FILE_SIZE64
+
+    SYNOPSIS
+        GetFileSize64(lock, size)
+                       A0    A1
+
+        ULONG GetFileSize64(BPTR, UQUAD *);
+
+    FUNCTION
+        This routine examines the given file and returns the file's size in
+        the supplied UQUAD. UQUAD is defined as:
+
+            typedef struct {
+            	    ULONG hi;
+            	    ULONG lo;
+            } UQUAD;
+
+    INPUTS
+        lock - a lock on the file to be examined
+        size - pointer to UQUAD that will be filled
+
+    RESULT
+        Returns NULL on success, unless the file-size fits in 32 bits which
+        will return dos error code ERROR_BAD_NUMBER.
+        Failure will return the error code from the reply message or the
+        result of IoErr(). In case the 64bit dos-message fails without
+        supplying a error code it will return ERROR_ACTION_NOT_KNOWN.
+        If it fails to open a port or allocate memory for the dos-message it
+        will return ERROR_OBJECT_TOO_LARGE.
+
+    NOTES
+        Works with WinUAE directory-mapped drives.
+
+    WARNING
+    	This is a preliminary implementation to test the feasibility of 64bit
+        dos-packets under OS 2.x/3.x on WinUAE. The behavior might change
+        as this function is put to practical use.
+
 galileofm.library/GetFileVersion                   galileofm.library/GetFileVersion
 
     NAME

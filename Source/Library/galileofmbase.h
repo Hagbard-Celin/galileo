@@ -1085,15 +1085,56 @@ ULONG IFFChunkID(APTR);
 ULONG IFFGetFORM(APTR);
 void IFFFailure(APTR);
 
+// Unsigned 64bit
+typedef struct {
+	ULONG hi;
+	ULONG lo;
+} UQUAD;
+
+struct DosPacket64
+{
+    struct Message  *dp_Link;    /* EXEC message                    */
+    struct MsgPort  *dp_Port;    /* Reply port for the packet,      */
+							    /* must be filled in on each send. */
+    LONG	    dp_Type;    /* See ACTION_... below            */
+    LONG	    dp_Res0;    /* Special compatibility field. [See below] */
+
+    LONG	    dp_Res2;    /* This is returned for IoErr()    */
+    ULONG	    Pad1;
+    UQUAD	    dp_Res1;    /* This is the 64 bit primary result */
+    LONG	    dp_Arg1;    /* 32 bit argument */
+    ULONG	    Pad2;
+    UQUAD	    dp_Arg2;    /* 64 bit argument */
+    LONG	    dp_Arg3;    /* 32 bit argument */
+    LONG	    dp_Arg4;    /* 32 bit argument */
+    UQUAD	    dp_Arg5;    /* 64 bit argument */
+};
+
+#define ACTION_GET_FILE_SIZE64	8004
+
+/* The DosPacket64 dp_Res0 member initialisation value. */
+#define DP64_INIT	-3L
+
+struct StandardPacket64
+{
+    struct Message      sp_Msg;
+    struct DosPacket64  sp_Pkt;
+};
+
 /* Function prototypes */
 
 void ActivateStrGad(struct Gadget *,struct Window *);
 ULONG Atoh(char *,short);
 Itoa(long,char *,char);
 ItoaU(unsigned long,char *,char);
-//Ito26(unsigned long,char *);
+QtoaU(UQUAD * number, STRPTR string, char sep);
+void GeometryToString(ULONG blocks, ULONG blocksize, char *string, short places, char sep);
 BytesToString(unsigned long,char *,short,char);
+void BytesToString64( UQUAD *bytes, char *string, short places, char sep);
+ULONG LsrQtoUL(UQUAD number, BYTE steps);
 DivideToString(char *,unsigned long,unsigned long,short,char);
+
+ULONG GetFileSize64(BPTR lock, UQUAD * size);
 
 ULONG CompareListFormat(ListFormat *,ListFormat *);
 
