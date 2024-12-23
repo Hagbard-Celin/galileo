@@ -1003,11 +1003,6 @@ char *__asm L_ParseDateStrings(
 BOOL __asm L_DateFromStrings(
 	register __a0 char *date,
 	register __a1 char *time,
-	register __a2 struct DateStamp *ds);
-
-BOOL __asm L_DateFromStringsNew(
-	register __a0 char *date,
-	register __a1 char *time,
 	register __a2 struct DateStamp *ds,
 	register __d0 ULONG);
 

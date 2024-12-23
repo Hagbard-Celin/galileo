@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -468,7 +468,7 @@ void lister_end_edit(Lister *lister,short flags)
 						ParseDateStrings(lister->edit_ptr,date_b,time_b,0);
 
 						// Convert to datestamp
-						if (DateFromStringsNew(date_b,time_b,&date,environment->env->settings.date_format))
+						if (DateFromStrings(date_b,time_b,&date,environment->env->settings.date_format))
 						{
 							// Set new datestamp
 							if (change=SetFileDate(lister->edit_entry->de_Node.dn_Name,&date))

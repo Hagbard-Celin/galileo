@@ -160,7 +160,7 @@ GALILEOFM_FUNC(function_change)
 						handle->work_buffer+896,0);
 
 					// Convert to datestamp
-					if (!(DateFromStringsNew(
+					if (!(DateFromStrings(
 						handle->work_buffer+768,
 						handle->work_buffer+896,
 						&data->date,
@@ -835,7 +835,7 @@ function_change_get_date(
 				handle->work_buffer+896,0);
 
 			// Convert to datestamp
-			if (!(DateFromStringsNew(
+			if (!(DateFromStrings(
 				handle->work_buffer+768,
 				handle->work_buffer+896,
 				date,

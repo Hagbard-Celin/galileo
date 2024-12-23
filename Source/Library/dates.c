@@ -208,19 +208,8 @@ getout:
 	return end_ptr;
 }
 
-
 // Convert a string to a datestamp
 BOOL __asm __saveds L_DateFromStrings(
-	register __a0 char *date,
-	register __a1 char *time,
-	register __a2 struct DateStamp *ds)
-{
-	return L_DateFromStringsNew(date,time,ds,FORMAT_DOS);
-}
-
-
-// Convert a string to a datestamp
-BOOL __asm __saveds L_DateFromStringsNew(
 	register __a0 char *date,
 	register __a1 char *time,
 	register __a2 struct DateStamp *ds,

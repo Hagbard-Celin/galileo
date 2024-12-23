@@ -32,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -191,7 +191,7 @@ void __asm __saveds L_FreeMatchHandle(register __a0 MatchHandle *handle)
 	// Valid handle?
 	if (handle)
 	{
-        FreeVec(handle->fullname);
+	FreeVec(handle->fullname);
 
 		// Close file
 		L_CloseBuf(handle->file);
@@ -1101,7 +1101,7 @@ void parse_date_string(char *string,struct DateStamp *date)
 	ptr=L_ParseDateStrings(string,datebuf,timebuf,&range);
 
 	// Convert to a datestamp
-	L_DateFromStrings(datebuf,timebuf,&date[0]);
+	L_DateFromStrings(datebuf,timebuf,&date[0],FORMAT_DOS);
 
 	// If only one date supplied, use midnight on the same day
 	if (!range) strcpy(timebuf,"23:59:59");
@@ -1110,7 +1110,7 @@ void parse_date_string(char *string,struct DateStamp *date)
 	else L_ParseDateStrings(ptr,datebuf,timebuf,&range);
 
 	// Convert second date to a datestamp
-	L_DateFromStrings(datebuf,timebuf,&date[1]);
+	L_DateFromStrings(datebuf,timebuf,&date[1],FORMAT_DOS);
 
 	// Fix seconds to beginning of the minute in first date, and end in the second
 	date[0].ds_Tick=((date[0].ds_Tick/50)*50);

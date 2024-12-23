@@ -349,7 +349,7 @@ SetAppIconMenuState(icon,item,state)(a0,d0/d1)
 *
 SearchFile(file,text,flags,buffer,size)(a0/a1,d0,a2,d1)
 ParseDateStrings(string,date,time,range)(a0/a1/a2/a3)
-DateFromStrings(date,time,ds)(a0/a1/a2)
+DateFromStrings(date,time,ds,method)(a0/a1/a2,d0)
 *
 GetMatchHandle(name)(a0)
 FreeMatchHandle(handle)(a0)
@@ -429,8 +429,6 @@ BuildRexxMsgEx(port,extension,host,tags)(a0/a1,d0,a2)
 NotifyDiskChange()()
 GetDosListCopy(list,memory)(a0/a1)
 FreeDosListCopy(list)(a0)
-*
-DateFromStringsNew(date,time,ds,method)(a0/a1/a2,d0)
 *
 RemapIcon(icon,screen,free)(a0/a1,d0)
 GetOriginalIcon(icon)(a0)

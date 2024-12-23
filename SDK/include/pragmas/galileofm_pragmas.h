@@ -201,21 +201,20 @@
 #pragma libcall GalileoFMBase SetRexxVarEx 774 109804
 #pragma libcall GalileoFMBase GetRexxVarEx 77a A9803
 #pragma libcall GalileoFMBase BuildRexxMsgEx 780 A09804
-#pragma libcall GalileoFMBase DateFromStringsNew 798 0A9804
-#pragma libcall GalileoFMBase CalcPercent 7aa 81003
-#pragma libcall GalileoFMBase IsDiskDevice 7b0 801
-#pragma libcall GalileoFMBase ReadBufLine 7c8 09803
-#pragma libcall GalileoFMBase LaunchWBNew 7f2 A109805
-#pragma libcall GalileoFMBase UpdatePathList 7f8 0
-#pragma libcall GalileoFMBase UpdateMyPaths 7fe 0
-#pragma libcall GalileoFMBase GetDeviceUnit 80a A9803
-#pragma libcall GalileoFMBase StripWindowMessages 810 9802
-#pragma libcall GalileoFMBase DeleteIcon 816 801
-#pragma libcall GalileoFMBase GetGalileoPathList 82e 0
-#pragma libcall GalileoFMBase GetStatistics 834 001
-#pragma libcall GalileoFMBase SetPopUpDelay 83a 001
-#pragma libcall GalileoFMBase LaunchWBNotify 840 2CBA109808
-#pragma libcall GalileoFMBase AppWindowWindow 846 801
-#pragma libcall GalileoFMBase DateToStrings 8be 0A9804
+#pragma libcall GalileoFMBase CalcPercent 7a4 81003
+#pragma libcall GalileoFMBase IsDiskDevice 7aa 801
+#pragma libcall GalileoFMBase ReadBufLine 7c2 09803
+#pragma libcall GalileoFMBase LaunchWBNew 7ec A109805
+#pragma libcall GalileoFMBase UpdatePathList 7f2 0
+#pragma libcall GalileoFMBase UpdateMyPaths 7f8 0
+#pragma libcall GalileoFMBase GetDeviceUnit 804 A9803
+#pragma libcall GalileoFMBase StripWindowMessages 80a 9802
+#pragma libcall GalileoFMBase DeleteIcon 810 801
+#pragma libcall GalileoFMBase GetGalileoPathList 828 0
+#pragma libcall GalileoFMBase GetStatistics 82e 001
+#pragma libcall GalileoFMBase SetPopUpDelay 834 001
+#pragma libcall GalileoFMBase LaunchWBNotify 83a 2CBA109808
+#pragma libcall GalileoFMBase AppWindowWindow 840 801
+#pragma libcall GalileoFMBase DateToStrings 8b8 0A9804
 /**/
 /* end "galileofm.library" pragmas */

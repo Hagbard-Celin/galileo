@@ -39,8 +39,7 @@ void SetEnv(char *,char *,BOOL);
 
 // Date routines
 char *ParseDateStrings(char *,char *,char *,long *);
-BOOL DateFromStrings(char *,char *,struct DateStamp *);
-BOOL DateFromStringsNew(char *,char *,struct DateStamp *,long);
+BOOL DateFromStrings(char *,char *,struct DateStamp *,long);
 void DateToStrings(struct DateStamp *date,char *date_buf,char *time_buf,int flags);
 
 #define RANGE_BETWEEN		1

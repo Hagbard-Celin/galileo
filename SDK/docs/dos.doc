@@ -1,37 +1,4 @@
-galileofm.library/DateFromStrings                 galileofm.library/DateFromStrings
-
-    NAME
-        DateFromStrings - convert date and time strings to a datestamp
-
-    SYNOPSIS
-        DateFromStrings(date, time, ds)
-                         A0    A1   A2
-
-        BOOL DateFromStrings(char *, char *, struct DateStamp *);
-
-    FUNCTION
-        This routine takes a date string and a time string and converts them
-        to a DOS DateStamp. The DOS StrToDate() routine is used to perform
-        this conversion, so it is sensitive to the current locale. If the
-        time string contains an 'a' or a 'p' to signify am or pm, it
-        is automatically converted to 24 hour time for the DOS call.
-
-    INPUTS
-        date - date string to convert
-        time - time string to convert
-        ds - DateStamp to store result
-
-    RESULT
-        Returns TRUE if successful.
-
-    NOTES
-        This routine expects the date string in the FORMAT_DOS format
-        (dd-mmm-yy). DateFromStringsNew() offers more control.
-
-    SEE ALSO
-        ParseDateStrings(), DateFromStringsNew(), dos.library/StrToDate()
-
-galileofm.library/DateFromStringsNew           galileofm.library/DateFromStringsNew
+galileofm.library/DateFromStrings                 galileofm.library/DateFromStrings
 
     NAME
         DateFromStringsNew - convert date and time strings to a datestamp

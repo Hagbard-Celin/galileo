@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -1473,7 +1473,7 @@ void select_rmb_scroll(Lister *lister,short x,short y)
 #ifdef _DEBUG
 								KPrintF("Renaming \n");
 #endif
-                                // Do rename
+								// Do rename
 								file_run_function(lister,entry,def_function_rename,0,0);
 								break;
 
@@ -2350,13 +2350,13 @@ void select_global_wild(Lister *lister,SelectData *data,PathList *dest_list)
 	date_match[0].ds_Minute=0;
 	date_match[0].ds_Tick=0;
 	if (data->date_from[0])
-		DateFromStringsNew(data->date_from,"00:00:00",&date_match[0],environment->env->settings.date_format);
+		DateFromStrings(data->date_from,"00:00:00",&date_match[0],environment->env->settings.date_format);
 	DateStamp(&date_match[1]);
 	if (data->date_to[0])
-		DateFromStringsNew(data->date_to,"23:59:59",&date_match[1],environment->env->settings.date_format);
+		DateFromStrings(data->date_to,"23:59:59",&date_match[1],environment->env->settings.date_format);
 	else
 	if (data->date_from[0])
-		DateFromStringsNew(data->date_from,"23:59:59",&date_match[1],environment->env->settings.date_format);
+		DateFromStrings(data->date_from,"23:59:59",&date_match[1],environment->env->settings.date_format);
 
 	// Get protection matches
 	prot_match[0]=(data->bits>>8)&0xff;

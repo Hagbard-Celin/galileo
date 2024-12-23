@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -230,7 +230,7 @@ short rexx_lister_add_file(Lister *lister,char *args,struct RexxMsg *msg)
 				ParseDateStrings(buffer,date_b,time_b,0);
 
 				// Convert to datestamp
-				if (DateFromStrings(date_b,time_b,&date)) got_date=1;
+				if (DateFromStrings(date_b,time_b,&date,FORMAT_DOS)) got_date=1;
 			}
 		}
 
