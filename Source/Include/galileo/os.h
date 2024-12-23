@@ -30,6 +30,12 @@
 #include <proto/rexxsyslib.h>
 #include <proto/Picasso96.h>
 
+#ifdef _FFP
+#include <proto/mathffp.h>
+#include <proto/mathtrans.h>
+#include <libraries/mathffp.h>
+#endif
+
 #include <exec/execbase.h>
 #include <exec/memory.h>
 #include <exec/resident.h>
