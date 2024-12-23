@@ -352,12 +352,16 @@ void startup_open_libraries()
 	// Some other useful libraries
 	DataTypesBase=OpenLibrary("datatypes.library",0);
 	AmigaGuideBase=OpenLibrary("amigaguide.library",0);
-	NewIconBase=(struct NewIconBase *)OpenLibrary("newicon.library",0);
+
+	// Only open if needed
+	if (IconBase->lib_Version<44)
+	    NewIconBase=(struct NewIconBase *)OpenLibrary("newicon.library",0);
+
 	// Under 39?
 	if (GfxBase->LibNode.lib_Version>=39)
 	{
 	    P96Base=OpenLibrary("Picasso96API.library",0);
-    }
+	}
 
 	// Get input.device base
 	if (!OpenDevice("input.device",0,(struct IORequest *)&input_req,0))
