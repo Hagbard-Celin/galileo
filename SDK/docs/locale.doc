@@ -51,4 +51,38 @@ galileofm.library/GalileoGetString                   galileofm.library/GalileoGe
         locale.library/OpenLocale(), locale.library/OpenCatalog(),
         locale.library/GetLocaleStr()
 
+galileofm.library/GetLocaleSettings                 galileofm.library/GetLocaleSettings
+
+    NAME
+        GetLocaleSettings - get the flags or date-format from locale settings
+
+    SYNOPSIS
+        GetLocaleSettings(type)
+                          d0
+
+        UWORD GetLocaleSettings(UBYTE);
+
+    FUNCTION
+        This routine returns the flags representing the users current choice
+        in Enviroment->Locale.
+
+        The flags are :
+
+            LOCALE_DATE_SUBST	- date substitution enabled
+            LOCALE_CLOCK_12HOUR	- 12 hour clock enabled
+            LOCALE_1000SEP	- thousands separator enabled
+
+        And the date-formats :
+
+            FORMAT_DOS - dd-mmm-yy
+            FORMAT_INT - yy-mmm-dd
+            FORMAT_USA - mm-dd-yy
+            FORMAT_CDN - dd-mm-yy
+    INPUTS
+        type - 0 for flags, 1 for date-format.
+
+    RESULT
+        A UWORD contining the current locale flags or the currently selected
+        date-format.
+
 

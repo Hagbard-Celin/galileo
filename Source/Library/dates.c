@@ -327,20 +327,24 @@ void __asm __saveds L_DateToStrings(register __a0 struct DateStamp *date,
 
 
 // Get locale flags from the library
-ULONG __asm __saveds L_GetLocaleFlags(register __a6 struct MyLibrary *libbase)
+UWORD __asm __saveds L_GetLocaleSettings(register __d0 UBYTE type, register __a6 struct MyLibrary *libbase)
 {
     struct LibData *data;
 
     // Get data pointer
     data=(struct LibData *)libbase->ml_UserData;
-
-    return data->locale_flags;
+    
+    // Gat flags or dateformat
+    if (!type)
+	return data->locale_flags;
+    else
+	return data->date_format;
 }
 
 
 // Set locale flags in the library
-void __asm __saveds L_SetLocaleFlags(register __d0 USHORT flags,
-				     register __d1 USHORT dateformat,
+void __asm __saveds L_SetLocaleFlags(register __d0 UWORD flags,
+				     register __d1 UWORD dateformat,
 				     register __a6 struct MyLibrary *libbase)
 {
 	struct LibData *data;
@@ -348,6 +352,7 @@ void __asm __saveds L_SetLocaleFlags(register __d0 USHORT flags,
 	// Get data pointer
 	data=(struct LibData *)libbase->ml_UserData;
 
+	// Set flags and dateformat
 	data->date_format = dateformat;
 	data->locale_flags = flags;
 }

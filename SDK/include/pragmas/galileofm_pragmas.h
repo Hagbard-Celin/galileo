@@ -2,6 +2,7 @@
 /*                                                             */
 /* Support routines for Galileo and associated programs */
 /* (c) Copyright 1996 Jonathan Potter                          */
+/*     Copyright 2024 Hagbard Celine                           */
 /*                                                             */
 #pragma libcall GalileoFMBase Random 1e 001
 #pragma libcall GalileoFMBase Atoh 24 0802
@@ -215,6 +216,7 @@
 #pragma libcall GalileoFMBase SetPopUpDelay 834 001
 #pragma libcall GalileoFMBase LaunchWBNotify 83a 2CBA109808
 #pragma libcall GalileoFMBase AppWindowWindow 840 801
+#pragma libcall GalileoFMBase GetLocaleSettings 8b2 001
 #pragma libcall GalileoFMBase DateToStrings 8b8 0A9804
 /**/
 /* end "galileofm.library" pragmas */

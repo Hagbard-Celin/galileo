@@ -7,6 +7,10 @@
 
  *****************************************************************************/
 
+#define	    LOCALE_DATE_SUBST	(1<<0)
+#define	    LOCALE_CLOCK_12HOUR	(1<<1)
+#define	    LOCALE_1000SEP	(1<<2)
+
 // Locale marker
 struct GalileoLocale
 {
@@ -17,5 +21,6 @@ struct GalileoLocale
 };
 
 STRPTR GalileoGetString(struct GalileoLocale *,LONG);
+UWORD GetLocaleSettings(UBYTE);
 
 #endif

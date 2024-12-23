@@ -1013,11 +1013,11 @@ void __asm L_DateToStrings(
 	register __d0 int flags,
 	register __a6 struct MyLibrary *libbase);
 
-ULONG __asm L_GetLocaleFlags(register __a6 struct MyLibrary *);
+UWORD __asm L_GetLocaleSettings(register __d0 UBYTE type, register __a6 struct MyLibrary *);
 
 void __asm L_SetLocaleFlags(
-	register __d0 USHORT flags,
-	register __d1 USHORT dateformat,
+	register __d0 UWORD flags,
+	register __d1 UWORD dateformat,
 	register __a6 struct MyLibrary *libbase);
 
 // filetypes
