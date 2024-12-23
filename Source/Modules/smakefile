@@ -226,10 +226,10 @@ modinitmffp.c: modinit.c
     copy modinit.c CLONE modinitmffp.c FORCE
 
 $(OBJ)libinitmffp.o: libinitmffp.c
-    sc libinitmffp.c $(SCFLAGS) math=ffp globalsymboltable=sc:include/include30ffp.gst objname $@
+    sc libinitmffp.c $(SCFLAGS) math=ffp globalsymboltable=include:osffp.gst objname $@
 
 $(SOBJ)modinitmffp.o: modinitmffp.c
-    sc modinitmffp.c $(SCFLAGS) math=ffp globalsymboltable=sc:include/include30ffp.gst objname $@
+    sc modinitmffp.c $(SCFLAGS) math=ffp globalsymboltable=include:osffp.gst objname $@
 
 #########################################################################
 
@@ -399,7 +399,7 @@ sc sd
 #########################################################################
 
 $(OBJ)diskinfo.o: diskinfo.c
-	sc $*.c $(SCFLAGS) math=ffp globalsymboltable=sc:include/include30ffp.gst objname $@
+	sc $*.c $(SCFLAGS) math=ffp globalsymboltable=include:osffp.gst objname $@
 
 $(BIN)diskinfo.gfmmodule: $(STDOBJS) $(DISKINFOOBJS)
 	slink with lib:utillib.with with <<
