@@ -332,6 +332,9 @@ BOOL environment_open(Cfg_Environment *env,char *name,BOOL first,APTR prog)
 	// Initialise progress
 	SetProgressWindowTags(prog,PW_FileCount,1,PW_FileNum,1,TAG_END);
 
+	// Set library locale flags
+	SetLocaleFlags(env->env->settings.date_flags, env->env->settings.date_format);
+
 	// Set library flag for 'Move AppIcons to Tools Menu'
 	SetLibraryFlags((env->env->display_options&DISPOPTF_SHIFT_APPICONS)?LIBDF_REDIRECT_TOOLS:0,LIBDF_REDIRECT_TOOLS);
 
