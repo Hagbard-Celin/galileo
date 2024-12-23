@@ -333,7 +333,7 @@ UWORD __asm __saveds L_GetLocaleSettings(register __d0 UBYTE type, register __a6
 
     // Get data pointer
     data=(struct LibData *)libbase->ml_UserData;
-    
+
     // Gat flags or dateformat
     if (!type)
 	return data->locale_flags;

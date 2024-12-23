@@ -52,11 +52,11 @@ For more information on Directory Opus for Windows please see:
 
 struct MyLibrary
 {
-        struct             Library ml_Lib;
-        ULONG              ml_SegList;
-        ULONG              ml_Flags;
-        APTR               ml_ExecBase; /* pointer to exec base  */
-        ULONG              ml_UserData;
+	struct             Library ml_Lib;
+	ULONG              ml_SegList;
+	ULONG              ml_Flags;
+	APTR               ml_ExecBase; /* pointer to exec base  */
+	ULONG              ml_UserData;
 };
 
 struct LibData
@@ -83,8 +83,8 @@ struct LibData
 	ULONG			error_wait;
 
 	struct GalileoLocale	locale;
-	USHORT			date_format;
-	USHORT			locale_flags;
+	UWORD			date_format;
+	UWORD			locale_flags;
 
 	struct ListLock		semaphores;
 
