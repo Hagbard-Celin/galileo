@@ -4,6 +4,7 @@ XADDIR      = xadbrowser/
 FTPDIR      = ftp/
 
 STDOBJS     =   $(OBJ)libinit.o $(OBJ)lsprintf.o
+FFPOBJS     =   $(OBJ)libinitmffp.o $(OBJ)lsprintf.o
 
 SHOWOBJS    =   $(OBJ)show.o $(OBJ)show_data.o $(OBJ)show_strings.o
 SHOWVER     =       0
@@ -19,7 +20,7 @@ MISCREV     =       1
 
 ICONOBJS    =   $(OBJ)icon.o $(OBJ)icon_data.o $(OBJ)icon_strings.o
 ICONVER     =       0
-ICONREV     =       17
+ICONREV     =       1
 
 FORMATOBJS  =   $(OBJ)format.o $(OBJ)format_data.o $(OBJ)format_strings.o
 FORMATVER   =       0
@@ -147,7 +148,7 @@ STRINGS = cleanup.strings debug.strings diskcopy.strings diskinfo.strings filety
      pathformat.strings play.strings print.strings read.strings recyclebin.strings show.strings themes.strings \
      update.strings $(FTPDIR)ftp.strings $(CONFIGDIR)config.strings $(XADDIR)XADbrowser.strings
 
-OBJS1 = $(STDOBJS) $(SHOWOBJS) $(PLAYOBJS) $(MISCOBJS) $(ICONOBJS) $(FORMATOBJS) $(DISKCOPYOBJS) \
+OBJS1 = $(STDOBJS) $(FFPOBJS) $(SHOWOBJS) $(PLAYOBJS) $(MISCOBJS) $(ICONOBJS) $(FORMATOBJS) $(DISKCOPYOBJS) \
 	$(READOBJS) $(JOINOBJS) $(PRINTOBJS) $(LISTFORMATOBJS) $(DISKINFOOBJS) $(FIXICONSOBJS) \
 	$(THEMESOBJS) $(FILETYPEOBJS) $(RECYCLEBINOBJS) $(ICONCLOCKOBJS) \
 	$(UPDATEOBJS) $(CLEANUPOBJS) $(ABOUTOBJS) $(PATHFORMATOBJS)
@@ -160,6 +161,7 @@ OBJS3 = $(CONFIGOBJS)
 #		ftp/ftp.strings ftp.gfmmodule \
 
 all:    modules_pragmas.h \
+	$(BIN)galileoconfig.gfmmodule \
 	$(BIN)show.gfmmodule \
 	$(BIN)play.gfmmodule \
 	$(BIN)misc.gfmmodule \
@@ -181,7 +183,6 @@ all:    modules_pragmas.h \
 	$(BIN)pathformat.gfmmodule \
 	$(SBIN)iconclock.gfmmodule \
 	$(CONFIGDIR)galileoconfig_pragmas.h \
-	$(BIN)galileoconfig.gfmmodule \
 	$(BIN)XADbrowser.gfmmodule \
 	modinit
 
