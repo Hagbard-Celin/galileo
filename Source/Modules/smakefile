@@ -94,7 +94,6 @@ FTPVER 	    =  0
 FTPREV      =  1
 
 CONFIGMYOBJS = $(OBJ)$(CONFIGDIR)config_drag.o \
-	$(OBJ)$(CONFIGDIR)config_settings.o \
 	$(OBJ)$(CONFIGDIR)config_environment.o $(OBJ)$(CONFIGDIR)config_environment_data.o \
 	$(OBJ)$(CONFIGDIR)config_environment_lister.o \
 	$(OBJ)$(CONFIGDIR)config_environment_desktop.o \
