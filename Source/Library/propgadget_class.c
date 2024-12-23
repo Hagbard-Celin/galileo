@@ -50,7 +50,7 @@ ULONG __asm __saveds propgadget_dispatch(register __a0 Class *cl,
     ULONG ret = NULL;
     BOOL vert = 0;
 
-    if (obj)
+    if (obj && msg->MethodID != OM_NEW)
     {
 	data = INST_DATA(cl,obj);
 	vert = (data->Flags & GPROPG_FREEVERT)?TRUE:FALSE;
