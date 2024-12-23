@@ -38,12 +38,6 @@ For more information on Directory Opus for Windows please see:
 #include "galileofmlib.h"
 #include "boopsi.h"
 
-/*
-APTR __stdargs my_NewObject(
-	Class *class,
-	UBYTE *classid,Tag tag,...);
-*/
-
 // Initialise a BOOPSI class
 Class *init_class(
 	struct LibData *data,
@@ -66,7 +60,7 @@ Class *init_class(
 	libs->LayersBase=LayersBase;
 	libs->CxBase=CxBase;
 #ifdef RESOURCE_TRACKING
-    libs->ResTrackBase=ResTrackBase;
+	libs->ResTrackBase=ResTrackBase;
 #endif
 	libs->data=data;
 
@@ -152,7 +146,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 				GA_Immediate,TRUE,
 				GA_FollowMouse,TRUE,
 				GA_RelVerify,TRUE,
-                GA_RightBorder,TRUE,
+				GA_RightBorder,TRUE,
 				PGA_Freedom,FREEVERT,
 				PGA_NewLook,TRUE,
 				PGA_Borderless,TRUE,
@@ -175,7 +169,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 				GA_Height,image[1]->Height,
 				GA_Immediate,TRUE,
 				GA_RelVerify,TRUE,
-                GA_RightBorder,TRUE,
+				GA_RightBorder,TRUE,
 				(flags&SCROLL_NOIDCMP)?TAG_IGNORE:ICA_TARGET,ICTARGET_IDCMP,
 				TAG_END))) return 0;
 		DoMethod((Object *)gadget,OM_ADDTAIL,list);
@@ -192,7 +186,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 				GA_Height,image[0]->Height,
 				GA_Immediate,TRUE,
 				GA_RelVerify,TRUE,
-                GA_RightBorder,TRUE,
+				GA_RightBorder,TRUE,
 				(flags&SCROLL_NOIDCMP)?TAG_IGNORE:ICA_TARGET,ICTARGET_IDCMP,
 				TAG_END))) return 0;
 		DoMethod((Object *)gadget,OM_ADDTAIL,list);
@@ -213,7 +207,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 				GA_Immediate,TRUE,
 				GA_FollowMouse,TRUE,
 				GA_RelVerify,TRUE,
-                GA_BottomBorder,TRUE,
+				GA_BottomBorder,TRUE,
 				PGA_Freedom,FREEHORIZ,
 				PGA_NewLook,TRUE,
 				PGA_Borderless,TRUE,
@@ -236,7 +230,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 				GA_Height,window->BorderBottom,
 				GA_Immediate,TRUE,
 				GA_RelVerify,TRUE,
-                GA_BottomBorder,TRUE,
+				GA_BottomBorder,TRUE,
 				(flags&SCROLL_NOIDCMP)?TAG_IGNORE:ICA_TARGET,ICTARGET_IDCMP,
 				TAG_END))) return 0;
 		DoMethod((Object *)gadget,OM_ADDTAIL,list);
@@ -253,7 +247,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 				GA_Height,window->BorderBottom,
 				GA_Immediate,TRUE,
 				GA_RelVerify,TRUE,
-                GA_BottomBorder,TRUE,
+				GA_BottomBorder,TRUE,
 				(flags&SCROLL_NOIDCMP)?TAG_IGNORE:ICA_TARGET,ICTARGET_IDCMP,
 				TAG_END))) return 0;
 		DoMethod((Object *)gadget,OM_ADDTAIL,list);
@@ -298,16 +292,6 @@ void __asm __saveds L_BOOPSIFree(register __a0 struct List *list)
 		DisposeObject(object);
 	NewList(list);
 }
-
-/*
-// varargs NewObject
-APTR __stdargs my_NewObject(
-	Class *class,
-	UBYTE *classid,Tag tag,...)
-{
-	return NewObjectA(class,classid,(struct TagItem *)&tag);
-}
-*/
 
 // Create a gadget in the window title bar
 struct Gadget *__asm __saveds L_CreateTitleGadget(
