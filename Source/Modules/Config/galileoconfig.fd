@@ -3,7 +3,6 @@
 ##bias 30
 *
 ##public
-Config_Settings(env,screen,ipc,mainipc,name)(a0/a1/a2/a3,d0)
 Config_Environment(env,screen,table,ipc,mainipc,alloc,change,name,scripts)(a0/a1/a2/a3/a4,d0,a5,d1/d2)
 Config_Buttons(bank,ipc,owner,screen,cmdlist)(a0/a1/a2/a3,d0)
 ConvertConfig(name,screen,owner)(a0/a1/a2)
