@@ -1183,19 +1183,6 @@ $(OBJ)config/config_drag.o: config/config.strings config/enums.h
 $(OBJ)config/config_drag.o: config/config_data.h config/function_export.h
 $(OBJ)config/config_drag.o: config/function_editor.h config/select_colours.h
 $(OBJ)config/config_drag.o: config/button_editor.h
-$(OBJ)config/config_settings.o: config/config_settings.c config/config_lib.h
-$(OBJ)config/config_settings.o: /Library/galileofmbase.h
-$(OBJ)config/config_settings.o: /Include/galileo/os.h
-$(OBJ)config/config_settings.o: /Program/galileo_config.h
-$(OBJ)config/config_settings.o: /Library/galileofmpragmas.h
-$(OBJ)config/config_settings.o: config/galileoconfig.h
-$(OBJ)config/config_settings.o: config/galileoconfig_pragmas.h
-$(OBJ)config/config_settings.o: config/config.strings config/enums.h
-$(OBJ)config/config_settings.o: config/config_data.h config/function_export.h
-$(OBJ)config/config_settings.o: config/function_editor.h
-$(OBJ)config/config_settings.o: config/select_colours.h
-$(OBJ)config/config_settings.o: config/button_editor.h /Modules/modules.h
-$(OBJ)config/config_settings.o: modules_pragmas.h
 $(OBJ)config/config_environment.o: config/config_environment.c config/config_lib.h
 $(OBJ)config/config_environment.o: /Library/galileofmbase.h
 $(OBJ)config/config_environment.o: /Include/galileo/os.h
