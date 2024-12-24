@@ -31,14 +31,14 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
 
 // Show info on backdrop objects
-void backdrop_info(BackdropInfo *info,BOOL disk,BackdropObject *icon)
+void backdrop_info(BackdropInfo *info,BackdropObject *icon)
 {
 	BackdropObject *object;
 
@@ -75,7 +75,6 @@ void backdrop_info(BackdropInfo *info,BOOL disk,BackdropObject *icon)
 
 			// Other
 			else
-			if (!disk || object->type==BDO_DISK)
 			{
 				BPTR old,lock;
 
@@ -87,8 +86,8 @@ void backdrop_info(BackdropInfo *info,BOOL disk,BackdropObject *icon)
 
 					// Show info
 					misc_startup(
-						(disk)?"galileo_disk_info":"galileo_icon_info",
-						(disk)?MENU_ICON_DISKINFO:MENU_ICON_INFO,
+						"galileo_icon_info",
+						MENU_ICON_INFO,
 						info->window,
 						(object->type==BDO_DISK)?":":object->name,
 						0);

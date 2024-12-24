@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -539,7 +539,6 @@ static ULONG
 		WINDOW_BACKDROP|WINDOW_LISTER_ICONS|WINDOW_GROUP,	MENU_ICON_RESET,
 		WINDOW_ALL,											MENU_ICON_RENAME,
 		WINDOW_BACKDROP,									MENU_ICON_FORMAT,
-		WINDOW_BACKDROP|WINDOW_LISTER|WINDOW_LISTER_ICONS,	MENU_ICON_DISKINFO,
 		WINDOW_ALL,											MENU_ICON_DELETE,
 
 		WINDOW_LISTER|WINDOW_LISTER_ICONS,					MENU_OPEN_PARENT,

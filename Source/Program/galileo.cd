@@ -753,9 +753,6 @@ Rename...
 MSG_ICON_FORMAT (//)
 Format Disk...
 ;
-MSG_ICON_DISKINFO (//)
-Disk Information...
-;
 MSG_ICON_UNSNAPSHOT_MENU (//)
 Un-Snapshot
 ;

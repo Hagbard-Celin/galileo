@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -292,7 +292,7 @@ BOOL backdrop_stop_drag(BackdropInfo *);
 BOOL backdrop_check_deadlocks(BackdropInfo *);
 void backdrop_show_drag(BackdropInfo *,BackdropObject *,short,short);
 void backdrop_check_pos(BackdropInfo *);
-void backdrop_info(BackdropInfo *,BOOL,BackdropObject *);
+void backdrop_info(BackdropInfo *,BackdropObject *);
 void backdrop_snapshot(BackdropInfo *,BOOL,BOOL,BackdropObject *);
 void backdrop_select_all(BackdropInfo *,short);
 BOOL backdrop_cleanup(BackdropInfo *,short,USHORT);

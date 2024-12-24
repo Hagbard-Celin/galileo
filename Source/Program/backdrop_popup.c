@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -604,7 +604,7 @@ BOOL backdrop_popup(
 			case MENU_ICON_INFO:
 
 				// Show information
-				backdrop_info(info,0,object);
+				backdrop_info(info,object);
 				break;
 
 
@@ -640,13 +640,6 @@ BOOL backdrop_popup(
 			case MENU_ICON_FORMAT:
 				backdrop_format(info,object);
 				break;
-
-
-			// DiskInfo
-			case MENU_ICON_DISKINFO:
-				backdrop_info(info,1,object);
-				break;
-
 
 			// Delete
 			case MENU_ICON_DELETE:
@@ -1825,9 +1818,6 @@ MatchHandle *popup_build_icon_menu(BackdropInfo *info,char *filename,BackdropObj
 			MSG_ICON_FORMAT,
 			MENU_ICON_FORMAT,
 			(flags&(BPF_NOFORMAT|BPF_WRITEPROT))?POPUPF_DISABLED:assign);
-
-		// Disk information
-		PopUpNewItem(menu,MSG_ICON_DISKINFO,MENU_ICON_DISKINFO,bad);
 	}
 
 	// Not an AppIcon or a Group?

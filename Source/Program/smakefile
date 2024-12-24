@@ -14,7 +14,7 @@ OBJS2 = $(OBJ)graphics.o $(OBJ)misc.o $(OBJ)misc_proc.o $(OBJ)dates.o $(OBJ)link
  $(OBJ)status_text.o $(OBJ)scripts.o $(OBJ)buffers.o $(OBJ)buffers_util.o $(OBJ)buffers_sort.o\
  $(OBJ)buffers_reselect.o $(OBJ)filetypes.o $(OBJ)filetypes_proc.o $(OBJ)search_data.o\
  $(OBJ)lister.o $(OBJ)lister_data.o $(OBJ)lister_proc.o $(OBJ)lister_idcmp.o $(OBJ)lister_function.o\
- $(OBJ)lister_window.o $(OBJ)lister_diskinfo.o $(OBJ)lister_display.o $(OBJ)lister_busy.o\
+ $(OBJ)lister_window.o $(OBJ)lister_display.o $(OBJ)lister_busy.o\
  $(OBJ)lister_title.o $(OBJ)lister_activate.o $(OBJ)lister_buffers.o $(OBJ)lister_dir.o\
  $(OBJ)lister_show.o $(OBJ)lister_toolbar.o $(OBJ)lister_drop.o $(OBJ)lister_icons.o\
  $(OBJ)lister_progress.o $(OBJ)lister_clip.o $(OBJ)lister_menus.o $(OBJ)lister_hotname.o\
@@ -1201,23 +1201,6 @@ $(OBJ)lister_window.o: groups.h help.h scripts.h start_menu.h position.h
 $(OBJ)lister_window.o: galileodata.h palette_routines.h envoy.h notify.h
 $(OBJ)lister_window.o: graphics.h file_select.h window_activate.h cleanup.h
 $(OBJ)lister_window.o: icons.h menu_data.h tile.h protos.h text.h callback.h
-$(OBJ)lister_diskinfo.o: lister_diskinfo.c galileofm.h /Include/galileo/os.h
-$(OBJ)lister_diskinfo.o: /Library/galileofmbase.h /Program/galileo_config.h
-$(OBJ)lister_diskinfo.o: /Library/galileofmpragmas.h
-$(OBJ)lister_diskinfo.o: /Modules/Config/galileoconfig.h
-$(OBJ)lister_diskinfo.o: /Modules/Config/galileoconfig_pragmas.h
-$(OBJ)lister_diskinfo.o: main_commands.h galileo.strings function_select.h
-$(OBJ)lister_diskinfo.o: pattern.h toolbar.h display.h reselect.h lister.h
-$(OBJ)lister_diskinfo.o: popup.h buttons.h dirlist.h app_msg.h
-$(OBJ)lister_diskinfo.o: function_launch.h function_protos.h function_data.h
-$(OBJ)lister_diskinfo.o: config.h environment.h misc.h rexx.h requesters.h
-$(OBJ)lister_diskinfo.o: file_op.h filetypes.h buffers.h path_routines.h
-$(OBJ)lister_diskinfo.o: dates.h links.h cx.h wb.h backdrop.h desktop.h
-$(OBJ)lister_diskinfo.o: groups.h help.h scripts.h start_menu.h position.h
-$(OBJ)lister_diskinfo.o: galileodata.h palette_routines.h envoy.h notify.h
-$(OBJ)lister_diskinfo.o: graphics.h file_select.h window_activate.h cleanup.h
-$(OBJ)lister_diskinfo.o: icons.h menu_data.h tile.h protos.h text.h
-$(OBJ)lister_diskinfo.o: callback.h
 $(OBJ)lister_display.o: lister_display.c galileofm.h /Include/galileo/os.h
 $(OBJ)lister_display.o: /Library/galileofmbase.h /Program/galileo_config.h
 $(OBJ)lister_display.o: /Library/galileofmpragmas.h

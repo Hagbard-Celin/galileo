@@ -507,16 +507,13 @@ void __saveds misc_proc(void)
 
 			// Show info on an object
 			case MENU_ICON_INFO:
-			case MENU_ICON_DISKINFO:
 				{
 					struct Library *ModuleBase;
 					struct List list;
 					struct Node node;
 
 					// Get icon module
-					if (ModuleBase=OpenModule(
-						(startup->command==MENU_ICON_DISKINFO)?
-							"diskinfo.gfmmodule":"icon.gfmmodule"))
+					if (ModuleBase=OpenModule("icon.gfmmodule"))
 					{
 						long flags=0;
 

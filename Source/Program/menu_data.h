@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -117,7 +117,6 @@ enum
 	MENU_TOOL_MENU,
 	MENU_LISTER_LOCK_POS,
 	MENU_LISTER_SNAPSHOT,
-	MENU_ICON_DISKINFO,
 	MENU_LISTER_ICONIFY,
 
 	MENU_ICON_MENU,

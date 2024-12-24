@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -1370,7 +1370,7 @@ BOOL backdrop_group_do_function(GroupData *group,ULONG id,struct MenuItem *item)
 
 		// Information
 		case MENU_ICON_INFO:
-			backdrop_info(group->info,0,0);
+			backdrop_info(group->info,0);
 			break;
 
 

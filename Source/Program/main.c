@@ -32,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -1083,7 +1083,6 @@ void startup_init_commands()
 	def_function_format=new_default_function("format",global_memory_pool);
 	def_function_diskcopy=new_default_function("diskcopy",global_memory_pool);
 	def_function_select=new_default_function("select",global_memory_pool);
-	def_function_diskinfo=new_default_function("diskinfo",global_memory_pool);
 	def_function_devicelist=new_default_function("devicelist",global_memory_pool);
 	def_function_cachelist=new_default_function("cachelist",global_memory_pool);
 	def_function_all=new_default_function("all",global_memory_pool);

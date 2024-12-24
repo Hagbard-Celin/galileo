@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -91,7 +91,6 @@ extern Cfg_Function	*def_function_iconinfo;
 extern Cfg_Function	*def_function_format;
 extern Cfg_Function	*def_function_diskcopy;
 extern Cfg_Function	*def_function_select;
-extern Cfg_Function	*def_function_diskinfo;
 extern Cfg_Function	*def_function_devicelist;
 extern Cfg_Function	*def_function_devicelist_full;
 extern Cfg_Function	*def_function_devicelist_brief;

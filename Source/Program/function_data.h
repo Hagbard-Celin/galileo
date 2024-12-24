@@ -32,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -68,7 +68,6 @@ enum
 	FUNC_DEVICELIST,
 	FUNC_DIRTREE,
 	FUNC_DISKCOPY,
-	FUNC_DISKINFO,
 	FUNC_ENCRYPT,
 	FUNC_MENCRYPT,
 	FUNC_HUNT,

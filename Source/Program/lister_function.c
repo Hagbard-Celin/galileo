@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -247,18 +247,11 @@ int lister_do_function(Lister *lister,ULONG func)
 
 			// Icon view?
 			if (lister->flags&LISTERF_VIEW_ICONS)
-				backdrop_info(lister->backdrop_info,0,0);
+				backdrop_info(lister->backdrop_info,0);
 
 			// Normal files
 			else function_launch_quick(FUNCTION_RUN_FUNCTION,def_function_iconinfo,lister);
 			break;
-
-
-		// Icon information
-		case MENU_ICON_DISKINFO:
-			lister_diskinfo(lister);
-			break;
-
 
 		// Lock position
 		case MENU_LISTER_LOCK_POS:

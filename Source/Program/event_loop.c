@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -1461,15 +1461,8 @@ BOOL menu_process_event(
 
 		// Info on backdrop objects
 		case MENU_ICON_INFO:
-			backdrop_info(GUI->backdrop,0,0);
+			backdrop_info(GUI->backdrop,0);
 			break;
-
-
-		// Disk info
-		case MENU_ICON_DISKINFO:
-			backdrop_info(GUI->backdrop,1,0);
-			break;
-
 
 		// Select all
 		case MENU_ICON_SELECT_ALL:

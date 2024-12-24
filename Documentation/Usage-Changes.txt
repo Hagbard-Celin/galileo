@@ -44,6 +44,9 @@ Command Changes:
 
 - FinishSection is removed. see note in "Function Editor Changes" above.
 
+- DiskInfo is removed and its functionallity integrated into IconInfo
+  command.
+
 LoadGB Changes:
 
 - The qualifier for fallback to LoadWB is canged to the Amiga keys.

@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -114,7 +114,6 @@ MenuData
 		{NM_ITEM,MENU_ICON_RENAME,MSG_ICON_RENAME,MENUFLAG_USE_SEQ|MENUFLAG_MAKE_SEQ('R')},
 		{NM_ITEM,MENU_ICON_DELETE,MSG_DELETE,0},
 		{NM_ITEM,MENU_ICON_FORMAT,MSG_ICON_FORMAT,0},
-		{NM_ITEM,MENU_ICON_DISKINFO,MSG_ICON_DISKINFO,0},
 
 		// Buttons
 		{NM_TITLE,0,MSG_BUTTONS_MENU,0},
@@ -217,7 +216,6 @@ MenuHelp
 		{MENU_ICON_RENAME,			"Rename"},
 		{MENU_ICON_DELETE,			"Delete"},
 		{MENU_ICON_FORMAT,			"Format"},
-		{MENU_ICON_DISKINFO,		"Disk Information"},
 		{MENU_ICON_COPY,			"Copy"},
 		{MENU_ICON_COPY_RAM,		"Copy"},
 		{MENU_ICON_COPY_DF0,		"Copy"},

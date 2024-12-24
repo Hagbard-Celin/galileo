@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -688,8 +688,6 @@ typedef struct
 	char			new_name[32];
 	struct DateStamp	date;
 } devname_change;
-
-void lister_diskinfo(Lister *lister);
 
 BOOL lister_check_valid(Lister *lister);
 
