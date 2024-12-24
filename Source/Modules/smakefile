@@ -619,7 +619,7 @@ $(BIN)galileoconfig.gfmmodule: $(CONFIGOBJS)
 define __ctype=___ctype
 libprefix _L_
 libfd $(CONFIGDIR)galileoconfig.fd
-$(ADDSYM) from lib:libent.o lib:libinit.o $(CONFIGOBJS) $(OBJ)lsprintf.o
+$(ADDSYM) from lib:libent.o lib:libinit.o $(CONFIGOBJS)
 to $(BIN)galileoconfig.gfmmodule
 lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(CONFIGVER)
@@ -683,6 +683,9 @@ configclean:
 $(OBJ)libinit.o: libinit.c modules_lib.h /Library/galileofmbase.h
 $(OBJ)libinit.o: /Include/galileo/os.h /Program/galileo_config.h
 $(OBJ)libinit.o: /Library/galileofmpragmas.h modules.h modules_pragmas.h
+$(OBJ)libinitmffp.o: libinitmffp.c modules_lib.h /Library/galileofmbase.h
+$(OBJ)libinitmffp.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)libinitmffp.o: /Library/galileofmpragmas.h modules.h modules_pragmas.h
 $(OBJ)show.o: show.c show.h show.strings modules_lib.h
 $(OBJ)show.o: /Library/galileofmbase.h /Include/galileo/os.h
 $(OBJ)show.o: /Program/galileo_config.h /Library/galileofmpragmas.h modules.h
@@ -1723,6 +1726,7 @@ $(SOBJ)modinit.o: //SDK/include/galileofm/clipboard.h
 $(SOBJ)modinit.o: //SDK/include/galileofm/images.h
 $(SOBJ)modinit.o: //SDK/include/galileofm/iff.h
 $(SOBJ)modinit.o: //SDK/include/galileofm/misc.h
+$(SOBJ)modinit.o: //SDK/include/galileofm/64bit.h
 $(SOBJ)modinit.o: //SDK/include/galileofm/progress.h
 $(SOBJ)modinit.o: //SDK/include/galileofm/appicon.h
 $(SOBJ)modinit.o: //SDK/include/galileofm/drag.h
@@ -1751,6 +1755,7 @@ $(SOBJ)modinitmffp.o: //SDK/include/galileofm/clipboard.h
 $(SOBJ)modinitmffp.o: //SDK/include/galileofm/images.h
 $(SOBJ)modinitmffp.o: //SDK/include/galileofm/iff.h
 $(SOBJ)modinitmffp.o: //SDK/include/galileofm/misc.h
+$(SOBJ)modinitmffp.o: //SDK/include/galileofm/64bit.h
 $(SOBJ)modinitmffp.o: //SDK/include/galileofm/progress.h
 $(SOBJ)modinitmffp.o: //SDK/include/galileofm/appicon.h
 $(SOBJ)modinitmffp.o: //SDK/include/galileofm/drag.h
