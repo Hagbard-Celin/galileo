@@ -1000,6 +1000,25 @@ typedef struct
 #define ID_SFS0_HARD		    0x53455300
 #define ID_SFS2_HARD		    0x53455302
 #define ID_ENVOY_DISK		    0x444F5380
+#define ID_CDHFS_DISK		    0x43443030
+#define ID_CDISO_DISK		    0x43443031
+#define ID_MUFS_INTER_FFS_DISK	    0x6d754653
+#define ID_MUFS_DOS_DISK	    0x6d754600
+#define ID_MUFS_FFS_DISK	    0x6d754601
+#define ID_MUFS_INTER_OFS	    0x6d754602
+#define ID_MUFS_INTER2_FFS_DISK	    0x6d754603
+#define ID_MUFS_FASTDIR_DOS_DISK    0x6d754604
+#define ID_MUFS_FASTDIR_FFS_DISK    0x6d754605
+#define ID_PFS2_DISK		    0x50465302
+#define ID_PFS3_DISK		    0x50465303
+#define ID_PDS2_DISK		    0x50445300
+#define ID_PDS3_DISK		    0x50445303
+#define ID_MUPFS_DISK		    0x6d755046
+#define ID_AMICDFS_DISK		    0x43444653
+#define ID_ASIMCDFS_DISK	    0x662dabac
+#define ID_CDDA_DISK		    0x43444441
+#define ID_FAT95_DISK		    0x46415401
+#define ID_BFFS_DISK		    0x42464653
 
 DiskHandle *OpenDisk(char *,struct MsgPort *);
 void CloseDisk(DiskHandle *);

@@ -285,19 +285,23 @@ sc sd
 <
 
 #########################################################################
+$(OBJ)icon.o: icon.c
+	sc $*.c $(SCFLAGS) math=ffp globalsymboltable=include:osffp.gst objname $@
 
-$(BIN)icon.gfmmodule: $(STDOBJS) $(ICONOBJS)
+$(BIN)icon.gfmmodule: $(FFPOBJS) $(ICONOBJS)
 	slink with lib:utillib.with with <<
 define __ctype=___ctype
 libprefix _L_
 libfd modules.fd
-$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(ICONOBJS) 
+$(ADDSYM) from lib:libent.o lib:libinit.o $(FFPOBJS) $(ICONOBJS)
 to $(BIN)icon.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
+lib lib:scmffp.lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(ICONVER)
 librevision $(ICONREV)
 $(STRIPDEBUG) noicons
 sc sd 
+DEFINE @__chkabort=@__dummy
+DEFINE @_CXBRK=@__dummy
 <
 
 #########################################################################

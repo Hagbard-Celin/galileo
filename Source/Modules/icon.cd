@@ -6,6 +6,9 @@
 MSG_ICON_TITLE (1000//)
 %s : %s (%s)
 ;
+MSG_ICON_FILE_SIZE (//)
+Info-file Size:
+;
 MSG_ICON_SAVE (//)
 _Save
 ;
@@ -18,14 +21,71 @@ _Cancel
 MSG_BLOCKS (//)
 Blocks:
 ;
+MSG_BLOCKS_POSTFIX (//)
+ blocks
+;
 MSG_BYTES (//)
 Bytes:
+;
+MSG_IMG_SIZE (//)
+Pixels:
+;
+MSG_COLORS (//)
+Colors:
+;
+MSG_MORE (//)
+More..
+;
+MSG_INFO_FILE_MORE (//)
+.info file details
+;
+MSG_DEV_NAME (//)
+on
+;
+MSG_DEVICE (//)
+Device:
+;
+MSG_STATE (//)
+State:
+;
+MSG_ERRORS (//)
+Errors:
+;
+MSG_FILESYSTEM (//)
+Filesystem:
+;
+MSG_DEFAULT_TOOL (//)
+Defau_lt Tool:
+;
+MSG_RAM_DEVICE (//)
+n/a
+;
+MSG_HANDLER (//)
+Handler:
+;
+MSG_UNIT (//)
+unit
+;
+MSG_CAPACITY (//)
+Total:
+;
+MSG_BLOCKSIZE (//)
+Blocksize:
+;
+MSG_BYTES_POSTFIX (//)
+ bytes
 ;
 MSG_STACK (//)
 St_ack:
 ;
+MSG_VOLNAME (//)
+_Name:
+;
+MSG_TYPE (//)
+Type:
+;
 MSG_LAST_CHANGED (//)
-Last Changed:
+Changed:
 ;
 MSG_COMMENT (//)
 Co_mment:
@@ -39,9 +99,6 @@ _New
 MSG_DELETE (//)
 _Delete
 ;
-MSG_DEFAULT_TOOL (//)
-Defau_lt Tool:
-;
 MSG_SIZE (//)
 Size:
 ;
@@ -51,14 +108,8 @@ Used:
 MSG_FREE (//)
 Free:
 ;
-MSG_FILE_SYSTEM (//)
-F.Sys:
-;
 MSG_CREATED (//)
 Created:
-;
-MSG_VOLUME_IS (//)
-Volume is
 ;
 MSG_ICON_DISK (//)
 Volume
@@ -99,6 +150,9 @@ Deletable
 MSG_VALIDATING (//)
 Validating
 ;
+MSG_READ_ONLY (//)
+Read Only
+;
 MSG_WRITE_PROTECTED (//)
 Read Only
 ;
@@ -108,52 +162,12 @@ Read/Write
 MSG_UNREADABLE (//)
 Unreadable
 ;
-MSG_OFS (//)
-OFS
-;
-MSG_FFS (//)
-FFS
-;
-MSG_IOFS (//)
-OFS (I)
-;
-MSG_IFFS (//)
-FFS (I)
-;
-MSG_COFS (//)
-OFS (C)
-;
-MSG_CFFS (//)
-FFS (C)
-;
-MSG_LOFS (//)
-OFS (L)
-;
-MSG_LFFS (//)
-FFS (L)
-;
-MSG_NDOS (//)
-Non-DOS
-;
-MSG_MSDOS (//)
-MS-DOS
-;
 MSG_UNKNOWN (//)
 ???
 ;
 ;
 MSG_ICONINFO_DESC (//)
 Show/edit icon information
-;
-;
-MSG_AFS (+2//)
-AFS
-;
-MSG_PFS (//)
-PFS
-;
-MSG_SFS (//)
-SFS
 ;
 ;
 MSG_SPECIAL_MENU (//)
@@ -175,8 +189,8 @@ from this icon. Are you sure?
 MSG_OK_CANCEL (//)
 Ok|Cancel
 ;
-MSG_LOCATION (//)
-Location:
+MSG_NAME (//)
+Name:
 ;
 ;
 MSG_ICON_GARBAGE (//)
@@ -230,11 +244,23 @@ Copy Both Images
 MSG_COPY_TOOLTYPES (//)
 Copy Tooltypes
 ;
+MSG_DEFICON_NEWICON (//)
+NewIcon (DefIcon)
+;
+MSG_DEFICON_OLDICON (//)
+Bitmap DefIcon
+;
+MSG_DEFICON_PALETTEMAPPED (//)
+Palette Mapped DefIcon
+;
 MSG_ICON_NEWICON (//)
 NewIcon
 ;
 MSG_ICON_OLDICON (//)
-Standard Icon
+Bitmap Icon
+;
+MSG_ICON_PALETTEMAPPED (//)
+Palette Mapped Icon
 ;
 MSG_ENTER_FUNCTION (//)
 Enter function to call icon editor\n(To use IconEdit you must\ntick the AppMessage box)
@@ -253,4 +279,116 @@ Icon has been modified.\nDo you wish to save it first?
 ;
 MSG_SORT (//)
 S_ort
+;
+;
+;
+; DOS types
+;
+MSG_DOSTYPE_0 (2000//)
+Old File System (DOS\\0)
+;
+MSG_DOSTYPE_1 (//)
+Fast File System (DOS\\1)
+;
+MSG_DOSTYPE_2 (//)
+Old File System International (DOS\\2)
+;
+MSG_DOSTYPE_3 (//)
+Fast File System International (DOS\\3)
+;
+MSG_DOSTYPE_4 (//)
+Old File System Directory Cache (DOS\\4)
+;
+MSG_DOSTYPE_5 (//)
+Fast File System Directory Cache (DOS\\5)
+;
+MSG_DOSTYPE_6 (//)
+Old File System Long Name (DOS\\6)
+;
+MSG_DOSTYPE_7 (//)
+Fast File System Long File Name (DOS\\7)
+;
+MSG_DOSTYPE_MSDOS (//)
+MS-DOS CrossDOS (FAT2)
+;
+MSG_DOSTYPE_AFSP (//)
+Ami-FileSafe Pro (AFS\\2)
+;
+MSG_DOSTYPE_AFSU (//)
+Ami-FileSafe User (AFS\\1)
+;
+MSG_DOSTYPE_AFSM (//)
+Ami-FileSafe Multi (muAF)
+;
+MSG_DOSTYPE_PFSF (//)
+PFS Floppy (PFS\\0)
+;
+MSG_DOSTYPE_PFSH (//)
+PFS Hard Drive (PFS\\1)
+;
+MSG_DOSTYPE_SFS0 (//)
+SFS Hard Drive (SFS\\0)
+;
+MSG_DOSTYPE_SFS2 (//)
+SFS Hard Drive (SFS\\2)
+;
+MSG_DOSTYPE_ENVOY (//)
+Envoy Network Volume (DOS\\x80)
+;
+MSG_DOSTYPE_CDHFS (//)
+CD-ROM High Sierra (CD00)
+;
+MSG_DOSTYPE_CDISO (//)
+CD-ROM ISO9660/Joliet (CD01)
+;
+MSG_DOSTYPE_MUFS_INTER_FFS (//)
+MultiUser File System FFS International (muFS)
+;
+MSG_DOSTYPE_MUFS_DOS (//)
+MultiUser File System OFS (muF\\0)
+;
+MSG_DOSTYPE_MUFS_FFS (//)
+MultiUser File System FFS (muF\\1)
+;
+MSG_DOSTYPE_MUFS_INTER_DOS (//)
+MultiUser File System OFS International (muF\\2)
+;
+MSG_DOSTYPE_MUFS_INTER2_FFS (//)
+MultiUser File System FFS International (muF\\3)
+;
+MSG_DOSTYPE_MUFS_FASTDIR_DOS (//)
+MultiUser File System OFS Directory Cache (muF\\4)
+;
+MSG_DOSTYPE_MUFS_FASTDIR_FFS (//)
+MultiUser File System FFS Directory Cache (muF\\5)
+;
+MSG_DOSTYPE_PFS2 (//)
+PFS 2 (PFS\\2)
+;
+MSG_DOSTYPE_PFS3 (//)
+PFS 3 (PFS\\3)
+;
+MSG_DOSTYPE_PDS2 (//)
+PFS 2, SCSIdirect (PDS\\2)
+;
+MSG_DOSTYPE_PDS3 (//)
+PFS 3, SCSIdirect (PDS\\2)
+;
+MSG_DOSTYPE_MUPFS (//)
+PFS, multiuser (muPS)
+;
+MSG_DOSTYPE_AMICDFS (//)
+CD-ROM AmiCDFS (CDFS)
+;
+MSG_DOSTYPE_ASIMCDFS (//)
+CD-ROM Asim CDFS (\\66\\2d\\ab\\ac)
+;
+MSG_DOSTYPE_CDDA (//)
+CD_AUDIO (CDDA)
+;
+MSG_DOSTYPE_FAT95 (//)
+Fat95 (FAT\\1)
+;
+MSG_DOSTYPE_BFFS (//)
+Berkeley Fast Filesystem (BFFS)
 ;
