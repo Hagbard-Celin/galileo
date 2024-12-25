@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -47,7 +47,7 @@ struct Library *ResTrackBase;
 ULONG callerid;
 #endif
 
-char *version="$VER: LoadDB 0.1 "__AMIGADATE__" ";
+char *version="$VER: LoadDB 0.2 "__AMIGADATE__" ";
 
 enum
 {

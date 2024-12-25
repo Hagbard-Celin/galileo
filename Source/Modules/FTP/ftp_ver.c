@@ -31,11 +31,11 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
-char *versionstring ="$VER: ftp.gfmmodule 0.1 (31.05.99)";
+char *versionstring ="$VER: ftp.gfmmodule 0.2 "__AMIGADATE__" ";
 
 /****************************************************************
 

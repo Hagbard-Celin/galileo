@@ -1,6 +1,6 @@
 #include "font.h"
 
-char *version="$VER: ViewFont 0.1 "__AMIGADATE__" ";
+char *version="$VER: ViewFont 0.2 "__AMIGADATE__" ";
 
 ConfigWindow
 	font_window={

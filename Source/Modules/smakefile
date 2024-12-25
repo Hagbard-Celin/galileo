@@ -8,75 +8,75 @@ FFPOBJS     =   $(OBJ)libinitmffp.o $(OBJ)lsprintf.o
 
 SHOWOBJS    =   $(OBJ)show.o $(OBJ)show_data.o $(OBJ)show_strings.o
 SHOWVER     =       0
-SHOWREV     =       1
+SHOWREV     =       2
 
 PLAYOBJS    =   $(OBJ)play.o $(OBJ)play_data.o $(OBJ)play_strings.o
 PLAYVER     =       0
-PLAYREV     =       1
+PLAYREV     =       2
 
 MISCOBJS    =   $(OBJ)misc.o $(OBJ)misc_data.o $(OBJ)misc_strings.o
 MISCVER     =       0
-MISCREV     =       1
+MISCREV     =       2
 
 ICONOBJS    =   $(OBJ)icon.o $(OBJ)icon_data.o $(OBJ)icon_strings.o
 ICONVER     =       0
-ICONREV     =       1
+ICONREV     =       2
 
 FORMATOBJS  =   $(OBJ)format.o $(OBJ)format_data.o $(OBJ)format_strings.o
 FORMATVER   =       0
-FORMATREV   =       1
+FORMATREV   =       2
 
 DISKCOPYOBJS    =   $(OBJ)diskcopy.o $(OBJ)diskcopy_data.o $(OBJ)diskcopy_strings.o
 DISKCOPYVER =       0
-DISKCOPYREV =       1
+DISKCOPYREV =       2
 
 READOBJS    =   $(OBJ)read.o $(OBJ)read_data.o $(OBJ)read_strings.o
 READVER     =       0
-READREV     =       1
+READREV     =       2
 
 JOINOBJS    =   $(OBJ)join.o $(OBJ)join_data.o $(OBJ)join_strings.o
 JOINVER     =       0
-JOINREV     =       1
+JOINREV     =       2
 
 PRINTOBJS   =   $(OBJ)print.o $(OBJ)print_data.o $(OBJ)print_strings.o
 PRINTVER    =       0
-PRINTREV    =       1
+PRINTREV    =       2
 
 LISTFORMATOBJS  =   $(OBJ)listerformat.o $(OBJ)listerformat_data.o $(OBJ)listerformat_strings.o
 LISTFORMATVER   =       0
-LISTFORMATREV   =       1
+LISTFORMATREV   =       2
 
 FIXICONSOBJS   =   $(OBJ)fixicons.o $(OBJ)fixicons_data.o $(OBJ)fixicons_strings.o
 FIXICONSVER    =   0
-FIXICONSREV    =   1
+FIXICONSREV    =   2
 
 THEMESOBJS    =   $(OBJ)themes.o $(OBJ)themes_data.o $(OBJ)themes_strings.o
 THEMESVER =       0
-THEMESREV =       1
+THEMESREV =       2
 
 ABOUTOBJS   =   $(OBJ)about.o $(OBJ)about_data.o
 ABOUTVER    =       0
-ABOUTREV    =       1
+ABOUTREV    =       2
 
 UPDATEOBJS  =   $(OBJ)update.o $(OBJ)update_data.o $(OBJ)update_strings.o
 UPDATEVER   =   0
-UPDATEREV   =   1
+UPDATEREV   =   2
 
 CLEANUPOBJS =   $(OBJ)cleanup.o $(OBJ)cleanup_data.o $(OBJ)cleanup_strings.o
 CLEANUPVER  =   0
-CLEANUPREV  =   1
+CLEANUPREV  =   2
 
 FILETYPEOBJS    =   $(OBJ)filetype.o $(OBJ)filetype_data.o $(OBJ)filetype_strings.o
 FILETYPEVER =       0
-FILETYPEREV =       1
+FILETYPEREV =       2
 
 RECYCLEBINOBJS  =   $(OBJ)recyclebin.o $(OBJ)recyclebin_data.o $(OBJ)recyclebin_strings.o
 RECYCLEBINVER   =   0
-RECYCLEBINREV   =   1
+RECYCLEBINREV   =   2
 
 ICONCLOCKOBJS   =   $(OBJ)iconclock.o $(OBJ)iconclock_data.o $(OBJ)iconclock_strings.o
 ICONCLOCKVER    =   0
-ICONCLOCKREV    =   1
+ICONCLOCKREV    =   2
 
 FTPMYOBJS   = $(OBJ)$(FTPDIR)ftp_ver.o  $(OBJ)$(FTPDIR)ftp_main.o $(OBJ)$(FTPDIR)ftp_lister.o \
 	      $(OBJ)$(FTPDIR)ftp_lister_list.o $(OBJ)$(FTPDIR)ftp_lister_xfer.o \
@@ -87,7 +87,7 @@ FTPMYOBJS   = $(OBJ)$(FTPDIR)ftp_ver.o  $(OBJ)$(FTPDIR)ftp_main.o $(OBJ)$(FTPDIR
 	
 FTPOBJS	    = $(OBJ)$(FTPDIR)ftp_module.o $(OBJ)$(FTPDIR)ftp_data.o $(OBJ)$(FTPDIR)ftp_strings.o $(FTPMYOBJS)
 FTPVER 	    =  0
-FTPREV      =  1
+FTPREV      =  2
 
 CONFIGMYOBJS = $(OBJ)$(CONFIGDIR)config_drag.o \
 	$(OBJ)$(CONFIGDIR)config_environment.o $(OBJ)$(CONFIGDIR)config_environment_data.o \
@@ -118,23 +118,23 @@ CONFIGMYOBJS = $(OBJ)$(CONFIGDIR)config_drag.o \
 
 CONFIGOBJS  = $(OBJ)$(CONFIGDIR)libinit.o $(OBJ)lsprintf.o $(OBJ)$(CONFIGDIR)config.o $(OBJ)$(CONFIGDIR)config_strings.o $(CONFIGMYOBJS)
 CONFIGVER   = 0
-CONFIGREV   = 1
+CONFIGREV   = 2
 
 
 XADMYOBJS   = $(OBJ)$(XADDIR)XADbrowser_progress.o
 
 XADOBJS     = $(OBJ)$(XADDIR)XADbrowser.o $(OBJ)$(XADDIR)XADbrowser_data.o $(OBJ)$(XADDIR)XADbrowser_strings.o $(XADMYOBJS)
 XADVER      = 0
-XADREV      = 1
+XADREV      = 2
 
 
 ENVOYOBJS   =   $(OBJ)envoy.o $(OBJ)envoy_data.o $(OBJ)envoy_strings.o
 ENVOYVER    =   0
-ENVOYREV    =   1
+ENVOYREV    =   2
 
 PATHFORMATOBJS = $(OBJ)pathformat.o $(OBJ)pathformat_data.o $(OBJ)pathformat_strings.o
 PATHFORMATVER  = 0
-PATHFORMATREV  = 1
+PATHFORMATREV  = 2
 
 MODINITOBJS = $(SOBJ)modinit.o $(SOBJ)modinitmffp.o
 

@@ -50,7 +50,7 @@ void free_locale_data(struct GalileoLocale *locale);
 
 static const struct TextAttr topaz_attr={"topaz.font",8,0,0};
 
-char *version="$VER: galileofm.library 0.1 "__AMIGADATE__" ";
+char *version="$VER: galileofm.library 0.2 "__AMIGADATE__" ";
 
 #ifdef RESOURCE_TRACKING
 ULONG callerid;

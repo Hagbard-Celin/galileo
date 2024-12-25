@@ -37,7 +37,7 @@ For more information on Directory Opus for Windows please see:
 
 #include "debug.h"
 
-char *version="$VER: debug.gfmmodule 0.1 "__AMIGADATE__"\0";
+char *version="$VER: debug.gfmmodule 0.2 "__AMIGADATE__"\0";
 
 int __asm __saveds L_Module_Entry(
 	register __a0 struct List *files,

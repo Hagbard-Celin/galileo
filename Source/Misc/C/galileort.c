@@ -31,14 +31,14 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "//Library/galileofmbase.h"
 #include "//Library/galileofmpragmas.h"
 
-char *version="$VER: GalileoRT 0.1 "__AMIGADATE__" ";
+char *version="$VER: GalileoRT 0.2 "__AMIGADATE__" ";
 
 void __stdargs __main(char *command)
 {

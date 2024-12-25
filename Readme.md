@@ -15,14 +15,26 @@ Secondly, another warning: The version numbers are set to 0 for a reason.
 There will be backward-compatibility breaking changes until the versions are
 bumped to 1.
 
-Also, I would have wanted to do more testing before this upload. But one of my
-backup disks died, so the upload was expedited in fear further data-loss. Thus
-not all parts of this fork have been tested further than that it compiles.
-This goes for the FTP and recyclebin module, among other parts.
+
+The current version has gone through substantially more testing than was the
+case with v0.1. But there are still parts that has not passed more than the
+the "it compiles" test. There might be dragons lurking in them dark corners.
 
 
-For a (almost) complete list of changes since version 5.82 see "ChangeLog.txt".
+For a almost complete list of changes since version 5.82 see "ChangeLog.txt".
 Some of the highlights are:
+
+v0.2:
+- Fixed build-system that actually works.
+- All known memory leaks removed.
+- Merged DiskInfo into IconInfo.
+- Redesigned IconInfo with multiple fixes/enhancements.
+- Fixed the "Discourage NewIcons" setting.
+- Fixed ScreenMode Workbench:Clone setting on WB2.x, and Workbench:Clone with
+  different screen-depth than WB, that I broke with my earlier fix for
+  Workbench:Clone sometimes failing to open a screen.
+
+v0.1:
 - Included XADopus renamed to XADbrowser. With lots of bugfixes and 
   enhancements. Now requires xadmaster.library version 13.0.
 - Plugged multiple memory leaks.
@@ -39,6 +51,7 @@ Some of the highlights are:
 
 
 Build instructions:
+(For v0.2 and later only, v0.1 had multiple errors in the build-system)
 
 For compiling, SAS/C 6.58 with y2kfix is required. Also, AmigaOS NDK 3.2 needs
 to be correctly installed/assigned.
@@ -53,35 +66,27 @@ With this in place, these are the steps to compile and install:
 
 1.  Unpack the Galileo_Source_<ver>.<rev>.lha to your preferred directory.
 
-1b. (Optional) Copy move the directory GalileoDist/Build to another location.
-    And change the variable "$builddir" in the script GalileoDist/buildme
+1b. (Optional) Copy move the directory "galileo/Build" to another location.
+    And change the variable "$builddir" in the script "galileo/buildme"
     accordingly.
 
-2.  Open a shell and cd to the GalileoDist directory at the location where you
-    extracted archive. For git-clones replace this with the repository-root
-    directory.
-
-2b. In v0.1 release archive there is an error in "Source/Program/smakefile"
-    and "Source/Misc/ViewFont/smakefile" where it tries to link with
-    "lib:galileofm.lib". This must be changed to "//SDK/lib/galileofm.lib"
-    and "///SDK/lib/galileofm.lib" respectively, or an assign must be made
-    with the command "assign lib: SDK/lib ADD".
+2.  Open a shell and cd to the "galileo" directory at the location where you
+    extracted archive.
 
 3.  Run the script "buildme".
 
-4.  Unpack "GalileoDist/Basedir.lha" to where you want the program installed.
+4.  Unpack "galileo/Basedir.lha" to where you want the program installed.
 
-5.  Copy the contents of "Build/Binary/" into the Galileo directory at install
+5.  Copy the contents of "Build/Binary/" into the "Galileo" directory at install
     location.
 
-5b. (Optional) Rename c:LoadWB to c:LoadWB_Old.
-    Copy <install_location>/Galileo/LoadGB to c:LoadWB.
-    Add "Assign Galileo: <install_location>/Galileo/" to s:User-Startup.
+5b. (Optional) Copy "<install_location>/Galileo/C/LoadGB" to "c:LoadGB".
+    Add "Assign Galileo: <install_location>/Galileo/" to "s:User-Startup".
+    Replace "LoadWB" with "LoadGB" at end of "s:startup-sequence".
 
 For building the SDK only replace the script in step 3 with
 "buildme Only SDK". This will fill/update the directories "SDK/source" and
-"SDK/lib" from the current source. Until v0.2 is tagged this is only
-supported for git-clones.
+"SDK/lib" from the current source.
 
 After installation you will have in your "Galilo/C" directory the command
 "IFFtoGalileo". This can be used to convert filetypes and button banks to/from

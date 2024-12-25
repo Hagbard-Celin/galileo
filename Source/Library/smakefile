@@ -1,6 +1,6 @@
 
 LIBVER = 0
-LIBREV = 1
+LIBREV = 2
 
 
 OBJS = $(OBJ)libinit.o $(OBJ)data.o $(OBJ)string_data.o \

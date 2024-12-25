@@ -1,7 +1,166 @@
-----------------------------
-Galileo - ChangeLog
-----------------------------
- 10-Dec-23 Hagbard Celine (ver 0.1 - initial GitHub upload)
+----------------------------------------
+Galileo - The Almost Complete ChangeLog
+----------------------------------------
+
+ 25-Dec-24 Hagbard Celine v0.2 - Buildable Beta
+
+      - Fixed multiple errors in the build script and smakefiles that all
+        added up to a build-system that only worked on my system.
+
+      - Fixed race condition and resource-cleanup in my
+        asynchronous-gfmmodule-command implementation.
+
+      - Changed the fallback command for LoadGB from LoadWB_Old to LoadWB
+
+      - Plug memory leaks in:
+      	*Library/Launcher.c
+        *Modules/Config/fileclass_editor.c
+        *Program/callback_main.c
+        *Program/rexx_handler.c
+        *Program/lister_window.c
+        *Modules/themes.c
+        For easy replication, the relevant commits are marked with
+        commit-messages starting with "Plug memory leak". Please be advised
+        that the change in Modules/FTP/ftp_arexx.c in commit 3cf97df is an
+        error that was reverted in commit 9f8df32.
+
+      - Added FreeScreenDrawInfo() where GetScreenDrawinfo() is used.
+
+      - ViewFont now restores pr_HomeDir and unlocks its lock on Galileo:
+        before quitting.
+
+      - Avoid redundant UnLock() for each file in directory when opening icon
+        mode listers.
+
+      - Fix Lister goes inactive when locking/unlocking position/size.
+
+      - Make Listers that are minimized to titlebar-only not able to be the active
+        lister for toolbar buttons.
+
+      - Fix for my v0.1 fix "Fixed runaway open-count for main library when
+        changing ScreenMode." This only worked for the first invocation of
+        the main Program, regardless if the library was flushed between invocations.
+
+      - Changed all "static" in library-code to "static const" where this
+        could be done without creating new compiler errors.
+
+      - Fixed a missing check for P96 that would crash if not present.
+
+      - Fixed overlapping gadgets on windows minimized to titlebar.
+
+      - Fixed size and position of titlebar gadgets.
+
+      - Fixed MuForce hit in XADbrowser if window is closed while the gfmmodule
+        is initializing or reading the archive.
+
+      - Added support for '#'-command-prefix to internal commands.
+
+      - Added '&'-command-prefix to force command to async mode.
+
+      - Added commandline option "ARCHIVE" to XADOpen.
+
+      - Added commandline options "ARCHIVE/M,TO/K" to XADExtract.
+
+      - Removed FinishSection command and made its functionality implicit.
+
+      - LoadDB:
+          *Change qualifier for LoadWB fallback to either Amiga-key.
+          *Updated commandline arguments pass-trough to match arguments of
+           LoadWB v47.1.
+
+      - Changed everything to compile with PARAMETERS=REGISTER.
+
+      - galileolistviewgclass:
+          *New proportional gadget that looks like other "NewLook" gadgets.
+          *Added one pixel line-spacing between item lines.
+      	  *Cancel selection if mouse is outside of gadget when releasing
+           button, unless we are auto-scrolling.
+          *Added tag to disable main border rendering for each side
+           individually.
+          *Enableed creation of fake multi-column lists-gadgets in the
+           layout-engine by joining multiple list-gadgets into a
+           compound-gadget.
+
+      - layout engine:
+          *Added flag for recessed separator line to OD_AREA.
+          *Implemented POSFLAG_CENTER_POS_X and POSFLAG_CENTER_POS_Y for
+           GTCustom_LayoutPos.
+          *Fixed frameless OD_AREA painting outside its box.
+          *Made GTCustom_LayoutRel and GTCustom_LayoutPos not
+           mutually-exclusive.
+          *Added missing support for TEXTFLAG_RIGHT_JUSTIFY and
+           TEXTFLAG_CENTER when setting text for OD_AREA or OD_TEXT using
+           SetGadgetValue().
+          *Fixed inner dimensions for borderless OD_AREA, OD_TEXT and
+           BUTTON_KIND.
+          *Added support for AREAFLAG_ERASE and AREAFLAG_OPTIM to OD_TEXT.
+          *Made POS_SQUARE work reliably with POS_CENTER.
+
+      - Changed ByteToString() prefixes from K to KB, M to MB and so on.
+
+      - Disabled remap-on load for palette-mapped icons if icon.library is
+        newer than v44.506. We do remapping later, and this was a kludge for
+        buggy icon.library versions in OS3.5.
+
+      - Disabled call to LoyoutIcon() for icons without PaletteMappe/NewIcon
+        part(s).
+
+      - Fixed the "Discourage NewIcons" setting.
+
+      - Fixed my v0.1 fix for ScreenMode Workbench:Clone logic, which broke
+        both Workbench:Clone on WB2.x and Workbench:Clone with different
+        depth than workbench.
+
+      - Fixed just opening Environment->Display somtimes leads to screen
+        Close and reopen when pressing Save/Use even if on settings are
+        changed.
+
+      - Removed DateFromString() and renamed DateFromStringNew() in its
+        place.
+
+      - Stored Environment->Locale settings in library and added
+        GetLocaleSettings() for gfmmodules to query them.
+
+      - Moved date_to_strings() to the library and renamed it to
+        DateToStrings().
+
+      - Made newicon.library open only on WB3.1 and below.
+
+      - Added generation of SDK/modinitmffp.o for modules compiled with
+        MATH=FFP.
+
+      - Added function QtoaU() for converting 64bit unsigned int to ascii
+        string.
+
+      - Added function GetFileSize64() for 64bit filesize support on WinUAE
+        directory mapped drives.
+
+      - Added function GeometryToString() for converting disk-sizes up to
+        PetaBytes to ascii size string, like ByteToString() output.
+
+      - iconinfo.gfmmodule:
+          *Redesigned IconInfo requester.
+          *Integrated functionality of DiskInfo.
+          *Added support for disks up to PetaBytes in size.
+          *Added support for 64 bit filesize on WinUAE directory mapped
+           drives.
+          *Now only shows popup-menu if mousepointer is inside the
+           IconInfo-window.
+          *Made output of numbers, date and time according to
+           Environment->Locale.
+          *Made decimal-point, and number-group-separator follow current
+           system Locale.
+          *Partly fixed icon-type detection on icon.library v44 an up. It no
+           longer says all icons are NewIcons. But still does not understand
+           the difference between NewIcons and Palette-Mapped icons, as this
+           requires major rework of the core icon-handling routines in the
+           main Program and library.
+
+      - Removed diskinfo.gfmmodule.
+
+      - Disabled option to run multiple copies simultaneously.
+
+ 10-Dec-23 Hagbard Celine v0.1 - Expedited Beta (initial GitHub upload)
 
       - Changed all versions to 0 and all revision to 1.
 

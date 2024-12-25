@@ -43,7 +43,7 @@ int __asm __saveds __UserLibInit(void);
 void __asm __saveds __UserLibCleanup(void);
 char *_ProgramName="galileoconfig.gfmmodule";
 
-char *version="$VER: galileoconfig.gfmmodule 0.1 "__AMIGADATE__" ";
+char *version="$VER: galileoconfig.gfmmodule 0.2 "__AMIGADATE__" ";
 
 struct DosLibrary *DOSBase=0;
 struct Library *GalileoFMBase=0;

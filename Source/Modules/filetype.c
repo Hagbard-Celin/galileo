@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -84,7 +84,7 @@ GOODBYE_SAVE,
 GOODBYE_ABORT
 };
 
-char *version="$VER: filetype.gfmmodule 0.1 "__AMIGADATE__" ";
+char *version="$VER: filetype.gfmmodule 0.2 "__AMIGADATE__" ";
 
 /********************************/
 
@@ -2843,7 +2843,7 @@ int __asm __saveds L_Module_Entry(
 	register __a1 struct Screen *screen,
 	register __a2 IPCData *ipc,
 	register __a3 IPCData *main_ipc,
-    register __a4 APTR *memhandlep,
+	register __a4 APTR *memhandlep,
 	register __d0 ULONG mod_id,
 	register __d1 EXT_FUNC(func_callback))
 {

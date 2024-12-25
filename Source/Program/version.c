@@ -31,15 +31,15 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
-short revision_num=1;
+short revision_num=2;
 short version_num=0;
-char *version_string="Expedited Beta";
+char *version_string="Buildable Beta";
 
-char *_version_str="$VER: Galileo 0.1 "__AMIGADATE__" ";
+char *_version_str="$VER: Galileo 0.2 "__AMIGADATE__" ";
 
 /*
 short revision_num=1610;

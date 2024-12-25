@@ -55,7 +55,7 @@ void cx_install(CxData *cx)
 	// Initialise broker
 	cx->nb.nb_Version=NB_VERSION;
 	cx->nb.nb_Name="Galileo";
-	cx->nb.nb_Title="Galileo File Manager 0.1";
+	cx->nb.nb_Title="Galileo File Manager 0.2";
 	cx->nb.nb_Descr=GetString(&locale,MSG_CX_DESC);
 	cx->nb.nb_Unique=0;
 	cx->nb.nb_Flags=COF_SHOW_HIDE;
