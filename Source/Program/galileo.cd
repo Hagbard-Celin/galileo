@@ -1232,9 +1232,6 @@ Encrypt files
 MSG_FUNC_DESC_FINDFILE (//)
 Search for filenames
 ;
-MSG_FUNC_DESC_FINISHSECTION (//)
-Finish above commands
-;
 MSG_FUNC_DESC_FORMAT (//)
 Format disks
 ;
