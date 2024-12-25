@@ -21,9 +21,9 @@ describes the main type, an AmigaDos library file. The other type, ARexx
 modules, are described in the main Galileo documentation.
 
     Library-based modules are located in the Galileo:Modules/ directory, and
-are identified by the ".module" suffix. They are standard AmigaDos libraries,
-with two compulsory entry points. They main contain any other entry points you
-want, but the first two are required to work with Galileo.
+are identified by the ".gfmmodule" suffix. They are standard AmigaDos
+libraries, with two compulsory entry points. They main contain any other
+entry points you want, but the first two are required to work with Galileo.
 
     The example code supplied with the SDK illustrates how to create an Galileo
 module. While the supplied code is designed for SAS/C, it would be easy to
@@ -72,7 +72,7 @@ Module_Entry() function are as follows:
 itself. When Galileo starts up it scans the contents of the modules directory,
 and calls this function in each of the modules.
 
-    The standard modinit.o module startup code supplies this function for you.
+    The standard modinit.o¹ module startup code supplies this function for you.
 It is not recommended that you change it. If you need to supply your own
 function, the prototype is as follows :
 
@@ -84,15 +84,17 @@ return a pointer to the ModuleInfo structure for the module. If "num" is equal
 to a valid command ID code, you must return a pointer to a description string
 for that command. If "num" is an invalid value, you must return 0.
 
+¹There is also modinitmffp.o for gfmmodules compiled with MATH=FFP. It will
+open mathffp.library and mathtrans.library for you.
 
 4. The contents of the module are identified with a ModuleInfo structure. All
 fields of the ModuleInfo structure must be initialised. The meaning of the
 fields is as follows:
 
         ver            - Module version number (for your own use)
-        name           - pointer to module name, including ".module" suffix
+        name           - pointer to module name, including ".gfmmodule" suffix
         locale_name    - name of locale catalog for the module. This is opened
-                         automatically by the standard modinit.o startup code,
+                         automatically by the standard modinit.o¹ startup code,
                          which you should use.
         flags          - Module flags, see below
         function_count - The number of functions in this module
@@ -118,7 +120,7 @@ fields is as follows:
                                   show help for the commands in this module.
                                   The name of the help file is taken from the
                                   'name' field of the ModuleInfo structure,
-                                  with the '.module' suffix replaced by
+                                  with the '.gfmmodule' suffix replaced by
                                   '.guide'
 
     The ModuleInfo structure contains room for only one function definition.
@@ -131,7 +133,7 @@ field of the ModuleInfo structure. For example,
         ModuleInfo
             module_info={
                 1,                  // Version
-                "example.module",   // Module name
+                "example.gfmmodule",   // Module name
                 "example.catalog",  // Catalog name
                 0,                  // Flags
                 2,                  // Number of functions
@@ -142,6 +144,8 @@ field of the ModuleInfo structure. For example,
             module_func_2={
                  1,"Example2",MSG_EXAMPLE2_DESC,0,0};
 
+¹There is also modinitmffp.o for gfmmodules compiled with MATH=FFP. It will
+open mathffp.library and mathtrans.library for you.
 
 
 5. The ModuleFunction structure is used to define each command that the
@@ -208,11 +212,13 @@ All fields of the ModuleFunction structure must be initialised, as follows:
 
 
 6. It is highly recommended that you link with the standard module startup
-code (modinit.o) when creating modules. This code contains the
+code (modinit.o¹) when creating modules. This code contains the
 Module_Identify() function, and automatically initialises several library bases
 which you may need. See the <galileofm/modules.h> file for more information on
 this file.
 
+¹There is also modinitmffp.o for gfmmodules compiled with MATH=FFP. It will
+open mathffp.library and mathtrans.library for you.
 
 7. The "callback" parameter to the Module_Entry() function provides the
 address of a callback function within Galileo. This function allows you to access

@@ -11,7 +11,7 @@ int __asm __saveds L_Module_Entry(
 	register __a1 struct Screen *screen,	// Screen to open on
 	register __a2 IPCData *ipc,				// Our IPC pointer
 	register __a3 IPCData *main_ipc,		// Main Galileo IPC pointer
-    register __a4 APTR *memhandlep,         // Async? See Documentation/Module-Changes.txt
+	register __a4 APTR *memhandlep,         // Async? See Documentation/Module-Changes.txt
 	register __d0 ULONG mod_id,				// ID of module function
 	register __d1 EXT_FUNC(func_callback))	// Galileo callback function
 {

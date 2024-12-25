@@ -3,8 +3,7 @@
 
                        Software Development Kit 1.1
 
-                    © 1998 Jonathan Potter & GPSoftware
-                          © 2023 Hagbard Celine
+                    Â© 1998 Jonathan Potter & GPSoftware
 
 -----------------------------------------------------------------------------
 
@@ -17,10 +16,10 @@ The contents of the SDK is as follows :
 	docs        - Documentation for the galileofm.library
 	include	    - Include files
 	lib         - Linker files (The contents of this directory gets generated
-                  while running the "buildme" scipt)
+                      while running the "buildme" scipt)
 	example     - Example source code
 	source      - Source to the modinit.o module (The contents of this directroy
-                  gets generated while running the "buildme" scipt)
+                      gets generated while running the "buildme" scipt)
 
 The include and linker files are all designed for use with a C compiler
 (the example source code is set up to compile under SAS/C).
@@ -29,7 +28,7 @@ The examples that have been included are :
 
 	module		- A basic module that adds one command to Galileo and
                           opens a requester. Shows a simple example of
-                          creating an Galileo module.
+                          creating an Galileo gfmmodule.
 
 	envoymodule	- A module that lets you set network information for
 	                  files with Envoy. Shows an example of a simple
