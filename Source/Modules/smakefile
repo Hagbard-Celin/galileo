@@ -138,13 +138,13 @@ PATHFORMATREV  = 1
 
 MODINITOBJS = $(SOBJ)modinit.o $(SOBJ)modinitmffp.o
 
-STRINGS = cleanup.strings debug.strings diskcopy.strings diskinfo.strings filetype.strings fixicons.strings \
+STRINGS = cleanup.strings debug.strings diskcopy.strings filetype.strings fixicons.strings \
      format.strings icon.strings iconclock.strings join.strings listerformat.strings misc.strings \
      pathformat.strings play.strings print.strings read.strings recyclebin.strings show.strings themes.strings \
      update.strings $(FTPDIR)ftp.strings $(CONFIGDIR)config.strings $(XADDIR)XADbrowser.strings
 
 OBJS1 = $(STDOBJS) $(FFPOBJS) $(SHOWOBJS) $(PLAYOBJS) $(MISCOBJS) $(ICONOBJS) $(FORMATOBJS) $(DISKCOPYOBJS) \
-	$(READOBJS) $(JOINOBJS) $(PRINTOBJS) $(LISTFORMATOBJS) $(DISKINFOOBJS) $(FIXICONSOBJS) \
+	$(READOBJS) $(JOINOBJS) $(PRINTOBJS) $(LISTFORMATOBJS) $(FIXICONSOBJS) \
 	$(THEMESOBJS) $(FILETYPEOBJS) $(RECYCLEBINOBJS) $(ICONCLOCKOBJS) \
 	$(UPDATEOBJS) $(CLEANUPOBJS) $(ABOUTOBJS) $(PATHFORMATOBJS)
 OBJS2 = $(ENVOYOBJS) $(FTPOBJS) $(XADOBJS)
