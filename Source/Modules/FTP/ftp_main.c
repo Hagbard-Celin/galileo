@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -2914,7 +2914,7 @@ char *commands[] =
 
 	// These need to be suppressed
 	"addicon",	"checkfit",	"comment",	"datestamp",
-	"diskinfo",	"duplicate",	"encrypt",	"search",
+	"duplicate",	"encrypt",	"search",
 	"user1",	"user2",	"user3",	"user4",
 	"user",
 
