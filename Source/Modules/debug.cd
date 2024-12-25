@@ -15,3 +15,6 @@ Debug-Print Tracked Memhancles
 MSG_PRINT_HANDLES_COMPACT_DESC (//)
 Debug-Print Tracked Memhandles Compact
 ;
+MSG_PRINT_HANDLES_DISKOBJECT_DESC (//)
+Debug-Print Tracked DiskObjects
+;

@@ -43,11 +43,13 @@ ModuleInfo
 		"debug.gfmmodule",
 		"debug.catalog",
 		0,
-		4,
+		5,
 		{0,"PrintTrackedResourcesCompact",MSG_PRINT_COMPACT_DESC,FUNCF_NO_ARGS,0}};
 
 ModuleFunction
 	more_functions[]={
 		{1,"PrintTrackedMemHandles",MSG_PRINT_HANDLES_DESC,FUNCF_NO_ARGS,0},
 		{2,"PrintTrackedResources",MSG_PRINT_DESC,FUNCF_NO_ARGS,0},
-        {3,"PrintTrackedMemHandlesCompact",MSG_PRINT_HANDLES_COMPACT_DESC,FUNCF_NO_ARGS,0}};
+        {3,"PrintTrackedMemHandlesCompact",MSG_PRINT_HANDLES_COMPACT_DESC,FUNCF_NO_ARGS,0},
+        {4,"PrintTrackedDiskObjects",MSG_PRINT_HANDLES_DISKOBJECT_DESC,FUNCF_NO_ARGS,0}};
+
