@@ -1,5 +1,5 @@
 ; Script for updating dependencies for release version of Galileo File Manager.
-;
+; Needs http://aminet.net/package/dev/c/makedepend_AmiMod
 
 set builddir GalileoD:Build
 
