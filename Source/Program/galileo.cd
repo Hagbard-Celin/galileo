@@ -1007,11 +1007,7 @@ User-specified custom handler port\n'%s'\ncould not be found!
 ;
 MSG_ALREADY_RUNNING (//)
 Galileo appears to be already running!\n\
-Running a second copy has the potential to cause\n\
-problems, and it is recommended that you do not.
-;
-MSG_ALREADY_RUNNING_BUTTONS (//)
-Cancel|Run Again
+Running a second copy is not supported.
 ;
 MSG_UNABLE_TO_CLOSE_SCREEN (//)
 Galileo is unable to close its screen.\nPlease close all windows and try again.

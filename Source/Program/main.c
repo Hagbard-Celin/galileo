@@ -286,25 +286,25 @@ void startup_check_duplicate()
 	{
 		struct MsgPort *port;
 
-		// Ask if we want to run another copy
+		// Show requester
 		Permit();
-		if (SimpleRequest(0,
+		SimpleRequest(0,
 			galileo_name,
-			GetString(&locale,MSG_ALREADY_RUNNING_BUTTONS),
-			GetString(&locale,MSG_ALREADY_RUNNING),0,0,0,0))
-		{
-			// Find port again (under Forbid)
-			Forbid();
-			if (port=FindPort(galileo_name))
-			{
-				// Signal program to wake up
-				Signal((struct Task *)port->mp_SigTask,IPCSIG_SHOW);
-			}
-			Permit();
+			GetString(&locale,MSG_OKAY),
+			GetString(&locale,MSG_ALREADY_RUNNING),0,0,0,0);
 
-			// Quit this copy
-			quit(0);
+		// Find port again (under Forbid)
+		Forbid();
+		if (port=FindPort(galileo_name))
+		{
+			// Signal program to wake up
+			Signal((struct Task *)port->mp_SigTask,IPCSIG_SHOW);
 		}
+		Permit();
+
+		// Quit this copy
+		quit(0);
+
 	}
 	Permit();
 }
