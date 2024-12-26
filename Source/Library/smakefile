@@ -60,7 +60,10 @@ libprefix _L_
 libfd galileofm_lib.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(OBJS)
 to $(LBIN)galileofm.library
-lib $(RTLIB) lib:sc.lib lib:pools.lib lib:amiga.lib $(DEBUGLIB) lib:asyncio.lib
+lib $(RTLIB) lib:sc.lib lib:amiga.lib $(DEBUGLIB)
+#Disabled for now just to fix v0.2 build
+#The code using it is hidden behind ifdef's and has never been compiled here
+#lib:asyncio.lib
 libversion $(LIBVER)
 librevision $(LIBREV)
 $(STRIPDEBUG)

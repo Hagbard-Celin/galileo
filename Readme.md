@@ -24,6 +24,14 @@ the "it compiles" test. There might be dragons lurking in them dark corners.
 For a almost complete list of changes since version 5.82 see "ChangeLog.txt".
 Some of the highlights are:
 
+v0.2a
+- Fixed the build-system and build instructions again. Previous version still
+  did not work as advertised. Thanks to riker77 on EAB for testing and
+  reporting.
+- No code changes. All resulting binaries are still v0.2, and should be
+  identical except the the pool-functions for use on Kickstart 2.x systems
+  will be taken from "amiga.lib" as opposed to the depreciated "pool.lib".
+
 v0.2:
 - Fixed build-system that actually works.
 - All known memory leaks removed.
@@ -51,10 +59,13 @@ v0.1:
 
 
 Build instructions:
-(For v0.2 and later only, v0.1 had multiple errors in the build-system)
+(For v0.2a and later only, earlier versions had multiple errors in the
+build-system.)
 
-For compiling, SAS/C 6.58 with y2kfix is required. Also, AmigaOS NDK 3.2 needs
-to be correctly installed/assigned.
+For compiling, SAS/C 6.58 with y2kfix is required. AmigaOS NDK 3.2r4 (or
+later) needs to be correctly installed/assigned. And the catcomp command from
+"Tools/Catcomp" dir in NDK needs to be copied to a directory that is in the
+path.
 
 The build system is set for fastest possible compile time, and thus maximum
 memory usage. If you do not have large amounts of ram, you might want to go
