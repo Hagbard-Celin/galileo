@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -41,81 +41,81 @@ For more information on Directory Opus for Windows please see:
 
 function_internal_async(AsyncData *adata)
 {
-	IPCData *async_proc = NULL;
+    IPCData *async_proc = NULL;
     int ret;
 
-	// call IPC_Launch
-	ret=IPC_Launch(0,
-		           &async_proc,
-				   adata->command->name,
-				   (ULONG)async_command,
-				   STACK_DEFAULT,
-				   (ULONG)adata,
-				   (struct Library *)DOSBase);
+    // call IPC_Launch
+    ret=IPC_Launch(0,
+	           &async_proc,
+		   adata->command->name,
+		   (ULONG)async_command,
+		   STACK_DEFAULT,
+		   (ULONG)adata,
+		   (struct Library *)DOSBase);
 
-			if( !async_proc )
-			     ret=0;
+    if (!async_proc)
+	 ret = 0;
     return ret;
 }
 
-ULONG __asm __saveds async_command_startup( register __a0 IPCData *ipc,
-                                       		register __a1 AsyncData *adata )
+ULONG __asm __saveds async_command_startup(register __a0 IPCData *ipc,
+					   register __a1 AsyncData *adata)
 {
     // make sure we do not get expunged
-	adata->module->lib_OpenCnt++;
+    adata->module->lib_OpenCnt++;
 
-	return TRUE; 
+    return TRUE;
 }
 
 
-void __saveds async_command( void )
+void __saveds async_command(void)
 {
-	AsyncData             *adata;
-	IPCData               *ipc;
+    AsyncData             *adata;
+    IPCData               *ipc;
     struct Library        *ModuleBase;
     APTR                  memhandlep;
 
-	// do IPC startup
-	ipc = IPC_ProcStartup( (ULONG *) &adata, async_command_startup );
+    // do IPC startup
+    ipc = IPC_ProcStartup((ULONG *) &adata, async_command_startup);
 
-	// did we get ipc?
-	if (!ipc)
+    // did we get ipc?
+    if (!ipc)
+    {
+	if (adata)
 	{
-		if (adata)
-		{
-			FreeVec(adata);
-		}
-
-		return;
+	    FreeVec(adata);
 	}
 
+	return;
+    }
+
     // Swap in new IPCData
-    ipc->userdata=adata->handle;
-    adata->handle->ipc=ipc;
+    ipc->userdata = adata->handle;
+    adata->handle->ipc = ipc;
 
     // Save ModuleBase for later
     ModuleBase=adata->module;
 
     // Save memhandlepointer for later
-    memhandlep=adata->memhandlep;
+    memhandlep = adata->memhandlep;
 
     // Call module
-	Module_Entry((adata->args)?(struct List *)adata->args:0,
-                 adata->screen,
-                 ipc,
-                 adata->main_ipc,
-                 adata->memhandlep,
-                 adata->command->function,
-                 adata->function_external_hook);
+    Module_Entry((adata->args)?(struct List *)adata->args:0,
+		 adata->screen,
+		 ipc,
+		 adata->main_ipc,
+		 adata->memhandlep,
+		 adata->command->function,
+		 adata->function_external_hook);
 
 
     // Free mem
     FreeMemHandle(*adata->memhandlep);
     FreeVec(memhandlep);
 
-	// Free ipc
-	IPC_Free( ipc );
+    // Free ipc
+    IPC_Free(ipc);
 
-	// Put opencount back
-	ModuleBase->lib_OpenCnt--;
+    // Put opencount back
+    ModuleBase->lib_OpenCnt--;
 }

@@ -32,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -570,25 +570,25 @@ void __asm __saveds HookFreePointerDirect(
 		// Handle
 		case MODPTR_HANDLE:
 
-            if (flags&POINTERF_DELPORT)
-            {
-                FunctionHandle *handle;
-                struct Message *msg;
+		        if (flags&POINTERF_DELPORT)
+		        {
+			    FunctionHandle *handle;
+			    struct Message *msg;
 
-                handle=(FunctionHandle *)pointer;
+			    handle=(FunctionHandle *)pointer;
 
-                // Done message?
-				if (handle->done_msg)
-				{
-					handle->done_msg->mn_Node.ln_Pri=handle->ret_code;
-					PutMsg(handle->done_msg->mn_ReplyPort,handle->done_msg);
-				}
+			    // Done message?
+			    if (handle->done_msg)
+			    {
+				    handle->done_msg->mn_Node.ln_Pri=handle->ret_code;
+				    PutMsg(handle->done_msg->mn_ReplyPort,handle->done_msg);
+			    }
 
-				// Free reply port
-    			while (msg=GetMsg(handle->reply_port))
+			    // Free reply port
+			    while (msg=GetMsg(handle->reply_port))
 					ReplyFreeMsg(msg);
-				DeleteMsgPort(handle->reply_port);
-            }
+			    DeleteMsgPort(handle->reply_port);
+		        }
 
 			// Free handle
 			function_free((FunctionHandle *)pointer);
@@ -911,9 +911,9 @@ BOOL __asm __saveds HookIsSourceDestLock(
     BOOL islocked;
 
     if (lister->flags&LISTERF_SOURCEDEST_LOCK)
-        islocked=TRUE;
+	islocked=TRUE;
     else
-        islocked=FALSE;
+	islocked=FALSE;
 
     return islocked;
 }
@@ -923,7 +923,7 @@ void __asm __saveds HookFakeDir(
     register __d0 BOOL fakedir)
 {
     if (fakedir)
-        lister->more_flags|=LISTERF_FAKEDIR;
+	lister->more_flags|=LISTERF_FAKEDIR;
     else
     	lister->more_flags&=~LISTERF_FAKEDIR;
 }
@@ -934,9 +934,9 @@ BOOL __asm __saveds HookIsFakeDir(
     BOOL isfake;
 
     if (lister->more_flags&LISTERF_FAKEDIR)
-        isfake=TRUE;
+	isfake=TRUE;
     else
-        isfake=FALSE;
+	isfake=FALSE;
 
     return isfake;
 }

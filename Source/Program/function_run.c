@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -159,16 +159,16 @@ short function_run(FunctionHandle *handle)
 				instruction->node.mln_Succ;
 				instruction=(InstructionParsed *)instruction->node.mln_Succ)
 			{
-                // Once only?
+				// Once only?
 				if (instruction->command && instruction->count>0)
-                {
+				{
 					// Check count; skip if already used
 					if (instruction->count>1) continue;
 
 					// Increment count
 					++instruction->count;
-                }
-                else if (instruction->string && *instruction->string=='#')
+				}
+				else if (instruction->string && *instruction->string=='#')
 				{
 					// Check count; skip if already used
 					if (instruction->count>0) continue;
@@ -400,7 +400,7 @@ BOOL function_check_paths(FunctionHandle *handle)
 				}
 			}
 		}
-        
+
 		// If we got source, lock it
 		if (handle->func_flags&FUNCF_GOT_SOURCE &&
 			!(function_lock_paths(handle,&handle->source_paths,1)))
@@ -432,10 +432,10 @@ BOOL function_check_paths(FunctionHandle *handle)
 
 		// Do single destination check
 		else
-        // Do not ask user for destination if drag-and-drip, we already got it.
+		// Do not ask user for destination if drag-and-drop, we already got it.
 		if (!(handle->flags&FUNCF_DRAG_DROP) &&
-        	handle->func_flags&FUNCF_GOT_DEST &&
-			handle->func_flags&FUNCF_SINGLE_DEST)
+		    handle->func_flags&FUNCF_GOT_DEST &&
+		    handle->func_flags&FUNCF_SINGLE_DEST)
 		{   
 			if (!(function_check_single(handle,LISTERF_DEST,LISTERF_DEST,0)))
 			{

@@ -32,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -89,12 +89,12 @@ typedef struct _InstructionParsed
 
 typedef struct _AsyncData
 {
-    char 					*args;
-	struct Screen 			*screen;
-	IPCData 				*main_ipc;
-	struct _CommandList		*command;
-	ULONG					function_external_hook;
-    struct Library 			*module;
+    char 			*args;
+    struct Screen 		*screen;
+    IPCData 			*main_ipc;
+    struct _CommandList		*command;
+    ULONG			function_external_hook;
+    struct Library 		*module;
     struct Library  		*library;
     APTR            		*memhandlep;
     struct _FunctionHandle	*handle;
@@ -173,142 +173,142 @@ typedef struct
 
 typedef struct _FunctionHandle
 {
-	IPCData			*ipc;			// IPC data
-	APTR			memory;			// Function memory pool
+    IPCData			*ipc;			// IPC data
+    APTR			memory;			// Function memory pool
 
-	ULONG			command;		// Function command
-	Cfg_Function		*function;		// Function pointer
-	ULONG			data;			// Function data
-	ULONG			flags;			// Function flags
+    ULONG			command;		// Function command
+    Cfg_Function		*function;		// Function pointer
+    ULONG			data;			// Function data
+    ULONG			flags;			// Function flags
 
-	char			source_path[512];	// Source path
-	char			dest_path[512];		// Destination path
+    char			source_path[512];	// Source path
+    char			dest_path[512];		// Destination path
 
-	int			entry_count;		// Total number of entries
-	struct List		entry_list;		// Entries to work on
-	FunctionEntry		*current_entry;		// Current entry
-	FunctionEntry		*use_entry;		// Entry to use
+    int				entry_count;		// Total number of entries
+    struct List			entry_list;		// Entries to work on
+    FunctionEntry		*current_entry;		// Current entry
+    FunctionEntry		*use_entry;		// Entry to use
 
-	int			arg_count;		// Argument count
-	struct ArgArray		*args;			// Arguments
-	ULONG			result;			// Result code
+    int				arg_count;		// Argument count
+    struct ArgArray		*args;			// Arguments
+    ULONG			result;			// Result code
 
-	ULONG			func_flags;		// Function flags
-	struct MinList		func_instructions;	// Function instructions (parsed)
-	CFG_FUNC		func_parameters;	// Function parameters
+    ULONG			func_flags;		// Function flags
+    struct MinList		func_instructions;	// Function instructions (parsed)
+    CFG_FUNC			func_parameters;	// Function parameters
 
-	struct List		func_arguments;		// Function arguments (user supplied)
-	struct Node		*func_current_arg;	// Current function argument
+    struct List			func_arguments;		// Function arguments (user supplied)
+    struct Node			*func_current_arg;	// Current function argument
 
-	short			func_iterations;	// Iteration count
-	short			func_source_num;	// Source number we are doing
+    short			func_iterations;	// Iteration count
+    short			func_source_num;	// Source number we are doing
 
-	struct List		recurse_list;		// List of files collected recursively
-	FunctionEntry		*current_recurse;	// Current recursively-collected file
+    struct List			recurse_list;		// List of files collected recursively
+    FunctionEntry		*current_recurse;	// Current recursively-collected file
 
-	struct AnchorPath	*anchor;		// Anchor for recursing directories
-	char			*anchor_path;		// Full pathname for anchor
-	int			recurse_return;		// Result code from last return
-	FunctionEntry		*recurse_entry;		// Recursively collected entry
-	FunctionEntry		*recurse_entry_data;
+    struct AnchorPath	       *anchor;		       // Anchor for recursing directories
+    char			*anchor_path;		// Full pathname for anchor
+    int				recurse_return;		// Result code from last return
+    FunctionEntry		*recurse_entry;		// Recursively collected entry
+    FunctionEntry		*recurse_entry_data;
 
-	BPTR			recurse_cd;		// Current dir for recursing
+    BPTR			recurse_cd;		// Current dir for recursing
 
-	ULONG			temp_key;		// Key for temp files
+    ULONG			temp_key;		// Key for temp files
 
-	ULONG			special_flags;		// Special flags
+    ULONG			special_flags;		// Special flags
 
-	InstructionParsed	*cur_instruction;	// Currently executing instruction
+    InstructionParsed		*cur_instruction;	// Currently executing instruction
 
-	char			recurse_path[512];	// Pathname of recursed entry
-	int			recurse_count;		// Count of recursed files
-	ULONG			recurse_bytes;		// Size of recursed files
-	int			recurse_depth;		// Recurse depth
+    char			recurse_path[512];	// Pathname of recursed entry
+    int				recurse_count;		// Count of recursed files
+    ULONG			recurse_bytes;		// Size of recursed files
+    int				recurse_depth;		// Recurse depth
 
-	char			work_buffer[1024];	// A buffer to do things in
+    char			work_buffer[1024];	// A buffer to do things in
 
-	PathList		source_paths;		// List of source paths
-	PathList		dest_paths;		// List of destination paths
+    PathList			source_paths;		// List of source paths
+    PathList			dest_paths;		// List of destination paths
 
-	struct FileInfoBlock				// Some FileInfoBlocks to play with
+    struct FileInfoBlock				// Some FileInfoBlocks to play with
 				*s_info,
 				*d_info;
 
-	ULONG			instruction_flags;	// Flags for this instruction
-	char			final_message[80];	// Final message to display
-	APTR			entry_memory;		// Entry memory pool
+    ULONG			instruction_flags;	// Flags for this instruction
+    char			final_message[80];	// Final message to display
+    APTR			entry_memory;		// Entry memory pool
 
-	char			*inst_data;		// Instruction-specific data pointer
-	ULONG			inst_flags;		// Instruction-specific flags
+    char			*inst_data;		// Instruction-specific data pointer
+    ULONG			inst_flags;		// Instruction-specific flags
 
-	struct FileInfoBlock	recurse_info;		// Info on last recursed entry
+    struct FileInfoBlock	recurse_info;		// Info on last recursed entry
 
-	char			last_filename[512];	// Last filename used
+    char			last_filename[512];	// Last filename used
 
-	APTR			script_file;		// External script file
-	char			script_name[80];	// Script file name
-	char			temp_buffer[256];	// Temporary buffer
-	char			temp_name[80];		// Temporary file name
+    APTR			script_file;		// External script file
+    char			script_name[80];	// Script file name
+    char			temp_buffer[256];	// Temporary buffer
+    char			temp_name[80];		// Temporary file name
 
-	struct MinList		external_list;		// List of external entries
+    struct MinList		external_list;		// List of external entries
 
-	Lister			*source_lister;		// Source lister
-	Lister			*dest_lister;		// Dest lister
+    Lister			*source_lister;		// Source lister
+    Lister			*dest_lister;		// Dest lister
 
-	unsigned short		dest_block_size;	// Destination block size
-	unsigned short		dest_data_block_size;	// Destination data block size
-	unsigned long		dest_recurse_blocks;	// Number of blocks for destination
+    unsigned short		dest_block_size;	// Destination block size
+    unsigned short		dest_data_block_size;	// Destination data block size
+    unsigned long		dest_recurse_blocks;	// Number of blocks for destination
 
-	FuncArgs		*funcargs;		// Parsed function arguments
-	struct List		entry_list_backup;
-	FunctionEntry		*current_entry_backup;
-	FunctionEntry		*use_entry_backup;
-	int			entry_count_backup;
+    FuncArgs			*funcargs;		// Parsed function arguments
+    struct List			entry_list_backup;
+    FunctionEntry		*current_entry_backup;
+    FunctionEntry		*use_entry_backup;
+    int				entry_count_backup;
 
-	Lister			*progress_lister;	// Lister with progress req
+    Lister			*progress_lister;	// Lister with progress req
 
-	struct Message		*done_msg;		// Message to send when done
+    struct Message		*done_msg;		// Message to send when done
 
-	char			file_filter[31];	// File filter
-	char			got_filter;
-	char			file_filter_parsed[63];
+    char			file_filter[31];	// File filter
+    char			got_filter;
+    char			file_filter_parsed[63];
 
-	char			replace_option;
+    char			replace_option;
 
-	unsigned short		file_count;		// File and dir counts
-	unsigned short		dir_count;
-	unsigned short		file_count_backup;
-	unsigned short		dir_count_backup;
+    unsigned short		file_count;		// File and dir counts
+    unsigned short		dir_count;
+    unsigned short		file_count_backup;
+    unsigned short		dir_count_backup;
 
-	short			instruction_count;	// Number of instructions
+    short			instruction_count;	// Number of instructions
 
-	char			output_handle[120];	// Output handle
+    char			output_handle[120];	// Output handle
 
-	ULONG			result_flags;		// Flags for result
+    ULONG			result_flags;		// Flags for result
 
-	struct MsgPort		*reply_port;
+    struct MsgPort		*reply_port;
 
-	Buttons			*buttons;		// Button bank launched from
+    Buttons			*buttons;		// Button bank launched from
 
-	struct FileRequester	*filereq;		// File requester
-	struct IBox		coords;			// Coordinates
+    struct FileRequester	*filereq;		// File requester
+    struct IBox			coords;			// Coordinates
 
-	struct _GalileoAppMessage	*app_msg;		// AppMessage from drag&drop
+    struct _GalileoAppMessage	*app_msg;		// AppMessage from drag&drop
 
-	struct List		filechange;		// File changes
+    struct List			filechange;		// File changes
 
-	ULONG			flags2;			// More flags
+    ULONG			flags2;			// More flags
 
-	struct ArgArray		*arg_passthru;		// Arguments passed through
+    struct ArgArray		*arg_passthru;		// Arguments passed through
 
-	unsigned short		link_dir_count;
-	unsigned short		link_file_count;
+    unsigned short		link_dir_count;
+    unsigned short		link_file_count;
 
-	Lister			*saved_source_lister;	// Source lister
+    Lister			*saved_source_lister;	// Source lister
 
-	short			ret_code;
+    short			ret_code;
 
-	ULONG			func_additional_flags;
+    ULONG			func_additional_flags;
 } FunctionHandle;
 
 
@@ -323,9 +323,9 @@ typedef struct _FunctionReturn {
 #define FUNCF_NEED_DEST			(1<<1)	// Needs a destination directory
 #define FUNCF_NEED_FILES		(1<<2)	// Needs some files to work with
 #define FUNCF_NEED_DIRS			(1<<3)	// Needs some files to work with
-#define FUNCF_NEED_ENTRIES	(FUNCF_NEED_FILES|FUNCF_NEED_DIRS)
+#define FUNCF_NEED_ENTRIES		(FUNCF_NEED_FILES|FUNCF_NEED_DIRS)
 /* DO NOT define flag with value (1<<4) here, it will clash with FUNCF_RUN_ASYNC */
-#define FUNCF_SCRIPT_OVERRIDE	(1<<5)	// Can be overridden by a script
+#define FUNCF_SCRIPT_OVERRIDE		(1<<5)	// Can be overridden by a script
 #define FUNCF_CAN_DO_ICONS		(1<<6)	// Function can do icons
 #define FUNCF_SINGLE_SOURCE		(1<<8)	// Only a single source needed
 #define FUNCF_SINGLE_DEST		(1<<9)	// Only a single destination needed
@@ -333,18 +333,18 @@ typedef struct _FunctionReturn {
 #define FUNCF_WANT_DEST			(1<<11)	// Want destinations, don't need them
 #define FUNCF_WANT_SOURCE		(1<<12)	// Want source, don't need it
 #define FUNCF_CREATE_SOURCE		(1<<13)	// Can create our own source
-#define FUNCF_EXTERNAL_FUNCTION	(1<<14)	// Function is external
+#define FUNCF_EXTERNAL_FUNCTION		(1<<14)	// Function is external
 #define FUNCF_ARG_ENTRIES		(1<<15) // Entries in arguments
 #define FUNCF_ASK_FILTER		(1<<16)	// Can ask for a file filter
 #define FUNCF_ASK_PATH			(1<<17)	// Allowed to ask for paths
 #define FUNCF_SPECIAL_OK		(1<<18)	// Ok if special buffer
 #define FUNCF_WANT_ENTRIES		(1<<19)	// Want entries
 #define FUNCF_NO_SOURCE			(1<<20)	// Can't use lister sources
-#define FUNCF_RESCAN_DESKTOP	(1<<21)	// Rescan the desktop
+#define FUNCF_RESCAN_DESKTOP		(1<<21)	// Rescan the desktop
 
 #define FUNCF_ASK_DEST			(1<<22)	// Must ask for destination
-#define FUNCF_ICONS				(1<<23)	// Function running on icons
-#define FUNCF_SYNC				(1<<24)	// Function wants to be synchronous
+#define FUNCF_ICONS			(1<<23)	// Function running on icons
+#define FUNCF_SYNC			(1<<24)	// Function wants to be synchronous
 #define FUNCF_DRAG_DROP			(1<<25)	// Called by drag'n'drop
 #define FUNCF_PRIVATE			(1<<26) // Function is private
 
@@ -353,7 +353,7 @@ typedef struct _FunctionReturn {
 #define FUNCF_RUN_NO_ICONS		(1<<28)	// Don't run using icons (double-click kludge)
 #define FUNCF_COPY_NO_MOVE		(1<<28)	// Don't move even if on same volume (drag'n'drop kludge)
 
-#define FUNCF_LAST_FILE_FLAG	(1<<29)	// Still using last file
+#define FUNCF_LAST_FILE_FLAG		(1<<29)	// Still using last file
 #define FUNCF_GOT_SOURCE		(1<<30)	// Got a source
 #define FUNCF_GOT_DEST			(1<<31)	// Got a destination
 
@@ -362,15 +362,15 @@ typedef struct _FunctionReturn {
 
 // Result flags
 #define FRESULTF_RESORT			(1<<0)	// Need to resort
-#define FRESULTF_MADE_LISTER	(1<<1)	// We made a lister
+#define FRESULTF_MADE_LISTER		(1<<1)	// We made a lister
 
 // Instruction flags
 #define INSTF_RECURSE_DIRS		(1<<0)	// Enter directories recursively
 #define INSTF_WANT_DIRS			(1<<1)	// Want directories as well as the contents
 #define INSTF_WANT_DIRS_END		(1<<2)	// Want directories at the end
-#define INSTF_DELETE_UNPROTECT	(1<<3)	// Unprotect all
+#define INSTF_DELETE_UNPROTECT		(1<<3)	// Unprotect all
 #define INSTF_DIR_NO_SIZES		(1<<4)	// Don't count directory sizes
-#define INSTF_DIR_CLEAR_SIZES	(1<<5)	// Clear directory sizes
+#define INSTF_DIR_CLEAR_SIZES		(1<<5)	// Clear directory sizes
 #define INSTF_REPEAT			(1<<6)	// Repeating this instruction
 #define INSTF_ABORT_DIR			(1<<7)	// Abort this directory
 
