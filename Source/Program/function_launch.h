@@ -55,36 +55,36 @@ enum
 
 typedef struct _FunctionEntry
 {
-	struct MinNode		node;
-	char			*name;
-	DirEntry		*entry;
-	short			type;
-	short			flags;
-	long			size;
+	struct MinNode		fe_node;
+	char			*fe_name;
+	DirEntry		*fe_entry;
+	short			fe_type;
+	short			fe_flags;
+	long			fe_size;
 } FunctionEntry;
 
 typedef struct
 {
-	struct MinNode		node;
-	short			type;
-	short			flags;
-	DirEntry		*entry;
-	char			*name;
-	char			path[1];
+	struct MinNode		een_node;
+	short			een_type;
+	short			een_flags;
+	DirEntry		*een_entry;
+	char			*een_name;
+	char			een_path[1];
 } ExternalEntry;
 
 typedef struct _InstructionParsed
 {
-	struct MinNode		node;
-	struct _CommandList	*command;
-	short			type;
-	unsigned char		*string;
-	ULONG			flags;
-	char			inst_data[680];
-	ULONG			inst_flags;
-	FuncArgs		*funcargs;
-	short			new_arg;
-	unsigned short		count;
+	struct MinNode		ipa_node;
+	struct _CommandList	*ipa_command;
+	short			ipa_type;
+	unsigned char		*ipa_string;
+	ULONG			ipa_flags;
+	char			ipa_inst_data[680];
+	ULONG			ipa_inst_flags;
+	FuncArgs		*ipa_funcargs;
+	short			ipa_new_arg;
+	unsigned short		ipa_count;
 } InstructionParsed;
 
 typedef struct _AsyncData
@@ -116,11 +116,11 @@ typedef struct _AsyncData
 
 typedef struct _PathNode
 {
-	struct MinNode		node;
-	char			path_buf[512];
-	char			*path;
-	Lister			*lister;
-	ULONG			flags;
+	struct MinNode		pn_node;
+	char			pn_path_buf[512];
+	char			*pn_path;
+	Lister			*pn_lister;
+	ULONG			pn_flags;
 } PathNode;
 
 #define LISTNF_INVALID		(1<<0)	// List is invalid

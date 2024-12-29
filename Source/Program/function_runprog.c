@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -57,7 +57,7 @@ GALILEOFM_FUNC(function_runprog)
 		BPTR file;
 
 		// Does file have an icon? (don't check if not allowed to)
-		if (!(handle->flags&FUNCF_RUN_NO_ICONS) && (icon=GetDiskObject(entry->name)))
+		if (!(handle->flags&FUNCF_RUN_NO_ICONS) && (icon=GetDiskObject(entry->fe_name)))
 		{
 			Lister *lister;
 			char *tool=0;
@@ -69,14 +69,14 @@ GALILEOFM_FUNC(function_runprog)
 				icon->do_DefaultTool[0])
 			{
 				// Test 'more' trap
-				if (file_trap_more(entry->name,icon->do_DefaultTool)) done=1;
+				if (file_trap_more(entry->fe_name,icon->do_DefaultTool)) done=1;
 
 				// Get pointer to tool name
 				else tool=FilePart(icon->do_DefaultTool);
 			}
 
 			// Get pointer to file name
-			else tool=FilePart(entry->name);
+			else tool=FilePart(entry->fe_name);
 
 			// Not run trapped more?
 			if (!done)
@@ -95,7 +95,7 @@ GALILEOFM_FUNC(function_runprog)
 				}
 
 				// Build name with quotes
-				lsprintf(handle->work_buffer,"\"%s\"",entry->name);
+				lsprintf(handle->work_buffer,"\"%s\"",entry->fe_name);
 
 				// Launch program
 				WB_LaunchNew(handle->work_buffer,GUI->screen_pointer,0,environment->env->default_stack,0);
@@ -107,7 +107,7 @@ GALILEOFM_FUNC(function_runprog)
 
 		// No; try to open file
 		else
-		if (file=Open(entry->name,MODE_OLDFILE))
+		if (file=Open(entry->fe_name,MODE_OLDFILE))
 		{
 			char *command,*output,*args;
 			long test;
@@ -137,7 +137,7 @@ GALILEOFM_FUNC(function_runprog)
 				// Build requester text
 				lsprintf(handle->work_buffer+512,
 					GetString(&locale,MSG_ENTER_ARGUMENTS_FOR),
-					entry->name);
+					entry->fe_name);
 
 				// Display requester
 				if (function_request(
@@ -150,7 +150,7 @@ GALILEOFM_FUNC(function_runprog)
 				{
 					// Build command command
 					strcpy(command,"\"");
-					strcat(command,entry->name);
+					strcat(command,entry->fe_name);
 					strcat(command,"\"");
 
 					// Add arguments
@@ -164,7 +164,7 @@ GALILEOFM_FUNC(function_runprog)
 
 			// Otherwise try to lock file
 			else
-			if (file=Lock(entry->name,ACCESS_READ))
+			if (file=Lock(entry->fe_name,ACCESS_READ))
 			{
 				// Examine file
 				Examine(file,handle->s_info);
@@ -175,7 +175,7 @@ GALILEOFM_FUNC(function_runprog)
 				{
 					// Execute script
 					strcpy(command,"execute \"");
-					strcat(command,entry->name);
+					strcat(command,entry->fe_name);
 					strcat(command,"\"");
 				}
 			}

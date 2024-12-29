@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -70,7 +70,7 @@ GALILEOFM_FUNC(function_rename)
 	data=(RenameData *)handle->inst_data;
 
 	// Tell this lister to update it's datestamp at the end
-	path->flags|=LISTNF_UPDATE_STAMP;
+	path->pn_flags|=LISTNF_UPDATE_STAMP;
 
 	// Allocate memory for strings
 	if (!(source_file=AllocVec(1024,MEMF_CLEAR))) return 0;
@@ -95,10 +95,10 @@ GALILEOFM_FUNC(function_rename)
 		function_build_source(handle,entry,source_file);
 
 		// Get destination filename
-		strcpy(dest_name,entry->name);
+		strcpy(dest_name,entry->fe_name);
 
 		// An icon entry?
-		if (entry->flags&FUNCENTF_ICON)
+		if (entry->fe_flags&FUNCENTF_ICON)
 		{
 			// Get new name, tack a .info to the end
 			strcpy(dest_name,new_name);
@@ -112,13 +112,13 @@ GALILEOFM_FUNC(function_rename)
 			if (!data->wild_flag)
 			{
 				// Name supplied in arguments?
-				if (instruction->funcargs &&
-					instruction->funcargs->FA_Arguments[RENAME_NAME] &&
-					instruction->funcargs->FA_Arguments[RENAME_NEWNAME])
+				if (instruction->ipa_funcargs &&
+					instruction->ipa_funcargs->FA_Arguments[RENAME_NAME] &&
+					instruction->ipa_funcargs->FA_Arguments[RENAME_NEWNAME])
 				{
 					// Store names
-					strcpy(data->old_name_edit,FilePart((char *)instruction->funcargs->FA_Arguments[RENAME_NAME]));
-					strcpy(data->new_name_edit,FilePart((char *)instruction->funcargs->FA_Arguments[RENAME_NEWNAME]));
+					strcpy(data->old_name_edit,FilePart((char *)instruction->ipa_funcargs->FA_Arguments[RENAME_NAME]));
+					strcpy(data->new_name_edit,FilePart((char *)instruction->ipa_funcargs->FA_Arguments[RENAME_NEWNAME]));
 					ret=1;
 				}
 
@@ -126,9 +126,9 @@ GALILEOFM_FUNC(function_rename)
 				else
 				{
 					// Ask for a new name
-					strcpy(data->new_name_edit,entry->name);
+					strcpy(data->new_name_edit,entry->fe_name);
 ask_point:
-					strcpy(data->old_name_edit,entry->name);
+					strcpy(data->old_name_edit,entry->fe_name);
 					asked=1;
 					if (!(ret=function_request(
 						handle,
@@ -201,7 +201,7 @@ ask_point:
 				file_ok=rename_get_wild(
 					data->old_name_edit,
 					data->new_name_edit,
-					entry->name,
+					entry->fe_name,
 					dest_name);
 			}
 
@@ -217,14 +217,14 @@ ask_point:
 		if (file_ok)
 		{
 			// Check names are different
-			if (strcmp(dest_name,entry->name)!=0)
+			if (strcmp(dest_name,entry->fe_name)!=0)
 			{
 				// Get destination path
 				strcpy(dest_file,handle->source_path);
 				AddPart(dest_file,dest_name,256);
 
 				// Check destination is ok
-				if ((stricmp(dest_name,entry->name))==0 ||
+				if ((stricmp(dest_name,entry->fe_name))==0 ||
 					(ret=check_file_destination(handle,entry,dest_file,&data->confirm_each))==1)
 				{
 					short suc=0;
@@ -233,7 +233,7 @@ ask_point:
 					while (!suc)
 					{
 						// Got a lister entry?
-						if (entry->entry)
+						if (entry->fe_entry)
 						{
 							// Use original function
 							suc=OriginalRename(source_file,dest_file);
@@ -253,7 +253,7 @@ ask_point:
 						}
 
 						// Display error
-						if (!(ret=function_error(handle,entry->name,MSG_RENAMING,IoErr())) ||
+						if (!(ret=function_error(handle,entry->fe_name,MSG_RENAMING,IoErr())) ||
 							ret==-1) break;
 
 						if (asked) goto ask_point;
@@ -266,7 +266,7 @@ ask_point:
 					BPTR lock;
 
 					// Mark this entry for removal
-					entry->flags|=FUNCENTF_REMOVE;
+					entry->fe_flags|=FUNCENTF_REMOVE;
 
 					// Lock the new file
 					if (lock=Lock(dest_file,ACCESS_READ))
@@ -276,7 +276,7 @@ ask_point:
 						UnLock(lock);
 
 						// Was it a link?
-						if (entry->entry && entry->entry->de_Flags&ENTF_LINK)
+						if (entry->fe_entry && entry->fe_entry->de_Flags&ENTF_LINK)
 						{
 							// Get new name from user string
 							strcpy(handle->s_info->fib_FileName,FilePart(dest_file));
@@ -287,7 +287,7 @@ ask_point:
 						}
 
 						// Add new file to listers
-						function_filechange_addfile(handle,path->path,handle->s_info,0,0);
+						function_filechange_addfile(handle,path->pn_path,handle->s_info,0,0);
 
 						// Is it a directory?
 						if (handle->s_info->fib_DirEntryType>0)

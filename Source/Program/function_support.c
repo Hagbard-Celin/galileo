@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -85,7 +85,7 @@ check_file_destination(
 	confirm=*confirm_flags;
 
 	// If entry is an icon, it's ok
-	if (entry->flags&FUNCENTF_ICON) return 1;
+	if (entry->fe_flags&FUNCENTF_ICON) return 1;
 
 	// If destination doesn't exist it's ok
 	if (!(lock=Lock(destination,ACCESS_READ))) return 1;
@@ -95,7 +95,7 @@ check_file_destination(
 
 	// Get parent directory if we need it
 	if (handle->d_info->fib_DirEntryType<0 &&
-		entry->type<0 &&
+		entry->fe_type<0 &&
 		!(confirm&COPYF_SKIP_ALL) &&
 		!(confirm&COPYF_DELETE_ALL)) dest_lock=ParentDir(lock);
 
@@ -109,7 +109,7 @@ check_file_destination(
 	if (handle->d_info->fib_DirEntryType>0)
 	{
 		// If source is also a directory, that's fine, we can return
-		if (entry->type>0) return 1;
+		if (entry->fe_type>0) return 1;
 
 		// Can't copy a file over a directory
 		lsprintf(handle->work_buffer,
@@ -127,7 +127,7 @@ check_file_destination(
 	}
 
 	// Destination must be a file; is source a directory?
-	if (entry->type>0)
+	if (entry->fe_type>0)
 	{
 		int ret;
 
@@ -181,8 +181,8 @@ check_file_destination(
 		UnLock(lock);
 
 		// Get window
-		if ((path=function_path_current(&handle->source_paths)) && path->lister)
-			win=path->lister->window;
+		if ((path=function_path_current(&handle->source_paths)) && path->pn_lister)
+			win=path->pn_lister->window;
 
 		// Show requester
 		ret=SmartAskReplace(
@@ -331,11 +331,11 @@ BOOL function_check_dirs(FunctionHandle *handle)
 
 	// Go through entry list
 	for (entry=(FunctionEntry *)handle->entry_list.lh_Head;
-		entry->node.mln_Succ;
-		entry=(FunctionEntry *)entry->node.mln_Succ)
+		entry->fe_node.mln_Succ;
+		entry=(FunctionEntry *)entry->fe_node.mln_Succ)
 	{
 		// Is this a directory?
-		if (entry->type>0) return 1;
+		if (entry->fe_type>0) return 1;
 	}
 
 	return 0;
@@ -349,13 +349,13 @@ void function_abort(FunctionHandle *handle)
 
 	// Get current lister
 	if ((node=handle->source_paths.current) &&
-		node->node.mln_Succ)
+		node->pn_node.mln_Succ)
 	{
 		// Display abort text
-		status_abort(node->lister);
+		status_abort(node->pn_lister);
 
 		// Set flag to save title
-		node->flags|=LISTNF_NO_TITLE;
+		node->pn_flags|=LISTNF_NO_TITLE;
 	}
 }
 
@@ -367,13 +367,13 @@ void function_error_text(FunctionHandle *handle,int code)
 
 	// Get current lister
 	if ((node=handle->source_paths.current) &&
-		node->node.mln_Succ)
+		node->pn_node.mln_Succ)
 	{
 		// Display abort text
-		status_display_error(node->lister,code);
+		status_display_error(node->pn_lister,code);
 
 		// Set flag to save title
-		node->flags|=LISTNF_NO_TITLE;
+		node->pn_flags|=LISTNF_NO_TITLE;
 	}
 }
 
@@ -385,13 +385,13 @@ void function_text(FunctionHandle *handle,char *text)
 
 	// Get current lister
 	if ((node=handle->source_paths.current) &&
-		node->node.mln_Succ)
+		node->pn_node.mln_Succ)
 	{
 		// Display text
-		status_text(node->lister,text);
+		status_text(node->pn_lister,text);
 
 		// Set flag to save title
-		node->flags|=LISTNF_NO_TITLE;
+		node->pn_flags|=LISTNF_NO_TITLE;
 	}
 }
 
@@ -407,8 +407,8 @@ function_request(
 	short ret;
 
 	// Get window
-	if ((path=function_path_current(&handle->source_paths)) && path->lister)
-		parent=path->lister->window;
+	if ((path=function_path_current(&handle->source_paths)) && path->pn_lister)
+		parent=path->pn_lister->window;
 
 	// Use screen
 	else
@@ -421,8 +421,8 @@ function_request(
 	ret=super_request(parent,message,handle->ipc,&flags);
 
 	// Let lister update itself
-	if (path && path->lister)
-		IPC_Command(path->lister->ipc,LISTER_CHECK_REFRESH,0,0,0,REPLY_NO_PORT);
+	if (path && path->pn_lister)
+		IPC_Command(path->pn_lister->ipc,LISTER_CHECK_REFRESH,0,0,0,REPLY_NO_PORT);
 
 	return ret;
 }
@@ -439,7 +439,7 @@ void function_cleanup(FunctionHandle *handle,PathNode *node,BOOL full)
 		Lister *lister;
 
 		// Get lister
-		if (lister=node->lister)
+		if (lister=node->pn_lister)
 		{
 			// Get source buffer and lock it
 			buffer=lister->cur_buffer;
@@ -448,15 +448,15 @@ void function_cleanup(FunctionHandle *handle,PathNode *node,BOOL full)
 
 		// Go through entry list
 		for (entry=(FunctionEntry *)handle->entry_list.lh_Head;
-			entry->node.mln_Succ;)
+			entry->fe_node.mln_Succ;)
 		{
-			FunctionEntry *next=(FunctionEntry *)entry->node.mln_Succ;
+			FunctionEntry *next=(FunctionEntry *)entry->fe_node.mln_Succ;
 
 			// Does entry need to be removed?
-			if (entry->flags&FUNCENTF_REMOVE)
+			if (entry->fe_flags&FUNCENTF_REMOVE)
 			{
 				// Add change for remove
-				function_filechange_delfile(handle,node->path,entry->name,0,0);
+				function_filechange_delfile(handle,node->pn_path,entry->fe_name,0,0);
 
 				// Remove entry
 				Remove((struct Node *)entry);
@@ -464,22 +464,22 @@ void function_cleanup(FunctionHandle *handle,PathNode *node,BOOL full)
 
 			// Deselected?
 			else
-			if (entry->flags&FUNCENTF_UNSELECT)
+			if (entry->fe_flags&FUNCENTF_UNSELECT)
 			{
 				// Valid buffer and entry?
-				if (buffer && entry->entry)
+				if (buffer && entry->fe_entry)
 				{
 					// Icon?
-					if (entry->flags&FUNCENTF_ICON_ACTION)
+					if (entry->fe_flags&FUNCENTF_ICON_ACTION)
 					{
 						// Deselect icon
-						((BackdropObject *)entry->entry)->state=0;
+						((BackdropObject *)entry->fe_entry)->state=0;
 
 						// If icon is borderless, show it immediately
-						if (!backdrop_icon_border((BackdropObject *)entry->entry))
+						if (!backdrop_icon_border((BackdropObject *)entry->fe_entry))
 						{
 							// Erase it
-							backdrop_erase_icon(lister->backdrop_info,(BackdropObject *)entry->entry,0);
+							backdrop_erase_icon(lister->backdrop_info,(BackdropObject *)entry->fe_entry,0);
 						}
 
 						// Fix selection count
@@ -488,12 +488,12 @@ void function_cleanup(FunctionHandle *handle,PathNode *node,BOOL full)
 
 					// Normal file
 					else
-					if (entry->entry->de_Flags&ENTF_SELECTED)
-						deselect_entry(buffer,entry->entry);
+					if (entry->fe_entry->de_Flags&ENTF_SELECTED)
+						deselect_entry(buffer,entry->fe_entry);
 				}
 
 				// Clear flag
-				entry->flags&=~FUNCENTF_UNSELECT;
+				entry->fe_flags&=~FUNCENTF_UNSELECT;
 			}
 
 			// Get next
@@ -537,8 +537,8 @@ void function_do_lister_changes(
 
 	// Go through listers
 	for (lister=(PathNode *)list->list.mlh_Head;
-		lister->node.mln_Succ;
-		lister=(PathNode *)lister->node.mln_Succ)
+		lister->pn_node.mln_Succ;
+		lister=(PathNode *)lister->pn_node.mln_Succ)
 	{
 		// Do changes for this lister
 		function_cleanup(handle,lister,1);
@@ -552,29 +552,29 @@ void function_perform_changes(
 	PathNode *path)
 {
 	// Rescan directory?
-	if (path->flags&LISTNF_RESCAN && path->lister)
+	if (path->pn_flags&LISTNF_RESCAN && path->pn_lister)
 	{
 		// Rescan
-		if (path->lister)
-			IPC_Command(path->lister->ipc,LISTER_RESCAN,0,0,0,0);
+		if (path->pn_lister)
+			IPC_Command(path->pn_lister->ipc,LISTER_RESCAN,0,0,0,0);
 
 		// Clear flag
-		path->flags&=~LISTNF_RESCAN;
+		path->pn_flags&=~LISTNF_RESCAN;
 	}
 
 	// Update datestamp?
 	else
-	if (path->flags&LISTNF_UPDATE_STAMP)
+	if (path->pn_flags&LISTNF_UPDATE_STAMP)
 	{
 		// Valid lister?
-		if (path->lister)
-			IPC_Command(path->lister->ipc,LISTER_UPDATE_STAMP,0,0,0,0);
+		if (path->pn_lister)
+			IPC_Command(path->pn_lister->ipc,LISTER_UPDATE_STAMP,0,0,0,0);
 
 		// Otherwise, do global lister update
-		else update_lister_global(path->path);
+		else update_lister_global(path->pn_path);
 
 		// Clear flag
-		path->flags&=~LISTNF_UPDATE_STAMP;
+		path->pn_flags&=~LISTNF_UPDATE_STAMP;
 	}
 }
 
@@ -595,8 +595,8 @@ void function_build_info(FunctionHandle *handle,char *src,char *dst,short which)
 	}
 
 	// Get string pointers
-	if (!src && source) src=source->path;
-	if (!dst && dest) dst=dest->path;
+	if (!src && source) src=source->pn_path;
+	if (!dst && dest) dst=dest->pn_path;
 
 	// Get paths
 	if (src) final_path(src,handle->work_buffer+256);

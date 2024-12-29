@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -140,7 +140,7 @@ GALILEOFM_FUNC(function_search)
 		}
 
 		// Skip directories
-		if (entry->type<0)
+		if (entry->fe_type<0)
 		{
 			APTR file;
 
@@ -192,7 +192,7 @@ GALILEOFM_FUNC(function_search)
 					case RESULT_LEAVE:
 
 						// If entry is recursive, abort this directory
-						if (entry->flags&FUNCENTF_RECURSE)
+						if (entry->fe_flags&FUNCENTF_RECURSE)
 						{
 							handle->instruction_flags|=INSTF_ABORT_DIR;
 						}
@@ -215,7 +215,7 @@ GALILEOFM_FUNC(function_search)
 							buf);
 
 						// If not recursive, leave file selected
-						if (!(entry->flags&FUNCENTF_RECURSE)) file_ok=0;
+						if (!(entry->fe_flags&FUNCENTF_RECURSE)) file_ok=0;
 
 						// Ask what to do
 						if (!(ret=function_request(
@@ -228,7 +228,7 @@ GALILEOFM_FUNC(function_search)
 							GetString(&locale,MSG_ABORT),0)))
 						{
 							// Is file in a directory?
-							if (entry->flags&FUNCENTF_RECURSE)
+							if (entry->fe_flags&FUNCENTF_RECURSE)
 							{
 								char *ptr;
 								PathNode *path;
@@ -237,7 +237,7 @@ GALILEOFM_FUNC(function_search)
 								// Get current path
 								if ((filename=AllocVec(256,0)) &&
 									(path=function_path_current(&handle->source_paths)) &&
-									path->lister)
+									path->pn_lister)
 								{
 									// Copy filename
 									if (ptr=FilePart(handle->work_buffer))
@@ -250,11 +250,11 @@ GALILEOFM_FUNC(function_search)
 									handle->flags=GETDIRF_CANCHECKBUFS|GETDIRF_CANMOVEEMPTY;
 									function_read_directory(
 										handle,
-										path->lister,
+										path->pn_lister,
 										handle->work_buffer);
 
 									// Select file
-									function_select_file(handle,path->lister,filename);
+									function_select_file(handle,path->pn_lister,filename);
 								}
 								FreeVec(filename);
 							}
@@ -274,7 +274,7 @@ GALILEOFM_FUNC(function_search)
 								data->search_result=RESULT_LEAVE;
 
 								// If entry is recursive, abort this directory
-								if (entry->flags&FUNCENTF_RECURSE)
+								if (entry->fe_flags&FUNCENTF_RECURSE)
 									handle->instruction_flags|=INSTF_ABORT_DIR;
 							}
 							break;
@@ -322,7 +322,7 @@ GALILEOFM_FUNC(function_search)
 		if (break_flag) break;
 
 		// Get next entry, increment count
-		if (entry->entry) ++count;
+		if (entry->fe_entry) ++count;
 		function_end_entry(handle,entry,file_ok);
 
 		// Reset result code

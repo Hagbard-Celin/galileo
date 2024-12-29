@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -72,16 +72,16 @@ GALILEOFM_FUNC(function_setbackground)
 	function_build_source(handle,entry,handle->work_buffer);
 
 	// Arguments?
-	if (instruction->funcargs)
+	if (instruction->ipa_funcargs)
 	{
 		// Which type?
-		if (instruction->funcargs->FA_Arguments[ARG_DESKTOP])
+		if (instruction->ipa_funcargs->FA_Arguments[ARG_DESKTOP])
 			which=PATTERN_MAIN;
 		else
-		if (instruction->funcargs->FA_Arguments[ARG_LISTER])
+		if (instruction->ipa_funcargs->FA_Arguments[ARG_LISTER])
 			which=PATTERN_LISTER;
 		else
-		if (instruction->funcargs->FA_Arguments[ARG_REQ])
+		if (instruction->ipa_funcargs->FA_Arguments[ARG_REQ])
 			which=PATTERN_REQ;
 	}
 
@@ -90,15 +90,15 @@ GALILEOFM_FUNC(function_setbackground)
 	colour=environment->env->env_BackgroundBorderColour[which];
 
 	// Arguments?
-	if (instruction->funcargs)
+	if (instruction->ipa_funcargs)
 	{
 		// Tile?
-		if (instruction->funcargs->FA_Arguments[ARG_TILE])
+		if (instruction->ipa_funcargs->FA_Arguments[ARG_TILE])
 			flags&=~(ENVBF_CENTER_PIC|ENVBF_STRETCH_PIC);
 		else
 
 		// Stretch?
-		if (instruction->funcargs->FA_Arguments[ARG_STRETCH] && which==PATTERN_MAIN)
+		if (instruction->ipa_funcargs->FA_Arguments[ARG_STRETCH] && which==PATTERN_MAIN)
 		{
 			flags&=~ENVBF_CENTER_PIC;
 			flags|=ENVBF_STRETCH_PIC;
@@ -106,21 +106,21 @@ GALILEOFM_FUNC(function_setbackground)
 		else
 
 		// Center
-		if (instruction->funcargs->FA_Arguments[ARG_CENTER])
+		if (instruction->ipa_funcargs->FA_Arguments[ARG_CENTER])
 		{
 			flags&=~ENVBF_STRETCH_PIC;
 			flags|=ENVBF_CENTER_PIC;
 		}
 
 		// Precision?
-		if (instruction->funcargs->FA_Arguments[ARG_PRECISION])
+		if (instruction->ipa_funcargs->FA_Arguments[ARG_PRECISION])
 		{
 			short a;
 
 			// Find keyword match
 			for (a=0;precision_key[a];a++)
 			{
-				if (stricmp((char *)instruction->funcargs->FA_Arguments[ARG_PRECISION],precision_key[a])==0)
+				if (stricmp((char *)instruction->ipa_funcargs->FA_Arguments[ARG_PRECISION],precision_key[a])==0)
 				{
 					// Clear precision flags
 					flags&=~(ENVBF_PRECISION_NONE|ENVBF_PRECISION_GUI|ENVBF_PRECISION_ICON|ENVBF_PRECISION_IMAGE|ENVBF_PRECISION_EXACT);
@@ -133,15 +133,15 @@ GALILEOFM_FUNC(function_setbackground)
 		}
 
 		// Border?
-		if (instruction->funcargs->FA_Arguments[ARG_BORDER])
+		if (instruction->ipa_funcargs->FA_Arguments[ARG_BORDER])
 		{
 			// Off?
-			if (stricmp((char *)instruction->funcargs->FA_Arguments[ARG_BORDER],"off")==0)
+			if (stricmp((char *)instruction->ipa_funcargs->FA_Arguments[ARG_BORDER],"off")==0)
 				flags&=~ENVBF_USE_COLOUR;
 			else
 			{
 				flags|=ENVBF_USE_COLOUR;
-				colour=Atoh((char *)instruction->funcargs->FA_Arguments[ARG_BORDER],-1)<<8;
+				colour=Atoh((char *)instruction->ipa_funcargs->FA_Arguments[ARG_BORDER],-1)<<8;
 			}
 		}
 	}

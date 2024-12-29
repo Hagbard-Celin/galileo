@@ -2501,14 +2501,14 @@ void select_global_wild(Lister *lister,SelectData *data,PathList *dest_list)
 				{
 					// Go through destination lists
 					for (node=(PathNode *)dest_list->list.mlh_Head;
-						node->node.mln_Succ;
-						node=(PathNode *)node->node.mln_Succ)
+						node->pn_node.mln_Succ;
+						node=(PathNode *)node->pn_node.mln_Succ)
 					{
 						// Valid lister?
-						if (!node->lister || node->flags&LISTNF_INVALID)
+						if (!node->pn_lister || node->pn_flags&LISTNF_INVALID)
 							continue;
 						// See if lister contains an entry by this name
-						if ((dest_entry=find_entry(&node->lister->cur_buffer->entry_list,entry->de_Node.dn_Name,0,node->lister->cur_buffer->more_flags&DWF_CASE)) &&
+						if ((dest_entry=find_entry(&node->pn_lister->cur_buffer->entry_list,entry->de_Node.dn_Name,0,node->pn_lister->cur_buffer->more_flags&DWF_CASE)) &&
 							dest_entry->de_Node.dn_Type==entry->de_Node.dn_Type)
 						{
 							if (data->compare==SELECT_COMPARE_NEWER)

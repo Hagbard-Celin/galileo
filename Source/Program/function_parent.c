@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -45,10 +45,10 @@ GALILEOFM_FUNC(function_parent)
 
 	// Get current source lister
 	if (!(path=function_path_current(&handle->source_paths)) ||
-		!path->lister) return 0;
+		!path->pn_lister) return 0;
 
 	// Get current path
-	strcpy(handle->inst_data,path->path);
+	strcpy(handle->inst_data,path->pn_path);
 
 	// Try twice
 	for (a=0;a<2;a++)
@@ -80,7 +80,7 @@ GALILEOFM_FUNC(function_parent)
 	{
 		// Read directory
 		handle->flags=GETDIRF_CANCHECKBUFS|GETDIRF_CANMOVEEMPTY;
-		function_read_directory(handle,path->lister,handle->inst_data);
+		function_read_directory(handle,path->pn_lister,handle->inst_data);
 	}
 
 	return 1;

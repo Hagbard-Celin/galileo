@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -82,8 +82,8 @@ GALILEOFM_FUNC(function_delete)
 	}
 
 	// Quiet?
-	if (instruction->funcargs &&
-		instruction->funcargs->FA_Arguments[DELARG_QUIET]) data->confirm_each=0;
+	if (instruction->ipa_funcargs &&
+		instruction->ipa_funcargs->FA_Arguments[DELARG_QUIET]) data->confirm_each=0;
 
 	// Allocate memory for source path
 	if (!(source_file=AllocVec(512,MEMF_CLEAR)))
@@ -96,7 +96,7 @@ GALILEOFM_FUNC(function_delete)
 		if (entry=function_get_entry(handle))
 		{
 			// Is is the trashcan?
-			if (stricmp(entry->name,"trashcan")==0)
+			if (stricmp(entry->fe_name,"trashcan")==0)
 			{
 				struct DiskObject *icon;
 
@@ -175,10 +175,10 @@ GALILEOFM_FUNC(function_delete)
 	if (path=function_path_current(&handle->source_paths))
 	{
 		// Tell this lister to update it's datestamp at the end
-		path->flags|=LISTNF_UPDATE_STAMP;
+		path->pn_flags|=LISTNF_UPDATE_STAMP;
 
 		// Check desktop
-		if (HookMatchDesktop(path->path_buf))
+		if (HookMatchDesktop(path->pn_path_buf))
 			handle->flags|=FUNCF_RESCAN_DESKTOP;
 	}
 
@@ -199,7 +199,7 @@ GALILEOFM_FUNC(function_delete)
 	if (environment->env->settings.copy_flags)
 	{
 		// Valid lister?
-		if (path && path->lister && lister_valid_window(path->lister))
+		if (path && path->pn_lister && lister_valid_window(path->pn_lister))
 		{
 			// Create timer for regular updates
 			if (timer=AllocTimer(UNIT_VBLANK,0))
@@ -216,7 +216,7 @@ GALILEOFM_FUNC(function_delete)
 		if (timer && CheckTimer(timer))
 		{
 			// Send update message
-			IPC_Command(path->lister->ipc,LISTER_REFRESH_NAME,0,0,0,0);
+			IPC_Command(path->pn_lister->ipc,LISTER_REFRESH_NAME,0,0,0,0);
 
 			// Restart timer
 			StartTimer(timer,DELETE_UPDATE_TIME,0);
@@ -254,7 +254,7 @@ GALILEOFM_FUNC(function_delete)
 		}
 
 		// Check this isn't an exited directory
-		if (!(entry->flags&FUNCENTF_EXITED))
+		if (!(entry->fe_flags&FUNCENTF_EXITED))
 		{
 			// Confirm each is on?
 			if (data->confirm_each)
@@ -262,16 +262,16 @@ GALILEOFM_FUNC(function_delete)
 				BOOL ask=1;
 
 				// Got a directory?
-				if (entry->type>0) change_info=1;
+				if (entry->fe_type>0) change_info=1;
 
 				// Is entry a top-level directory?
-				if (entry->flags&FUNCENTF_TOP_LEVEL &&
-					entry->type>0 &&
-					!(entry->flags&FUNCENTF_LINK) &&
+				if (entry->fe_flags&FUNCENTF_TOP_LEVEL &&
+					entry->fe_type>0 &&
+					!(entry->fe_flags&FUNCENTF_LINK) &&
 					environment->env->settings.delete_flags&DELETE_DIRS)
 				{
 					// Skip if the trashcan
-					if (del_trash && stricmp(entry->name,"trashcan")==0) ask=0;
+					if (del_trash && stricmp(entry->fe_name,"trashcan")==0) ask=0;
 
 					// Build requester text
 					else
@@ -283,8 +283,8 @@ GALILEOFM_FUNC(function_delete)
 
 				// Ask for confirmation for normal file?
 				else
-				if ((entry->flags&FUNCENTF_LINK || entry->type<0) &&
-					!(entry->flags&FUNCENTF_ICON) &&
+				if ((entry->fe_flags&FUNCENTF_LINK || entry->fe_type<0) &&
+					!(entry->fe_flags&FUNCENTF_ICON) &&
 					environment->env->settings.delete_flags&DELETE_FILES)
 				{
 					// Build requester text
@@ -336,7 +336,7 @@ GALILEOFM_FUNC(function_delete)
 			change_info=1;
 
 			// If this is the trashcan, don't really delete the directory
-			if (del_trash && stricmp(entry->name,"trashcan")==0)
+			if (del_trash && stricmp(entry->fe_name,"trashcan")==0)
 				ret=0;
 		}
 
@@ -346,7 +346,7 @@ GALILEOFM_FUNC(function_delete)
 			short try=0;
 
 			// Directory?
-			if (entry->type>0 && !(entry->flags&FUNCENTF_EXITED) && !(entry->flags&FUNCENTF_LINK))
+			if (entry->fe_type>0 && !(entry->fe_flags&FUNCENTF_EXITED) && !(entry->fe_flags&FUNCENTF_LINK))
 			{
 				// Skip this entry
 				ret=2;
@@ -360,7 +360,7 @@ GALILEOFM_FUNC(function_delete)
 				short err_code;
 
 				// Delete file
-				ret=GalileoDeleteFile(source_file,handle,delete_cmd,(entry->entry)?1:0);
+				ret=GalileoDeleteFile(source_file,handle,delete_cmd,(entry->fe_entry)?1:0);
 
 				// Increment try count
 				++try;
@@ -453,13 +453,13 @@ GALILEOFM_FUNC(function_delete)
 
 					// Otherwise
 					else
-					if ((ret=function_error(handle,entry->name,MSG_DELETING,err_code))==-1)
+					if ((ret=function_error(handle,entry->fe_name,MSG_DELETING,err_code))==-1)
 						break;
 				}
 			}
 
 			// Successful?
-			if (ret==1) entry->flags|=FUNCENTF_REMOVE;
+			if (ret==1) entry->fe_flags|=FUNCENTF_REMOVE;
 			else
 			if (ret!=2) file_ok=0;
 		}

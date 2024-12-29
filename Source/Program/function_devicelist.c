@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -70,8 +70,8 @@ GALILEOFM_FUNC(function_devicelist)
 	DirBuffer *custom=0;
 
 	// New lister?
-	if (instruction->funcargs &&
-		instruction->funcargs->FA_Arguments[ARG_NEW] &&
+	if (instruction->ipa_funcargs &&
+		instruction->ipa_funcargs->FA_Arguments[ARG_NEW] &&
 		!(handle->result_flags&FRESULTF_MADE_LISTER))
 	{
 		// Open new lister
@@ -84,15 +84,15 @@ GALILEOFM_FUNC(function_devicelist)
 				lister->lister->lister.flags|=GLSTF_DEVICE_LIST;
 
 				// Which sort of device-list?
-				if (instruction->funcargs)
+				if (instruction->ipa_funcargs)
 				{
 					// Full?
-					if (instruction->funcargs->FA_Arguments[ARG_FULL])
+					if (instruction->ipa_funcargs->FA_Arguments[ARG_FULL])
 						lister->lister->lister.flags|=GLSTF_DEV_FULL;
 
 					// Brief?
 					else
-					if (instruction->funcargs->FA_Arguments[ARG_BRIEF])
+					if (instruction->ipa_funcargs->FA_Arguments[ARG_BRIEF])
 						lister->lister->lister.flags|=GLSTF_DEV_BRIEF;
 				}
 			}
@@ -239,10 +239,10 @@ GALILEOFM_FUNC(function_devicelist)
         lister->more_flags|=LISTERF_FAKEDIR;
 
 		// Which sort of device-list?
-		if (instruction->funcargs)
+		if (instruction->ipa_funcargs)
 		{
 			// Full?
-			if (instruction->funcargs->FA_Arguments[ARG_FULL])
+			if (instruction->ipa_funcargs->FA_Arguments[ARG_FULL])
 			{
 				full=1;
 				lister->cur_buffer->more_flags|=DWF_DEV_FULL;
@@ -250,7 +250,7 @@ GALILEOFM_FUNC(function_devicelist)
 
 			// Brief?
 			else
-			if (instruction->funcargs->FA_Arguments[ARG_BRIEF])
+			if (instruction->ipa_funcargs->FA_Arguments[ARG_BRIEF])
 			{
 				brief=1;
 				lister->cur_buffer->more_flags|=DWF_DEV_BRIEF;

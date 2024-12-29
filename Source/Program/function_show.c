@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -48,8 +48,8 @@ GALILEOFM_FUNC(function_show)
 	BOOL sync_flag=0;
 
 	// Got arguments? See if 'wait' flag is set
-	if (instruction->funcargs &&
-		instruction->funcargs->FA_Arguments[1]) sync_flag=1;
+	if (instruction->ipa_funcargs &&
+		instruction->ipa_funcargs->FA_Arguments[1]) sync_flag=1;
 
 	// Or, set in function
 	else
@@ -77,7 +77,7 @@ GALILEOFM_FUNC(function_show)
 				lsprintf(
 					handle->work_buffer,
 					GetString(&locale,MSG_SNIFF_CONFIRMATION),
-					entry->name);
+					entry->fe_name);
 
 				// Ask for confirmation
 				if ((ret=function_request(
@@ -205,17 +205,17 @@ GALILEOFM_FUNC(function_show)
 		struct Window *window=0;
 
 		// Got arguments?
-		if (instruction->funcargs)
+		if (instruction->ipa_funcargs)
 		{
 			// Quiet?
-			if (instruction->funcargs->FA_Arguments[2]) func=FUNC_PLAY_QUIET;
+			if (instruction->ipa_funcargs->FA_Arguments[2]) func=FUNC_PLAY_QUIET;
 
 			// Iconified?
 			else
-			if (instruction->funcargs->FA_Arguments[3]) func=FUNC_PLAY_ICON;
+			if (instruction->ipa_funcargs->FA_Arguments[3]) func=FUNC_PLAY_ICON;
 
 			// Volume?
-			if (instruction->funcargs->FA_Arguments[4]) volume=*((ULONG *)instruction->funcargs->FA_Arguments[4]);
+			if (instruction->ipa_funcargs->FA_Arguments[4]) volume=*((ULONG *)instruction->ipa_funcargs->FA_Arguments[4]);
 		}
 
 		// Current lister?
@@ -339,7 +339,7 @@ GALILEOFM_FUNC(function_show)
 				if (node->node.lve_Flags&(SHOWF_SELECTED|SHOWF_DELETE))
 				{
 					// Clear 'unselect' flag
-					((FunctionEntry *)node->data)->flags&=~FUNCENTF_UNSELECT;
+					((FunctionEntry *)node->data)->fe_flags&=~FUNCENTF_UNSELECT;
 
 					// Delete?
 					if (node->node.lve_Flags&SHOWF_DELETE)
@@ -394,8 +394,8 @@ void function_iconinfo_update(FunctionHandle *handle,Att_List *list)
 				entry=(FunctionEntry *)node->data;
 
 				// Reload file and icon
-				function_filechange_reloadfile(handle,handle->source_path,entry->name,0);
-				function_filechange_reloadfile(handle,handle->source_path,entry->name,FFLF_ICON);
+				function_filechange_reloadfile(handle,handle->source_path,entry->fe_name,0);
+				function_filechange_reloadfile(handle,handle->source_path,entry->fe_name,FFLF_ICON);
 			}
 		}
 	}

@@ -33,7 +33,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -174,7 +174,7 @@ BOOL function_launch(
 					handle->dest_path[len])
 				{
 					// Mark node as having a changed path
-					path->flags|=LISTNF_CHANGED;
+					path->pn_flags|=LISTNF_CHANGED;
 				}
 			}
 		}
@@ -353,7 +353,7 @@ void __saveds function_launch_code(void)
 					if (source_list->flags&(LISTERF_VIEW_ICONS|LISTERF_ICON_ACTION))
 					{
 						// Set 'no refresh' flag
-						((PathNode *)handle->source_paths.list.mlh_Head)->flags|=LISTNF_NO_REFRESH;
+						((PathNode *)handle->source_paths.list.mlh_Head)->pn_flags|=LISTNF_NO_REFRESH;
 					}
 
 					// Clear 'first time' flag
@@ -376,7 +376,7 @@ void __saveds function_launch_code(void)
 					lister_get_icons(handle,source_list,0,0);
 
 					// Set 'no refresh' flag
-					((PathNode *)handle->source_paths.list.mlh_Head)->flags|=LISTNF_NO_REFRESH;
+					((PathNode *)handle->source_paths.list.mlh_Head)->pn_flags|=LISTNF_NO_REFRESH;
 				}
 			}
 			break;
@@ -496,30 +496,30 @@ BOOL function_check_abort(FunctionHandle *handle)
 			{
 				// Go through lists and see if lister in there
 				for (node=(PathNode *)handle->source_paths.list.mlh_Head;
-					node->node.mln_Succ;
-					node=(PathNode *)node->node.mln_Succ)
+					node->pn_node.mln_Succ;
+					node=(PathNode *)node->pn_node.mln_Succ)
 				{
 					// Match lister?
-					if (node->lister==lister)
+					if (node->pn_lister==lister)
 					{
 						// Remove this node, and clear lister pointer
 						Remove((struct Node *)node);
-						node->lister=0;
+						node->pn_lister=0;
 						break;
 					}
 				}
 
 				// Go through lists and see if lister in there
 				for (node=(PathNode *)handle->dest_paths.list.mlh_Head;
-					node->node.mln_Succ;
-					node=(PathNode *)node->node.mln_Succ)
+					node->pn_node.mln_Succ;
+					node=(PathNode *)node->pn_node.mln_Succ)
 				{
 					// Match lister?
-					if (node->lister==lister)
+					if (node->pn_lister==lister)
 					{
 						// Remove this node, and clear lister pointer
 						Remove((struct Node *)node);
-						node->lister=0;
+						node->pn_lister=0;
 						break;
 					}
 				}
@@ -535,21 +535,21 @@ BOOL function_check_abort(FunctionHandle *handle)
 
 	// Go through lists and see if the abort flag is set
 	for (node=(PathNode *)handle->source_paths.list.mlh_Head;
-		node->node.mln_Succ;
-		node=(PathNode *)node->node.mln_Succ)
+		node->pn_node.mln_Succ;
+		node=(PathNode *)node->pn_node.mln_Succ)
 	{
 		// Valid lister?
-		if (node->lister && (node->lister->flags&LISTERF_ABORTED))
+		if (node->pn_lister && (node->pn_lister->flags&LISTERF_ABORTED))
 			return 1;
 	}
 
 	// Go through lists and see if the abort flag is set
 	for (node=(PathNode *)handle->dest_paths.list.mlh_Head;
-		node->node.mln_Succ;
-		node=(PathNode *)node->node.mln_Succ)
+		node->pn_node.mln_Succ;
+		node=(PathNode *)node->pn_node.mln_Succ)
 	{
 		// Valid lister?
-		if (node->lister && (node->lister->flags&LISTERF_ABORTED))
+		if (node->pn_lister && (node->pn_lister->flags&LISTERF_ABORTED))
 			return 1;
 	}
 
@@ -617,18 +617,18 @@ BOOL function_lock_paths(FunctionHandle *handle,PathList *list,int locker)
 
 	// Go through list of paths
 	for (node=(PathNode *)list->list.mlh_Head;
-		node->node.mln_Succ;)
+		node->pn_node.mln_Succ;)
 	{
-		PathNode *next=(PathNode *)node->node.mln_Succ;
+		PathNode *next=(PathNode *)node->pn_node.mln_Succ;
 
 		// Check path not already locked
-		if (node->lister && !(node->flags&LISTNF_LOCKED))
+		if (node->pn_lister && !(node->pn_flags&LISTNF_LOCKED))
 		{
 			// Lister not available first time unless this is a read dir op
-			if (node->lister->flags2&LISTERF2_UNAVAILABLE && locker!=3)
+			if (node->pn_lister->flags2&LISTERF2_UNAVAILABLE && locker!=3)
 			{
 				// Clear lister
-				node->lister=0;
+				node->pn_lister=0;
 			}
 
 			// No lister sources?
@@ -636,18 +636,18 @@ BOOL function_lock_paths(FunctionHandle *handle,PathList *list,int locker)
 			if (handle->flags&FUNCF_NO_SOURCE)
 			{
                 // Clear lister
-				node->lister=0;
+				node->pn_lister=0;
 			}
 
 			// Check lister is valid
 			else
-			if (node->lister=function_valid_lister(handle,node->lister))
+			if (node->pn_lister=function_valid_lister(handle,node->pn_lister))
 			{
 				IPCMessage *msg;
 
                 // Make lister busy
 				IPC_Command(
-					node->lister->ipc,
+					node->pn_lister->ipc,
 					LISTER_BUSY,
 					0,
 					(APTR)1,
@@ -668,7 +668,7 @@ BOOL function_lock_paths(FunctionHandle *handle,PathList *list,int locker)
 					if (locker)
 					{
 						IPC_Command(
-							node->lister->ipc,
+							node->pn_lister->ipc,
 							LISTER_SET_LOCKER,
 							0,
 							handle->ipc,
@@ -677,13 +677,13 @@ BOOL function_lock_paths(FunctionHandle *handle,PathList *list,int locker)
 					}
 
 					// Set lock flag
-					node->flags|=LISTNF_LOCKED;
+					node->pn_flags|=LISTNF_LOCKED;
 				}
 
 				// Don't use lister
 				else
 				{
-					node->lister=0;
+					node->pn_lister=0;
 					result=0;
 				}
 
@@ -719,24 +719,24 @@ void function_unlock_paths(FunctionHandle *handle,PathList *list,int locker)
 
 	// Go through list of listers
 	for (node=(PathNode *)list->list.mlh_Head;
-		node->node.mln_Succ;
-		node=(PathNode *)node->node.mln_Succ)
+		node->pn_node.mln_Succ;
+		node=(PathNode *)node->pn_node.mln_Succ)
 	{
 		// Valid lister?
-		if (node->lister)
+		if (node->pn_lister)
 		{
 			// Check list is locked by us
-			if (node->flags&LISTNF_LOCKED)
+			if (node->pn_flags&LISTNF_LOCKED)
 			{
 				ULONG ref;
 
 				// Clear lock flag
-				node->flags&=~LISTNF_LOCKED;
+				node->pn_flags&=~LISTNF_LOCKED;
 
 				// Clear locker
 				if (locker)
 					IPC_Command(
-						node->lister->ipc,
+						node->pn_lister->ipc,
 						LISTER_SET_LOCKER,
 						0,
 						0,
@@ -745,7 +745,7 @@ void function_unlock_paths(FunctionHandle *handle,PathList *list,int locker)
 
 				// Clear busy
 				IPC_Command(
-					node->lister->ipc,
+					node->pn_lister->ipc,
 					LISTER_BUSY,
 					0,
 					(APTR)0,
@@ -753,23 +753,23 @@ void function_unlock_paths(FunctionHandle *handle,PathList *list,int locker)
 					(locker)?REPLY_NO_PORT:0);
 
 				// Allowed to refresh?
-				if (!(node->flags&LISTNF_NO_REFRESH))
+				if (!(node->pn_flags&LISTNF_NO_REFRESH))
 				{
 					// Refresh flags
 					ref=REFRESHF_SLIDERS;
 					if (handle->result_flags&FRESULTF_RESORT) ref|=REFRESHF_RESORT;
-					if (node->lister->flags&LISTERF_VIEW_ICONS) ref|=REFRESHF_ICONS;
-					if (!(node->flags&LISTNF_NO_TITLE)) ref|=REFRESHF_UPDATE_NAME|REFRESHF_STATUS;
+					if (node->pn_lister->flags&LISTERF_VIEW_ICONS) ref|=REFRESHF_ICONS;
+					if (!(node->pn_flags&LISTNF_NO_TITLE)) ref|=REFRESHF_UPDATE_NAME|REFRESHF_STATUS;
 
 					// Refresh lister
-					IPC_Command(node->lister->ipc,LISTER_REFRESH_WINDOW,ref,0,0,0);
+					IPC_Command(node->pn_lister->ipc,LISTER_REFRESH_WINDOW,ref,0,0,0);
 
 					// Update title
-					IPC_Command(node->lister->ipc,LISTER_SHOW_INFO,0,0,0,0);
+					IPC_Command(node->pn_lister->ipc,LISTER_SHOW_INFO,0,0,0,0);
 				}
 
 				// Set flag to indicate deferred title update
-				if (node->flags&LISTNF_NO_TITLE) node->lister->flags|=LISTERF_SHOW_TITLE;
+				if (node->pn_flags&LISTNF_NO_TITLE) node->pn_lister->flags|=LISTERF_SHOW_TITLE;
 			}
 		}
 	}
@@ -832,7 +832,7 @@ BOOL function_progress_update(
 		// Allocate memory for name
 		if (name=AllocMemH(
 			handle->progress_lister->progress_memory,
-			strlen((file=FilePart(entry->name)))+1))
+			strlen((file=FilePart(entry->fe_name)))+1))
 		{
 			// Copy name
 			strcpy(name,file);
@@ -893,7 +893,7 @@ Lister *function_get_paths(
 
 	// Is there a path already in the list?
 	if (!(IsListEmpty((struct List *)list)))
-		first=((PathNode *)list->list.mlh_Head)->lister;
+		first=((PathNode *)list->list.mlh_Head)->pn_lister;
 
 	// No first lister yet?
 	if (!first)
@@ -904,8 +904,8 @@ Lister *function_get_paths(
 			// Add to head of the list
 			if (node=AllocMemH(handle->memory,sizeof(PathNode)))
 			{
-				node->lister=first;
-				node->flags=0;
+				node->pn_lister=first;
+				node->pn_flags=0;
 				AddHead((struct List *)list,(struct Node *)node);
 			}
 		}
@@ -945,8 +945,8 @@ Lister *function_get_paths(
 						if (node=AllocMemH(handle->memory,sizeof(PathNode)))
 						{
 							// Add to list
-							node->lister=lister;
-							node->flags=0;
+							node->pn_lister=lister;
+							node->pn_flags=0;
 							AddTail((struct List *)list,(struct Node *)node);
 						}
 					}

@@ -32,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -176,8 +176,8 @@ GALILEOFM_FUNC(function_copy)
 
 	// Copy or CopyAs, with Move flag set?
 	else
-	if ((function==(FUNC_COPY || FUNC_MCOPY) && instruction->funcargs && instruction->funcargs->FA_Arguments[COPY_MOVESAME]) ||
-		(function==(FUNC_COPYAS || FUNC_MCOPYAS) && instruction->funcargs && instruction->funcargs->FA_Arguments[COPYAS_MOVESAME]))
+	if ((function==(FUNC_COPY || FUNC_MCOPY) && instruction->ipa_funcargs && instruction->ipa_funcargs->FA_Arguments[COPY_MOVESAME]) ||
+		(function==(FUNC_COPYAS || FUNC_MCOPYAS) && instruction->ipa_funcargs && instruction->ipa_funcargs->FA_Arguments[COPYAS_MOVESAME]))
 	{
 		// See if paths are the same device
 		if (function_check_same_path(handle->source_path,handle->dest_path)==LOCK_SAME_VOLUME)
@@ -194,18 +194,18 @@ GALILEOFM_FUNC(function_copy)
 		short invalid=0,ret;
 
 		// See if the paths are the same
-		if ((ret=function_check_same_path(handle->source_path,path->path))==LOCK_SAME)
+		if ((ret=function_check_same_path(handle->source_path,path->pn_path))==LOCK_SAME)
 		{
 			// Mark as the same
-			path->flags|=LISTNF_SAME;
+			path->pn_flags|=LISTNF_SAME;
 
 			// If not clone or *as, we can't do this
 			if (function!=FUNC_CLONE &&
 				function!=FUNC_MOVEAS &&
 				function!=FUNC_COPYAS &&
-                function!=FUNC_MCOPYAS &&
+		function!=FUNC_MCOPYAS &&
 				function!=FUNC_MAKELINKAS &&
-                function!=FUNC_MMAKELINKAS)
+		function!=FUNC_MMAKELINKAS)
 			{
 				// Don't show requester for drag & drop
 				if (!dragdrop)
@@ -230,7 +230,7 @@ GALILEOFM_FUNC(function_copy)
 		if (!invalid)
 		{
 			// Tell this lister to update it's datestamp at the end
-			path->flags|=LISTNF_UPDATE_STAMP;
+			path->pn_flags|=LISTNF_UPDATE_STAMP;
 
 			// Increment count
 			++dest_count;
@@ -280,7 +280,7 @@ GALILEOFM_FUNC(function_copy)
 	}
 
 	// Args?
-	if (instruction->funcargs)
+	if (instruction->ipa_funcargs)
 	{
 		short arg=0;
 
@@ -298,18 +298,18 @@ GALILEOFM_FUNC(function_copy)
 			arg=ENCRYPT_QUIET;
 
 		// Quiet?		
-		if (instruction->funcargs->FA_Arguments[arg])
+		if (instruction->ipa_funcargs->FA_Arguments[arg])
 			data->confirm_each=COPYF_DELETE_ALL|COPYF_UNPROTECT_ALL;
 
 		// Copy?
 		if (function==(FUNC_COPY || FUNC_MCOPY))
 		{
 			// Update?
-			if (instruction->funcargs->FA_Arguments[COPY_UPDATEC]) copy_flags|=COPY_UPDATE_COPY;
+			if (instruction->ipa_funcargs->FA_Arguments[COPY_UPDATEC]) copy_flags|=COPY_UPDATE_COPY;
 
 			// Newer?
 			else
-			if (instruction->funcargs->FA_Arguments[COPY_NEWER]) copy_flags|=COPY_NEWER_COPY;
+			if (instruction->ipa_funcargs->FA_Arguments[COPY_NEWER]) copy_flags|=COPY_NEWER_COPY;
 		}
 	}
 
@@ -317,7 +317,7 @@ GALILEOFM_FUNC(function_copy)
 	if (move_flag || source_same)
 	{
 		// Tell source to update its datestamp
-		source->flags|=LISTNF_UPDATE_STAMP;
+		source->pn_flags|=LISTNF_UPDATE_STAMP;
 	}
 
 	// Initialise file count
@@ -331,7 +331,7 @@ GALILEOFM_FUNC(function_copy)
 		function_progress_file(handle,0,2);
 
 		// See if source is the desktop
-		if (source && HookMatchDesktop(source->path_buf))
+		if (source && HookMatchDesktop(source->pn_path_buf))
 			handle->flags|=FUNCF_RESCAN_DESKTOP;
 	}
 
@@ -344,14 +344,14 @@ GALILEOFM_FUNC(function_copy)
 		BOOL file_ok=1;
 
 		// Is source a device (in drag'n'drop operation)?
-		if (!(entry->flags&FUNCENTF_EXITED) &&
-			entry->name[strlen(entry->name)-1]==':' && dragdrop)
+		if (!(entry->fe_flags&FUNCENTF_EXITED) &&
+			entry->fe_name[strlen(entry->fe_name)-1]==':' && dragdrop)
 		{
 			BPTR lock;
 
 			// See if source is the same device
 			if (move_flag &&
-				function_check_same_path(entry->name,handle->dest_path)==LOCK_SAME_VOLUME)
+				function_check_same_path(entry->fe_name,handle->dest_path)==LOCK_SAME_VOLUME)
 			{
 				// Skip over this entry
 				DisplayBeep(GUI->screen_pointer);
@@ -360,7 +360,7 @@ GALILEOFM_FUNC(function_copy)
 			}
 
 			// Lock and examine source path
-			if (lock=Lock(entry->name,ACCESS_READ))
+			if (lock=Lock(entry->fe_name,ACCESS_READ))
 			{
 				struct DiskObject *icon;
 
@@ -372,7 +372,7 @@ GALILEOFM_FUNC(function_copy)
 				UnLock(lock);
 
 				// Get disk icon
-				lsprintf(handle->work_buffer,"%sDisk",entry->name);
+				lsprintf(handle->work_buffer,"%sDisk",entry->fe_name);
 				if (!(icon=GetDiskObject(handle->work_buffer)))
 				{
 					// Use default drawer icon
@@ -393,7 +393,7 @@ GALILEOFM_FUNC(function_copy)
 				if (path=function_path_current(&handle->dest_paths))
 				{
 					// Build destination path
-					strcpy(handle->work_buffer,path->path);
+					strcpy(handle->work_buffer,path->pn_path);
 					AddPart(handle->work_buffer,handle->d_info->fib_FileName,512);
 
 					// Create directory
@@ -414,20 +414,20 @@ GALILEOFM_FUNC(function_copy)
 								// Add to listers
 								function_filechange_loadfile(
 									handle,
-									path->path,
+									path->pn_path,
 									handle->d_info->fib_FileName,
 									FFLF_ICON);
 							}
 						}
 
 						// Add new directory
-						function_filechange_addfile(handle,path->path,handle->s_info,0,0);
+						function_filechange_addfile(handle,path->pn_path,handle->s_info,0,0);
 					}
 
 					// Fix path node
-					strcpy(path->path_buf,path->path);
-					AddPart(path->path_buf,handle->d_info->fib_FileName,512);
-					path->flags|=LISTNF_CHANGED;
+					strcpy(path->pn_path_buf,path->pn_path);
+					AddPart(path->pn_path_buf,handle->d_info->fib_FileName,512);
+					path->pn_flags|=LISTNF_CHANGED;
 				}
 
 				// Free icon
@@ -447,10 +447,10 @@ GALILEOFM_FUNC(function_copy)
 		function_build_source(handle,entry,source_file);
 
 		// Get destination filename
-		strcpy(dest_name,entry->name);
+		strcpy(dest_name,entry->fe_name);
 
 		// Check this isn't an exited directory
-		if (!(entry->flags&FUNCENTF_EXITED))
+		if (!(entry->fe_flags&FUNCENTF_EXITED))
 		{
 			// Copy as/Move as/MakeLink as/Clone?
 			if (function==FUNC_COPYAS || function==FUNC_MCOPYAS ||
@@ -459,10 +459,10 @@ GALILEOFM_FUNC(function_copy)
 				function==FUNC_CLONE)
 			{
 				// Not recurse entry?
-				if (!(entry->flags&FUNCENTF_RECURSE))
+				if (!(entry->fe_flags&FUNCENTF_RECURSE))
 				{
 					// An icon entry?
-					if (entry->flags&FUNCENTF_ICON)
+					if (entry->fe_flags&FUNCENTF_ICON)
 					{
 						// Get new name, tack a .info to the end
 						strcpy(dest_name,new_name);
@@ -476,13 +476,13 @@ GALILEOFM_FUNC(function_copy)
 						if (!data->func.copy.wild_copy)
 						{
 							// Name supplied in arguments?
-							if (instruction->funcargs &&
-								instruction->funcargs->FA_Arguments[COPYAS_NAME] &&
-								instruction->funcargs->FA_Arguments[COPYAS_NEWNAME])
+							if (instruction->ipa_funcargs &&
+								instruction->ipa_funcargs->FA_Arguments[COPYAS_NAME] &&
+								instruction->ipa_funcargs->FA_Arguments[COPYAS_NEWNAME])
 							{
 								// Get names
-								strcpy(old_name_edit,(char *)instruction->funcargs->FA_Arguments[COPYAS_NAME]);
-								strcpy(new_name_edit,(char *)instruction->funcargs->FA_Arguments[COPYAS_NEWNAME]);
+								strcpy(old_name_edit,(char *)instruction->ipa_funcargs->FA_Arguments[COPYAS_NAME]);
+								strcpy(new_name_edit,(char *)instruction->ipa_funcargs->FA_Arguments[COPYAS_NEWNAME]);
 								ret=1;
 							}
 
@@ -490,8 +490,8 @@ GALILEOFM_FUNC(function_copy)
 							else
 							{
 								// Ask for a new name
-								strcpy(old_name_edit,entry->name);
-								strcpy(new_name_edit,entry->name);
+								strcpy(old_name_edit,entry->fe_name);
+								strcpy(new_name_edit,entry->fe_name);
 								if ((ret=function_request(
 									handle,
 									GetString(&locale,MSG_ENTER_NEW_NAME),
@@ -555,7 +555,7 @@ GALILEOFM_FUNC(function_copy)
 							file_ok=rename_get_wild(
 								old_name_edit,
 								new_name_edit,
-								entry->name,
+								entry->fe_name,
 								dest_name);
 						}
 
@@ -563,7 +563,7 @@ GALILEOFM_FUNC(function_copy)
 						if (file_ok)
 						{
 							// Get old and new names
-							old_name=entry->name;
+							old_name=entry->fe_name;
 							strcpy(new_name,dest_name);
 						}
 					}
@@ -582,11 +582,11 @@ GALILEOFM_FUNC(function_copy)
 				if (!password)
 				{
 					// Password supplied in arguments?
-					if (instruction->funcargs &&
-						instruction->funcargs->FA_Arguments[ENCRYPT_PASSWORD])
+					if (instruction->ipa_funcargs &&
+						instruction->ipa_funcargs->FA_Arguments[ENCRYPT_PASSWORD])
 					{
 						// Copy password
-						stccpy(password_buf,(char *)instruction->funcargs->FA_Arguments[ENCRYPT_PASSWORD],24);
+						stccpy(password_buf,(char *)instruction->ipa_funcargs->FA_Arguments[ENCRYPT_PASSWORD],24);
 					}
 
 					// Ask for a password
@@ -619,28 +619,28 @@ GALILEOFM_FUNC(function_copy)
 		else
 		{
 			// Exited a device (in drag'n'drop operation)?
-			if (entry->name[strlen(entry->name)-1]==':' && dragdrop)
+			if (entry->fe_name[strlen(entry->fe_name)-1]==':' && dragdrop)
 			{
 				// Get destination path
 				if (path=function_path_current(&handle->dest_paths))
 				{
 					// Clear path flag
-					path->flags&=~LISTNF_CHANGED;
+					path->pn_flags&=~LISTNF_CHANGED;
 				}
 			}
 		}
 
 		// Top-level entry?
-		if (entry->flags&FUNCENTF_TOP_LEVEL)
+		if (entry->fe_flags&FUNCENTF_TOP_LEVEL)
 		{
 			// Exited directory?
-			if (entry->flags&FUNCENTF_EXITED)
+			if (entry->fe_flags&FUNCENTF_EXITED)
 			{
 				// Add size update
 				function_filechange_modify(
 					handle,
-					source->path,
-					entry->name,
+					source->pn_path,
+					entry->fe_name,
 					FM_Size,rec_size,
 					TAG_END);
 				rec_size=0;
@@ -649,10 +649,10 @@ GALILEOFM_FUNC(function_copy)
 
 		// File within a directory?
 		else
-		if (entry->type<0)
+		if (entry->fe_type<0)
 		{
 			// Increment size count
-			rec_size+=entry->size;
+			rec_size+=entry->fe_size;
 		}
 
 		// Ok to do this file?
@@ -668,7 +668,7 @@ GALILEOFM_FUNC(function_copy)
 			while (path)
 			{
 				// Get destination path
-				strcpy(handle->dest_path,path->path);
+				strcpy(handle->dest_path,path->pn_path);
 				strcpy(dest_file,handle->dest_path);
 				AddPart(dest_file,dest_name,256);
 
@@ -693,18 +693,18 @@ GALILEOFM_FUNC(function_copy)
 				}
 
 				// Check this isn't an exited directory
-				if (!(entry->flags&FUNCENTF_EXITED))
+				if (!(entry->fe_flags&FUNCENTF_EXITED))
 				{
 					BOOL ok=1;
 
 					// Is this a directory?
-					if (entry->type>0)
+					if (entry->fe_type>0)
 					{
 						// Set flag to change info
 						change_info=1;
 
 						// Is this a top-level directory?
-						if (entry->flags&FUNCENTF_TOP_LEVEL)
+						if (entry->fe_flags&FUNCENTF_TOP_LEVEL)
 						{
 							short len;
 
@@ -771,10 +771,10 @@ GALILEOFM_FUNC(function_copy)
 						long error=0;
 
 						// If we're moving, try rename, unless this is an icon
-						if (move_flag && (!(entry->flags&FUNCENTF_ICON) || !(copy_flags&COPYF_ICON_COPY)))
+						if (move_flag && (!(entry->fe_flags&FUNCENTF_ICON) || !(copy_flags&COPYF_ICON_COPY)))
 						{
 							// Can only rename if a file, or no recursive filter set
-							if (!no_move_rename && (entry->type<0 || handle->got_filter!=2))
+							if (!no_move_rename && (entry->fe_type<0 || handle->got_filter!=2))
 							{
 								// Try rename
 								if (error=OriginalRename(source_file,dest_file))
@@ -848,7 +848,7 @@ GALILEOFM_FUNC(function_copy)
 									// Show error
 									if (!(ret=function_error(
 										handle,
-										entry->name,
+										entry->fe_name,
 										MSG_LINKING,
 										IoErr())) || ret==-1) break;
 								}
@@ -865,9 +865,9 @@ GALILEOFM_FUNC(function_copy)
 							ret=1;
 
 							// Did we move a whole directory tree?
-							if (entry->flags&FUNCENTF_ENTERED)
+							if (entry->fe_flags&FUNCENTF_ENTERED)
 							{
-								entry->flags|=FUNCENTF_REMOVE;
+								entry->fe_flags|=FUNCENTF_REMOVE;
 								rename_flag=1;
 							}
 						}
@@ -877,7 +877,7 @@ GALILEOFM_FUNC(function_copy)
 						if (!link_flag)
 						{
 							// Top-level entry?
-							if (entry->flags&FUNCENTF_TOP_LEVEL)
+							if (entry->fe_flags&FUNCENTF_TOP_LEVEL)
 								copy_flags|=COPY_TOP_LEVEL;
 							else copy_flags&=~COPY_TOP_LEVEL;
 
@@ -896,7 +896,7 @@ GALILEOFM_FUNC(function_copy)
 								if (error==ERROR_OBJECT_NOT_FOUND)
 								{
 									// If this is an icon, just ignore it
-									if (entry->flags&FUNCENTF_ICON)
+									if (entry->fe_flags&FUNCENTF_ICON)
 									{
 										ret=-2;	// 0
 										break;
@@ -926,7 +926,7 @@ GALILEOFM_FUNC(function_copy)
 								}
 
 								// Display error
-								if (!(ret=function_error(handle,entry->name,MSG_COPYING,error)) ||
+								if (!(ret=function_error(handle,entry->fe_name,MSG_COPYING,error)) ||
 									ret==-1) break;
 							}
 						}
@@ -939,31 +939,31 @@ GALILEOFM_FUNC(function_copy)
 					if (ret>0)
 					{
 						// If a top-level entry, add to destination list
-						if (entry->flags&FUNCENTF_TOP_LEVEL)
+						if (entry->fe_flags&FUNCENTF_TOP_LEVEL)
 						{
 							// Add file
-							function_filechange_addfile(handle,path->path,handle->d_info,0,0);
+							function_filechange_addfile(handle,path->pn_path,handle->d_info,0,0);
 						}
 
 						// Update free space?
 						if (copy_flags&COPY_UPDATE)
 						{
 							// Valid lister?
-							if (path->lister && path->lister->window)
+							if (path->pn_lister && path->pn_lister->window)
 							{
 								// Send update message
-								IPC_Command(path->lister->ipc,LISTER_REFRESH_NAME,0,0,0,0);
+								IPC_Command(path->pn_lister->ipc,LISTER_REFRESH_NAME,0,0,0,0);
 							}
 						}
 
 						// Update archive bit status in lister entry?
 						if (copy_flags&COPY_ARC &&
-							!(entry->flags&FUNCENTF_ICON_ACTION) &&
-							entry->entry)
+							!(entry->fe_flags&FUNCENTF_ICON_ACTION) &&
+							entry->fe_entry)
 						{
 							// Get new protection bits
-							entry->entry->de_Protection=handle->s_info->fib_Protection;
-							protect_get_string(entry->entry->de_Protection,entry->entry->de_ProtBuf);
+							entry->fe_entry->de_Protection=handle->s_info->fib_Protection;
+							protect_get_string(entry->fe_entry->de_Protection,entry->fe_entry->de_ProtBuf);
 						}
 					}
 
@@ -999,7 +999,7 @@ GALILEOFM_FUNC(function_copy)
 		if (move_flag &&
 			file_ok &&
 			!rename_flag &&
-			(entry->type<0 || entry->flags&FUNCENTF_EXITED))
+			(entry->fe_type<0 || entry->fe_flags&FUNCENTF_EXITED))
 		{
 			BOOL icon=0;
 			char *ptr;
@@ -1097,13 +1097,13 @@ GALILEOFM_FUNC(function_copy)
 
 					// Otherwise
 					else
-					if (!(ret=function_error(handle,entry->name,MSG_DELETING,err_code)) ||
+					if (!(ret=function_error(handle,entry->fe_name,MSG_DELETING,err_code)) ||
 						ret==-1) break;
 				}
 			}
 
 			// Successful?
-			if (ret==1) entry->flags|=FUNCENTF_REMOVE;
+			if (ret==1) entry->fe_flags|=FUNCENTF_REMOVE;
 			else file_ok=0;
 		}
 

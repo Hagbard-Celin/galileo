@@ -74,7 +74,7 @@ function_internal_command(CommandList *command,
 	    if (lister->cur_buffer->buf_CustomHandler[0])
 	    {
 		// If there's a NEW flag, we won't be using this lister
-		if (instruction && !instruction->new_arg)
+		if (instruction && !instruction->ipa_new_arg)
 		{
 		    // Look for trap handler
 		    if (FindFunctionTrap(command->name,lister->cur_buffer->buf_CustomHandler,custom_port))
@@ -132,9 +132,9 @@ function_internal_command(CommandList *command,
 		             HA_Value,1,source_lister,
 		             HA_String,2,files,
 		             HA_Value,3,dest_lister,
-		             HA_String,4,(source_n)?source_n->path:0,
+		             HA_String,4,(source_n)?source_n->pn_path:0,
 		             HA_String,5,args,
-		             HA_String,7,(dest_n)?dest_n->path:0,
+		             HA_String,7,(dest_n)?dest_n->pn_path:0,
 		             HA_Value,8,(flags&RXMF_SYNC)?handle:0,
 		             TAG_END);
 
@@ -183,8 +183,8 @@ function_internal_command(CommandList *command,
 		     command->stuff.module_name,
 		     GUI->rexx_port_name,
 		     command->name,
-		     (source_n)?source_n->lister:0,
-		     (dest_n)?dest_n->lister:0,
+		     (source_n)?source_n->pn_lister:0,
+		     (dest_n)?dest_n->pn_lister:0,
 		     args);
 #ifdef _DEBUG_AREXX_COMMAND
 	    KPrintF("Running arexx command %s\n", buffer);
@@ -203,10 +203,10 @@ function_internal_command(CommandList *command,
 	    // Add a newline
 	    if (*buffer) strcat(buffer,"\n");
 #ifdef _DEBUG
-	    KPrintF("function_internal_command instruction->flags: %lx \n", instruction->flags);
+	    KPrintF("function_internal_command instruction->flags: %lx \n", instruction->ipa_flags);
 #endif
 	    // Async by '&'? Set appropriate flags
-	    if ((handle) && (instruction->flags&FUNCF_RUN_ASYNC))
+	    if ((handle) && (instruction->ipa_flags&FUNCF_RUN_ASYNC))
 	    {
 		handle->func_parameters.flags|=FUNCF_RUN_ASYNC;
 		handle->func_parameters.flags&=~(FUNCF_RELOAD_FILES|FUNCF_RESCAN_SOURCE|FUNCF_RESCAN_DEST);

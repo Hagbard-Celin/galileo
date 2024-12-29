@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -90,35 +90,35 @@ GALILEOFM_FUNC(function_addicon)
 		data->savepos=0;
 */
 		// Parsed arguments?
-		if (instruction->funcargs)
+		if (instruction->ipa_funcargs)
 		{
 			// Only change flags?
-			if (instruction->funcargs->FA_Arguments[ARG_CHANGE])
+			if (instruction->ipa_funcargs->FA_Arguments[ARG_CHANGE])
 			{
 				data->change=1;
 				data->confirm_each=0;
 			}
 
 			// Border/No border?
-			if (instruction->funcargs->FA_Arguments[ARG_BORDER])
+			if (instruction->ipa_funcargs->FA_Arguments[ARG_BORDER])
 			{
 				data->mask|=ICONF_BORDER_OFF|ICONF_BORDER_ON;
 				data->flags|=ICONF_BORDER_ON;
 			}
 			else
-			if (instruction->funcargs->FA_Arguments[ARG_NOBORDER])
+			if (instruction->ipa_funcargs->FA_Arguments[ARG_NOBORDER])
 			{
 				data->mask|=ICONF_BORDER_OFF|ICONF_BORDER_ON;
 				data->flags|=ICONF_BORDER_OFF;
 			}
 
 			// Label/No label?
-			if (instruction->funcargs->FA_Arguments[ARG_LABEL])
+			if (instruction->ipa_funcargs->FA_Arguments[ARG_LABEL])
 			{
 				data->mask|=ICONF_NO_LABEL;
 			}
 			else
-			if (instruction->funcargs->FA_Arguments[ARG_NOLABEL])
+			if (instruction->ipa_funcargs->FA_Arguments[ARG_NOLABEL])
 			{
 				data->flags|=ICONF_NO_LABEL;
 				data->mask|=ICONF_NO_LABEL;
@@ -141,7 +141,7 @@ GALILEOFM_FUNC(function_addicon)
 		return 0;
 
 	// Tell this path to update it's datestamp at the end
-	path->flags|=LISTNF_UPDATE_STAMP;
+	path->pn_flags|=LISTNF_UPDATE_STAMP;
 
 	// Turn progress indicator on
 	function_progress_on(
@@ -164,7 +164,7 @@ GALILEOFM_FUNC(function_addicon)
 		}
 
 		// Ignore icons
-		if (!(isicon(entry->name)))
+		if (!(isicon(entry->fe_name)))
 		{
 			// Build source and icon name
 			function_build_source(handle,entry,handle->work_buffer);
@@ -184,7 +184,7 @@ GALILEOFM_FUNC(function_addicon)
 					// Build message
 					lsprintf(handle->work_buffer+800,
 						GetString(&locale,MSG_ICON_ALREADY_EXISTS),
-						entry->name);
+						entry->fe_name);
 
 					// Display requester
 					if (!(ret=function_request(
@@ -266,7 +266,7 @@ GALILEOFM_FUNC(function_addicon)
 						if	(PutDiskObject(handle->work_buffer,icon))
 						{
 							// Load icon file into listers
-							function_filechange_loadfile(handle,path->path,entry->name,FFLF_ICON);
+							function_filechange_loadfile(handle,path->pn_path,entry->fe_name,FFLF_ICON);
 							file_ok=1;
 						}
 
@@ -281,7 +281,7 @@ GALILEOFM_FUNC(function_addicon)
 					short ok,err;
 					ret=1;
 					while (!(ok=icon_write(
-								(entry->type>0)?ICONTYPE_DRAWER:ICONTYPE_PROJECT,
+								(entry->fe_type>0)?ICONTYPE_DRAWER:ICONTYPE_PROJECT,
 								handle->work_buffer,
 								replace_image,
 								data->flags,
@@ -291,7 +291,7 @@ GALILEOFM_FUNC(function_addicon)
 						// Display error requester
 						if ((ret=function_error(
 							handle,
-							entry->name,
+							entry->fe_name,
 							MSG_ADDICONING,
 							err))==-1 || ret==0) break;
 						function_build_source(handle,entry,handle->work_buffer);
@@ -301,7 +301,7 @@ GALILEOFM_FUNC(function_addicon)
 					if (ok)
 					{
 						// Load icon file into listers
-						function_filechange_loadfile(handle,path->path,entry->name,FFLF_ICON);
+						function_filechange_loadfile(handle,path->pn_path,entry->fe_name,FFLF_ICON);
 						file_ok=1;
 					}
 					else

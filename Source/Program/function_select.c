@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -57,7 +57,7 @@ GALILEOFM_FUNC(function_select)
 		return 0;
 
 	// Parsed arguments?
-	if (instruction->funcargs)
+	if (instruction->ipa_funcargs)
 	{
 		long val;
 
@@ -66,73 +66,73 @@ GALILEOFM_FUNC(function_select)
 
 		// Name match stuff
 		data->name_match=SELECT_MATCH_IGNORE;
-		if (instruction->funcargs->FA_Arguments[SELECT_VAR_NAME])
+		if (instruction->ipa_funcargs->FA_Arguments[SELECT_VAR_NAME])
 		{
-			stccpy(data->name,(char *)instruction->funcargs->FA_Arguments[SELECT_VAR_NAME],59);
+			stccpy(data->name,(char *)instruction->ipa_funcargs->FA_Arguments[SELECT_VAR_NAME],59);
 			data->name_match=SELECT_MATCH_MATCH;
 		}
-		if (instruction->funcargs->FA_Arguments[SELECT_VAR_NOMATCHNAME])
+		if (instruction->ipa_funcargs->FA_Arguments[SELECT_VAR_NOMATCHNAME])
 			data->name_match=SELECT_MATCH_NO_MATCH;
 
 		// Date match stuff
 		data->date_match=SELECT_MATCH_IGNORE;
-		if (instruction->funcargs->FA_Arguments[SELECT_VAR_FROM])
+		if (instruction->ipa_funcargs->FA_Arguments[SELECT_VAR_FROM])
 		{
-			stccpy(data->date_from,(char *)instruction->funcargs->FA_Arguments[SELECT_VAR_FROM],10);
+			stccpy(data->date_from,(char *)instruction->ipa_funcargs->FA_Arguments[SELECT_VAR_FROM],10);
 			data->date_match=SELECT_MATCH_MATCH;
 		}
-		if (instruction->funcargs->FA_Arguments[SELECT_VAR_TO])
+		if (instruction->ipa_funcargs->FA_Arguments[SELECT_VAR_TO])
 		{
-			stccpy(data->date_to,(char *)instruction->funcargs->FA_Arguments[SELECT_VAR_TO],10);
+			stccpy(data->date_to,(char *)instruction->ipa_funcargs->FA_Arguments[SELECT_VAR_TO],10);
 			data->date_match=SELECT_MATCH_MATCH;
 		}
-		if (instruction->funcargs->FA_Arguments[SELECT_VAR_NOMATCHDATE])
+		if (instruction->ipa_funcargs->FA_Arguments[SELECT_VAR_NOMATCHDATE])
 			data->date_match=SELECT_MATCH_NO_MATCH;
 
 		// Bits match stuff
 		data->bits_match=SELECT_MATCH_IGNORE;
-		if (instruction->funcargs->FA_Arguments[SELECT_VAR_BITSON])
+		if (instruction->ipa_funcargs->FA_Arguments[SELECT_VAR_BITSON])
 		{
-			val=prot_from_string((char *)instruction->funcargs->FA_Arguments[SELECT_VAR_BITSON]);
+			val=prot_from_string((char *)instruction->ipa_funcargs->FA_Arguments[SELECT_VAR_BITSON]);
 			val=((val&0xf0)|((~val)&0xf))&0xff;
 			data->bits|=(val<<8);
 			data->bits_match=SELECT_MATCH_MATCH;
 		}
-		if (instruction->funcargs->FA_Arguments[SELECT_VAR_BITSOFF])
+		if (instruction->ipa_funcargs->FA_Arguments[SELECT_VAR_BITSOFF])
 		{
-			val=prot_from_string((char *)instruction->funcargs->FA_Arguments[SELECT_VAR_BITSOFF]);
+			val=prot_from_string((char *)instruction->ipa_funcargs->FA_Arguments[SELECT_VAR_BITSOFF]);
 			val=((val&0xf0)|((~val)&0xf))&0xff;
 			data->bits|=(val&0xff);
 			data->bits_match=SELECT_MATCH_MATCH;
 		}
-		if (instruction->funcargs->FA_Arguments[SELECT_VAR_NOMATCHBITS])
+		if (instruction->ipa_funcargs->FA_Arguments[SELECT_VAR_NOMATCHBITS])
 			data->bits_match=SELECT_MATCH_NO_MATCH;
 
 		// Compare match stuff		
 		data->compare_match=SELECT_MATCH_IGNORE;
-		if (instruction->funcargs->FA_Arguments[SELECT_VAR_COMPARE])
+		if (instruction->ipa_funcargs->FA_Arguments[SELECT_VAR_COMPARE])
 		{
-			if (stricmp((char *)instruction->funcargs->FA_Arguments[SELECT_VAR_COMPARE],"newer")==0)
+			if (stricmp((char *)instruction->ipa_funcargs->FA_Arguments[SELECT_VAR_COMPARE],"newer")==0)
 				data->compare=SELECT_COMPARE_NEWER;
 			else
-			if (stricmp((char *)instruction->funcargs->FA_Arguments[SELECT_VAR_COMPARE],"older")==0)
+			if (stricmp((char *)instruction->ipa_funcargs->FA_Arguments[SELECT_VAR_COMPARE],"older")==0)
 				data->compare=SELECT_COMPARE_OLDER;
 			else data->compare=SELECT_COMPARE_DIFFERENT;
 			data->compare_match=SELECT_MATCH_MATCH;
 		}
-		if (instruction->funcargs->FA_Arguments[SELECT_VAR_NOMATCHCOMPARE])
+		if (instruction->ipa_funcargs->FA_Arguments[SELECT_VAR_NOMATCHCOMPARE])
 			data->compare_match=SELECT_MATCH_NO_MATCH;
 
 		// Entry type
-		if (instruction->funcargs->FA_Arguments[SELECT_VAR_FILESONLY])
+		if (instruction->ipa_funcargs->FA_Arguments[SELECT_VAR_FILESONLY])
 			data->entry_type=SELECT_ENTRY_FILES;
 		else
-		if (instruction->funcargs->FA_Arguments[SELECT_VAR_DIRSONLY])
+		if (instruction->ipa_funcargs->FA_Arguments[SELECT_VAR_DIRSONLY])
 			data->entry_type=SELECT_ENTRY_DIRS;
 		else data->entry_type=SELECT_ENTRY_BOTH;
 
 		// Include type
-		if (instruction->funcargs->FA_Arguments[SELECT_VAR_EXCLUDE])
+		if (instruction->ipa_funcargs->FA_Arguments[SELECT_VAR_EXCLUDE])
 			data->include=SELECT_EXCLUDE;
 		else data->include=SELECT_INCLUDE;
 

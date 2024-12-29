@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -69,15 +69,15 @@ GALILEOFM_FUNC(function_disk)
 
 	// Parsed arguments?
 	else
-	if (instruction->funcargs)
+	if (instruction->ipa_funcargs)
 	{
 		// Got a disk?
-		if (instruction->funcargs->FA_Arguments[0])
+		if (instruction->ipa_funcargs->FA_Arguments[0])
 		{
 			// Add a node
 			if (node=AllocMemH(handle->memory,sizeof(struct Node)))
 			{
-				node->ln_Name=(char *)instruction->funcargs->FA_Arguments[0];
+				node->ln_Name=(char *)instruction->ipa_funcargs->FA_Arguments[0];
 				AddTail(&list,node);
 			}
 		}

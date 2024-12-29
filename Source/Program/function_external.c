@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -63,7 +63,7 @@ function_external_command(
 		return 0;
 
 	// If we needs files, check there are some
-	if ((instruction->flags&FUNCF_NEED_ENTRIES) &&
+	if ((instruction->ipa_flags&FUNCF_NEED_ENTRIES) &&
 		!(function_current_entry(handle)))
 		return 0;
 
@@ -86,7 +86,7 @@ function_external_command(
 		current_arg=handle->func_current_arg;
 
 		// Get destination path
-		if (path) strcpy(handle->dest_path,path->path);
+		if (path) strcpy(handle->dest_path,path->pn_path);
 
 		// Loop until this instruction is finished
 		while (cont==PARSE_MORE_FILES)
@@ -112,7 +112,7 @@ function_external_command(
 			if (cont>=PARSE_OK)
 			{
 				// Write a line to the script file
-				function_write_script(handle,func_string,instruction->type);
+				function_write_script(handle,func_string,instruction->ipa_type);
 
 				// Store last argument
 				last_arg=handle->func_current_arg;

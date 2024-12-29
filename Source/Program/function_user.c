@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -92,10 +92,10 @@ GALILEOFM_FUNC(function_user)
 		cmd_ptr="doubleclick";
 
 		// Arguments?
-		if (instruction->funcargs)
+		if (instruction->ipa_funcargs)
 		{
 			// Control?
-			if (instruction->funcargs->FA_Arguments[USER_ARG_CTRL])
+			if (instruction->ipa_funcargs->FA_Arguments[USER_ARG_CTRL])
 			{
 				action=FTTYPE_CTRL_DOUBLECLICK;
 				qual|=IEQUALIFIER_CONTROL;
@@ -103,7 +103,7 @@ GALILEOFM_FUNC(function_user)
 			else
 
 			// Alt?
-			if (instruction->funcargs->FA_Arguments[USER_ARG_ALT])
+			if (instruction->ipa_funcargs->FA_Arguments[USER_ARG_ALT])
 			{
 				action=FTTYPE_ALT_DOUBLECLICK;
 				qual|=IEQUALIFIER_LALT;
@@ -121,10 +121,10 @@ GALILEOFM_FUNC(function_user)
 		cmd_ptr="dropfrom";
 
 		// Arguments?
-		if (instruction->funcargs)
+		if (instruction->ipa_funcargs)
 		{
 			// Control?
-			if (instruction->funcargs->FA_Arguments[USER_ARG_CTRL])
+			if (instruction->ipa_funcargs->FA_Arguments[USER_ARG_CTRL])
 			{
 				action=FTTYPE_CTRL_DRAGDROP;
 				qual|=IEQUALIFIER_CONTROL;
@@ -132,7 +132,7 @@ GALILEOFM_FUNC(function_user)
 			else
 
 			// Alt?
-			if (instruction->funcargs->FA_Arguments[USER_ARG_ALT])
+			if (instruction->ipa_funcargs->FA_Arguments[USER_ARG_ALT])
 			{
 				action=FTTYPE_ALT_DRAGDROP;
 				qual|=IEQUALIFIER_LALT;
@@ -144,12 +144,12 @@ GALILEOFM_FUNC(function_user)
 		action=FTTYPE_DRAG_DROP;
 	}
 	else
-	if (command->function==FUNC_USER && instruction->funcargs && instruction->funcargs->FA_Arguments[USER_ARG_ID])
+	if (command->function==FUNC_USER && instruction->ipa_funcargs && instruction->ipa_funcargs->FA_Arguments[USER_ARG_ID])
 	{
 		short id;
 
 		// Get ID
-		id=*((ULONG *)instruction->funcargs->FA_Arguments[USER_ARG_ID]);
+		id=*((ULONG *)instruction->ipa_funcargs->FA_Arguments[USER_ARG_ID]);
 
 		// Build command
 		lsprintf(cmd_buf,"user %ld",id);
@@ -173,13 +173,13 @@ GALILEOFM_FUNC(function_user)
 	if (source=function_path_current(&handle->dest_paths))
 	{
 		// Get destination path
-		if (dest_lister=source->lister)
+		if (dest_lister=source->pn_lister)
 			dest_path=dest_lister->cur_buffer->buf_Path;
 	}
 
 	// Get source lister
 	if (source=function_path_current(&handle->source_paths))
-		source_lister=source->lister;
+		source_lister=source->pn_lister;
 
 	// Go through entries
 	while (entry=function_get_entry(handle))
@@ -194,7 +194,7 @@ GALILEOFM_FUNC(function_user)
 				RXMF_WARN,
 				HA_String,0,cmd_ptr,
 				HA_Value,1,source_lister,
-				HA_String,2,entry->name,
+				HA_String,2,entry->fe_name,
 				HA_Value,3,dest_lister,
 				HA_String,5,dest_path,
 				HA_Qualifier,6,qual,
@@ -238,7 +238,7 @@ GALILEOFM_FUNC(function_user)
 				if (exentry=new_external_entry(handle,handle->work_buffer))
 				{
 					// Save pointer to lister entry
-					exentry->entry=entry->entry;
+					exentry->een_entry=entry->fe_entry;
 
 					// Add to external entry list
 					AddTail((struct List *)&handle->external_list,(struct Node *)exentry);

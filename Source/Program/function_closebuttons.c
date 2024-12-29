@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -55,28 +55,28 @@ GALILEOFM_FUNC(function_closebuttons)
 	IPCData *ipc;
 
 	// Arguments?
-	if (instruction->funcargs)
+	if (instruction->ipa_funcargs)
 	{
 		// Close all?
-		if (instruction->funcargs->FA_Arguments[ARG_ALL])
+		if (instruction->ipa_funcargs->FA_Arguments[ARG_ALL])
 			close_all=1;
 
 		// Specific bank
 		else
-		if (instruction->funcargs->FA_Arguments[ARG_NAME])
-			close_bank=(char *)instruction->funcargs->FA_Arguments[ARG_NAME];
+		if (instruction->ipa_funcargs->FA_Arguments[ARG_NAME])
+			close_bank=(char *)instruction->ipa_funcargs->FA_Arguments[ARG_NAME];
 
 		// Iconify?
-		if (instruction->funcargs->FA_Arguments[ARG_ICONIFY])
+		if (instruction->ipa_funcargs->FA_Arguments[ARG_ICONIFY])
 			iconify=1;
 
 		// Hide
 		else
-		if (instruction->funcargs->FA_Arguments[ARG_HIDE])
+		if (instruction->ipa_funcargs->FA_Arguments[ARG_HIDE])
 			hide=1;
 
 		// Start menu?
-		if (instruction->funcargs->FA_Arguments[ARG_START])
+		if (instruction->ipa_funcargs->FA_Arguments[ARG_START])
 			start=1;
 	}
 

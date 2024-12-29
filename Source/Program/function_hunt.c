@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -98,8 +98,8 @@ GALILEOFM_FUNC(function_hunt)
 	while (entry=function_get_entry(handle))
 	{
 		// Top-level directory?
-		if (entry->flags&FUNCENTF_TOP_LEVEL &&
-			entry->type>0)
+		if (entry->fe_flags&FUNCENTF_TOP_LEVEL &&
+			entry->fe_type>0)
 		{
 			// Update progress indicator
 			if (function_progress_update(handle,entry,count++))
@@ -121,7 +121,7 @@ GALILEOFM_FUNC(function_hunt)
 			}
 
 			// File?
-			if (entry->type<0)
+			if (entry->fe_type<0)
 			{
 				BOOL match=0;
 
@@ -145,7 +145,7 @@ GALILEOFM_FUNC(function_hunt)
 				else
 				{
 					// Match name
-					match=MatchPatternNoCase(handle->inst_data+64,FilePart(entry->name));
+					match=MatchPatternNoCase(handle->inst_data+64,FilePart(entry->fe_name));
 				}
 
 				// Does file match?
@@ -155,7 +155,7 @@ GALILEOFM_FUNC(function_hunt)
 
 					// Strip filename
 					if (ptr=FilePart(handle->work_buffer+512)) *ptr=0;
-					get_trunc_filename(FilePart(entry->name),name);
+					get_trunc_filename(FilePart(entry->fe_name),name);
 
 					// Build requester text
 					lsprintf(handle->work_buffer,
@@ -185,14 +185,14 @@ GALILEOFM_FUNC(function_hunt)
 
 						// Get current lister
 						if ((path=function_path_current(&handle->source_paths)) &&
-							path->lister)
+							path->pn_lister)
 						{
 							// Read directory
 							handle->flags=GETDIRF_CANCHECKBUFS|GETDIRF_CANMOVEEMPTY;
-							function_read_directory(handle,path->lister,handle->work_buffer+512);
+							function_read_directory(handle,path->pn_lister,handle->work_buffer+512);
 
 							// Do wildcard selection
-							function_select_file(handle,path->lister,(data->comment)?(char *)FilePart(entry->name):data->pattern);
+							function_select_file(handle,path->pn_lister,(data->comment)?(char *)FilePart(entry->fe_name):data->pattern);
 
 							// Break out
 							ret=0;
@@ -224,7 +224,7 @@ GALILEOFM_FUNC(function_hunt)
 								0);
 
 							// Do wildcard selection
-							function_select_file(handle,lister,(data->comment)?(char *)FilePart(entry->name):data->pattern);
+							function_select_file(handle,lister,(data->comment)?(char *)FilePart(entry->fe_name):data->pattern);
 						}
 					}
 				}

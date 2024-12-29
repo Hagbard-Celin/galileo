@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -57,11 +57,11 @@ GALILEOFM_FUNC(function_printdir)
 		return 0;
 
 	// Output path
-	WriteBuf(outfile,path->path,-1);
+	WriteBuf(outfile,path->pn_path,-1);
 	WriteBuf(outfile,"\n\n",2);
 
 	// Valid lister?
-	if ((lister=path->lister))
+	if ((lister=path->pn_lister))
 	{
 		DirBuffer *buffer;
 		DirEntry *entry;
@@ -99,7 +99,7 @@ GALILEOFM_FUNC(function_printdir)
 	}
 
 	// Otherwise, lock directory
-	else if (lock=Lock(path->path,ACCESS_READ))
+	else if (lock=Lock(path->pn_path,ACCESS_READ))
 	{
 		// Examine directory
 		Examine(lock,handle->s_info);

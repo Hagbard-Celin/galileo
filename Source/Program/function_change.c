@@ -67,7 +67,7 @@ GALILEOFM_FUNC(function_change)
 	handle->instruction_flags=0;
 
 	// Got arguments?
-	if (instruction->funcargs)
+	if (instruction->ipa_funcargs)
 	{
 		// Default to no recursing
 		handle->inst_flags|=INSTF_NO_RECURSE;
@@ -80,18 +80,18 @@ GALILEOFM_FUNC(function_change)
 		error_action=MSG_COMMENTING;
 
 		// Arguments?
-		if (instruction->funcargs)
+		if (instruction->ipa_funcargs)
 		{
 			// Comment supplied?
-			if (instruction->funcargs->FA_Arguments[1])
+			if (instruction->ipa_funcargs->FA_Arguments[1])
 			{
 				// Copy comment
-				stccpy(data->comment,(char *)instruction->funcargs->FA_Arguments[1],80);
+				stccpy(data->comment,(char *)instruction->ipa_funcargs->FA_Arguments[1],80);
 				handle->inst_flags|=INSTF_NO_ASK;
 			}
 
 			// Recursing?
-			if (instruction->funcargs->FA_Arguments[2])
+			if (instruction->ipa_funcargs->FA_Arguments[2])
 				handle->inst_flags|=INSTF_RECURSE;
 		}
 	}
@@ -102,11 +102,11 @@ GALILEOFM_FUNC(function_change)
 		error_action=MSG_PROTECTING;
 
 		// Arguments?
-		if (instruction->funcargs)
+		if (instruction->ipa_funcargs)
 		{
 			// Protection supplied?
-			if ((instruction->funcargs->FA_Arguments[2] ||
-				instruction->funcargs->FA_Arguments[3]))
+			if ((instruction->ipa_funcargs->FA_Arguments[2] ||
+				instruction->ipa_funcargs->FA_Arguments[3]))
 			{
 				short a;
 
@@ -118,10 +118,10 @@ GALILEOFM_FUNC(function_change)
 				for (a=0;a<2;a++)
 				{
 					// Bits supplied?
-					if (instruction->funcargs->FA_Arguments[a+2])
+					if (instruction->ipa_funcargs->FA_Arguments[a+2])
 					{
 						// Get bit value
-						data->prot[a]=prot_from_string((char *)instruction->funcargs->FA_Arguments[a+2]);
+						data->prot[a]=prot_from_string((char *)instruction->ipa_funcargs->FA_Arguments[a+2]);
 
 						// Toggle lower bits
 						data->prot[a]=(data->prot[a]&0xf0)|((~data->prot[a])&0xf);
@@ -131,7 +131,7 @@ GALILEOFM_FUNC(function_change)
 			}
 
 			// Recursing?
-			if (instruction->funcargs->FA_Arguments[1])
+			if (instruction->ipa_funcargs->FA_Arguments[1])
 				handle->inst_flags|=INSTF_RECURSE;
 		}
 	}
@@ -141,13 +141,13 @@ GALILEOFM_FUNC(function_change)
 		error_action=MSG_DATESTAMPING;
 
 		// Arguments supplied?
-		if (instruction->funcargs)
+		if (instruction->ipa_funcargs)
 		{
 			// Date supplied?
-			if (instruction->funcargs->FA_Arguments[2])
+			if (instruction->ipa_funcargs->FA_Arguments[2])
 			{
 				// Null date?
-				if (((char *)instruction->funcargs->FA_Arguments[2])[0]==0)
+				if (((char *)instruction->ipa_funcargs->FA_Arguments[2])[0]==0)
 					DateStamp(&data->date);
 
 				// Otherwise	
@@ -155,7 +155,7 @@ GALILEOFM_FUNC(function_change)
 				{
 					// Convert to separate strings
 					ParseDateStrings(
-						(char *)instruction->funcargs->FA_Arguments[2],
+						(char *)instruction->ipa_funcargs->FA_Arguments[2],
 						handle->work_buffer+768,
 						handle->work_buffer+896,0);
 
@@ -170,7 +170,7 @@ GALILEOFM_FUNC(function_change)
 			}
 
 			// Recursing?
-			if (instruction->funcargs->FA_Arguments[1])
+			if (instruction->ipa_funcargs->FA_Arguments[1])
 				handle->inst_flags|=INSTF_RECURSE;
 		}
 	}
@@ -216,7 +216,7 @@ GALILEOFM_FUNC(function_change)
 		return 0;
 
 	// Tell this path to update it's datestamp at the end
-	path->flags|=LISTNF_UPDATE_STAMP;
+	path->pn_flags|=LISTNF_UPDATE_STAMP;
 
 	// Allocate memory for source path
 	if (!(source_file=AllocVec(256,0))) return 0;
@@ -239,7 +239,7 @@ GALILEOFM_FUNC(function_change)
 
 		// Do we have to ask?
 		if (!(handle->inst_flags&INSTF_NO_ASK) &&
-			!(entry->flags&(FUNCENTF_RECURSE|FUNCENTF_EXITED)))
+			!(entry->fe_flags&(FUNCENTF_RECURSE|FUNCENTF_EXITED)))
 		{
 			// Call appropriate "ask" routine
 			if (command->function==FUNC_COMMENT)
@@ -251,9 +251,9 @@ GALILEOFM_FUNC(function_change)
 				data->comment[0]=0;
 
 				// Is there an entry attached?
-				if (entry->entry &&
-					!(entry->flags&FUNCENTF_ICON_ACTION) &&
-					(ptr=(char *)GetTagData(DE_Comment,0,entry->entry->de_Tags)))
+				if (entry->fe_entry &&
+					!(entry->fe_flags&FUNCENTF_ICON_ACTION) &&
+					(ptr=(char *)GetTagData(DE_Comment,0,entry->fe_entry->de_Tags)))
 				{
 					// Get existing comment
 					strcpy(data->comment,ptr);
@@ -277,8 +277,8 @@ GALILEOFM_FUNC(function_change)
 				ULONG old_prot=0;
 
 				// Get old protection
-				if (entry->entry && !(entry->flags&FUNCENTF_ICON_ACTION))
-					old_prot=entry->entry->de_Protection;
+				if (entry->fe_entry && !(entry->fe_flags&FUNCENTF_ICON_ACTION))
+					old_prot=entry->fe_entry->de_Protection;
 
 				// Ask for protection masks
 				ret=function_change_get_protect(handle,source_file,old_prot,data->prot);
@@ -287,8 +287,8 @@ GALILEOFM_FUNC(function_change)
 			else
 			{
 				// Get old datestamp
-				if (entry->entry && !(entry->flags&FUNCENTF_ICON_ACTION))
-					data->date=entry->entry->de_Date;
+				if (entry->fe_entry && !(entry->fe_flags&FUNCENTF_ICON_ACTION))
+					data->date=entry->fe_entry->de_Date;
 				else DateStamp(&data->date);
 
 				// Ask for date
@@ -322,9 +322,9 @@ GALILEOFM_FUNC(function_change)
 		}
 
 		// Skip directory "entered" entries
-		if (entry->type<0 ||
+		if (entry->fe_type<0 ||
 			handle->inst_flags&INSTF_NO_RECURSE ||
-			entry->flags&FUNCENTF_EXITED)
+			entry->fe_flags&FUNCENTF_EXITED)
 		{
 			// Ok to do this entry?
 			while (ret)
@@ -335,18 +335,18 @@ GALILEOFM_FUNC(function_change)
 				struct DateStamp date={0};
 
 				// Get existing settings
-				if (entry->entry && !(entry->flags&FUNCENTF_ICON_ACTION))
+				if (entry->fe_entry && !(entry->fe_flags&FUNCENTF_ICON_ACTION))
 				{
-					comment=(char *)GetTagData(DE_Comment,0,entry->entry->de_Tags);
-					protection=entry->entry->de_Protection;
-					date=entry->entry->de_Date;
+					comment=(char *)GetTagData(DE_Comment,0,entry->fe_entry->de_Tags);
+					protection=entry->fe_entry->de_Protection;
+					date=entry->fe_entry->de_Date;
 				}
 
 				// Comment?
 				if (command->function==FUNC_COMMENT)
 				{
 					// Got a lister entry?
-					if (entry->entry)
+					if (entry->fe_entry)
 					{
 						// Use original function
 						ret=OriginalSetComment(source_file,data->comment);
@@ -361,7 +361,7 @@ GALILEOFM_FUNC(function_change)
 						ret=1;
 
 						// Is the new comment different?
-						if (entry->entry && !(entry->flags&FUNCENTF_ICON_ACTION) &&
+						if (entry->fe_entry && !(entry->fe_flags&FUNCENTF_ICON_ACTION) &&
 							((!comment && *data->comment) ||
 							(comment && strcmp(comment,data->comment))))
 						{
@@ -383,8 +383,8 @@ GALILEOFM_FUNC(function_change)
 					clear_bits=(data->prot[1]&0xf0)|(data->prot[0]&0xf);
 
 					// Get current bits
-					if (entry->entry && !(entry->flags&FUNCENTF_ICON_ACTION))
-						new_prot=entry->entry->de_Protection;
+					if (entry->fe_entry && !(entry->fe_flags&FUNCENTF_ICON_ACTION))
+						new_prot=entry->fe_entry->de_Protection;
 					else new_prot=handle->recurse_info.fib_Protection;
 
 					// Apply changes
@@ -392,7 +392,7 @@ GALILEOFM_FUNC(function_change)
 					new_prot&=~clear_bits;
 
 					// Got a lister entry?
-					if (entry->entry)
+					if (entry->fe_entry)
 					{
 						// Use original function
 						ret=OriginalSetProtection(source_file,new_prot);
@@ -407,9 +407,9 @@ GALILEOFM_FUNC(function_change)
 						ret=1;
 
 						// Are the new bits different?
-						if (entry->entry &&
-							!(entry->flags&FUNCENTF_ICON_ACTION) && 
-							entry->entry->de_Protection!=new_prot)
+						if (entry->fe_entry &&
+							!(entry->fe_flags&FUNCENTF_ICON_ACTION) &&
+							entry->fe_entry->de_Protection!=new_prot)
 						{
 							// Need to change entry
 							change=1;
@@ -422,7 +422,7 @@ GALILEOFM_FUNC(function_change)
 				else
 				{
 					// Got a lister entry?
-					if (entry->entry)
+					if (entry->fe_entry)
 					{
 						// Use original function
 						ret=OriginalSetFileDate(source_file,&data->date);
@@ -437,9 +437,9 @@ GALILEOFM_FUNC(function_change)
 						ret=1;
 
 						// Is the new date different?
-						if (entry->entry &&
-							!(entry->flags&FUNCENTF_ICON_ACTION) && 
-							CompareDates(&entry->entry->de_Date,&data->date))
+						if (entry->fe_entry &&
+							!(entry->fe_flags&FUNCENTF_ICON_ACTION) &&
+							CompareDates(&entry->fe_entry->de_Date,&data->date))
 						{
 							// Need to change entry
 							change=1;
@@ -449,29 +449,29 @@ GALILEOFM_FUNC(function_change)
 				}
 
 				// Need to change entry?
-				if (change && path->lister)
+				if (change && path->pn_lister)
 				{
 					struct FileInfoBlock fib;
 
 					// Fill out dummy fileinfoblock
-					strcpy(fib.fib_FileName,entry->name);
+					strcpy(fib.fib_FileName,entry->fe_name);
 					if (comment) strcpy(fib.fib_Comment,comment);
 					else fib.fib_Comment[0]=0;
-					fib.fib_Size=entry->entry->de_Size;
-					fib.fib_DirEntryType=entry->entry->de_Node.dn_Type;
+					fib.fib_Size=entry->fe_entry->de_Size;
+					fib.fib_DirEntryType=entry->fe_entry->de_Node.dn_Type;
 					fib.fib_Date=date;
 					fib.fib_Protection=protection;
 
 					// Add new file
 					if (function_filechange_addfile(
 							handle,
-							path->path,
+							path->pn_path,
 							&fib,
-							(NetworkInfo *)GetTagData(DE_NetworkInfo,0,entry->entry->de_Tags),
+							(NetworkInfo *)GetTagData(DE_NetworkInfo,0,entry->fe_entry->de_Tags),
 							0))
 					{
 						// Mark old entry for removal
-						entry->flags|=FUNCENTF_REMOVE;
+						entry->fe_flags|=FUNCENTF_REMOVE;
 					}
 				}
 
@@ -481,7 +481,7 @@ GALILEOFM_FUNC(function_change)
 				// Display error requester
 				if ((ret=function_error(
 					handle,
-					entry->name,
+					entry->fe_name,
 					error_action,
 					IoErr()))==-1) break;
 

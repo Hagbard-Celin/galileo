@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -47,8 +47,8 @@ GALILEOFM_FUNC(function_special)
 		case FUNC_QUIT:
 
 			// Force quit?
-			if (instruction->funcargs &&
-				instruction->funcargs->FA_Arguments[0])
+			if (instruction->ipa_funcargs &&
+				instruction->ipa_funcargs->FA_Arguments[0])
 			{
 				// Send quit message directory
 				IPC_Quit(&main_ipc,0,FALSE);

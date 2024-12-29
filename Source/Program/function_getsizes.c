@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -65,8 +65,8 @@ GALILEOFM_FUNC(function_getsizes)
 		handle->instruction_flags=INSTF_RECURSE_DIRS|INSTF_WANT_DIRS|INSTF_WANT_DIRS_END;
 
 		// GetSizes with clear option?
-		if (instruction->funcargs &&
-			instruction->funcargs->FA_Arguments[0]) clear=1;
+		if (instruction->ipa_funcargs &&
+			instruction->ipa_funcargs->FA_Arguments[0]) clear=1;
 	}
 
 	// Display progress requester
@@ -99,7 +99,7 @@ GALILEOFM_FUNC(function_getsizes)
 			struct InfoData __aligned info;
 
 			// RAM?
-			if (strncmp(path->path,"RAM:",4)==0)
+			if (strncmp(path->pn_path,"RAM:",4)==0)
 			{
 				// Kludge for RAM
 				dest_blocks=(AvailMem(MEMF_ANY)>>10)-2;
@@ -109,7 +109,7 @@ GALILEOFM_FUNC(function_getsizes)
 
 			// Get disk information
 			else
-			if (lock=Lock(path->path,ACCESS_READ))
+			if (lock=Lock(path->pn_path,ACCESS_READ))
 			{
 				// Get info
 				Info(lock,&info);
@@ -158,21 +158,21 @@ GALILEOFM_FUNC(function_getsizes)
 			}
 
 			// Get directory entry
-			if (entry->entry) dirent=entry->entry;
+			if (entry->fe_entry) dirent=entry->fe_entry;
 			else
 			if (buffer)
 			{
-				dirent=find_entry(&buffer->entry_list,entry->name,0,buffer->more_flags&DWF_CASE);
-				entry->entry=dirent;
+				dirent=find_entry(&buffer->entry_list,entry->fe_name,0,buffer->more_flags&DWF_CASE);
+				entry->fe_entry=dirent;
 			}
 
 			// Got entry?
 			if (dirent)
 			{
 				// Top-level directory?
-				if (entry->type>=ENTRY_DIRECTORY &&
-					(clear==2 || entry->flags&FUNCENTF_ENTERED) &&
-					!(entry->flags&FUNCENTF_ICON_ACTION))
+				if (entry->fe_type>=ENTRY_DIRECTORY &&
+					(clear==2 || entry->fe_flags&FUNCENTF_ENTERED) &&
+					!(entry->fe_flags&FUNCENTF_ICON_ACTION))
 				{
 					// Clear size?
 					if (clear)
@@ -222,7 +222,7 @@ GALILEOFM_FUNC(function_getsizes)
 				if (command->function==FUNC_CHECKFIT)
 				{
 					// Exited directory?
-					if (entry->flags&FUNCENTF_EXITED && !(entry->flags&FUNCENTF_RECURSE))
+					if (entry->fe_flags&FUNCENTF_EXITED && !(entry->fe_flags&FUNCENTF_RECURSE))
 					{
 						// Add count to total
 						total_blocks+=dirent->de_block_total;
@@ -230,7 +230,7 @@ GALILEOFM_FUNC(function_getsizes)
 
 					// Or a top-level file
 					else
-					if (entry->type<0 && !(entry->flags&FUNCENTF_ICON_ACTION))
+					if (entry->fe_type<0 && !(entry->fe_flags&FUNCENTF_ICON_ACTION))
 					{
 						long fileListEntries;
 						long dataBlocks;
@@ -282,7 +282,7 @@ GALILEOFM_FUNC(function_getsizes)
 				// Build string
 				lsprintf(handle->work_buffer,
 					"\n%s %s %ld%%",
-					path->path,
+					path->pn_path,
 					GetString(&locale,MSG_FIT),
 					percent);
 			}

@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -62,35 +62,35 @@ GALILEOFM_FUNC(function_loadbuttons)
 	image[0]=0;
 
 	// Args?
-	if (instruction->funcargs)
+	if (instruction->ipa_funcargs)
 	{
 		// Start?
-		if (instruction->funcargs->FA_Arguments[ARG_START])
+		if (instruction->ipa_funcargs->FA_Arguments[ARG_START])
 		{
 			// Set flag
 			start=1;
 
 			// Get label
-			if (instruction->funcargs->FA_Arguments[ARG_LABEL])
-				stccpy(label,(char *)instruction->funcargs->FA_Arguments[ARG_LABEL],39);
+			if (instruction->ipa_funcargs->FA_Arguments[ARG_LABEL])
+				stccpy(label,(char *)instruction->ipa_funcargs->FA_Arguments[ARG_LABEL],39);
 
 			// Get image
-			if (instruction->funcargs->FA_Arguments[ARG_IMAGE])
-				stccpy(image,(char *)instruction->funcargs->FA_Arguments[ARG_IMAGE],255);
+			if (instruction->ipa_funcargs->FA_Arguments[ARG_IMAGE])
+				stccpy(image,(char *)instruction->ipa_funcargs->FA_Arguments[ARG_IMAGE],255);
 		}
 
 		// Open under mouse?
-		if (instruction->funcargs->FA_Arguments[ARG_UNDERMOUSE])
+		if (instruction->ipa_funcargs->FA_Arguments[ARG_UNDERMOUSE])
 			buttonflags|=BUTTONF_UNDERMOUSE;
 
 		// Open hidden
-		if (instruction->funcargs->FA_Arguments[ARG_HIDDEN])
+		if (instruction->ipa_funcargs->FA_Arguments[ARG_HIDDEN])
 			hidden=1;
 
 		// Toggle/Show?
 		if (!start &&
-			(instruction->funcargs->FA_Arguments[ARG_TOGGLE] ||
-			 instruction->funcargs->FA_Arguments[ARG_SHOW]))
+			(instruction->ipa_funcargs->FA_Arguments[ARG_TOGGLE] ||
+			 instruction->ipa_funcargs->FA_Arguments[ARG_SHOW]))
 		{
 			IPCData *ipc;
 			BOOL matched=0;
@@ -110,17 +110,17 @@ GALILEOFM_FUNC(function_loadbuttons)
 					BOOL match=0;
 
 					// Or does it match the name?
-					if (stricmp(entry->name,buttons->bank->window.name)==0) match=1;
+					if (stricmp(entry->fe_name,buttons->bank->window.name)==0) match=1;
 
 					// Or the filename?
 					else
-					if (stricmp(entry->name,FilePart(buttons->buttons_file))==0) match=1;
+					if (stricmp(entry->fe_name,FilePart(buttons->buttons_file))==0) match=1;
 
 					// Match bank to close?
 					if (match)
 					{
 						// Send message
-			 			if (instruction->funcargs->FA_Arguments[ARG_SHOW])
+			 			if (instruction->ipa_funcargs->FA_Arguments[ARG_SHOW])
 			 				IPC_Command(ipc,IPC_SHOW,0,GUI->screen_pointer,0,0);
 			 			else
 							IPC_Quit(ipc,0,FALSE);

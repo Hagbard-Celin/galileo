@@ -58,11 +58,11 @@ extern ULONG callerid;
 
 typedef struct _PathNode
 {
-	struct MinNode		node;
-	char			path_buf[512];
-	char			*path;
-	ULONG 			*lister;
-	ULONG			flags;
+	struct MinNode		pn_node;
+	char			pn_path_buf[512];
+	char			*pn_path;
+	ULONG 			*pn_lister;
+	ULONG			pn_flags;
 };
 
 struct DirDate

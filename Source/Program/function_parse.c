@@ -148,21 +148,21 @@ function_parse_function(FunctionHandle *handle)
 	    if (parse=AllocMemH(handle->memory,sizeof(InstructionParsed)))
 	    {
 		// Initialise
-		parse->type=instruction->type;
+		parse->ipa_type=instruction->type;
 
 		// Internal command? Set count if to run only once
-		if ((parse->command=command) && (*instruction->string=='#')) parse->count=1;
+		if ((parse->ipa_command=command) && (*instruction->string=='#')) parse->ipa_count=1;
 
 		// Parse instruction
 		function_parse_instruction(handle,ptr,buf,&flags);
 
 		// Get command flags
-		if (parse->command)
+		if (parse->ipa_command)
 		{
 	    	    if ((instruction->string[0]=='&') || ((instruction->string[0]=='#') && (instruction->string[1]=='&')))
 		    	flags|=FUNCF_RUN_ASYNC;
 
-		    flags|=parse->command->flags;
+		    flags|=parse->ipa_command->flags;
 		}
 
 		// External command
@@ -171,24 +171,24 @@ function_parse_function(FunctionHandle *handle)
 		// Copy argument string
 		if (buf[0])
 		{
-		    if (parse->string=AllocMemH(handle->memory,strlen(buf)+1))
+		    if (parse->ipa_string=AllocMemH(handle->memory,strlen(buf)+1))
 		    {
-			strcpy(parse->string,buf);
+			strcpy(parse->ipa_string,buf);
 
 			// If it's a command, parse it
-			if (parse->command && parse->command->template)
+			if (parse->ipa_command && parse->ipa_command->template)
 			{
 			    // ReadArgs parse
-			    if ((parse->funcargs=ParseArgs(parse->command->template,parse->string)) &&
-				parse->command->template_key)
+			    if ((parse->ipa_funcargs=ParseArgs(parse->ipa_command->template,parse->ipa_string)) &&
+				parse->ipa_command->template_key)
 			    {
 				char *ptr;
 
 				// Can this supply a source?
-				if (ptr=strchr(parse->command->template_key,FUNCKEY_SOURCE))
+				if (ptr=strchr(parse->ipa_command->template_key,FUNCKEY_SOURCE))
 				{
 					// Source supplied?
-					if ((ptr=(char *)parse->funcargs->FA_ArgArray[atoi(ptr+1)]) &&
+					if ((ptr=(char *)parse->ipa_funcargs->FA_ArgArray[atoi(ptr+1)]) &&
 					    (strchr(ptr,':') || strchr(ptr,'/')))
 					{
 					    // Clear "need source" flag
@@ -197,10 +197,10 @@ function_parse_function(FunctionHandle *handle)
 				}
 
 				// Can this supply a destination?
-				if (ptr=strchr(parse->command->template_key,FUNCKEY_DIR))
+				if (ptr=strchr(parse->ipa_command->template_key,FUNCKEY_DIR))
 				{
 					// Source supplied?
-					if ((ptr=(char *)parse->funcargs->FA_ArgArray[atoi(ptr+1)]) &&
+					if ((ptr=(char *)parse->ipa_funcargs->FA_ArgArray[atoi(ptr+1)]) &&
 					    (strchr(ptr,':') || strchr(ptr,'/')))
 					{
 					    // Clear "need dest" flag
@@ -209,11 +209,11 @@ function_parse_function(FunctionHandle *handle)
 				}
 
 				// Can this supply a file?
-				if ((ptr=strchr(parse->command->template_key,FUNCKEY_FILE)) ||
-				    (ptr=strchr(parse->command->template_key,FUNCKEY_FILENO)))
+				if ((ptr=strchr(parse->ipa_command->template_key,FUNCKEY_FILE)) ||
+				    (ptr=strchr(parse->ipa_command->template_key,FUNCKEY_FILENO)))
 				{
 				    // File supplied?
-				    if (parse->funcargs->FA_ArgArray[atoi(ptr+1)])
+				    if (parse->ipa_funcargs->FA_ArgArray[atoi(ptr+1)])
 				    {
 					// Clear "need files" flag
 					flags&=~FUNCF_NEED_ENTRIES;
@@ -222,11 +222,11 @@ function_parse_function(FunctionHandle *handle)
 				}
 
 				// New argument?
-				if (ptr=strchr(parse->command->template_key,FUNCKEY_NEW))
+				if (ptr=strchr(parse->ipa_command->template_key,FUNCKEY_NEW))
 				{
 				    // New flag set?
-				    if (parse->funcargs->FA_ArgArray[atoi(ptr+1)])
-					parse->new_arg=1;
+				    if (parse->ipa_funcargs->FA_ArgArray[atoi(ptr+1)])
+					parse->ipa_new_arg=1;
 				}
 			    }
 			}
@@ -235,7 +235,7 @@ function_parse_function(FunctionHandle *handle)
 
 		// Set function flags
 		handle->func_flags|=flags;
-		parse->flags|=flags;
+		parse->ipa_flags|=flags;
 
 		// Link instruction in
 		AddTail((struct List *)&handle->func_instructions,(struct Node *)parse);
@@ -697,14 +697,14 @@ function_build_instruction(FunctionHandle *handle,
     function_buf[0]=0;
 
     // Workbench instruction?
-    if (ins->type==INST_WORKBENCH) wb_func=1;
+    if (ins->ipa_type==INST_WORKBENCH) wb_func=1;
 
     // If quoting filenames, this is a convenient way to know about it
     if (!(handle->func_parameters.flags&FUNCF_NO_QUOTES)) quote_extra=2;
 
     // Get instruction pointer
     if (!instruction && ins)
-	    instruction=ins->string;
+	    instruction=ins->ipa_string;
 
     // Is there actually anything to parse?
     if (!ins || !instruction || !*instruction)
@@ -750,12 +750,12 @@ function_build_instruction(FunctionHandle *handle,
     quote_flag=0;
 
     // Get current paths
-    if (!(path=function_path_current(&handle->source_paths)) || !(source=path->lister))
+    if (!(path=function_path_current(&handle->source_paths)) || !(source=path->pn_lister))
     {
 	if (!(source=handle->source_lister))
 	    source=handle->saved_source_lister;
     }
-    if (!(path=function_path_current(&handle->dest_paths)) || !(dest=path->lister))
+    if (!(path=function_path_current(&handle->dest_paths)) || !(dest=path->pn_lister))
 	dest=handle->dest_lister;
 
     // Go through parsed function string
@@ -838,22 +838,22 @@ function_build_instruction(FunctionHandle *handle,
 
 		        // Add name to string
 		        func_pos+=function_add_filename(function_buf,
-					                (entry->type!=ENTRY_DEVICE)?path_str:0,
-					                entry->name,
+					                (entry->fe_type!=ENTRY_DEVICE)?path_str:0,
+					                entry->fe_name,
 					                1,
-					                (wb_func && entry->type>ENTRY_DEVICE));
+					                (wb_func && entry->fe_type>ENTRY_DEVICE));
 
 		        // Store name
 		        strcpy(handle->last_filename,handle->source_path);
-		        AddPart(handle->last_filename,entry->name,512);
+		        AddPart(handle->last_filename,entry->fe_name,512);
 
 		        // Reload this file?
 		        if (handle->func_parameters.flags&FUNCF_RELOAD_FILES &&
-			    entry->entry &&
-			    !(entry->flags&FUNCENTF_ICON_ACTION))
+			    entry->fe_entry &&
+			    !(entry->fe_flags&FUNCENTF_ICON_ACTION))
 		        {
 			    // Add for reload
-			    function_filechange_reloadfile(handle,handle->source_path,entry->name,FFLF_DEFERRED);
+			    function_filechange_reloadfile(handle,handle->source_path,entry->fe_name,FFLF_DEFERRED);
 		        }
 
 		        // Say we're done with this entry
@@ -862,7 +862,7 @@ function_build_instruction(FunctionHandle *handle,
 
 		    // No entries, and must have them?
 		    else
-		    if (ins->flags&FUNCF_NEED_ENTRIES)
+		    if (ins->ipa_flags&FUNCF_NEED_ENTRIES)
 		        return PARSE_INVALID;
 		    break;
 
@@ -897,7 +897,7 @@ function_build_instruction(FunctionHandle *handle,
 			    (ch==FUNC_LAST_PATH)?(char *)handle->last_filename:(char *)FilePart(handle->last_filename),
 			    0,
 			    1,
-			    (wb_func && entry->type>ENTRY_DEVICE));
+			    (wb_func && entry->fe_type>ENTRY_DEVICE));
 		    break;
 
 
@@ -941,7 +941,7 @@ function_build_instruction(FunctionHandle *handle,
 			    okay=1;
 
 			    // See if this would fill the buffer
-			    if ((len+strlen(entry->name)+path_len+quote_value)>=max_len)
+			    if ((len+strlen(entry->fe_name)+path_len+quote_value)>=max_len)
 				break;
 
 			    // Need a preceeding space?
@@ -954,18 +954,18 @@ function_build_instruction(FunctionHandle *handle,
 
 			    // Add name to function
 			    len+=function_add_filename(function_buf,
-				                       (entry->type!=ENTRY_DEVICE)?path_str:0,
-				                       entry->name,
+				                       (entry->fe_type!=ENTRY_DEVICE)?path_str:0,
+				                       entry->fe_name,
 				                       (quote_value)?0:FUNCF_NO_QUOTES,
-				                       (wb_func && entry->type>ENTRY_DEVICE));
+				                       (wb_func && entry->fe_type>ENTRY_DEVICE));
 
 			    // Reload file?
 			    if (handle->func_parameters.flags&FUNCF_RELOAD_FILES &&
-				entry->entry &&
-				!(entry->flags&FUNCENTF_ICON_ACTION))
+				entry->fe_entry &&
+				!(entry->fe_flags&FUNCENTF_ICON_ACTION))
 			    {
 				// Add for reload
-				function_filechange_reloadfile(handle,handle->source_path,entry->name,FFLF_DEFERRED);
+				function_filechange_reloadfile(handle,handle->source_path,entry->fe_name,FFLF_DEFERRED);
 			    }
 
 			    // Done with this entry
@@ -985,7 +985,7 @@ function_build_instruction(FunctionHandle *handle,
 		    if (!okay)
 		    {
 			// No entries, and must have them?
-			if (ins->flags&FUNCF_NEED_ENTRIES)
+			if (ins->ipa_flags&FUNCF_NEED_ENTRIES)
 			{
 			    cont_flag=PARSE_INVALID;
 			    abort=1;
@@ -1343,14 +1343,14 @@ void function_parse_arguments(FunctionHandle *handle,
     short arg,limit;
 
     // Got argumnts and a template key?
-    if (!ins->funcargs || !ins->command->template_key)
+    if (!ins->ipa_funcargs || !ins->ipa_command->template_key)
 	    return;
 
     // Already done this?
-    if (ins->funcargs->FA_DoneArgs) return;
+    if (ins->ipa_funcargs->FA_DoneArgs) return;
 
     // Set flag to say we've done this
-    ins->funcargs->FA_DoneArgs=1;
+    ins->ipa_funcargs->FA_DoneArgs=1;
 
     // Get cll limit
     if ((limit=environment->env->settings.command_line_length)<256)
@@ -1360,7 +1360,7 @@ void function_parse_arguments(FunctionHandle *handle,
     if (!(buf=AllocVec(limit+2,0))) return;
 
     // Go through template
-    for (ptr=ins->command->template_key;*ptr;ptr++)
+    for (ptr=ins->ipa_command->template_key;*ptr;ptr++)
     {
 	// String argument?
 	if (*ptr==FUNCKEY_FILE || *ptr==FUNCKEY_FILENO || *ptr==FUNCKEY_SOURCE || *ptr==FUNCKEY_DIR || *ptr==FUNCKEY_ARG)
@@ -1375,22 +1375,22 @@ void function_parse_arguments(FunctionHandle *handle,
 	    while (isdigit(*(ptr+1))) ++ptr;
 
 	    // Got a string for this argument?
-	    if (ins->funcargs->FA_ArgArray[arg])
+	    if (ins->ipa_funcargs->FA_ArgArray[arg])
 	    {
 		// Parse argument
 		function_build_instruction(handle,
 			                   ins,
-			                   (unsigned char *)ins->funcargs->FA_ArgArray[arg],
+			                   (unsigned char *)ins->ipa_funcargs->FA_ArgArray[arg],
 			                   buf);
 
 		// Has it changed?
-		if (strcmp((char *)ins->funcargs->FA_ArgArray[arg],buf))
+		if (strcmp((char *)ins->ipa_funcargs->FA_ArgArray[arg],buf))
 		{
 		    // Allocate copy
-		    if (ins->funcargs->FA_Arguments[arg]=(long)AllocVec(strlen((char *)buf)+1,0))
+		    if (ins->ipa_funcargs->FA_Arguments[arg]=(long)AllocVec(strlen((char *)buf)+1,0))
 		    {
 			// Copy new argument string
-			strcpy((char *)ins->funcargs->FA_Arguments[arg],buf);
+			strcpy((char *)ins->ipa_funcargs->FA_Arguments[arg],buf);
 		    }
 		}
 	    }

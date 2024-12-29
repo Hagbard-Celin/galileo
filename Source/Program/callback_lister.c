@@ -43,13 +43,13 @@ For more information on Directory Opus for Windows please see:
 APTR __asm __saveds HookConvertEntry(
 	register __a0 FunctionEntry *entry)
 {
-	return (entry)?entry->entry:0;
+	return (entry)?entry->fe_entry:0;
 }
 
 Lister *__asm __saveds HookGetLister(
 	register __a0 PathNode *path)
 {
-	return (path)?path->lister:0;
+	return (path)?path->pn_lister:0;
 }
 
 ULONG __asm __saveds HookExamineEntry(
@@ -60,12 +60,12 @@ ULONG __asm __saveds HookExamineEntry(
 
 	// Name?
 	if (type==EE_NAME)
-		return (ULONG)entry->name;
+		return (ULONG)entry->fe_name;
 
 	// Type
 	else
 	if (type==EE_TYPE)
-		return (ULONG)entry->type;
+		return (ULONG)entry->fe_type;
 
 	return 0;
 }
@@ -87,7 +87,7 @@ PathNode *__asm __saveds HookGetSource(
 		return 0;
 
 	// Copy path name
-	if (pathbuf) strcpy(pathbuf,path->path);
+	if (pathbuf) strcpy(pathbuf,path->pn_path);
 	return path;
 }
 
@@ -108,7 +108,7 @@ PathNode *__asm __saveds HookNextSource(
 		return 0;
 
 	// Copy path name
-	if (pathbuf) strcpy(pathbuf,path->path);
+	if (pathbuf) strcpy(pathbuf,path->pn_path);
 
 	// Out of files?
 	if (!function_current_entry(handle))
@@ -142,7 +142,7 @@ PathNode *__asm __saveds HookGetDest(
 		return 0;
 
 	// Copy path name
-	if (pathbuf) strcpy(pathbuf,path->path);
+	if (pathbuf) strcpy(pathbuf,path->pn_path);
 	return path;
 }
 
@@ -187,7 +187,7 @@ void __asm __saveds HookEndEntry(
 void __asm __saveds HookRemoveEntry(
 	register __a0 FunctionEntry *entry)
 {
-	if (entry) entry->flags|=FUNCENTF_REMOVE;
+	if (entry) entry->fe_flags|=FUNCENTF_REMOVE;
 }
 
 long __asm __saveds HookEntryCount(
@@ -208,8 +208,8 @@ void __asm __saveds HookReloadEntry(
 		// Add for reload
 		function_filechange_reloadfile(
 			handle,
-			path->path,
-			entry->name,0);
+			path->pn_path,
+			entry->fe_name,0);
 	}
 }
 
@@ -269,8 +269,8 @@ struct Window *__asm __saveds HookGetWindow(
 	register __a0 PathNode *path)
 {
 	// Valid lister?
-	if (path && path->lister)
-		return path->lister->window;
+	if (path && path->pn_lister)
+		return path->pn_lister->window;
 	return 0;
 }
 
@@ -326,7 +326,7 @@ void __asm __saveds HookOpenProgress(
 	ProgressPacket *prog;
 
 	// No lister?
-	if (!path || !path->lister) return;
+	if (!path || !path->pn_lister) return;
 
 	// Allocate progress packet
 	if (prog=AllocVec(sizeof(ProgressPacket),MEMF_CLEAR))
@@ -337,7 +337,7 @@ void __asm __saveds HookOpenProgress(
 		prog->flags=PWF_FILENAME|PWF_GRAPH;
 
 		// Open progress indicator in lister
-		IPC_Command(path->lister->ipc,LISTER_PROGRESS_ON,0,0,prog,0);
+		IPC_Command(path->pn_lister->ipc,LISTER_PROGRESS_ON,0,0,prog,0);
 	}
 }
 
@@ -348,9 +348,9 @@ void __asm __saveds HookUpdateProgress(
 	register __d0 long count)
 {
 	// Update progress indicator
-	if (path && path->lister)
+	if (path && path->pn_lister)
 		lister_command(
-			path->lister,
+			path->pn_lister,
 			LISTER_PROGRESS_UPDATE,
 			count,
 			name,
@@ -362,9 +362,9 @@ void __asm __saveds HookCloseProgress(
 	register __a0 PathNode *path)
 {
 	// Close progress indicator
-	if (path && path->lister)
+	if (path && path->pn_lister)
 		lister_command(
-			path->lister,
+			path->pn_lister,
 			LISTER_PROGRESS_OFF,
 			0,0,0,0);
 }

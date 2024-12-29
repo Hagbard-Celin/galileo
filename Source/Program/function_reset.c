@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -47,11 +47,11 @@ enum
 GALILEOFM_FUNC(function_reset)
 {
 	// Arguments?
-	if (!instruction->funcargs)
+	if (!instruction->ipa_funcargs)
 		return 0;
 
 	// Reset modules?
-	if (instruction->funcargs->FA_Arguments[ARG_MODULES])
+	if (instruction->ipa_funcargs->FA_Arguments[ARG_MODULES])
 	{
 		// Update commands
 		update_commands(SNIFF_BOTH);
@@ -59,7 +59,7 @@ GALILEOFM_FUNC(function_reset)
 
 	// Reset system
 	else
-	if (instruction->funcargs->FA_Arguments[ARG_SYSTEM])
+	if (instruction->ipa_funcargs->FA_Arguments[ARG_SYSTEM])
 	{
 		// Reboot
 		ColdReboot();

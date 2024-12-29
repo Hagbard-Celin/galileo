@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -65,31 +65,31 @@ GALILEOFM_FUNC(function_makedir)
 	// Default to icons?
 	if (GUI->flags&GUIF_SAVE_ICONS ||
 		handle->flags&FUNCF_ICONS ||
-		(path && path->lister && path->lister->flags&LISTERF_VIEW_ICONS)) def_icon=1;
+		(path && path->pn_lister && path->pn_lister->flags&LISTERF_VIEW_ICONS)) def_icon=1;
 
 	// Parsed arguments?
-	if (instruction->funcargs)
+	if (instruction->ipa_funcargs)
 	{
 		// No icons?
-		if (instruction->funcargs->FA_Arguments[MAKEDIR_NOICON])
+		if (instruction->ipa_funcargs->FA_Arguments[MAKEDIR_NOICON])
 			icon_flag=0;
 
 		// Select?
-		if (instruction->funcargs->FA_Arguments[MAKEDIR_SELECT])
+		if (instruction->ipa_funcargs->FA_Arguments[MAKEDIR_SELECT])
 			select=1;
 
 		// New?
-		if (instruction->funcargs->FA_Arguments[MAKEDIR_NEW])
+		if (instruction->ipa_funcargs->FA_Arguments[MAKEDIR_NEW])
 			new_flag=1;
 
 		// Read?
-		if (instruction->funcargs->FA_Arguments[MAKEDIR_READ])
+		if (instruction->ipa_funcargs->FA_Arguments[MAKEDIR_READ])
 			read_flag=1;
 
 		// Directory?
-		if (instruction->funcargs->FA_Arguments[MAKEDIR_NAME])
+		if (instruction->ipa_funcargs->FA_Arguments[MAKEDIR_NAME])
 		{
-			char *path=(char *)instruction->funcargs->FA_Arguments[MAKEDIR_NAME];
+			char *path=(char *)instruction->ipa_funcargs->FA_Arguments[MAKEDIR_NAME];
 
 			// Don't need to ask
 			ask_flag=0;
@@ -215,7 +215,7 @@ GALILEOFM_FUNC(function_makedir)
 		if (read_flag)
 		{
 			// Read directory
-			function_read_directory(handle,path->lister,dir_path);
+			function_read_directory(handle,path->pn_lister,dir_path);
 			add_flag=0;
 		}
 
@@ -223,7 +223,7 @@ GALILEOFM_FUNC(function_makedir)
 		else
 		{
 			// Tell lister to update it's stamp
-			path->flags|=LISTNF_UPDATE_STAMP;
+			path->pn_flags|=LISTNF_UPDATE_STAMP;
 
 			// Display status text
 			function_text(handle,GetString(&locale,MSG_DIRECTORY_CREATED));
@@ -258,7 +258,7 @@ GALILEOFM_FUNC(function_makedir)
 	}
 
 	// Use path in lister
-	else dir_name=path->path;
+	else dir_name=path->pn_path;
 
 	// Ok to add?
 	if (add_flag)

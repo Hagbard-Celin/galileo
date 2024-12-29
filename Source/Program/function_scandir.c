@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -64,20 +64,20 @@ GALILEOFM_FUNC(function_scandir)
 		return 0;
 
 	// Parsed arguments?
-	if (instruction->funcargs)
+	if (instruction->ipa_funcargs)
 	{
 		// Get arguments
-		new_flag=instruction->funcargs->FA_Arguments[SCANDIR_NEW];
-		if (instruction->funcargs->FA_Arguments[SCANDIR_PATH])
+		new_flag=instruction->ipa_funcargs->FA_Arguments[SCANDIR_NEW];
+		if (instruction->ipa_funcargs->FA_Arguments[SCANDIR_PATH])
 		{
 			path_flag=1;
-			strcpy(handle->source_path,(char *)instruction->funcargs->FA_Arguments[SCANDIR_PATH]);
+			strcpy(handle->source_path,(char *)instruction->ipa_funcargs->FA_Arguments[SCANDIR_PATH]);
 		}
 
 		// Mode?
-		if (instruction->funcargs->FA_Arguments[SCANDIR_MODE])
+		if (instruction->ipa_funcargs->FA_Arguments[SCANDIR_MODE])
 		{
-			char *ptr=(char *)instruction->funcargs->FA_Arguments[SCANDIR_MODE];
+			char *ptr=(char *)instruction->ipa_funcargs->FA_Arguments[SCANDIR_MODE];
 
 			// Icon?
 			if (stricmp(ptr,mode_keys[1])==0) mode_flags=GLSTF_ICON;
@@ -88,11 +88,11 @@ GALILEOFM_FUNC(function_scandir)
 		}
 
 		// Show all?
-		if (instruction->funcargs->FA_Arguments[SCANDIR_SHOWALL])
+		if (instruction->ipa_funcargs->FA_Arguments[SCANDIR_SHOWALL])
 			mode_flags|=GLSTF_SHOW_ALL;
 
 		// Container?
-		if (instruction->funcargs->FA_Arguments[SCANDIR_CONTAINER])
+		if (instruction->ipa_funcargs->FA_Arguments[SCANDIR_CONTAINER])
 			cont_flag=1;
 	}
 
@@ -103,10 +103,10 @@ GALILEOFM_FUNC(function_scandir)
 		while (entry=function_get_entry(handle))
 		{
 			// Directory?
-			if (entry->type>0)
+			if (entry->fe_type>0)
 			{
 				// Build path name
-				AddPart(handle->source_path,entry->name,512);
+				AddPart(handle->source_path,entry->fe_name,512);
 
 				// Finish with entry
 				function_end_entry(handle,entry,FALSE);

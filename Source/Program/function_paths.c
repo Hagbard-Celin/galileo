@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -46,10 +46,10 @@ PathNode *function_add_path(FunctionHandle *handle,PathList *list,Lister *lister
 	if (node=AllocMemH(handle->memory,sizeof(PathNode)))
 	{
 		// Copy path
-		if (path) strcpy(node->path_buf,path);
+		if (path) strcpy(node->pn_path_buf,path);
 
 		// Store lister pointer
-		node->lister=lister;
+		node->pn_lister=lister;
 
 		// Add to path list
 		AddHead((struct List *)list,(struct Node *)node);
@@ -74,15 +74,15 @@ void function_build_source(
 	char *buffer)
 {
 	// Is entry a device?
-	if (entry->type>0 && entry->name[strlen(entry->name)-1]==':')
+	if (entry->fe_type>0 && entry->fe_name[strlen(entry->fe_name)-1]==':')
 	{
 		// This is the new source path
-		strcpy(handle->source_path,entry->name);
+		strcpy(handle->source_path,entry->fe_name);
 	}
 
 	// Build source path
 	strcpy(buffer,handle->source_path);
-	AddPart(buffer,entry->name,256);
+	AddPart(buffer,entry->fe_name,256);
 }
 
 
@@ -93,7 +93,7 @@ void function_build_dest(
 	char *buffer)
 {
 	strcpy(buffer,handle->dest_path);
-	AddPart(buffer,entry->name,256);
+	AddPart(buffer,entry->fe_name,256);
 }
 
 
@@ -102,12 +102,12 @@ PathNode *function_path_current(PathList *list)
 {
 	// Is there a current one?
 	if (list->current &&
-		list->current->node.mln_Succ)
+		list->current->pn_node.mln_Succ)
 	{
 		// Make sure the path is right
-		if (list->current->lister && !(list->current->flags&LISTNF_CHANGED))
-			list->current->path=list->current->lister->cur_buffer->buf_Path;
-		else list->current->path=list->current->path_buf;
+		if (list->current->pn_lister && !(list->current->pn_flags&LISTNF_CHANGED))
+			list->current->pn_path=list->current->pn_lister->cur_buffer->buf_Path;
+		else list->current->pn_path=list->current->pn_path_buf;
 
 		// Return current path node
 		return list->current;
@@ -121,9 +121,9 @@ Lister *function_lister_current(PathList *list)
 {
 	// Is there a current one?
 	if (list->current &&
-		list->current->node.mln_Succ)
+		list->current->pn_node.mln_Succ)
 	{
-		return list->current->lister;
+		return list->current->pn_lister;
 	}
 	return 0;
 }
@@ -135,17 +135,17 @@ PathNode *function_path_next(PathList *list)
 	PathNode *node=0;
 
 	// While there's a valid path
-	while (list->current && list->current->node.mln_Succ)
+	while (list->current && list->current->pn_node.mln_Succ)
 	{
 		// Is this lister valid?
-		if (!(list->current->flags&LISTNF_INVALID))
+		if (!(list->current->pn_flags&LISTNF_INVALID))
 		{
 			node=list->current;
 			break;
 		}
 
 		// Get next
-		list->current=(PathNode *)list->current->node.mln_Succ;
+		list->current=(PathNode *)list->current->pn_node.mln_Succ;
 	}
 
 	// If no path found, reset to first in the list
@@ -167,7 +167,7 @@ PathNode *function_path_next(PathList *list)
 void function_path_end(FunctionHandle *handle,PathList *list,int cleanup)
 {
 	// Valid lister?
-	if (list->current && list->current->node.mln_Succ && list->current->lister)
+	if (list->current && list->current->pn_node.mln_Succ && list->current->pn_lister)
 	{
 		// Call cleanup for this list
 		if (cleanup==1)
@@ -180,7 +180,7 @@ void function_path_end(FunctionHandle *handle,PathList *list,int cleanup)
 		else
 		if (cleanup==-1)
 		{
-			list->current->flags|=LISTNF_INVALID;
+			list->current->pn_flags|=LISTNF_INVALID;
 		}
 	}
 
@@ -188,14 +188,14 @@ void function_path_end(FunctionHandle *handle,PathList *list,int cleanup)
 	while (list->current)
 	{
 		// Is the current one valid?
-		if (list->current->node.mln_Succ)
+		if (list->current->pn_node.mln_Succ)
 		{
 			// Get next lister
-			list->current=(PathNode *)list->current->node.mln_Succ;
+			list->current=(PathNode *)list->current->pn_node.mln_Succ;
 
 			// Is this lister ok?
-			if (list->current->node.mln_Succ &&
-				!(list->current->flags&LISTNF_INVALID))
+			if (list->current->pn_node.mln_Succ &&
+				!(list->current->pn_flags&LISTNF_INVALID))
 				return;
 		}
 
@@ -211,13 +211,13 @@ BOOL function_valid_path(PathNode *path)
 	if (!path) return 0;
 
 	// Valid path?
-	if (path->path && path->path[0]) return 1;
+	if (path->pn_path && path->pn_path[0]) return 1;
 
 	// Lister pointer?
-	if (path->lister)
+	if (path->pn_lister)
 	{
 		// Get path from lister
-		path->path=path->lister->cur_buffer->buf_Path;
+		path->pn_path=path->pn_lister->cur_buffer->buf_Path;
 		return 1;
 	}
 

@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -273,14 +273,14 @@ void function_close_script(
 					if (handle->func_parameters.flags&FUNCF_RESCAN_SOURCE)
 					{
 						PathNode *path=function_path_current(&handle->source_paths);
-						if (path) path->flags|=LISTNF_RESCAN;
+						if (path) path->pn_flags|=LISTNF_RESCAN;
 					}
 
 					// Rescan destination?
 					if (handle->func_parameters.flags&FUNCF_RESCAN_DEST)
 					{
 						PathNode *path=function_path_current(&handle->dest_paths);
-						if (path) path->flags|=LISTNF_RESCAN;
+						if (path) path->pn_flags|=LISTNF_RESCAN;
 					}
 
 					// Delete script file

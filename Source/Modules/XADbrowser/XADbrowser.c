@@ -1235,7 +1235,7 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 
 	if (data.listp2)
 	{
-    		data.listh = (ULONG)data.listp2->lister;
+    		data.listh = (ULONG)data.listp2->pn_lister;
     		data.listw = data.hook.gc_GetWindow(data.listp2);
     		sprintf(data.lists, "%lu", data.listh);
 
@@ -1353,10 +1353,10 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 	    if (data.destp)
 	    {
 		// Needed for the following scandir not to open a new window
-		sprintf(buf,"lister set %lu busy off wait",data.destp->lister);
+		sprintf(buf,"lister set %lu busy off wait",data.destp->pn_lister);
 		data.hook.gc_SendCommand(IPCDATA(ipc),buf,NULL,NULL);
 
-  	        sprintf(buf,"command source %lu ScanDir %s",data.destp->lister,data.destp->path);
+  	        sprintf(buf,"command source %lu ScanDir %s",data.destp->pn_lister,data.destp->pn_path);
 		data.hook.gc_SendCommand(IPCDATA(ipc),buf,NULL,NULL);
 	    }
 	    xadFreeObject(data.ArcInf,NULL);
@@ -1383,7 +1383,7 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
     if (data.destp=data.hook.gc_GetDest(IPCDATA(ipc), data.listpath))
     {
 	// Store lister for restoring deststination status later
-	data.desth=(ULONG)data.destp->lister;
+	data.desth=(ULONG)data.destp->pn_lister;
 
 	data.hook.gc_EndDest(IPCDATA(ipc), 0);
 
@@ -1394,7 +1394,7 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 
     if (data.listp2)
     {
-	data.listh2=(ULONG)data.listp2->lister;
+	data.listh2=(ULONG)data.listp2->pn_lister;
 
 	if (!data.newlister)
 	{
@@ -1501,9 +1501,9 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 		}
 
 
-	        data.listp->lister = (APTR)data.listh;
-	        *data.listp->path_buf = data.listp->flags = 0;
-	        data.listp->path = data.listp->path_buf;
+	        data.listp->pn_lister = (APTR)data.listh;
+	        *data.listp->pn_path_buf = data.listp->pn_flags = 0;
+	        data.listp->pn_path = data.listp->pn_path_buf;
 	        data.listw = data.hook.gc_GetWindow(data.listp);
 	    }
 

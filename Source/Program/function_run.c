@@ -75,18 +75,18 @@ void function_run_function(FunctionHandle *handle)
 			handle->source_paths.list.mlh_Head->mln_Succ)
 		{
 			status_text(
-				((PathNode *)handle->source_paths.list.mlh_Head)->lister,
+				((PathNode *)handle->source_paths.list.mlh_Head)->pn_lister,
 				handle->final_message);
 		}
 	}
 
 	// Go through instruction list
 	for (instruction=(InstructionParsed *)handle->func_instructions.mlh_Head;
-		instruction->node.mln_Succ;
-		instruction=(InstructionParsed *)instruction->node.mln_Succ)
+		instruction->ipa_node.mln_Succ;
+		instruction=(InstructionParsed *)instruction->ipa_node.mln_Succ)
 	{
 		// Free ReadArgs stuff?
-		DisposeArgs(instruction->funcargs);
+		DisposeArgs(instruction->ipa_funcargs);
 	}
 }
 
@@ -139,7 +139,7 @@ short function_run(FunctionHandle *handle)
 		// Get source path
 		if (path)
 		{
-			strcpy(handle->source_path,path->path);
+			strcpy(handle->source_path,path->pn_path);
 			AddPart(handle->source_path,"",512);
 		}
 		else handle->source_path[0]=0;
@@ -149,37 +149,37 @@ short function_run(FunctionHandle *handle)
 
 		// If we're reloading files, update stamp in source
 		if (handle->func_parameters.flags&FUNCF_RELOAD_FILES && path)
-			path->flags|=LISTNF_UPDATE_STAMP;
+			path->pn_flags|=LISTNF_UPDATE_STAMP;
 
 		// Loop until finished
 		FOREVER
 		{
 			// Go through instruction list
 			for (instruction=(InstructionParsed *)handle->func_instructions.mlh_Head;
-				instruction->node.mln_Succ;
-				instruction=(InstructionParsed *)instruction->node.mln_Succ)
+				instruction->ipa_node.mln_Succ;
+				instruction=(InstructionParsed *)instruction->ipa_node.mln_Succ)
 			{
 				// Once only?
-				if (instruction->command && instruction->count>0)
+				if (instruction->ipa_command && instruction->ipa_count>0)
 				{
 					// Check count; skip if already used
-					if (instruction->count>1) continue;
+					if (instruction->ipa_count>1) continue;
 
 					// Increment count
-					++instruction->count;
+					++instruction->ipa_count;
 				}
-				else if (instruction->string && *instruction->string=='#')
+				else if (instruction->ipa_string && *instruction->ipa_string=='#')
 				{
 					// Check count; skip if already used
-					if (instruction->count>0) continue;
+					if (instruction->ipa_count>0) continue;
 
 					// Increment count
-					++instruction->count;
+					++instruction->ipa_count;
 				}
 
 				// Set instruction data pointer
-				handle->inst_data=instruction->inst_data;
-				handle->inst_flags=instruction->inst_flags;
+				handle->inst_data=instruction->ipa_inst_data;
+				handle->inst_flags=instruction->ipa_inst_flags;
 
 				// Are we out of files?
 				if (!function_current_entry(handle))
@@ -192,8 +192,8 @@ short function_run(FunctionHandle *handle)
 					}
 
 					// Check entries
-					if (instruction->flags&FUNCF_NEED_ENTRIES &&
-						(!first || !(instruction->flags&FUNCF_WANT_ENTRIES)) &&
+					if (instruction->ipa_flags&FUNCF_NEED_ENTRIES &&
+						(!first || !(instruction->ipa_flags&FUNCF_WANT_ENTRIES)) &&
 						!(function_current_entry(handle)))
 					{
 						run_okay=0;
@@ -240,7 +240,7 @@ short function_run(FunctionHandle *handle)
 				if (run_okay!=1) break;
 
 				// Store flags in case they've changed
-				instruction->inst_flags=handle->inst_flags;
+				instruction->ipa_inst_flags=handle->inst_flags;
 
 				// Do cleanup for this instruction
 				function_cleanup(handle,path,0);
@@ -295,13 +295,13 @@ function_run_instruction(
 	handle->cur_instruction=instruction;
 
 	// Is the instruction an internal function?
-	if (instruction->type==INST_COMMAND)
+	if (instruction->ipa_type==INST_COMMAND)
 	{
 		char *args;
 		short limit;
 
 		// Invalid command?
-		if (!instruction->command) return 1;
+		if (!instruction->ipa_command) return 1;
 
 		// Run preceding external commands
 		if (handle->script_file)
@@ -325,8 +325,8 @@ function_run_instruction(
 				function_parse_arguments(handle,instruction);
 
 				// If we needs files, check there are some
-				if (!(instruction->flags&FUNCF_NEED_ENTRIES) ||
-					instruction->flags&FUNCF_WANT_ENTRIES ||
+				if (!(instruction->ipa_flags&FUNCF_NEED_ENTRIES) ||
+					instruction->ipa_flags&FUNCF_WANT_ENTRIES ||
 					(function_current_entry(handle)))
 				{
 					// Don't need a source path, or have one already?
@@ -335,7 +335,7 @@ function_run_instruction(
 					{
 						// Run the command
 						ret=function_internal_command(
-							instruction->command,
+							instruction->ipa_command,
 							args,
 							handle,
 							instruction);
@@ -471,7 +471,7 @@ short function_check_single(
 
 	// Got a current lister?
 	if (usetype &&
-		(!(current=function_path_current(path_list)) || !current->lister))
+		(!(current=function_path_current(path_list)) || !current->pn_lister))
 		return 1;
 
 	// Create list
@@ -526,7 +526,7 @@ short function_check_single(
 		if (!(IsListEmpty((struct List *)list)) && current)
 		{
 			// Add the path we do have to lister
-			if (node=Att_NewNode(list,current->lister->cur_buffer->buf_Path,(ULONG)current,ADDNODE_SORT))
+			if (node=Att_NewNode(list,current->pn_lister->cur_buffer->buf_Path,(ULONG)current,ADDNODE_SORT))
 				sel=Att_FindNodeNumber(list,node);
 		}
 
@@ -615,8 +615,8 @@ short function_check_single(
 				// Typed-in path name?
 				if (handle->work_buffer[0])
 				{
-					strcpy(current->path_buf,handle->work_buffer);
-					current->path=current->path_buf;
+					strcpy(current->pn_path_buf,handle->work_buffer);
+					current->pn_path=current->pn_path_buf;
 				}
 
 				// Lister
@@ -638,7 +638,7 @@ short function_check_single(
 							if (IPCDATA(ipc)==(APTR)node->data)
 							{
 								// Grab it
-								current->lister=(Lister *)node->data;
+								current->pn_lister=(Lister *)node->data;
 								break;
 							}
 						}
@@ -648,12 +648,12 @@ short function_check_single(
 					}
 
 					// Haven't got a lister?
-					if (!current->lister)
+					if (!current->pn_lister)
 					{
 						// Get path
-						if (node) strcpy(current->path_buf,node->node.ln_Name);
-						else current->path[0]=0;
-						current->path=current->path_buf;
+						if (node) strcpy(current->pn_path_buf,node->node.ln_Name);
+						else current->pn_path[0]=0;
+						current->pn_path=current->pn_path_buf;
 					}
 				}
 
@@ -665,7 +665,7 @@ short function_check_single(
 				path_list->current=current;
 
 				// Lock this path (if a lister)
-				if (current->lister)
+				if (current->pn_lister)
 				{
 					ret=function_lock_paths(handle,path_list,locker);
 				}
@@ -699,12 +699,12 @@ void function_check_ins_path(
 
 	// Path supplied in instruction?
 	if (instruction &&
-		instruction->command &&
-		instruction->command->template_key &&
-		(ptr=strchr(instruction->command->template_key,path_type)))
+		instruction->ipa_command &&
+		instruction->ipa_command->template_key &&
+		(ptr=strchr(instruction->ipa_command->template_key,path_type)))
 	{
 		// Parsed arguments?
-		if (instruction->funcargs)
+		if (instruction->ipa_funcargs)
 		{
 			// Get number of path argument
 			short num=atoi(ptr+1);
@@ -713,8 +713,8 @@ void function_check_ins_path(
 			*handle->work_buffer=0;
 
 			// Copy to buffer
-			if (instruction->funcargs->FA_Arguments[num])
-				strcpy(handle->work_buffer,(char *)instruction->funcargs->FA_Arguments[num]);
+			if (instruction->ipa_funcargs->FA_Arguments[num])
+				strcpy(handle->work_buffer,(char *)instruction->ipa_funcargs->FA_Arguments[num]);
 
 			// Valid path?
 			if (handle->work_buffer[0])
@@ -752,8 +752,8 @@ void function_replace_paths(
 	if (current=AllocMemH(handle->memory,sizeof(PathNode)))
 	{
 		// Copy path
-		strcpy(current->path_buf,new_path);
-		current->path=current->path_buf;
+		strcpy(current->pn_path_buf,new_path);
+		current->pn_path=current->pn_path_buf;
 
 		// Add to list
 		AddHead((struct List *)path_list,(struct Node *)current);

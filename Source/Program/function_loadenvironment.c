@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -59,7 +59,7 @@ GALILEOFM_FUNC(function_loadenvironment)
 		if (command->function==FUNC_LOADENVIRONMENT)
 		{
 			// If file didn't exist, look in default directory
-			if (!lock) lsprintf(handle->work_buffer,"PROGDIR:environment/%s",entry->name);
+			if (!lock) lsprintf(handle->work_buffer,"PROGDIR:environment/%s",entry->fe_name);
 
 			// Allocate packet
 			if (packet=AllocVec(sizeof(env_packet)+strlen(handle->work_buffer),0))
