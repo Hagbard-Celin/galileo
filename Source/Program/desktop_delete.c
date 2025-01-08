@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -220,8 +220,12 @@ void desktop_delete(IPCData *ipc,BackdropInfo *info,BackdropObject *only_one)
 	// Free list
 	Att_RemList(list,0);
 
-	// Recalc backdrop objects
-	backdrop_calc_virtual(info);
+	// Skip for groups as they already calls this themselves
+	if (!(info->flags&BDIF_GROUP))
+	{
+	    // Recalc backdrop objects
+	    backdrop_calc_virtual(info);
+	}
 
 	// Delete other things?
 	if (othercount>0)
