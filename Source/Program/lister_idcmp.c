@@ -786,7 +786,7 @@ void __asm __saveds lister_process_msg(
 			    lister_close = FindGadgetType(lister->window->FirstGadget,GTYP_CLOSE);
 
 			    // Skip if click was on close-gadget
-			    if ((msg->MouseX > lister_close->Width) || (msg->MouseY > lister_close->Height))
+			    if (!(lister_close->Flags&GFLG_SELECTED))
 			    {
 				// Set pointer to current lister, only if not minimized to titlebar
 				if (!(lister->more_flags&LISTERF_TITLEBARRED))
