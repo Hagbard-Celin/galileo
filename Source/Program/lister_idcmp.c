@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -775,29 +775,40 @@ void __asm __saveds lister_process_msg(
 
 		// Window activated
 		case IDCMP_ACTIVEWINDOW:
+			{
+			    struct Gadget *lister_close;
 
-			// Set pointer to current lister only if not minimized to titlebar
-            if (!(lister->more_flags&LISTERF_TITLEBARRED))
-				GUI->current_lister=lister;
+			    // Make sure progress bar is visible
+			    if (lister->progress_window)
+				    ShowProgressWindow(lister->progress_window,0,0);
+
+			    // Get lister-window close-gadget
+			    lister_close = FindGadgetType(lister->window->FirstGadget,GTYP_CLOSE);
+
+			    // Skip if click was on close-gadget
+			    if ((msg->MouseX > lister_close->Width) || (msg->MouseY > lister_close->Height))
+			    {
+				// Set pointer to current lister, only if not minimized to titlebar
+				if (!(lister->more_flags&LISTERF_TITLEBARRED))
+					GUI->current_lister=lister;
 
 /*
-			// Is lister busy, and do we have a known locker?
-			if (lister->flags&LISTERF_BUSY && lister->locker_ipc)
-			{
-				// Send activate command
-				IPC_Command(lister->locker_ipc,IPC_ACTIVATE,0,0,0,0);
-				break;
-			}
+				// Is lister busy, and do we have a known locker?
+				if (lister->flags&LISTERF_BUSY && lister->locker_ipc)
+				{
+					// Send activate command
+					IPC_Command(lister->locker_ipc,IPC_ACTIVATE,0,0,0,0);
+					break;
+				}
 */
 
-			// Make sure progress bar is visible
-			if (lister->progress_window)
-				ShowProgressWindow(lister->progress_window,0,0);
 
-			// See if buffer needs to be re-read
-			if (!(lister->flags&LISTERF_LOCK))
-			{
-				lister_check_old_buffer(lister,0);
+				// See if buffer needs to be re-read
+				if (!(lister->flags&LISTERF_LOCK))
+				{
+					lister_check_old_buffer(lister,0);
+				}
+			    }
 			}
 			break;
 
