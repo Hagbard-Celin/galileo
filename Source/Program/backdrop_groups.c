@@ -247,7 +247,7 @@ void __saveds backdrop_group_handler(void)
 					if (group->window) SetBusyPointer(group->window);
 
 					// Dropped on an object?
-					if (drop_obj=backdrop_get_object(group->info,amsg->da_Msg.am_MouseX,amsg->da_Msg.am_MouseY,0))
+					if (drop_obj=backdrop_get_object(group->info,amsg->ga_Msg.am_MouseX,amsg->ga_Msg.am_MouseY,0))
 					{
 						USHORT qual;
 
@@ -258,7 +258,7 @@ void __saveds backdrop_group_handler(void)
 						if (qual&(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT)==(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))
 						{
 							// Get path of first file
-							GetWBArgPath(&amsg->da_Msg.am_ArgList[0],path,256);
+							GetWBArgPath(&amsg->ga_Msg.am_ArgList[0],path,256);
 
 							// Replace the image
 							backdrop_replace_icon_image(group->info,path,drop_obj);
@@ -271,21 +271,21 @@ void __saveds backdrop_group_handler(void)
 							drop_obj,
 							0,
 							0,
-							amsg->da_Msg.am_NumArgs,
-							amsg->da_Msg.am_ArgList);
+							amsg->ga_Msg.am_NumArgs,
+							amsg->ga_Msg.am_ArgList);
 					}
 
 					// Otherwise, adding objects to the group
 					else
-					for (arg=0;arg<amsg->da_Msg.am_NumArgs;arg++)
+					for (arg=0;arg<amsg->ga_Msg.am_NumArgs;arg++)
 					{
 						// Valid name?
-						if (*amsg->da_Msg.am_ArgList[arg].wa_Name)
+						if (*amsg->ga_Msg.am_ArgList[arg].wa_Name)
 						{
 							short x,y;
 
 							// Get full path name
-							GetWBArgPath(&amsg->da_Msg.am_ArgList[arg],path,256);
+							GetWBArgPath(&amsg->ga_Msg.am_ArgList[arg],path,256);
 
 							// Default to no position
 							x=-1;
@@ -295,8 +295,8 @@ void __saveds backdrop_group_handler(void)
 							if (CheckAppMessage(amsg))
 							{
 								// Get icon position
-								x=amsg->da_DragOffset.x+amsg->da_Msg.am_MouseX+amsg->da_DropPos[arg].x;
-								y=amsg->da_DragOffset.y+amsg->da_Msg.am_MouseY+amsg->da_DropPos[arg].y;
+								x=amsg->ga_DragOffset.x+amsg->ga_Msg.am_MouseX+amsg->ga_DropPos[arg].x;
+								y=amsg->ga_DragOffset.y+amsg->ga_Msg.am_MouseY+amsg->ga_DropPos[arg].y;
 							}
 
 							// Add group object

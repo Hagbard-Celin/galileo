@@ -87,13 +87,13 @@ GalileoAppMessage *alloc_appmsg_files(
 	}
 
 	// Any arguments?
-	if (msg->da_Msg.am_NumArgs>0)
+	if (msg->ga_Msg.am_NumArgs>0)
 	{
 		// If multi-drag, get first selected file
 		if (multifiles) entry=get_entry(&buffer->entry_list,1,ENTRY_ANYTHING);
 
 		// Fill out arguments
-		for (arg=0;arg<msg->da_Msg.am_NumArgs && entry;arg++)
+		for (arg=0;arg<msg->ga_Msg.am_NumArgs && entry;arg++)
 		{
 			// Is entry a directory?
 			if (entry->de_Node.dn_Type>=ENTRY_DIRECTORY && dir_lock)
@@ -107,7 +107,7 @@ GalileoAppMessage *alloc_appmsg_files(
 				SetWBArg(msg,arg,0,0,global_memory_pool);
 
 				// Get lock on directory
-				if (!(msg->da_Msg.am_ArgList[arg].wa_Lock=Lock(entry->de_Node.dn_Name,ACCESS_READ)))
+				if (!(msg->ga_Msg.am_ArgList[arg].wa_Lock=Lock(entry->de_Node.dn_Name,ACCESS_READ)))
 				{
 					// If a custom handler, just pass name
 					if (buffer->buf_CustomHandler[0])
@@ -142,7 +142,7 @@ GalileoAppMessage *alloc_appmsg_files(
 				SetWBArg(msg,arg,0,0,global_memory_pool);
 
 				// Lock thingy
-				if (!(msg->da_Msg.am_ArgList[arg].wa_Lock=Lock(ptr,ACCESS_READ)))
+				if (!(msg->ga_Msg.am_ArgList[arg].wa_Lock=Lock(ptr,ACCESS_READ)))
 				{
 					// Just pass name
 					SetWBArg(msg,arg,0,entry->de_Node.dn_Name,global_memory_pool);
@@ -171,7 +171,7 @@ GalileoAppMessage *alloc_appmsg_files(
 // Get arguments as an array
 struct ArgArray *AppArgArray(GalileoAppMessage *msg,short flags)
 {
-	return WBArgArray(msg->da_Msg.am_ArgList,msg->da_Msg.am_NumArgs,flags);
+	return WBArgArray(msg->ga_Msg.am_ArgList,msg->ga_Msg.am_NumArgs,flags);
 }
 
 struct ArgArray *WBArgArray(struct WBArg *arglist,short count,short flags)
@@ -238,12 +238,12 @@ void set_appmsg_data(GalileoAppMessage *msg,ULONG value1,ULONG value2,ULONG valu
 	if (msg)
 	{
 		// Set check pointer
-		msg->da_Msg.am_Reserved[6]=(ULONG)msg;
+		msg->ga_Msg.am_Reserved[6]=(ULONG)msg;
 
 		// Store data
-		msg->da_Msg.am_Reserved[3]=value1;
-		msg->da_Msg.am_Reserved[4]=value2;
-		msg->da_Msg.am_Reserved[5]=value3;
+		msg->ga_Msg.am_Reserved[3]=value1;
+		msg->ga_Msg.am_Reserved[4]=value2;
+		msg->ga_Msg.am_Reserved[5]=value3;
 	}
 }
 
@@ -252,12 +252,12 @@ void set_appmsg_data(GalileoAppMessage *msg,ULONG value1,ULONG value2,ULONG valu
 BOOL get_appmsg_data(GalileoAppMessage *msg,ULONG *value1,ULONG *value2,ULONG *value3)
 {
 	// Check for valid message
-	if (!msg || msg->da_Msg.am_Reserved[6]!=(ULONG)msg) return 0;
+	if (!msg || msg->ga_Msg.am_Reserved[6]!=(ULONG)msg) return 0;
 
 	// Return data
-	if (value1) *value1=msg->da_Msg.am_Reserved[3];
-	if (value2) *value2=msg->da_Msg.am_Reserved[4];
-	if (value3) *value3=msg->da_Msg.am_Reserved[5];
+	if (value1) *value1=msg->ga_Msg.am_Reserved[3];
+	if (value2) *value2=msg->ga_Msg.am_Reserved[4];
+	if (value3) *value3=msg->ga_Msg.am_Reserved[5];
 	return 1;
 }
 

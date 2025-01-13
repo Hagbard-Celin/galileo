@@ -553,24 +553,24 @@ BOOL rexx_galileo_cmd(struct RexxMsg *msg,short command,char *args)
 						char buf[20];
 
 						// Get information
-						rexx_parse_word(&args,temp.dse_Name,32);
+						rexx_parse_word(&args,temp.gse_Name,32);
 						if (clear)
-							temp.dse_Sound[0]=0;
+							temp.gse_Sound[0]=0;
 						else
-							rexx_parse_word(&args,temp.dse_Sound,256);
+							rexx_parse_word(&args,temp.gse_Sound,256);
 						if (rexx_parse_word(&args,buf,20) && buf[0])
-							temp.dse_Volume=atoi(buf);
+							temp.gse_Volume=atoi(buf);
 						else
-							temp.dse_Volume=64;
+							temp.gse_Volume=64;
 
 						// Expand assignment path for themes
-						theme_expand_path(temp.dse_Sound);
+						theme_expand_path(temp.gse_Sound);
 
 						// Lock sound list
 						GetSemaphore(&environment->sound_lock,SEMF_EXCLUSIVE,0);
 
 						// Find sound event
-						if (sound=(Cfg_SoundEntry *)FindNameI((struct List *)&environment->sound_list,temp.dse_Name))
+						if (sound=(Cfg_SoundEntry *)FindNameI((struct List *)&environment->sound_list,temp.gse_Name))
 						{
 							// Clear?
 							if (clear)
@@ -584,15 +584,15 @@ BOOL rexx_galileo_cmd(struct RexxMsg *msg,short command,char *args)
 							else
 							{
 								// Store new values
-								strcpy(sound->dse_Sound,temp.dse_Sound);
-								sound->dse_Volume=temp.dse_Volume;
+								strcpy(sound->gse_Sound,temp.gse_Sound);
+								sound->gse_Volume=temp.gse_Volume;
 								strcpy(result,"1");
 							}
 						}
 
 						// Not found
 						else
-						if (!(node=(Att_Node *)FindNameI((struct List *)script_list,temp.dse_Name)) || node->data&SCRIPTF_NO_SOUND)
+						if (!(node=(Att_Node *)FindNameI((struct List *)script_list,temp.gse_Name)) || node->data&SCRIPTF_NO_SOUND)
 							rc=RXERR_INVALID_NAME;
 
 						// Not in sound list currently; try to allocate
@@ -600,10 +600,10 @@ BOOL rexx_galileo_cmd(struct RexxMsg *msg,short command,char *args)
 						if (!clear && (sound=AllocMemH(environment->desktop_memory,sizeof(Cfg_SoundEntry))))
 						{
 							// Initialise and add
-							strcpy(sound->dse_Name,temp.dse_Name);
-							strcpy(sound->dse_Sound,temp.dse_Sound);
-							sound->dse_Volume=temp.dse_Volume;
-							sound->dse_Node.ln_Name=sound->dse_Name;
+							strcpy(sound->gse_Name,temp.gse_Name);
+							strcpy(sound->gse_Sound,temp.gse_Sound);
+							sound->gse_Volume=temp.gse_Volume;
+							sound->gse_Node.ln_Name=sound->gse_Name;
 							AddTail((struct List *)&environment->sound_list,(struct Node *)sound);
 							strcpy(result,"1");
 						}
@@ -843,7 +843,7 @@ BOOL rexx_galileo_cmd(struct RexxMsg *msg,short command,char *args)
 						if (sound=(Cfg_SoundEntry *)FindNameI((struct List *)&environment->sound_list,buf))
 						{
 							// Return the information
-							lsprintf(result,"\"%s\" %ld",sound->dse_Sound,sound->dse_Volume);
+							lsprintf(result,"\"%s\" %ld",sound->gse_Sound,sound->gse_Volume);
 						}
 
 						// Not found

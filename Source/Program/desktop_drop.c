@@ -51,7 +51,7 @@ void desktop_drop(BackdropInfo *info,GalileoAppMessage *msg,USHORT qual)
 	lock_listlock(&info->objects,0);
 
 	// See if we dropped stuff on an object
-	if ((drop_obj=backdrop_get_object(info,msg->da_Msg.am_MouseX,msg->da_Msg.am_MouseY,0)))
+	if ((drop_obj=backdrop_get_object(info,msg->ga_Msg.am_MouseX,msg->ga_Msg.am_MouseY,0)))
 	{
 		// Is shift/alt down?
 		if (qual&(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT)==(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))
@@ -59,7 +59,7 @@ void desktop_drop(BackdropInfo *info,GalileoAppMessage *msg,USHORT qual)
 			char pathname[256];
 
 			// Get path of first file
-			GetWBArgPath(&msg->da_Msg.am_ArgList[0],pathname,256);
+			GetWBArgPath(&msg->ga_Msg.am_ArgList[0],pathname,256);
 
 			// Replace the image
 			backdrop_replace_icon_image(info,pathname,drop_obj);
@@ -141,7 +141,7 @@ void desktop_drop(BackdropInfo *info,GalileoAppMessage *msg,USHORT qual)
 	check=CheckAppMessage(msg);
 
 	// Go through arguments
-	for (arg=0;arg<msg->da_Msg.am_NumArgs;arg++)
+	for (arg=0;arg<msg->ga_Msg.am_NumArgs;arg++)
 	{
 		// What operation?
 		switch (action)
@@ -150,7 +150,7 @@ void desktop_drop(BackdropInfo *info,GalileoAppMessage *msg,USHORT qual)
 			case DESKTOP_POPUP_LEFTOUT:
 
 				// Get path name
-				GetWBArgPath(&msg->da_Msg.am_ArgList[arg],name,512);
+				GetWBArgPath(&msg->ga_Msg.am_ArgList[arg],name,512);
 
 				// Ignore if it's an icon or a disk
 				if (!(isicon(name)) && name[strlen(name)-1]!=':')
@@ -163,15 +163,15 @@ void desktop_drop(BackdropInfo *info,GalileoAppMessage *msg,USHORT qual)
 						perm=1;
 
 					// Get position
-					x=msg->da_Msg.am_MouseX;
-					y=msg->da_Msg.am_MouseY;
+					x=msg->ga_Msg.am_MouseX;
+					y=msg->ga_Msg.am_MouseY;
 
 					// Drop from Galileo?
 					if (check)
 					{
 						// Adjust position for icon offset
-						x+=msg->da_DragOffset.x+msg->da_DropPos[arg].x;
-						y+=msg->da_DragOffset.y+msg->da_DropPos[arg].y;
+						x+=msg->ga_DragOffset.x+msg->ga_DropPos[arg].x;
+						y+=msg->ga_DragOffset.y+msg->ga_DropPos[arg].y;
 					}
 
 					// Strip trailing /
@@ -202,11 +202,11 @@ void desktop_drop(BackdropInfo *info,GalileoAppMessage *msg,USHORT qual)
 						!(array=NewArgArray())) break;
 
 					// Get path name
-					GetWBArgPath(&msg->da_Msg.am_ArgList[arg],name,512);
+					GetWBArgPath(&msg->ga_Msg.am_ArgList[arg],name,512);
 
 					// Set flag if a directory
-					if (!msg->da_Msg.am_ArgList[arg].wa_Name ||
-						!*msg->da_Msg.am_ArgList[arg].wa_Name) dir=1;
+					if (!msg->ga_Msg.am_ArgList[arg].wa_Name ||
+						!*msg->ga_Msg.am_ArgList[arg].wa_Name) dir=1;
 
 					// Get source path
 					if (!*source_path)
@@ -300,16 +300,16 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 			struct MsgPort *port;
 
 			// Turn message into an AppIcon one
-			(*msg)->da_Msg.am_Type=MTYPE_APPICON;
+			(*msg)->ga_Msg.am_Type=MTYPE_APPICON;
 
 			// Get port and info
 			port=WB_AppWindowData(
 				(struct AppWindow *)drop_obj->misc_data,
-				&(*msg)->da_Msg.am_ID,
-				&(*msg)->da_Msg.am_UserData);
+				&(*msg)->ga_Msg.am_ID,
+				&(*msg)->ga_Msg.am_UserData);
 
 			// Fix reply port
-			(*msg)->da_Msg.am_Message.mn_ReplyPort=GUI->appmsg_port;
+			(*msg)->ga_Msg.am_Message.mn_ReplyPort=GUI->appmsg_port;
 
 			// Send the message on
 			PutMsg(port,(struct Message *)*msg);
@@ -333,14 +333,14 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 			unlock_listlock(&GUI->group_list);
 
 		// Go through arguments
-		for (arg=0;arg<(*msg)->da_Msg.am_NumArgs;arg++)
+		for (arg=0;arg<(*msg)->ga_Msg.am_NumArgs;arg++)
 		{
 			// Valid file?
-			if ((*msg)->da_Msg.am_ArgList[arg].wa_Name &&
-				*(*msg)->da_Msg.am_ArgList[arg].wa_Name)
+			if ((*msg)->ga_Msg.am_ArgList[arg].wa_Name &&
+				*(*msg)->ga_Msg.am_ArgList[arg].wa_Name)
 			{
 				// Get filename
-				GetWBArgPath(&(*msg)->da_Msg.am_ArgList[arg],name,512);
+				GetWBArgPath(&(*msg)->ga_Msg.am_ArgList[arg],name,512);
 
 				// Send add message to group if it's open
 				if (group)
@@ -399,8 +399,8 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 						drop_obj,
 						0,
 						0,
-						(*msg)->da_Msg.am_NumArgs,
-						(*msg)->da_Msg.am_ArgList);
+						(*msg)->ga_Msg.am_NumArgs,
+						(*msg)->ga_Msg.am_ArgList);
 					ret=1;
 				}
 
@@ -423,8 +423,8 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 			drop_obj,
 			0,
 			0,
-			(*msg)->da_Msg.am_NumArgs,
-			(*msg)->da_Msg.am_ArgList);
+			(*msg)->ga_Msg.am_NumArgs,
+			(*msg)->ga_Msg.am_ArgList);
 	}
 
 
@@ -442,12 +442,12 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 			BPTR lock;
 
 			// Get pathname of first file
-			DevNameFromLock((*msg)->da_Msg.am_ArgList[0].wa_Lock,name,512);
+			DevNameFromLock((*msg)->ga_Msg.am_ArgList[0].wa_Lock,name,512);
 
 			// Need source directory; if no name, get parent
-			if ((!(*msg)->da_Msg.am_ArgList[0].wa_Name ||
-				!*(*msg)->da_Msg.am_ArgList[0].wa_Name) &&
-				(lock=ParentDir((*msg)->da_Msg.am_ArgList[0].wa_Lock)))
+			if ((!(*msg)->ga_Msg.am_ArgList[0].wa_Name ||
+				!*(*msg)->ga_Msg.am_ArgList[0].wa_Name) &&
+				(lock=ParentDir((*msg)->ga_Msg.am_ArgList[0].wa_Lock)))
 			{
 				// Get pathname of parent
 				DevNameFromLock(lock,name,512);

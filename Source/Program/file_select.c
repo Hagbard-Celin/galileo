@@ -1052,13 +1052,13 @@ short select_select_files(Lister *lister,USHORT qual,short mouse_x,short mouse_y
 					// Get window information
 					port=WB_AppWindowData(
 						app_window,
-						&msg->da_Msg.am_ID,
-						&msg->da_Msg.am_UserData);
+						&msg->ga_Msg.am_ID,
+						&msg->ga_Msg.am_UserData);
 
 					// Fill out AppMessage info
-					msg->da_Msg.am_Type=MTYPE_APPWINDOW;
-					msg->da_Msg.am_MouseX=mouse_x-((window)?window->LeftEdge:0);
-					msg->da_Msg.am_MouseY=mouse_y-((window)?window->TopEdge:0);
+					msg->ga_Msg.am_Type=MTYPE_APPWINDOW;
+					msg->ga_Msg.am_MouseX=mouse_x-((window)?window->LeftEdge:0);
+					msg->ga_Msg.am_MouseY=mouse_y-((window)?window->TopEdge:0);
 
 					// Set source lister pointer
 					set_appmsg_data(msg,(ULONG)lister,over_parent,(ULONG)over_entry);
@@ -1128,7 +1128,7 @@ short select_select_files(Lister *lister,USHORT qual,short mouse_x,short mouse_y
 								lock_listlock(&info->objects,0);
 
 								// See if we dropped on an object
-								if (icon=backdrop_get_object(info,msg->da_Msg.am_MouseX,msg->da_Msg.am_MouseY,0))
+								if (icon=backdrop_get_object(info,msg->ga_Msg.am_MouseX,msg->ga_Msg.am_MouseY,0))
 								{
 									// Get path of icon
 									if (desktop_icon_path(icon,pathname,512,0))

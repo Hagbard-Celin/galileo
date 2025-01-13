@@ -86,13 +86,13 @@ void backdrop_object_open(
 		if (!(msg=AllocAppMessage(global_memory_pool,GUI->appmsg_port,0))) return;
 
 		// Message type
-		msg->da_Msg.am_Type=MTYPE_APPICON;
+		msg->ga_Msg.am_Type=MTYPE_APPICON;
 
 		// Get AppInfo
 		port=WB_AppWindowData(
 			(struct AppWindow *)object->misc_data,
-			&msg->da_Msg.am_ID,
-			&msg->da_Msg.am_UserData);
+			&msg->ga_Msg.am_ID,
+			&msg->ga_Msg.am_UserData);
 
 		// Send the message
 		PutMsg(port,(struct Message *)msg);

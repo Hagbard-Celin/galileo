@@ -1796,13 +1796,13 @@ BOOL icon_send_appmsg( icon_data *data, struct Window *window, char *name )
 
 					port = WB_AppWindowData(
 						appwin,
-						&msg->da_Msg.am_ID,
-						&msg->da_Msg.am_UserData);
+						&msg->ga_Msg.am_ID,
+						&msg->ga_Msg.am_UserData);
 
 					// Fill out AppMessage info
-					msg->da_Msg.am_Type = MTYPE_APPWINDOW;
-					msg->da_Msg.am_MouseX = 30;
-					msg->da_Msg.am_MouseY = 30;
+					msg->ga_Msg.am_Type = MTYPE_APPWINDOW;
+					msg->ga_Msg.am_MouseX = 30;
+					msg->ga_Msg.am_MouseY = 30;
 
 					PutMsg( port, (struct Message *)msg );
 

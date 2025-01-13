@@ -674,10 +674,10 @@ environment_save(Cfg_Environment *env,char *name,short snapshot,CFG_ENVR *data)
 		}
 
 		// Go through sound list
-		for (sound=(Cfg_SoundEntry *)env->sound_list.mlh_Head;sound->dse_Node.ln_Succ;sound=(Cfg_SoundEntry *)sound->dse_Node.ln_Succ)
+		for (sound=(Cfg_SoundEntry *)env->sound_list.mlh_Head;sound->gse_Node.ln_Succ;sound=(Cfg_SoundEntry *)sound->gse_Node.ln_Succ)
 		{
 			// Write chunk
-			if (!(IFFWriteChunk(iff,sound->dse_Name,ID_SNDX,32+2+2+strlen(sound->dse_Sound)+1)))
+			if (!(IFFWriteChunk(iff,sound->gse_Name,ID_SNDX,32+2+2+strlen(sound->gse_Sound)+1)))
 			{
 				success=IoErr();
 				break;

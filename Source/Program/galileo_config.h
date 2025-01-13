@@ -845,13 +845,13 @@ typedef struct {
 
 typedef struct
 {
-	struct Node	dse_Node;
-	char		dse_Name[32];
-	short		dse_Volume;
-	unsigned short	dse_Flags;
-	char		dse_Sound[256];
-	char		dse_Random[256];
-	short		dse_RandomVolume;
+	struct Node	gse_Node;
+	char		gse_Name[32];
+	short		gse_Volume;
+	unsigned short	gse_Flags;
+	char		gse_Sound[256];
+	char		gse_Random[256];
+	short		gse_RandomVolume;
 } Cfg_SoundEntry;
 
 

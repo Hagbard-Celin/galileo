@@ -325,14 +325,14 @@ GalileoAppMessage *backdrop_appmessage(BackdropInfo *info,BOOL need_obj)
 		return 0;
 
 	// Set icon flag
-	msg->da_Flags|=GAPPF_ICON_DROP;
+	msg->ga_Flags|=GAPPF_ICON_DROP;
 
 	// Pointer to first selected object
 	if (first=info->last_sel_object)
 	{
 		// Save drag offset
-		msg->da_DragOffset.x=first->image_rect.MinX-first->pos.Left+first->drag_x_offset-info->offset_x;
-		msg->da_DragOffset.y=first->image_rect.MinY-first->pos.Top+first->drag_y_offset-info->offset_y;
+		msg->ga_DragOffset.x=first->image_rect.MinX-first->pos.Left+first->drag_x_offset-info->offset_x;
+		msg->ga_DragOffset.y=first->image_rect.MinY-first->pos.Top+first->drag_y_offset-info->offset_y;
 	}
 
 	// Go through backdrop list, fill in arguments
@@ -349,8 +349,8 @@ GalileoAppMessage *backdrop_appmessage(BackdropInfo *info,BOOL need_obj)
 			if (first)
 			{
 				// Store object position relative to first object
-				msg->da_DropPos[arg].x=object->pos.Left-first->pos.Left;
-				msg->da_DropPos[arg].y=object->pos.Top-first->pos.Top;
+				msg->ga_DropPos[arg].x=object->pos.Left-first->pos.Left;
+				msg->ga_DropPos[arg].y=object->pos.Top-first->pos.Top;
 			}
 
 			// AppIcon?
@@ -373,14 +373,14 @@ GalileoAppMessage *backdrop_appmessage(BackdropInfo *info,BOOL need_obj)
 					old=CurrentDir(lock);
 
 					// Lock sub-directory
-					if (!(msg->da_Msg.am_ArgList[arg].wa_Lock=Lock(object->name,ACCESS_READ)))
+					if (!(msg->ga_Msg.am_ArgList[arg].wa_Lock=Lock(object->name,ACCESS_READ)))
 					{
 						char *name;
 
 						// Couldn't lock directory, so steal lock for parent
 						if (name=AllocVec(strlen(object->name)+8,0))
 						{
-							msg->da_Msg.am_ArgList[arg].wa_Lock=lock;
+							msg->ga_Msg.am_ArgList[arg].wa_Lock=lock;
 							lock=0;
 
 							// Get filename
@@ -400,8 +400,8 @@ GalileoAppMessage *backdrop_appmessage(BackdropInfo *info,BOOL need_obj)
 			else
 			{
 				// Duplicate lock (unless we've already got one)
-				if (!msg->da_Msg.am_ArgList[arg].wa_Lock)
-					msg->da_Msg.am_ArgList[arg].wa_Lock=backdrop_icon_lock(object);
+				if (!msg->ga_Msg.am_ArgList[arg].wa_Lock)
+					msg->ga_Msg.am_ArgList[arg].wa_Lock=backdrop_icon_lock(object);
 
 				// If not a disk, copy filename
 				if (object->icon->do_Type!=WBDISK)
@@ -411,7 +411,7 @@ GalileoAppMessage *backdrop_appmessage(BackdropInfo *info,BOOL need_obj)
 			}
 
 			// If no filename given, create a dummy one
-			if (!msg->da_Msg.am_ArgList[arg].wa_Name)
+			if (!msg->ga_Msg.am_ArgList[arg].wa_Name)
 				SetWBArg(msg,arg,0,0,global_memory_pool);
 			++arg;
 		}
@@ -433,13 +433,13 @@ void backdrop_drop_appwindow(BackdropInfo *info,struct AppWindow *appwindow,shor
 	if (msg=backdrop_appmessage(info,1))
 	{
 		// Complete message
-		msg->da_Msg.am_Type=MTYPE_APPWINDOW;
-		msg->da_Msg.am_MouseX=x;
-		msg->da_Msg.am_MouseY=y;
+		msg->ga_Msg.am_Type=MTYPE_APPWINDOW;
+		msg->ga_Msg.am_MouseX=x;
+		msg->ga_Msg.am_MouseY=y;
 		port=WB_AppWindowData(
 			appwindow,
-			(ULONG *)&msg->da_Msg.am_ID,
-			(ULONG *)&msg->da_Msg.am_UserData);
+			(ULONG *)&msg->ga_Msg.am_ID,
+			(ULONG *)&msg->ga_Msg.am_UserData);
 
 		// Send the message
 		PutMsg(port,(struct Message *)msg);

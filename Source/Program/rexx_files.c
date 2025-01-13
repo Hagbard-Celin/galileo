@@ -85,13 +85,13 @@ char *rexx_build_filestring(
 	if (lister_ptr) *lister_ptr=lister;
 
 	// Go through arguments
-	for (num=0;num<msg->da_Msg.am_NumArgs;num++)
+	for (num=0;num<msg->ga_Msg.am_NumArgs;num++)
 	{
 		// Get path name
-		GetWBArgPath(&msg->da_Msg.am_ArgList[num],buf,256);
+		GetWBArgPath(&msg->ga_Msg.am_ArgList[num],buf,256);
 
 		// If a directory and not from a lister, add trailing /
-		if ((!msg->da_Msg.am_ArgList[num].wa_Name || !*msg->da_Msg.am_ArgList[num].wa_Name) && !lister)
+		if ((!msg->ga_Msg.am_ArgList[num].wa_Name || !*msg->ga_Msg.am_ArgList[num].wa_Name) && !lister)
 		{
 			AddPart(buf,"",256);
 		}
@@ -112,13 +112,13 @@ char *rexx_build_filestring(
 		return 0;
 
 	// Go through arguments
-	for (num=0;num<msg->da_Msg.am_NumArgs;num++)
+	for (num=0;num<msg->ga_Msg.am_NumArgs;num++)
 	{
 		// Get path name
-		GetWBArgPath(&msg->da_Msg.am_ArgList[num],buf,256);
+		GetWBArgPath(&msg->ga_Msg.am_ArgList[num],buf,256);
 
 		// If a directory and not from a lister, add trailing /
-		if ((!msg->da_Msg.am_ArgList[num].wa_Name || !*msg->da_Msg.am_ArgList[num].wa_Name) && !lister)
+		if ((!msg->ga_Msg.am_ArgList[num].wa_Name || !*msg->ga_Msg.am_ArgList[num].wa_Name) && !lister)
 		{
 			AddPart(buf,"",256);
 		}
@@ -140,7 +140,7 @@ char *rexx_build_filestring(
 		if (flags&CUSTF_WANT_QUOTES) strcat(string,"\"");
 
 		// Space
-		if (num<msg->da_Msg.am_NumArgs-1) strcat(string," ");
+		if (num<msg->ga_Msg.am_NumArgs-1) strcat(string," ");
 	}
 
 	return string;

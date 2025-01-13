@@ -249,7 +249,7 @@ BOOL RunScript_Node(Att_Node *node,char *data)
 	// See if there's a sound configured for this event
 	if (sound=(Cfg_SoundEntry *)FindNameI((struct List *)&environment->sound_list,node->node.ln_Name))
 	{
-		if (sound->dse_Sound[0])
+		if (sound->gse_Sound[0])
 		{
 			// Don't play other sounds before the startup script
 			if (!(environment->env->settings.general_flags&GENERALF_EXCLUSIVE_STARTUP_SND) ||
@@ -261,8 +261,8 @@ BOOL RunScript_Node(Att_Node *node,char *data)
 				short vol;
 
 				// Get sound pointer
-				ptr=(sound->dse_Random[0])?sound->dse_Random:sound->dse_Sound;
-				vol=(sound->dse_Random[0] && sound->dse_RandomVolume)?sound->dse_RandomVolume:sound->dse_Volume;
+				ptr=(sound->gse_Random[0])?sound->gse_Random:sound->gse_Sound;
+				vol=(sound->gse_Random[0] && sound->gse_RandomVolume)?sound->gse_RandomVolume:sound->gse_Volume;
 
 				// Build command
 				lsprintf(command,"play \"%s\" quiet vol %ld",ptr,vol);
@@ -368,18 +368,18 @@ void InitSoundEvents(BOOL force)
 	GetSemaphore(&environment->sound_lock,SEMF_SHARED,0);
 
 	// Go through sounds
-	for (sound=(Cfg_SoundEntry *)environment->sound_list.mlh_Head;sound->dse_Node.ln_Succ;sound=(Cfg_SoundEntry *)sound->dse_Node.ln_Succ)
+	for (sound=(Cfg_SoundEntry *)environment->sound_list.mlh_Head;sound->gse_Node.ln_Succ;sound=(Cfg_SoundEntry *)sound->gse_Node.ln_Succ)
 	{
 		// If sound is empty, make sure random buffer is too
-		if (!sound->dse_Sound[0])
+		if (!sound->gse_Sound[0])
 		{
-			sound->dse_Random[0]=0;
-			sound->dse_RandomVolume=0;
+			sound->gse_Random[0]=0;
+			sound->gse_RandomVolume=0;
 		}
 
 		// Otherwise, see if sound has changed
 		else
-		if (sound->dse_Flags&CFGSEF_CHANGED || force)
+		if (sound->gse_Flags&CFGSEF_CHANGED || force)
 		{
 			struct FileInfoBlock __aligned fib;
 			struct AnchorPath __aligned anchor;
@@ -390,21 +390,21 @@ void InitSoundEvents(BOOL force)
 			APTR file;
 
 			// Clear change flag and initialise random buffer
-			sound->dse_Flags&=~CFGSEF_CHANGED;
-			sound->dse_Random[0]=0;
-			sound->dse_RandomVolume=0;
+			sound->gse_Flags&=~CFGSEF_CHANGED;
+			sound->gse_Random[0]=0;
+			sound->gse_RandomVolume=0;
 
 			// Check for wildcard characters
-			if ((ptr=FilePart(sound->dse_Sound)) && (strchr(ptr,'*') || strchr(ptr,'?') || strchr(ptr,'#')))
+			if ((ptr=FilePart(sound->gse_Sound)) && (strchr(ptr,'*') || strchr(ptr,'?') || strchr(ptr,'#')))
 				wild=1;
 
 			// If supplied picture is a file (or doesn't exist), use the name as given
 			else
-			if (!GetFileInfo(sound->dse_Sound,&fib) || fib.fib_DirEntryType<0)
+			if (!GetFileInfo(sound->gse_Sound,&fib) || fib.fib_DirEntryType<0)
 				continue;
 
 			// Build name to search directory
-			strcpy(buf,sound->dse_Sound);
+			strcpy(buf,sound->gse_Sound);
 			if (!wild) AddPart(buf,"*",300);
 
 			// Build list of matching files
@@ -436,7 +436,7 @@ void InitSoundEvents(BOOL force)
 			}
 
 			// See what the last random sound was
-			lsprintf(buf,"PROGDIR:system/rnd.%s",sound->dse_Node.ln_Name);
+			lsprintf(buf,"PROGDIR:system/rnd.%s",sound->gse_Node.ln_Name);
 			if (file=OpenBuf(buf,MODE_OLDFILE,512))
 			{
 				ReadBufLine(file,buf+200,256);
@@ -462,7 +462,7 @@ void InitSoundEvents(BOOL force)
 			if (node)
 			{
 				// Save name of sound so it won't be used next time
-				strcpy(buf+200,sound->dse_Sound);
+				strcpy(buf+200,sound->gse_Sound);
 				if (wild && (ptr=FilePart(buf+200))) *ptr=0;
 				AddPart(buf+200,node->node.ln_Name,256);
 				if (file=OpenBuf(buf,MODE_NEWFILE,512))
@@ -472,9 +472,9 @@ void InitSoundEvents(BOOL force)
 				}
 
 				// Store random name and volume
-				strcpy(sound->dse_Random,buf+200);
-				if ((sound->dse_RandomVolume=node->data)<0 || sound->dse_RandomVolume>64)
-					sound->dse_RandomVolume=0;
+				strcpy(sound->gse_Random,buf+200);
+				if ((sound->gse_RandomVolume=node->data)<0 || sound->gse_RandomVolume>64)
+					sound->gse_RandomVolume=0;
 			}
 
 			// Free list

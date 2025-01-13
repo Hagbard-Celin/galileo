@@ -1531,18 +1531,18 @@ unsigned long __asm __saveds L_Config_Environment(
 		{
 			Cfg_SoundEntry *sound;
 			GetSemaphore(&env->sound_lock,SEMF_EXCLUSIVE,0);
-			for (sound=(Cfg_SoundEntry *)data->sound_list.mlh_Head;sound->dse_Node.ln_Succ;sound=(Cfg_SoundEntry *)sound->dse_Node.ln_Succ)
+			for (sound=(Cfg_SoundEntry *)data->sound_list.mlh_Head;sound->gse_Node.ln_Succ;sound=(Cfg_SoundEntry *)sound->gse_Node.ln_Succ)
 			{
 				// Did this sound change?
-				if (sound->dse_Node.lve_Flags&LVEF_TEMP)
+				if (sound->gse_Node.lve_Flags&LVEF_TEMP)
 				{
 					Cfg_SoundEntry *orig;
 
 					// Find original sound
-					if (orig=(Cfg_SoundEntry *)FindNameI((struct List *)&env->sound_list,sound->dse_Name))
+					if (orig=(Cfg_SoundEntry *)FindNameI((struct List *)&env->sound_list,sound->gse_Name))
 					{
 						// New sound empty?
-						if (!sound->dse_Sound[0])
+						if (!sound->gse_Sound[0])
 						{
 							// Remove from list
 							Remove((struct Node *)orig);
@@ -1553,24 +1553,24 @@ unsigned long __asm __saveds L_Config_Environment(
 						// Store new settings
 						else
 						{
-							strcpy(orig->dse_Sound,sound->dse_Sound);
-							orig->dse_Volume=sound->dse_Volume;
-							orig->dse_Flags=sound->dse_Flags;
+							strcpy(orig->gse_Sound,sound->gse_Sound);
+							orig->gse_Volume=sound->gse_Volume;
+							orig->gse_Flags=sound->gse_Flags;
 						}
 					}
 
 					// Need to create entry, but only if sound is set
 					else
-					if (sound->dse_Sound)
+					if (sound->gse_Sound)
 					{
 						// Create entry
 						if (orig=AllocMemH(env->desktop_memory,sizeof(Cfg_SoundEntry)))
 						{
-							strcpy(orig->dse_Name,sound->dse_Name);
-							strcpy(orig->dse_Sound,sound->dse_Sound);
-							orig->dse_Volume=sound->dse_Volume;
-							orig->dse_Flags=sound->dse_Flags;
-							orig->dse_Node.ln_Name=orig->dse_Name;
+							strcpy(orig->gse_Name,sound->gse_Name);
+							strcpy(orig->gse_Sound,sound->gse_Sound);
+							orig->gse_Volume=sound->gse_Volume;
+							orig->gse_Flags=sound->gse_Flags;
+							orig->gse_Node.ln_Name=orig->gse_Name;
 							AddTail((struct List *)&env->sound_list,(struct Node *)orig);
 						}
 					}
@@ -1578,7 +1578,7 @@ unsigned long __asm __saveds L_Config_Environment(
 					// Set change flag
 					if (orig)
 					{
-						orig->dse_Flags|=CFGSEF_CHANGED;
+						orig->gse_Flags|=CFGSEF_CHANGED;
 						change_flags[1]|=CONFIG_CHANGE_SOUNDS;
 					}
 				}
@@ -1821,7 +1821,7 @@ void _config_env_cleanup(config_env_data *data)
 		Att_RemList(data->icon_settings,0);
 		Att_RemList(data->desktop_drives[0],0);
 		Att_RemList(data->desktop_drives[1],0);
-		while ((sound=(Cfg_SoundEntry *)data->sound_list.mlh_Head) && sound->dse_Node.ln_Succ)
+		while ((sound=(Cfg_SoundEntry *)data->sound_list.mlh_Head) && sound->gse_Node.ln_Succ)
 		{
 			Remove((struct Node *)sound);
 			FreeVec(sound);
@@ -2949,14 +2949,14 @@ void config_env_load(config_env_data *data,USHORT id)
 		ret=READCFG_OK;
 
 		// Initialise sounds
-		for (sound=(Cfg_SoundEntry *)data->sound_list.mlh_Head;sound->dse_Node.ln_Succ;sound=(Cfg_SoundEntry *)sound->dse_Node.ln_Succ)
+		for (sound=(Cfg_SoundEntry *)data->sound_list.mlh_Head;sound->gse_Node.ln_Succ;sound=(Cfg_SoundEntry *)sound->gse_Node.ln_Succ)
 		{
-			if (sound->dse_Sound[0])
-				sound->dse_Node.lve_Flags|=LVEF_TEMP;
-			sound->dse_Sound[0]=0;
-			sound->dse_Volume=64;
-			sound->dse_Flags=0;
-			sound->dse_Node.lve_Flags&=~LVEF_USE_PEN;
+			if (sound->gse_Sound[0])
+				sound->gse_Node.lve_Flags|=LVEF_TEMP;
+			sound->gse_Sound[0]=0;
+			sound->gse_Volume=64;
+			sound->gse_Flags=0;
+			sound->gse_Node.lve_Flags&=~LVEF_USE_PEN;
 		}
 	}
 
@@ -2970,7 +2970,7 @@ void config_env_load(config_env_data *data,USHORT id)
 		CopyMem((char *)data->env->env,(char *)work,sizeof(CFG_ENVR));
 
 		// Free sound list and re-initialise
-		while ((sound=(Cfg_SoundEntry *)data->sound_list.mlh_Head) && sound->dse_Node.ln_Succ)
+		while ((sound=(Cfg_SoundEntry *)data->sound_list.mlh_Head) && sound->gse_Node.ln_Succ)
 		{
 			Remove((struct Node *)sound);
 			FreeVec(sound);
@@ -3006,23 +3006,23 @@ void config_env_load(config_env_data *data,USHORT id)
 				CopyMem((char *)&opendata->env,(char *)work,sizeof(CFG_ENVR));
 
 				// Initialise sounds
-				for (sound=(Cfg_SoundEntry *)data->sound_list.mlh_Head;sound->dse_Node.ln_Succ;sound=(Cfg_SoundEntry *)sound->dse_Node.ln_Succ)
+				for (sound=(Cfg_SoundEntry *)data->sound_list.mlh_Head;sound->gse_Node.ln_Succ;sound=(Cfg_SoundEntry *)sound->gse_Node.ln_Succ)
 				{
 					Cfg_SoundEntry *newsnd;
 
 					// Is this sound present in the new environment?
-					if (newsnd=(Cfg_SoundEntry *)FindNameI((struct List *)&opendata->soundlist,sound->dse_Node.ln_Name))
+					if (newsnd=(Cfg_SoundEntry *)FindNameI((struct List *)&opendata->soundlist,sound->gse_Node.ln_Name))
 					{
 						// Sound has changed?
-						if (stricmp(sound->dse_Sound,newsnd->dse_Sound)!=0)
+						if (stricmp(sound->gse_Sound,newsnd->gse_Sound)!=0)
 						{
 							// Copy new sound details
-							strcpy(sound->dse_Sound,newsnd->dse_Sound);
-							sound->dse_Volume=newsnd->dse_Volume;
-							sound->dse_Flags=newsnd->dse_Flags;
+							strcpy(sound->gse_Sound,newsnd->gse_Sound);
+							sound->gse_Volume=newsnd->gse_Volume;
+							sound->gse_Flags=newsnd->gse_Flags;
 
 							// Set change flag
-							sound->dse_Node.lve_Flags|=LVEF_TEMP;
+							sound->gse_Node.lve_Flags|=LVEF_TEMP;
 						}
 
 						// Remove sound from list
@@ -3032,38 +3032,38 @@ void config_env_load(config_env_data *data,USHORT id)
 
 					// Sound must be blank, so clear entry
 					else
-					if (sound->dse_Sound[0])
+					if (sound->gse_Sound[0])
 					{
-						sound->dse_Sound[0]=0;
-						sound->dse_Volume=64;
-						sound->dse_Flags=0;
-						sound->dse_Node.lve_Flags|=LVEF_TEMP;
+						sound->gse_Sound[0]=0;
+						sound->gse_Volume=64;
+						sound->gse_Flags=0;
+						sound->gse_Node.lve_Flags|=LVEF_TEMP;
 					}
 
 					// Is sound valid?
-					if (sound->dse_Sound[0])
-						sound->dse_Node.lve_Flags|=LVEF_USE_PEN;
+					if (sound->gse_Sound[0])
+						sound->gse_Node.lve_Flags|=LVEF_USE_PEN;
 					else
-						sound->dse_Node.lve_Flags&=~LVEF_USE_PEN;
+						sound->gse_Node.lve_Flags&=~LVEF_USE_PEN;
 				}
 
 				// Any sounds left in newly-loaded environment?
-				while ((sound=(Cfg_SoundEntry *)opendata->soundlist.mlh_Head) && sound->dse_Node.ln_Succ)
+				while ((sound=(Cfg_SoundEntry *)opendata->soundlist.mlh_Head) && sound->gse_Node.ln_Succ)
 				{
 					Cfg_SoundEntry *copy;
 
 					// Add to our copy of the sound list
 					if (copy=AllocVec(sizeof(Cfg_SoundEntry),MEMF_CLEAR))
 					{
-						strcpy(copy->dse_Name,sound->dse_Name);
-						copy->dse_Node.ln_Name=copy->dse_Name;
-						copy->dse_Node.lve_Pen=DRAWINFO(data->window)->dri_Pens[HIGHLIGHTTEXTPEN];
-						strcpy(copy->dse_Sound,sound->dse_Sound);
-						copy->dse_Volume=sound->dse_Volume;
-						copy->dse_Flags=sound->dse_Flags;
-						if (copy->dse_Sound[0])
-							copy->dse_Node.lve_Flags|=LVEF_USE_PEN;
-						sound->dse_Node.lve_Flags|=LVEF_TEMP;
+						strcpy(copy->gse_Name,sound->gse_Name);
+						copy->gse_Node.ln_Name=copy->gse_Name;
+						copy->gse_Node.lve_Pen=DRAWINFO(data->window)->dri_Pens[HIGHLIGHTTEXTPEN];
+						strcpy(copy->gse_Sound,sound->gse_Sound);
+						copy->gse_Volume=sound->gse_Volume;
+						copy->gse_Flags=sound->gse_Flags;
+						if (copy->gse_Sound[0])
+							copy->gse_Node.lve_Flags|=LVEF_USE_PEN;
+						sound->gse_Node.lve_Flags|=LVEF_TEMP;
 						AddSorted((struct List *)&data->sound_list,(struct Node *)copy);
 					}
 
@@ -3197,32 +3197,32 @@ void env_init_sounds(config_env_data *data)
 			if (node->data&SCRIPTF_NO_SOUND) continue;
 			if (copy=AllocVec(sizeof(Cfg_SoundEntry),MEMF_CLEAR))
 			{
-				strcpy(copy->dse_Name,node->node.ln_Name);
-				copy->dse_Node.ln_Name=copy->dse_Name;
-				copy->dse_Node.lve_Pen=DRAWINFO(data->window)->dri_Pens[HIGHLIGHTTEXTPEN];
+				strcpy(copy->gse_Name,node->node.ln_Name);
+				copy->gse_Node.ln_Name=copy->gse_Name;
+				copy->gse_Node.lve_Pen=DRAWINFO(data->window)->dri_Pens[HIGHLIGHTTEXTPEN];
 				AddSorted((struct List *)&data->sound_list,(struct Node *)copy);
 			}
 		}
 	}
 	GetSemaphore(&data->env->sound_lock,SEMF_SHARED,0);
-	for (sound=(Cfg_SoundEntry *)data->env->sound_list.mlh_Head;sound->dse_Node.ln_Succ;sound=(Cfg_SoundEntry *)sound->dse_Node.ln_Succ)
+	for (sound=(Cfg_SoundEntry *)data->env->sound_list.mlh_Head;sound->gse_Node.ln_Succ;sound=(Cfg_SoundEntry *)sound->gse_Node.ln_Succ)
 	{
 		Cfg_SoundEntry *copy;
-		if ((copy=(Cfg_SoundEntry *)FindNameI((struct List *)&data->sound_list,sound->dse_Name)) ||
+		if ((copy=(Cfg_SoundEntry *)FindNameI((struct List *)&data->sound_list,sound->gse_Name)) ||
 			(copy=AllocVec(sizeof(Cfg_SoundEntry),MEMF_CLEAR)))
 		{
-			if (!copy->dse_Name[0])
+			if (!copy->gse_Name[0])
 			{
-				strcpy(copy->dse_Name,sound->dse_Name);
-				copy->dse_Node.ln_Name=copy->dse_Name;
-				copy->dse_Node.lve_Pen=DRAWINFO(data->window)->dri_Pens[HIGHLIGHTTEXTPEN];
+				strcpy(copy->gse_Name,sound->gse_Name);
+				copy->gse_Node.ln_Name=copy->gse_Name;
+				copy->gse_Node.lve_Pen=DRAWINFO(data->window)->dri_Pens[HIGHLIGHTTEXTPEN];
 				AddSorted((struct List *)&data->sound_list,(struct Node *)copy);
 			}
-			strcpy(copy->dse_Sound,sound->dse_Sound);
-			copy->dse_Volume=sound->dse_Volume;
-			copy->dse_Flags=sound->dse_Flags;
-			if (copy->dse_Sound[0])
-				copy->dse_Node.lve_Flags|=LVEF_USE_PEN;
+			strcpy(copy->gse_Sound,sound->gse_Sound);
+			copy->gse_Volume=sound->gse_Volume;
+			copy->gse_Flags=sound->gse_Flags;
+			if (copy->gse_Sound[0])
+				copy->gse_Node.lve_Flags|=LVEF_USE_PEN;
 		}
 	}
 	FreeSemaphore(&data->env->sound_lock);

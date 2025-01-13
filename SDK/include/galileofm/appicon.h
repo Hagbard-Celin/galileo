@@ -67,11 +67,11 @@ long SetAppIconMenuState(APTR,long,long);
 
 typedef struct _GalileoAppMessage
 {
-	struct AppMessage	da_Msg;		// Message
-	Point			*da_DropPos;	// Drop array
-	Point			da_DragOffset;	// Mouse pointer offset
-	ULONG			da_Flags;	// Flags
-	ULONG			da_Pad[2];
+	struct AppMessage	ga_Msg;		// Message
+	Point			*ga_DropPos;	// Drop array
+	Point			ga_DragOffset;	// Mouse pointer offset
+	ULONG			ga_Flags;	// Flags
+	ULONG			ga_Pad[2];
 } GalileoAppMessage;
 
 #define GAPPF_ICON_DROP		(1<<16)		// Dropped with icon

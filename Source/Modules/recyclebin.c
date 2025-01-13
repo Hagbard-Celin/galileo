@@ -246,7 +246,7 @@ void __saveds recycle_bin(void)
 		while (amsg=(GalileoAppMessage *)GetMsg(data->app_port))
 		{
 			// SnapShot?
-			if (amsg->da_Msg.am_Type==MTYPE_APPSNAPSHOT)
+			if (amsg->ga_Msg.am_Type==MTYPE_APPSNAPSHOT)
 			{
 				struct AppSnapshotMsg *asm;
 
@@ -286,10 +286,10 @@ void __saveds recycle_bin(void)
 
 			// Icon manipulation?
 			else
-			if (amsg->da_Msg.am_Type==MTYPE_APPICON)
+			if (amsg->ga_Msg.am_Type==MTYPE_APPICON)
 			{
 				// Double-click?
-				if (amsg->da_Msg.am_NumArgs==0)
+				if (amsg->ga_Msg.am_NumArgs==0)
 				{
 					struct command_packet pkt;
 
@@ -312,23 +312,23 @@ void __saveds recycle_bin(void)
 					if (CheckAppMessage(amsg))
 					{
 						// Icon mode?
-						if (amsg->da_Flags&GAPPF_ICON_DROP) icon=1;
+						if (amsg->ga_Flags&GAPPF_ICON_DROP) icon=1;
 					}
 
 					// Go through arguments
-					for (arg=0;arg<amsg->da_Msg.am_NumArgs;arg++)
+					for (arg=0;arg<amsg->ga_Msg.am_NumArgs;arg++)
 					{
 						short loop;
 
 						// Build name
-						DevNameFromLock(amsg->da_Msg.am_ArgList[arg].wa_Lock,data->buffer,256);
+						DevNameFromLock(amsg->ga_Msg.am_ArgList[arg].wa_Lock,data->buffer,256);
 
 						// Filename?
-						if (amsg->da_Msg.am_ArgList[arg].wa_Name &&
-							*amsg->da_Msg.am_ArgList[arg].wa_Name)
+						if (amsg->ga_Msg.am_ArgList[arg].wa_Name &&
+							*amsg->ga_Msg.am_ArgList[arg].wa_Name)
 						{
 							// Add name
-							AddPart(data->buffer,amsg->da_Msg.am_ArgList[arg].wa_Name,256);
+							AddPart(data->buffer,amsg->ga_Msg.am_ArgList[arg].wa_Name,256);
 						}
 
 						// Otherwise

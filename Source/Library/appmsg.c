@@ -51,19 +51,19 @@ GalileoAppMessage *__asm __saveds L_AllocAppMessage(
 			((sizeof(struct WBArg)+sizeof(Point))*num)))) return 0;
 
 	// Set check pointer
-	msg->da_Msg.am_Reserved[7]=(ULONG)msg;
+	msg->ga_Msg.am_Reserved[7]=(ULONG)msg;
 
 	// Set ArgList pointer
-	if (num>0) msg->da_Msg.am_ArgList=(struct WBArg *)(msg+1);
-	msg->da_Msg.am_NumArgs=num;
+	if (num>0) msg->ga_Msg.am_ArgList=(struct WBArg *)(msg+1);
+	msg->ga_Msg.am_NumArgs=num;
 
 	// Set drop position array pointer
-	if (num>0) msg->da_DropPos=(Point *)(msg->da_Msg.am_ArgList+num);
+	if (num>0) msg->ga_DropPos=(Point *)(msg->ga_Msg.am_ArgList+num);
 
 	// Fill out miscellaneous fields
-	msg->da_Msg.am_Message.mn_ReplyPort=reply;
-	msg->da_Msg.am_Version=AM_VERSION;
-	CurrentTime(&msg->da_Msg.am_Seconds,&msg->da_Msg.am_Micros);
+	msg->ga_Msg.am_Message.mn_ReplyPort=reply;
+	msg->ga_Msg.am_Version=AM_VERSION;
+	CurrentTime(&msg->ga_Msg.am_Seconds,&msg->ga_Msg.am_Micros);
 
 	return msg;
 }
@@ -78,12 +78,12 @@ void __asm __saveds L_FreeAppMessage(
 		short arg;
 
 		// Free any arguments
-		if (msg->da_Msg.am_ArgList)
+		if (msg->ga_Msg.am_ArgList)
 		{
-			for (arg=0;arg<msg->da_Msg.am_NumArgs;arg++)
+			for (arg=0;arg<msg->ga_Msg.am_NumArgs;arg++)
 			{
-				UnLock(msg->da_Msg.am_ArgList[arg].wa_Lock);
-				L_FreeMemH(msg->da_Msg.am_ArgList[arg].wa_Name);
+				UnLock(msg->ga_Msg.am_ArgList[arg].wa_Lock);
+				L_FreeMemH(msg->ga_Msg.am_ArgList[arg].wa_Name);
 			}
 		}
 
@@ -99,7 +99,7 @@ void __asm __saveds L_ReplyAppMessage(
 	// Valid message?
 	if (msg)
 	{
-		if (msg->da_Msg.am_Message.mn_ReplyPort)
+		if (msg->ga_Msg.am_Message.mn_ReplyPort)
 		{
 			ReplyMsg((struct Message *)msg);
 		}
@@ -114,7 +114,7 @@ void __asm __saveds L_ReplyAppMessage(
 BOOL __asm __saveds L_CheckAppMessage(register __a0 GalileoAppMessage *msg)
 {
 	// Check check pointer
-	return (BOOL)(msg && msg->da_Msg.am_Reserved[7]==(ULONG)msg);
+	return (BOOL)(msg && msg->ga_Msg.am_Reserved[7]==(ULONG)msg);
 }
 
 
@@ -130,40 +130,40 @@ GalileoAppMessage *__asm __saveds L_CopyAppMessage(
 	if (!L_CheckAppMessage(orig)) return 0;
 
 	// Allocate new message
-	if (!(msg=L_AllocAppMessage(memory,0,orig->da_Msg.am_NumArgs))) return 0;
+	if (!(msg=L_AllocAppMessage(memory,0,orig->ga_Msg.am_NumArgs))) return 0;
 
 	// Copy AppMessage fields
-	msg->da_Msg.am_Type=orig->da_Msg.am_Type;
-	msg->da_Msg.am_UserData=orig->da_Msg.am_UserData;
-	msg->da_Msg.am_ID=orig->da_Msg.am_ID;
-	msg->da_Msg.am_Class=orig->da_Msg.am_Class;
-	msg->da_Msg.am_MouseX=orig->da_Msg.am_MouseX;
-	msg->da_Msg.am_MouseY=orig->da_Msg.am_MouseY;
-	msg->da_Msg.am_Seconds=orig->da_Msg.am_Seconds;
-	msg->da_Msg.am_Micros=orig->da_Msg.am_Micros;
+	msg->ga_Msg.am_Type=orig->ga_Msg.am_Type;
+	msg->ga_Msg.am_UserData=orig->ga_Msg.am_UserData;
+	msg->ga_Msg.am_ID=orig->ga_Msg.am_ID;
+	msg->ga_Msg.am_Class=orig->ga_Msg.am_Class;
+	msg->ga_Msg.am_MouseX=orig->ga_Msg.am_MouseX;
+	msg->ga_Msg.am_MouseY=orig->ga_Msg.am_MouseY;
+	msg->ga_Msg.am_Seconds=orig->ga_Msg.am_Seconds;
+	msg->ga_Msg.am_Micros=orig->ga_Msg.am_Micros;
 
 	// Copy arguments
-	for (arg=0;arg<orig->da_Msg.am_NumArgs;arg++)
+	for (arg=0;arg<orig->ga_Msg.am_NumArgs;arg++)
 	{
 		// Copy argument
 		L_SetWBArg(
 			msg,
 			arg,
-			orig->da_Msg.am_ArgList[arg].wa_Lock,
-			orig->da_Msg.am_ArgList[arg].wa_Name,
+			orig->ga_Msg.am_ArgList[arg].wa_Lock,
+			orig->ga_Msg.am_ArgList[arg].wa_Name,
 			memory);
 	}
 
 	// Copy Drop-positions
-	if (orig->da_DropPos)
+	if (orig->ga_DropPos)
 		CopyMem(
-			(char *)orig->da_DropPos,
-			(char *)msg->da_DropPos,
-			sizeof(Point)*orig->da_Msg.am_NumArgs);
+			(char *)orig->ga_DropPos,
+			(char *)msg->ga_DropPos,
+			sizeof(Point)*orig->ga_Msg.am_NumArgs);
 
 	// Copy other info
-	msg->da_DragOffset=orig->da_DragOffset;
-	msg->da_Flags=orig->da_Flags;
+	msg->ga_DragOffset=orig->ga_DragOffset;
+	msg->ga_Flags=orig->ga_Flags;
 
 	return msg;
 }
@@ -178,17 +178,17 @@ BOOL __asm __saveds L_SetWBArg(
 	register __a2 APTR memory)
 {
 	// Valid message and number?
-	if (!msg || num>msg->da_Msg.am_NumArgs) return 0;
+	if (!msg || num>msg->ga_Msg.am_NumArgs) return 0;
 
 	// Null-name?
 	if (!name) name="";
 
 	// Copy name
-	if (msg->da_Msg.am_ArgList[num].wa_Name=L_AllocMemH(memory,strlen(name)+1))
-		strcpy(msg->da_Msg.am_ArgList[num].wa_Name,name);
+	if (msg->ga_Msg.am_ArgList[num].wa_Name=L_AllocMemH(memory,strlen(name)+1))
+		strcpy(msg->ga_Msg.am_ArgList[num].wa_Name,name);
 
 	// Copy lock
-	if (lock) msg->da_Msg.am_ArgList[num].wa_Lock=DupLock(lock);
+	if (lock) msg->ga_Msg.am_ArgList[num].wa_Lock=DupLock(lock);
 
 	return 1;
 }

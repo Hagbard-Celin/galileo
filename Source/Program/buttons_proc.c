@@ -137,7 +137,7 @@ void __saveds buttons_code(void)
 		while (msg=(GalileoAppMessage *)GetMsg(buttons->app_port))
 		{
 			// Menu operation?
-			if (msg->da_Msg.am_Type==MTYPE_APPSNAPSHOT)
+			if (msg->ga_Msg.am_Type==MTYPE_APPSNAPSHOT)
 			{
 				struct AppSnapshotMsg *asm;
 
@@ -165,10 +165,10 @@ void __saveds buttons_code(void)
 
 			// AppIcon?
 			else
-			if (msg->da_Msg.am_Type==MTYPE_APPICON)
+			if (msg->ga_Msg.am_Type==MTYPE_APPICON)
 			{
 				// De-iconify?
-				if (msg->da_Msg.am_NumArgs==0)
+				if (msg->ga_Msg.am_NumArgs==0)
 				{
 					// Update icon position
 					buttons_update_icon(buttons);

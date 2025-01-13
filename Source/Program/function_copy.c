@@ -1641,19 +1641,19 @@ void copy_icon_position(FunctionHandle *handle,char *name,struct DiskObject *ico
 
 		// Find arg number
 		if ((num=FindWBArg(
-			handle->app_msg->da_Msg.am_ArgList,
-			handle->app_msg->da_Msg.am_NumArgs,
+			handle->app_msg->ga_Msg.am_ArgList,
+			handle->app_msg->ga_Msg.am_NumArgs,
 			name))>-1)
 		{
 			short x,y;
 
 			// Fix icon position
-			x=handle->app_msg->da_DragOffset.x+
-				handle->app_msg->da_Msg.am_MouseX+
-				handle->app_msg->da_DropPos[num].x;
-			y=handle->app_msg->da_DragOffset.y+
-				handle->app_msg->da_Msg.am_MouseY+
-				handle->app_msg->da_DropPos[num].y;
+			x=handle->app_msg->ga_DragOffset.x+
+				handle->app_msg->ga_Msg.am_MouseX+
+				handle->app_msg->ga_DropPos[num].x;
+			y=handle->app_msg->ga_DragOffset.y+
+				handle->app_msg->ga_Msg.am_MouseY+
+				handle->app_msg->ga_DropPos[num].y;
 
 			// Store position, unless removing Galileo positions
 			if (!(environment->env->display_options&DISPOPTF_REMGALILEOPOS))

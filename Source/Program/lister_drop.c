@@ -85,10 +85,10 @@ void lister_receive_drop(Lister *dest,GalileoAppMessage *msg)
 	}
 
 	// Is first entry a directory?
-	if (WBArgDir(&msg->da_Msg.am_ArgList[0]))
+	if (WBArgDir(&msg->ga_Msg.am_ArgList[0]))
 	{
 		// Get first path name
-		if (DevNameFromLock(msg->da_Msg.am_ArgList[0].wa_Lock,pathname,256))
+		if (DevNameFromLock(msg->ga_Msg.am_ArgList[0].wa_Lock,pathname,256))
 		{
 			BOOL read=0;
 
@@ -153,13 +153,13 @@ void lister_receive_drop(Lister *dest,GalileoAppMessage *msg)
 		lock_listlock(&info->objects,0);
 
 		// See if it's dropped on anything
-		if (drop_on=backdrop_get_object(info,msg->da_Msg.am_MouseX,msg->da_Msg.am_MouseY,0))
+		if (drop_on=backdrop_get_object(info,msg->ga_Msg.am_MouseX,msg->ga_Msg.am_MouseY,0))
 		{
 			// Is shift/alt down?
 			if (qual&(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT)==(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))
 			{
 				// Get path of first file
-				GetWBArgPath(&msg->da_Msg.am_ArgList[0],pathname,256);
+				GetWBArgPath(&msg->ga_Msg.am_ArgList[0],pathname,256);
 
 				// Replace the image
 				backdrop_replace_icon_image(info,pathname,drop_on);
@@ -186,8 +186,8 @@ void lister_receive_drop(Lister *dest,GalileoAppMessage *msg)
 					drop_on,
 					0,
 					0,
-					msg->da_Msg.am_NumArgs,
-					msg->da_Msg.am_ArgList);
+					msg->ga_Msg.am_NumArgs,
+					msg->ga_Msg.am_ArgList);
 				ok=0;
 			}
 		}
@@ -223,10 +223,10 @@ void lister_receive_drop(Lister *dest,GalileoAppMessage *msg)
 			return;
 
 		// Get path of first file
-		DevNameFromLock(msg->da_Msg.am_ArgList[0].wa_Lock,pathname,256);
+		DevNameFromLock(msg->ga_Msg.am_ArgList[0].wa_Lock,pathname,256);
 
 		// Need source directory; if this is a drawer, get parent
-		if (WBArgDir(&msg->da_Msg.am_ArgList[0]))
+		if (WBArgDir(&msg->ga_Msg.am_ArgList[0]))
 		{
 			// Get parent of drawer
 			path_parent(pathname);

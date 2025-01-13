@@ -962,9 +962,9 @@ BOOL __asm __saveds L_OpenEnvironment(
 					if (sound=L_AllocMemH(data->memory,sizeof(Cfg_SoundEntry)))
 					{
 						// Read data, add to list
-						L_IFFReadChunkBytes(iff,(char *)sound->dse_Name,L_IFFChunkSize(iff));
-						sound->dse_Node.ln_Name=sound->dse_Name;
-						sound->dse_Flags&=~CFGSEF_CHANGED;
+						L_IFFReadChunkBytes(iff,(char *)sound->gse_Name,L_IFFChunkSize(iff));
+						sound->gse_Node.ln_Name=sound->gse_Name;
+						sound->gse_Flags&=~CFGSEF_CHANGED;
 						AddTail((struct List *)&data->soundlist,(struct Node *)sound);
 					}
 				}

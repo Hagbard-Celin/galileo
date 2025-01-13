@@ -135,13 +135,13 @@ void __asm __saveds lister_process_msg(
 								if (msg=alloc_appmsg_files(0,lister->cur_buffer,1))
 								{
 									// Set message type
-									msg->da_Msg.am_Type=MTYPE_APPMENUITEM;
+									msg->ga_Msg.am_Type=MTYPE_APPMENUITEM;
 
 									// Get port and info
 									port=WB_AppWindowData(
 										(struct AppWindow *)menuitem,
-										&msg->da_Msg.am_ID,
-										&msg->da_Msg.am_UserData);
+										&msg->ga_Msg.am_ID,
+										&msg->ga_Msg.am_UserData);
 
 									// Send the message
 									PutMsg(port,(struct Message *)msg);

@@ -160,8 +160,8 @@ BOOL buttons_app_message(Buttons *buttons,GalileoAppMessage *msg)
 	GetSemaphore(&buttons->bank->lock,SEMF_SHARED,0);
 
 	// Get button and function we dropped on
-	col=msg->da_Msg.am_MouseX;
-	row=msg->da_Msg.am_MouseY;
+	col=msg->ga_Msg.am_MouseX;
+	row=msg->ga_Msg.am_MouseY;
 	if (!(button=button_from_point(buttons,&col,&row)) ||
 		!(function=button_valid(button,button->current)))
 	{
@@ -176,12 +176,12 @@ BOOL buttons_app_message(Buttons *buttons,GalileoAppMessage *msg)
 		char pathname[256];
 
 		// Get pathname of first file
-		DevNameFromLock(msg->da_Msg.am_ArgList[0].wa_Lock,pathname,256);
+		DevNameFromLock(msg->ga_Msg.am_ArgList[0].wa_Lock,pathname,256);
 
 		// Need source directory; if no name, get parent
-		if ((!msg->da_Msg.am_ArgList[0].wa_Name ||
-			!*msg->da_Msg.am_ArgList[0].wa_Name) &&
-			(lock=ParentDir(msg->da_Msg.am_ArgList[0].wa_Lock)))
+		if ((!msg->ga_Msg.am_ArgList[0].wa_Name ||
+			!*msg->ga_Msg.am_ArgList[0].wa_Name) &&
+			(lock=ParentDir(msg->ga_Msg.am_ArgList[0].wa_Lock)))
 		{
 			// Get pathname of parent
 			DevNameFromLock(lock,pathname,256);

@@ -404,13 +404,13 @@ void backdrop_drop_object(BackdropInfo *info,BackdropObject *on_object)
 		}
 
 		// Set message type
-		msg->da_Msg.am_Type=MTYPE_APPICON;
+		msg->ga_Msg.am_Type=MTYPE_APPICON;
 
 		// Get AppInfo
 		port=WB_AppWindowData(
 			(struct AppWindow *)on_object->misc_data,
-			&msg->da_Msg.am_ID,
-			&msg->da_Msg.am_UserData);
+			&msg->ga_Msg.am_ID,
+			&msg->ga_Msg.am_UserData);
 
 		// Send the message
 		PutMsg(port,(struct Message *)msg);

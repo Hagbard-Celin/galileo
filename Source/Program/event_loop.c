@@ -104,10 +104,10 @@ void event_loop()
 		{
 			// App message reply?
 			if (msg->mn_Node.ln_Type==NT_REPLYMSG &&
-				(((GalileoAppMessage *)msg)->da_Msg.am_Type==MTYPE_APPWINDOW ||
-				((GalileoAppMessage *)msg)->da_Msg.am_Type==MTYPE_APPICON ||
-				((GalileoAppMessage *)msg)->da_Msg.am_Type==MTYPE_APPMENUITEM ||
-				((GalileoAppMessage *)msg)->da_Msg.am_Type==MTYPE_APPSNAPSHOT))
+				(((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_APPWINDOW ||
+				((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_APPICON ||
+				((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_APPMENUITEM ||
+				((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_APPSNAPSHOT))
 			{
 				// Free the message
 				FreeAppMessage((GalileoAppMessage *)msg);
@@ -116,9 +116,9 @@ void event_loop()
 
 			// File drop on backdrop window?
 			else
-			if ((((GalileoAppMessage *)msg)->da_Msg.am_Type==MTYPE_GALILEOFM ||
-				((GalileoAppMessage *)msg)->da_Msg.am_Type==MTYPE_APPWINDOW) &&
-				((GalileoAppMessage *)msg)->da_Msg.am_ID==WINDOW_BACKDROP)
+			if ((((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_GALILEOFM ||
+				((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_APPWINDOW) &&
+				((GalileoAppMessage *)msg)->ga_Msg.am_ID==WINDOW_BACKDROP)
 			{
 				// Handle drop
 				desktop_drop(GUI->backdrop,(GalileoAppMessage *)msg,PeekQualifier());
@@ -127,15 +127,15 @@ void event_loop()
 
 			// Hidden App message
 			else
-			if ((((GalileoAppMessage *)msg)->da_Msg.am_Type==MTYPE_APPICON ||
-				((GalileoAppMessage *)msg)->da_Msg.am_Type==MTYPE_APPWINDOW ||
-				((GalileoAppMessage *)msg)->da_Msg.am_Type==MTYPE_APPMENUITEM) &&
-				((GalileoAppMessage *)msg)->da_Msg.am_ID==0x12345678)
+			if ((((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_APPICON ||
+				((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_APPWINDOW ||
+				((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_APPMENUITEM) &&
+				((GalileoAppMessage *)msg)->ga_Msg.am_ID==0x12345678)
 			{
 				// Files dropped on AppIcon?
-				if ((((GalileoAppMessage *)msg)->da_Msg.am_Type==MTYPE_APPICON ||
-					((GalileoAppMessage *)msg)->da_Msg.am_Type==MTYPE_APPWINDOW) &&
-					((GalileoAppMessage *)msg)->da_Msg.am_NumArgs>0)
+				if ((((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_APPICON ||
+					((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_APPWINDOW) &&
+					((GalileoAppMessage *)msg)->ga_Msg.am_NumArgs>0)
 				{
 					struct ArgArray *arg_array;
 					char *pathname;
@@ -149,12 +149,12 @@ void event_loop()
 						if (arg_array=AppArgArray(amsg,0))
 						{
 							// Get pathname of first file
-							DevNameFromLock(amsg->da_Msg.am_ArgList[0].wa_Lock,pathname,512);
+							DevNameFromLock(amsg->ga_Msg.am_ArgList[0].wa_Lock,pathname,512);
 
 							// Need source directory; if no name, get parent
-							if ((!amsg->da_Msg.am_ArgList[0].wa_Name ||
-								!*amsg->da_Msg.am_ArgList[0].wa_Name) &&
-								(lock=ParentDir(amsg->da_Msg.am_ArgList[0].wa_Lock)))
+							if ((!amsg->ga_Msg.am_ArgList[0].wa_Name ||
+								!*amsg->ga_Msg.am_ArgList[0].wa_Name) &&
+								(lock=ParentDir(amsg->ga_Msg.am_ArgList[0].wa_Lock)))
 							{
 								// Get pathname of parent
 								DevNameFromLock(lock,pathname,512);
@@ -1730,11 +1730,11 @@ BOOL menu_process_event(
 						if (msg=backdrop_appmessage(GUI->backdrop,0))
 						{
 							// Complete message
-							msg->da_Msg.am_Type=MTYPE_APPMENUITEM;
+							msg->ga_Msg.am_Type=MTYPE_APPMENUITEM;
 							port=WB_AppWindowData(
 								(struct AppWindow *)appitem,
-								&msg->da_Msg.am_ID,
-								&msg->da_Msg.am_UserData);
+								&msg->ga_Msg.am_ID,
+								&msg->ga_Msg.am_UserData);
 
 							// Send the message
 							PutMsg(port,(struct Message *)msg);

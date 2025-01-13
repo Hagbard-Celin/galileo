@@ -100,7 +100,7 @@ BOOL function_launch(
 		if ((handle->app_msg=(GalileoAppMessage *)buttons))
 		{
 			// Free the locks in the message
-			UnlockWBArg(handle->app_msg->da_Msg.am_ArgList,handle->app_msg->da_Msg.am_NumArgs);
+			UnlockWBArg(handle->app_msg->ga_Msg.am_ArgList,handle->app_msg->ga_Msg.am_NumArgs);
 		}
 	}
 

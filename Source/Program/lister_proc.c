@@ -315,7 +315,7 @@ void __saveds lister_code(void)
 
 			// Files dropped?
 			if ((lister->window || lister->appicon) &&
-				amsg->da_Msg.am_NumArgs>0 &&
+				amsg->ga_Msg.am_NumArgs>0 &&
 				!(lister->flags&LISTERF_LOCK))
 			{
 				// Receive the drop
@@ -324,7 +324,7 @@ void __saveds lister_code(void)
 
 			// Menu operation?
 			else
-			if (amsg->da_Msg.am_Type==MTYPE_APPSNAPSHOT)
+			if (amsg->ga_Msg.am_Type==MTYPE_APPSNAPSHOT)
 			{
 				struct AppSnapshotMsg *asm;
 
@@ -352,10 +352,10 @@ void __saveds lister_code(void)
 
 			// Or, appicon action?
 			else
-			if (amsg->da_Msg.am_Type==MTYPE_APPICON)
+			if (amsg->ga_Msg.am_Type==MTYPE_APPICON)
 			{
 				// Double-click?
-				if (amsg->da_Msg.am_NumArgs==0)
+				if (amsg->ga_Msg.am_NumArgs==0)
 				{
 					// Clear iconified flag
 					lister->flags&=~LISTERF_ICONIFIED;

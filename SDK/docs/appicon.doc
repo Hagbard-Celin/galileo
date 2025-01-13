@@ -133,27 +133,27 @@ galileofm.library/AppXXX routines                 galileofm.library/AppXXX routi
     the message is a GalileoAppMessage, which contains additional information.
     The extra fields are :
 
-        da_DropPos
+        ga_DropPos
 
         This field contains an array of Point structures. Each structure
         gives the offset from the origin of each file in the message.
         This allows you to maintain the relative positions of all icons
         dropped in a multiple-file operation.
 
-        da_DragOffset
+        ga_DragOffset
 
         This Point structure gives you the offset of the primary icon
         from the mouse pointer. That is, if the user clicked on the primary
         icon in the top-left corner, this offset would be 0,0. If they
         picked up the icon from the bottom-right corner, it might be 32,18.
 
-        da_Flags
+        ga_Flags
 
         The only flag supported so far is GAPPF_ICON_DROP. This indicates
         that the files dropped were in fact icons (ie from an icon mode
         lister).
 
-    The da_DropPos and da_DragOffset fields enable you to calculate the
+    The ga_DropPos and ga_DragOffset fields enable you to calculate the
     exact position that the user dropped the files on. Normal AppMessages
     only provide the position of the mouse pointer, which is useless if you
     want to maintain the relative and correct positions of the icons.
@@ -180,7 +180,7 @@ galileofm.library/AppXXX routines                 galileofm.library/AppXXX routi
 
     RESULT
         Allocates a GalileoAppMessage, including space for count arguments
-        (both da_Msg.am_ArgList and da_DropPos will be initialised).
+        (both ga_Msg.am_ArgList and ga_DropPos will be initialised).
 
     NOTES
         Unless you actually want to send an AppMessage to a Galileo window
