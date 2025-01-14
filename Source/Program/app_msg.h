@@ -57,9 +57,9 @@ struct ArgArray
 
 struct ArgArrayEntry
 {
-	struct MinNode	ae_Node;
-	USHORT		ae_Flags;
-	char		ae_String[1];
+	struct MinNode	aae_Node;
+	USHORT		aae_Flags;
+	char		aae_String[1];
 };
 
 #define AAF_ALLOW_DIRS	(1<<0)

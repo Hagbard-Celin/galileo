@@ -1237,22 +1237,22 @@ void function_files_from_args(FunctionHandle *handle)
 
     // Go through arguments
     for (arg=(struct ArgArrayEntry *)handle->args->aa_List.mlh_Head;
-	 arg->ae_Node.mln_Succ;
-	 arg=(struct ArgArrayEntry *)arg->ae_Node.mln_Succ)
+	 arg->aae_Node.mln_Succ;
+	 arg=(struct ArgArrayEntry *)arg->aae_Node.mln_Succ)
     {
 	// Create a new external entry
-	if (entry=new_external_entry(handle,arg->ae_String))
+	if (entry=new_external_entry(handle,arg->aae_String))
 	{
 	    // Directory?
-	    if (arg->ae_Flags&AEF_DIR)
+	    if (arg->aae_Flags&AEF_DIR)
 		entry->een_type=1;
 
 	    // Link?
-	    if (arg->ae_Flags&AEF_LINK)
+	    if (arg->aae_Flags&AEF_LINK)
 		entry->een_flags|=FUNCENTF_LINK;
 
 	    // Fake icon?
-	    if (arg->ae_Flags&AEF_FAKE_ICON)
+	    if (arg->aae_Flags&AEF_FAKE_ICON)
 		entry->een_flags|=FUNCENTF_FAKE_ICON;
 
 	    // Add to external entry list

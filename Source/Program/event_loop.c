@@ -1777,7 +1777,7 @@ void handle_icon_notify(GalileoNotify *notify)
 
 		// Showing AppIcons, or a local icon?
 		if (environment->env->display_options&DISPOPTF_SHOW_APPICONS ||
-			icon->flags&APPENTF_LOCAL)
+			icon->ae_flags&APPENTF_LOCAL)
 		{
 			short flags;
 

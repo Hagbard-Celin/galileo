@@ -1423,24 +1423,24 @@ enum
 
 typedef struct
 {
-    struct MinNode	node;
-    ULONG		type;		// Type of entry
+    struct MinNode	ae_node;
+    ULONG		ae_type;	   // Type of entry
 
-    ULONG		id;		// ID
-    ULONG		userdata;	// User data
+    ULONG		ae_id;		   // ID
+    ULONG		ae_userdata;	   // User data
 
-    APTR		object;		// Type-specific object
-    char		*text;		// If text is needed
-    struct MsgPort	*port;		// Message port
+    APTR		ae_object;	   // Type-specific object
+    char		*ae_text;	   // If text is needed
+    struct MsgPort	*ae_port;	   // Message port
 
-    APTR		os_object;	// Object from OS routine
+    APTR		ae_os_object;	   // Object from OS routine
 
-    unsigned short	flags;		// Some flags
+    unsigned short	ae_flags;	   // Some flags
 
-    struct MinList	menu;		// Menu items
+    struct MinList	ae_menu;	   // Menu items
 
-    unsigned short	data;
-    long		menu_id_base;	// Base ID for menu
+    unsigned short	ae_data;
+    long		ae_menu_id_base;   // Base ID for menu
 }  AppEntry;
 
 #define GAE_Local		TAG_USER + 0		// Local entry

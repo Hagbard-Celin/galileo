@@ -177,13 +177,13 @@ void icon_function(BackdropInfo *info,BackdropObject *only_one,char *data,Cfg_Fu
 				if (aae=NewArgArrayEntry(array,name))
 				{
 					// Dir?
-					if (dir) aae->ae_Flags|=AEF_DIR;
+					if (dir) aae->aae_Flags|=AEF_DIR;
 
 					// Link?
-					if (link) aae->ae_Flags|=AEF_LINK;
+					if (link) aae->aae_Flags|=AEF_LINK;
 
 					// No icon?
-					if (!icon) aae->ae_Flags|=AEF_FAKE_ICON;
+					if (!icon) aae->aae_Flags|=AEF_FAKE_ICON;
 				}
 
 				// Only doing one?

@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -54,7 +54,7 @@ void backdrop_read_appicons(BackdropInfo *info,short flags)
 	{
 		// Showing AppIcons, or a local icon?
 		if (environment->env->display_options&DISPOPTF_SHOW_APPICONS ||
-			icon->flags&APPENTF_LOCAL)
+			icon->ae_flags&APPENTF_LOCAL)
 		{
 			// See if icon is already in list
 			if (!(object=backdrop_find_appicon(info,icon)))
@@ -119,25 +119,25 @@ BackdropObject *backdrop_add_appicon(AppEntry *appicon,BackdropInfo *info,short 
 		if (flags&BDAF_CHANGE)
 		{
 			// Has name changed?
-			if (strcmp(object->name,appicon->text))
+			if (strcmp(object->name,appicon->ae_text))
 			{
 				// Erase object label
 				backdrop_render_object(info,object,BRENDERF_CLEAR|BRENDERF_CLIP|BRENDERF_LABEL);
 
 				// Get new name
-				strcpy(object->name,appicon->text);
+				strcpy(object->name,appicon->ae_text);
 			}
 
 			// Update locked state
-			if (appicon->flags&APPENTF_LOCKED) object->flags|=BDOF_LOCKED;
+			if (appicon->ae_flags&APPENTF_LOCKED) object->flags|=BDOF_LOCKED;
 			else object->flags&=~BDOF_LOCKED;
 
 			// Update busy state
-			if (appicon->flags&APPENTF_BUSY) object->flags|=BDOF_BUSY;
+			if (appicon->ae_flags&APPENTF_BUSY) object->flags|=BDOF_BUSY;
 			else object->flags&=~BDOF_BUSY;
 
 			// Update ghosted state
-			if (appicon->flags&APPENTF_GHOSTED) object->flags|=BDOF_GHOSTED;
+			if (appicon->ae_flags&APPENTF_GHOSTED) object->flags|=BDOF_GHOSTED;
 			else object->flags&=~BDOF_GHOSTED;
 
 			// Did image change?
@@ -163,7 +163,7 @@ BackdropObject *backdrop_add_appicon(AppEntry *appicon,BackdropInfo *info,short 
 	if (object || flags&BDAF_CHANGE) return object;
 
 	// Valid text?
-	if (appicon->text && *appicon->text)
+	if (appicon->ae_text && *appicon->ae_text)
 	{
 		// Lock position list
 		lock_listlock(&GUI->positions,FALSE);
@@ -177,11 +177,11 @@ BackdropObject *backdrop_add_appicon(AppEntry *appicon,BackdropInfo *info,short 
 			if (left->node.ln_Type==PTYPE_APPICON)
 			{
 				// Match this icon?
-				if (strcmp(left->icon_label,appicon->text)==0)
+				if (strcmp(left->icon_label,appicon->ae_text)==0)
 				{
 					// Set position in icon
-					((struct DiskObject *)appicon->object)->do_CurrentX=left->icon_x;
-					((struct DiskObject *)appicon->object)->do_CurrentY=left->icon_y;
+					((struct DiskObject *)appicon->ae_object)->do_CurrentX=left->icon_x;
+					((struct DiskObject *)appicon->ae_object)->do_CurrentY=left->icon_y;
 					break;
 				}
 			}
@@ -194,7 +194,7 @@ BackdropObject *backdrop_add_appicon(AppEntry *appicon,BackdropInfo *info,short 
 	// Allocate a new object
 	if (object=backdrop_new_object(
 		info,
-		appicon->text,
+		appicon->ae_text,
 		0,
 		BDO_APP_ICON))
 	{
@@ -202,23 +202,23 @@ BackdropObject *backdrop_add_appicon(AppEntry *appicon,BackdropInfo *info,short 
 		if (flags&BDAF_LOCK) lock_listlock(&info->objects,1);
 
 		// Store icon and owner
-		object->icon=appicon->object;
+		object->icon=appicon->ae_object;
 		object->misc_data=(ULONG)appicon;
 
 		// Background colour?
-		if (((AppEntry *)appicon)->flags&APPENTF_BACKGROUND)
+		if (((AppEntry *)appicon)->ae_flags&APPENTF_BACKGROUND)
 		{
 			// Store background colour
-			object->size=((AppEntry *)appicon)->data;
+			object->size=((AppEntry *)appicon)->ae_data;
 			object->flags|=BDOF_BACKGROUND;
 		}
 
 		// Locked?
-		if (((AppEntry *)appicon)->flags&APPENTF_LOCKED)
+		if (((AppEntry *)appicon)->ae_flags&APPENTF_LOCKED)
 			object->flags|=BDOF_LOCKED;
 
 		// Special?
-		if (((AppEntry *)appicon)->flags&APPENTF_SPECIAL)
+		if (((AppEntry *)appicon)->ae_flags&APPENTF_SPECIAL)
 			object->flags|=BDOF_SPECIAL;
 
 		// Fix size and position

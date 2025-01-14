@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -384,14 +384,14 @@ void __saveds launcher_proc(void)
 
 				// Go through free list
 				for (entry=(AppEntry *)data->wb_data.rem_app_list.mlh_Head;
-					entry->node.mln_Succ;
+					entry->ae_node.mln_Succ;
 					entry=next)
 				{
 					// Get next entry
-					next=(AppEntry *)entry->node.mln_Succ;
+					next=(AppEntry *)entry->ae_node.mln_Succ;
 
 					// Has this entry's time expired?
-					if (++entry->menu_id_base==5)
+					if (++entry->ae_menu_id_base==5)
 					{
 						free_app_entry(entry,&data->wb_data);
 						++count;

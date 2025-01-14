@@ -216,7 +216,7 @@ BOOL backdrop_popup(
 			flags|=BPF_CANINFO;
 
 		// Close item?
-		if (((AppEntry *)object->misc_data)->flags&APPENTF_CLOSE)
+		if (((AppEntry *)object->misc_data)->ae_flags&APPENTF_CLOSE)
 			flags|=BPF_CLOSE;
 	}
 
@@ -470,9 +470,9 @@ BOOL backdrop_popup(
 						if (entry=NewArgArrayEntry(array,(devptr)?devptr:((filename)?(char *)FilePart(filename):object->name)))
 						{
 							// Directory?
-							if (flags&BPF_DIRECTORY) entry->ae_Flags|=AEF_DIR;
+							if (flags&BPF_DIRECTORY) entry->aae_Flags|=AEF_DIR;
 							else
-							if (object && object->icon->do_Type==WBDRAWER) entry->ae_Flags|=AEF_DIR;
+							if (object && object->icon->do_Type==WBDRAWER) entry->aae_Flags|=AEF_DIR;
 						}
 					}
 
@@ -896,10 +896,10 @@ void popup_get_appicon(PopUpHandle *menu,AppEntry *app)
 	menu->ph_Flags&=~POPHF_SEP;
 
 	// Get menu base
-	num=app->menu_id_base;
+	num=app->ae_menu_id_base;
 
 	// Go through icon menu items
-	for (node=(struct Node *)app->menu.mlh_Head;node->ln_Succ;node=node->ln_Succ)
+	for (node=(struct Node *)app->ae_menu.mlh_Head;node->ln_Succ;node=node->ln_Succ)
 	{
 		// Want a separator?
 		if (strcmp(node->ln_Name,"---")==0)

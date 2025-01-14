@@ -56,12 +56,12 @@ GALILEOFM_FUNC(function_disk)
 	
 		// Add arg nodes
 		for (arg=(struct ArgArrayEntry *)handle->args->aa_List.mlh_Head;
-			arg->ae_Node.mln_Succ;
-			arg=(struct ArgArrayEntry *)arg->ae_Node.mln_Succ)
+			arg->aae_Node.mln_Succ;
+			arg=(struct ArgArrayEntry *)arg->aae_Node.mln_Succ)
 		{
 			if (node=AllocMemH(handle->memory,sizeof(struct Node)))
 			{
-				node->ln_Name=arg->ae_String;
+				node->ln_Name=arg->aae_String;
 				AddTail(&list,node);
 			}
 		}

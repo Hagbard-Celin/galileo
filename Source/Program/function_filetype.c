@@ -72,11 +72,11 @@ void function_filetype(FunctionHandle *handle)
 
 		// Go through list
 		for (arg=(struct ArgArrayEntry *)handle->args->aa_List.mlh_Head;
-			arg->ae_Node.mln_Succ;
-			arg=(struct ArgArrayEntry *)arg->ae_Node.mln_Succ)
+			arg->aae_Node.mln_Succ;
+			arg=(struct ArgArrayEntry *)arg->aae_Node.mln_Succ)
 		{
 			// Match filetype for this file
-			if (!(type=filetype_identify(arg->ae_String,handle->data,0,qual)))
+			if (!(type=filetype_identify(arg->aae_String,handle->data,0,qual)))
 			{
 				// Couldn't match. Was this a drag & drop operation?
 				if (handle->flags&FUNCF_DRAG_DROP)
@@ -145,7 +145,7 @@ void function_filetype(FunctionHandle *handle)
 					type_function=func;
 
 					// Create a new external entry
-					if (entry=new_external_entry(handle,arg->ae_String))
+					if (entry=new_external_entry(handle,arg->aae_String))
 					{
 						// Add to external entry list
 						AddTail((struct List *)&handle->external_list,(struct Node *)entry);

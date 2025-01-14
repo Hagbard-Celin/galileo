@@ -1085,8 +1085,8 @@ function_build_instruction(FunctionHandle *handle,
 					entry=(struct ArgArrayEntry *)handle->args->aa_List.mlh_Head;
 
 					// Get data
-					if (entry->ae_Node.mln_Succ)
-					    query_data=entry->ae_String;
+					if (entry->aae_Node.mln_Succ)
+					    query_data=entry->aae_String;
 				    }
 				    break;
 			}

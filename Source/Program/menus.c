@@ -273,7 +273,7 @@ void display_build_user_menu(void)
 				GUI->user_menu_data[num].id=(ULONG)appmenu;
 
 				// Separator?
-				if (strncmp(appmenu->text,"---",3)==0)
+				if (strncmp(appmenu->ae_text,"---",3)==0)
 				{
 					GUI->user_menu_data[num].name=(ULONG)NM_BARLABEL;
 				}
@@ -281,7 +281,7 @@ void display_build_user_menu(void)
 				// Normal string
 				else
 				{
-					GUI->user_menu_data[num].name=(ULONG)appmenu->text;
+					GUI->user_menu_data[num].name=(ULONG)appmenu->ae_text;
 					GUI->user_menu_data[num].flags=MENUFLAG_TEXT_STRING;
 				}
 

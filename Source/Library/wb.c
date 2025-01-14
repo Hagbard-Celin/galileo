@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -253,13 +253,13 @@ struct AppWindow *__asm __saveds L_WB_AddAppWindow(
 		if (tags && GetTagData(GAE_Local,0,tags))
 		{
 			// Set local flag
-			app_entry->flags|=APPENTF_LOCAL;
+			app_entry->ae_flags|=APPENTF_LOCAL;
 		}
 
 		// Otherwise pass to OS
 		else
 		{
-			app_entry->os_object=
+			app_entry->ae_os_object=
 				((struct AppWindow *__asm (*)
 					(register __d0 ULONG,
 					register __d1 ULONG,
@@ -339,52 +339,52 @@ struct AppIcon *__asm __saveds L_WB_AddAppIcon(
 			if (GetTagData(GAE_SnapShot,0,tags))
 			{
 				// Set flag
-				app_entry->flags|=APPENTF_SNAPSHOT;
+				app_entry->ae_flags|=APPENTF_SNAPSHOT;
 			}
 
 			// Support info?
 			if (GetTagData(GAE_Info,0,tags))
 			{
 				// Set flag
-				app_entry->flags|=APPENTF_INFO;
+				app_entry->ae_flags|=APPENTF_INFO;
 			}
 
 			// Locked?
 			if (GetTagData(GAE_Locked,0,tags))
 			{
 				// Set flag
-				app_entry->flags|=APPENTF_LOCKED;
+				app_entry->ae_flags|=APPENTF_LOCKED;
 			}
 
 			// Close item?
 			if (a=GetTagData(GAE_Close,0,tags))
 			{
 				// Set flag
-				app_entry->flags|=APPENTF_CLOSE;
+				app_entry->ae_flags|=APPENTF_CLOSE;
 
 				// No open?
-				if (a==2) app_entry->flags|=APPENTF_NO_OPEN;
+				if (a==2) app_entry->ae_flags|=APPENTF_NO_OPEN;
 			}
 
 			// Background colour?
 			if (tag=FindTagItem(GAE_Background,tags))
 			{
 				// Set flag
-				app_entry->flags|=APPENTF_BACKGROUND;
+				app_entry->ae_flags|=APPENTF_BACKGROUND;
 
 				// Store colour;
-				app_entry->data=tag->ti_Data;
+				app_entry->ae_data=tag->ti_Data;
 			}
 
 			// Special?
 			if (GetTagData(GAE_Special,0,tags))
 			{
 				// Set flag
-				app_entry->flags|=APPENTF_SPECIAL;
+				app_entry->ae_flags|=APPENTF_SPECIAL;
 			}
 
 			// Set menu base
-			app_entry->menu_id_base=GetTagData(GAE_MenuBase,0,tags);
+			app_entry->ae_menu_id_base=GetTagData(GAE_MenuBase,0,tags);
 
 			// Go through tags
 			tstate=tags;
@@ -410,7 +410,7 @@ struct AppIcon *__asm __saveds L_WB_AddAppIcon(
 						if (tag->ti_Tag==GAE_ToggleMenuSel) node->ln_MenuFlags=MNF_TOGGLE|MNF_SEL;
 
 						// Add to list
-						AddTail((struct List *)&app_entry->menu,(struct Node *)node);
+						AddTail((struct List *)&app_entry->ae_menu,(struct Node *)node);
 					}
 				}
 			}
@@ -420,7 +420,7 @@ struct AppIcon *__asm __saveds L_WB_AddAppIcon(
 		if (local==1 && !osonly)
 		{
 			// Set local flag
-			app_entry->flags|=APPENTF_LOCAL;
+			app_entry->ae_flags|=APPENTF_LOCAL;
 		}
 
 		// Otherwise, pass to OS
@@ -437,7 +437,7 @@ struct AppIcon *__asm __saveds L_WB_AddAppIcon(
 					register __a4 struct TagItem *,
 					register __a6 struct Library *))wb_data->old_function[WB_PATCH_ADDAPPICON])
 					(id,userdata,text,port,lock,icon,tags,wb_data->wb_base);
-			if (app_entry) app_entry->os_object=object;
+			if (app_entry) app_entry->ae_os_object=object;
 		}
 
 		// Send notification
@@ -484,7 +484,7 @@ struct AppMenuItem *__asm __saveds L_WB_AddAppMenuItem(
 		if (tags && GetTagData(GAE_Local,0,tags))
 		{
 			// Set local flag
-			app_entry->flags|=APPENTF_LOCAL;
+			app_entry->ae_flags|=APPENTF_LOCAL;
 		}
 
 		// Otherwise pass to OS
@@ -499,7 +499,7 @@ struct AppMenuItem *__asm __saveds L_WB_AddAppMenuItem(
 					register __a2 struct TagItem *,
 					register __a6 struct Library *))wb_data->old_function[WB_PATCH_ADDAPPMENU])
 					(id,userdata,text,port,tags,wb_data->wb_base);
-			if (app_entry) app_entry->os_object=object;
+			if (app_entry) app_entry->ae_os_object=object;
 		}
 
 		// Send notification
@@ -588,7 +588,7 @@ BOOL __asm __saveds L_WB_RemoveAppIcon(
 	if (find_app_entry(entry,wb_data))
 	{
 		// Is it a menu (must have been redirected)?
-		if (entry->type==APP_MENU)
+		if (entry->ae_type==APP_MENU)
 		{
 			// Unlock list
 			L_FreeSemaphore(&wb_data->patch_lock);
@@ -678,12 +678,12 @@ struct AppWindow __asm __saveds *L_WB_FindAppWindow(
 
 	// Go through app objects
 	for (app_entry=(AppEntry *)wb_data->app_list.mlh_Head;
-		app_entry->node.mln_Succ;
-		app_entry=(AppEntry *)app_entry->node.mln_Succ)
+		app_entry->ae_node.mln_Succ;
+		app_entry=(AppEntry *)app_entry->ae_node.mln_Succ)
 	{
 		// Is this the window?
-		if (app_entry->type==APP_WINDOW &&
-			app_entry->object==window)
+		if (app_entry->ae_type==APP_WINDOW &&
+			app_entry->ae_object==window)
 		{
 			// Forbid so window can't go
 			Forbid();
@@ -711,9 +711,9 @@ struct MsgPort *__asm __saveds L_WB_AppWindowData(
 	// Valid entry?
 	if (entry=(AppEntry *)window)
 	{
-		if (id) *id=entry->id;
-		if (userdata) *userdata=entry->userdata;
-		return entry->port;
+		if (id) *id=entry->ae_id;
+		if (userdata) *userdata=entry->ae_userdata;
+		return entry->ae_port;
 	}
 	return 0;
 }
@@ -723,7 +723,7 @@ struct MsgPort *__asm __saveds L_WB_AppWindowData(
 BOOL __asm __saveds L_WB_AppWindowLocal(
 	register __a0 struct AppWindow *window)
 {
-	return (BOOL)((((AppEntry *)window)->flags&APPENTF_LOCAL)?1:0);
+	return (BOOL)((((AppEntry *)window)->ae_flags&APPENTF_LOCAL)?1:0);
 }
 
 
@@ -731,7 +731,7 @@ BOOL __asm __saveds L_WB_AppWindowLocal(
 struct Window *__asm __saveds L_WB_AppWindowWindow(
 	register __a0 struct AppWindow *window)
 {
-	return (struct Window *)(((AppEntry *)window)->object);
+	return (struct Window *)(((AppEntry *)window)->ae_object);
 }
 
 
@@ -739,7 +739,7 @@ struct Window *__asm __saveds L_WB_AppWindowWindow(
 unsigned long __asm __saveds L_WB_AppIconFlags(
 	register __a0 struct AppIcon *icon)
 {
-	return ((AppEntry *)icon)->flags;
+	return ((AppEntry *)icon)->ae_flags;
 }
 
 
@@ -761,12 +761,12 @@ AppEntry *new_app_entry(
 		return 0;
 
 	// Fill out AppEntry
-	entry->type=type;
-	entry->id=id;
-	entry->userdata=userdata;
-	entry->text=text;
-	entry->port=port;
-	NewList((struct List *)&entry->menu);
+	entry->ae_type=type;
+	entry->ae_id=id;
+	entry->ae_userdata=userdata;
+	entry->ae_text=text;
+	entry->ae_port=port;
+	NewList((struct List *)&entry->ae_menu);
 
 	// AppIcon?
 	if (type==APP_ICON)
@@ -777,8 +777,8 @@ AppEntry *new_app_entry(
 		if (icon_copy=L_CopyDiskObject((struct DiskObject *)object,0,wb_data->galileofm_base))
 		{
 			// Use copy
-			entry->object=icon_copy;
-			entry->flags|=APPENTF_ICON_COPY;
+			entry->ae_object=icon_copy;
+			entry->ae_flags|=APPENTF_ICON_COPY;
 		}
 
 		// Couldn't copy
@@ -790,7 +790,7 @@ AppEntry *new_app_entry(
 	}
 
 	// Otherwise, save object pointer
-	else entry->object=object;
+	else entry->ae_object=object;
 
 #ifdef RESOURCE_TRACKING
     KPrintF("!!!!!!wb.c line: %ld ADDING app_entry \n", __LINE__);
@@ -855,8 +855,8 @@ APTR rem_app_entry(
 
 	// Look for entry in list
 	for (app_entry=(AppEntry *)wb_data->app_list.mlh_Head;
-		app_entry!=entry && app_entry->node.mln_Succ;
-		app_entry=(AppEntry *)app_entry->node.mln_Succ);
+		app_entry!=entry && app_entry->ae_node.mln_Succ;
+		app_entry=(AppEntry *)app_entry->ae_node.mln_Succ);
 
 	// Found match?
 	if (app_entry==entry)
@@ -865,16 +865,16 @@ APTR rem_app_entry(
 		Remove((struct Node *)entry);
 
 		// Return OS object pointer
-		retval=entry->os_object;
+		retval=entry->ae_os_object;
 
 		// Local?
-		if (local && entry->flags&APPENTF_LOCAL) *local=1;
+		if (local && entry->ae_flags&APPENTF_LOCAL) *local=1;
 
 		// Add to removal list
 		AddTail((struct List *)&wb_data->rem_app_list,(struct Node *)entry);
 
 		// Zero the count
-		entry->menu_id_base=0;
+		entry->ae_menu_id_base=0;
 	}
 
 	// Unlock list
@@ -894,7 +894,7 @@ void free_app_entry(AppEntry *entry,WB_Data *wb_data)
 	Remove((struct Node *)entry);
 
 	// Free menu nodes
-	for (node=entry->menu.mlh_Head;node->mln_Succ;)
+	for (node=entry->ae_menu.mlh_Head;node->mln_Succ;)
 	{
 		// Cache next pointer
 		struct MinNode *next=node->mln_Succ;
@@ -907,8 +907,8 @@ void free_app_entry(AppEntry *entry,WB_Data *wb_data)
 	}
 
 	// Free icon
-	if (entry->flags&APPENTF_ICON_COPY)
-		L_FreeDiskObjectCopy((struct DiskObject *)entry->object,wb_data->galileofm_base);
+	if (entry->ae_flags&APPENTF_ICON_COPY)
+		L_FreeDiskObjectCopy((struct DiskObject *)entry->ae_object,wb_data->galileofm_base);
 
 	// Free data structure
 	FreeVec(entry);
@@ -925,8 +925,8 @@ AppEntry *find_app_entry(AppEntry *entry,WB_Data *wb_data)
 
 	// Look for entry in list
 	for (app_entry=(AppEntry *)wb_data->app_list.mlh_Head;
-		app_entry!=entry && app_entry->node.mln_Succ;
-		app_entry=(AppEntry *)app_entry->node.mln_Succ);
+		app_entry!=entry && app_entry->ae_node.mln_Succ;
+		app_entry=(AppEntry *)app_entry->ae_node.mln_Succ);
 
 	// Found match?
 	if (app_entry==entry) return entry;
@@ -977,16 +977,16 @@ APTR __asm __saveds L_NextAppEntry(
 	if (last==wb_data) entry=(AppEntry *)wb_data->app_list.mlh_Head;
 
 	// Otherwise, go from next entry
-	else entry=(AppEntry *)((AppEntry *)last)->node.mln_Succ;
+	else entry=(AppEntry *)((AppEntry *)last)->ae_node.mln_Succ;
 
 	// Scan list
-	while (entry->node.mln_Succ)
+	while (entry->ae_node.mln_Succ)
 	{
 		// Correct type?
-		if (entry->type==type) return entry;
+		if (entry->ae_type==type) return entry;
 
 		// Get next entry
-		entry=(AppEntry *)entry->node.mln_Succ;
+		entry=(AppEntry *)entry->ae_node.mln_Succ;
 	}
 
 	// Not found
@@ -1088,8 +1088,8 @@ void __asm __saveds L_ChangeAppIcon(
 
 	// Look for entry in list
 	for (app_entry=(AppEntry *)wb_data->app_list.mlh_Head;
-		app_entry!=(AppEntry *)appicon && app_entry->node.mln_Succ;
-		app_entry=(AppEntry *)app_entry->node.mln_Succ);
+		app_entry!=(AppEntry *)appicon && app_entry->ae_node.mln_Succ;
+		app_entry=(AppEntry *)app_entry->ae_node.mln_Succ);
 
 	// Found it?
 	if (app_entry==(AppEntry *)appicon)
@@ -1097,7 +1097,7 @@ void __asm __saveds L_ChangeAppIcon(
 		struct DiskObject *icon;
 
 		// Get icon pointer
-		if (icon=(struct DiskObject *)app_entry->object)
+		if (icon=(struct DiskObject *)app_entry->ae_object)
 		{
 			ULONG notify_flags=GNF_ICON_CHANGED;
 
@@ -1112,32 +1112,32 @@ void __asm __saveds L_ChangeAppIcon(
 				icon->do_Gadget.SelectRender=select;
 				notify_flags|=GNF_ICON_IMAGE_CHANGED;
 			}
-			if (flags&CAIF_TITLE) app_entry->text=title;
+			if (flags&CAIF_TITLE) app_entry->ae_text=title;
 
 			// Change locked state
 			if (flags&CAIF_LOCKED)
 			{
 				// Set?
-				if (flags&CAIF_SET) app_entry->flags|=APPENTF_LOCKED;
+				if (flags&CAIF_SET) app_entry->ae_flags|=APPENTF_LOCKED;
 
 				// Clear
-				else app_entry->flags&=~APPENTF_LOCKED;
+				else app_entry->ae_flags&=~APPENTF_LOCKED;
 			}
 
 			// Change ghosted state
 			if (flags&CAIF_GHOST)
 			{
 				// Set?
-				if (flags&CAIF_SET) app_entry->flags|=APPENTF_GHOSTED;
+				if (flags&CAIF_SET) app_entry->ae_flags|=APPENTF_GHOSTED;
 
 				// Clear
-				else app_entry->flags&=~APPENTF_GHOSTED;
+				else app_entry->ae_flags&=~APPENTF_GHOSTED;
 			}
 
 			// Change busy state?
-			if (flags&CAIF_BUSY) app_entry->flags|=APPENTF_BUSY;
+			if (flags&CAIF_BUSY) app_entry->ae_flags|=APPENTF_BUSY;
 			else
-			if (flags&CAIF_UNBUSY) app_entry->flags&=~APPENTF_BUSY;
+			if (flags&CAIF_UNBUSY) app_entry->ae_flags&=~APPENTF_BUSY;
 
 			// Send notification
 			L_SendNotifyMsg(GN_APP_ICON_LIST,(ULONG)app_entry,notify_flags,FALSE,0,0,libbase);
@@ -1160,7 +1160,7 @@ long __asm __saveds L_SetAppIconMenuState(
 	AppEntry *app_entry=(AppEntry *)appicon;
 
 	// Go through menus
-	for (node=(struct Node *)app_entry->menu.mlh_Head,num=0;
+	for (node=(struct Node *)app_entry->ae_menu.mlh_Head,num=0;
 		node->ln_Succ && num<item;
 		node=node->ln_Succ,num++);
 

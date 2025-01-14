@@ -208,7 +208,7 @@ struct ArgArray *WBArgArray(struct WBArg *arglist,short count,short flags)
 			{
 				// Directory?
 				if (!arglist->wa_Name || !*arglist->wa_Name)
-					entry->ae_Flags|=AEF_DIR;
+					entry->aae_Flags|=AEF_DIR;
 
 				// Increment array index
 				++array->aa_Count;
@@ -373,7 +373,7 @@ struct ArgArray *BuildArgArrayA(char **args)
 			if (entry=AllocMemH(array->aa_Memory,sizeof(struct ArgArrayEntry)+strlen(args[num])))
 			{
 				// Copy path
-				strcpy(entry->ae_String,args[num]);
+				strcpy(entry->aae_String,args[num]);
 
 				// Increment array index
 				++array->aa_Count;
@@ -420,7 +420,7 @@ struct ArgArrayEntry *NewArgArrayEntry(struct ArgArray *array,char *string)
 	if (entry=AllocMemH(array->aa_Memory,sizeof(struct ArgArrayEntry)+strlen(string)))
 	{
 		// Copy path
-		strcpy(entry->ae_String,string);
+		strcpy(entry->aae_String,string);
 
 		// Add to list
 		AddTail((struct List *)&array->aa_List,(struct Node *)entry);
