@@ -208,7 +208,7 @@ struct ArgArray *WBArgArray(struct WBArg *arglist,short count,short flags)
 			{
 				// Directory?
 				if (!arglist->wa_Name || !*arglist->wa_Name)
-					entry->aae_Flags|=AEF_DIR;
+					entry->aae_Flags|=AAEF_DIR;
 
 				// Increment array index
 				++array->aa_Count;

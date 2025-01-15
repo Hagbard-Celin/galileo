@@ -1244,15 +1244,15 @@ void function_files_from_args(FunctionHandle *handle)
 	if (entry=new_external_entry(handle,arg->aae_String))
 	{
 	    // Directory?
-	    if (arg->aae_Flags&AEF_DIR)
+	    if (arg->aae_Flags&AAEF_DIR)
 		entry->een_type=1;
 
 	    // Link?
-	    if (arg->aae_Flags&AEF_LINK)
+	    if (arg->aae_Flags&AAEF_LINK)
 		entry->een_flags|=FUNCENTF_LINK;
 
 	    // Fake icon?
-	    if (arg->aae_Flags&AEF_FAKE_ICON)
+	    if (arg->aae_Flags&AAEF_FAKE_ICON)
 		entry->een_flags|=FUNCENTF_FAKE_ICON;
 
 	    // Add to external entry list

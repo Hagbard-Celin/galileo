@@ -470,9 +470,9 @@ BOOL backdrop_popup(
 						if (entry=NewArgArrayEntry(array,(devptr)?devptr:((filename)?(char *)FilePart(filename):object->name)))
 						{
 							// Directory?
-							if (flags&BPF_DIRECTORY) entry->aae_Flags|=AEF_DIR;
+							if (flags&BPF_DIRECTORY) entry->aae_Flags|=AAEF_DIR;
 							else
-							if (object && object->icon->do_Type==WBDRAWER) entry->aae_Flags|=AEF_DIR;
+							if (object && object->icon->do_Type==WBDRAWER) entry->aae_Flags|=AAEF_DIR;
 						}
 					}
 

@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -64,9 +64,9 @@ struct ArgArrayEntry
 
 #define AAF_ALLOW_DIRS	(1<<0)
 
-#define AEF_DIR		(1<<0)
-#define AEF_LINK	(1<<1)
-#define AEF_FAKE_ICON	(1<<2)
+#define AAEF_DIR	(1<<0)
+#define AAEF_LINK	(1<<1)
+#define AAEF_FAKE_ICON	(1<<2)
 
 struct ArgArray *BuildArgArray(char *,...);
 struct ArgArray *BuildArgArrayA(char **);

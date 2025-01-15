@@ -224,7 +224,7 @@ void desktop_drop(BackdropInfo *info,GalileoAppMessage *msg,USHORT qual)
 					if (aae=NewArgArrayEntry(array,FilePart(name)))
 					{
 						// Set directory flag
-						if (dir) aae->aae_Flags|=AEF_DIR;
+						if (dir) aae->aae_Flags|=AAEF_DIR;
 
 						// Set OK flag
 						ok=1;
