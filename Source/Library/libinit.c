@@ -87,8 +87,11 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 	GadToolsBase=0;
 	AslBase=0;
 	UtilityBase=0;
+	LayersBase=0;
 	LocaleBase=0;
 	IconBase=0;
+	CxBase=0;
+	WorkbenchBase=0;
 	topaz_font=0;
 	NewList(&image_list);
 	InitSemaphore(&image_lock);
@@ -429,6 +432,7 @@ void __asm __saveds __UserLibCleanup(register __a6 struct MyLibrary *libbase)
 	if (P96Base) CloseLibrary(P96Base);
 	if (DataTypesBase) CloseLibrary(DataTypesBase);
 	CloseLibrary(IconBase);
+	CloseLibrary(CxBase);
 	CloseLibrary(LayersBase);
 	CloseLibrary(UtilityBase);
 	CloseLibrary(AslBase);
