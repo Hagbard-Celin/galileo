@@ -47,59 +47,20 @@ Class *init_class(
 	long data_size)
 {
 	Class *cl;
-	BoopsiLibs *libs;
-
-	// Allocate library data
-	if (!(libs=AllocVec(sizeof(BoopsiLibs),MEMF_CLEAR)))
-		return 0;
-
-	// Fill out library pointers
-	libs->IntuitionBase=(struct Library *)IntuitionBase;
-	libs->GfxBase=(struct GfxBase *)GfxBase;
-	libs->UtilityBase=UtilityBase;
-	libs->LayersBase=LayersBase;
-	libs->CxBase=CxBase;
-#ifdef RESOURCE_TRACKING
-	libs->ResTrackBase=ResTrackBase;
-#endif
-	libs->data=data;
 
 	// Create class
 	if (cl=MakeClass(name,super,0,data_size,0))
 	{
 		// Initialise
 		cl->cl_Dispatcher.h_Entry=dispatcher;
-		cl->cl_Dispatcher.h_Data=libs;
+		cl->cl_Dispatcher.h_Data=data;
 
 		// Make it available
 		AddClass(cl);
 	}
-	else FreeVec(libs);
 
 	return cl;
 }
-
-
-// Free a class
-void class_free(Class *cl)
-{
-	APTR data;
-
-	// Valid class?
-	if (cl)
-	{
-		// Store data pointer
-		data=cl->cl_Dispatcher.h_Data;
-
-		// Try to free class
-		if (FreeClass(cl))
-		{
-			// Free data
-			FreeVec(data);
-		}
-	}
-}
-
 
 // Add a set of scroll bars to a window
 struct Gadget *__asm __saveds L_AddScrollBars(

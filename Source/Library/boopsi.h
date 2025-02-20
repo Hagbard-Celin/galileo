@@ -45,21 +45,8 @@ For more information on Directory Opus for Windows please see:
 #define CLASS_FRAME		0x1237
 #define CLASS_GAUGE		0x1238
 
-typedef struct
-{
-    struct Library	    *IntuitionBase;
-    struct GfxBase	    *GfxBase;
-    struct Library	    *UtilityBase;
-    struct Library	    *LayersBase;
-    struct Library	    *CxBase;
-#ifdef RESOURCE_TRACKING
-    struct Library	    *ResTrackBase;
-#endif
-    struct LibData	    *data;
-} BoopsiLibs;
 
 Class *init_class(struct LibData *,char *,char *,unsigned long (*)(),long);
-void class_free(Class *);
 
 typedef struct
 {
@@ -310,15 +297,15 @@ void palette_render(Class *,struct Gadget *,PaletteData *,struct gpRender *);
 #define GOTBUF_ALL	(GOTBUF_MAIN|GOTBUF_UNDO|GOTBUF_WORK)
 
 #ifdef BOOPSI_LIBS
-#define IntuitionBase	((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->IntuitionBase
-#define GfxBase		((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->GfxBase
-#define UtilityBase	((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->UtilityBase
-#define LayersBase	((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->LayersBase
-#define CxBase		((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->CxBase
+#define IntuitionBase	((struct LibData *)cl->cl_Dispatcher.h_Data)->int_base
+#define GfxBase		((struct LibData *)cl->cl_Dispatcher.h_Data)->gfx_base
+#define UtilityBase	((struct LibData *)cl->cl_Dispatcher.h_Data)->wb_data.utility_base
+#define LayersBase	((struct LibData *)cl->cl_Dispatcher.h_Data)->LayersBase
+#define CxBase		((struct LibData *)cl->cl_Dispatcher.h_Data)->CxBase
 #ifdef RESOURCE_TRACKING
-#define ResTrackBase	((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->ResTrackBase
+#define ResTrackBase	((struct LibData *)cl->cl_Dispatcher.h_Data)->restrack_base
 #endif
-#define DOSBase		((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->data->dos_base
+#define DOSBase		((struct LibData *)cl->cl_Dispatcher.h_Data)->dos_base
 #endif
 
 struct gpRenderExt

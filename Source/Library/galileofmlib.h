@@ -101,7 +101,7 @@ struct LibData
 
 	IPCData			*fake_wb;
 	struct MyLibrary	*galileofm_base;
-	struct Library		*gfx_base;
+	struct GfxBase		*gfx_base;
 
 	struct ListLock		file_list;
 	BPTR			last_file;
@@ -140,6 +140,8 @@ struct LibData
 
 	CxObj			*cx_select_up_down;
 
+	struct Library	        *LayersBase;
+	struct Library	        *CxBase;
 #ifdef RESOURCE_TRACKING
     struct Library          *restrack_base;
 #endif

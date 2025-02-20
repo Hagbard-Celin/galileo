@@ -163,7 +163,9 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 	data->new_icon_base=(struct Library *)NewIconBase;
 	data->int_base=(struct Library *)IntuitionBase;
 	data->galileofm_base=libbase;
-	data->gfx_base=(struct Library *)GfxBase;
+	data->gfx_base=GfxBase;
+	data->LayersBase = LayersBase;
+	data->CxBase = CxBase;
 
 #ifdef RESOURCE_TRACKING
 	data->wb_data.restrack_base=ResTrackBase;
@@ -416,16 +418,16 @@ void __asm __saveds __UserLibCleanup(register __a6 struct MyLibrary *libbase)
 		FreeVec(data);
 	}
 
-	class_free(listview_class);
-	class_free(propgadget_class);
-	class_free(button_class);
-	class_free(string_class);
-	class_free(check_class);
-	class_free(view_class);
-	class_free(frame_class);
-	class_free(palette_class);
-	class_free(gauge_class);
-	class_free(image_class);
+	FreeClass(listview_class);
+	FreeClass(propgadget_class);
+	FreeClass(button_class);
+	FreeClass(string_class);
+	FreeClass(check_class);
+	FreeClass(view_class);
+	FreeClass(frame_class);
+	FreeClass(palette_class);
+	FreeClass(gauge_class);
+	FreeClass(image_class);
 	if (topaz_font) CloseFont(topaz_font);
 	if (NewIconBase) CloseLibrary((struct Library *)NewIconBase);
 	if (RexxSysBase) CloseLibrary((struct Library *)RexxSysBase);

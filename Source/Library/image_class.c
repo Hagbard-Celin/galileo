@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -76,7 +76,7 @@ ULONG __asm __saveds image_dispatch(
 				// Initialise data
 				data->type=GetTagData(GIA_Type,0,tags);
 				data->fpen=GetTagData(GIA_FrontPen,-1,tags);
-				data->data=((BoopsiLibs *)cl->cl_Dispatcher.h_Data)->data;
+				data->data=(struct LibData *)cl->cl_Dispatcher.h_Data;
 				data->flags=0;
 				if (GetTagData(GIA_ThinBorders,0,tags))
 					data->flags|=BIF_THIN_BORDERS;
