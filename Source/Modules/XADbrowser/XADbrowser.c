@@ -1485,13 +1485,6 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 		// Did we have a destination lister to begin with?
 		if (data.desth)
 		{
-		    // Turn originating lister off
-		    if (!(data.hook.gc_IsSourceDestLock(data.listh2)))
-		    {
-			sprintf(buf, "lister set %lu off", data.listh2);
-	                data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
-		    }
-
 		    // Restore destination status
 		    if (!(data.hook.gc_IsSourceDestLock(data.desth)))
 		    {
