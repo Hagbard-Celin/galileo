@@ -94,3 +94,6 @@ Enter password
 MSG_NEEDS_ASYNC_ERR (//)
 Run asynchronously needs to be enabled for this command to work.
 ;
+MSG_XAD_OPEN_ERR (//)
+Unable to open xadmaster.library V13 or higher.
+;

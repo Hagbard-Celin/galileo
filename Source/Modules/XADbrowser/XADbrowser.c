@@ -1203,7 +1203,11 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
     if (!(data.password=AllocMemH(data.memhandle,512))) goto end_1;
 
     // Open xadmaster.library
-    if (!(xadMasterBase=(struct xadMasterBase *)OpenLibrary(XADNAME,13))) goto end_1;
+    if (!(xadMasterBase=(struct xadMasterBase *)OpenLibrary(XADNAME,13)))
+    {
+	ErrorReq(&data,GetString(locale,MSG_XAD_OPEN_ERR));
+	goto end_1;
+    }
 
     data.xadMasterBase = xadMasterBase;
 
@@ -1493,7 +1497,6 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 		    }
 		}
 
-
 	        data.listp->pn_lister = (APTR)data.listh;
 	        *data.listp->pn_path_buf = data.listp->pn_flags = 0;
 	        data.listp->pn_path = data.listp->pn_path_buf;
@@ -1657,8 +1660,22 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
     KPrintF("XAD fail1 END!! \n");
 #endif
     if (async)
-	data.hook.gc_FreePointerDirect(IPCDATA(ipc),GETPTR_HANDLE,NULL);
+    {
+	// Get deatination pathnode
+	if (data.destp=data.hook.gc_GetDest(IPCDATA(ipc), data.listpath))
+	{
+	    // Get lister pointer
+	    data.desth=(ULONG)data.destp->pn_lister;
 
+	    data.hook.gc_EndDest(IPCDATA(ipc), 0);
+
+	    // Have to do this, or destination lister will be locked busy
+	    sprintf(buf,"lister set %lu busy off wait",data.desth);
+	    data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+	}
+	data.hook.gc_UnlockSource(IPCDATA(ipc));
+	data.hook.gc_FreePointerDirect(IPCDATA(ipc),GETPTR_HANDLE,NULL);
+    }
     if (!async)
 		FreeMemHandle(data.memhandle);
     end_0:
