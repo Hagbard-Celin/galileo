@@ -885,7 +885,7 @@ void config_menus_close(config_menus_data *data)
 				ReplyMsg(msg);
 			DeleteMsgPort(data->app_port);
 		}
-        
+
 		// Free button banks
 		CloseButtonBank(data->bank);
 		CloseButtonBank(data->restore_bank);
