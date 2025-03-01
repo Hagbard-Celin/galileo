@@ -89,12 +89,6 @@ int __asm __saveds L_Module_Entry(
 	char buf[4];
 	struct Message *msg;
 
-	{
-	    char currentdir[512];
-
-	    GetCurrentDirName(currentdir,512);
-	}
-
 	// Allocate data
 	if (!(data = AllocVec( sizeof(icon_data), MEMF_CLEAR )))
 	    return 0;
