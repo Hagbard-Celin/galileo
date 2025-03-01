@@ -1892,7 +1892,7 @@ BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG fla
 			node=(Att_Node *)node->node.ln_Succ)
 		{
 			// Send notify message
-			SendNotifyMsg(GN_DISKCHANGE,0,node->data,FALSE,node->node.ln_Name,0);
+			SendNotifyMsg(GN_DISKCHANGE,0,node->att_data,FALSE,node->node.ln_Name,0);
 		}
 
 		// Free list

@@ -339,7 +339,7 @@ GALILEOFM_FUNC(function_show)
 				if (node->node.lve_Flags&(SHOWF_SELECTED|SHOWF_DELETE))
 				{
 					// Clear 'unselect' flag
-					((FunctionEntry *)node->data)->fe_flags&=~FUNCENTF_UNSELECT;
+					((FunctionEntry *)node->att_data)->fe_flags&=~FUNCENTF_UNSELECT;
 
 					// Delete?
 					if (node->node.lve_Flags&SHOWF_DELETE)
@@ -391,7 +391,7 @@ void function_iconinfo_update(FunctionHandle *handle,Att_List *list)
 				FunctionEntry *entry;
 
 				// Get entry pointer
-				entry=(FunctionEntry *)node->data;
+				entry=(FunctionEntry *)node->att_data;
 
 				// Reload file and icon
 				function_filechange_reloadfile(handle,handle->source_path,entry->fe_name,0);

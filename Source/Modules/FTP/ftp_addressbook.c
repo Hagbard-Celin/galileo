@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -184,7 +184,7 @@ struct window_params *wp;
 
 for	(node=(Att_Node *)dg->dg_wp_list->list.lh_Head;node->node.ln_Succ;node=(Att_Node *)node->node.ln_Succ)
 	{
-	wp=(struct window_params *)node->data;
+	wp=(struct window_params *)node->att_data;
 
 	if	(wp->wp_win==win)
 		return(wp);
@@ -228,7 +228,7 @@ if	(wp->wp_children)
 		{
 		struct Node *node;
 		for	(node=list->lh_Head;node->ln_Succ;node=node->ln_Succ)
-			myWindowToFront((struct window_params *)((Att_Node *)node)->data,activate);
+			myWindowToFront((struct window_params *)((Att_Node *)node)->att_data,activate);
 		}
 	}
 
@@ -367,7 +367,7 @@ drag_node = Att_FindNode( dg->dg_og->og_SiteList, dg->dg_drag_item );
 if	(drag_node)
 	{
 	struct site_entry *newe;
-	newe=(struct site_entry *)drag_node->data;
+	newe=(struct site_entry *)drag_node->att_data;
 
 	copy_site_entry(dg->dg_og,wp->wp_se_copy,newe);
 
@@ -470,7 +470,7 @@ int ok = 0;
 // Find entry in phonebook
 if	(node = Att_FindNode( dg->dg_og->og_SiteList, dg->dg_drag_item ))
 	{
-	entry = (struct site_entry *)node->data;
+	entry = (struct site_entry *)node->att_data;
 
 	if	(name = AllocVec( strlen(entry->se_name) + 1, MEMF_ANY ))
 		{
@@ -540,7 +540,7 @@ if	(pos = AllocVec( sizeof(Point), MEMF_CLEAR ))
 			{
 			char label[80];
 
-			entry = (struct site_entry *)node->data;
+			entry = (struct site_entry *)node->att_data;
 
 			/************* New Stuff here *****************/
 
@@ -595,7 +595,7 @@ struct connect_msg *cm;
 
 if	(node = Att_FindNode( dg->dg_og->og_SiteList, dg->dg_drag_item ))
 	{
-	e = (struct site_entry *)node->data;
+	e = (struct site_entry *)node->att_data;
 
 	// no need to get_blank_connectmsg() since we overwrite anyway
 	if	(cm=AllocVec(sizeof(struct connect_msg),MEMF_CLEAR))
@@ -1021,7 +1021,7 @@ struct window_params *wp;
 
 for	(node=(Att_Node *)dg->dg_wp_list->list.lh_Head;node->node.ln_Succ;node=(Att_Node *)node->node.ln_Succ)
 	{
-	wp=(struct window_params *)node->data;
+	wp=(struct window_params *)node->att_data;
 
 	if	(wp->wp_se_real==entry)
 		return(wp);
@@ -1053,7 +1053,7 @@ if	(list && !IsListEmpty(list))
 			{
 			struct site_entry *site;
 
-			site=(struct site_entry *)((Att_Node *)node)->data;
+			site=(struct site_entry *)((Att_Node *)node)->att_data;
 
 			if	(!stricmp(e->se_name,site->se_name) && !stricmp(e->se_host,site->se_host))
 				{
@@ -1117,7 +1117,7 @@ if	(dg->dg_og->og_main_ipc)
 		{
 		if	(node=Att_FindNode(dg->dg_og->og_SiteList, selection))
 			{
-			e=(struct site_entry *)node->data;
+			e=(struct site_entry *)node->att_data;
 		
 			/*
 			 *	Send connect msg to main
@@ -1370,7 +1370,7 @@ if	(wp->wp_children)
 	while	(list->lh_TailPred !=(struct Node *)list) // IsListEmpty ?
 		{
 		node=(Att_Node *)list->lh_TailPred;
-		close_conwin_by_type((struct window_params *)node->data,FALSE);
+		close_conwin_by_type((struct window_params *)node->att_data,FALSE);
 		}
 	}
 
@@ -1396,7 +1396,7 @@ list=&dg->dg_wp_list->list;
 while	(list->lh_TailPred !=(struct Node *)list) // IsListEmpty ?
 	{
 	node=(Att_Node *)list->lh_TailPred;
-	close_conwin_by_type((struct window_params *)node->data,FALSE);
+	close_conwin_by_type((struct window_params *)node->att_data,FALSE);
 	}
 
 }
@@ -1564,7 +1564,7 @@ if	(node=Att_FindNode(dg->dg_og->og_SiteList,number))
 
 	struct site_entry * e;
 	
-	e=(struct site_entry *)node->data;
+	e=(struct site_entry *)node->att_data;
 	SetGadgetValue(dg->dg_addrwp->wp_objlist,GAD_FTP_SITE_NAME,(ULONG)e->se_name);
 	SetGadgetValue(dg->dg_addrwp->wp_objlist,GAD_FTP_HOST_NAME,(ULONG)e->se_host);
 	SetGadgetValue(dg->dg_addrwp->wp_objlist,GAD_FTP_PORT,e->se_port);
@@ -2070,7 +2070,7 @@ if	(opts=build_sub_options(subopts))
 	
 			option_node=Att_FindNode(wp->wp_options_list,wp->wp_option);
 
-			wp->wp_sub_objlist=AddObjectList(wp->wp_win,wp->wp_SubOptionsHandle[option_node->data].objects);
+			wp->wp_sub_objlist=AddObjectList(wp->wp_win,wp->wp_SubOptionsHandle[option_node->att_data].objects);
 
 
 			if	(type==WT_DEFOPT)
@@ -2209,7 +2209,7 @@ if	(opts=build_sub_options(subopts))
 	
 			option_node=Att_FindNode(wp->wp_options_list,wp->wp_option);
 	
-			wp->wp_sub_objlist=AddObjectList(wp->wp_win,wp->wp_SubOptionsHandle[option_node->data].objects);
+			wp->wp_sub_objlist=AddObjectList(wp->wp_win,wp->wp_SubOptionsHandle[option_node->att_data].objects);
 	
 			display_options_gadgets(wp);
 		
@@ -2426,7 +2426,7 @@ if	(node=Att_FindNode(dg->dg_og->og_SiteList,dg->dg_selected))
 
 	parentwp=FINDWP(win);
 
-	if	(oldwp=entry_in_use(dg,(struct site_entry *)node->data))
+	if	(oldwp=entry_in_use(dg,(struct site_entry *)node->att_data))
 		{
 		myWindowToFront(oldwp,TRUE);
 		return;
@@ -2436,7 +2436,7 @@ if	(node=Att_FindNode(dg->dg_og->og_SiteList,dg->dg_selected))
 		{
 		struct site_entry *new;		
 
-		wp->wp_se_real=(struct site_entry *)node->data;
+		wp->wp_se_real=(struct site_entry *)node->att_data;
 
 		wp->wp_sitenode=node;
 
@@ -2626,7 +2626,7 @@ if	(found=check_duplicate_entry(dg,copy)) // Exists then update it
 	struct site_entry *olde;
 
 	// get entry from site list or..
-	olde=(struct site_entry *)found->data;
+	olde=(struct site_entry *)found->att_data;
 
 	// if is currently being edited or displayed get
 	// site_entry being edited from its wp
@@ -2733,7 +2733,7 @@ if	(flag)
 	hit=GetGadgetValue(wp->wp_objlist,GAD_LIST_SITES);
 
 	if	(node=Att_FindNode(dg->dg_og->og_SiteList, hit))
-		e=(struct site_entry*)node->data;
+		e=(struct site_entry*)node->att_data;
 
 	}
 
@@ -2913,7 +2913,7 @@ if	(flag)
 
 	if	(wp->wp_type==WT_NEW)
 		{
-		// Allocated copy used for node->data in list so do not free
+		// Allocated copy used for node->att_data in list so do not free
 		change_site_list_entry(dg,copy,NULL);
 		copy=NULL;
 		}
@@ -3089,7 +3089,7 @@ if	(node=Att_FindNode(dg->dg_og->og_SiteList,dg->dg_selected))
 	{
 	struct window_params *oldwp;
 
-	if	(oldwp=entry_in_use(dg,(struct site_entry *)node->data))
+	if	(oldwp=entry_in_use(dg,(struct site_entry *)node->att_data))
 		{
 		myWindowToFront(oldwp,TRUE);
 		return;
@@ -3099,7 +3099,7 @@ if	(node=Att_FindNode(dg->dg_og->og_SiteList,dg->dg_selected))
 	SetGadgetChoices(dg->dg_addrwp->wp_objlist, GAD_FTP_SITES, (APTR)~0);
 
 	// free the node data then remove the node
-	FreeVec((APTR)node->data);
+	FreeVec((APTR)node->att_data);
 	Att_RemNode(node);
 
 	// add list
@@ -3151,7 +3151,7 @@ if	(wp)
 			{
 			// nodes are progressively removed from list by sub funcs
 			node=(Att_Node *)list->lh_TailPred;
-			close_conwin_by_type((struct window_params *)node->data,FALSE);
+			close_conwin_by_type((struct window_params *)node->att_data,FALSE);
 			}
 		}
 
@@ -3332,7 +3332,7 @@ while	(list->lh_TailPred !=(struct Node *)list) // IsListEmpty ?
 	node=(Att_Node *)list->lh_TailPred;
 
 	// save data pointer
-	e=(struct site_entry *)node->data;
+	e=(struct site_entry *)node->att_data;
 
 	// remove from new list , data not freed
 	Att_RemNode(node);
@@ -4162,7 +4162,7 @@ while	(TRUE)
 
 
 			// Same as last selection?
-			if	(wp->wp_option==wp->wp_SubOptionsHandle[option_node->data].num)
+			if	(wp->wp_option==wp->wp_SubOptionsHandle[option_node->att_data].num)
 				break;
 
 
@@ -4179,8 +4179,8 @@ while	(TRUE)
 				SetGadgetValue(wp->wp_objlist,GAD_ENV_EDIT_AREA,0);
 				}
 			// Create option list
-			wp->wp_option=wp->wp_SubOptionsHandle[option_node->data].num;
-			wp->wp_sub_objlist=AddObjectList(wp->wp_win,wp->wp_SubOptionsHandle[option_node->data].objects);
+			wp->wp_option=wp->wp_SubOptionsHandle[option_node->att_data].num;
+			wp->wp_sub_objlist=AddObjectList(wp->wp_win,wp->wp_SubOptionsHandle[option_node->att_data].objects);
 
 			// Initialise gadgets
 			display_options_gadgets(wp);

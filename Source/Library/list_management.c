@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -104,7 +104,7 @@ Att_Node *__asm __saveds L_Att_NewNode(
 	}
 
 	// Store data and list pointer
-	node->data=data;
+	node->att_data=data;
 	node->list=list;
 
 	// Alphabetical sort?
@@ -295,8 +295,8 @@ void __asm __saveds L_Att_RemList(
 			// If flag is set, free node data
 			if (flags&REMLIST_FREEDATA)
 			{
-				if (flags&REMLIST_FREEMEMH) L_FreeMemH((APTR)node->data);
-				else FreeVec((APTR)node->data);
+				if (flags&REMLIST_FREEMEMH) L_FreeMemH((APTR)node->att_data);
+				else FreeVec((APTR)node->att_data);
 			}
 
 			// If not pooling, remove node
@@ -399,7 +399,7 @@ Att_Node *__asm __saveds L_Att_FindNodeData(
 
 	// Scan list
 	for (node=(Att_Node *)list->list.lh_Head;
-		node->data!=data && node->node.ln_Succ;node=(Att_Node *)node->node.ln_Succ);
+		node->att_data!=data && node->node.ln_Succ;node=(Att_Node *)node->node.ln_Succ);
 
 	// Return node
 	return (node->node.ln_Succ)?node:0;
@@ -422,7 +422,7 @@ __asm __saveds L_Att_NodeDataNumber(
 
 	// Scan list
 	for (a=0,node=(Att_Node *)list->list.lh_Head;
-		node->data!=data && node->node.ln_Succ;node=(Att_Node *)node->node.ln_Succ,a++);
+		node->att_data!=data && node->node.ln_Succ;node=(Att_Node *)node->node.ln_Succ,a++);
 
 	// Return node
 	return (node->node.ln_Succ)?a:-1;

@@ -632,7 +632,7 @@ typedef struct _Att_Node
 {
 	struct Node		node;		// Node structure
 	Att_List		*list;		// Pointer to list (inefficient!)
-	ULONG			data;		// User data
+	ULONG			att_data;	// User data
 } Att_Node;
 
 #define ADDNODE_SORT		1		// Sort names

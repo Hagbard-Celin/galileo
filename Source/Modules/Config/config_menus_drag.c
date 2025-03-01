@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -218,7 +218,7 @@ BOOL config_menus_import_bank(
 		else node=(Att_Node *)data->menu_list[MENU_ITEM]->list.lh_TailPred;
 
 		// Add after this button
-		add_pos=((menu_node *)node->data)->button;
+		add_pos=((menu_node *)node->att_data)->button;
 	}
 
 	// Import as sub-item
@@ -238,7 +238,7 @@ BOOL config_menus_import_bank(
 		}
 
 		// Add to this button
-		add_pos=((menu_node *)node->data)->button;
+		add_pos=((menu_node *)node->att_data)->button;
 	}
 
 	// Go through buttons in import bank
@@ -483,8 +483,8 @@ void config_menus_end_drag(config_menus_data *data,short drop,unsigned short qua
 				ok=config_drag_send_button(
 					&data->drag,
 					ipc,
-					((menu_node *)data->drag.drag_node->data)->button,
-					(type==MENU_SUB)?((menu_node *)data->drag.drag_node->data)->func:0);
+					((menu_node *)data->drag.drag_node->att_data)->button,
+					(type==MENU_SUB)?((menu_node *)data->drag.drag_node->att_data)->func:0);
 			}
 		}
 
@@ -593,8 +593,8 @@ void config_menus_move_item(
 	else
 	if (send_button=
 		config_drag_get_button(
-			((menu_node *)drag_node->data)->button,
-			(type==MENU_ITEM)?0:((menu_node *)drag_node->data)->func))
+			((menu_node *)drag_node->att_data)->button,
+			(type==MENU_ITEM)?0:((menu_node *)drag_node->att_data)->func))
 	{
 		Point pos;
 		Cfg_Button *button;
@@ -602,8 +602,8 @@ void config_menus_move_item(
 		BOOL del;
 
 		// Get button/function pointers
-		button=((menu_node *)drag_node->data)->button;
-		func=((menu_node *)drag_node->data)->func;
+		button=((menu_node *)drag_node->att_data)->button;
+		func=((menu_node *)drag_node->att_data)->func;
 
 		// Get fake position
 		pos.x=data->window->LeftEdge+x;
@@ -643,7 +643,7 @@ void config_menus_move_item(
 			if (Att_FindNodeNumber(data->menu_list[type],drag_node)>-1)
 			{
 				// Remove node from menu list
-				FreeVec((APTR)drag_node->data);
+				FreeVec((APTR)drag_node->att_data);
 				Att_RemNode(drag_node);
 			}
 		}

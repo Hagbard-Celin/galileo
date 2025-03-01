@@ -86,7 +86,7 @@ int __asm __saveds L_Module_Entry(
 
 			// Build filename
 			func_callback(EXTCMD_GET_SOURCE,IPCDATA(ipc),filename);
-			AddPart(filename,entry->name,256);
+			AddPart(filename,entry->fe_name,256);
 
 			// Fill out packet to end entry
 			packet.entry=entry;
@@ -462,7 +462,7 @@ long save_theme(struct Screen *screen,GalileoCallbackInfo *info,char *filename,B
 		for (node=(Att_Node *)list->list.lh_Head;node->node.ln_Succ;node=(Att_Node *)node->node.ln_Succ)
 		{
 			// No sound?
-			if (node->data&(1<<1))
+			if (node->att_data&(1<<1))
 			{
 				if (progress)
 					SetProgressWindowTags(progress,PW_FileInc,1,TAG_END);
@@ -961,8 +961,8 @@ short convert_theme(GalileoCallbackInfo *info,char *source,char *dest)
 		{
 			// Save filename for later
 			convert_theme_file(buf);
-			if (node->data=(ULONG)AllocVec(strlen(buf)+1,MEMF_CLEAR))
-				strcpy((char *)node->data,buf);	
+			if (node->att_data=(ULONG)AllocVec(strlen(buf)+1,MEMF_CLEAR))
+				strcpy((char *)node->att_data,buf);
 			node=0;
 		}
 	}
@@ -1009,7 +1009,7 @@ short convert_theme(GalileoCallbackInfo *info,char *source,char *dest)
 			// Sound found?
 			if (node)
 			{
-				char *name=(char *)node->data;
+				char *name=(char *)node->att_data;
 				if (name && *name)
 				{
 					lsprintf(buf,	"\tgalileo  set  sound \"'%s'\" \"'%s'\" 64\n",

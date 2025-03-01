@@ -373,7 +373,7 @@ ULONG __asm __saveds L_Module_Entry(
 									if (newnode=Att_NewNode(
 										data->item_sel_list,
 										node->node.ln_Name,
-										node->data,0))
+										node->att_data,0))
 									{
 										// Remove node from available list
 										Att_RemNode(node);
@@ -563,7 +563,7 @@ void _config_lister_init_format(config_lister_data *data)
 			Att_Node *new_node;
 
 			// Add to selected list
-			if (new_node=Att_NewNode(data->item_sel_list,node->node.ln_Name,node->data,0))
+			if (new_node=Att_NewNode(data->item_sel_list,node->node.ln_Name,node->att_data,0))
 			{
 				// See if this is the sort method
 				if (data->format.sort.sort==data->format.display_pos[a])
@@ -641,7 +641,7 @@ void listformat_get_values(config_lister_data *data,ListFormat *format)
 		// Valid node?
 		if (node->node.ln_Succ)
 		{
-			format->display_pos[num]=item_lookup[node->data];
+			format->display_pos[num]=item_lookup[node->att_data];
 			node=(Att_Node *)node->node.ln_Succ;
 		}
 		else format->display_pos[num]=-1;
@@ -649,7 +649,7 @@ void listformat_get_values(config_lister_data *data,ListFormat *format)
 
 	// Sort method
 	if (node=Att_FindNode(data->item_sel_list,GetGadgetValue(data->objlist,GAD_LISTER_FORMAT_SELITEMS)))
-		format->sort.sort=item_lookup[node->data];
+		format->sort.sort=item_lookup[node->att_data];
 
 	// Separation
 	format->sort.separation=GetGadgetValue(data->objlist,GAD_LISTER_FORMAT_SEPARATION);
@@ -729,7 +729,7 @@ void listerformat_end_drag(config_lister_data *data,BOOL ok)
 					if (node=Att_NewNode(
 						data->item_sel_list,
 						data->drag_node->node.ln_Name,
-						data->drag_node->data,0))
+						data->drag_node->att_data,0))
 					{
 						// Position in list
 						listerformat_position(data,node);
@@ -746,7 +746,7 @@ void listerformat_end_drag(config_lister_data *data,BOOL ok)
 					Att_NewNode(
 						data->item_list,
 						data->drag_node->node.ln_Name,
-						data->drag_node->data,
+						data->drag_node->att_data,
 						ADDNODE_PRI);
 
 					// Clear selected item

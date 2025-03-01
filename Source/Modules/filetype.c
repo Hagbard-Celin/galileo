@@ -241,7 +241,7 @@ Att_Node *finder_Att_NewNode(
 	}
 
 	// Store data and list pointer
-	node->data=data;
+	node->att_data=data;
 	node->list=list;
 
 	// Filetype sort? (of course!)
@@ -256,14 +256,14 @@ Att_Node *finder_Att_NewNode(
 		if	(namep = getname( name ))
 		{
 			if	(flags&ADDNODE_INSTALLED)
-				node->data|=ADDNODE_INSTALLED;
+				node->att_data|=ADDNODE_INSTALLED;
 
 			// Go through existing nodes
 			posnode=(Att_Node *)list->list.lh_Head;
 			while (posnode->node.ln_Succ)
 			{
-				posnodeinstalled=posnode->data&ADDNODE_INSTALLED?1:0;
-				posnodedata=posnode->data;
+				posnodeinstalled=posnode->att_data&ADDNODE_INSTALLED?1:0;
+				posnodedata=posnode->att_data;
 				posnamep = getname( posnode->node.ln_Name );
 
 				if	(!posnamep)
@@ -331,7 +331,7 @@ if	(!list)
 
 // Find best installed
 for	(test_node = (Att_Node *)list->list.lh_Head, count = 0;
-	!(test_node->data & ADDNODE_INSTALLED) && test_node->node.ln_Succ;
+	!(test_node->att_data & ADDNODE_INSTALLED) && test_node->node.ln_Succ;
 	test_node = (Att_Node *)test_node->node.ln_Succ, count++);
 
 // If none found, find best non-installed
@@ -453,7 +453,7 @@ if	(data->filetype_cache)
 
 	for	(node = (Att_Node *)data->filetype_cache->list.lh_Head; node->node.ln_Succ; node = (Att_Node *)node->node.ln_Succ)
 		{
-		ftl = (Cfg_FiletypeList *)node->data;
+		ftl = (Cfg_FiletypeList *)node->att_data;
 
 		if	(ftl->flags & FTLISTF_INSTALLED)
 			{
@@ -798,7 +798,7 @@ if	(data->edited_filetype)
 				if	(oldnode = Att_FindNodeData( data->filetype_cache, (ULONG)data->best_installed_ft->list ))
 					{
 					/* 24/7/97 (JP) : Next two lines swapped around */
-					FreeFiletypeList( (Cfg_FiletypeList *)oldnode->data );
+					FreeFiletypeList( (Cfg_FiletypeList *)oldnode->att_data );
 					Att_RemNode( oldnode );
 
  					/* 4/8/97 (JP) : Was ..._ft->list=NULL; */
@@ -1239,8 +1239,8 @@ if	(data->filetype_cache)
 	{
 	for	(node = (Att_Node *)data->filetype_cache->list.lh_Head; node->node.ln_Succ; node = (Att_Node *)node->node.ln_Succ)
 		{
-		FreeFiletypeList( (Cfg_FiletypeList *)node->data );
-		node->data = NULL;
+		FreeFiletypeList( (Cfg_FiletypeList *)node->att_data );
+		node->att_data = NULL;
 		}
 	}
 
@@ -1284,7 +1284,7 @@ if	(data = AllocVec( sizeof(finder_data), MEMF_CLEAR ))
 		while	(entry = (FunctionEntry *)func_callback( EXTCMD_GET_ENTRY, IPCDATA(ipc), 0 ))
 			{
 			strcpy( data->current_entry_path, data->path );
-			AddPart( data->current_entry_path, entry->name, 256 );
+			AddPart( data->current_entry_path, entry->fe_name, 256 );
 
 			// Filename
 			SetGadgetValue( data->list, GAD_FIND_TEXT1,
@@ -2129,7 +2129,7 @@ if	(data->file_list && !data->edited)
 			// Check for file already in list...
 			if	(node = (Att_Node *)FindNameI( (struct List *)data->file_list, data->filereq->fr_File ))
 				{
-				if	(stricmp( ((struct filetype_info *)node->data)->fti_path, data->filereq->fr_Drawer) == 0)
+				if	(stricmp( ((struct filetype_info *)node->att_data)->fti_path, data->filereq->fr_Drawer) == 0)
 					exists = TRUE;
 				}
 
@@ -2146,8 +2146,8 @@ if	(data->file_list && !data->edited)
 					SetGadgetChoices( data->list, GAD_CREATE_LISTVIEW, (APTR)~0 );
 
 					// Find relevant filetype info
-					creator_sniff_filetype( data, (struct filetype_info *)node->data );
-					creator_addnode( data, (struct filetype_info *)node->data );
+					creator_sniff_filetype( data, (struct filetype_info *)node->att_data );
+					creator_addnode( data, (struct filetype_info *)node->att_data );
 
 					// Reattach list
 					SetGadgetChoices( data->list, GAD_CREATE_LISTVIEW, data->file_list );
@@ -2193,7 +2193,7 @@ if	(data->file_list && !data->edited)
 
 		// Rebuild filetype from remaining list
 		for	(node = (Att_Node *)data->file_list->list.lh_Head; node->node.ln_Succ; node = (Att_Node *)node->node.ln_Succ)
-			creator_addnode( data, (struct filetype_info *)node->data );
+			creator_addnode( data, (struct filetype_info *)node->att_data );
 		}
 
 	// Reattach list
@@ -2443,7 +2443,7 @@ while	(amsg = (struct AppMessage *)GetMsg( data->app_port ))
 				// Check for file already in list...
 				if	(node = (Att_Node *)FindNameI( (struct List *)data->file_list, amsg->am_ArgList[a].wa_Name ))
 					{
-					if	(stricmp( ((struct filetype_info *)node->data)->fti_path, buffer) == 0)
+					if	(stricmp( ((struct filetype_info *)node->att_data)->fti_path, buffer) == 0)
 						exists = TRUE;
 					}
 
@@ -2455,8 +2455,8 @@ while	(amsg = (struct AppMessage *)GetMsg( data->app_port ))
 					if	(node = Att_NewNode( data->file_list, fti->fti_filename, (ULONG)fti, 0 ))
 						{
 						// Find relevant filetype info
-						creator_sniff_filetype( data, (struct filetype_info *)node->data );
-						creator_addnode( data, (struct filetype_info *)node->data );
+						creator_sniff_filetype( data, (struct filetype_info *)node->att_data );
+						creator_addnode( data, (struct filetype_info *)node->att_data );
 
 						ok = TRUE;
 						}
@@ -2725,8 +2725,8 @@ if	(data = AllocVec( sizeof(creator_data), MEMF_CLEAR ))
 		for	(node = (Att_Node *)data->file_list->list.lh_Head; node->node.ln_Succ; node = (Att_Node *)node->node.ln_Succ)
 			{
 			// Find relevant filetype info
-			creator_sniff_filetype( data, (struct filetype_info *)node->data );
-			creator_addnode( data, (struct filetype_info *)node->data );
+			creator_sniff_filetype( data, (struct filetype_info *)node->att_data );
+			creator_addnode( data, (struct filetype_info *)node->att_data );
 			}
 
 		creator_display_info( data );
@@ -2787,13 +2787,13 @@ if	(func_callback( EXTCMD_GET_SOURCE, IPCDATA(ipc), path ))
 		// Go through files
 		while	(entry = (FunctionEntry *)func_callback( EXTCMD_GET_ENTRY, IPCDATA(ipc), 0 ))
 			{
-			if	(file_exists( NULL, path, entry->name, EXISTF_FILE ))
+			if	(file_exists( NULL, path, entry->fe_name, EXISTF_FILE ))
 				{
 				if	(fti = AllocMemH( list->memory, sizeof(struct filetype_info) ))
 					{
-					if	(node = Att_NewNode( list, entry->name, (ULONG)fti, 0 ))
+					if	(node = Att_NewNode( list, entry->fe_name, (ULONG)fti, 0 ))
 						{
-						strcpy( fti->fti_filename, entry->name );
+						strcpy( fti->fti_filename, entry->fe_name );
 						strncpy( fti->fti_path, path, 256 );
 						ok = TRUE;
 						}

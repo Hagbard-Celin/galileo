@@ -183,7 +183,7 @@ void desktop_delete(IPCData *ipc,BackdropInfo *info,BackdropObject *only_one)
 			lock_listlock(&info->objects,1);
 
 			// Get object
-			if (object=find_backdrop_object(info,(BackdropObject *)node->data))
+			if (object=find_backdrop_object(info,(BackdropObject *)node->att_data))
 			{
 				// Group?
 				if (object->type==BDO_GROUP)

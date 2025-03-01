@@ -181,7 +181,7 @@ int __asm __saveds L_Module_Entry(
 
 			// Build path
 			strcpy(buf,data->source);
-			AddPart(buf,entry->name,256);
+			AddPart(buf,entry->fe_name,256);
 
 			// Add entry to list
 			join_add_file(data,buf,1);

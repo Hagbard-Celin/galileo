@@ -228,7 +228,7 @@ int __asm __saveds L_Module_Entry(
 								// Valid selection?
 								if (data->path_sel)
 								{
-									position_rec *pos=(position_rec *)data->path_sel->data;
+									position_rec *pos=(position_rec *)data->path_sel->att_data;
 
 									// Open new lister?
 									if (msg_copy.Code)
@@ -571,14 +571,14 @@ void config_paths_change(config_path_data *data)
 	if (pos)
 	{
 		// Different entry?
-		if (pos!=(position_rec *)data->path_sel->data)
+		if (pos!=(position_rec *)data->path_sel->att_data)
 		{
 			// Remove current entry from list
-			Remove((struct Node *)data->path_sel->data);
+			Remove((struct Node *)data->path_sel->att_data);
 
 			// Free current data
-			FreeMemH((void *)data->path_sel->data);
-			data->path_sel->data=(ULONG)pos;
+			FreeMemH((void *)data->path_sel->att_data);
+			data->path_sel->att_data=(ULONG)pos;
 		}
 
 		// If path exists, clear "new" flag
@@ -586,7 +586,7 @@ void config_paths_change(config_path_data *data)
 	}
 
 	// It is now
-	else pos=(position_rec *)data->path_sel->data;
+	else pos=(position_rec *)data->path_sel->att_data;
 
 	// Set its user flag
 	pos->flags|=POSITIONF_USER;
@@ -621,7 +621,7 @@ void config_paths_select(config_path_data *data,Att_Node *node,BOOL new)
 	if (data->path_sel)
 	{
 		// Is current path empty?
-		if (!((position_rec *)data->path_sel->data)->name[0])
+		if (!((position_rec *)data->path_sel->att_data)->name[0])
 		{
 			// Remove it
 			config_paths_remove(data,FALSE);
@@ -638,7 +638,7 @@ void config_paths_select(config_path_data *data,Att_Node *node,BOOL new)
 	// Valid node?
 	if (num>-1)
 	{
-		position_rec *pos=(position_rec *)node->data;
+		position_rec *pos=(position_rec *)node->att_data;
 		short mode;
 
 		// Get key string
@@ -693,7 +693,7 @@ void config_paths_get_key(config_path_data *data)
 		IX ix;
 
 		// Current position
-		pos=(position_rec *)data->path_sel->data;
+		pos=(position_rec *)data->path_sel->att_data;
 
 		// Get key string
 		key=(char *)GetGadgetValue(data->objlist,GAD_PATHFORMAT_KEY);
@@ -729,7 +729,7 @@ void config_paths_remove(config_path_data *data,BOOL disable)
 	// Valid selection?
 	if (data->path_sel)
 	{
-		position_rec *pos=(position_rec *)data->path_sel->data;
+		position_rec *pos=(position_rec *)data->path_sel->att_data;
 
 		// Remove list from gadget
 		SetGadgetChoices(data->objlist,GAD_PATHFORMAT_PATHS,(APTR)~0);
@@ -768,7 +768,7 @@ void config_paths_edit(config_path_data *data)
 	// Valid selection?
 	if (data->path_sel)
 	{
-		position_rec *pos=(position_rec *)data->path_sel->data;
+		position_rec *pos=(position_rec *)data->path_sel->att_data;
 		struct Library *ModuleBase;
 		ListFormat format;
 		short ret=0;

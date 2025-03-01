@@ -446,7 +446,7 @@ else
 		struct endentry_packet packet;
 
 		// Add name to list
-		Att_NewNode(files,entry->name,0,0);
+		Att_NewNode(files,entry->fe_name,0,0);
 
 		// Fill out packet to end entry
 		packet.entry=entry;

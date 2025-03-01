@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -194,7 +194,7 @@ void __saveds FileclassEditor(void)
 									if (selection<0) break;
 
 									// Get fileclass node
-									fcnode=(FileclassNode *)data->match_edit->data;
+									fcnode=(FileclassNode *)data->match_edit->att_data;
 
 									// Get match type
 									fcnode->match_type=data->lookup[selection];
@@ -548,7 +548,7 @@ void _fileclassed_build_recognition(fileclass_ed_data *data)
 		node=(Att_Node *)node->node.ln_Succ)
 	{
 		// Get node data
-		FileclassNode *fcnode=(FileclassNode *)node->data;
+		FileclassNode *fcnode=(FileclassNode *)node->att_data;
 
 		// Add one for type
 		++size;
@@ -576,7 +576,7 @@ void _fileclassed_build_recognition(fileclass_ed_data *data)
 		node=(Att_Node *)node->node.ln_Succ)
 	{
 		// Get node data
-		FileclassNode *fcnode=(FileclassNode *)node->data;
+		FileclassNode *fcnode=(FileclassNode *)node->att_data;
 
 		// Check valid type
 		if (fcnode->match_type<FTOP_LAST)
@@ -661,20 +661,20 @@ void _fileclassed_build_display(
 	// Find entry in string table
 	for (entry=0;data->lookup[entry];entry++)
 	{
-		if (data->lookup[entry]==((FileclassNode *)node->data)->match_type)
+		if (data->lookup[entry]==((FileclassNode *)node->att_data)->match_type)
 			break;
 	}
 
 	// Build new display string
 	strcpy(buf,GetString(data->new_win.locale,data->strings[entry<<1]));
-	if (((FileclassNode *)node->data)->match_type!=FTOP_AND &&
-		((FileclassNode *)node->data)->match_type!=FTOP_OR &&
-		((FileclassNode *)node->data)->match_type!=FTOP_DIRECTORY &&
-		((FileclassNode *)node->data)->match_type!=FTOP_MODULE &&
-		((FileclassNode *)node->data)->match_data[0])
+	if (((FileclassNode *)node->att_data)->match_type!=FTOP_AND &&
+		((FileclassNode *)node->att_data)->match_type!=FTOP_OR &&
+		((FileclassNode *)node->att_data)->match_type!=FTOP_DIRECTORY &&
+		((FileclassNode *)node->att_data)->match_type!=FTOP_MODULE &&
+		((FileclassNode *)node->att_data)->match_data[0])
 	{
 		strcat(buf,"\a\xf");
-		strcat(buf,((FileclassNode *)node->data)->match_data);
+		strcat(buf,((FileclassNode *)node->att_data)->match_data);
 	}
 
 	// Set new name
@@ -691,7 +691,7 @@ void _fileclassed_start_edit(
 	short type;
 
 	// Get fileclass node
-	fcnode=(FileclassNode *)node->data;
+	fcnode=(FileclassNode *)node->att_data;
 
 	// Fill out edit fields
 	for (type=0;data->lookup[type];type++)
@@ -735,7 +735,7 @@ void _fileclassed_end_edit(fileclass_ed_data *data,short disable)
 		FileclassNode *fcnode;
 
 		// Get fileclass node
-		fcnode=(FileclassNode *)data->match_edit->data;
+		fcnode=(FileclassNode *)data->match_edit->att_data;
 
 		// Remove list from listview
 		SetGadgetChoices(data->objlist,GAD_CLASSED_DEFINITION,(APTR)~0);

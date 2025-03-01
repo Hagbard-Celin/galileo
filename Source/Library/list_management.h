@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -42,7 +42,7 @@ typedef struct _Att_List {
 typedef struct _Att_Node {
 	struct Node node;
 	Att_List *list;
-	ULONG data;
+	ULONG att_data;
 } Att_Node;
 
 #define ADDNODE_SORT		1		// Sort names

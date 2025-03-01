@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -497,7 +497,7 @@ unsigned long __asm __saveds L_Config_Environment(
 								data->option_node=Att_FindNode(data->options,msg_copy.Code);
 
 								// Same as last selection?
-								if (data->option==_environment_options[data->option_node->data].num)
+								if (data->option==_environment_options[data->option_node->att_data].num)
 									break;
 
 								// See if we have an option already
@@ -516,8 +516,8 @@ unsigned long __asm __saveds L_Config_Environment(
 								}
 
 								// Create option list
-								data->option=_environment_options[data->option_node->data].num;
-								data->option_list=AddObjectList(data->window,_environment_options[data->option_node->data].objects);
+								data->option=_environment_options[data->option_node->att_data].num;
+								data->option_list=AddObjectList(data->window,_environment_options[data->option_node->att_data].objects);
 
 #ifndef FUCKOFF
 								// Initialise gadgets
@@ -1223,7 +1223,7 @@ unsigned long __asm __saveds L_Config_Environment(
 							{
 								// Add to help string
 								strcat(buf," - ");
-								strcat(buf,GetString(&temp,_environment_options[data->option_node->data].name));
+								strcat(buf,GetString(&temp,_environment_options[data->option_node->att_data].name));
 							}
 
 							// Set busy pointer
@@ -1740,7 +1740,7 @@ BOOL _config_env_open(config_env_data *data,struct Screen *screen)
 			Att_FindNodeNumber(data->options,data->option_node));
 
 		// Create option list
-		data->option_list=AddObjectList(data->window,_environment_options[data->option_node->data].objects);
+		data->option_list=AddObjectList(data->window,_environment_options[data->option_node->att_data].objects);
 
 #ifdef FUCKOFF
 		// Initialise gadgets
@@ -2119,7 +2119,7 @@ void _config_env_set(config_env_data *data,short option)
 
 				for (node=(Att_Node *)data->icon_settings->list.lh_Head;node->node.ln_Succ;node=(Att_Node *)node->node.ln_Succ)
 				{
-					short a=node->data;
+					short a=node->att_data;
 					if ((a==0 && !(data->config->desktop_flags&DESKTOPF_NO_CACHE)) ||
 						(a==1 && !(data->config->desktop_flags&DESKTOPF_NO_REMAP)) ||
 						(a==2 && !(data->config->desktop_flags&DESKTOPF_NO_BORDERS)) ||
@@ -2598,7 +2598,7 @@ void _config_env_store(config_env_data *data,short option)
 
 				for (node=(Att_Node *)data->icon_settings->list.lh_Head;node->node.ln_Succ;node=(Att_Node *)node->node.ln_Succ)
 				{
-					short a=node->data;
+					short a=node->att_data;
 					if (a==0 && !(node->node.lve_Flags&LVEF_SELECTED))
 						data->config->desktop_flags|=DESKTOPF_NO_CACHE;
 					else
@@ -3194,7 +3194,7 @@ void env_init_sounds(config_env_data *data)
 		for (node=(Att_Node *)data->script_list->list.lh_Head;node->node.ln_Succ;node=(Att_Node *)node->node.ln_Succ)
 		{
 			Cfg_SoundEntry *copy;
-			if (node->data&SCRIPTF_NO_SOUND) continue;
+			if (node->att_data&SCRIPTF_NO_SOUND) continue;
 			if (copy=AllocVec(sizeof(Cfg_SoundEntry),MEMF_CLEAR))
 			{
 				strcpy(copy->gse_Name,node->node.ln_Name);

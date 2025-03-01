@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -930,7 +930,7 @@ void config_menus_build_list(config_menus_data *data,short type)
 		SetGadgetValue(data->objlist,GAD_MENUS_MENU_NAME+type-1,(ULONG)parent_sel->node.ln_Name);
 
 		// Get parent button
-		button=((menu_node *)parent_sel->data)->button;
+		button=((menu_node *)parent_sel->att_data)->button;
 
 		// Doing sub-items?
 		if (type==MENU_SUB)
@@ -981,7 +981,7 @@ void config_menus_build_list(config_menus_data *data,short type)
 				first=0;
 
 				// First button?
-				if (button==((menu_node *)parent_sel->data)->button)
+				if (button==((menu_node *)parent_sel->att_data)->button)
 				{
 					// Skip over parent
 					continue;
@@ -1174,7 +1174,7 @@ void config_menus_add_menu(config_menus_data *data,BOOL copy,unsigned short qual
 		Insert(
 			&data->bank->buttons,
 			&button->node,
-			((menu_node *)current_sel->data)->button->node.ln_Pred);
+			((menu_node *)current_sel->att_data)->button->node.ln_Pred);
 
 		// Add after this node
 		add_after=&button->node;
@@ -1193,7 +1193,7 @@ void config_menus_add_menu(config_menus_data *data,BOOL copy,unsigned short qual
 		short count;
 
 		// Go through buttons to copy
-		for (copy_but=((menu_node *)copy_sel->data)->button,count=0;
+		for (copy_but=((menu_node *)copy_sel->att_data)->button,count=0;
 			copy_but->node.ln_Succ;
 			copy_but=(Cfg_Button *)copy_but->node.ln_Succ,count++)
 		{
@@ -1321,7 +1321,7 @@ void config_menus_add_item(
 		else
 		if (copy_sel)
 		{
-			button=CopyButton(((menu_node *)copy_sel->data)->button,data->bank->memory,0);
+			button=CopyButton(((menu_node *)copy_sel->att_data)->button,data->bank->memory,0);
 		}
 
 		// Create a new button
@@ -1370,10 +1370,10 @@ void config_menus_add_item(
 			prev=(Att_Node *)node->node.ln_Pred;
 
 			// Get previous button
-			if (prev->node.ln_Pred) prev_but=((menu_node *)prev->data)->button;
+			if (prev->node.ln_Pred) prev_but=((menu_node *)prev->att_data)->button;
 
 			// Otherwise, get menu parent
-			else prev_but=((menu_node *)parent_sel->data)->button;
+			else prev_but=((menu_node *)parent_sel->att_data)->button;
 
 			// Add button to bank
 			Insert(&data->bank->buttons,&button->node,(struct Node *)prev_but);
@@ -1389,7 +1389,7 @@ void config_menus_add_item(
 		char *name;
 
 		// Get button pointer
-		button=((menu_node *)parent_sel->data)->button;
+		button=((menu_node *)parent_sel->att_data)->button;
 
 		// Got function?
 		if (add_item) func=(Cfg_ButtonFunction *)add_item;
@@ -1408,7 +1408,7 @@ void config_menus_add_item(
 			if (copy_sel)
 			{
 				// Copy into new function
-				if (!(CopyButtonFunction(((menu_node *)copy_sel->data)->func,data->bank->memory,func)))
+				if (!(CopyButtonFunction(((menu_node *)copy_sel->att_data)->func,data->bank->memory,func)))
 				{
 					// Failed
 					FreeButtonFunction(func);
@@ -1451,7 +1451,7 @@ void config_menus_add_item(
 				Insert(
 					(struct List *)&button->function_list,
 					&func->node,
-					((menu_node *)current_sel->data)->func->node.ln_Pred);
+					((menu_node *)current_sel->att_data)->func->node.ln_Pred);
 			}
 
 			// Add function to button
@@ -1498,7 +1498,7 @@ void config_menus_del_menu(config_menus_data *data)
 			GetGadgetValue(data->objlist,GAD_MENUS_MENU)))) return;
 
 	// Get node pointer
-	node=(menu_node *)sel->data;
+	node=(menu_node *)sel->att_data;
 
 	// Delete all buttons until next menu title
 	for (button=node->button;
@@ -1556,7 +1556,7 @@ void config_menus_del_item(config_menus_data *data,short type)
 			GetGadgetValue(data->objlist,GAD_MENUS_MENU+type)))) return;
 
 	// Get node pointer
-	node=(menu_node *)sel->data;
+	node=(menu_node *)sel->att_data;
 
 	// Detach menu list
 	SetGadgetChoices(data->objlist,GAD_MENUS_MENU+type,(APTR)~0);

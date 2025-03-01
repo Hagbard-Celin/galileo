@@ -321,7 +321,7 @@ void _config_env_screenmode_fix_gadgets(config_env_data *data)
 void _config_env_screenmode_set_mode(config_env_data *data,Att_Node *node)
 {
 	// Get mode ID
-	data->config->screen_mode=node->data;
+	data->config->screen_mode=node->att_data;
 
 	// If this is a public screen use, get public screen name
 	if (data->config->screen_mode==MODE_PUBLICSCREEN)

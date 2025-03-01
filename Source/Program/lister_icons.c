@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -248,7 +248,7 @@ void lister_get_icons(FunctionHandle *handle,Lister *lister,char *add_name,short
 			if (!icon_node->node.ln_Succ) entry=(DirEntry *)icon_node;
 			else
 			{
-				entry=(DirEntry *)icon_node->data;
+				entry=(DirEntry *)icon_node->att_data;
 			}
 		}
 		else entry=(DirEntry *)entry->de_Node.dn_Succ;
@@ -277,7 +277,7 @@ void lister_get_icons(FunctionHandle *handle,Lister *lister,char *add_name,short
 				if (!(IsListEmpty((struct List *)icon_list)))
 				{
 					icon_node=(Att_Node *)icon_list->list.lh_Head;
-					entry=(DirEntry *)icon_node->data;
+					entry=(DirEntry *)icon_node->att_data;
 				}
 			}
 		}

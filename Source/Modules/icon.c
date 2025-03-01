@@ -2996,7 +2996,7 @@ short icon_info( icon_data *data, char *name, struct Node *next )
 										if	(!(newnode = tooltype_newnode(
 											newlist,
 											oldnode->node.ln_Name,
-											oldnode->data,
+											oldnode->att_data,
 											sort_flags )))
 											ok = FALSE;
 										}
@@ -3748,11 +3748,11 @@ void save_protection(icon_data *data, char *save_name)
 			// Is this bit set?
 			if	(node->node.lve_Flags & LVEF_SELECTED)
 			{
-				if	(node->data<4)
-					prot |= protect_lookup[node->data];
+				if	(node->att_data<4)
+					prot |= protect_lookup[node->att_data];
 			}
-			else if	(node->data>3)
-				prot |= protect_lookup[node->data];
+			else if	(node->att_data>3)
+				prot |= protect_lookup[node->att_data];
 		}
 
 		// Set protection
@@ -4065,7 +4065,7 @@ Att_Node *tooltype_newnode(
 	}
 
 	// Store data and list pointer
-	node->data=data;
+	node->att_data=data;
 	node->list=list;
 
 	// Alphabetical sort?

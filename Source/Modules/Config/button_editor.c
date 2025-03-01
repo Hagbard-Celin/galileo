@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -1007,16 +1007,16 @@ Cfg_ButtonFunction *buttoned_find_function(ButtonEdData *data,short which)
 	if (node=Att_FindNode(data->func_list,which))
 	{
 		// Normal function?
-		if (node->data==FTYPE_LEFT_BUTTON ||
-			node->data==FTYPE_MID_BUTTON ||
-			node->data==FTYPE_RIGHT_BUTTON)
+		if (node->att_data==FTYPE_LEFT_BUTTON ||
+			node->att_data==FTYPE_MID_BUTTON ||
+			node->att_data==FTYPE_RIGHT_BUTTON)
 		{
 			return (Cfg_ButtonFunction *)
-				FindFunctionType((struct List *)&data->button->function_list,node->data);
+				FindFunctionType((struct List *)&data->button->function_list,node->att_data);
 		}
 
 		// Function pointer itself
-		return (Cfg_ButtonFunction *)node->data;
+		return (Cfg_ButtonFunction *)node->att_data;
 	}
 
 	return 0;
@@ -1414,17 +1414,17 @@ void buttoned_fix_functionlist(ButtonEdData *data)
 		Cfg_ButtonFunction *func;
 
 		// Custom function?
-		if (node->data>10)
+		if (node->att_data>10)
 		{
 			// Get function pointer from node
-			func=(Cfg_ButtonFunction *)node->data;
+			func=(Cfg_ButtonFunction *)node->att_data;
 		}
 
 		// Normal function
 		else
 		{
 			func=(Cfg_ButtonFunction *)
-				FindFunctionType((struct List *)&data->button->function_list,node->data);
+				FindFunctionType((struct List *)&data->button->function_list,node->att_data);
 		}
 
 		// Non-empty function?

@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -56,7 +56,7 @@ void config_menus_new_name(config_menus_data *data,short type)
 	if (!sel) return;
 
 	// Get function pointer
-	func=((menu_node *)sel->data)->func;
+	func=((menu_node *)sel->att_data)->func;
 
 	// Get new name pointer
 	name=(char *)GetGadgetValue(data->objlist,GAD_MENUS_MENU_NAME+type);
@@ -71,20 +71,20 @@ void config_menus_new_name(config_menus_data *data,short type)
 	Att_ChangeNodeName(sel,name);
 
 	// Remember node flags
-	flags=((menu_node *)sel->data)->flags;
+	flags=((menu_node *)sel->att_data)->flags;
 
 	// Separator?
 	if (strcmp(name,"---")==0)
 	{
 		// Set flag
-		((menu_node *)sel->data)->flags|=MNF_SEP;
+		((menu_node *)sel->att_data)->flags|=MNF_SEP;
 	}
 
 	// Clear flag
-	else ((menu_node *)sel->data)->flags&=~MNF_SEP;
+	else ((menu_node *)sel->att_data)->flags&=~MNF_SEP;
 
 	// Flags changed?
-	if (flags!=((menu_node *)sel->data)->flags)
+	if (flags!=((menu_node *)sel->att_data)->flags)
 	{
 		// Check disable for sub-items
 		if (type==MENU_ITEM)
@@ -142,7 +142,7 @@ void config_menus_edit_item(config_menus_data *data,short type)
 			GetGadgetValue(data->objlist,GAD_MENUS_MENU+type)))) return;
 
 	// Get node pointer
-	edit=(menu_node *)node->data;
+	edit=(menu_node *)node->att_data;
 
 	// Can't edit separators
 	if (edit->flags&MNF_SEP)
@@ -502,7 +502,7 @@ void config_menus_swap(
 			NewList(&temp[a]);
 
 			// Go through buttons that come under this menu
-			for (button=((menu_node *)node->data)->button;
+			for (button=((menu_node *)node->att_data)->button;
 				button->node.ln_Succ;
 				button=next)
 			{
@@ -510,7 +510,7 @@ void config_menus_swap(
 				next=(Cfg_Button *)button->node.ln_Succ;
 
 				// Skip title
-				if (button==((menu_node *)node->data)->button) continue;
+				if (button==((menu_node *)node->att_data)->button) continue;
 
 				// Break out if we hit another title
 				if (button->button.flags&BUTNF_TITLE) break;
@@ -531,15 +531,15 @@ void config_menus_swap(
 			// Swap the two buttons
 			SwapListNodes(
 				&data->bank->buttons,
-				(struct Node *)((menu_node *)node2->data)->button,
-				(struct Node *)((menu_node *)node1->data)->button);
+				(struct Node *)((menu_node *)node2->att_data)->button,
+				(struct Node *)((menu_node *)node1->att_data)->button);
 		}
 
 		// Add to end of list
 		else
 		{
 			// Remove from list
-			Remove((struct Node *)((menu_node *)node1->data)->button);
+			Remove((struct Node *)((menu_node *)node1->att_data)->button);
 
 			// If a menu, add to end of list
 			if (type==MENU_MENU)
@@ -547,7 +547,7 @@ void config_menus_swap(
 				// Add to end
 				AddTail(
 					&data->bank->buttons,
-					(struct Node *)((menu_node *)node1->data)->button);
+					(struct Node *)((menu_node *)node1->att_data)->button);
 			}
 
 			// Otherwise
@@ -557,8 +557,8 @@ void config_menus_swap(
 				// Insert after last node
 				Insert(
 					&data->bank->buttons,
-					(struct Node *)((menu_node *)node1->data)->button,
-					(struct Node *)((menu_node *)last_node->data)->button);
+					(struct Node *)((menu_node *)node1->att_data)->button,
+					(struct Node *)((menu_node *)last_node->att_data)->button);
 			}
 		}
 	}
@@ -571,21 +571,21 @@ void config_menus_swap(
 		{
 			// Swap the two functions
 			SwapListNodes(
-				(struct List *)&((menu_node *)node2->data)->button->function_list,
-				(struct Node *)((menu_node *)node2->data)->func,
-				(struct Node *)((menu_node *)node1->data)->func);
+				(struct List *)&((menu_node *)node2->att_data)->button->function_list,
+				(struct Node *)((menu_node *)node2->att_data)->func,
+				(struct Node *)((menu_node *)node1->att_data)->func);
 		}
 
 		// Add to end of list
 		else
 		{
 			// Remove from list
-			Remove((struct Node *)((menu_node *)node1->data)->func);
+			Remove((struct Node *)((menu_node *)node1->att_data)->func);
 
 			// Add to end of function list
 			AddTail(
-				(struct List *)&((menu_node *)node1->data)->button->function_list,
-				(struct Node *)((menu_node *)node1->data)->func);
+				(struct List *)&((menu_node *)node1->att_data)->button->function_list,
+				(struct Node *)((menu_node *)node1->att_data)->func);
 		}
 	}
 
@@ -602,7 +602,7 @@ void config_menus_swap(
 			Cfg_Button *button,*next;
 
 			// Get parent button
-			last=((menu_node *)node->data)->button;
+			last=((menu_node *)node->att_data)->button;
 
 			// Go through lists
 			for (button=(Cfg_Button *)temp[a].lh_Head;

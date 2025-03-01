@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -460,10 +460,10 @@ void FunctionEditor(void)
 								node=Att_FindNode(data->flag_list,msg.Code);
 
 								// Set flag
-								data->function->function.flags^=node->data;
+								data->function->function.flags^=node->att_data;
 
 								// Check change
-								funced_check_flag(&data->function->function.flags,node->data);
+								funced_check_flag(&data->function->function.flags,node->att_data);
 
 								// Update flag list
 								funced_update_flaglist(data);
@@ -528,7 +528,7 @@ void FunctionEditor(void)
 								if (!data->edit_node) break;
 
 								// Store type
-								((FunctionEntry *)data->edit_node->data)->type=msg.Code;
+								((FunctionEntry *)data->edit_node->att_data)->type=msg.Code;
 
 								// Disable popup button if no functions
 								DisableObject(
@@ -550,7 +550,7 @@ void FunctionEditor(void)
 									if (!(funced_command_req(
 										data,
 										buffer,
-										((FunctionEntry *)data->edit_node->data)->type)))
+										((FunctionEntry *)data->edit_node->att_data)->type)))
 										break;
 
 									// Insert string in edit line
@@ -1017,7 +1017,7 @@ void funced_update_flaglist(FuncEdData *data)
 		node=(Att_Node *)node->node.ln_Succ)
 	{
 		// Is flag set?
-		if (data->function->function.flags&node->data) node->node.lve_Flags|=LVEF_SELECTED;
+		if (data->function->function.flags&node->att_data) node->node.lve_Flags|=LVEF_SELECTED;
 		else node->node.lve_Flags&=~LVEF_SELECTED;
 	}
 
@@ -1087,7 +1087,7 @@ void funced_compile(FuncEdData *data)
 		node=(Att_Node *)node->node.ln_Succ)
 	{
 		// Get function entry
-		entry=(FunctionEntry *)node->data;
+		entry=(FunctionEntry *)node->att_data;
 
 		// Create a new instruction
 		if (ins=NewInstruction(0,entry->type,entry->buffer))
@@ -1116,7 +1116,7 @@ void funced_build_display(FuncEdData *data)
 		node=(Att_Node *)node->node.ln_Succ)
 	{
 		// Build display string for this node
-		funced_build_entrydisplay(data,0,(FunctionEntry *)node->data);
+		funced_build_entrydisplay(data,0,(FunctionEntry *)node->att_data);
 	}
 
 	// Attach list to gadget
@@ -1161,20 +1161,20 @@ void funced_start_edit(FuncEdData *data)
 	SetGadgetValue(
 		data->objlist,
 		GAD_FUNCED_LISTER,
-		Att_NodeDataNumber(data->func_display_list,data->edit_node->data));
+		Att_NodeDataNumber(data->func_display_list,data->edit_node->att_data));
 
 	// Copy string
 	SetGadgetValue(
 		data->objlist,
 		GAD_FUNCED_EDIT,
-		(ULONG)((FunctionEntry *)data->edit_node->data)->buffer);
+		(ULONG)((FunctionEntry *)data->edit_node->att_data)->buffer);
 	DisableObject(data->objlist,GAD_FUNCED_EDIT,FALSE);
 
 	// Set function type
 	SetGadgetValue(
 		data->objlist,
 		GAD_FUNCED_FUNCTION_TYPE,
-		((FunctionEntry *)data->edit_node->data)->type);
+		((FunctionEntry *)data->edit_node->att_data)->type);
 	DisableObject(data->objlist,GAD_FUNCED_FUNCTION_TYPE,FALSE);
 
 	// Enable some gadgets
@@ -1183,9 +1183,9 @@ void funced_start_edit(FuncEdData *data)
 
 	// Enable popup list if not a command, or if command & we have function list
 	DisableObject(data->objlist,GAD_FUNCED_EDIT_GLASS,
-		(((FunctionEntry *)data->edit_node->data)->type==INST_COMMAND && !data->startup->func_list));
+		(((FunctionEntry *)data->edit_node->att_data)->type==INST_COMMAND && !data->startup->func_list));
 	DisableObject(data->objlist,GAD_FUNCED_EDIT_ARGUMENT,
-		(((FunctionEntry *)data->edit_node->data)->type==INST_COMMAND && !data->startup->func_list));
+		(((FunctionEntry *)data->edit_node->att_data)->type==INST_COMMAND && !data->startup->func_list));
 
 	// Activate gadget
 	ActivateStrGad(GADGET(GetObject(data->objlist,GAD_FUNCED_EDIT)),data->window);
@@ -1205,7 +1205,7 @@ BOOL funced_end_edit(
 	if (node)
 	{
 		// Get entry data
-		FunctionEntry *entry=(FunctionEntry *)node->data;
+		FunctionEntry *entry=(FunctionEntry *)node->att_data;
 
 		// Detach existing list
 		SetGadgetValue(data->objlist,GAD_FUNCED_LISTER,(ULONG)~0);
@@ -1358,7 +1358,7 @@ Att_Node *funced_new_entry(
 		// If insert, position nodes
 		if (insert)
 		{
-			Att_PosNode(data->function_list,entry->node,((FunctionEntry *)insert->data)->node);
+			Att_PosNode(data->function_list,entry->node,((FunctionEntry *)insert->att_data)->node);
 			Att_PosNode(data->func_display_list,node,insert);
 		}
 
@@ -1368,7 +1368,7 @@ Att_Node *funced_new_entry(
 		// If it's valid, get the type of that entry
 		if (!copy && insert && insert->node.ln_Pred)
 		{
-			((FunctionEntry *)node->data)->type=((FunctionEntry *)insert->data)->type;
+			((FunctionEntry *)node->att_data)->type=((FunctionEntry *)insert->att_data)->type;
 		}
 
 		// Build display node
@@ -1381,7 +1381,7 @@ Att_Node *funced_new_entry(
 		SetGadgetValue(
 			data->objlist,
 			GAD_FUNCED_FUNCTION_TYPE,
-			((FunctionEntry *)node->data)->type);
+			((FunctionEntry *)node->att_data)->type);
 	}
 
 	// Return node
@@ -1616,7 +1616,7 @@ BOOL funced_command_req(FuncEdData *data,char *buffer,short type)
 
 		// Command arguments?
 		else
-		if (((FunctionEntry *)data->edit_node->data)->type==INST_COMMAND)
+		if (((FunctionEntry *)data->edit_node->att_data)->type==INST_COMMAND)
 		{
 			char *cmd;
 
@@ -1756,7 +1756,7 @@ BOOL funced_command_req(FuncEdData *data,char *buffer,short type)
 				else
 				{
 					// Copy command into buffer
-					strcpy(buffer,((CommandList *)node->data)->name);
+					strcpy(buffer,((CommandList *)node->att_data)->name);
 				}
 				ret=1;
 			}
@@ -2119,7 +2119,7 @@ void functioned_end_drag(FuncEdData *data,short ok)
 			while (node && node->node.ln_Succ)
 			{
 				// Copy function entry
-				copy=(FunctionEntry *)node->data;
+				copy=(FunctionEntry *)node->att_data;
 				if (entry=AllocVec(sizeof(FunctionEntry),MEMF_CLEAR))
 				{
 					// Copy function data

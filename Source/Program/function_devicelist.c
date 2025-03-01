@@ -213,7 +213,7 @@ GALILEOFM_FUNC(function_devicelist)
 					entry))
 				{
 					// set userdata to point to buffer
-					entry->de_UserData=(ULONG)node->data;
+					entry->de_UserData=(ULONG)node->att_data;
 				}
 			}
 

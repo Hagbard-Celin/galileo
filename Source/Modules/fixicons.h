@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -54,9 +54,9 @@ enum
 
 typedef struct _FunctionEntry
 {
-	struct MinNode		node;
-	char			*name;
-	struct DirEntry		*entry;
-	short			type;
-	short			flags;
+	struct MinNode		fe_node;
+	char			*fe_name;
+	struct DirEntry		*fe_entry;
+	short			fe_type;
+	short			fe_flags;
 } FunctionEntry;

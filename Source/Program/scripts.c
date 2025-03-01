@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -254,7 +254,7 @@ BOOL RunScript_Node(Att_Node *node,char *data)
 			// Don't play other sounds before the startup script
 			if (!(environment->env->settings.general_flags&GENERALF_EXCLUSIVE_STARTUP_SND) ||
 				(GUI->flags&GUIF_DONE_STARTUP) ||
-				(node->data&SCRIPTF_STARTUP))
+				(node->att_data&SCRIPTF_STARTUP))
 			{
 				Cfg_Function *func;
 				char command[400],*ptr;
@@ -283,7 +283,7 @@ BOOL RunScript_Node(Att_Node *node,char *data)
 		return 0;
 
 	// If this is a synchronous script, we need to wait for reply
-	if (node->data&SCRIPTF_SYNC)
+	if (node->att_data&SCRIPTF_SYNC)
 	{
 		// Create reply port
 		if (reply_port=CreateMsgPort())
@@ -294,7 +294,7 @@ BOOL RunScript_Node(Att_Node *node,char *data)
 	}
 
 	// Get flags
-	if (node->data&SCRIPTF_NO_LOCK) flags=FUNCF_NO_SOURCE;
+	if (node->att_data&SCRIPTF_NO_LOCK) flags=FUNCF_NO_SOURCE;
 	if (reply_port) flags|=FUNCF_SYNC;
 
 	// Run function
@@ -473,7 +473,7 @@ void InitSoundEvents(BOOL force)
 
 				// Store random name and volume
 				strcpy(sound->gse_Random,buf+200);
-				if ((sound->gse_RandomVolume=node->data)<0 || sound->gse_RandomVolume>64)
+				if ((sound->gse_RandomVolume=node->att_data)<0 || sound->gse_RandomVolume>64)
 					sound->gse_RandomVolume=0;
 			}
 

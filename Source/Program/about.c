@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -106,13 +106,13 @@ void show_about(struct Screen *screen,IPCData *ipc)
 			node=(Att_Node *)node->node.ln_Succ)
 		{
 			// Skip?
-			if (node->data==3) continue;
+			if (node->att_data==3) continue;
 
 			// Add to string
 			strcat(buffer,node->node.ln_Name);
-			if (node->data>0)
+			if (node->att_data>0)
 			{
-				strcat(buffer,(node->data==2)?"\n\n":"\n");
+				strcat(buffer,(node->att_data==2)?"\n\n":"\n");
 			}
 		}
 

@@ -638,8 +638,8 @@ BOOL start_diskcopy(diskcopy_data *data)
 				msg=0;
 
 				// Try to open device
-				if (!node->data &&
-					!(node->data=(ULONG)OpenDisk(node->node.ln_Name,data->dest_port)))
+				if (!node->att_data &&
+					!(node->att_data=(ULONG)OpenDisk(node->node.ln_Name,data->dest_port)))
 				{
 					msg=MSG_CANT_OPEN_DESTINATION;
 				}
@@ -648,22 +648,22 @@ BOOL start_diskcopy(diskcopy_data *data)
 				else
 				{
 					// Check for disk presence
-					((DiskHandle *)node->data)->dh_io->iotd_Req.io_Command=TD_CHANGESTATE;
-					DoIO((struct IORequest *)((DiskHandle *)node->data)->dh_io);
+					((DiskHandle *)node->att_data)->dh_io->iotd_Req.io_Command=TD_CHANGESTATE;
+					DoIO((struct IORequest *)((DiskHandle *)node->att_data)->dh_io);
 
 					// No source present?
-					if (((DiskHandle *)node->data)->dh_io->iotd_Req.io_Actual)
+					if (((DiskHandle *)node->att_data)->dh_io->iotd_Req.io_Actual)
 						msg=MSG_NO_DISK_PRESENT_DEST;
 
 					// Check for write protect (unless same as source)
 					else
-					if (strcmp(((DiskHandle *)node->data)->dh_name,data->source->dh_name))
+					if (strcmp(((DiskHandle *)node->att_data)->dh_name,data->source->dh_name))
 					{
-						((DiskHandle *)node->data)->dh_io->iotd_Req.io_Command=TD_PROTSTATUS;
-						DoIO((struct IORequest *)((DiskHandle *)node->data)->dh_io);
+						((DiskHandle *)node->att_data)->dh_io->iotd_Req.io_Command=TD_PROTSTATUS;
+						DoIO((struct IORequest *)((DiskHandle *)node->att_data)->dh_io);
 
 						// Write protected?
-						if (((DiskHandle *)node->data)->dh_io->iotd_Req.io_Actual)
+						if (((DiskHandle *)node->att_data)->dh_io->iotd_Req.io_Actual)
 							msg=MSG_WRITE_PROTECTED_DEST;
 					}
 				}
@@ -685,14 +685,14 @@ BOOL start_diskcopy(diskcopy_data *data)
 					// Remove from list?
 					if (msg==2)
 					{
-						if (node->data)
+						if (node->att_data)
 						{
 							// Turn motor off
-							diskcopy_motor((DiskHandle *)node->data,0);
+							diskcopy_motor((DiskHandle *)node->att_data,0);
 
 							// Close disk
-							CloseDisk((DiskHandle *)node->data);
-							node->data=0;
+							CloseDisk((DiskHandle *)node->att_data);
+							node->att_data=0;
 						}
 						node->node.lve_Flags&=~LVEF_SELECTED;
 					}
@@ -801,14 +801,14 @@ void cleanup_diskcopy(diskcopy_data *data)
 		node=(Att_Node *)node->node.ln_Succ)
 	{
 		// Device open for this node?
-		if (node->data)
+		if (node->att_data)
 		{
 			// Turn motor off
-			diskcopy_motor((DiskHandle *)node->data,0);
+			diskcopy_motor((DiskHandle *)node->att_data,0);
 
 			// Close disk
-			CloseDisk((DiskHandle *)node->data);
-			node->data=0;
+			CloseDisk((DiskHandle *)node->att_data);
+			node->att_data=0;
 		}
 
 		// Was node selected?
@@ -894,7 +894,7 @@ BOOL do_diskcopy(diskcopy_data *data,APTR status)
 		node->node.ln_Pri=0;
 
 		// Destination?
-		if (node->data)
+		if (node->att_data)
 		{
 			// Increment count
 			++dest_count;
@@ -906,7 +906,7 @@ BOOL do_diskcopy(diskcopy_data *data,APTR status)
 			}
 
 			// Give each destination its own DateStamp
-			DateStamp(&((DiskHandle *)node->data)->dh_stamp);
+			DateStamp(&((DiskHandle *)node->att_data)->dh_stamp);
 		}
 	}
 
@@ -1060,7 +1060,7 @@ BOOL do_diskcopy(diskcopy_data *data,APTR status)
 					}
 
 					// Device open for this node?
-					if (node->data)
+					if (node->att_data)
 					{
 						// Verify?
 						if (verify)
@@ -1069,8 +1069,8 @@ BOOL do_diskcopy(diskcopy_data *data,APTR status)
 							if (node->node.ln_Pri==1)
 							{
 								// Update track
-								((DiskHandle *)node->data)->dh_io->iotd_Req.io_Command=CMD_UPDATE;
-								DoIO((struct IORequest *)((DiskHandle *)node->data)->dh_io);
+								((DiskHandle *)node->att_data)->dh_io->iotd_Req.io_Command=CMD_UPDATE;
+								DoIO((struct IORequest *)((DiskHandle *)node->att_data)->dh_io);
 
 								// Serialising, and this is the right track?
 								if (serialise && write_track==root_track)
@@ -1079,15 +1079,15 @@ BOOL do_diskcopy(diskcopy_data *data,APTR status)
 									serialise_disk(
 										(ULONG *)track_buffer_ptr,
 										root_offset,
-										&((DiskHandle *)node->data)->dh_stamp);
+										&((DiskHandle *)node->att_data)->dh_stamp);
 								}
 
 								// Read track
-								((DiskHandle *)node->data)->dh_io->iotd_Req.io_Command=CMD_READ;
-								((DiskHandle *)node->data)->dh_io->iotd_Req.io_Data=verify_buffer;
-								((DiskHandle *)node->data)->dh_io->iotd_Req.io_Offset=offset;
-								((DiskHandle *)node->data)->dh_io->iotd_Req.io_Length=track_size;
-								if (!(DoIO((struct IORequest *)((DiskHandle *)node->data)->dh_io)))
+								((DiskHandle *)node->att_data)->dh_io->iotd_Req.io_Command=CMD_READ;
+								((DiskHandle *)node->att_data)->dh_io->iotd_Req.io_Data=verify_buffer;
+								((DiskHandle *)node->att_data)->dh_io->iotd_Req.io_Offset=offset;
+								((DiskHandle *)node->att_data)->dh_io->iotd_Req.io_Length=track_size;
+								if (!(DoIO((struct IORequest *)((DiskHandle *)node->att_data)->dh_io)))
 								{
 									long cmp;
 
@@ -1097,7 +1097,7 @@ BOOL do_diskcopy(diskcopy_data *data,APTR status)
 										if (verify_buffer[cmp]!=track_buffer_ptr[cmp])
 										{
 											// Verify error
-											((DiskHandle *)node->data)->dh_io->iotd_Req.io_Error=-1;
+											((DiskHandle *)node->att_data)->dh_io->iotd_Req.io_Error=-1;
 											break;
 										}
 									}
@@ -1118,15 +1118,15 @@ BOOL do_diskcopy(diskcopy_data *data,APTR status)
 									serialise_disk(
 										(ULONG *)track_buffer_ptr,
 										root_offset,
-										&((DiskHandle *)node->data)->dh_stamp);
+										&((DiskHandle *)node->att_data)->dh_stamp);
 								}
 
 								// Write track
-								((DiskHandle *)node->data)->dh_io->iotd_Req.io_Command=TD_FORMAT;
-								((DiskHandle *)node->data)->dh_io->iotd_Req.io_Data=track_buffer_ptr;
-								((DiskHandle *)node->data)->dh_io->iotd_Req.io_Offset=offset;
-								((DiskHandle *)node->data)->dh_io->iotd_Req.io_Length=track_size;
-								SendIO((struct IORequest *)((DiskHandle *)node->data)->dh_io);
+								((DiskHandle *)node->att_data)->dh_io->iotd_Req.io_Command=TD_FORMAT;
+								((DiskHandle *)node->att_data)->dh_io->iotd_Req.io_Data=track_buffer_ptr;
+								((DiskHandle *)node->att_data)->dh_io->iotd_Req.io_Offset=offset;
+								((DiskHandle *)node->att_data)->dh_io->iotd_Req.io_Length=track_size;
+								SendIO((struct IORequest *)((DiskHandle *)node->att_data)->dh_io);
 								++send_count;
 							}
 						}
@@ -1162,17 +1162,17 @@ BOOL do_diskcopy(diskcopy_data *data,APTR status)
 					node=(Att_Node *)node->node.ln_Succ)
 				{
 					// Device open for this node?
-					if (node->data)
+					if (node->att_data)
 					{
 						short ret;
 
 						// Check for error
-						if (((DiskHandle *)node->data)->dh_io->iotd_Req.io_Error)
+						if (((DiskHandle *)node->att_data)->dh_io->iotd_Req.io_Error)
 						{
 							// Put up requester
 							ret=diskcopy_error(
 								window,
-								((DiskHandle *)node->data)->dh_io->iotd_Req.io_Error,
+								((DiskHandle *)node->att_data)->dh_io->iotd_Req.io_Error,
 								write_track,
 								node->node.ln_Name,
 								MSG_RETRY_REMOVE_CANCEL,
@@ -1188,14 +1188,14 @@ BOOL do_diskcopy(diskcopy_data *data,APTR status)
 							// Remove
 							if (ret==2)
 							{
-								if (node->data)
+								if (node->att_data)
 								{
 									// Turn motor off
-									diskcopy_motor((DiskHandle *)node->data,0);
+									diskcopy_motor((DiskHandle *)node->att_data,0);
 
 									// Close disk
-									CloseDisk((DiskHandle *)node->data);
-									node->data=0;
+									CloseDisk((DiskHandle *)node->att_data);
+									node->att_data=0;
 
 									// Decrement destination count
 									if (--dest_count<1) abort=1;
@@ -1331,14 +1331,14 @@ BOOL do_diskcopy(diskcopy_data *data,APTR status)
 			node=(Att_Node *)node->node.ln_Succ)
 		{
 			// Destination?
-			if (node->data)
+			if (node->att_data)
 			{
 				// Turn motor off
-				diskcopy_motor((DiskHandle *)node->data,0);
+				diskcopy_motor((DiskHandle *)node->att_data,0);
 
 				// Close disk
-				CloseDisk((DiskHandle *)node->data);
-				node->data=0;
+				CloseDisk((DiskHandle *)node->att_data);
+				node->att_data=0;
 
 				// Get device process
 				if (proc=GetDeviceProc(node->node.ln_Name,0))

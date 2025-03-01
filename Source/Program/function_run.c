@@ -597,7 +597,7 @@ short function_check_single(
 		// New path?
 		else	
 		if (handle->work_buffer[0] ||
-			(node=Att_FindNode(list,sel)) && (!current || node->data!=(ULONG)current))
+			(node=Att_FindNode(list,sel)) && (!current || node->att_data!=(ULONG)current))
 		{
 			// Already got a path?
 			if (current)
@@ -635,10 +635,10 @@ short function_check_single(
 							ipc=(IPCData *)ipc->node.mln_Succ)
 						{
 							// Is this the lister we asked for?
-							if (IPCDATA(ipc)==(APTR)node->data)
+							if (IPCDATA(ipc)==(APTR)node->att_data)
 							{
 								// Grab it
-								current->pn_lister=(Lister *)node->data;
+								current->pn_lister=(Lister *)node->att_data;
 								break;
 							}
 						}

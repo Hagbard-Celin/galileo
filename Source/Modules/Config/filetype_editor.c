@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -148,10 +148,10 @@ void FiletypeEditor(void)
 								node=(Att_Node *)node->node.ln_Succ)
 							{
 								// Match function
-								if (((func_node *)node->data)->func==(Cfg_Function *)which)
+								if (((func_node *)node->att_data)->func==(Cfg_Function *)which)
 								{
 									// Clear editor pointer
-									((func_node *)node->data)->editor=0;
+									((func_node *)node->att_data)->editor=0;
 
 									// Check for invalid function
 									if (filetypeed_check_iconmenu(data,node,FALSE))
@@ -282,11 +282,11 @@ void FiletypeEditor(void)
 								if (!data->last_sel) break;
 
 								// Is editor already up for this action?	
-								if (data->editor[data->last_sel->data])
-									IPC_Command(data->editor[data->last_sel->data],IPC_ACTIVATE,0,0,0,0);
+								if (data->editor[data->last_sel->att_data])
+									IPC_Command(data->editor[data->last_sel->att_data],IPC_ACTIVATE,0,0,0,0);
 
 								// Need to launch editor
-								else filetypeed_edit_action(data,data->last_sel->data,data->last_sel->node.ln_Name);
+								else filetypeed_edit_action(data,data->last_sel->att_data,data->last_sel->node.ln_Name);
 								break;
 
 
@@ -297,11 +297,11 @@ void FiletypeEditor(void)
 								if (!data->last_sel) break;
 
 								// Is editor up for this action?	
-								if (data->editor[data->last_sel->data])
-									IPC_Command(data->editor[data->last_sel->data],IPC_QUIT,0,0,0,0);
+								if (data->editor[data->last_sel->att_data])
+									IPC_Command(data->editor[data->last_sel->att_data],IPC_QUIT,0,0,0,0);
 
 								// Delete it
-								if (filetypeed_del_action(data,data->last_sel->data))
+								if (filetypeed_del_action(data,data->last_sel->att_data))
 									change_flag=1;
 								break;
 
@@ -676,7 +676,7 @@ void filetypeed_update_actions(filetype_ed_data *data)
 			func=(Cfg_Function *)func->node.ln_Succ)
 		{
 			// Right type?
-			if (func->function.func_type==node->data &&
+			if (func->function.func_type==node->att_data &&
 				!(func->function.flags2&FUNCF2_LABEL_FUNC))
 			{
 				node->node.lve_Flags|=LVEF_SELECTED;
@@ -778,7 +778,7 @@ filetypeed_receive_edit(
 				node=(Att_Node *)node->node.ln_Succ)
 			{
 				// Match function
-				if (((func_node *)node->data)->func==(Cfg_Function *)ret->object_flags)
+				if (((func_node *)node->att_data)->func==(Cfg_Function *)ret->object_flags)
 				{
 					// Get function pointer
 					function=(Cfg_Function *)ret->object_flags;
@@ -1154,7 +1154,7 @@ void filetypeed_edit_iconmenu(filetype_ed_data *data,Att_Node *node)
 	BOOL success=0;
 
 	// Get the function to edit
-	if (!node || !(fndata=(func_node *)node->data)) return;
+	if (!node || !(fndata=(func_node *)node->att_data)) return;
 
 	// Editor already open?
 	if (fndata->editor)
@@ -1209,7 +1209,7 @@ BOOL filetypeed_check_iconmenu(filetype_ed_data *data,Att_Node *node,BOOL del)
 	func_node *fndata;
 
 	// Get data pointer
-	fndata=(func_node *)node->data;
+	fndata=(func_node *)node->att_data;
 
 	// Invalid function?
 	if (del || !fndata->func || IsListEmpty((struct List *)&fndata->func->instructions))
@@ -1321,8 +1321,8 @@ BOOL filetypeed_end_drag(filetype_ed_data *data,BOOL ok)
 				// Swap functions
 				SwapListNodes(
 					(struct List *)&data->type->function_list,
-					(struct Node *)((func_node *)node1->data)->func,
-					(struct Node *)((func_node *)node2->data)->func);
+					(struct Node *)((func_node *)node1->att_data)->func,
+					(struct Node *)((func_node *)node2->att_data)->func);
 
 				// Attach list
 				SetGadgetChoices(data->objlist,GAD_FILETYPES_ICON_MENU,data->icon_list);
@@ -1352,7 +1352,7 @@ BOOL filetypeed_end_drag(filetype_ed_data *data,BOOL ok)
 				Cfg_Function *func=0;
 
 				// Get function pointer
-				if (fndata=(func_node *)node->data)
+				if (fndata=(func_node *)node->att_data)
 					func=fndata->func;
 
 				// Drop on function editor?

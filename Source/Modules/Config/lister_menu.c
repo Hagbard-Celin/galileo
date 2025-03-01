@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -152,7 +152,7 @@ ULONG __asm __saveds L_Config_Menu(
 							SetGadgetChoices(data->objlist,GAD_LISTER_MENU_ITEMS,(APTR)data->menu_list);
 
 							// Get button pointer
-							button=(Cfg_Button *)node->data;
+							button=(Cfg_Button *)node->att_data;
 
 							// Create a new function
 							if (function=NewButtonFunction(data->bank->memory,0))
@@ -639,7 +639,7 @@ ULONG __asm __saveds L_Config_Menu(
 									Cfg_Button *button;
 
 									// Get button
-									button=(Cfg_Button *)data->sel_item->data;
+									button=(Cfg_Button *)data->sel_item->att_data;
 
 									// Set or clear flag
 									if (msg_copy.Code) button->button.flags|=BUTNF_GLOBAL;
@@ -1020,7 +1020,7 @@ void lister_menu_fix_gadgets(lister_menu_data *data)
 		SetGadgetValue(
 			data->objlist,
 			GAD_HOTKEYS_GLOBAL,
-			((Cfg_Button *)data->sel_item->data)->button.flags&BUTNF_GLOBAL);
+			((Cfg_Button *)data->sel_item->att_data)->button.flags&BUTNF_GLOBAL);
 	}
 
 	// Clear name to name field
@@ -1072,8 +1072,8 @@ void lister_menu_end_edit(lister_menu_data *data,short disable,Att_Node *node)
 
 			// Hotkey?
 			if (data->type==TYPE_HOTKEYS &&
-				node->data &&
-				(func=(Cfg_ButtonFunction *)FindFunctionType((struct List *)&((Cfg_Button *)node->data)->function_list,FTYPE_LEFT_BUTTON)) &&
+				node->att_data &&
+				(func=(Cfg_ButtonFunction *)FindFunctionType((struct List *)&((Cfg_Button *)node->att_data)->function_list,FTYPE_LEFT_BUTTON)) &&
 				func->function.code!=0xffff)
 			{
 				char key[80];
@@ -1143,7 +1143,7 @@ void lister_menu_edit_item(lister_menu_data *data)
 
 	// Get selected item
 	if (!data->sel_item ||
-		!(button=(Cfg_Button *)data->sel_item->data)) return;
+		!(button=(Cfg_Button *)data->sel_item->att_data)) return;
 
 	// See if this button is already being edited
 	for (node=(edit_node *)data->edit_list.lh_Head;
@@ -1223,7 +1223,7 @@ BOOL lister_menu_receive_edit(
 
 	// Try to find button in list
 	if ((node=Att_FindNodeData(data->menu_list,(ULONG)ret->object)) &&
-		(button=(Cfg_Button *)node->data))
+		(button=(Cfg_Button *)node->att_data))
 	{
 		Cfg_ButtonFunction *func;
 
@@ -1606,7 +1606,7 @@ void lister_menu_end_drag(lister_menu_data *data,BOOL ok)
 			}
 
 			// Copy button
-			if (button=CopyButton((Cfg_Button *)data->drag.drag_node->data,0,0))
+			if (button=CopyButton((Cfg_Button *)data->drag.drag_node->att_data,0,0))
 			{
 				// Send button
 				IPC_Command(ipc,BUTTONEDIT_CLIP_BUTTON,0,button,pos,0);
@@ -1634,7 +1634,7 @@ Att_Node *lister_menu_add_item(lister_menu_data *data,Att_Node *insert)
 	if (insert==(Att_Node *)-1)
 	{
 		// Copy this button
-		if (!(button=CopyButton((Cfg_Button *)data->sel_item->data,data->bank->memory,0)))
+		if (!(button=CopyButton((Cfg_Button *)data->sel_item->att_data,data->bank->memory,0)))
 			return 0;
 
 		// Find first function
@@ -1704,7 +1704,7 @@ void lister_menu_build_buttons(lister_menu_data *data)
 		node->node.ln_Succ;
 		node=(Att_Node *)node->node.ln_Succ,++data->bank->window.rows)
 	{
-		Cfg_Button *button=(Cfg_Button *)node->data;
+		Cfg_Button *button=(Cfg_Button *)node->att_data;
 		Cfg_ButtonFunction *func;
 
 		// Invalid button?
@@ -1963,7 +1963,7 @@ void lister_menu_fix_functionlist(lister_menu_data *data)
 		node->node.lve_Flags&=~LVEF_USE_PEN;
 
 		// Get button pointer
-		if (button=((Cfg_Button *)node->data))
+		if (button=((Cfg_Button *)node->att_data))
 		{
 			Cfg_Function *func;
 
@@ -1996,7 +1996,7 @@ void lister_menu_del_item(lister_menu_data *data,Att_Node *item)
 	if (!item) return;
 
 	// Get button from selection
-	if (button=(Cfg_Button *)item->data)
+	if (button=(Cfg_Button *)item->att_data)
 	{
 		// See if this button is being edited
 		for (node=(edit_node *)data->edit_list.lh_Head;

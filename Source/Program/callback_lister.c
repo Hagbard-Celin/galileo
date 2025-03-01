@@ -531,7 +531,7 @@ ULONG __asm __saveds HookGetPointer(
 				if (list=Att_NewList(LISTF_POOL))
 				{
 					for (node=(Att_Node *)script_list->list.lh_Head;node->node.ln_Succ;node=(Att_Node *)node->node.ln_Succ)
-						Att_NewNode(list,node->node.ln_Name,node->data,ADDNODE_SORT);
+						Att_NewNode(list,node->node.ln_Name,node->att_data,ADDNODE_SORT);
 				}
 				ptr->pointer=list;
 				ptr->flags=POINTERF_LOCKED;

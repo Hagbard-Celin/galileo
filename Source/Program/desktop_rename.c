@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -156,7 +156,7 @@ void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
 				lock_listlock(&info->objects,0);
 
 				// Is object still valid?>
-				if (object=find_backdrop_object(info,(BackdropObject *)node->data))
+				if (object=find_backdrop_object(info,(BackdropObject *)node->att_data))
 				{
 					// Object in a group?
 					if (info->flags&BDIF_GROUP)

@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -592,7 +592,7 @@ BOOL rexx_galileo_cmd(struct RexxMsg *msg,short command,char *args)
 
 						// Not found
 						else
-						if (!(node=(Att_Node *)FindNameI((struct List *)script_list,temp.gse_Name)) || node->data&SCRIPTF_NO_SOUND)
+						if (!(node=(Att_Node *)FindNameI((struct List *)script_list,temp.gse_Name)) || node->att_data&SCRIPTF_NO_SOUND)
 							rc=RXERR_INVALID_NAME;
 
 						// Not in sound list currently; try to allocate
@@ -848,7 +848,7 @@ BOOL rexx_galileo_cmd(struct RexxMsg *msg,short command,char *args)
 
 						// Not found
 						else
-						if (!(node=(Att_Node *)FindNameI((struct List *)script_list,buf)) || node->data&SCRIPTF_NO_SOUND)
+						if (!(node=(Att_Node *)FindNameI((struct List *)script_list,buf)) || node->att_data&SCRIPTF_NO_SOUND)
 							rc=RXERR_INVALID_NAME;
 
 						// Unlock sound list

@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -247,7 +247,7 @@ short __asm __saveds L_Config_Filetypes(
 											msg_copy.Seconds,msg_copy.Micros))
 									{
 										// Launch editor for this filetype
-										filetype_edit(data,(FiletypeNode *)data->sel_filetype->data,0);
+										filetype_edit(data,(FiletypeNode *)data->sel_filetype->att_data,0);
 									}
 
 									// New selection
@@ -281,7 +281,7 @@ short __asm __saveds L_Config_Filetypes(
 										{
 											// Copy filetype
 											type=CopyFiletype(
-												((FiletypeNode *)data->sel_filetype->data)->type,
+												((FiletypeNode *)data->sel_filetype->att_data)->type,
 												data->memory);
 										}
 
@@ -338,7 +338,7 @@ short __asm __saveds L_Config_Filetypes(
 								if (data->sel_filetype)
 								{
 									// Launch editor for this filetype
-									filetype_edit(data,(FiletypeNode *)data->sel_filetype->data,0);
+									filetype_edit(data,(FiletypeNode *)data->sel_filetype->att_data,0);
 								}
 								break;
 
@@ -723,7 +723,7 @@ short filetype_remove(
 	short change=0;
 
 	// Get filetype node
-	ftnode=(FiletypeNode *)node->data;
+	ftnode=(FiletypeNode *)node->att_data;
 
 	// Fill out requester structure
 	simple.title=GetString(locale,MSG_FILETYPE_EDITOR_TITLE);
@@ -955,7 +955,7 @@ void filetype_edit_name(config_filetypes_data *data,char *name)
 		SetGadgetValue(data->objlist,GAD_FILETYPES_LIST,Att_FindNodeNumber(data->filetype_list,node));
 
 		// Launch editor
-		filetype_edit(data,(FiletypeNode *)node->data,0);
+		filetype_edit(data,(FiletypeNode *)node->att_data,0);
 	}
 
 	// Load from disk?
@@ -1015,7 +1015,7 @@ void filetype_new_node(config_filetypes_data *data,Att_Node *node)
 	// Launch editor for this filetype
 	if (node)
 	{
-		filetype_edit(data,(FiletypeNode *)node->data,1);
+		filetype_edit(data,(FiletypeNode *)node->att_data,1);
 		data->change=1;
 	}
 }

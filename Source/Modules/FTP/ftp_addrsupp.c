@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -390,7 +390,7 @@ if	(cf = Open(path, MODE_NEWFILE))
 		node = dg->dg_og->og_SiteList->list.lh_Head;
 		while	(next = node->ln_Succ)
 			{
-			e=(struct site_entry*)((Att_Node *)node)->data;
+			e=(struct site_entry*)((Att_Node *)node)->att_data;
 			if	(!(ok=write_entry(cf,e)))
 				break;
 			node = next;
@@ -577,7 +577,7 @@ if	(iff=IFFOpen(filename,IFF_WRITE|IFF_SAFE,ID_GILO))
 	node = dg->dg_og->og_SiteList->list.lh_Head;
 	while	(next = node->ln_Succ)
 		{
-		e=(struct site_entry*)((Att_Node *)node)->data;
+		e=(struct site_entry*)((Att_Node *)node)->att_data;
 
 		if	(e->se_has_custom_env)
 			{
@@ -1443,7 +1443,7 @@ if	(list && !IsListEmpty(list))
 
 			count++;
 		
-			site=(struct site_entry *)((Att_Node *)node)->data;
+			site=(struct site_entry *)((Att_Node *)node)->att_data;
 
 			if	(type==MATCH_NAME)
 				found=stricmp(e->se_name,site->se_name);
