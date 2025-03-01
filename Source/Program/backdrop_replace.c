@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -123,20 +123,41 @@ void backdrop_replace_icon_image(BackdropInfo *info,char *source_name,BackdropOb
 if	(IconBase->lib_Version>=44)
 	{
 	struct DiskObject *source;
+	struct DiskObject *dest;
 
 	// Get source icon
-
-	if	(source=GetIconTags(source_name,
+	// Workaround for several bugs in icon.library v44 revisions 506 and below that
+	// break stuff if the icons are not remapped at load
+	if (IconBase->lib_Version==44 && IconBase->lib_Revision<=506)
+	{
+	    source=GetIconTags(source_name,
 			ICONGETA_FailIfUnavailable,TRUE,
 			ICONGETA_Screen,info->window->WScreen,
-			TAG_DONE))
-		{
-		struct DiskObject *dest;
-		// Get destination icon
-		if	(dest=GetIconTags(buffer+512,
+			TAG_DONE);
+
+	    dest=GetIconTags(buffer+512,
 				ICONGETA_FailIfUnavailable,TRUE,
 				ICONGETA_Screen,info->window->WScreen,
-				TAG_DONE))
+				TAG_DONE);
+	}
+	else
+	{
+	    source=GetIconTags(source_name,
+			ICONGETA_FailIfUnavailable,TRUE,
+			ICONGETA_RemapIcon,FALSE,
+			TAG_DONE);
+
+	    dest=GetIconTags(buffer+512,
+				ICONGETA_FailIfUnavailable,TRUE,
+				ICONGETA_RemapIcon,FALSE,
+				TAG_DONE);
+	}
+
+
+	if	(source)
+		{
+		// Get destination icon
+		if	(dest)
 			{
 			struct DiskObject *new;
 

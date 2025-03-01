@@ -227,21 +227,29 @@ GALILEOFM_FUNC(function_addicon)
 					// Get icon
 
 					// gjp V44 icn stuff
-					if	(IconBase->lib_Version>=44)
+					if (IconBase->lib_Version>=44)
+					{
+						// Workaround for several bugs in icon.library v44 revisions 506 and below that
+						// break stuff if the icon are not remapped at load
+						if (IconBase->lib_Version==44 && IconBase->lib_Revision<=506)
 						{
-						//icon=GetIconTags(handle->work_buffer,
-						//	ICONGETA_FailIfUnavailable,TRUE,
-						//	ICONGETA_RemapIcon,FALSE,
-						//	TAG_DONE);
+						    struct Screen *screen=LockPubScreen(0);
 
-						struct Screen *screen=LockPubScreen(0);
-							
-						icon=GetIconTags(handle->work_buffer,
-							ICONGETA_FailIfUnavailable,TRUE,
-							ICONGETA_Screen,screen,
-							TAG_DONE);
-						UnlockPubScreen(NULL,screen);
+						    icon=GetIconTags(handle->work_buffer,
+								     ICONGETA_FailIfUnavailable,TRUE,
+								     ICONGETA_Screen,screen,
+								     TAG_DONE);
+
+						    UnlockPubScreen(NULL,screen);
 						}
+						else
+						{
+						    icon=GetIconTags(handle->work_buffer,
+								     ICONGETA_FailIfUnavailable,TRUE,
+								     ICONGETA_RemapIcon,FALSE,
+								     TAG_DONE);
+						}
+					}
 					else
 						icon=GetDiskObject(handle->work_buffer);
 
