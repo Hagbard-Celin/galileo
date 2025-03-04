@@ -916,6 +916,8 @@ int openwindow( icon_data *data, int next )
 	}
 	else
 	{
+	    data->protection=FALSE;
+
 	    // Initialise Area
 	    InitArea(&data->areainfo,data->areabuf,AREAVERTEX);
 	    data->window->RPort->AreaInfo=&data->areainfo;
@@ -2298,14 +2300,17 @@ BOOL icon_edit_reload( icon_data *data )
 		// Display icon
 		icon_switch_image( data, data->icon_mode );
 
-		// Remove old protections
-		Att_RemList( data->prot_list[0], 0 );
-		Att_RemList( data->prot_list[1], 0 );
-		Att_RemList( data->prot_list[2], 0 );
-		Att_RemList( data->prot_list[3], 0 );
+		if (data->icon_type != WBDISK)
+		{
+		    // Remove old protections
+		    Att_RemList( data->prot_list[0], 0 );
+		    Att_RemList( data->prot_list[1], 0 );
+		    Att_RemList( data->prot_list[2], 0 );
+		    Att_RemList( data->prot_list[3], 0 );
 
-		// Build protection list
-		icon_build_protlist( data );
+		    // Build protection list
+		    icon_build_protlist( data );
+		}
 
 		// Stack
 		SetGadgetValue( data->list, GAD_ICON_STACK, (data->icon->do_StackSize == 0) ? 4000 : data->icon->do_StackSize );
