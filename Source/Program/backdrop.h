@@ -40,36 +40,36 @@ For more information on Directory Opus for Windows please see:
 
 typedef struct _BackdropObject
 {
-	struct Node		node;
+	struct Node		bdo_node;
 
-	short			type;		// Type of object
-	short			state;		// Object state
+	short			bdo_type;	    // Type of object
+	short			bdo_state;	    // Object state
 
-	struct DiskObject	*icon;		// Object icon
-	char			*name;		// Object name
-	char			*path;		// Path name
-	struct DateStamp	date;		// Object date
-	char			*device_name;	// Device name (for disks)
+	struct DiskObject	*bdo_icon;	    // Object icon
+	char			*bdo_name;	    // Object name
+	char			*bdo_path;	    // Path name
+	struct DateStamp	bdo_date;	    // Object date
+	char			*bdo_device_name;   // Device name (for disks)
 
-	unsigned long 		flags;		// Flags
+	unsigned long 		bdo_flags;	    // Flags
 
-	struct IBox		pos;		// Object position
-	struct Rectangle	show_rect;	// Rectangle we display in
-	struct Rectangle	full_size;	// Full size of object
-	struct Rectangle	image_rect;	// Rectangle for image
-	ULONG			custom_pos;	// Custom position
+	struct IBox		bdo_pos;	    // Object position
+	struct Rectangle	bdo_show_rect;	    // Rectangle we display in
+	struct Rectangle	bdo_full_size;	    // Full size of object
+	struct Rectangle	bdo_image_rect;	    // Rectangle for image
+	ULONG			bdo_custom_pos;	    // Custom position
 
-	USHORT			*image_mask[2];	// Image mask
+	USHORT			*bdo_image_mask[2]; // Image mask
 
-	DragInfo		*drag_info;	// Drag info for this object
-	short			drag_x_offset;
-	short			drag_y_offset;
+	DragInfo		*bdo_drag_info;	    // Drag info for this object
+	short			bdo_drag_x_offset;
+	short			bdo_drag_y_offset;
 
-	ULONG			misc_data;	// Miscellaneous data
-	unsigned long		value;		// Value for position-sorting
-	Cfg_Filetype		*filetype;	// Filetype
+	ULONG			bdo_misc_data;	    // Miscellaneous data
+	unsigned long		bdo_value;	    // Value for position-sorting
+	Cfg_Filetype		*bdo_filetype;	    // Filetype
 
-	unsigned long		size;		// File size
+	unsigned long		bdo_size;	    // File size
 } BackdropObject;
 
 

@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -46,7 +46,7 @@ GALILEOFM_FUNC(function_leaveout)
 	short count=0;
 
 	// Get current path
-	if (!(path=function_path_current(&handle->source_paths)))
+	if (!(path=function_path_current(&handle->func_source_paths)))
 		return 0;
 
 	// Go through entries
@@ -62,15 +62,15 @@ GALILEOFM_FUNC(function_leaveout)
 		}
 
 		// Build source name
-		function_build_source(handle,entry,handle->work_buffer);
+		function_build_source(handle,entry,handle->func_work_buf);
 
 		// Ignore if this is an icon
-		if (!(isicon(handle->work_buffer)))
+		if (!(isicon(handle->func_work_buf)))
 		{
 			// Leave object out
 			if (backdrop_leave_out(
 				GUI->backdrop,
-				handle->work_buffer,
+				handle->func_work_buf,
 				BLOF_PERMANENT|BLOF_REFRESH,-1,-1))
 			{
 				ok=1;

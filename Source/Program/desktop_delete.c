@@ -56,22 +56,22 @@ void desktop_delete(IPCData *ipc,BackdropInfo *info,BackdropObject *only_one)
 	while (object=backdrop_next_object(info,object,only_one))
 	{
 		// Group?
-		if (object->type==BDO_GROUP) ++groupcount;
+		if (object->bdo_type==BDO_GROUP) ++groupcount;
 
 		// Assign?
 		else
-		if (object->flags&BDOF_ASSIGN) ++assigncount;
+		if (object->bdo_flags&BDOF_ASSIGN) ++assigncount;
 
 		// Group object?
 		else
-		if (object->type==BDO_LEFT_OUT && info->flags&BDIF_GROUP) ++filecount;
+		if (object->bdo_type==BDO_LEFT_OUT && info->flags&BDIF_GROUP) ++filecount;
 
 		// Desktop object?
 		else
-		if (object->type==BDO_LEFT_OUT && object->flags&BDOF_DESKTOP_FOLDER)
+		if (object->bdo_type==BDO_LEFT_OUT && object->bdo_flags&BDOF_DESKTOP_FOLDER)
 		{
 			++othercount;
-			if (object->icon->do_Type==WBDRAWER) ++dircount;
+			if (object->bdo_icon->do_Type==WBDRAWER) ++dircount;
 		}
 
 		// Something else
@@ -186,7 +186,7 @@ void desktop_delete(IPCData *ipc,BackdropInfo *info,BackdropObject *only_one)
 			if (object=find_backdrop_object(info,(BackdropObject *)node->att_data))
 			{
 				// Group?
-				if (object->type==BDO_GROUP)
+				if (object->bdo_type==BDO_GROUP)
 				{
 					// Delete this group
 					backdrop_delete_group(info,object);
@@ -194,10 +194,10 @@ void desktop_delete(IPCData *ipc,BackdropInfo *info,BackdropObject *only_one)
 
 				// Assign?
 				else
-				if (object->flags&BDOF_ASSIGN)
+				if (object->bdo_flags&BDOF_ASSIGN)
 				{
 					// Copy name, strip trailing colon
-					strcpy(info->buffer+2,object->name);
+					strcpy(info->buffer+2,object->bdo_name);
 					info->buffer[strlen(info->buffer+2)+1]=0;
 
 					// Delete assign

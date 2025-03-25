@@ -47,23 +47,23 @@ void backdrop_info(BackdropInfo *info,BackdropObject *icon)
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Is object selected, or one supplied?
-		if ((!icon && object->state) ||
+		if ((!icon && object->bdo_state) ||
 			(icon==object))
 		{
 			// Bad disk?
-			if (object->type==BDO_BAD_DISK)
+			if (object->bdo_type==BDO_BAD_DISK)
 				DisplayBeep(info->window->WScreen);
 
 			// AppIcon?
 			else
-			if (object->type==BDO_APP_ICON)
+			if (object->bdo_type==BDO_APP_ICON)
 			{
 				// Does it support Info?
-				if ((WB_AppIconFlags((struct AppIcon *)object->misc_data))&APPENTF_INFO)
+				if ((WB_AppIconFlags((struct AppIcon *)object->bdo_misc_data))&APPENTF_INFO)
 				{
 					// Send info message
 					backdrop_appicon_message(object,BAPPF_INFO);
@@ -89,7 +89,7 @@ void backdrop_info(BackdropInfo *info,BackdropObject *icon)
 						"galileo_icon_info",
 						MENU_ICON_INFO,
 						info->window,
-						(object->type==BDO_DISK)?":":object->name,
+						(object->bdo_type==BDO_DISK)?":":object->bdo_name,
 						0);
 
 					// Restore directory

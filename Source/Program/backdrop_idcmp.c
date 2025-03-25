@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -312,7 +312,7 @@ BOOL backdrop_idcmp(BackdropInfo *info,struct IntuiMessage *msg,unsigned short f
 							if (object=find_backdrop_object(info,info->current_sel_object))
 							{
 								// Clear selection flag and redraw
-								object->flags&=~BDOF_SELECTED;
+								object->bdo_flags&=~BDOF_SELECTED;
 								backdrop_render_object(info,object,BRENDERF_CLIP);
 							}
 
@@ -329,10 +329,10 @@ BOOL backdrop_idcmp(BackdropInfo *info,struct IntuiMessage *msg,unsigned short f
 
 							// Get first object
 							object=(BackdropObject *)info->objects.list.lh_Head;
-							if (object->node.ln_Succ)
+							if (object->bdo_node.ln_Succ)
 							{
 								// Set selection flag in new object and render
-								object->flags|=BDOF_SELECTED;
+								object->bdo_flags|=BDOF_SELECTED;
 								backdrop_render_object(info,object,BRENDERF_CLIP);
 
 								// Store object pointer
@@ -379,18 +379,18 @@ BOOL backdrop_idcmp(BackdropInfo *info,struct IntuiMessage *msg,unsigned short f
 						{
 							// Down or right, get next object
 							if (msg->Code==CURSORDOWN || msg->Code==CURSORRIGHT)
-								object=(BackdropObject *)lastobject->node.ln_Succ;
+								object=(BackdropObject *)lastobject->bdo_node.ln_Succ;
 
 							// Up or left, get previous object
 							else
-								object=(BackdropObject *)lastobject->node.ln_Pred;
+								object=(BackdropObject *)lastobject->bdo_node.ln_Pred;
 						}
 
 						// Invalid object?
-						if (!object || !object->node.ln_Succ || !object->node.ln_Pred)
+						if (!object || !object->bdo_node.ln_Succ || !object->bdo_node.ln_Pred)
 						{
 							// Get first (or last) selection
-							if (object && !object->node.ln_Pred)
+							if (object && !object->bdo_node.ln_Pred)
 								object=(BackdropObject *)info->objects.list.lh_TailPred;
 							else object=(BackdropObject *)info->objects.list.lh_Head;
 						}
@@ -402,7 +402,7 @@ BOOL backdrop_idcmp(BackdropInfo *info,struct IntuiMessage *msg,unsigned short f
 							if (lastobject)
 							{
 								// Clear selection flag and redraw
-								lastobject->flags&=~BDOF_SELECTED;
+								lastobject->bdo_flags&=~BDOF_SELECTED;
 								backdrop_render_object(info,lastobject,BRENDERF_CLIP);
 							}
 
@@ -413,7 +413,7 @@ BOOL backdrop_idcmp(BackdropInfo *info,struct IntuiMessage *msg,unsigned short f
 								backdrop_make_visible(info,object);
 
 								// Set selection flag in new object and render
-								object->flags|=BDOF_SELECTED;
+								object->bdo_flags|=BDOF_SELECTED;
 								backdrop_render_object(info,object,BRENDERF_CLIP);
 							}
 
@@ -452,7 +452,7 @@ BOOL backdrop_idcmp(BackdropInfo *info,struct IntuiMessage *msg,unsigned short f
 							info->flags&=~BDIF_KEY_SELECTION;
 
 							// Deselect object
-							object->flags&=~BDOF_SELECTED;
+							object->bdo_flags&=~BDOF_SELECTED;
 							backdrop_render_object(info,object,BRENDERF_CLIP);
 						}
 

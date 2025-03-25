@@ -44,7 +44,7 @@ GALILEOFM_FUNC(function_runprog)
 	BPTR lock,old;
 
 	// Lock source path
-	if (!(lock=Lock(handle->source_path,ACCESS_READ)))
+	if (!(lock=Lock(handle->func_source_path,ACCESS_READ)))
 		return 1;
 
 	// Change directory
@@ -82,7 +82,7 @@ GALILEOFM_FUNC(function_runprog)
 			if (!done)
 			{
 				// Try to get current lister
-				if (lister=function_lister_current(&handle->source_paths))
+				if (lister=function_lister_current(&handle->func_source_paths))
 				{
 					// Set screen title
 					if (lister->window)
@@ -95,10 +95,10 @@ GALILEOFM_FUNC(function_runprog)
 				}
 
 				// Build name with quotes
-				lsprintf(handle->work_buffer,"\"%s\"",entry->fe_name);
+				lsprintf(handle->func_work_buf,"\"%s\"",entry->fe_name);
 
 				// Launch program
-				WB_LaunchNew(handle->work_buffer,GUI->screen_pointer,0,environment->env->default_stack,0);
+				WB_LaunchNew(handle->func_work_buf,GUI->screen_pointer,0,environment->env->default_stack,0);
 			}
 
 			// Free icon
@@ -117,15 +117,15 @@ GALILEOFM_FUNC(function_runprog)
 			Close(file);
 
 			// Pointer to command buffer
-			command=handle->work_buffer;
+			command=handle->func_work_buf;
 			*command=0;
 
 			// Pointer to argument buffer
-			args=handle->work_buffer+824;
+			args=handle->func_work_buf+824;
 			*args=0;
 
 			// Pointer to output buffer
-			output=handle->work_buffer+904;
+			output=handle->func_work_buf+904;
 			lsprintf(output,"%s%s/AUTO/CLOSE/WAIT/SCREEN %s",
 				environment->env->output_device,
 				environment->env->output_window,
@@ -135,14 +135,14 @@ GALILEOFM_FUNC(function_runprog)
 			if (test==0x000003f3)
 			{
 				// Build requester text
-				lsprintf(handle->work_buffer+512,
+				lsprintf(handle->func_work_buf+512,
 					GetString(&locale,MSG_ENTER_ARGUMENTS_FOR),
 					entry->fe_name);
 
 				// Display requester
 				if (function_request(
 					handle,
-					handle->work_buffer+512,
+					handle->func_work_buf+512,
 					SRF_BUFFER,
 					args,79,
 					GetString(&locale,MSG_OKAY),

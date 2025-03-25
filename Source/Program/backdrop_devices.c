@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -118,13 +118,13 @@ short backdrop_get_devices(BackdropInfo *info)
 			while (object=(BackdropObject *)FindName(search,device_name))
 			{
 				// Bad disk object?
-				if (object->type==BDO_BAD_DISK)
+				if (object->bdo_type==BDO_BAD_DISK)
 				{
 					// Compare types; if it exists, we won't get it again later
-					if (disk_type==object->misc_data)
+					if (disk_type==object->bdo_misc_data)
 					{
 						// Mark entry as ok
-						object->flags|=BDOF_OK;
+						object->bdo_flags|=BDOF_OK;
 					}
 					break;
 				}
@@ -156,15 +156,15 @@ short backdrop_get_devices(BackdropInfo *info)
 			while (object=(BackdropObject *)FindName(search,dos_entry->dle_Node.ln_Name))
 			{
 				// Disk object?
-				if (object->type==BDO_DISK)
+				if (object->bdo_type==BDO_DISK)
 				{
 					// Compare date stamps
 					if (CompareDates(
-							&object->date,
+							&object->bdo_date,
 							&dos_entry->dle_DosList.dol_misc.dol_volume.dol_VolumeDate)==0)
 					{
 						// Mark entry as ok
-						object->flags|=BDOF_OK;
+						object->bdo_flags|=BDOF_OK;
 						break;
 					}
 				}
@@ -200,22 +200,22 @@ short backdrop_get_devices(BackdropInfo *info)
 
 		// Get object date
 		if (dos_entry->dle_Node.ln_Type==DLT_VOLUME)
-			object->date=dos_entry->dle_DosList.dol_misc.dol_volume.dol_VolumeDate;
+			object->bdo_date=dos_entry->dle_DosList.dol_misc.dol_volume.dol_VolumeDate;
 
 		// Store disk type
-		object->misc_data=disk_type;
+		object->bdo_misc_data=disk_type;
 
 		// Mark object as ok
-		object->flags=BDOF_OK|BDOF_NO_POSITION;
+		object->bdo_flags=BDOF_OK|BDOF_NO_POSITION;
 
 		// If this is the ram disk, add it to the start of the list
-		if (object->device_name && strcmp(object->device_name,"RAM:")==0)
+		if (object->bdo_device_name && strcmp(object->bdo_device_name,"RAM:")==0)
 		{
-			AddHead(&info->objects.list,&object->node);
+			AddHead(&info->objects.list,&object->bdo_node);
 		}
 
 		// Add to backdrop list
-		else AddTail(&info->objects.list,&object->node);
+		else AddTail(&info->objects.list,&object->bdo_node);
 
 		// Set change flag
 		change|=BDEVF_DISK_ADDED;
@@ -226,28 +226,28 @@ short backdrop_get_devices(BackdropInfo *info)
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;)
+		object->bdo_node.ln_Succ;)
 	{
-		BackdropObject *next=(BackdropObject *)object->node.ln_Succ;
+		BackdropObject *next=(BackdropObject *)object->bdo_node.ln_Succ;
 
 		// Is this a disk?
-		if (object->type==BDO_DISK ||
-			object->type==BDO_BAD_DISK)
+		if (object->bdo_type==BDO_DISK ||
+			object->bdo_type==BDO_BAD_DISK)
 		{
 			// Is object marked ok?
-			if (object->flags&BDOF_OK)
+			if (object->bdo_flags&BDOF_OK)
 			{
 				// Clear ok flag
-				object->flags&=~BDOF_OK;
+				object->bdo_flags&=~BDOF_OK;
 
 				// Does object not have an icon?
-				if (!object->icon)
+				if (!object->bdo_icon)
 				{
 					// Get icon for object
 					backdrop_get_icon(info,object,GETICON_CD);
 
 					// If there's still no icon, remove it
-					if (!object->icon)
+					if (!object->bdo_icon)
 					{
 						// Remove and free object
 						backdrop_remove_object(info,object);
@@ -259,7 +259,7 @@ short backdrop_get_devices(BackdropInfo *info)
 			else
 			{
 				// Erase object
-				if (object->icon) backdrop_erase_icon(info,object,0);
+				if (object->bdo_icon) backdrop_erase_icon(info,object,0);
 
 				// Remove and free object
 				backdrop_remove_object(info,object);

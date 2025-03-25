@@ -83,7 +83,7 @@ PathNode *__asm __saveds HookGetSource(
 	if (pathbuf) *pathbuf=0;
 
 	// Valid source?
-	if (!(path=function_path_current(&handle->source_paths)))
+	if (!(path=function_path_current(&handle->func_source_paths)))
 		return 0;
 
 	// Copy path name
@@ -101,10 +101,10 @@ PathNode *__asm __saveds HookNextSource(
 	if (pathbuf) *pathbuf=0;
 
 	// Finish with current path
-	function_path_end(handle,&handle->source_paths,1);
+	function_path_end(handle,&handle->func_source_paths,1);
 
 	// Next valid source?
-	if (!(path=function_path_current(&handle->source_paths)))
+	if (!(path=function_path_current(&handle->func_source_paths)))
 		return 0;
 
 	// Copy path name
@@ -124,8 +124,8 @@ void __asm __saveds HookUnlockSource(
 	register __a0 FunctionHandle *handle)
 {
 	// Unlock listers
-	function_do_lister_changes(handle,&handle->source_paths);
-	function_unlock_paths(handle,&handle->source_paths,1);
+	function_do_lister_changes(handle,&handle->func_source_paths);
+	function_unlock_paths(handle,&handle->func_source_paths,1);
 }
 
 PathNode *__asm __saveds HookGetDest(
@@ -138,7 +138,7 @@ PathNode *__asm __saveds HookGetDest(
 	if (pathbuf) *pathbuf=0;
 
 	// Valid source?
-	if (!(path=function_path_current(&handle->dest_paths)))
+	if (!(path=function_path_current(&handle->func_dest_paths)))
 		return 0;
 
 	// Copy path name
@@ -151,7 +151,7 @@ void __asm __saveds HookEndSource(
 	register __d0 long complete)
 {
 	// Done with this path
-	function_path_end(handle,&handle->source_paths,complete);
+	function_path_end(handle,&handle->func_source_paths,complete);
 }
 
 void __asm __saveds HookEndDest(
@@ -159,7 +159,7 @@ void __asm __saveds HookEndDest(
 	register __d0 long complete)
 {
 	// Done with this path
-	function_path_end(handle,&handle->dest_paths,complete);
+	function_path_end(handle,&handle->func_dest_paths,complete);
 }
 
 APTR __asm __saveds HookGetEntry(
@@ -203,7 +203,7 @@ void __asm __saveds HookReloadEntry(
 	PathNode *path;
 
 	// Get current path
-	if (path=function_path_current(&handle->source_paths))
+	if (path=function_path_current(&handle->func_source_paths))
 	{
 		// Add for reload
 		function_filechange_reloadfile(

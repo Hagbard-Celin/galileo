@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -97,7 +97,7 @@ void groups_new(BackdropInfo *info,IPCData *ipc)
 	if (object=backdrop_leftout_new(info,path,0,0))
 	{
 		// Change type to group
-		object->type=BDO_GROUP;
+		object->bdo_type=BDO_GROUP;
 
 		// Add object
 		backdrop_new_group_object(info,object,BDNF_CD|BDNF_RECALC);
@@ -123,11 +123,11 @@ BOOL backdrop_new_group_object(
 	backdrop_get_icon(info,object,flags&(GETICON_CD|GETICON_KEEP));
 
 	// If it's a disk, fail
-	if (!object->icon || (flags&BDNF_NO_DISKS && object->icon->do_Type==WBDISK))
+	if (!object->bdo_icon || (flags&BDNF_NO_DISKS && object->bdo_icon->do_Type==WBDISK))
 		return 0;
 
 	// Arrange new icon if necessary
-	if (object->flags&BDOF_NO_POSITION)
+	if (object->bdo_flags&BDOF_NO_POSITION)
 	{
 		// Allowed to arrange?
 		if (!(flags&BDNF_NO_ARRANGE))
@@ -280,10 +280,10 @@ void group_snapshot_icon(BackdropInfo *info,BackdropObject *icon,short x,short y
 	old=CurrentDir(lock);
 
 	// Dereference object
-	if (group_dereference(0,icon->device_name,buffer,0,&flags))
+	if (group_dereference(0,icon->bdo_device_name,buffer,0,&flags))
 	{
 		// Write new data file
-		group_write_data(icon->device_name,buffer,x,y,flags);
+		group_write_data(icon->bdo_device_name,buffer,x,y,flags);
 	}
 
 	// Restore directory

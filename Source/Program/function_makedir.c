@@ -60,7 +60,7 @@ GALILEOFM_FUNC(function_makedir)
 	dir_name=dir_path+512;
 
 	// Get current lister
-	path=function_path_current(&handle->source_paths);
+	path=function_path_current(&handle->func_source_paths);
 
 	// Default to icons?
 	if (GUI->flags&GUIF_SAVE_ICONS ||
@@ -105,7 +105,7 @@ GALILEOFM_FUNC(function_makedir)
 			else
 			{
 				// Build path
-				strcpy(dir_path,handle->source_path);
+				strcpy(dir_path,handle->func_source_path);
 				AddPart(dir_path,path,512);
 			}
 		}
@@ -151,7 +151,7 @@ GALILEOFM_FUNC(function_makedir)
 			}
 
 			// Build path name
-			strcpy(dir_path,handle->source_path);
+			strcpy(dir_path,handle->func_source_path);
 			AddPart(dir_path,dir_name,512);
 
 			// No icon?

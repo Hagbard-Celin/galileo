@@ -196,10 +196,10 @@ BOOL backdrop_popup(
 
 	// AppIcon?
 	else
-	if (object->type==BDO_APP_ICON)
+	if (object->bdo_type==BDO_APP_ICON)
 	{
 		// Is icon busy?
-		if (object->flags&BDOF_BUSY)
+		if (object->bdo_flags&BDOF_BUSY)
 		{
 			// No popups if busy
 			if (flags&BPF_OLOCKED) unlock_listlock(&info->objects);
@@ -207,32 +207,32 @@ BOOL backdrop_popup(
 		}
 
 		// Does it support snapshot?
-		if (((WB_AppIconFlags((struct AppIcon *)object->misc_data))&APPENTF_SNAPSHOT) ||
-			*object->name)
+		if (((WB_AppIconFlags((struct AppIcon *)object->bdo_misc_data))&APPENTF_SNAPSHOT) ||
+			*object->bdo_name)
 			flags|=BPF_SNAPSHOT;
 
 		// Does it support information?
-		if ((WB_AppIconFlags((struct AppIcon *)object->misc_data))&APPENTF_INFO)
+		if ((WB_AppIconFlags((struct AppIcon *)object->bdo_misc_data))&APPENTF_INFO)
 			flags|=BPF_CANINFO;
 
 		// Close item?
-		if (((AppEntry *)object->misc_data)->ae_flags&APPENTF_CLOSE)
+		if (((AppEntry *)object->bdo_misc_data)->ae_flags&APPENTF_CLOSE)
 			flags|=BPF_CLOSE;
 	}
 
 	// Disk?
 	else
-	if (object->type==BDO_DISK ||
-		object->type==BDO_BAD_DISK)
+	if (object->bdo_type==BDO_DISK ||
+		object->bdo_type==BDO_BAD_DISK)
 	{
 		// Good disk?
-		if (object->type==BDO_DISK) flags|=BPF_DISK;
+		if (object->bdo_type==BDO_DISK) flags|=BPF_DISK;
 
 		// Was icon selected, and is shift held down?
-		if (object->state && (qual&IEQUAL_ANYSHIFT))
+		if (object->bdo_state && (qual&IEQUAL_ANYSHIFT))
 		{
 			// Add to hidden list
-			if (desktop_add_hidden(object->device_name))
+			if (desktop_add_hidden(object->bdo_device_name))
 			{
 				// Refresh drives
 				send_main_reset_cmd(CONFIG_CHANGE_HIDDEN_DRIVES,0,0);
@@ -244,13 +244,13 @@ BOOL backdrop_popup(
 		}
 				
 		// Get disk information
-		if (!(object->flags&(BDOF_ASSIGN|BDOF_CACHE)))
-			diskinfo=GetDiskInfo(object->device_name,&infodata);
+		if (!(object->bdo_flags&(BDOF_ASSIGN|BDOF_CACHE)))
+			diskinfo=GetDiskInfo(object->bdo_device_name,&infodata);
 	}
 
 	// Trashcan?
 	else
-	if (object->icon->do_Type==WBGARBAGE)
+	if (object->bdo_icon->do_Type==WBGARBAGE)
 		flags|=BPF_TRASH;
 
 	// Got disk info?
@@ -337,9 +337,9 @@ BOOL backdrop_popup(
 
 	// Filetype menu?
 	if (handle ||
-		(object && (object->type==BDO_LEFT_OUT ||
-					object->type==BDO_DISK ||
-					object->type==BDO_BAD_DISK)))
+		(object && (object->bdo_type==BDO_LEFT_OUT ||
+					object->bdo_type==BDO_DISK ||
+					object->bdo_type==BDO_BAD_DISK)))
 	{
 		// Get popups for this file
 		if (popup_get_filetype(menu,info,handle,object,filename,extnum,&flags))
@@ -349,10 +349,10 @@ BOOL backdrop_popup(
 
 	// AppIcon?
 	else
-	if (object && object->type==BDO_APP_ICON)
+	if (object && object->bdo_type==BDO_APP_ICON)
 	{
 		// Get AppIcon menus
-		popup_get_appicon(menu,(AppEntry *)object->misc_data);
+		popup_get_appicon(menu,(AppEntry *)object->bdo_misc_data);
 	}
 
 	// Check for and remove trailing separators
@@ -391,7 +391,7 @@ BOOL backdrop_popup(
 			}
 
 			// Custom item for AppIcon?
-			if (res>=MENU_CUSTOM && object && object->type==BDO_APP_ICON)
+			if (res>=MENU_CUSTOM && object && object->bdo_type==BDO_APP_ICON)
 			{
 				unsigned short flags;
 
@@ -437,8 +437,8 @@ BOOL backdrop_popup(
 				if (object)
 				{
 					// Pass device name if it's a disk
-					if (object->type==BDO_DISK ||
-						object->type==BDO_BAD_DISK) devptr=object->device_name;
+					if (object->bdo_type==BDO_DISK ||
+						object->bdo_type==BDO_BAD_DISK) devptr=object->bdo_device_name;
 
 					// Else get a lock on the object's parent
 					else lock=backdrop_icon_lock(object);
@@ -467,12 +467,12 @@ BOOL backdrop_popup(
 						struct ArgArrayEntry *entry;
 
 						// Get entry
-						if (entry=NewArgArrayEntry(array,(devptr)?devptr:((filename)?(char *)FilePart(filename):object->name)))
+						if (entry=NewArgArrayEntry(array,(devptr)?devptr:((filename)?(char *)FilePart(filename):object->bdo_name)))
 						{
 							// Directory?
 							if (flags&BPF_DIRECTORY) entry->aae_Flags|=AAEF_DIR;
 							else
-							if (object && object->icon->do_Type==WBDRAWER) entry->aae_Flags|=AAEF_DIR;
+							if (object && object->bdo_icon->do_Type==WBDRAWER) entry->aae_Flags|=AAEF_DIR;
 						}
 					}
 
@@ -494,7 +494,7 @@ BOOL backdrop_popup(
 
 			// AppIcon?
 			else
-			if (object && object->type==BDO_APP_ICON)
+			if (object && object->bdo_type==BDO_APP_ICON)
 			{
 				// Send message
 				backdrop_appicon_message(object,BAPPF_MENU|(res-MENU_CUSTOM));
@@ -754,7 +754,7 @@ BOOL backdrop_popup(
 			case MENU_ICON_COPY:
 
 				// This only works on disks
-				if (object->type==BDO_DISK)
+				if (object->bdo_type==BDO_DISK)
 				{
 					// Launch diskcopy
 					function_launch(
@@ -764,7 +764,7 @@ BOOL backdrop_popup(
 						0,
 						0,0,
 						0,0,
-						BuildArgArray(object->device_name,0),0,0);
+						BuildArgArray(object->bdo_device_name,0),0,0);
 				}
 				break;
 
@@ -967,11 +967,11 @@ BOOL popup_get_filetype(
 	if (!(name=filename))
 	{
 		// Disk?
-		if (object->type==BDO_DISK ||
-			object->type==BDO_BAD_DISK)
+		if (object->bdo_type==BDO_DISK ||
+			object->bdo_type==BDO_BAD_DISK)
 		{
 			// Use device name
-			name=object->device_name;
+			name=object->bdo_device_name;
 		}
 
 		// Get icon lock
@@ -982,7 +982,7 @@ BOOL popup_get_filetype(
 			old=CurrentDir(lock);
 
 			// Get name pointer
-			name=object->name;
+			name=object->bdo_name;
 		}
 	}
 
@@ -1410,11 +1410,11 @@ void popup_default_menu(BackdropInfo *info,PopUpHandle *menu,short *extnum)
 
 				// Go through backdrop list
 				for (object=(BackdropObject *)info->objects.list.lh_Head;
-					object->node.ln_Succ;
-					object=(BackdropObject *)object->node.ln_Succ)
+					object->bdo_node.ln_Succ;
+					object=(BackdropObject *)object->bdo_node.ln_Succ)
 				{
 					// Selected icon?
-					if (object->state)
+					if (object->bdo_state)
 					{
 						selicons=0;
 						break;
@@ -1670,26 +1670,26 @@ MatchHandle *popup_build_icon_menu(BackdropInfo *info,char *filename,BackdropObj
 	else
 	{
 		// Flags for various types
-		bad=(object->type==BDO_BAD_DISK)?POPUPF_DISABLED:0;
-		app=(object->type==BDO_APP_ICON)?POPUPF_DISABLED:0;
-		group=(object->type==BDO_GROUP)?POPUPF_DISABLED:0;
-		leftout=(object->type==BDO_LEFT_OUT && !(object->flags&BDOF_DESKTOP_FOLDER) && info->flags&(BDIF_MAIN_DESKTOP|BDIF_GROUP))?POPUPF_DISABLED:0;
-		realleft=(object->type==BDO_LEFT_OUT && !(object->flags&BDOF_DESKTOP_FOLDER) && info->flags&BDIF_MAIN_DESKTOP)?POPUPF_DISABLED:0;
-		templeft=(realleft && object->flags&BDOF_TEMP_LEFTOUT)?POPUPF_DISABLED:0;
-		assign=(object->flags&BDOF_ASSIGN)?POPUPF_DISABLED:0;
+		bad=(object->bdo_type==BDO_BAD_DISK)?POPUPF_DISABLED:0;
+		app=(object->bdo_type==BDO_APP_ICON)?POPUPF_DISABLED:0;
+		group=(object->bdo_type==BDO_GROUP)?POPUPF_DISABLED:0;
+		leftout=(object->bdo_type==BDO_LEFT_OUT && !(object->bdo_flags&BDOF_DESKTOP_FOLDER) && info->flags&(BDIF_MAIN_DESKTOP|BDIF_GROUP))?POPUPF_DISABLED:0;
+		realleft=(object->bdo_type==BDO_LEFT_OUT && !(object->bdo_flags&BDOF_DESKTOP_FOLDER) && info->flags&BDIF_MAIN_DESKTOP)?POPUPF_DISABLED:0;
+		templeft=(realleft && object->bdo_flags&BDOF_TEMP_LEFTOUT)?POPUPF_DISABLED:0;
+		assign=(object->bdo_flags&BDOF_ASSIGN)?POPUPF_DISABLED:0;
 		nosnap=(flags&BPF_DISK && info->lister)?POPUPF_DISABLED:0;
-		noinfo=(object->type==BDO_APP_ICON && !(flags&BPF_CANINFO))?POPUPF_DISABLED:0;
-		nodev=(object->type==BDO_DISK && !object->device_name)?POPUPF_DISABLED:0;
+		noinfo=(object->bdo_type==BDO_APP_ICON && !(flags&BPF_CANINFO))?POPUPF_DISABLED:0;
+		nodev=(object->bdo_type==BDO_DISK && !object->bdo_device_name)?POPUPF_DISABLED:0;
 
 		// Write-protected disk?
 		if (flags&BPF_DISK && flags&BPF_WRITEPROT) nosnap=POPUPF_DISABLED;
 
 		// Get icon type
-		object_type=object->icon->do_Type;
+		object_type=object->bdo_icon->do_Type;
 	}
 
 	// Fix type for bad disks
-	if (object && object->type==BDO_BAD_DISK)
+	if (object && object->bdo_type==BDO_BAD_DISK)
 		object_type=WBKICK;
 
 	// Open - ghosted for bad disks
@@ -1699,7 +1699,7 @@ MatchHandle *popup_build_icon_menu(BackdropInfo *info,char *filename,BackdropObj
 		bad);
 
 	// Open with for projects
-	if (object_type==WBPROJECT && (!object || object->type!=BDO_APP_ICON))
+	if (object_type==WBPROJECT && (!object || object->bdo_type!=BDO_APP_ICON))
 	{
 		// Build OpenWith menu
 		popup_build_openwith(menu);
@@ -1710,7 +1710,7 @@ MatchHandle *popup_build_icon_menu(BackdropInfo *info,char *filename,BackdropObj
 		PopUpNewItem(menu,MSG_OPEN_NEW_WINDOW,MENU_OPEN_NEW_WINDOW,0);
 
 	// If the object is a cache drawer, can't do anything else
-	if (object && object->flags&BDOF_CACHE) bad=POPUPF_DISABLED;
+	if (object && object->bdo_flags&BDOF_CACHE) bad=POPUPF_DISABLED;
 
 	// Information - ghosted for appicons & bad disks, and assigns
 	PopUpNewItem(menu,MSG_ICON_INFO_MENU,MENU_ICON_INFO,bad|assign|noinfo);
@@ -1731,7 +1731,7 @@ MatchHandle *popup_build_icon_menu(BackdropInfo *info,char *filename,BackdropObj
 		bad|((flags&BPF_SNAPSHOT)?0:app)|assign|nosnap|templeft);
 
 	// Not an appicon?
-	if (!object || object->type!=BDO_APP_ICON)
+	if (!object || object->bdo_type!=BDO_APP_ICON)
 	{
 		// Add separator
 		PopUpSeparator(menu);
@@ -1748,7 +1748,7 @@ MatchHandle *popup_build_icon_menu(BackdropInfo *info,char *filename,BackdropObj
 		{
 			// Icon in a lister, or temp leftout?
 			if ((filename && !(flags&BPF_DISK)) ||
-				(object && object->type==BDO_LEFT_OUT && !(object->flags&BDOF_DESKTOP_FOLDER) && !(info->flags&BDIF_MAIN_DESKTOP)) ||
+				(object && object->bdo_type==BDO_LEFT_OUT && !(object->bdo_flags&BDOF_DESKTOP_FOLDER) && !(info->flags&BDIF_MAIN_DESKTOP)) ||
 				templeft)
 			{
 				// Leave out
@@ -1771,8 +1771,8 @@ MatchHandle *popup_build_icon_menu(BackdropInfo *info,char *filename,BackdropObj
 			{
 				// Icon in a lister?
 				if ((filename && !(flags&BPF_DISK)) ||
-					(object && object->type==BDO_LEFT_OUT &&
-						(!(info->flags&(BDIF_MAIN_DESKTOP|BDIF_GROUP)) || object->flags&BDOF_DESKTOP_FOLDER)))
+					(object && object->bdo_type==BDO_LEFT_OUT &&
+						(!(info->flags&(BDIF_MAIN_DESKTOP|BDIF_GROUP)) || object->bdo_flags&BDOF_DESKTOP_FOLDER)))
 				{
 					// Build 'CopyTo' menu
 					popup_build_copyto(menu,item);
@@ -1797,9 +1797,9 @@ MatchHandle *popup_build_icon_menu(BackdropInfo *info,char *filename,BackdropObj
 
 	// Leftout/group or assign?
 	if ((filename && !(flags&BPF_DISK)) ||
-		(object && (object->type==BDO_LEFT_OUT ||
-					object->type==BDO_GROUP ||
-					object->flags&BDOF_ASSIGN)))
+		(object && (object->bdo_type==BDO_LEFT_OUT ||
+					object->bdo_type==BDO_GROUP ||
+					object->bdo_flags&BDOF_ASSIGN)))
 	{
 		// Delete
 		if (!(flags&BPF_TRASH))
@@ -1811,7 +1811,7 @@ MatchHandle *popup_build_icon_menu(BackdropInfo *info,char *filename,BackdropObj
 
 	// Disk?
 	else
-	if ((flags&BPF_DISK || object->type==BDO_BAD_DISK) && (!object || !(object->flags&BDOF_CACHE)))
+	if ((flags&BPF_DISK || object->bdo_type==BDO_BAD_DISK) && (!object || !(object->bdo_flags&BDOF_CACHE)))
 	{
 		// Format
 		PopUpNewItem(menu,
@@ -1822,7 +1822,7 @@ MatchHandle *popup_build_icon_menu(BackdropInfo *info,char *filename,BackdropObj
 
 	// Not an AppIcon or a Group?
 	if (!object ||
-		(object->type!=BDO_APP_ICON && object->type!=BDO_GROUP))
+		(object->bdo_type!=BDO_APP_ICON && object->bdo_type!=BDO_GROUP))
 	{
 		// Lock extension list
 		lock_listlock(&GUI->popupext_list,FALSE);
@@ -1843,8 +1843,8 @@ MatchHandle *popup_build_icon_menu(BackdropInfo *info,char *filename,BackdropObj
 			{
 				// Is this left-out?
 				if (object &&
-					object->type==BDO_LEFT_OUT &&
-					!(object->flags&BDOF_DESKTOP_FOLDER) &&
+					object->bdo_type==BDO_LEFT_OUT &&
+					!(object->bdo_flags&BDOF_DESKTOP_FOLDER) &&
 					info->flags&BDIF_MAIN_DESKTOP) match=1;
 			}
 

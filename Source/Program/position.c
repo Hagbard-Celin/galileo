@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -451,14 +451,14 @@ position_rec *PositionUpdate(Lister *lister,short flags)
 
 				// Go through icons
 				for (object=(BackdropObject *)info->objects.list.lh_Head;
-					object->node.ln_Succ;
-					object=(BackdropObject *)object->node.ln_Succ)
+					object->bdo_node.ln_Succ;
+					object=(BackdropObject *)object->bdo_node.ln_Succ)
 				{
 					// Is lister from this icon?
 					if (lister->backdrop==object)
 					{
 						// If we have an icon, set info in that
-						if (object->icon && object->icon->do_DrawerData)
+						if (object->bdo_icon && object->bdo_icon->do_DrawerData)
 						{
 							struct IBox *dims;
 
@@ -472,31 +472,31 @@ position_rec *PositionUpdate(Lister *lister,short flags)
 								dims=&lister->cur_buffer->dimensions;
 
 							// Set position in icon
-							*((struct IBox *)&object->icon->do_DrawerData->dd_NewWindow.LeftEdge)=*dims;
+							*((struct IBox *)&object->bdo_icon->do_DrawerData->dd_NewWindow.LeftEdge)=*dims;
 
 							// Clear flags
-							object->icon->do_DrawerData->dd_Flags&=~(WBSHOWFLAG_SHOWALL|WBSHOWFLAG_ACTION);
+							object->bdo_icon->do_DrawerData->dd_Flags&=~(WBSHOWFLAG_SHOWALL|WBSHOWFLAG_ACTION);
 
 							// Currently in icon mode?
 							if (lister->flags&LISTERF_VIEW_ICONS)
 							{
 								// Set flags
-								object->icon->do_DrawerData->dd_ViewModes=WBVIEWMODE_ICON;
+								object->bdo_icon->do_DrawerData->dd_ViewModes=WBVIEWMODE_ICON;
 
 								// Icon action?
 								if (lister->flags&LISTERF_ICON_ACTION)
-									object->icon->do_DrawerData->dd_Flags|=WBSHOWFLAG_ACTION;
+									object->bdo_icon->do_DrawerData->dd_Flags|=WBSHOWFLAG_ACTION;
 
 								// Show all?
 								if (lister->flags&LISTERF_SHOW_ALL)
-									object->icon->do_DrawerData->dd_Flags|=WBSHOWFLAG_SHOWALL;
+									object->bdo_icon->do_DrawerData->dd_Flags|=WBSHOWFLAG_SHOWALL;
 							}
 
 							// Or in text mode
 							else
 							{
 								// Set viewmode
-								object->icon->do_DrawerData->dd_ViewModes=WBVIEWMODE_NAME;
+								object->bdo_icon->do_DrawerData->dd_ViewModes=WBVIEWMODE_NAME;
 							}
 						}
 						break;
@@ -507,7 +507,7 @@ position_rec *PositionUpdate(Lister *lister,short flags)
 				unlock_listlock(&info->objects);
 
 				// Matched?
-				if (object->node.ln_Succ) break;
+				if (object->bdo_node.ln_Succ) break;
 			}
 		}
 

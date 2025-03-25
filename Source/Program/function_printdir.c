@@ -48,12 +48,12 @@ GALILEOFM_FUNC(function_printdir)
 	struct Library *ModuleBase;
 
 	// Get source path
-	if (!(path=function_path_current(&handle->source_paths)))
+	if (!(path=function_path_current(&handle->func_source_paths)))
 		return 0;
 
 	// Open temporary output file
-	lsprintf(handle->work_buffer+800,"T:Galileo-tmp.%lx",handle);
-	if (!(outfile=OpenBuf(handle->work_buffer+800,MODE_NEWFILE,1024)))
+	lsprintf(handle->func_work_buf+800,"T:Galileo-tmp.%lx",handle);
+	if (!(outfile=OpenBuf(handle->func_work_buf+800,MODE_NEWFILE,1024)))
 		return 0;
 
 	// Output path
@@ -77,20 +77,20 @@ GALILEOFM_FUNC(function_printdir)
 			short len;
 
 			// Build display string for this entry
-			builddisplaystring(entry,handle->work_buffer,lister);
+			builddisplaystring(entry,handle->func_work_buf,lister);
 
 			// Find last character in string
-			for (len=strlen(handle->work_buffer)-1;len>=0;len--)
+			for (len=strlen(handle->func_work_buf)-1;len>=0;len--)
 			{
-				if (handle->work_buffer[len]!=' ')
+				if (handle->func_work_buf[len]!=' ')
 				{
-					handle->work_buffer[len+1]=0;
+					handle->func_work_buf[len+1]=0;
 					break;
 				}
 			}
 
 			// Output to temporary file
-			WriteBuf(outfile,handle->work_buffer,-1);
+			WriteBuf(outfile,handle->func_work_buf,-1);
 			WriteBuf(outfile,"\n",1);
 		}
 
@@ -121,7 +121,7 @@ GALILEOFM_FUNC(function_printdir)
 			date_build_string(&handle->s_info->fib_Date,handle->temp_buffer+40,1);
 
 			// Build output string for this file
-			lsprintf(handle->work_buffer,
+			lsprintf(handle->func_work_buf,
 				"%-24s%8s %8s %s\n",
 				handle->s_info->fib_FileName,
 				handle->temp_buffer,
@@ -129,7 +129,7 @@ GALILEOFM_FUNC(function_printdir)
 				handle->temp_buffer+40);
 
 			// Write output
-			WriteBuf(outfile,handle->work_buffer,-1);
+			WriteBuf(outfile,handle->func_work_buf,-1);
 
 			// Comment?
 			if (handle->s_info->fib_Comment[0])
@@ -155,7 +155,7 @@ GALILEOFM_FUNC(function_printdir)
 
 		// Initialise fake list
 		NewList(&list);
-		node.ln_Name=handle->work_buffer+800;
+		node.ln_Name=handle->func_work_buf+800;
 		AddTail(&list,&node);
 
 		// Print file
@@ -166,6 +166,6 @@ GALILEOFM_FUNC(function_printdir)
 	}
 
 	// Delete temporary file
-	DeleteFile(handle->work_buffer+800);
+	DeleteFile(handle->func_work_buf+800);
 	return 1;
 }

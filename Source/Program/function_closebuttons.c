@@ -149,7 +149,7 @@ GALILEOFM_FUNC(function_closebuttons)
 	if (!close_all && !close_bank)
 	{
 		// If we don't have one, return
-		if (!(bank=handle->buttons)) return 1;
+		if (!(bank=handle->func_buttons)) return 1;
 	}
 
 	// Lock buttons list

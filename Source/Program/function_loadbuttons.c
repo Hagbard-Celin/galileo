@@ -143,7 +143,7 @@ GALILEOFM_FUNC(function_loadbuttons)
 		Buttons *buttons;
 
 		// Build full name
-		function_build_source(handle,entry,handle->work_buffer);
+		function_build_source(handle,entry,handle->func_work_buf);
 
 		// Start menu?
 		if (start)
@@ -151,7 +151,7 @@ GALILEOFM_FUNC(function_loadbuttons)
 			IPCData *ipc;
 
 			// Open as a start menu
-			if (ipc=start_new(handle->work_buffer,label,image,-1,-1))
+			if (ipc=start_new(handle->func_work_buf,label,image,-1,-1))
 			{
 				// Not iconified?
 				if (GUI->window && !hidden)
@@ -161,7 +161,7 @@ GALILEOFM_FUNC(function_loadbuttons)
 
 		// Open button bank
 		else
-		if (buttons=buttons_new(handle->work_buffer,0,0,0,buttonflags))
+		if (buttons=buttons_new(handle->func_work_buf,0,0,0,buttonflags))
 		{
 			// Not iconified?
 			if (GUI->window && !hidden)

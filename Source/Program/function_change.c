@@ -156,13 +156,13 @@ GALILEOFM_FUNC(function_change)
 					// Convert to separate strings
 					ParseDateStrings(
 						(char *)instruction->ipa_funcargs->FA_Arguments[2],
-						handle->work_buffer+768,
-						handle->work_buffer+896,0);
+						handle->func_work_buf+768,
+						handle->func_work_buf+896,0);
 
 					// Convert to datestamp
 					if (!(DateFromStrings(
-						handle->work_buffer+768,
-						handle->work_buffer+896,
+						handle->func_work_buf+768,
+						handle->func_work_buf+896,
 						&data->date,
 						environment->env->settings.date_format))) return 0;
 				}
@@ -212,7 +212,7 @@ GALILEOFM_FUNC(function_change)
 	}
 
 	// Get current path
-	if (!(path=function_path_current(&handle->source_paths)))
+	if (!(path=function_path_current(&handle->func_source_paths)))
 		return 0;
 
 	// Tell this path to update it's datestamp at the end
@@ -523,10 +523,10 @@ function_change_get_comment(
 
 	// Ask user for a comment
 	get_trunc_filename(FilePart(file),name);
-	lsprintf(handle->work_buffer,GetString(&locale,MSG_ENTER_COMMENT),name);
+	lsprintf(handle->func_work_buf,GetString(&locale,MSG_ENTER_COMMENT),name);
 	ret=function_request(
 		handle,
-		handle->work_buffer,
+		handle->func_work_buf,
 		SRF_BUFFER,
 		buffer,79,
 		GetString(&locale,MSG_OKAY),
@@ -567,7 +567,7 @@ function_change_get_protect(
 	clear_mask=masks+1;
 
 	// Fill out new window
-	if (lister=function_lister_current(&handle->source_paths))
+	if (lister=function_lister_current(&handle->func_source_paths))
 	{
 		new_win.parent=lister->window;
 		new_win.flags=0;
@@ -785,23 +785,23 @@ function_change_get_date(
 	// Get current datestamp string
 	DateToStrings(
 		date,
-		handle->work_buffer+512,
-		handle->work_buffer+540,
+		handle->func_work_buf+512,
+		handle->func_work_buf+540,
 		0);
 
 	// Strip excess spaces at the end of the date string
-	ptr=handle->work_buffer+512+strlen(handle->work_buffer+512)-1;
-	while (*ptr==' ' && ptr>handle->work_buffer+512) --ptr;
+	ptr=handle->func_work_buf+512+strlen(handle->func_work_buf+512)-1;
+	while (*ptr==' ' && ptr>handle->func_work_buf+512) --ptr;
 	if (*(ptr+1)==' ') *(ptr+1)=0;
 
 	// Add time string
-	strcat(handle->work_buffer+512," ");
-	strcat(handle->work_buffer+512,handle->work_buffer+540);
+	strcat(handle->func_work_buf+512," ");
+	strcat(handle->func_work_buf+512,handle->func_work_buf+540);
 
 	// Ask user for date
 	get_trunc_filename(FilePart(file),name);
 	lsprintf(
-		handle->work_buffer,
+		handle->func_work_buf,
 		GetString(&locale,MSG_ENTER_DATE_AND_TIME),
 		name);
 
@@ -811,16 +811,16 @@ function_change_get_date(
 		// Ask for date
 		if ((ret=function_request(
 			handle,
-			handle->work_buffer,
+			handle->func_work_buf,
 			SRF_BUFFER,
-			handle->work_buffer+512,20,
+			handle->func_work_buf+512,20,
 			GetString(&locale,MSG_OKAY),
 			GetString(&locale,MSG_ALL),
 			GetString(&locale,MSG_SKIP),
 			GetString(&locale,MSG_ABORT),0))==0 || ret==3) break;
 
 		// If string is empty, get current datestamp
-		if (handle->work_buffer[512]==0)
+		if (handle->func_work_buf[512]==0)
 		{
 			DateStamp(date);
 			break;
@@ -830,14 +830,14 @@ function_change_get_date(
 		{
 			// Convert to separate strings
 			ParseDateStrings(
-				handle->work_buffer+512,
-				handle->work_buffer+768,
-				handle->work_buffer+896,0);
+				handle->func_work_buf+512,
+				handle->func_work_buf+768,
+				handle->func_work_buf+896,0);
 
 			// Convert to datestamp
 			if (!(DateFromStrings(
-				handle->work_buffer+768,
-				handle->work_buffer+896,
+				handle->func_work_buf+768,
+				handle->func_work_buf+896,
 				date,
 				environment->env->settings.date_format)))
 			{

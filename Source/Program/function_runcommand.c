@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -48,10 +48,10 @@ GALILEOFM_FUNC(function_runcommand)
 		return 0;
 
 	// Build full name
-	function_build_source(handle,entry,handle->work_buffer);
+	function_build_source(handle,entry,handle->func_work_buf);
 
 	// Load command
-	func=function_load_function(handle->work_buffer);
+	func=function_load_function(handle->func_work_buf);
 
 	// Got function?
 	if (func)
@@ -90,10 +90,10 @@ GALILEOFM_FUNC(function_editcommand)
 		return 0;
 
 	// Build full name
-	function_build_source(handle,entry,handle->work_buffer);
+	function_build_source(handle,entry,handle->func_work_buf);
 
 	// Edit the command
-	command_new(GUI->backdrop,handle->ipc,handle->work_buffer);
+	command_new(GUI->backdrop,handle->ipc,handle->func_work_buf);
 	return 1;
 }
 

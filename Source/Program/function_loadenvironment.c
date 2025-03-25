@@ -49,24 +49,24 @@ GALILEOFM_FUNC(function_loadenvironment)
 		BPTR lock;
 
 		// Build full name
-		function_build_source(handle,entry,handle->work_buffer);
+		function_build_source(handle,entry,handle->func_work_buf);
 
 		// See if file exists
-		if (lock=Lock(handle->work_buffer,ACCESS_READ))
+		if (lock=Lock(handle->func_work_buf,ACCESS_READ))
 			UnLock(lock);
 
 		// Load environment?
 		if (command->function==FUNC_LOADENVIRONMENT)
 		{
 			// If file didn't exist, look in default directory
-			if (!lock) lsprintf(handle->work_buffer,"PROGDIR:environment/%s",entry->fe_name);
+			if (!lock) lsprintf(handle->func_work_buf,"PROGDIR:environment/%s",entry->fe_name);
 
 			// Allocate packet
-			if (packet=AllocVec(sizeof(env_packet)+strlen(handle->work_buffer),0))
+			if (packet=AllocVec(sizeof(env_packet)+strlen(handle->func_work_buf),0))
 			{
 				// Fill out packet
 				packet->type=-1;
-				strcpy(packet->name,handle->work_buffer);
+				strcpy(packet->name,handle->func_work_buf);
 
 				// Launch process to open environment
 				IPC_Launch(
@@ -90,8 +90,8 @@ GALILEOFM_FUNC(function_loadenvironment)
 				char *name;
 
 				// Allocate name copy
-				if (name=AllocVec(strlen(handle->work_buffer)+1,0))
-					strcpy(name,handle->work_buffer);
+				if (name=AllocVec(strlen(handle->func_work_buf)+1,0))
+					strcpy(name,handle->func_work_buf);
 
 				// Launch process to configure filetypes
 				if (!(misc_startup("galileo_config_filetypes",MENU_FILETYPES,GUI->window,name,1)))

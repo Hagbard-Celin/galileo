@@ -49,7 +49,7 @@ GALILEOFM_FUNC(function_select)
 	short ret=0;
 
 	// Get current lister
-	if (!(lister=function_lister_current(&handle->source_paths)))
+	if (!(lister=function_lister_current(&handle->func_source_paths)))
 		return 1;
 
 	// Allocate and copy local select data
@@ -180,7 +180,7 @@ GALILEOFM_FUNC(function_select)
 		IPC_Command(
 			lister->ipc,
 			LISTER_SELECT_WILD,
-			(ULONG)&handle->dest_paths,
+			(ULONG)&handle->func_dest_paths,
 			data,
 			0,
 			REPLY_NO_PORT);
@@ -559,7 +559,7 @@ void function_select_file(FunctionHandle *handle,Lister *lister,char *filename)
 	IPC_Command(
 		lister->ipc,
 		LISTER_SELECT_WILD,
-		(ULONG)&handle->dest_paths,
+		(ULONG)&handle->func_dest_paths,
 		&data,
 		0,
 		(struct MsgPort *)-1);

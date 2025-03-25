@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -48,16 +48,16 @@ void backdrop_select_all(BackdropInfo *info,short state)
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Is object not selected?
-		if (((state && !object->state) ||
-			(!state && object->state)) && object->icon)
+		if (((state && !object->bdo_state) ||
+			(!state && object->bdo_state)) && object->bdo_icon)
 		{
 			// Select object
-			object->state=state;
-			object->flags|=BDOF_STATE_CHANGE;
+			object->bdo_state=state;
+			object->bdo_flags|=BDOF_STATE_CHANGE;
 
 /*
 			// Add to selection list
@@ -98,24 +98,24 @@ void backdrop_select_area(BackdropInfo *info,short state)
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Valid icon?	
-		if (object->icon)
+		if (object->bdo_icon)
 		{
 			// Icon temporarily selected?
-			if (object->state==2)
+			if (object->bdo_state==2)
 			{
 				// Turn it on?
 				if (state==1)
 				{
 					// Select object
-					object->state=1;
+					object->bdo_state=1;
 
 					// Is this a tool?
-					if (object->type!=BDO_APP_ICON &&
-						object->icon->do_Type==WBTOOL)
+					if (object->bdo_type!=BDO_APP_ICON &&
+						object->bdo_icon->do_Type==WBTOOL)
 					{
 						// If no tools selected, remember this one
 						if (!info->first_sel_tool)
@@ -125,25 +125,25 @@ void backdrop_select_area(BackdropInfo *info,short state)
 
 				// See if it needs to be turned off
 				else
-				if (state==0 || !(geo_box_intersect(&object->image_rect,&info->select)))
+				if (state==0 || !(geo_box_intersect(&object->bdo_image_rect,&info->select)))
 				{
 					// Deselect this object
-					object->state=0;
-					object->flags|=BDOF_STATE_CHANGE;
+					object->bdo_state=0;
+					object->bdo_flags|=BDOF_STATE_CHANGE;
 					backdrop_render_object(info,object,0);
 				}
 			}
 
 			// Currently off?
 			else
-			if (!object->state && state==2)
+			if (!object->bdo_state && state==2)
 			{
 				// See if icon is in select area
-				if (geo_box_intersect(&object->image_rect,&info->select))
+				if (geo_box_intersect(&object->bdo_image_rect,&info->select))
 				{
 					// Select this object
-					object->state=2;
-					object->flags|=BDOF_STATE_CHANGE;
+					object->bdo_state=2;
+					object->bdo_flags|=BDOF_STATE_CHANGE;
 					backdrop_render_object(info,object,0);
 				}
 			}

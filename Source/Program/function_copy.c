@@ -154,7 +154,7 @@ GALILEOFM_FUNC(function_copy)
 	}
 
 	// Get source path
-	source=function_path_current(&handle->source_paths);
+	source=function_path_current(&handle->func_source_paths);
 
 	// From icon drag & drop?
 	if (handle->flags&FUNCF_DRAG_DROP && handle->flags&FUNCF_ICONS && !(handle->flags&FUNCF_COPY_NO_MOVE))
@@ -163,7 +163,7 @@ GALILEOFM_FUNC(function_copy)
 		dragdrop=1;
 
 		// See if paths are the same device
-		if (function_check_same_path(handle->source_path,handle->dest_path)==LOCK_SAME_VOLUME)
+		if (function_check_same_path(handle->func_source_path,handle->func_dest_path)==LOCK_SAME_VOLUME)
 		{
 			// Change operation to move
 			handle->instruction_flags|=INSTF_DIR_CLEAR_SIZES;
@@ -180,7 +180,7 @@ GALILEOFM_FUNC(function_copy)
 		(function==(FUNC_COPYAS || FUNC_MCOPYAS) && instruction->ipa_funcargs && instruction->ipa_funcargs->FA_Arguments[COPYAS_MOVESAME]))
 	{
 		// See if paths are the same device
-		if (function_check_same_path(handle->source_path,handle->dest_path)==LOCK_SAME_VOLUME)
+		if (function_check_same_path(handle->func_source_path,handle->func_dest_path)==LOCK_SAME_VOLUME)
 		{
 			// Change operation to move
 			handle->instruction_flags|=INSTF_DIR_CLEAR_SIZES;
@@ -189,12 +189,12 @@ GALILEOFM_FUNC(function_copy)
 	}		
 
 	// Go through destination paths
-	while (path=function_path_next(&handle->dest_paths))
+	while (path=function_path_next(&handle->func_dest_paths))
 	{
 		short invalid=0,ret;
 
 		// See if the paths are the same
-		if ((ret=function_check_same_path(handle->source_path,path->pn_path))==LOCK_SAME)
+		if ((ret=function_check_same_path(handle->func_source_path,path->pn_path))==LOCK_SAME)
 		{
 			// Mark as the same
 			path->pn_flags|=LISTNF_SAME;
@@ -237,7 +237,7 @@ GALILEOFM_FUNC(function_copy)
 		}
 
 		// Done with this path
-		function_path_end(handle,&handle->dest_paths,invalid);
+		function_path_end(handle,&handle->func_dest_paths,invalid);
 	}
 
 	// If we don't have any destinations, return
@@ -351,7 +351,7 @@ GALILEOFM_FUNC(function_copy)
 
 			// See if source is the same device
 			if (move_flag &&
-				function_check_same_path(entry->fe_name,handle->dest_path)==LOCK_SAME_VOLUME)
+				function_check_same_path(entry->fe_name,handle->func_dest_path)==LOCK_SAME_VOLUME)
 			{
 				// Skip over this entry
 				DisplayBeep(GUI->screen_pointer);
@@ -368,12 +368,12 @@ GALILEOFM_FUNC(function_copy)
 				Examine(lock,handle->d_info);
 
 				// Get device name
-				DevNameFromLock(lock,handle->work_buffer+512,256);
+				DevNameFromLock(lock,handle->func_work_buf+512,256);
 				UnLock(lock);
 
 				// Get disk icon
-				lsprintf(handle->work_buffer,"%sDisk",entry->fe_name);
-				if (!(icon=GetDiskObject(handle->work_buffer)))
+				lsprintf(handle->func_work_buf,"%sDisk",entry->fe_name);
+				if (!(icon=GetDiskObject(handle->func_work_buf)))
 				{
 					// Use default drawer icon
 					icon=GetDefDiskObject(WBDRAWER);
@@ -386,18 +386,18 @@ GALILEOFM_FUNC(function_copy)
 					icon->do_Type=WBDRAWER;
 
 					// Try and get position
-					copy_icon_position(handle,handle->work_buffer+512,icon);
+					copy_icon_position(handle,handle->func_work_buf+512,icon);
 				}
 
 				// Get destination path
-				if (path=function_path_current(&handle->dest_paths))
+				if (path=function_path_current(&handle->func_dest_paths))
 				{
 					// Build destination path
-					strcpy(handle->work_buffer,path->pn_path);
-					AddPart(handle->work_buffer,handle->d_info->fib_FileName,512);
+					strcpy(handle->func_work_buf,path->pn_path);
+					AddPart(handle->func_work_buf,handle->d_info->fib_FileName,512);
 
 					// Create directory
-					if (lock=OriginalCreateDir(handle->work_buffer))
+					if (lock=OriginalCreateDir(handle->func_work_buf))
 					{
 						// Examine this directory
 						Examine(lock,handle->s_info);
@@ -409,7 +409,7 @@ GALILEOFM_FUNC(function_copy)
 						if (icon)
 						{
 							// Write icon
-							if (PutDiskObject(handle->work_buffer,icon))
+							if (PutDiskObject(handle->func_work_buf,icon))
 							{
 								// Add to listers
 								function_filechange_loadfile(
@@ -622,7 +622,7 @@ GALILEOFM_FUNC(function_copy)
 			if (entry->fe_name[strlen(entry->fe_name)-1]==':' && dragdrop)
 			{
 				// Get destination path
-				if (path=function_path_current(&handle->dest_paths))
+				if (path=function_path_current(&handle->func_dest_paths))
 				{
 					// Clear path flag
 					path->pn_flags&=~LISTNF_CHANGED;
@@ -662,14 +662,14 @@ GALILEOFM_FUNC(function_copy)
 			if (function==FUNC_CLONE) path=source;
 
 			// Otherwise, get destination path
-			else path=function_path_next(&handle->dest_paths);
+			else path=function_path_next(&handle->func_dest_paths);
 
 			// Go through destination paths
 			while (path)
 			{
 				// Get destination path
-				strcpy(handle->dest_path,path->pn_path);
-				strcpy(dest_file,handle->dest_path);
+				strcpy(handle->func_dest_path,path->pn_path);
+				strcpy(dest_file,handle->func_dest_path);
 				AddPart(dest_file,dest_name,256);
 
 				// If there's multiple destinations, or flagged, change info
@@ -685,7 +685,7 @@ GALILEOFM_FUNC(function_copy)
 					}
 
 					// Build info string
-					function_build_info(handle,source_file,handle->dest_path,3);
+					function_build_info(handle,source_file,handle->func_dest_path,3);
 					change_info=0;
 
 					// Restore source filename
@@ -709,10 +709,10 @@ GALILEOFM_FUNC(function_copy)
 							short len;
 
 							// Check we're not trying to copy it into itself
-							if (strnicmp(handle->dest_path,source_file,(len=strlen(source_file)))==0 &&
-								(handle->dest_path[len]==0 ||
-								handle->dest_path[len]=='/' ||
-								handle->dest_path[len]==':'))
+							if (strnicmp(handle->func_dest_path,source_file,(len=strlen(source_file)))==0 &&
+								(handle->func_dest_path[len]==0 ||
+								handle->func_dest_path[len]=='/' ||
+								handle->func_dest_path[len]==':'))
 							{
 								// Put up error requester
 								if (!(function_request(
@@ -982,8 +982,8 @@ GALILEOFM_FUNC(function_copy)
 				if (function==FUNC_CLONE) break;
 
 				// Done with this path, get next
-				function_path_end(handle,&handle->dest_paths,0);
-				path=function_path_next(&handle->dest_paths);
+				function_path_end(handle,&handle->func_dest_paths,0);
+				path=function_path_next(&handle->func_dest_paths);
 			}
 
 			// Aborted?
@@ -1046,14 +1046,14 @@ GALILEOFM_FUNC(function_copy)
 					if (!(handle->instruction_flags&INSTF_DELETE_UNPROTECT))
 					{
 						// Build requester text
-						lsprintf(handle->work_buffer,
+						lsprintf(handle->func_work_buf,
 							GetString(&locale,MSG_DELETE_PROTECTED),
 							FilePart(source_file));
 
 						// Display request
 						if (!(ret=function_request(
 							handle,
-							handle->work_buffer,
+							handle->func_work_buf,
 							0,
 							GetString(&locale,MSG_UNPROTECT),
 							GetString(&locale,MSG_UNPROTECT_ALL),

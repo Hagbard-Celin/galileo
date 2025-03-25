@@ -2098,14 +2098,14 @@ void select_global_state(Lister *lister,int sel_state)
 
 			// Go through objects
 			for (object=(BackdropObject *)lister->backdrop_info->objects.list.lh_Head;
-				object->node.ln_Succ;
-				object=(BackdropObject *)object->node.ln_Succ)
+				object->bdo_node.ln_Succ;
+				object=(BackdropObject *)object->bdo_node.ln_Succ)
 			{
 				// Set state
-				if (object->state!=sel_state)
+				if (object->bdo_state!=sel_state)
 				{
-					object->state=sel_state;
-					object->flags|=BDOF_STATE_CHANGE;
+					object->bdo_state=sel_state;
+					object->bdo_flags|=BDOF_STATE_CHANGE;
 				}
 			}
 
@@ -2179,12 +2179,12 @@ void select_global_toggle(Lister *lister)
 
 		// Go through objects
 		for (object=(BackdropObject *)lister->backdrop_info->objects.list.lh_Head;
-			object->node.ln_Succ;
-			object=(BackdropObject *)object->node.ln_Succ)
+			object->bdo_node.ln_Succ;
+			object=(BackdropObject *)object->bdo_node.ln_Succ)
 		{
 			// Toggle state
-			object->state=(object->state)?0:1;
-			object->flags|=BDOF_STATE_CHANGE;
+			object->bdo_state=(object->bdo_state)?0:1;
+			object->bdo_flags|=BDOF_STATE_CHANGE;
 		}
 
 		// Unlock backdrop list
@@ -2385,7 +2385,7 @@ void select_global_wild(Lister *lister,SelectData *data,PathList *dest_list)
 
 	// Go through entries
 	while ( (entry && entry->de_Node.dn_Succ) ||
-			(object && object->node.ln_Succ))
+			(object && object->bdo_node.ln_Succ))
 	{
 		BOOL match;
 		short entry_type,sel;
@@ -2397,7 +2397,7 @@ void select_global_wild(Lister *lister,SelectData *data,PathList *dest_list)
 		{
 			// Get next entry
 			if (entry) entry=(DirEntry *)entry->de_Node.dn_Succ;
-			else object=(BackdropObject *)object->node.ln_Succ;
+			else object=(BackdropObject *)object->bdo_node.ln_Succ;
 
 			// Clear flag and loop
 			get_next=0;
@@ -2407,24 +2407,24 @@ void select_global_wild(Lister *lister,SelectData *data,PathList *dest_list)
 
 		// Selected?
 		if (entry) sel=(entry->de_Flags&ENTF_SELECTED)?1:0;
-		else sel=object->state;
+		else sel=object->bdo_state;
 
 		// Get type
 		if (entry) entry_type=ENTRYTYPE(entry->de_Node.dn_Type);
-		else entry_type=(object->icon->do_Type==WBDRAWER || object->icon->do_Type==WBGARBAGE)?ENTRY_DIRECTORY:ENTRY_FILE;
+		else entry_type=(object->bdo_icon->do_Type==WBDRAWER || object->bdo_icon->do_Type==WBGARBAGE)?ENTRY_DIRECTORY:ENTRY_FILE;
 
 		// Get name and date
-		entry_name=(entry)?entry->de_Node.dn_Name:object->name;
-		entry_date=(entry)?&entry->de_Date:&object->date;
+		entry_name=(entry)?entry->de_Node.dn_Name:object->bdo_name;
+		entry_date=(entry)?&entry->de_Date:&object->bdo_date;
 
 		// If exclusive, deselect this to start with
 		if (data->type&SELECTF_EXCLUSIVE && sel)
 		{
 			// Icon?
-			if (object && object->state)
+			if (object && object->bdo_state)
 			{
-				object->state=0;
-				object->flags|=BDOF_STATE_CHANGE;
+				object->bdo_state=0;
+				object->bdo_flags|=BDOF_STATE_CHANGE;
 			}
 
 			// Normal file
@@ -2551,8 +2551,8 @@ void select_global_wild(Lister *lister,SelectData *data,PathList *dest_list)
 			// Icon?
 			if (object)
 			{
-				object->state=(object->state)?0:1;
-				object->flags|=BDOF_STATE_CHANGE;
+				object->bdo_state=(object->bdo_state)?0:1;
+				object->bdo_flags|=BDOF_STATE_CHANGE;
 			}
 
 			// Normal file

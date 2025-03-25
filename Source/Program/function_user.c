@@ -170,7 +170,7 @@ GALILEOFM_FUNC(function_user)
 	else return 0;
 
 	// Get destination lister
-	if (source=function_path_current(&handle->dest_paths))
+	if (source=function_path_current(&handle->func_dest_paths))
 	{
 		// Get destination path
 		if (dest_lister=source->pn_lister)
@@ -178,7 +178,7 @@ GALILEOFM_FUNC(function_user)
 	}
 
 	// Get source lister
-	if (source=function_path_current(&handle->source_paths))
+	if (source=function_path_current(&handle->func_source_paths))
 		source_lister=source->pn_lister;
 
 	// Go through entries
@@ -206,10 +206,10 @@ GALILEOFM_FUNC(function_user)
 		}
 
 		// Build source name
-		function_build_source(handle,entry,handle->work_buffer);
+		function_build_source(handle,entry,handle->func_work_buf);
 
 		// Match filetype for this file
-		if (type=filetype_identify(handle->work_buffer,action,0,0))
+		if (type=filetype_identify(handle->func_work_buf,action,0,0))
 		{
 			// Get appropriate function
 			if (func=FindFunctionType(&type->function_list,action))
@@ -235,7 +235,7 @@ GALILEOFM_FUNC(function_user)
 				type_function=func;
 
 				// Create a new external entry
-				if (exentry=new_external_entry(handle,handle->work_buffer))
+				if (exentry=new_external_entry(handle,handle->func_work_buf))
 				{
 					// Save pointer to lister entry
 					exentry->een_entry=entry->fe_entry;
@@ -285,16 +285,16 @@ void function_user_run(FunctionHandle *handle,Cfg_Function *function)
 	function_run_function(handle);
 
 	// Has the destination path list changed?
-	if (backup->dest_paths.list.mlh_Head!=handle->dest_paths.list.mlh_Head ||
-		backup->dest_paths.list.mlh_TailPred!=handle->dest_paths.list.mlh_TailPred)
+	if (backup->func_dest_paths.list.mlh_Head!=handle->func_dest_paths.list.mlh_Head ||
+		backup->func_dest_paths.list.mlh_TailPred!=handle->func_dest_paths.list.mlh_TailPred)
 	{
 		// List not empty?
-		if (!(IsListEmpty((struct List *)&backup->dest_paths)))
+		if (!(IsListEmpty((struct List *)&backup->func_dest_paths)))
 		{
 			// Copy destination list pointers into backup
-			backup->dest_paths=handle->dest_paths;
-			backup->dest_paths.list.mlh_TailPred->mln_Succ=(struct MinNode *)&handle->dest_paths.list.mlh_Tail;
-			backup->dest_paths.list.mlh_Head->mln_Pred=(struct MinNode *)&handle->dest_paths.list.mlh_Head;
+			backup->func_dest_paths=handle->func_dest_paths;
+			backup->func_dest_paths.list.mlh_TailPred->mln_Succ=(struct MinNode *)&handle->func_dest_paths.list.mlh_Tail;
+			backup->func_dest_paths.list.mlh_Head->mln_Pred=(struct MinNode *)&handle->func_dest_paths.list.mlh_Head;
 		}
 	}
 

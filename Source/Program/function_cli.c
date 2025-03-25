@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -169,7 +169,7 @@ GALILEOFM_FUNC(function_cli)
 		if (ch=='\n')
 		{
 			// Null-terminate buffer
-			handle->work_buffer[pos]=0;
+			handle->func_work_buf[pos]=0;
 
 			// Anything in buffer?
 			if (pos>0 || last_cmd)
@@ -181,18 +181,18 @@ GALILEOFM_FUNC(function_cli)
 				if (last_cmd)
 				{
 					// Copy input string to temporary area
-					strcpy(handle->work_buffer+512,handle->work_buffer);
+					strcpy(handle->func_work_buf+512,handle->func_work_buf);
 
 					// Build command string
-					lsprintf(handle->work_buffer,"%s %s",last_cmd->name,handle->work_buffer+512);
+					lsprintf(handle->func_work_buf,"%s %s",last_cmd->name,handle->func_work_buf+512);
 				}
 
 				// Quit?
-				if (stricmp(handle->work_buffer,"quit")==0)
+				if (stricmp(handle->func_work_buf,"quit")==0)
 					break;
 
 				// Fun
-				if (stricmp(handle->work_buffer,"joshua")==0)
+				if (stricmp(handle->func_work_buf,"joshua")==0)
 				{
 					print_string("Greetings Professor Falken.\n");
 				}
@@ -202,7 +202,7 @@ GALILEOFM_FUNC(function_cli)
 				if (eliza_state==2)
 				{
 					// Pass the line to Eliza
-					if (!eliza_line(edata,handle->work_buffer))
+					if (!eliza_line(edata,handle->func_work_buf))
 					{
 						// Not in eliza any more
 						eliza_state=1;
@@ -212,7 +212,7 @@ GALILEOFM_FUNC(function_cli)
 				// Otherwise, go into Eliza?
 				else
 				if (eliza_state==1 &&
-					stricmp(handle->work_buffer,"help me eliza!")==0)
+					stricmp(handle->func_work_buf,"help me eliza!")==0)
 				{
 					print_string("How can I help you?\n\n");
 					eliza_state=2;
@@ -220,12 +220,12 @@ GALILEOFM_FUNC(function_cli)
 
 				// Help?
 				else
-				if (strnicmp(handle->work_buffer,"help",4)==0)
+				if (strnicmp(handle->func_work_buf,"help",4)==0)
 				{
 					CommandList *command;
 
 					// Get pointer to word after "help"
-					ptr=handle->work_buffer+4;
+					ptr=handle->func_work_buf+4;
 					rexx_skip_space(&ptr);
 
 					// Lock command list
@@ -252,18 +252,18 @@ GALILEOFM_FUNC(function_cli)
 							// Not private?
 							if (!(command->flags&FUNCF_PRIVATE))
 							{
-								lsprintf(handle->work_buffer,"%s",command->name);
+								lsprintf(handle->func_work_buf,"%s",command->name);
 								if (command->flags&FUNCF_EXTERNAL_FUNCTION)
 								{
-									strcat(handle->work_buffer," (");
+									strcat(handle->func_work_buf," (");
 									if (strcmp(command->stuff.module_name,"!")==0)
-										strcat(handle->work_buffer,"temp");
+										strcat(handle->func_work_buf,"temp");
 									else
-										strcat(handle->work_buffer,command->stuff.module_name);
-									strcat(handle->work_buffer,")");
+										strcat(handle->func_work_buf,command->stuff.module_name);
+									strcat(handle->func_work_buf,")");
 								}
-								strcat(handle->work_buffer,"\n");
-								print_string(handle->work_buffer);
+								strcat(handle->func_work_buf,"\n");
+								print_string(handle->func_work_buf);
 							}
 						}
 					}
@@ -294,19 +294,19 @@ GALILEOFM_FUNC(function_cli)
 					CommandList *cmd;
 
 					// Asynchronous function?
-					if (handle->work_buffer[pos-1]=='&')
+					if (handle->func_work_buf[pos-1]=='&')
 					{
 						// Yep
-						handle->work_buffer[pos-1]=0;
+						handle->func_work_buf[pos-1]=0;
 						wait_reply=0;
 					}
 
 					// Get pointer to start of string, bump past whitespaces
-					ptr=handle->work_buffer;
+					ptr=handle->func_work_buf;
 					rexx_skip_space(&ptr);
 
 					// Rexx message?
-					if (handle->work_buffer[0]=='+')
+					if (handle->func_work_buf[0]=='+')
 					{
 						// Got ARexx?
 						if (RexxSysBase)
@@ -318,7 +318,7 @@ GALILEOFM_FUNC(function_cli)
 							// Allocate message
 							if (msg=BuildRexxMsgExTags(
 								data.reply_port,0,0,
-								RexxTag_Arg0,handle->work_buffer+1,
+								RexxTag_Arg0,handle->func_work_buf+1,
 								TAG_END))
 							{
 								// Asynchronous?
@@ -395,7 +395,7 @@ GALILEOFM_FUNC(function_cli)
 
 						// Create dummy function
 						else
-						if (function=new_default_function(handle->work_buffer,handle->memory))
+						if (function=new_default_function(handle->func_work_buf,handle->memory))
 						{
 							struct Message reply_msg;
 
@@ -435,7 +435,7 @@ GALILEOFM_FUNC(function_cli)
 					else
 					{
 						CLI_Launch(
-							handle->work_buffer,
+							handle->func_work_buf,
 							(struct Screen *)-1,
 							0,
 							Open("console:",MODE_OLDFILE),
@@ -455,7 +455,7 @@ GALILEOFM_FUNC(function_cli)
 
 		// Store in buffer (unless full)
 		else
-		if (pos<255) handle->work_buffer[pos++]=(char)ch;
+		if (pos<255) handle->func_work_buf[pos++]=(char)ch;
 	}
 
 	// Clean up

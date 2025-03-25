@@ -77,19 +77,19 @@ void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
 
 	// Go through backdrop list (backwards, just for the hell of it)
 	for (object=(BackdropObject *)info->objects.list.lh_TailPred;
-		object->node.ln_Pred;
-		object=(BackdropObject *)object->node.ln_Pred)
+		object->bdo_node.ln_Pred;
+		object=(BackdropObject *)object->bdo_node.ln_Pred)
 	{
 		// Correct type?
-		if (object->type!=BDO_APP_ICON && object->type!=BDO_BAD_DISK && !(object->flags&BDOF_CACHE))
+		if (object->bdo_type!=BDO_APP_ICON && object->bdo_type!=BDO_BAD_DISK && !(object->bdo_flags&BDOF_CACHE))
 		{
 			// Selected or supplied?
-			if ((!icon && object->state) || icon==object)
+			if ((!icon && object->bdo_state) || icon==object)
 			{
 				// Add object to list
 				Att_NewNode(
 					list,
-					(object->flags&BDOF_CUSTOM_LABEL)?object->device_name:object->name,
+					(object->bdo_flags&BDOF_CUSTOM_LABEL)?object->bdo_device_name:object->bdo_name,
 					(ULONG)object,
 					0);
 				if (icon) break;
@@ -162,13 +162,13 @@ void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
 					if (info->flags&BDIF_GROUP)
 					{
 						// Must have custom label
-						if (object->flags&BDOF_CUSTOM_LABEL)
+						if (object->bdo_flags&BDOF_CUSTOM_LABEL)
 						{
 							// Try to rename object
-							if (Rename(object->device_name,name))
+							if (Rename(object->bdo_device_name,name))
 							{
 								// Store new name
-								strcpy(object->device_name,name);
+								strcpy(object->bdo_device_name,name);
 								ret=1;
 								copy=0;
 							}
@@ -177,12 +177,12 @@ void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
 
 					// Assign?
 					else
-					if (object->flags&BDOF_ASSIGN)
+					if (object->bdo_flags&BDOF_ASSIGN)
 					{
 						BPTR lock;
 
 						// Lock the assign
-						if (lock=Lock(object->name,ACCESS_READ))
+						if (lock=Lock(object->bdo_name,ACCESS_READ))
 						{
 							// Assign the new name to it
 							while (!(ret=AssignLock(name,lock)))
@@ -193,7 +193,7 @@ void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
 									ERF_MOUSE,
 									GetString(&locale,MSG_RENAMING),
 									-1,
-									object->name,
+									object->bdo_name,
 									":",
 									0))) break;
 							}
@@ -212,10 +212,10 @@ void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
 
 					// Disk?
 					else
-					if (object->type==BDO_DISK)
+					if (object->bdo_type==BDO_DISK)
 					{
 						// Try to relabel
-						while (!(ret=OriginalRelabel(object->device_name,name)))
+						while (!(ret=OriginalRelabel(object->bdo_device_name,name)))
 						{
 							// Failed, display requester
 							if (!(error_request(
@@ -223,7 +223,7 @@ void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
 								ERF_MOUSE,
 								GetString(&locale,MSG_RENAMING),
 								-1,
-								object->name,
+								object->bdo_name,
 								":",
 								0))) break;
 						}
@@ -232,23 +232,23 @@ void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
 						if (ret)
 						{
 							// Pass name change through to things
-							notify_disk_name_change(info,object->device_name,name);
+							notify_disk_name_change(info,object->bdo_device_name,name);
 						}
 					}
 
 					// Group, desktop folder
 					else
-					if (object->type==BDO_GROUP ||
-						(object->type==BDO_LEFT_OUT && object->flags&BDOF_DESKTOP_FOLDER))	
+					if (object->bdo_type==BDO_GROUP ||
+						(object->bdo_type==BDO_LEFT_OUT && object->bdo_flags&BDOF_DESKTOP_FOLDER))	
 					{
 						BPTR old=0,lock;
 
 						// Change directory
-						if (lock=Lock(object->path,ACCESS_READ))
+						if (lock=Lock(object->bdo_path,ACCESS_READ))
 							old=CurrentDir(lock);
 
 						// Rename file
-						if (!(ret=Rename(object->name,name)))
+						if (!(ret=Rename(object->bdo_name,name)))
 						{
 							// Show error requester
 							if (error_request(
@@ -256,7 +256,7 @@ void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
 									ERF_MOUSE,
 									GetString(&locale,MSG_RENAMING),
 									-1,
-									object->name,
+									object->bdo_name,
 									":",
 									0))
 							{
@@ -271,7 +271,7 @@ void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
 							GroupData *group;
 
 							// Add .infos on
-							strcpy(info->buffer,object->name);
+							strcpy(info->buffer,object->bdo_name);
 							strcat(info->buffer,".info");
 							strcpy(info->buffer+300,name);
 							strcat(info->buffer+300,".info");
@@ -280,7 +280,7 @@ void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
 							Rename(info->buffer,info->buffer+300);
 
 							// Group?
-							if (object->type==BDO_GROUP)
+							if (object->bdo_type==BDO_GROUP)
 							{
 								// Lock process list
 								lock_listlock(&GUI->group_list,0);
@@ -310,7 +310,7 @@ void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
 
 					// Left-out
 					else
-					if (object->type==BDO_LEFT_OUT)
+					if (object->bdo_type==BDO_LEFT_OUT)
 					{
 						leftout_record *left;
 
@@ -326,7 +326,7 @@ void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
 							if (left->node.ln_Type==PTYPE_LEFTOUT)
 							{
 								// Match this icon?
-								if (object->misc_data==(ULONG)left)
+								if (object->bdo_misc_data==(ULONG)left)
 								{
 									// Store new label
 									stccpy(left->icon_label,name,sizeof(left->icon_label));
@@ -340,9 +340,9 @@ void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
 						unlock_listlock(&GUI->positions);
 
 						// Store name in icon
-						if (object->flags&BDOF_CUSTOM_LABEL)
+						if (object->bdo_flags&BDOF_CUSTOM_LABEL)
 						{
-							strcpy(object->device_name,name);
+							strcpy(object->bdo_device_name,name);
 							ret=1;
 							copy=0;
 						}
@@ -357,8 +357,8 @@ void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
 						// Store new name
 						if (copy)
 						{
-							strcpy(object->name,name);
-							if (object->flags&BDOF_ASSIGN) strcat(object->name,":");
+							strcpy(object->bdo_name,name);
+							if (object->bdo_flags&BDOF_ASSIGN) strcat(object->bdo_name,":");
 						}
 
 						// Show new object
@@ -512,18 +512,18 @@ void backdrop_update_disk(BackdropInfo *info,devname_change *change,BOOL show)
 
 	// Go through icons
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Is this the critter?
-		if (object->type==BDO_DISK &&
-			stricmp(change->old_name,object->device_name)==0)
+		if (object->bdo_type==BDO_DISK &&
+			stricmp(change->old_name,object->bdo_device_name)==0)
 		{
 			// Erase object
 			if (show) backdrop_erase_icon(info,object,0);
 
 			// Store new name
-			strcpy(object->name,change->new_name);
+			strcpy(object->bdo_name,change->new_name);
 
 			// Show new object
 			if (show) backdrop_render_object(info,object,BRENDERF_CLIP);

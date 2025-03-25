@@ -137,7 +137,7 @@ GALILEOFM_FUNC(function_addicon)
 	}
 
 	// Get current path
-	if (!(path=function_path_current(&handle->source_paths)))
+	if (!(path=function_path_current(&handle->func_source_paths)))
 		return 0;
 
 	// Tell this path to update it's datestamp at the end
@@ -167,9 +167,9 @@ GALILEOFM_FUNC(function_addicon)
 		if (!(isicon(entry->fe_name)))
 		{
 			// Build source and icon name
-			function_build_source(handle,entry,handle->work_buffer);
-			strcpy(handle->work_buffer+384,handle->work_buffer);
-			strcat(handle->work_buffer+384,".info");
+			function_build_source(handle,entry,handle->func_work_buf);
+			strcpy(handle->func_work_buf+384,handle->func_work_buf);
+			strcat(handle->func_work_buf+384,".info");
 
 			// Need confirmation?
 			if (data->confirm_each)
@@ -177,19 +177,19 @@ GALILEOFM_FUNC(function_addicon)
 				BPTR lock;
 
 				// Does icon exist?
-				if (lock=Lock(handle->work_buffer+384,ACCESS_READ))
+				if (lock=Lock(handle->func_work_buf+384,ACCESS_READ))
 				{
 					UnLock(lock);
 
 					// Build message
-					lsprintf(handle->work_buffer+800,
+					lsprintf(handle->func_work_buf+800,
 						GetString(&locale,MSG_ICON_ALREADY_EXISTS),
 						entry->fe_name);
 
 					// Display requester
 					if (!(ret=function_request(
 						handle,
-						handle->work_buffer+800,
+						handle->func_work_buf+800,
 						0,
 						GetString(&locale,MSG_REPLACE),
 						GetString(&locale,MSG_ALL),
@@ -235,7 +235,7 @@ GALILEOFM_FUNC(function_addicon)
 						{
 						    struct Screen *screen=LockPubScreen(0);
 
-						    icon=GetIconTags(handle->work_buffer,
+						    icon=GetIconTags(handle->func_work_buf,
 								     ICONGETA_FailIfUnavailable,TRUE,
 								     ICONGETA_Screen,screen,
 								     TAG_DONE);
@@ -244,14 +244,14 @@ GALILEOFM_FUNC(function_addicon)
 						}
 						else
 						{
-						    icon=GetIconTags(handle->work_buffer,
+						    icon=GetIconTags(handle->func_work_buf,
 								     ICONGETA_FailIfUnavailable,TRUE,
 								     ICONGETA_RemapIcon,FALSE,
 								     TAG_DONE);
 						}
 					}
 					else
-						icon=GetDiskObject(handle->work_buffer);
+						icon=GetDiskObject(handle->func_work_buf);
 
 					if (icon)
 					{
@@ -271,7 +271,7 @@ GALILEOFM_FUNC(function_addicon)
 
 						// Write icon
 
-						if	(PutDiskObject(handle->work_buffer,icon))
+						if	(PutDiskObject(handle->func_work_buf,icon))
 						{
 							// Load icon file into listers
 							function_filechange_loadfile(handle,path->pn_path,entry->fe_name,FFLF_ICON);
@@ -290,7 +290,7 @@ GALILEOFM_FUNC(function_addicon)
 					ret=1;
 					while (!(ok=icon_write(
 								(entry->fe_type>0)?ICONTYPE_DRAWER:ICONTYPE_PROJECT,
-								handle->work_buffer,
+								handle->func_work_buf,
 								replace_image,
 								data->flags,
 								data->mask,
@@ -302,7 +302,7 @@ GALILEOFM_FUNC(function_addicon)
 							entry->fe_name,
 							MSG_ADDICONING,
 							err))==-1 || ret==0) break;
-						function_build_source(handle,entry,handle->work_buffer);
+						function_build_source(handle,entry,handle->func_work_buf);
 					}
 
 					// Success?

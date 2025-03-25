@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -90,33 +90,33 @@ BackdropObject *backdrop_leftout_new(
 	if (newob=AllocMemH(info->memory,size))
 	{
 		// Fill out object
-		newob->type=BDO_LEFT_OUT;
-		newob->flags=BDOF_NO_POSITION;
+		newob->bdo_type=BDO_LEFT_OUT;
+		newob->bdo_flags=BDOF_NO_POSITION;
 
 		// Get object name
-		newob->name=(char *)(newob+1);
-		newob->node.ln_Name=newob->name;
-		strcpy(newob->name,FilePart(name));
+		newob->bdo_name=(char *)(newob+1);
+		newob->bdo_node.ln_Name=newob->bdo_name;
+		strcpy(newob->bdo_name,FilePart(name));
 
 		// Get path pointer
-		if (parent_dir) newob->path=newob->name+GUI->def_filename_length+1;
+		if (parent_dir) newob->bdo_path=newob->bdo_name+GUI->def_filename_length+1;
 
 		// Custom label?
 		if (flags&BLNF_CUSTOM_LABEL)
 		{
 			// Get label pointer
-			newob->device_name=newob->name+GUI->def_filename_length+1;
-			newob->flags|=BDOF_CUSTOM_LABEL;
+			newob->bdo_device_name=newob->bdo_name+GUI->def_filename_length+1;
+			newob->bdo_flags|=BDOF_CUSTOM_LABEL;
 
 			// Bump path pointer
-			if (parent_dir) newob->path+=GUI->def_filename_length+1;
+			if (parent_dir) newob->bdo_path+=GUI->def_filename_length+1;
 		}
 
 		// Copy path
-		if (parent_dir) strcpy(newob->path,parent_dir);
+		if (parent_dir) strcpy(newob->bdo_path,parent_dir);
 
 		// Add to backdrop list
-		AddTail(&info->objects.list,&newob->node);
+		AddTail(&info->objects.list,&newob->bdo_node);
 	}
 
 	return newob;
@@ -146,7 +146,7 @@ void backdrop_leave_icons_out(BackdropInfo *info,BackdropObject *only_one,BOOL s
 			{
 				// Get icon path name
 				DevNameFromLock(dir,path,256);
-				AddPart(path,object->name,256);
+				AddPart(path,object->bdo_name,256);
 
 				// New shortcut
 				backdrop_create_shortcut(GUI->backdrop,path,-1,-1);
@@ -158,13 +158,13 @@ void backdrop_leave_icons_out(BackdropInfo *info,BackdropObject *only_one,BOOL s
 
 		// Left-out object?
 		else
-		if (object->type==BDO_LEFT_OUT)
+		if (object->bdo_type==BDO_LEFT_OUT)
 		{
 			// Temporary leave-out?
-			if (object->flags&BDOF_TEMP_LEFTOUT)
+			if (object->bdo_flags&BDOF_TEMP_LEFTOUT)
 			{
 				// Clear temporary flag
-				object->flags&=~BDOF_TEMP_LEFTOUT;
+				object->bdo_flags&=~BDOF_TEMP_LEFTOUT;
 
 				// Set flag to save leftouts
 				save=1;
@@ -182,7 +182,7 @@ void backdrop_leave_icons_out(BackdropInfo *info,BackdropObject *only_one,BOOL s
 				{
 					// Get icon path name
 					DevNameFromLock(dir,path,256);
-					AddPart(path,object->name,256);
+					AddPart(path,object->bdo_name,256);
 
 					// New left-out
 					if (backdrop_leave_out(
@@ -250,8 +250,8 @@ BackdropObject *backdrop_leave_out(
 	while (object=(BackdropObject *)FindNameI(search,fib.fib_FileName))
 	{
 		// See if parents are the same
-		if (object->type==BDO_LEFT_OUT &&
-			stricmp(path,object->path)==0) break;
+		if (object->bdo_type==BDO_LEFT_OUT &&
+			stricmp(path,object->bdo_path)==0) break;
 
 		// Keep searching from this object
 		search=(struct List *)object;
@@ -267,18 +267,18 @@ BackdropObject *backdrop_leave_out(
 		if (object=backdrop_leftout_new(info,name,path,BLNF_CUSTOM_LABEL))
 		{
 			// Set name
-			stccpy(object->device_name,FilePart(name),GUI->def_filename_length);
+			stccpy(object->bdo_device_name,FilePart(name),GUI->def_filename_length);
 
 			// Set temporary flag if not permanent
-			if (!(flags&BLOF_PERMANENT)) object->flags|=BDOF_TEMP_LEFTOUT;
+			if (!(flags&BLOF_PERMANENT)) object->bdo_flags|=BDOF_TEMP_LEFTOUT;
 
 			// Position supplied?
 			if (x>-1 && y>-1)
 			{
 				// Set position
-				object->custom_pos=(x<<16)|y;
-				object->flags|=BDOF_LEFTOUT_POS|BDOF_BORDER_ADJUST;
-				object->flags&=~BDOF_NO_POSITION;
+				object->bdo_custom_pos=(x<<16)|y;
+				object->bdo_flags|=BDOF_LEFTOUT_POS|BDOF_BORDER_ADJUST;
+				object->bdo_flags&=~BDOF_NO_POSITION;
 			}
 
 			// Get icon
@@ -318,19 +318,19 @@ void backdrop_save_leftouts(BackdropInfo *info)
 
 	// Go through objects
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Is this a permanent left-out?
-		if (object->type==BDO_LEFT_OUT &&
-			!(object->flags&(BDOF_TEMP_LEFTOUT|BDOF_DESKTOP_FOLDER)))
+		if (object->bdo_type==BDO_LEFT_OUT &&
+			!(object->bdo_flags&(BDOF_TEMP_LEFTOUT|BDOF_DESKTOP_FOLDER)))
 		{
 			struct Node *entry;
 			struct List *search;
 
 			// Get full path of object
-			stccpy(info->buffer,object->path,sizeof(info->buffer));
-			AddPart(info->buffer,object->name,256);
+			stccpy(info->buffer,object->bdo_path,sizeof(info->buffer));
+			AddPart(info->buffer,object->bdo_name,256);
 
 			// See if it's already in the list
 			search=(struct List *)&GUI->positions;
@@ -350,17 +350,17 @@ void backdrop_save_leftouts(BackdropInfo *info)
 				if (left=AllocMemH(GUI->position_memory,sizeof(leftout_record)+strlen(info->buffer)))
 				{
 					// Valid icon position?
-					if (!(object->flags&BDOF_NO_POSITION))
+					if (!(object->bdo_flags&BDOF_NO_POSITION))
 					{
 						short x,y;
 						ULONG iflags;
 
 						// Get position
-						x=object->pos.Left;
-						y=object->pos.Top;
+						x=object->bdo_pos.Left;
+						y=object->bdo_pos.Top;
 
 						// Adjust for borders?
-						if (!((iflags=GetIconFlags(object->icon))&ICONF_BORDER_OFF) &&
+						if (!((iflags=GetIconFlags(object->bdo_icon))&ICONF_BORDER_OFF) &&
 							(!(environment->env->desktop_flags&DESKTOPF_NO_BORDERS) || (iflags&ICONF_BORDER_ON)))
 						{
 							// Shift back by border size
@@ -383,7 +383,7 @@ void backdrop_save_leftouts(BackdropInfo *info)
 					left->node.ln_Type=PTYPE_LEFTOUT;
 
 					// Set pointer in object
-					object->misc_data=(ULONG)left;
+					object->bdo_misc_data=(ULONG)left;
 
 					// Add to list
 					AddTail((struct List *)&GUI->positions,(struct Node *)left);
@@ -418,20 +418,20 @@ void backdrop_putaway(BackdropInfo *info,BackdropObject *only_one)
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;)
+		object->bdo_node.ln_Succ;)
 	{
-		BackdropObject *next=(BackdropObject *)object->node.ln_Succ;
+		BackdropObject *next=(BackdropObject *)object->bdo_node.ln_Succ;
 
 		// Is object left out and selected?
-		if (object->type==BDO_LEFT_OUT &&
-			!(object->flags&BDOF_DESKTOP_FOLDER) && 
-			((only_one && object==only_one) || (!only_one && object->state)))
+		if (object->bdo_type==BDO_LEFT_OUT &&
+			!(object->bdo_flags&BDOF_DESKTOP_FOLDER) &&
+			((only_one && object==only_one) || (!only_one && object->bdo_state)))
 		{
 			// Erase object
 			backdrop_erase_icon(info,object,0);
 
 			// If left-out wasn't temporary, delete from list
-			if (!(object->flags&BDOF_TEMP_LEFTOUT))
+			if (!(object->bdo_flags&BDOF_TEMP_LEFTOUT))
 			{
 				if (backdrop_remove_leftout(object))
 				{
@@ -469,8 +469,8 @@ BOOL backdrop_remove_leftout(BackdropObject *object)
 	struct List *search;
 
 	// Get full path of object
-	stccpy(buf,object->path,256);
-	AddPart(buf,object->name,256);
+	stccpy(buf,object->bdo_path,256);
+	AddPart(buf,object->bdo_name,256);
 
 	// Look for object in list
 	search=(struct List *)&GUI->positions;
@@ -524,10 +524,10 @@ void backdrop_add_leftouts(BackdropInfo *info)
 			while (object=(BackdropObject *)FindNameI(search,name))
 			{
 				// Is this a left-out?
-				if (object->type==BDO_LEFT_OUT)
+				if (object->bdo_type==BDO_LEFT_OUT)
 				{
 					// Match entry pointer
-					if (object->misc_data==(ULONG)left) break;
+					if (object->bdo_misc_data==(ULONG)left) break;
 				}
 
 				// Continue search
@@ -544,13 +544,13 @@ void backdrop_add_leftouts(BackdropInfo *info)
 					if (!(left->flags&LEFTOUTF_NO_POSITION))
 					{
 						// Store position
-						object->flags|=BDOF_LEFTOUT_POS;
-						object->custom_pos=(left->icon_x<<16)|left->icon_y;
+						object->bdo_flags|=BDOF_LEFTOUT_POS;
+						object->bdo_custom_pos=(left->icon_x<<16)|left->icon_y;
 					}
 
 					// Copy label, store entry pointer
-					stccpy(object->device_name,left->icon_label,GUI->def_filename_length+1);
-					object->misc_data=(ULONG)left;
+					stccpy(object->bdo_device_name,left->icon_label,GUI->def_filename_length+1);
+					object->bdo_misc_data=(ULONG)left;
 
 					// Fix size and position
 					backdrop_get_icon(info,object,GETICON_CD);

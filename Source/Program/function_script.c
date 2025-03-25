@@ -71,12 +71,12 @@ function_open_script(FunctionHandle *handle)
 
 	// CD source?
 	if (handle->func_parameters.flags&FUNCF_CD_SOURCE)
-		strcpy(handle->temp_buffer+4,handle->source_path);
+		strcpy(handle->temp_buffer+4,handle->func_source_path);
 
 	// CD destination?
 	else
 	if (handle->func_parameters.flags&FUNCF_CD_DESTINATION)
-		strcpy(handle->temp_buffer+4,handle->dest_path);
+		strcpy(handle->temp_buffer+4,handle->func_dest_path);
 
 	// No CD
 	else handle->temp_buffer[4]=0;
@@ -212,7 +212,7 @@ void function_close_script(
 			if (handle->func_parameters.flags&FUNCF_OUTPUT_WINDOW || need_window==1)
 			{
 				// Copy handle
-				strcpy(handle->work_buffer,handle->output_handle);
+				strcpy(handle->func_work_buf,handle->output_handle);
 
 				// Close button?
 				if (handle->func_parameters.flags&FUNCF_WAIT_CLOSE)
@@ -220,24 +220,24 @@ void function_close_script(
 					char *ptr;
 
 					// If there's a /SCREEN option, we must insert before it
-					if (ptr=strstri(handle->work_buffer,"/SCREEN "))
+					if (ptr=strstri(handle->func_work_buf,"/SCREEN "))
 					{
 						// Copy remainder of string to temporary buffer
-						strcpy(handle->work_buffer+512,ptr);
+						strcpy(handle->func_work_buf+512,ptr);
 
 						// Copy close string
 						strcpy(ptr,"/CLOSE/WAIT");
 
 						// Copy /SCREEN back onto end of string
-						strcat(ptr,handle->work_buffer+512);
+						strcat(ptr,handle->func_work_buf+512);
 					}
 
 					// Otherwise, just tack it on to the end
-					else strcat(handle->work_buffer,"/CLOSE/WAIT");
+					else strcat(handle->func_work_buf,"/CLOSE/WAIT");
 				}
 
 				// Open window
-				output=Open(handle->work_buffer,MODE_OLDFILE);
+				output=Open(handle->func_work_buf,MODE_OLDFILE);
 			}
 
 			// No output, get nil
@@ -272,14 +272,14 @@ void function_close_script(
 					// Rescan source?
 					if (handle->func_parameters.flags&FUNCF_RESCAN_SOURCE)
 					{
-						PathNode *path=function_path_current(&handle->source_paths);
+						PathNode *path=function_path_current(&handle->func_source_paths);
 						if (path) path->pn_flags|=LISTNF_RESCAN;
 					}
 
 					// Rescan destination?
 					if (handle->func_parameters.flags&FUNCF_RESCAN_DEST)
 					{
-						PathNode *path=function_path_current(&handle->dest_paths);
+						PathNode *path=function_path_current(&handle->func_dest_paths);
 						if (path) path->pn_flags|=LISTNF_RESCAN;
 					}
 

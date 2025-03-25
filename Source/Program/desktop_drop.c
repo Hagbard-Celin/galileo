@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -285,10 +285,10 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 	if (!(name=AllocVec(1024,0))) return 1;
 
 	// Was it an AppIcon?
-	if (drop_obj->type==BDO_APP_ICON)
+	if (drop_obj->bdo_type==BDO_APP_ICON)
 	{
 		// Is the icon busy?
-		if (drop_obj->flags&BDOF_BUSY)
+		if (drop_obj->bdo_flags&BDOF_BUSY)
 		{
 			// Flash error
 			DisplayBeep(info->window->WScreen);
@@ -304,7 +304,7 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 
 			// Get port and info
 			port=WB_AppWindowData(
-				(struct AppWindow *)drop_obj->misc_data,
+				(struct AppWindow *)drop_obj->bdo_misc_data,
 				&(*msg)->ga_Msg.am_ID,
 				&(*msg)->ga_Msg.am_UserData);
 
@@ -321,7 +321,7 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 
 	// Was it a group?
 	else
-	if (drop_obj->type==BDO_GROUP)
+	if (drop_obj->bdo_type==BDO_GROUP)
 	{
 		short arg;
 		GroupData *group;
@@ -359,7 +359,7 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 				// Otherwise add object to group
 				else
 				{
-					backdrop_group_add_object(drop_obj->name,0,name,-1,-1);
+					backdrop_group_add_object(drop_obj->bdo_name,0,name,-1,-1);
 					ok=1;
 				}
 			}
@@ -374,7 +374,7 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 
 	// Or a project?
 	else
-	if (drop_obj->icon->do_Type==WBPROJECT)
+	if (drop_obj->bdo_icon->do_Type==WBPROJECT)
 	{
 		// Is it an Galileo command?
 		if (command_filetype)
@@ -391,7 +391,7 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 				old=CurrentDir(lock);
 
 				// See if it's a command
-				if (filetype_match_type(drop_obj->name,command_filetype))
+				if (filetype_match_type(drop_obj->bdo_name,command_filetype))
 				{
 					// Run command with args
 					backdrop_object_open(
@@ -415,7 +415,7 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 
 	// Or a tool?
 	else
-	if (drop_obj->icon->do_Type==WBTOOL)
+	if (drop_obj->bdo_icon->do_Type==WBTOOL)
 	{
 		// Run program with args
 		backdrop_object_open(
@@ -430,9 +430,9 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 
 	// Or a disk/directory?
 	else
-	if (drop_obj->icon->do_Type==WBDISK ||
-		drop_obj->icon->do_Type==WBDRAWER ||
-		drop_obj->icon->do_Type==WBGARBAGE)
+	if (drop_obj->bdo_icon->do_Type==WBDISK ||
+		drop_obj->bdo_icon->do_Type==WBDRAWER ||
+		drop_obj->bdo_icon->do_Type==WBGARBAGE)
 	{
 		struct ArgArray *arg_array;
 
@@ -464,10 +464,10 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 				UnLock(lock);
 
 				// Is object a left-out?
-				if (drop_obj->type==BDO_LEFT_OUT)
+				if (drop_obj->bdo_type==BDO_LEFT_OUT)
 				{
 					// Add left-out name
-					AddPart(name+512,drop_obj->name,512);
+					AddPart(name+512,drop_obj->bdo_name,512);
 				}
 
 				// Get filetype action

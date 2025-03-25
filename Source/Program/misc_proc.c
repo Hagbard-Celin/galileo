@@ -451,12 +451,12 @@ void __saveds misc_proc(void)
 
 					// Go through backdrop list
 					for (object=(BackdropObject *)info->objects.list.lh_Head;
-						object->node.ln_Succ;)
+						object->bdo_node.ln_Succ;)
 					{
-						BackdropObject *next=(BackdropObject *)object->node.ln_Succ;
+						BackdropObject *next=(BackdropObject *)object->bdo_node.ln_Succ;
 
 						// Is object selected, or object supplied?
-						if ((!packet->object && object->state) ||
+						if ((!packet->object && object->bdo_state) ||
 							packet->object==object)
 						{
 							// Open with?
@@ -469,9 +469,9 @@ void __saveds misc_proc(void)
 								{
 									// Build name
 									DevNameFromLock(lock,name,512);
-									if (object->icon->do_Type==WBPROJECT ||
-										object->icon->do_Type==WBTOOL)
-										AddPart(name,object->name,512);
+									if (object->bdo_icon->do_Type==WBPROJECT ||
+										object->bdo_icon->do_Type==WBTOOL)
+										AddPart(name,object->bdo_name,512);
 
 									// Unlock lock
 									UnLock(lock);
@@ -581,7 +581,7 @@ void __saveds misc_proc(void)
 
 						// Do delete
 						else
-						if ((packet->backdrop->flags&BDIF_MAIN_DESKTOP && (!packet->object || !(packet->object->flags&BDOF_DESKTOP_FOLDER))) ||
+						if ((packet->backdrop->flags&BDIF_MAIN_DESKTOP && (!packet->object || !(packet->object->bdo_flags&BDOF_DESKTOP_FOLDER))) ||
 							packet->backdrop->flags&BDIF_GROUP ||
 							(packet->backdrop->lister &&
 								packet->backdrop->lister->cur_buffer->more_flags&(DWF_DEVICE_LIST|DWF_CACHE_LIST)))

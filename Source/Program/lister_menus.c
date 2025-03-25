@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -70,11 +70,11 @@ void lister_fix_menus(Lister *lister,BOOL sel_only)
 
 		// Go through list
 		for (icon=(BackdropObject *)lister->backdrop_info->objects.list.lh_Head;
-			icon->node.ln_Succ;
-			icon=(BackdropObject *)icon->node.ln_Succ)
+			icon->bdo_node.ln_Succ;
+			icon=(BackdropObject *)icon->bdo_node.ln_Succ)
 		{
 			// Something selected?
-			if (icon->state)
+			if (icon->bdo_state)
 			{
 				// Set flag and break
 				sel=1;

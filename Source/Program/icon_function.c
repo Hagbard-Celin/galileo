@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -51,24 +51,24 @@ void icon_function(BackdropInfo *info,BackdropObject *only_one,char *data,Cfg_Fu
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Skip invalid icons
-		if (object->type!=BDO_LEFT_OUT ||
-			(!info->lister && !(object->flags&BDOF_DESKTOP_FOLDER))) continue;
+		if (object->bdo_type!=BDO_LEFT_OUT ||
+			(!info->lister && !(object->bdo_flags&BDOF_DESKTOP_FOLDER))) continue;
 
 		// Want this icon?
 		if (!only_one || only_one==object)
 		{
 			// Is object selected?
-			if ((only_one || object->state) && object->icon)
+			if ((only_one || object->bdo_state) && object->bdo_icon)
 			{
 				// Increment counts
-				if (object->icon->do_Type==WBDRAWER ||
-					object->icon->do_Type==WBGARBAGE ||
-					object->icon->do_Type==WBPROJECT ||
-					object->icon->do_Type==WBTOOL)
+				if (object->bdo_icon->do_Type==WBDRAWER ||
+					object->bdo_icon->do_Type==WBGARBAGE ||
+					object->bdo_icon->do_Type==WBPROJECT ||
+					object->bdo_icon->do_Type==WBTOOL)
 					++count;
 
 				// Only doing one?
@@ -94,9 +94,9 @@ void icon_function(BackdropInfo *info,BackdropObject *only_one,char *data,Cfg_Fu
 
 	// Source path from icon?
 	else
-	if (only_one && only_one->path &&
-		(source_path=AllocVec(strlen(only_one->path)+1,0)))
-		strcpy(source_path,only_one->path);
+	if (only_one && only_one->bdo_path &&
+		(source_path=AllocVec(strlen(only_one->bdo_path)+1,0)))
+		strcpy(source_path,only_one->bdo_path);
 
 	// Otherwise, assume this is the desktop folder
 	else
@@ -106,18 +106,18 @@ void icon_function(BackdropInfo *info,BackdropObject *only_one,char *data,Cfg_Fu
 
 	// Go through backdrop list again
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Skip invalid icons
-		if (object->type!=BDO_LEFT_OUT ||
-			(!info->lister && !(object->flags&BDOF_DESKTOP_FOLDER))) continue;
+		if (object->bdo_type!=BDO_LEFT_OUT ||
+			(!info->lister && !(object->bdo_flags&BDOF_DESKTOP_FOLDER))) continue;
 
 		// Want this icon?
 		if (!only_one || only_one==object)
 		{
 			// Is object selected?
-			if ((only_one || object->state) && object->icon)
+			if ((only_one || object->bdo_state) && object->bdo_icon)
 			{
 				char name[80];
 				BOOL dir=0,link=0,icon=0;
@@ -125,14 +125,14 @@ void icon_function(BackdropInfo *info,BackdropObject *only_one,char *data,Cfg_Fu
 				struct ArgArrayEntry *aae;
 
 				// Build name
-				stccpy(name,object->name,sizeof(name));
+				stccpy(name,object->bdo_name,sizeof(name));
 
 				// Got a buffer?
 				if (buffer)
 				{
 					// See if we can find this entry
-					if ((entry=find_entry(&buffer->entry_list,object->name,0,buffer->more_flags&DWF_CASE)) ||
-						(entry=find_entry(&buffer->reject_list,object->name,0,buffer->more_flags&DWF_CASE)))
+					if ((entry=find_entry(&buffer->entry_list,object->bdo_name,0,buffer->more_flags&DWF_CASE)) ||
+						(entry=find_entry(&buffer->reject_list,object->bdo_name,0,buffer->more_flags&DWF_CASE)))
 					{
 						// Directory?
 						if (entry->de_Node.dn_Type>=ENTRY_DEVICE) dir=1;
@@ -141,8 +141,8 @@ void icon_function(BackdropInfo *info,BackdropObject *only_one,char *data,Cfg_Fu
 						if (entry->de_Flags&ENTF_LINK) link=1;
 
 						// See if entry has icon
-						if (find_entry(&buffer->entry_list,object->name,0,(buffer->more_flags&DWF_CASE)|FINDENTRY_ICON) ||
-							find_entry(&buffer->reject_list,object->name,0,(buffer->more_flags&DWF_CASE)|FINDENTRY_ICON))
+						if (find_entry(&buffer->entry_list,object->bdo_name,0,(buffer->more_flags&DWF_CASE)|FINDENTRY_ICON) ||
+							find_entry(&buffer->reject_list,object->bdo_name,0,(buffer->more_flags&DWF_CASE)|FINDENTRY_ICON))
 							icon=1;
 					}
 
@@ -165,9 +165,9 @@ void icon_function(BackdropInfo *info,BackdropObject *only_one,char *data,Cfg_Fu
 				// Get type from icon
 				if (!entry)
 				{
-					if (object->icon->do_Type==WBDRAWER ||
-						object->icon->do_Type==WBGARBAGE) dir=1;
-					if (object->flags&BDOF_LINK_ICON) link=1;
+					if (object->bdo_icon->do_Type==WBDRAWER ||
+						object->bdo_icon->do_Type==WBGARBAGE) dir=1;
+					if (object->bdo_flags&BDOF_LINK_ICON) link=1;
 				}
 
 				// Tack on a / for directories

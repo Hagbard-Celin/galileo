@@ -58,7 +58,7 @@ PathNode *function_add_path(FunctionHandle *handle,PathList *list,Lister *lister
 		list->current=node;
 
 		// Set appropriate flag
-		if (list==&handle->source_paths)
+		if (list==&handle->func_source_paths)
 			handle->func_flags|=FUNCF_GOT_SOURCE;
 		else handle->func_flags|=FUNCF_GOT_DEST;
 	}
@@ -77,11 +77,11 @@ void function_build_source(
 	if (entry->fe_type>0 && entry->fe_name[strlen(entry->fe_name)-1]==':')
 	{
 		// This is the new source path
-		strcpy(handle->source_path,entry->fe_name);
+		strcpy(handle->func_source_path,entry->fe_name);
 	}
 
 	// Build source path
-	strcpy(buffer,handle->source_path);
+	strcpy(buffer,handle->func_source_path);
 	AddPart(buffer,entry->fe_name,256);
 }
 
@@ -92,7 +92,7 @@ void function_build_dest(
 	FunctionEntry *entry,
 	char *buffer)
 {
-	strcpy(buffer,handle->dest_path);
+	strcpy(buffer,handle->func_dest_path);
 	AddPart(buffer,entry->fe_name,256);
 }
 

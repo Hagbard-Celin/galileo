@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -66,10 +66,10 @@ void handle_dos_notify(GalileoNotify *notify,FunctionHandle *handle)
 		char *ptr;
 
 		// Copy path to buffer
-		strcpy(handle->work_buffer,notify->gn_Name);
+		strcpy(handle->func_work_buf,notify->gn_Name);
 
 		// Get pointer to filename
-		if (ptr=FilePart(handle->work_buffer))
+		if (ptr=FilePart(handle->func_work_buf))
 		{
 			// Copy to separate buffer and break connection
 			strcpy(handle->recurse_path,ptr);
@@ -82,7 +82,7 @@ void handle_dos_notify(GalileoNotify *notify,FunctionHandle *handle)
 			// Add change to remove file
 			function_filechange_delfile(
 				handle,
-				handle->work_buffer,
+				handle->func_work_buf,
 				handle->recurse_path,
 				0,
 				1);
@@ -157,20 +157,20 @@ void handle_dos_notify(GalileoNotify *notify,FunctionHandle *handle)
 				if (notify->gn_Fib->fib_DirEntryType>0)
 				{
 					// Build full pathname for old...
-					strcpy(handle->work_buffer,notify->gn_Name);
-					AddPart(handle->work_buffer,notify->gn_Fib->fib_FileName,512);
-					AddPart(handle->work_buffer,"",512);
+					strcpy(handle->func_work_buf,notify->gn_Name);
+					AddPart(handle->func_work_buf,notify->gn_Fib->fib_FileName,512);
+					AddPart(handle->func_work_buf,"",512);
 
 					// And for new...
-					strcpy(handle->work_buffer+512,notify->gn_Name);
-					AddPart(handle->work_buffer+512,notify->gn_Fib->fib_Comment,512);
-					AddPart(handle->work_buffer+512,"",512);
+					strcpy(handle->func_work_buf+512,notify->gn_Name);
+					AddPart(handle->func_work_buf+512,notify->gn_Fib->fib_Comment,512);
+					AddPart(handle->func_work_buf+512,"",512);
 
 					// Add directory rename
 					function_filechange_rename(
 						handle,
-						handle->work_buffer,
-						handle->work_buffer+512);
+						handle->func_work_buf,
+						handle->func_work_buf+512);
 				}
 			}
 

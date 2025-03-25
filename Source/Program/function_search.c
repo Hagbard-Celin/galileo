@@ -116,7 +116,7 @@ GALILEOFM_FUNC(function_search)
 	}
 
 	// Get current path
-	if (!(path=function_path_current(&handle->source_paths)))
+	if (!(path=function_path_current(&handle->func_source_paths)))
 		return 0;
 
 	// Turn progress indicator on
@@ -160,23 +160,23 @@ GALILEOFM_FUNC(function_search)
 				{
 					if (output=OpenBuf("T:Galileo-SearchResults",MODE_NEWFILE,512))
 					{
-						lsprintf(handle->work_buffer,
+						lsprintf(handle->func_work_buf,
 							GetString(&locale,MSG_SEARCH_OUTPUT_HEADER),
 							data->search_text);
-						WriteBuf(output,handle->work_buffer,-1);
+						WriteBuf(output,handle->func_work_buf,-1);
 					}
 					else data->search_result=RESULT_LEAVE;
 				}
 			}
 
 			// Build source name
-			function_build_source(handle,entry,handle->work_buffer);
+			function_build_source(handle,entry,handle->func_work_buf);
 
 			// By default no match
 			ret=-1;
 
 			// Open file
-			if (file=OpenBuf(handle->work_buffer,MODE_OLDFILE,0))
+			if (file=OpenBuf(handle->func_work_buf,MODE_OLDFILE,0))
 			{
 				ret=SearchFile(file,data->search_text,data->search_flags,0,0);
 				CloseBuf(file);
@@ -209,8 +209,8 @@ GALILEOFM_FUNC(function_search)
 						char buf[256];
 
 						// Build requester text
-						get_trunc_path(handle->work_buffer,buf);
-						lsprintf(handle->work_buffer+512,
+						get_trunc_path(handle->func_work_buf,buf);
+						lsprintf(handle->func_work_buf+512,
 							GetString(&locale,MSG_FOUND_A_MATCH),
 							buf);
 
@@ -220,7 +220,7 @@ GALILEOFM_FUNC(function_search)
 						// Ask what to do
 						if (!(ret=function_request(
 							handle,
-							handle->work_buffer+512,
+							handle->func_work_buf+512,
 							0,
 							GetString(&locale,MSG_SEARCH_READ),
 							GetString(&locale,MSG_SKIP),
@@ -236,11 +236,11 @@ GALILEOFM_FUNC(function_search)
 
 								// Get current path
 								if ((filename=AllocVec(256,0)) &&
-									(path=function_path_current(&handle->source_paths)) &&
+									(path=function_path_current(&handle->func_source_paths)) &&
 									path->pn_lister)
 								{
 									// Copy filename
-									if (ptr=FilePart(handle->work_buffer))
+									if (ptr=FilePart(handle->func_work_buf))
 									{
 										strcpy(filename,ptr);
 										*ptr=0;
@@ -251,7 +251,7 @@ GALILEOFM_FUNC(function_search)
 									function_read_directory(
 										handle,
 										path->pn_lister,
-										handle->work_buffer);
+										handle->func_work_buf);
 
 									// Select file
 									function_select_file(handle,path->pn_lister,filename);
@@ -286,7 +286,7 @@ GALILEOFM_FUNC(function_search)
 							struct read_startup *startup;
 
 							// Add filename node
-							Att_NewNode(list,handle->work_buffer,0,0);
+							Att_NewNode(list,handle->func_work_buf,0,0);
 
 							// Allocate startup
 							if (startup=AllocVec(sizeof(struct read_startup),MEMF_CLEAR))
@@ -310,7 +310,7 @@ GALILEOFM_FUNC(function_search)
 
 						if (output)
 						{
-							WriteBuf(output,handle->work_buffer,-1);
+							WriteBuf(output,handle->func_work_buf,-1);
 							WriteBuf(output,"\n",1);
 						}
 						break;
@@ -380,7 +380,7 @@ search_get_data(
 	short cancel=1;
 
 	// Fill out new window
-	if (lister=function_lister_current(&handle->source_paths))
+	if (lister=function_lister_current(&handle->func_source_paths))
 	{
 		new_win.parent=lister->window;
 		new_win.flags=0;

@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -669,7 +669,7 @@ void function_filechange_do(FunctionHandle *handle,BOOL strip)
 								if (object=(BackdropObject *)FindNameI(&info->objects.list,change->fib_FileName))
 								{
 									// Delete if a fake icon, or if not, because we removed the .info
-									if (object->flags&BDOF_FAKE_ICON || ptr)
+									if (object->bdo_flags&BDOF_FAKE_ICON || ptr)
 									{
 										// Erase object (if in icon mode)
 										if (lister->flags&LISTERF_VIEW_ICONS)

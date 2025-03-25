@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -43,15 +43,15 @@ GALILEOFM_FUNC(function_assign)
 	short suc=0,len;
 
 	// Valid path?
-	if (!*handle->source_path) return 0;
+	if (!*handle->func_source_path) return 0;
 
 	// Strip trailing /
-	if (handle->source_path[(len=strlen(handle->source_path)-1)]=='/')
-		handle->source_path[len]=0;
+	if (handle->func_source_path[(len=strlen(handle->func_source_path)-1)]=='/')
+		handle->func_source_path[len]=0;
 
 	// Get pointer to object name
-	if (!(ptr=FilePart(handle->source_path)) || !*ptr)
-		ptr=handle->source_path;
+	if (!(ptr=FilePart(handle->func_source_path)) || !*ptr)
+		ptr=handle->func_source_path;
 
 	// Get truncated file name
 	get_trunc_filename(ptr,name);
@@ -64,38 +64,38 @@ GALILEOFM_FUNC(function_assign)
 
 		// Build requester text
 		lsprintf(
-			handle->work_buffer,
+			handle->func_work_buf,
 			GetString(&locale,MSG_ENTER_ASSIGN_NAME),
 			name);
 
 		// Ask for name
 		if (!(ret=function_request(
 			handle,
-			handle->work_buffer,
+			handle->func_work_buf,
 			SRF_BUFFER|SRF_PATH_FILTER,
-			handle->work_buffer+512,30,
+			handle->func_work_buf+512,30,
 			GetString(&locale,MSG_ASSIGN),
 			GetString(&locale,MSG_ADD),
 			GetString(&locale,MSG_PATH),
 			GetString(&locale,MSG_DEFER),
-			GetString(&locale,MSG_ABORT),0)) || !*(handle->work_buffer+512)) return 0;
+			GetString(&locale,MSG_ABORT),0)) || !*(handle->func_work_buf+512)) return 0;
 
 		// Path assign?
-		if (ret==3) suc=AssignPath(handle->work_buffer+512,handle->source_path);
+		if (ret==3) suc=AssignPath(handle->func_work_buf+512,handle->func_source_path);
 
 		// Late assign?
 		else
-		if (ret==4) suc=AssignLate(handle->work_buffer+512,handle->source_path);
+		if (ret==4) suc=AssignLate(handle->func_work_buf+512,handle->func_source_path);
 
 		// Try to lock path
 		else
-		if (lock=Lock(handle->source_path,ACCESS_READ))
+		if (lock=Lock(handle->func_source_path,ACCESS_READ))
 		{
 			// Add?
-			if (ret==2) suc=AssignAdd(handle->work_buffer+512,lock);
+			if (ret==2) suc=AssignAdd(handle->func_work_buf+512,lock);
 
 			// Normal assign
-			else suc=AssignLock(handle->work_buffer+512,lock);
+			else suc=AssignLock(handle->func_work_buf+512,lock);
 
 			// Successful?
 			if (suc) lock=0;
@@ -105,7 +105,7 @@ GALILEOFM_FUNC(function_assign)
 		if (!suc)
 		{
 			// Show error
-			suc=!(function_error(handle,handle->work_buffer+512,MSG_ASSIGNING,-IoErr()));
+			suc=!(function_error(handle,handle->func_work_buf+512,MSG_ASSIGNING,-IoErr()));
 		}
 
 		// Lock to free?

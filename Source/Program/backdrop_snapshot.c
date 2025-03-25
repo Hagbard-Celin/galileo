@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -61,8 +61,8 @@ void backdrop_snapshot(BackdropInfo *info,BOOL unsnapshot,BOOL all,BackdropObjec
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		BOOL ok=0;
 
@@ -70,19 +70,19 @@ void backdrop_snapshot(BackdropInfo *info,BOOL unsnapshot,BOOL all,BackdropObjec
 		if (icon)
 		{
 			// Does it match?
-			if (object!=icon || !object->icon) continue;
+			if (object!=icon || !object->bdo_icon) continue;
 		}
 
 		// Is object selected?
 		else
-		if ((!object->state && !all) || !object->icon) continue;
+		if ((!object->bdo_state && !all) || !object->bdo_icon) continue;
 		beep=1;
 
 		// Appicon?
-		if (object->type==BDO_APP_ICON)
+		if (object->bdo_type==BDO_APP_ICON)
 		{
 			// Does icon support snapshot itself?
-			if (WB_AppIconFlags((struct AppIcon *)object->misc_data)&APPENTF_SNAPSHOT)
+			if (WB_AppIconFlags((struct AppIcon *)object->bdo_misc_data)&APPENTF_SNAPSHOT)
 			{
 				backdrop_appicon_message(object,(unsnapshot)?BAPPF_UNSNAPSHOT:0);
 				++count;
@@ -90,12 +90,12 @@ void backdrop_snapshot(BackdropInfo *info,BOOL unsnapshot,BOOL all,BackdropObjec
 
 			// Otherwise, fake snapshot
 			else
-			if (*object->name) ok=1;
+			if (*object->bdo_name) ok=1;
 		}
 
 		// Otherwise, is it ok to snapshot?
 		else
-		if (object->type!=BDO_BAD_DISK) ok=1;
+		if (object->bdo_type!=BDO_BAD_DISK) ok=1;
 
 		// Ok to snapshot?
 		if (ok)
@@ -114,10 +114,10 @@ void backdrop_snapshot(BackdropInfo *info,BOOL unsnapshot,BOOL all,BackdropObjec
 			else
 			{
 				// Drawer?
-				if (object->icon->do_DrawerData)
+				if (object->bdo_icon->do_DrawerData)
 				{
 					// Group icon?
-					if (object->type==BDO_GROUP)
+					if (object->bdo_type==BDO_GROUP)
 					{
 						GroupData *group;
 
@@ -125,7 +125,7 @@ void backdrop_snapshot(BackdropInfo *info,BOOL unsnapshot,BOOL all,BackdropObjec
 						if (group=backdrop_find_group(object))
 						{
 							// Update window position
-							*((struct IBox *)&object->icon->do_DrawerData->dd_NewWindow.LeftEdge)=group->dimensions;
+							*((struct IBox *)&object->bdo_icon->do_DrawerData->dd_NewWindow.LeftEdge)=group->dimensions;
 						}
 					}
 
@@ -149,12 +149,12 @@ void backdrop_snapshot(BackdropInfo *info,BOOL unsnapshot,BOOL all,BackdropObjec
 				}
 
 				// Get position
-				x=object->pos.Left;
-				y=object->pos.Top;
+				x=object->bdo_pos.Left;
+				y=object->bdo_pos.Top;
 			}
 
 			// AppIcon?
-			if (object->type==BDO_APP_ICON)
+			if (object->bdo_type==BDO_APP_ICON)
 			{
 				leftout_record *left;
 
@@ -170,7 +170,7 @@ void backdrop_snapshot(BackdropInfo *info,BOOL unsnapshot,BOOL all,BackdropObjec
 					if (left->node.ln_Type==PTYPE_APPICON)
 					{
 						// Match this icon?
-						if (strcmp(left->icon_label,object->name)==0)
+						if (strcmp(left->icon_label,object->bdo_name)==0)
 							break;
 					}
 				}
@@ -182,7 +182,7 @@ void backdrop_snapshot(BackdropInfo *info,BOOL unsnapshot,BOOL all,BackdropObjec
 					if (left=AllocMemH(GUI->position_memory,sizeof(leftout_record)))
 					{
 						// Fill out entry
-						stccpy(left->icon_label,object->name,sizeof(left->icon_label));
+						stccpy(left->icon_label,object->bdo_name,sizeof(left->icon_label));
 						left->node.ln_Name=left->name;
 						left->node.ln_Type=PTYPE_APPICON;
 
@@ -208,7 +208,7 @@ void backdrop_snapshot(BackdropInfo *info,BOOL unsnapshot,BOOL all,BackdropObjec
 						ULONG iflags;
 
 						// Adjust for borders?
-						if (!((iflags=GetIconFlags(object->icon))&ICONF_BORDER_OFF) &&
+						if (!((iflags=GetIconFlags(object->bdo_icon))&ICONF_BORDER_OFF) &&
 							(!(environment->env->desktop_flags&DESKTOPF_NO_BORDERS) || (iflags&ICONF_BORDER_ON)))
 						{
 							// Shift back by border size
@@ -236,7 +236,7 @@ void backdrop_snapshot(BackdropInfo *info,BOOL unsnapshot,BOOL all,BackdropObjec
 
 			// Left-out on desktop?
 			else
-			if (object->type==BDO_LEFT_OUT && !(object->flags&BDOF_DESKTOP_FOLDER) && info->flags&BDIF_MAIN_DESKTOP)
+			if (object->bdo_type==BDO_LEFT_OUT && !(object->bdo_flags&BDOF_DESKTOP_FOLDER) && info->flags&BDIF_MAIN_DESKTOP)
 			{
 				leftout_record *left;
 
@@ -252,7 +252,7 @@ void backdrop_snapshot(BackdropInfo *info,BOOL unsnapshot,BOOL all,BackdropObjec
 					if (left->node.ln_Type==PTYPE_LEFTOUT)
 					{
 						// Match this icon?
-						if (object->misc_data==(ULONG)left) break;
+						if (object->bdo_misc_data==(ULONG)left) break;
 					}
 				}
 
@@ -302,14 +302,14 @@ void backdrop_snapshot(BackdropInfo *info,BOOL unsnapshot,BOOL all,BackdropObjec
 				if (environment->env->display_options&DISPOPTF_ICON_POS)
 				{
 					// Set position
-					object->icon->do_CurrentX=(unsnapshot)?NO_ICON_POSITION:x-WBICONMAGIC_X;
-					object->icon->do_CurrentY=(unsnapshot)?NO_ICON_POSITION:y-WBICONMAGIC_Y;
+					object->bdo_icon->do_CurrentX=(unsnapshot)?NO_ICON_POSITION:x-WBICONMAGIC_X;
+					object->bdo_icon->do_CurrentY=(unsnapshot)?NO_ICON_POSITION:y-WBICONMAGIC_Y;
 
 					// Removing Galileo positions?
 					if (environment->env->display_options&DISPOPTF_REMGALILEOPOS)
 					{
 						// Remove Galileo position from icon
-						SetIconFlags(object->icon,GetIconFlags(object->icon)&~ICONF_POSITION_OK);
+						SetIconFlags(object->bdo_icon,GetIconFlags(object->bdo_icon)&~ICONF_POSITION_OK);
 					}
 				}
 
@@ -317,10 +317,10 @@ void backdrop_snapshot(BackdropInfo *info,BOOL unsnapshot,BOOL all,BackdropObjec
 				else
 				{
 					// Set "position ok" flag
-					SetIconFlags(object->icon,GetIconFlags(object->icon)|ICONF_POSITION_OK);
+					SetIconFlags(object->bdo_icon,GetIconFlags(object->bdo_icon)|ICONF_POSITION_OK);
 
 					// Update icon position
-					SetIconPosition(object->icon,x,y);
+					SetIconPosition(object->bdo_icon,x,y);
 				}
 
 				// Get icon lock
@@ -330,7 +330,7 @@ void backdrop_snapshot(BackdropInfo *info,BOOL unsnapshot,BOOL all,BackdropObjec
 					old=CurrentDir(lock);
 
 					// Save this object out
-					if (!(WriteIcon((object->icon->do_Type==WBDISK)?"Disk":object->name,object->icon)))
+					if (!(WriteIcon((object->bdo_icon->do_Type==WBDISK)?"Disk":object->bdo_name,object->bdo_icon)))
 						beep=1;
 
 					// Success; is this in a lister?
@@ -340,7 +340,7 @@ void backdrop_snapshot(BackdropInfo *info,BOOL unsnapshot,BOOL all,BackdropObjec
 						char name[256];
 
 						// Get icon name
-						strcpy(name,(object->icon->do_Type==WBDISK)?"Disk":object->name);
+						strcpy(name,(object->bdo_icon->do_Type==WBDISK)?"Disk":object->bdo_name);
 						strcat(name,".info");
 
 						// Reload the file

@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -76,10 +76,10 @@ BOOL backdrop_start_drag(BackdropInfo *info,short x,short y)
 	CurrentTime(&info->drag_sec,&info->drag_mic);
 
 	// Last selected icon?
-	if ((object=info->last_sel_object) && object->state)
+	if ((object=info->last_sel_object) && object->bdo_state)
 	{
 		// Check icon isn't locked
-		if (object->flags&BDOF_LOCKED)
+		if (object->bdo_flags&BDOF_LOCKED)
 		{
 			// Can't drag at all
 			backdrop_stop_drag(info);
@@ -89,14 +89,14 @@ BOOL backdrop_start_drag(BackdropInfo *info,short x,short y)
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Is object selected?
-		if (object->state)
+		if (object->bdo_state)
 		{
 			// Check icon isn't locked
-			if (object->flags&BDOF_LOCKED) continue;
+			if (object->bdo_flags&BDOF_LOCKED) continue;
 
 			// Start dragging
 			if (!(backdrop_drag_object(info,object)))
@@ -121,17 +121,17 @@ BOOL backdrop_drag_object(
 	ULONG flags=0;
 
 	// Is object already being dragged?
-	if (object->drag_info) return 1;
+	if (object->bdo_drag_info) return 1;
 
 	// Is there a select image?
-	if (object->icon->do_Gadget.SelectRender &&
-		(object->icon->do_Gadget.Flags&GFLG_GADGHIMAGE))
+	if (object->bdo_icon->do_Gadget.SelectRender &&
+		(object->bdo_icon->do_Gadget.Flags&GFLG_GADGHIMAGE))
 	{
-		image=(struct Image *)object->icon->do_Gadget.SelectRender;
+		image=(struct Image *)object->bdo_icon->do_Gadget.SelectRender;
 	}
 
 	// No
-	else image=(struct Image *)object->icon->do_Gadget.GadgetRender;
+	else image=(struct Image *)object->bdo_icon->do_Gadget.GadgetRender;
 
 	// Get flags
 	if (info->flags&BDIF_CUSTOM_DRAG)
@@ -144,27 +144,27 @@ BOOL backdrop_drag_object(
 	}
 
 	// Get drag info
-	if (!(object->drag_info=
+	if (!(object->bdo_drag_info=
 		GetDragInfo(
 			info->window,
 			&GUI->drag_screen_rp,
-			(image->Width<object->pos.Width)?object->pos.Width:image->Width,
-			(image->Height<object->pos.Height)?object->pos.Height:image->Height,
+			(image->Width<object->bdo_pos.Width)?object->bdo_pos.Width:image->Width,
+			(image->Height<object->bdo_pos.Height)?object->bdo_pos.Height:image->Height,
 			flags)))
 			return 0;
 
 	// Get image to drag
-	backdrop_draw_object(info,object,0,&object->drag_info->drag_rp,0,0);
+	backdrop_draw_object(info,object,0,&object->bdo_drag_info->drag_rp,0,0);
 
 	// Get mask
 	if (environment->env->desktop_flags&DESKTOPF_QUICK_DRAG)
-		object->drag_info->flags|=DRAGF_OPAQUE;
+		object->bdo_drag_info->flags|=DRAGF_OPAQUE;
 	else
 	if (environment->env->desktop_flags&DESKTOPF_TRANSPARENCY)
-		object->drag_info->flags|=DRAGF_TRANSPARENT;
+		object->bdo_drag_info->flags|=DRAGF_TRANSPARENT;
 	else
-		object->drag_info->flags|=DRAGF_TRANSPARENT|DRAGF_OPAQUE;
-	GetDragMask(object->drag_info);
+		object->bdo_drag_info->flags|=DRAGF_TRANSPARENT|DRAGF_OPAQUE;
+	GetDragMask(object->bdo_drag_info);
 
 	return 1;
 }
@@ -217,14 +217,14 @@ BOOL backdrop_stop_drag(BackdropInfo *info)
 			{
 				// Go through backdrop list
 				for (object=(BackdropObject *)info->objects.list.lh_Head;
-					object->node.ln_Succ;
-					object=(BackdropObject *)object->node.ln_Succ)
+					object->bdo_node.ln_Succ;
+					object=(BackdropObject *)object->bdo_node.ln_Succ)
 				{
 					// Is object being dragged?
-					if (object->drag_info)
+					if (object->bdo_drag_info)
 					{
 						// Hide object
-						RemBob(&object->drag_info->bob);
+						RemBob(&object->bdo_drag_info->bob);
 					}
 				}
 			}
@@ -246,11 +246,11 @@ BOOL backdrop_stop_drag(BackdropInfo *info)
 
 		// Go through backdrop list
 		for (object=(BackdropObject *)info->objects.list.lh_Head;
-			object->node.ln_Succ;
-			object=(BackdropObject *)object->node.ln_Succ)
+			object->bdo_node.ln_Succ;
+			object=(BackdropObject *)object->bdo_node.ln_Succ)
 		{
 			// Was object being dragged?
-			if (object->drag_info)
+			if (object->bdo_drag_info)
 			{
 				if ((info->flags & BDIF_CUSTOM_DRAG) && (GUI->flags & GUIF_DRAGGING))
 				{
@@ -260,11 +260,11 @@ BOOL backdrop_stop_drag(BackdropInfo *info)
 					// dragging the object needs to _stay_ in the GELs list before the call to
 					// DrawDragList(..., DRAGF_CUSTOM|DRAGF_REMOVE).
 					// Thus, remove the object from the GELs list here instead.
-					RemVSprite(&object->drag_info->sprite);
+					RemVSprite(&object->bdo_drag_info->sprite);
 				}
 				// Free drag
-				FreeDragInfo(object->drag_info);
-				object->drag_info=0;
+				FreeDragInfo(object->bdo_drag_info);
+				object->bdo_drag_info=0;
 			}
 		}
 
@@ -304,45 +304,45 @@ void backdrop_show_drag(
 	
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Is object being dragged?
-		if (object->drag_info)
+		if (object->bdo_drag_info)
 		{
 			short ox,oy;
 
 			// Get object position relative to first object
-			ox=object->pos.Left-first->pos.Left;
-			oy=object->pos.Top-first->pos.Top;
+			ox=object->bdo_pos.Left-first->bdo_pos.Left;
+			oy=object->bdo_pos.Top-first->bdo_pos.Top;
 
 			// Offset by mouse coordinates
 			ox+=x;
 			oy+=y;
 
 			// Offset by drag offset and window offset
-			ox+=first->drag_x_offset+info->size.MinX-info->offset_x;
-			oy+=first->drag_y_offset+info->size.MinY-info->offset_y;
+			ox+=first->bdo_drag_x_offset+info->size.MinX-info->offset_x;
+			oy+=first->bdo_drag_y_offset+info->size.MinY-info->offset_y;
 
 			// Position image
-			object->drag_info->sprite.X=ox;
-			object->drag_info->sprite.Y=oy;
+			object->bdo_drag_info->sprite.X=ox;
+			object->bdo_drag_info->sprite.Y=oy;
 			ok=1;
 
 			// Not dragging yet?
 			if (!(GUI->flags&GUIF_DRAGGING))
 			{
-                // If not custom dragging..
+		// If not custom dragging..
 				if (!(info->flags & BDIF_CUSTOM_DRAG))
 				{
-                    // ..Add bob to list
-					AddBob(&object->drag_info->bob, &GUI->drag_screen_rp);
+		    // ..Add bob to list
+					AddBob(&object->bdo_drag_info->bob, &GUI->drag_screen_rp);
 				}
 				else
 				{
 					// Custom dragging is abusing the GELs list merely for keeping track of
 					// the dragged objects, thus use AddVSprite() to link it into the list
-					AddVSprite(&object->drag_info->sprite, &GUI->drag_screen_rp);
+					AddVSprite(&object->bdo_drag_info->sprite, &GUI->drag_screen_rp);
 				}
 			}
 		}
@@ -383,13 +383,13 @@ void backdrop_drop_object(BackdropInfo *info,BackdropObject *on_object)
 	dbuf=buf+256;
 
 	// Drop on an AppIcon
-	if (on_object->type==BDO_APP_ICON)
+	if (on_object->bdo_type==BDO_APP_ICON)
 	{
 		GalileoAppMessage *msg;
 		struct MsgPort *port;
 
 		// Is the icon busy?
-		if (on_object->flags&BDOF_BUSY)
+		if (on_object->bdo_flags&BDOF_BUSY)
 		{
 			DisplayBeep(info->window->WScreen);
 			FreeVec(buf);
@@ -408,7 +408,7 @@ void backdrop_drop_object(BackdropInfo *info,BackdropObject *on_object)
 
 		// Get AppInfo
 		port=WB_AppWindowData(
-			(struct AppWindow *)on_object->misc_data,
+			(struct AppWindow *)on_object->bdo_misc_data,
 			&msg->ga_Msg.am_ID,
 			&msg->ga_Msg.am_UserData);
 
@@ -419,8 +419,8 @@ void backdrop_drop_object(BackdropInfo *info,BackdropObject *on_object)
 	}
 
 	// Only support dropping on disks at the moment
-	if ((on_object->type!=BDO_DISK && on_object->type!=BDO_BAD_DISK) ||
-		on_object->flags&(BDOF_ASSIGN|BDOF_CACHE))
+	if ((on_object->bdo_type!=BDO_DISK && on_object->bdo_type!=BDO_BAD_DISK) ||
+		on_object->bdo_flags&(BDOF_ASSIGN|BDOF_CACHE))
 	{
 		DisplayBeep(info->window->WScreen);
 		FreeVec(buf);
@@ -429,11 +429,11 @@ void backdrop_drop_object(BackdropInfo *info,BackdropObject *on_object)
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Selected disk?
-		if (object->type==BDO_DISK && !(object->flags&(BDOF_ASSIGN|BDOF_CACHE)) && object->state)
+		if (object->bdo_type==BDO_DISK && !(object->bdo_flags&(BDOF_ASSIGN|BDOF_CACHE)) && object->bdo_state)
 		{
 			BPTR lock;
 
@@ -454,7 +454,7 @@ void backdrop_drop_object(BackdropInfo *info,BackdropObject *on_object)
 	}
 
 	// Didn't get anything?
-	if (!object->node.ln_Succ)
+	if (!object->bdo_node.ln_Succ)
 	{
 		DisplayBeep(info->window->WScreen);
 		FreeVec(buf);
@@ -462,10 +462,10 @@ void backdrop_drop_object(BackdropInfo *info,BackdropObject *on_object)
 	}
 
 	// Drop on a bad disk?
-	if (on_object->type==BDO_BAD_DISK)
+	if (on_object->bdo_type==BDO_BAD_DISK)
 	{
 		// Get device name
-		strcpy(dbuf,on_object->name);
+		strcpy(dbuf,on_object->bdo_name);
 	}
 
 	// Real disk

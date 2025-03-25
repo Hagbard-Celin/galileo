@@ -181,8 +181,8 @@ typedef struct _FunctionHandle
     ULONG			data;			// Function data
     ULONG			flags;			// Function flags
 
-    char			source_path[512];	// Source path
-    char			dest_path[512];		// Destination path
+    char			func_source_path[512];	// Source path
+    char			func_dest_path[512];	// Destination path
 
     int				entry_count;		// Total number of entries
     struct List			entry_list;		// Entries to work on
@@ -225,10 +225,10 @@ typedef struct _FunctionHandle
     ULONG			recurse_bytes;		// Size of recursed files
     int				recurse_depth;		// Recurse depth
 
-    char			work_buffer[1024];	// A buffer to do things in
+    char			func_work_buf[1024];	// A buffer to do things in
 
-    PathList			source_paths;		// List of source paths
-    PathList			dest_paths;		// List of destination paths
+    PathList			func_source_paths;	     // List of source paths
+    PathList			func_dest_paths;	     // List of destination paths
 
     struct FileInfoBlock				// Some FileInfoBlocks to play with
 				*s_info,
@@ -288,7 +288,7 @@ typedef struct _FunctionHandle
 
     struct MsgPort		*reply_port;
 
-    Buttons			*buttons;		// Button bank launched from
+    Buttons			*func_buttons;		     // Button bank launched from
 
     struct FileRequester	*filereq;		// File requester
     struct IBox			coords;			// Coordinates

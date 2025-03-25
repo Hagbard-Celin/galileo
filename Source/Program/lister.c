@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -292,8 +292,8 @@ void lister_update_icon(Lister *lister)
 	if (object=backdrop_find_appicon(GUI->backdrop,(AppEntry *)lister->appicon))
 	{
 		// Save position
-		lister->icon_pos_x=object->pos.Left;
-		lister->icon_pos_y=object->pos.Top;
+		lister->icon_pos_x=object->bdo_pos.Left;
+		lister->icon_pos_y=object->bdo_pos.Top;
 	}
 
 	// Unlock main icon list
@@ -784,7 +784,7 @@ Lister *lister_open_new(char *path,BackdropObject *object,struct Window *parent,
 	pos=GetListerPosition(
 		full_path,
 		device,
-		(object)?object->icon:0,
+		(object)?object->bdo_icon:0,
 		&cfg->lister.pos[0],
 		&mode,
 		&cfg->lister.format,

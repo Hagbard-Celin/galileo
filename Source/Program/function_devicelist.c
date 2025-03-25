@@ -109,7 +109,7 @@ GALILEOFM_FUNC(function_devicelist)
 	}
 
 	// Get current lister
-	if (!(lister=function_lister_current(&handle->source_paths)))
+	if (!(lister=function_lister_current(&handle->func_source_paths)))
 		return 1;
 
 	// Make window into a "special" buffer
@@ -181,13 +181,13 @@ GALILEOFM_FUNC(function_devicelist)
 					if (*buffer->buf_CustomHandler) continue;
 
 					// Copy path, strip /
-					strcpy(handle->work_buffer,buffer->buf_Path);
-					if (*(ptr=handle->work_buffer+strlen(handle->work_buffer)-1)=='/')
+					strcpy(handle->func_work_buf,buffer->buf_Path);
+					if (*(ptr=handle->func_work_buf+strlen(handle->func_work_buf)-1)=='/')
 						*ptr=0;
 
 					// Add to list
-					if (handle->work_buffer[0])
-						Att_NewNode(list,handle->work_buffer,(ULONG)buffer,ADDNODE_SORT|ADDNODE_EXCLUSIVE);
+					if (handle->func_work_buf[0])
+						Att_NewNode(list,handle->func_work_buf,(ULONG)buffer,ADDNODE_SORT|ADDNODE_EXCLUSIVE);
 				}
 			}
 
@@ -279,15 +279,15 @@ GALILEOFM_FUNC(function_devicelist)
 					strcat(device_name,":");
 
 					// Get pathname
-					if (full) DevNameFromLock(list_entry->dol_Lock,handle->work_buffer,256);
-					else handle->work_buffer[0]=0;
+					if (full) DevNameFromLock(list_entry->dol_Lock,handle->func_work_buf,256);
+					else handle->func_work_buf[0]=0;
 
 					// Create entry
-					if (node=AllocMemH(handle->entry_memory,sizeof(struct Node)+32+strlen(handle->work_buffer)+1))
+					if (node=AllocMemH(handle->entry_memory,sizeof(struct Node)+32+strlen(handle->func_work_buf)+1))
 					{
 						node->ln_Type=list_entry->dol_Type;
 						strcpy((char *)(node+1),device_name);
-						strcpy(((char *)(node+1))+32,handle->work_buffer);
+						strcpy(((char *)(node+1))+32,handle->func_work_buf);
 						AddTail(&list[type],node);
 					}
 
@@ -304,13 +304,13 @@ GALILEOFM_FUNC(function_devicelist)
 							assign=assign->al_Next)
 						{
 							// Get pathname
-							DevNameFromLock(assign->al_Lock,handle->work_buffer,256);
+							DevNameFromLock(assign->al_Lock,handle->func_work_buf,256);
 
 							// Create entry
-							if (node=AllocMemH(handle->entry_memory,sizeof(struct Node)+strlen(handle->work_buffer)+1))
+							if (node=AllocMemH(handle->entry_memory,sizeof(struct Node)+strlen(handle->func_work_buf)+1))
 							{
 								node->ln_Type=255;
-								strcpy((char *)(node+1),handle->work_buffer);
+								strcpy((char *)(node+1),handle->func_work_buf);
 								AddTail(&list[type],node);
 							}
 						}
@@ -486,9 +486,9 @@ GALILEOFM_FUNC(function_devicelist)
 		}
 
 		// Get format string pointers
-		dev_format=handle->work_buffer+256;
-		dev_val_format=handle->work_buffer+384;
-		asn_format=handle->work_buffer+512;
+		dev_format=handle->func_work_buf+256;
+		dev_val_format=handle->func_work_buf+384;
+		asn_format=handle->func_work_buf+512;
 
 		// Need to use volume string in device list?
 		if (need_vol)
@@ -576,7 +576,7 @@ GALILEOFM_FUNC(function_devicelist)
 						if (!data->valid)
 						{
 							// Build display string
-							lsprintf(handle->work_buffer,
+							lsprintf(handle->func_work_buf,
 								dev_format,
 								data->name,
 								buf,
@@ -590,7 +590,7 @@ GALILEOFM_FUNC(function_devicelist)
 						else
 						{
 							// Build display string
-							lsprintf(handle->work_buffer,
+							lsprintf(handle->func_work_buf,
 								dev_val_format,
 								data->name,
 								buf);
@@ -613,7 +613,7 @@ GALILEOFM_FUNC(function_devicelist)
 					// Multi-directory assign?
 					if (node->ln_Type==255)
 					{
-						lsprintf(handle->work_buffer,"\t\b%ld\b+ %s",asn_multi_x,(char *)(node+1));
+						lsprintf(handle->func_work_buf,"\t\b%ld\b+ %s",asn_multi_x,(char *)(node+1));
 						if (comment=AllocMemH(handle->entry_memory,strlen((char *)(node+1))+1))
 							strcpy(comment,(char *)(node+1));
 					}
@@ -621,12 +621,12 @@ GALILEOFM_FUNC(function_devicelist)
 					// Build display string
 					else
 					{
-						lsprintf(handle->work_buffer,
+						lsprintf(handle->func_work_buf,
 							asn_format,
 							(char *)(node+1));
 						if (full)
 						{
-							lsprintf(handle->work_buffer+strlen(handle->work_buffer),"\t\b%ld\b%s",asn_first_x,((char *)(node+1))+32);
+							lsprintf(handle->func_work_buf+strlen(handle->func_work_buf),"\t\b%ld\b%s",asn_first_x,((char *)(node+1))+32);
 						}
 					}
 				}
@@ -643,7 +643,7 @@ GALILEOFM_FUNC(function_devicelist)
 						comment,
 						0,
 						(node->ln_Type==255)?SUBENTRY_BUFFER:0,
-						handle->work_buffer,0,
+						handle->func_work_buf,0,
 						0),
 					(node->ln_Type==255 && last_entry)?last_entry:add_after);
 			}

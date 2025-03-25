@@ -172,7 +172,7 @@ GALILEOFM_FUNC(function_delete)
 	}
 
 	// Get current path
-	if (path=function_path_current(&handle->source_paths))
+	if (path=function_path_current(&handle->func_source_paths))
 	{
 		// Tell this lister to update it's datestamp at the end
 		path->pn_flags|=LISTNF_UPDATE_STAMP;
@@ -276,7 +276,7 @@ GALILEOFM_FUNC(function_delete)
 					// Build requester text
 					else
 					lsprintf(
-						handle->work_buffer,
+						handle->func_work_buf,
 						GetString(&locale,MSG_DELETE_DIR_CONFIRM),
 						FilePart(source_file));
 				}
@@ -289,7 +289,7 @@ GALILEOFM_FUNC(function_delete)
 				{
 					// Build requester text
 					lsprintf(
-						handle->work_buffer,
+						handle->func_work_buf,
 						GetString(&locale,MSG_DELETE_FILE_CONFIRM),
 						FilePart(source_file));
 				}
@@ -303,7 +303,7 @@ GALILEOFM_FUNC(function_delete)
 					// Show requester
 					if ((ret=function_request(
 						handle,
-						handle->work_buffer,
+						handle->func_work_buf,
 						0,
 						GetString(&locale,MSG_DELETE),
 						GetString(&locale,MSG_DELETE_ALL),
@@ -394,14 +394,14 @@ GALILEOFM_FUNC(function_delete)
 					if (!data->unprotect_all)
 					{
 						// Build requester text
-						lsprintf(handle->work_buffer,
+						lsprintf(handle->func_work_buf,
 							GetString(&locale,MSG_DELETE_PROTECTED),
 							FilePart(source_file));
 
 						// Display request
 						if (!(ret=function_request(
 							handle,
-							handle->work_buffer,
+							handle->func_work_buf,
 							0,
 							GetString(&locale,MSG_UNPROTECT),
 							GetString(&locale,MSG_UNPROTECT_ALL),

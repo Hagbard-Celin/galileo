@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -61,15 +61,15 @@ void lister_clip_entries(Lister *lister,unsigned short qual)
 
 		// Go through icons
 		for (icon=(BackdropObject *)lister->backdrop_info->objects.list.lh_Head;
-			icon->node.ln_Succ;
-			icon=(BackdropObject *)icon->node.ln_Succ)
+			icon->bdo_node.ln_Succ;
+			icon=(BackdropObject *)icon->bdo_node.ln_Succ)
 		{
 			// Selected?
-			if (icon->state)
+			if (icon->bdo_state)
 			{
 				// Add length to total
 				len+=path_len;
-				len+=strlen(icon->name);
+				len+=strlen(icon->bdo_name);
 
 				// Add space for linefeed
 				if (num++>0)
@@ -128,21 +128,21 @@ void lister_clip_entries(Lister *lister,unsigned short qual)
 
 			// Go through icons
 			for (icon=(BackdropObject *)lister->backdrop_info->objects.list.lh_Head;
-				icon->node.ln_Succ;
-				icon=(BackdropObject *)icon->node.ln_Succ)
+				icon->bdo_node.ln_Succ;
+				icon=(BackdropObject *)icon->bdo_node.ln_Succ)
 			{
 				// Selected?
-				if (icon->state)
+				if (icon->bdo_state)
 				{
 					// Add pathname to buffer (unless shift is down)
 					if (!(qual&IEQUAL_ANYSHIFT))
 					{
 						strcat(ptr,lister->cur_buffer->buf_ExpandedPath);
-						AddPart(ptr,icon->name,256);
+						AddPart(ptr,icon->bdo_name,256);
 					}
 
 					// If shift is down, just add name
-					else strcat(ptr,icon->name);
+					else strcat(ptr,icon->bdo_name);
 
 					// Add linefeed if needed
 					if (num>1) strcat(ptr,"\n");

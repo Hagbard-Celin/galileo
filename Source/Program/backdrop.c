@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -139,14 +139,14 @@ void backdrop_init_info(
 
 		// Remap existing icons
 		for (icon=(BackdropObject *)info->objects.list.lh_Head;
-			icon->node.ln_Succ;
-			icon=(BackdropObject *)icon->node.ln_Succ)
+			icon->bdo_node.ln_Succ;
+			icon=(BackdropObject *)icon->bdo_node.ln_Succ)
 		{
 			// Remap the icon
-			if (RemapIcon(icon->icon,info->window->WScreen,0))
+			if (RemapIcon(icon->bdo_icon,info->window->WScreen,0))
 			{
 				// Had icon never been remapped before?
-				if (!(icon->flags&BDOF_REMAPPED))
+				if (!(icon->bdo_flags&BDOF_REMAPPED))
 				{
 					// Get new object size, etc
 					backdrop_get_icon(info,icon,GETICON_KEEP|GETICON_POS_ONLY|GETICON_SAVE_POS|GETICON_REMAP);
@@ -157,7 +157,7 @@ void backdrop_init_info(
 			}
 			
 			// Set flag to say we've been remapped
-			icon->flags|=BDOF_REMAPPED;
+			icon->bdo_flags|=BDOF_REMAPPED;
 		}
 
 		// Unlock icon list
@@ -180,11 +180,11 @@ void backdrop_free_remap(BackdropInfo *info,struct Window *window)
 
 	// Free icon remapping
 	for (icon=(BackdropObject *)info->objects.list.lh_Head;
-		icon->node.ln_Succ;
-		icon=(BackdropObject *)icon->node.ln_Succ)
+		icon->bdo_node.ln_Succ;
+		icon=(BackdropObject *)icon->bdo_node.ln_Succ)
 	{
 		// Remap the icon
-		RemapIcon(icon->icon,(window)?window->WScreen:0,1);
+		RemapIcon(icon->bdo_icon,(window)?window->WScreen:0,1);
 	}
 
 	// Unlock icon list
@@ -260,21 +260,21 @@ BackdropObject *backdrop_new_object(
 		return 0;
 
 	// Get name pointer
-	object->name=(char *)(object+1);
+	object->bdo_name=(char *)(object+1);
 
 	// Set name
-	object->node.ln_Name=object->name;
-	if (name) stccpy(object->name,name,GUI->def_filename_length);
+	object->bdo_node.ln_Name=object->bdo_name;
+	if (name) stccpy(object->bdo_name,name,GUI->def_filename_length);
 
 	// Set type
-	object->type=type;
+	object->bdo_type=type;
 
 	// Any extra?
 	if (extra)
 	{
 		// Copy extra
-		object->device_name=object->name+GUI->def_filename_length+1;
-		strcpy(object->device_name,extra);
+		object->bdo_device_name=object->bdo_name+GUI->def_filename_length+1;
+		strcpy(object->bdo_device_name,extra);
 	}
 
 	return object;
@@ -294,9 +294,9 @@ void backdrop_free_list(BackdropInfo *info)
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;)
+		object->bdo_node.ln_Succ;)
 	{
-		BackdropObject *next=(BackdropObject *)object->node.ln_Succ;
+		BackdropObject *next=(BackdropObject *)object->bdo_node.ln_Succ;
 
 		// Remove object
 		backdrop_remove_object(info,object);
@@ -316,25 +316,25 @@ void backdrop_remove_object(BackdropInfo *info,BackdropObject *object)
 	short a;
 
 	// Remove from list
-	Remove(&object->node);
+	Remove(&object->bdo_node);
 
 	// Not an appicon?
-	if (object->type!=BDO_APP_ICON)
+	if (object->bdo_type!=BDO_APP_ICON)
 	{
-		if (object->icon)
+		if (object->bdo_icon)
 		{
 			// Free icon remapping
-			RemapIcon(object->icon,(info->window)?info->window->WScreen:0,1);
+			RemapIcon(object->bdo_icon,(info->window)?info->window->WScreen:0,1);
 
 			// Free icon
-			FreeCachedDiskObject(object->icon);
+			FreeCachedDiskObject(object->bdo_icon);
 		}
 	}
 
 	// Mask plane?
 	for (a=0;a<2;a++)
-        if (object->image_mask[a])
-			FreeVec(object->image_mask[a]);
+	if (object->bdo_image_mask[a])
+			FreeVec(object->bdo_image_mask[a]);
 
 	// Free object
 	FreeMemH(object);
@@ -351,30 +351,30 @@ void backdrop_get_icon(BackdropInfo *info,BackdropObject *object,short flags)
 	if (flags&GETICON_KEEP) new_icon=0;
 
 	// Not AppIcon?
-	if (object->type!=BDO_APP_ICON && !(flags&GETICON_POS_ONLY))
+	if (object->bdo_type!=BDO_APP_ICON && !(flags&GETICON_POS_ONLY))
 	{
 		BPTR lock=0,old=0;
 
 		// Already got icon?
-		if (object->icon && !(flags&GETICON_KEEP))
+		if (object->bdo_icon && !(flags&GETICON_KEEP))
 		{
 			// Free icon remapping
-			RemapIcon(object->icon,(info->window)?info->window->WScreen:0,1);
+			RemapIcon(object->bdo_icon,(info->window)?info->window->WScreen:0,1);
 
 			// Free icon
-			FreeCachedDiskObject(object->icon);
-			object->icon=0;
+			FreeCachedDiskObject(object->bdo_icon);
+			object->bdo_icon=0;
 
 			// We'll be getting a new one
 			new_icon=1;
 		}
 
 		// Bad disk?
-		if (object->type==BDO_BAD_DISK)
+		if (object->bdo_type==BDO_BAD_DISK)
 		{
 			// Get default disk
-			if (!object->icon && !(object->icon=GetCachedDefDiskObject(WBKICK)))
-				object->icon=GetCachedDefDiskObject(WBDISK);
+			if (!object->bdo_icon && !(object->bdo_icon=GetCachedDefDiskObject(WBKICK)))
+				object->bdo_icon=GetCachedDefDiskObject(WBDISK);
 		}
 
 		// Default directory icon?
@@ -382,7 +382,7 @@ void backdrop_get_icon(BackdropInfo *info,BackdropObject *object,short flags)
 		if (flags&GETICON_DEFDIR)
 		{
 			// Get default drawer icon
-			if (!object->icon) object->icon=GetCachedDefDiskObject(WBDRAWER);
+			if (!object->bdo_icon) object->bdo_icon=GetCachedDefDiskObject(WBDRAWER);
 		}
 
 		// Get lock on directory
@@ -393,18 +393,18 @@ void backdrop_get_icon(BackdropInfo *info,BackdropObject *object,short flags)
 			if (lock) old=CurrentDir(lock);
 
 			// Disk?
-			if (object->type==BDO_DISK)
+			if (object->bdo_type==BDO_DISK)
 			{
 				// No icon already?
-				if (!object->icon)
+				if (!object->bdo_icon)
 				{
 					BOOL ok=1;
 					Cfg_Filetype *type=0;
 					char name[256],*ptr;
 
 					// Find a filetype-defined icon
-					if (object->device_name &&
-						(type=filetype_identify(object->device_name,FTTYPE_ICON,0,0)))
+					if (object->bdo_device_name &&
+						(type=filetype_identify(object->bdo_device_name,FTTYPE_ICON,0,0)))
 					{
 						// Copy icon path, strip .info
 						strcpy(name,type->icon_path);
@@ -414,15 +414,15 @@ void backdrop_get_icon(BackdropInfo *info,BackdropObject *object,short flags)
 						if (type->type.flags&FILETYPEF_OVERRIDE)
 						{
 							// Try for filetype icon first
-							object->icon=GetCachedDiskObject(name,0);
+							object->bdo_icon=GetCachedDiskObject(name,0);
 						}
 					}
 
 					// Don't have icon yet?
-					if (!object->icon)
+					if (!object->bdo_icon)
 					{
 						// Is this a MSDOS disk?
-						if (object->misc_data==ID_MSDOS_DISK)
+						if (object->bdo_misc_data==ID_MSDOS_DISK)
 						{
 							// See if icon actually exists
 							if (type && !(SetProtection("Disk.info",FIBF_ARCHIVE)) &&
@@ -435,81 +435,81 @@ void backdrop_get_icon(BackdropInfo *info,BackdropObject *object,short flags)
 						
 						// Get disk icon
 						if (ok)
-							object->icon=GetCachedDiskObject("Disk",0);
+							object->bdo_icon=GetCachedDiskObject("Disk",0);
 					}
 
 					// Got icon?
-					if (object->icon)
+					if (object->bdo_icon)
 					{
 #ifdef _DEBUG_ICONS
-                        KPrintF("backdrop_get_icon  path: %s name: %s \n", object->path, object->name);
-                        KPrintF("backdrop_get_icon  do_Gadget.Width: %ld do_Gadget.Height %ld  \n", object->icon->do_Gadget.Width, object->icon->do_Gadget.Height );
-                        if (object->icon->do_Gadget.GadgetRender)
-                            KPrintF("backdrop_get_icon  do_Gadget.GadgetRender->Width: %ld do_Gadget.GadgetRender->Height %ld \n", ((struct Image *)object->icon->do_Gadget.GadgetRender)->Width, ((struct Image *)object->icon->do_Gadget.GadgetRender)->Height );
+			KPrintF("backdrop_get_icon  path: %s name: %s \n", object->bdo_path, object->bdo_name);
+			KPrintF("backdrop_get_icon  do_Gadget.Width: %ld do_Gadget.Height %ld  \n", object->bdo_icon->do_Gadget.Width, object->bdo_icon->do_Gadget.Height );
+			if (object->bdo_icon->do_Gadget.GadgetRender)
+			    KPrintF("backdrop_get_icon  do_Gadget.GadgetRender->Width: %ld do_Gadget.GadgetRender->Height %ld \n", ((struct Image *)object->bdo_icon->do_Gadget.GadgetRender)->Width, ((struct Image *)object->bdo_icon->do_Gadget.GadgetRender)->Height );
 #endif
-                        // If it's a drawer icon, turn it into a disk
-						if (object->icon->do_Type==WBDRAWER)
-							object->icon->do_Type=WBDISK;
+			// If it's a drawer icon, turn it into a disk
+						if (object->bdo_icon->do_Type==WBDRAWER)
+							object->bdo_icon->do_Type=WBDISK;
 
 						// Check it is for a disk
-						if (object->icon->do_Type!=WBDISK)
+						if (object->bdo_icon->do_Type!=WBDISK)
 						{
 							// It's not, free it and use default
-							FreeCachedDiskObject(object->icon);
-							object->icon=0;
+							FreeCachedDiskObject(object->bdo_icon);
+							object->bdo_icon=0;
 						}
 					}
 
 					// Still no icon? Get default
-					if (!object->icon && !(flags&GETICON_FAIL))
+					if (!object->bdo_icon && !(flags&GETICON_FAIL))
 					{
 						// Got type-defined?
 						if (type)
 						{
 							// Try for filetype icon
-							object->icon=GetCachedDiskObject(name,0);
+							object->bdo_icon=GetCachedDiskObject(name,0);
 						}
 
 						// Still none? Get default
-						if (!object->icon)
-							object->icon=GetCachedDefDiskObject(WBDISK);
+						if (!object->bdo_icon)
+							object->bdo_icon=GetCachedDefDiskObject(WBDISK);
 
 						// Set fake flag
-						if (object->icon)
-							object->flags|=BDOF_FAKE_ICON;
+						if (object->bdo_icon)
+							object->bdo_flags|=BDOF_FAKE_ICON;
 					}
 				}
 			}
 
 			// Left out or group
 			else
-			if (object->type==BDO_LEFT_OUT || object->type==BDO_GROUP)
+			if (object->bdo_type==BDO_LEFT_OUT || object->bdo_type==BDO_GROUP)
 			{
 				// Try for icon
-				if (!object->icon)
+				if (!object->bdo_icon)
 				{
 					short fake=0;
 
 					// Want real icon?
-					if (flags&GETICON_FAIL) object->icon=GetCachedDiskObject(object->name,0);
+					if (flags&GETICON_FAIL) object->bdo_icon=GetCachedDiskObject(object->bdo_name,0);
 
 					// Get default icon if fails
-					else object->icon=GetProperIcon(object->name,&fake,0);
+					else object->bdo_icon=GetProperIcon(object->bdo_name,&fake,0);
 
 					// Ended up fake?
 					if (fake)
 					{
 						// Set flag
-						object->flags|=BDOF_FAKE_ICON;
+						object->bdo_flags|=BDOF_FAKE_ICON;
 					}
 				}
 
 				// Got group icon?
-				if (object->icon && object->type==BDO_GROUP)
+				if (object->bdo_icon && object->bdo_type==BDO_GROUP)
 				{
 					// Auto-open group?
-					if (FindToolType(object->icon->do_ToolTypes,"OPEN"))
-						object->flags|=BDOF_AUTO_OPEN;
+					if (FindToolType(object->bdo_icon->do_ToolTypes,"OPEN"))
+						object->bdo_flags|=BDOF_AUTO_OPEN;
 				}
 			}
 
@@ -517,10 +517,10 @@ void backdrop_get_icon(BackdropInfo *info,BackdropObject *object,short flags)
 			if (lock)
 			{
 				// Got icon?
-				if (object->icon)
+				if (object->bdo_icon)
 				{
 					// Clear custom position flag
-					object->flags&=~BDOF_CUSTOM_POS;
+					object->bdo_flags&=~BDOF_CUSTOM_POS;
 
 #ifdef DISTINCT_OK
 					// Main desktop, distinct positions?
@@ -533,10 +533,10 @@ void backdrop_get_icon(BackdropInfo *info,BackdropObject *object,short flags)
 						if (desktop_icon_path(object,path,256,lock))
 						{
 							// See if position is available
-							if (desktop_find_icon(path,&object->custom_pos))
+							if (desktop_find_icon(path,&object->bdo_custom_pos))
 							{
 								// Set "custom position" flag
-								object->flags|=BDOF_CUSTOM_POS;
+								object->bdo_flags|=BDOF_CUSTOM_POS;
 							}
 						}
 					}
@@ -553,34 +553,34 @@ void backdrop_get_icon(BackdropInfo *info,BackdropObject *object,short flags)
 
 		// Failed to even get a lock; get default icon if a disk
 		else
-		if (object->type==BDO_DISK)
+		if (object->bdo_type==BDO_DISK)
 		{
 			// Get default icon
-			if (!object->icon && (object->icon=GetCachedDefDiskObject(WBDISK)))
-				object->flags|=BDOF_FAKE_ICON;
+			if (!object->bdo_icon && (object->bdo_icon=GetCachedDefDiskObject(WBDISK)))
+				object->bdo_flags|=BDOF_FAKE_ICON;
 		}
 	}
 
 	// Got an icon?
-	if (object->icon)
+	if (object->bdo_icon)
 	{
 		// Ended up fake?
-		if (object->flags&BDOF_FAKE_ICON)
+		if (object->bdo_flags&BDOF_FAKE_ICON)
 		{
 			// Make sure default icon has no position
-			if (object->icon)
+			if (object->bdo_icon)
 			{
 				// Clear 'position ok' flag, set invalid position
-				SetIconFlags(object->icon,GetIconFlags(object->icon)&~ICONF_POSITION_OK);
-				SetIconPosition(object->icon,-1,-1);
-				object->icon->do_CurrentX=NO_ICON_POSITION;
-				object->icon->do_CurrentY=NO_ICON_POSITION;
+				SetIconFlags(object->bdo_icon,GetIconFlags(object->bdo_icon)&~ICONF_POSITION_OK);
+				SetIconPosition(object->bdo_icon,-1,-1);
+				object->bdo_icon->do_CurrentX=NO_ICON_POSITION;
+				object->bdo_icon->do_CurrentY=NO_ICON_POSITION;
 			}
 		}
 
 		// If this is a group, make sure icon is a drawer
-		if (object->type==BDO_GROUP)
-			object->icon->do_Type=WBDRAWER;
+		if (object->bdo_type==BDO_GROUP)
+			object->bdo_icon->do_Type=WBDRAWER;
 
 		// Is it a new icon?
 		if (new_icon)
@@ -589,10 +589,10 @@ void backdrop_get_icon(BackdropInfo *info,BackdropObject *object,short flags)
 			if (info->window)
 			{
 				// Remap the icon
-				RemapIcon(object->icon,info->window->WScreen,0);
+				RemapIcon(object->bdo_icon,info->window->WScreen,0);
 
 				// Set flag
-				object->flags|=BDOF_REMAPPED;
+				object->bdo_flags|=BDOF_REMAPPED;
 			}
 		}
 
@@ -611,51 +611,51 @@ void backdrop_get_icon(BackdropInfo *info,BackdropObject *object,short flags)
 		}
 
 		// No label?
-		if ((GetIconFlags(object->icon)&ICONF_NO_LABEL) && !(environment->env->desktop_flags&DESKTOPF_NO_NOLABELS))
-			object->flags|=BDOF_NO_LABEL;
+		if ((GetIconFlags(object->bdo_icon)&ICONF_NO_LABEL) && !(environment->env->desktop_flags&DESKTOPF_NO_NOLABELS))
+			object->bdo_flags|=BDOF_NO_LABEL;
 		else
-			object->flags&=~BDOF_NO_LABEL;
+			object->bdo_flags&=~BDOF_NO_LABEL;
 	}
 
 	// No icon, or no size stuff?
-	if (!object->icon || flags&GETICON_NO_POS) return;
+	if (!object->bdo_icon || flags&GETICON_NO_POS) return;
 
 	// Get masks
 	if (!(flags&GETICON_KEEP)) backdrop_get_masks(object);
 
 	// Get object size
-	object->pos.Width=object->icon->do_Gadget.Width;
-	object->pos.Height=object->icon->do_Gadget.Height;
+	object->bdo_pos.Width=object->bdo_icon->do_Gadget.Width;
+	object->bdo_pos.Height=object->bdo_icon->do_Gadget.Height;
 
 	// (Re)position?
 	if (!(flags&GETICON_SAVE_POS))
 	{
 		// No position initially
-		object->flags|=BDOF_NO_POSITION;
+		object->bdo_flags|=BDOF_NO_POSITION;
 
 		// Auto position?
-		if (object->flags&BDOF_AUTO_POSITION)
+		if (object->bdo_flags&BDOF_AUTO_POSITION)
 		{
 			return;
 		}
 
 		// Custom position?
 		else
-		if (object->flags&(BDOF_CUSTOM_POS|BDOF_LEFTOUT_POS))
+		if (object->bdo_flags&(BDOF_CUSTOM_POS|BDOF_LEFTOUT_POS))
 		{
 			// Get custom position
-			x=(object->custom_pos>>16)&0xffff;
-			y=object->custom_pos&0xffff;
+			x=(object->bdo_custom_pos>>16)&0xffff;
+			y=object->bdo_custom_pos&0xffff;
 		}
 
 		// Valid position?
 		else
-		if (object->type!=BDO_APP_ICON &&
+		if (object->bdo_type!=BDO_APP_ICON &&
 			(!(environment->env->display_options&DISPOPTF_ICON_POS) || environment->env->display_options&DISPOPTF_REMGALILEOPOS) &&
-			GetIconFlags(object->icon)&ICONF_POSITION_OK)
+			GetIconFlags(object->bdo_icon)&ICONF_POSITION_OK)
 		{
 			// Get position
-			GetIconPosition(object->icon,&x,&y);
+			GetIconPosition(object->bdo_icon,&x,&y);
 
 			// No position?
 			if (x==-1 && y==-1) return;
@@ -663,15 +663,15 @@ void backdrop_get_icon(BackdropInfo *info,BackdropObject *object,short flags)
 
 		// Otherwise, get original Workbench position
 		else
-		if (object->icon->do_CurrentX!=NO_ICON_POSITION)
+		if (object->bdo_icon->do_CurrentX!=NO_ICON_POSITION)
 		{
 			// Get position
-			x=object->icon->do_CurrentX+WBICONMAGIC_X;
-			y=object->icon->do_CurrentY+WBICONMAGIC_Y;
+			x=object->bdo_icon->do_CurrentX+WBICONMAGIC_X;
+			y=object->bdo_icon->do_CurrentY+WBICONMAGIC_Y;
 
 			// Pretend we have an Opus snapshot now (won't matter unless we Snapshot in which case we will anyway)
-			SetIconPosition(object->icon,x,y);
-			SetIconFlags(object->icon,GetIconFlags(object->icon)|ICONF_POSITION_OK);
+			SetIconPosition(object->bdo_icon,x,y);
+			SetIconFlags(object->bdo_icon,GetIconFlags(object->bdo_icon)|ICONF_POSITION_OK);
 		}
 
 		// No position
@@ -688,21 +688,21 @@ void backdrop_get_icon(BackdropInfo *info,BackdropObject *object,short flags)
 		if (flags&GETICON_REMAP)
 		{
 			// Save old position
-			x=object->pos.Left;
-			y=object->pos.Top;
+			x=object->bdo_pos.Left;
+			y=object->bdo_pos.Top;
 		}
 
 		// Normal
 		else
 		{
 			// Get old position
-			x=object->image_rect.MinX+border_x-(info->size.MinX-info->offset_x);
-			y=object->image_rect.MinY+border_y_top-(info->size.MinY-info->offset_y);
+			x=object->bdo_image_rect.MinX+border_x-(info->size.MinX-info->offset_x);
+			y=object->bdo_image_rect.MinY+border_y_top-(info->size.MinY-info->offset_y);
 
 			// Store position
-			object->pos.Left=x;
-			object->pos.Top=y;
-			object->flags&=~BDOF_NO_POSITION;
+			object->bdo_pos.Left=x;
+			object->bdo_pos.Top=y;
+			object->bdo_flags&=~BDOF_NO_POSITION;
 		}
 	}
 
@@ -710,21 +710,21 @@ void backdrop_get_icon(BackdropInfo *info,BackdropObject *object,short flags)
 	backdrop_show_rect(info,object,x-border_x,y-border_y_top);
 
 	// Copy to full-size rectangle
-	object->full_size=object->show_rect;
+	object->bdo_full_size=object->bdo_show_rect;
 
 	// Adjust show rectangle
-	object->show_rect.MinX+=info->size.MinX-info->offset_x;
-	object->show_rect.MinY+=info->size.MinY-info->offset_y;
-	object->show_rect.MaxX+=info->size.MinX-info->offset_x;
-	object->show_rect.MaxY+=info->size.MinY-info->offset_y;
+	object->bdo_show_rect.MinX+=info->size.MinX-info->offset_x;
+	object->bdo_show_rect.MinY+=info->size.MinY-info->offset_y;
+	object->bdo_show_rect.MaxX+=info->size.MinX-info->offset_x;
+	object->bdo_show_rect.MaxY+=info->size.MinY-info->offset_y;
 
 	// Place object?
 	if (!(flags&GETICON_SAVE_POS))
 	{
 		// Store position
-		object->pos.Left=x;
-		object->pos.Top=y;
-		object->flags&=~BDOF_NO_POSITION;
+		object->bdo_pos.Left=x;
+		object->bdo_pos.Top=y;
+		object->bdo_flags&=~BDOF_NO_POSITION;
 
 		// Place it
 		backdrop_place_object(info,object);
@@ -742,8 +742,8 @@ BackdropObject *find_backdrop_object(
 	if (!look) return 0;
 
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		if (object==look) return look;
 	}
@@ -845,21 +845,21 @@ void backdrop_calc_virtual_size(BackdropInfo *info,struct Rectangle *rect)
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Valid icon, with valid position?
-		if (object->icon && !(object->flags&BDOF_NO_POSITION))
+		if (object->bdo_icon && !(object->bdo_flags&BDOF_NO_POSITION))
 		{
 			// See if icon is outside current window
-			if (object->full_size.MinX<rect->MinX)
-				rect->MinX=object->full_size.MinX;
-			if (object->full_size.MinY<rect->MinY)
-				rect->MinY=object->full_size.MinY;
-			if (object->full_size.MaxX>rect->MaxX)
-				rect->MaxX=object->full_size.MaxX;
-			if (object->full_size.MaxY>rect->MaxY)
-				rect->MaxY=object->full_size.MaxY;
+			if (object->bdo_full_size.MinX<rect->MinX)
+				rect->MinX=object->bdo_full_size.MinX;
+			if (object->bdo_full_size.MinY<rect->MinY)
+				rect->MinY=object->bdo_full_size.MinY;
+			if (object->bdo_full_size.MaxX>rect->MaxX)
+				rect->MaxX=object->bdo_full_size.MaxX;
+			if (object->bdo_full_size.MaxY>rect->MaxY)
+				rect->MaxY=object->bdo_full_size.MaxY;
 		}
 	}
 }
@@ -1012,18 +1012,18 @@ BPTR backdrop_icon_lock(BackdropObject *object)
 	BPTR lock=0;
 
 	// Bad disk?
-	if (object->type==BDO_BAD_DISK) return 0;
+	if (object->bdo_type==BDO_BAD_DISK) return 0;
 
 	// Is object a disk?
 	else
-	if (object->type==BDO_DISK &&
-		object->device_name)
+	if (object->bdo_type==BDO_DISK &&
+		object->bdo_device_name)
 	{
 		// Lock device
-		if (lock=Lock(object->device_name,ACCESS_READ))
+		if (lock=Lock(object->bdo_device_name,ACCESS_READ))
 		{
 			// Cache drawer?
-			if (object->flags&BDOF_CACHE)
+			if (object->bdo_flags&BDOF_CACHE)
 			{
 				BPTR parent;
 
@@ -1040,16 +1040,16 @@ BPTR backdrop_icon_lock(BackdropObject *object)
 
 	// Otherwise, lock parent directory
 	else
-	if (object->path) lock=Lock(object->path,ACCESS_READ);
+	if (object->bdo_path) lock=Lock(object->bdo_path,ACCESS_READ);
 
 	// And if no parent directory, lock volume name if it's a disk
 	else
-	if (object->type==BDO_DISK)
+	if (object->bdo_type==BDO_DISK)
 	{
 		char name[80];
 
 		// Build volume name
-		lsprintf(name,"%s:",object->name);
+		lsprintf(name,"%s:",object->bdo_name);
 
 		// Lock volume
 		lock=Lock(name,ACCESS_READ);

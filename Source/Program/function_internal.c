@@ -64,11 +64,11 @@ function_internal_command(CommandList *command,
     if (handle)
     {
 	// Get source and dest nodes
-	source_n=function_path_current(&handle->source_paths);
-	dest_n=function_path_current(&handle->dest_paths);
+	source_n=function_path_current(&handle->func_source_paths);
+	dest_n=function_path_current(&handle->func_dest_paths);
 
 	// Get current source lister
-	if (lister=function_lister_current(&handle->source_paths))
+	if (lister=function_lister_current(&handle->func_source_paths))
 	{
 	    // Custom handler installed?
 	    if (lister->cur_buffer->buf_CustomHandler[0])
@@ -80,7 +80,7 @@ function_internal_command(CommandList *command,
 		    if (FindFunctionTrap(command->name,lister->cur_buffer->buf_CustomHandler,custom_port))
 		    {
 			source_lister=lister;
-			dest_lister=function_lister_current(&handle->dest_paths);
+			dest_lister=function_lister_current(&handle->func_dest_paths);
 			cust_buffer=lister->cur_buffer;
 		    }
 		}
@@ -90,7 +90,7 @@ function_internal_command(CommandList *command,
 	// If no custom handler, try destination
 	if (!cust_buffer &&
 	    (command->flags&FUNCF_NEED_DEST) &&
-	    (lister=function_lister_current(&handle->dest_paths)))
+	    (lister=function_lister_current(&handle->func_dest_paths)))
 	{
 	    // Custom handler installed?
 	    if (lister->cur_buffer->buf_CustomHandler[0])
@@ -98,7 +98,7 @@ function_internal_command(CommandList *command,
 		// Look for trap handler
 		if (FindFunctionTrap(command->name,lister->cur_buffer->buf_CustomHandler,custom_port))
 		{
-		    source_lister=function_lister_current(&handle->source_paths);
+		    source_lister=function_lister_current(&handle->func_source_paths);
 		    dest_lister=lister;
 		    cust_buffer=lister->cur_buffer;
 		}
@@ -156,7 +156,7 @@ function_internal_command(CommandList *command,
 	    work_buf=AllocVec(512,MEMF_CLEAR);
 	    buffer=work_buf;
 	}
-	else buffer=handle->work_buffer;
+	else buffer=handle->func_work_buf;
 
 	// No buffer?
 	if (!buffer || strcmp(command->stuff.module_name,"!")==0)

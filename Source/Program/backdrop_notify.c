@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -117,7 +117,7 @@ BOOL backdrop_check_notify(
 	while (object=(BackdropObject *)FindNameI(search,name_buf))
 	{
 		// Disk?
-		if (object->type==BDO_DISK && disk)
+		if (object->bdo_type==BDO_DISK && disk)
 		{
 			// Matched
 			break;
@@ -125,9 +125,9 @@ BOOL backdrop_check_notify(
 
 		// Valid object?
 		else
-		if (object->type!=BDO_APP_ICON &&
-			object->type!=BDO_BAD_DISK &&
-			object->path)
+		if (object->bdo_type!=BDO_APP_ICON &&
+			object->bdo_type!=BDO_BAD_DISK &&
+			object->bdo_path)
 		{
 			char *path=0;
 			BPTR lock;
@@ -136,7 +136,7 @@ BOOL backdrop_check_notify(
 			if (!lister && (path=AllocVec(512,0)))
 			{
 				// Lock path
-				if (lock=Lock(object->path,ACCESS_READ))
+				if (lock=Lock(object->bdo_path,ACCESS_READ))
 				{
 					// Get full path
 					DevNameFromLock(lock,path,512);
@@ -144,11 +144,11 @@ BOOL backdrop_check_notify(
 				}
 
 				// Failed
-				else strcpy(path,object->path);
+				else strcpy(path,object->bdo_path);
 			}
 					
 			// Objects in same directory?
-			if (lister || stricmp(notify->gn_Name,(path)?path:object->path)==0)
+			if (lister || stricmp(notify->gn_Name,(path)?path:object->bdo_path)==0)
 			{
 				// Free path
 				if (path) FreeVec(path);
@@ -180,8 +180,8 @@ BOOL backdrop_check_notify(
 		struct DiskObject *old;
 
 		// Save old icon
-		old=object->icon;
-		object->icon=0;
+		old=object->bdo_icon;
+		object->bdo_icon=0;
 
 		// Not deleted?
 		if (!notify->gn_Flags)
@@ -196,16 +196,16 @@ BOOL backdrop_check_notify(
 		}
 
 		// No icon now?
-		if (!object->icon)
+		if (!object->bdo_icon)
 		{
 			// Replace old icon
-			object->icon=old;
+			object->bdo_icon=old;
 
 			// Erase old object
 			backdrop_erase_icon(info,object,BDSF_RECALC);
 
 			// Is object a disk?
-			if (object->type==BDO_DISK)
+			if (object->bdo_type==BDO_DISK)
 			{
 				// Signal to refresh drives
 				IPC_Command(info->ipc,MAINCMD_REFRESH_DRIVES,0,0,0,0);
@@ -219,9 +219,9 @@ BOOL backdrop_check_notify(
 		else
 		{
 			// Get image checksums
-			new_image1=IconCheckSum(object->icon,0);
-			new_image2=IconCheckSum(object->icon,1);
-			new_flags=GetIconFlags(object->icon);
+			new_image1=IconCheckSum(object->bdo_icon,0);
+			new_image2=IconCheckSum(object->bdo_icon,1);
+			new_flags=GetIconFlags(object->bdo_icon);
 
 			// Mask out uninteresting flag bits
 			old_flags&=ICONF_BORDER_OFF|ICONF_BORDER_ON|ICONF_NO_LABEL;

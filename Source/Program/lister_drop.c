@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -168,17 +168,17 @@ void lister_receive_drop(Lister *dest,GalileoAppMessage *msg)
 
 			// Is this a drawer?
 			else
-			if (drop_on->icon->do_Type==WBDRAWER || drop_on->icon->do_Type==WBGARBAGE)
+			if (drop_on->bdo_icon->do_Type==WBDRAWER || drop_on->bdo_icon->do_Type==WBGARBAGE)
 			{
 				// Move into this drawer
 				func_type=FUNCTION_RUN_FUNCTION_EXTERNAL;
 				function=def_function_copy;
-				AddPart(info->buffer,drop_on->name,512);
+				AddPart(info->buffer,drop_on->bdo_name,512);
 			}
 
 			// Dropped on a tool?
 			else
-			if (drop_on->icon->do_Type==WBTOOL)
+			if (drop_on->bdo_icon->do_Type==WBTOOL)
 			{
 				// Run program with args
 				backdrop_object_open(

@@ -50,7 +50,7 @@ GALILEOFM_FUNC(function_getsizes)
 	DirBuffer *buffer=0;
 
 	// Get current lister
-	if (lister=function_lister_current(&handle->source_paths))
+	if (lister=function_lister_current(&handle->func_source_paths))
 		buffer=lister->cur_buffer;
 
 	// Clear sizes?
@@ -85,7 +85,7 @@ GALILEOFM_FUNC(function_getsizes)
 	}
 
 	// Go through destination paths
-	path=function_path_next(&handle->dest_paths);
+	path=function_path_next(&handle->func_dest_paths);
 	FOREVER
 	{
 		// Zero destination blocks
@@ -280,7 +280,7 @@ GALILEOFM_FUNC(function_getsizes)
 				}
 
 				// Build string
-				lsprintf(handle->work_buffer,
+				lsprintf(handle->func_work_buf,
 					"\n%s %s %ld%%",
 					path->pn_path,
 					GetString(&locale,MSG_FIT),
@@ -288,21 +288,21 @@ GALILEOFM_FUNC(function_getsizes)
 			}
 
 			// No
-			else lsprintf(handle->work_buffer,
+			else lsprintf(handle->func_work_buf,
 				"%ld %s",
 				total_blocks,
 				GetString(&locale,MSG_BLOCKS_NEEDED));
 
 			// Add to requester text
-			strcat(req_text,handle->work_buffer);
+			strcat(req_text,handle->func_work_buf);
 		}
 
 		// Done with this path
-		function_path_end(handle,&handle->dest_paths,0);
+		function_path_end(handle,&handle->func_dest_paths,0);
 
 		// Get next path
 		if (command->function!=FUNC_CHECKFIT ||
-			!(path=function_path_next(&handle->dest_paths)))
+			!(path=function_path_next(&handle->func_dest_paths)))
 			break;
 
 		// Start with first entry again

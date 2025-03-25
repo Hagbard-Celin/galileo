@@ -110,13 +110,13 @@ BOOL function_launch(
 		handle->arg_passthru=(struct ArgArray *)buttons;
 
 	// Buttons
-	else handle->buttons=buttons;
+	else handle->func_buttons=buttons;
 
 	// Source path
 	if (source_path)
 	{
-		strcpy(handle->source_path,source_path);
-		if (source_path[0]) AddPart(handle->source_path,"",512);
+		strcpy(handle->func_source_path,source_path);
+		if (source_path[0]) AddPart(handle->func_source_path,"",512);
 	}
 
 	// Destination path
@@ -133,8 +133,8 @@ BOOL function_launch(
 		// Copy path
 		else
 		{
-			strcpy(handle->dest_path,dest_path);
-			if (dest_path[0]) AddPart(handle->dest_path,"",512);
+			strcpy(handle->func_dest_path,dest_path);
+			if (dest_path[0]) AddPart(handle->func_dest_path,"",512);
 			else dest_path=0;
 		}
 	}
@@ -147,7 +147,7 @@ BOOL function_launch(
 	if (handle->source_lister || source_path)
 	{
 		// Add source path
-		function_add_path(handle,&handle->source_paths,handle->source_lister,handle->source_path);
+		function_add_path(handle,&handle->func_source_paths,handle->source_lister,handle->func_source_path);
 	}
 
 	if (handle->dest_lister || dest_path)
@@ -155,7 +155,7 @@ BOOL function_launch(
 		PathNode *path;
 
 		// Add destination path
-		if (path=function_add_path(handle,&handle->dest_paths,handle->dest_lister,handle->dest_path))
+		if (path=function_add_path(handle,&handle->func_dest_paths,handle->dest_lister,handle->func_dest_path))
 		{
 			// Is this a drag'n'drop to a lister?
 			if (handle->dest_lister &&
@@ -170,8 +170,8 @@ BOOL function_launch(
 				len=strlen(handle->dest_lister->cur_buffer->buf_Path);
 
 				// To a directory inside the lister?
-				if (strncmp(handle->dest_lister->cur_buffer->buf_Path,handle->dest_path,len)==0 &&
-					handle->dest_path[len])
+				if (strncmp(handle->dest_lister->cur_buffer->buf_Path,handle->func_dest_path,len)==0 &&
+					handle->func_dest_path[len])
 				{
 					// Mark node as having a changed path
 					path->pn_flags|=LISTNF_CHANGED;
@@ -231,10 +231,10 @@ FunctionHandle *function_new_handle(struct MsgPort *port,BOOL small)
 	FreeSemaphore(&GUI->req_lock);
 
 	// Initialise paths
-	NewList((struct List *)&handle->source_paths.list);
-	handle->source_paths.current=0;
-	NewList((struct List *)&handle->dest_paths.list);
-	handle->dest_paths.current=0;
+	NewList((struct List *)&handle->func_source_paths.list);
+	handle->func_source_paths.current=0;
+	NewList((struct List *)&handle->func_dest_paths.list);
+	handle->func_dest_paths.current=0;
 
 	// Initialise handle
 	function_handle_init(handle,0);
@@ -276,11 +276,11 @@ void function_handle_init(FunctionHandle *handle,BOOL clear)
 	handle->script_file=0;
 
 	// Do we have a source list?
-	if (!(IsListEmpty((struct List *)&handle->source_paths)))
+	if (!(IsListEmpty((struct List *)&handle->func_source_paths)))
 		handle->func_flags|=FUNCF_GOT_SOURCE;
 
 	// Do we have a destination list?
-	if (!(IsListEmpty((struct List *)&handle->dest_paths)))
+	if (!(IsListEmpty((struct List *)&handle->func_dest_paths)))
 		handle->func_flags|=FUNCF_GOT_DEST;
 }
 
@@ -339,21 +339,21 @@ void __saveds function_launch_code(void)
 	{
 		// Read a directory
 		case FUNCTION_READ_DIRECTORY:
-			if (function_lock_paths(handle,&handle->source_paths,3))
+			if (function_lock_paths(handle,&handle->func_source_paths,3))
 			{
 				Lister *source_list;
 
 				// Get source list
-				if (source_list=function_lister_current(&handle->source_paths))
+				if (source_list=function_lister_current(&handle->func_source_paths))
 				{
 					// Read directory	
-					function_read_directory(handle,source_list,handle->source_path);
+					function_read_directory(handle,source_list,handle->func_source_path);
 
 					// If the lister is in icon mode, we don't refresh it
 					if (source_list->flags&(LISTERF_VIEW_ICONS|LISTERF_ICON_ACTION))
 					{
 						// Set 'no refresh' flag
-						((PathNode *)handle->source_paths.list.mlh_Head)->pn_flags|=LISTNF_NO_REFRESH;
+						((PathNode *)handle->func_source_paths.list.mlh_Head)->pn_flags|=LISTNF_NO_REFRESH;
 					}
 
 					// Clear 'first time' flag
@@ -365,18 +365,18 @@ void __saveds function_launch_code(void)
 
 		// Get icons
 		case FUNCTION_GET_ICONS:
-			if (function_lock_paths(handle,&handle->source_paths,2))
+			if (function_lock_paths(handle,&handle->func_source_paths,2))
 			{
 				Lister *source_list;
 
 				// Get source list
-				if (source_list=function_lister_current(&handle->source_paths))
+				if (source_list=function_lister_current(&handle->func_source_paths))
 				{
 					// Get icons
 					lister_get_icons(handle,source_list,0,0);
 
 					// Set 'no refresh' flag
-					((PathNode *)handle->source_paths.list.mlh_Head)->pn_flags|=LISTNF_NO_REFRESH;
+					((PathNode *)handle->func_source_paths.list.mlh_Head)->pn_flags|=LISTNF_NO_REFRESH;
 				}
 			}
 			break;
@@ -396,8 +396,8 @@ void __saveds function_launch_code(void)
 
 		// Do a filetype on a function
 		case FUNCTION_FILETYPE:
-			function_lock_paths(handle,&handle->source_paths,1);
-			function_lock_paths(handle,&handle->dest_paths,1);
+			function_lock_paths(handle,&handle->func_source_paths,1);
+			function_lock_paths(handle,&handle->func_dest_paths,1);
 			function_filetype(handle);
 			break;
 	}
@@ -409,8 +409,8 @@ void __saveds function_launch_code(void)
 		function_filechange_do(handle,0);
 
 		// Unlock listers
-		function_unlock_paths(handle,&handle->source_paths,1);
-		function_unlock_paths(handle,&handle->dest_paths,0);
+		function_unlock_paths(handle,&handle->func_source_paths,1);
+		function_unlock_paths(handle,&handle->func_dest_paths,0);
 
 
 		// Update desktop?
@@ -495,7 +495,7 @@ BOOL function_check_abort(FunctionHandle *handle)
 			if (lister=(Lister *)msg->data)
 			{
 				// Go through lists and see if lister in there
-				for (node=(PathNode *)handle->source_paths.list.mlh_Head;
+				for (node=(PathNode *)handle->func_source_paths.list.mlh_Head;
 					node->pn_node.mln_Succ;
 					node=(PathNode *)node->pn_node.mln_Succ)
 				{
@@ -510,7 +510,7 @@ BOOL function_check_abort(FunctionHandle *handle)
 				}
 
 				// Go through lists and see if lister in there
-				for (node=(PathNode *)handle->dest_paths.list.mlh_Head;
+				for (node=(PathNode *)handle->func_dest_paths.list.mlh_Head;
 					node->pn_node.mln_Succ;
 					node=(PathNode *)node->pn_node.mln_Succ)
 				{
@@ -534,7 +534,7 @@ BOOL function_check_abort(FunctionHandle *handle)
 	if (abort) return 1;
 
 	// Go through lists and see if the abort flag is set
-	for (node=(PathNode *)handle->source_paths.list.mlh_Head;
+	for (node=(PathNode *)handle->func_source_paths.list.mlh_Head;
 		node->pn_node.mln_Succ;
 		node=(PathNode *)node->pn_node.mln_Succ)
 	{
@@ -544,7 +544,7 @@ BOOL function_check_abort(FunctionHandle *handle)
 	}
 
 	// Go through lists and see if the abort flag is set
-	for (node=(PathNode *)handle->dest_paths.list.mlh_Head;
+	for (node=(PathNode *)handle->func_dest_paths.list.mlh_Head;
 		node->pn_node.mln_Succ;
 		node=(PathNode *)node->pn_node.mln_Succ)
 	{
@@ -789,10 +789,10 @@ void function_progress_on(
 	Lister *lister;
 
 	// Get current source lister
-	if (!(lister=function_lister_current(&handle->source_paths)))
+	if (!(lister=function_lister_current(&handle->func_source_paths)))
 	{
 		// No source, get current destination
-		lister=function_lister_current(&handle->dest_paths);
+		lister=function_lister_current(&handle->func_dest_paths);
 	}
 
 	// Got a lister?

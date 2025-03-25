@@ -294,15 +294,15 @@ int function_build_list(FunctionHandle *handle,
 					UnLock(parent);
 
 					// Make this the source path
-					function_replace_paths(handle,&handle->source_paths,handle->temp_buffer,1);
-					strcpy(handle->source_path,handle->temp_buffer);
+					function_replace_paths(handle,&handle->func_source_paths,handle->temp_buffer,1);
+					strcpy(handle->func_source_path,handle->temp_buffer);
 
 					// Save old source lister
 					handle->saved_source_lister=handle->source_lister;
 					handle->source_lister=0;
 
 					// Get new path pointer
-					*path=function_path_next(&handle->source_paths);
+					*path=function_path_next(&handle->func_source_paths);
 				    }
 
 				    // Unlock file lock
@@ -363,19 +363,19 @@ int function_build_list(FunctionHandle *handle,
 
 	    // Go through backdrop list
 	    for (object=(BackdropObject *)info->objects.list.lh_Head;
-		 object->node.ln_Succ;
-		 object=(BackdropObject *)object->node.ln_Succ)
+		 object->bdo_node.ln_Succ;
+		 object=(BackdropObject *)object->bdo_node.ln_Succ)
 	    {
 		// Is icon selected?
-		if (object->state)
+		if (object->bdo_state)
 		{
 		    short type;
 		    BOOL icon_only=0;
 		    DirEntry *entry;
 
 		    // See if we can find this entry
-		    if ((entry=find_entry(&buffer->entry_list,object->name,0,buffer->more_flags&DWF_CASE)) ||
-			(entry=find_entry(&buffer->reject_list,object->name,0,buffer->more_flags&DWF_CASE)))
+		    if ((entry=find_entry(&buffer->entry_list,object->bdo_name,0,buffer->more_flags&DWF_CASE)) ||
+			(entry=find_entry(&buffer->reject_list,object->bdo_name,0,buffer->more_flags&DWF_CASE)))
 		    {
 			// Get type from entry
 			type=entry->de_Node.dn_Type;
@@ -384,7 +384,7 @@ int function_build_list(FunctionHandle *handle,
 		    // Get type from icon
 		    else
 		    {
-			type=(object->icon->do_Type==WBDRAWER || object->icon->do_Type==WBGARBAGE)?ENTRY_DIRECTORY:ENTRY_FILE;
+			type=(object->bdo_icon->do_Type==WBDRAWER || object->bdo_icon->do_Type==WBGARBAGE)?ENTRY_DIRECTORY:ENTRY_FILE;
 			icon_only=1;
 		    }
 
@@ -399,7 +399,7 @@ int function_build_list(FunctionHandle *handle,
 			if (!icon_only)
 			{
 			    // Allocate new function entry
-			    if (funcentry=function_new_entry(handle,object->name,0))
+			    if (funcentry=function_new_entry(handle,object->bdo_name,0))
 			    {
 				// Fill out entry
 				funcentry->fe_entry=(DirEntry *)object;
@@ -407,7 +407,7 @@ int function_build_list(FunctionHandle *handle,
 				funcentry->fe_flags=FUNCENTF_TOP_LEVEL|FUNCENTF_ICON_ACTION;
 
 				// Link?
-				if (object->flags&BDOF_LINK_ICON)
+				if (object->bdo_flags&BDOF_LINK_ICON)
 					funcentry->fe_flags|=FUNCENTF_LINK;
 
 				// Increment count
@@ -428,11 +428,11 @@ int function_build_list(FunctionHandle *handle,
 			}
 
 			// Not a fake icon, and we want icons?
-			if (!(object->flags&BDOF_FAKE_ICON) &&
+			if (!(object->bdo_flags&BDOF_FAKE_ICON) &&
 				(do_icons || icon_only))
 			{
 			    // Create entry for icon
-			    if (funcentry=function_new_entry(handle,object->name,1))
+			    if (funcentry=function_new_entry(handle,object->bdo_name,1))
 			    {
 				// Fill out entry
 				funcentry->fe_entry=0;
@@ -443,7 +443,7 @@ int function_build_list(FunctionHandle *handle,
 				if (!icon_only) funcentry->fe_flags|=FUNCENTF_ICON;
 
 				// Link?
-				if (object->flags&BDOF_LINK_ICON)
+				if (object->bdo_flags&BDOF_LINK_ICON)
 				    funcentry->fe_flags|=FUNCENTF_LINK;
 
 				// Increment counts
@@ -552,10 +552,10 @@ int function_build_list(FunctionHandle *handle,
 				BPTR lock;
 
 				// Build icon name
-				strcpy(handle->work_buffer,handle->source_path);
-				AddPart(handle->work_buffer,entry->de_Node.dn_Name,280);
-				strcat(handle->work_buffer,".info");
-				icon_name=FilePart(handle->work_buffer);
+				strcpy(handle->func_work_buf,handle->func_source_path);
+				AddPart(handle->func_work_buf,entry->de_Node.dn_Name,280);
+				strcat(handle->func_work_buf,".info");
+				icon_name=FilePart(handle->func_work_buf);
 
 				// See if entry has an icon in buffer
 				if (!(icon_entry=find_entry(&buffer->entry_list,icon_name,0,buffer->more_flags&DWF_CASE)))
@@ -564,7 +564,7 @@ int function_build_list(FunctionHandle *handle,
 				    if (icon_entry=find_entry(&buffer->reject_list,icon_name,0,buffer->more_flags&DWF_CASE))
 				    {
 					// Check that icon is on the disk
-					if (!(lock=Lock(handle->work_buffer,ACCESS_READ)))
+					if (!(lock=Lock(handle->func_work_buf,ACCESS_READ)))
 					{
 					    // It's not there; remove from reject list
 					    remove_file_entry(buffer,icon_entry);
@@ -772,7 +772,7 @@ FunctionEntry *function_get_entry(FunctionHandle *handle)
 		    !(handle->anchor->ap_Flags&APF_DIDDIR))
 	    {
 		// Fill out path
-		strcpy(handle->recurse_path,handle->anchor_path+strlen(handle->source_path));
+		strcpy(handle->recurse_path,handle->anchor_path+strlen(handle->func_source_path));
 		AddPart(handle->recurse_path,handle->anchor->ap_Info.fib_FileName,256);
 
 		// Do we want this entry?
@@ -897,7 +897,7 @@ FunctionEntry *function_get_entry(FunctionHandle *handle)
 			char *ptr;
 
 			// Fill out path
-			strcpy(handle->recurse_path,handle->anchor_path+strlen(handle->source_path));
+			strcpy(handle->recurse_path,handle->anchor_path+strlen(handle->func_source_path));
 			AddPart(handle->recurse_path,handle->anchor->ap_Info.fib_FileName,256);
 
 			// Point to dummy entry
@@ -944,7 +944,7 @@ FunctionEntry *function_get_entry(FunctionHandle *handle)
 		    DirBuffer *buffer;
 
 		    // Make sure there's a valid buffer
-		    if (buffer=handle->source_paths.current->pn_lister->cur_buffer)
+		    if (buffer=handle->func_source_paths.current->pn_lister->cur_buffer)
 		    {
 			// Allowed to count sizes?
 			if (!(handle->instruction_flags&INSTF_DIR_NO_SIZES))
@@ -1091,11 +1091,11 @@ function_end_entry(FunctionHandle *handle,
 	    handle->anchor->ap_Flags=0;
 
 	    // Get path to go into
-	    strcpy(handle->work_buffer,handle->source_path);
-	    AddPart(handle->work_buffer,entry->fe_name,512);
+	    strcpy(handle->func_work_buf,handle->func_source_path);
+	    AddPart(handle->func_work_buf,entry->fe_name,512);
 
 	    // Lock directory
-	    if (lock=Lock(handle->work_buffer,ACCESS_READ))
+	    if (lock=Lock(handle->func_work_buf,ACCESS_READ))
 	    {
 		// Restore original CD
 		if (handle->recurse_cd)
@@ -1108,25 +1108,25 @@ function_end_entry(FunctionHandle *handle,
 		handle->recurse_cd=CurrentDir(lock);
 
 		// Match from within
-		strcpy(handle->work_buffer,"#?");
+		strcpy(handle->func_work_buf,"#?");
 	    }
 
 	    // Failed to lock, use full string
 	    else
 	    {
 		// Path to go into
-		fix_literals(handle->work_buffer,handle->source_path);
-		fix_literals(handle->work_buffer+300,entry->fe_name);
-		AddPart(handle->work_buffer,handle->work_buffer+300,256);
-		AddPart(handle->work_buffer,"#?",256);
+		fix_literals(handle->func_work_buf,handle->func_source_path);
+		fix_literals(handle->func_work_buf+300,entry->fe_name);
+		AddPart(handle->func_work_buf,handle->func_work_buf+300,256);
+		AddPart(handle->func_work_buf,"#?",256);
 	    }
 
 	    // Recurse into it
-	    handle->recurse_return=MatchFirst(handle->work_buffer,handle->anchor);
+	    handle->recurse_return=MatchFirst(handle->func_work_buf,handle->anchor);
 	    handle->recurse_depth=1;
 
 	    // Initialise anchor path
-	    strcpy(handle->anchor_path,handle->source_path);
+	    strcpy(handle->anchor_path,handle->func_source_path);
 	    AddPart(handle->anchor_path,entry->fe_name,256);
 	}
 

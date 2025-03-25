@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -218,13 +218,13 @@ void popup_run_func(PopUpExt *ext,BackdropObject *object,char *filename,Lister *
 				BPTR lock;
 
 				// Disk?
-				if (object->type==BDO_DISK)
+				if (object->bdo_type==BDO_DISK)
 				{
 					// Get device name
-					if (object->device_name)
+					if (object->bdo_device_name)
 					{
 						// Add device name in quotes
-						lsprintf(ptr,"\"%s\"",object->device_name);
+						lsprintf(ptr,"\"%s\"",object->bdo_device_name);
 					}
 				}
 
@@ -243,7 +243,7 @@ void popup_run_func(PopUpExt *ext,BackdropObject *object,char *filename,Lister *
 					}
 
 					// Add name to path
-					AddPart(ptr,object->name,512);
+					AddPart(ptr,object->bdo_name,512);
 
 					// Add trailing quote
 					strcat(ptr,"\"");

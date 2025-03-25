@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -48,18 +48,18 @@ void backdrop_format(BackdropInfo *info,BackdropObject *icon)
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Disk?
-		if (object->type!=BDO_DISK && object->type!=BDO_BAD_DISK)
+		if (object->bdo_type!=BDO_DISK && object->bdo_type!=BDO_BAD_DISK)
 			continue;
 
 		// Selected or supplied?
-		if ((!icon && object->state) || icon==object)
+		if ((!icon && object->bdo_state) || icon==object)
 		{
 			// Got a device name?
-			if (object->device_name)
+			if (object->bdo_device_name)
 			{
 				// Launch format
 				function_launch(
@@ -69,7 +69,7 @@ void backdrop_format(BackdropInfo *info,BackdropObject *icon)
 					0,
 					0,0,
 					0,0,
-					BuildArgArray(object->device_name,0),0,0);
+					BuildArgArray(object->bdo_device_name,0),0,0);
 
 				// Increment count
 				++count;

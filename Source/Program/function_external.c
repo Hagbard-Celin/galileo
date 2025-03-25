@@ -68,7 +68,7 @@ function_external_command(
 		return 0;
 
 	// Get first path
-	path=function_path_current(&handle->dest_paths);
+	path=function_path_current(&handle->func_dest_paths);
 
 	// Get cll limit
 	if ((limit=environment->env->settings.command_line_length)<256)
@@ -86,7 +86,7 @@ function_external_command(
 		current_arg=handle->func_current_arg;
 
 		// Get destination path
-		if (path) strcpy(handle->dest_path,path->pn_path);
+		if (path) strcpy(handle->func_dest_path,path->pn_path);
 
 		// Loop until this instruction is finished
 		while (cont==PARSE_MORE_FILES)
@@ -148,8 +148,8 @@ function_external_command(
 		// Done with this path
 		if (path)
 		{
-			function_path_end(handle,&handle->dest_paths,0);
-			path=function_path_next(&handle->dest_paths);
+			function_path_end(handle,&handle->func_dest_paths,0);
+			path=function_path_next(&handle->func_dest_paths);
 		}
 	} while (path);
 

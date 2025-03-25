@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -50,10 +50,10 @@ GALILEOFM_FUNC(function_loadfonts)
 		APTR iff;
 
 		// Build full name
-		function_build_source(handle,entry,handle->work_buffer);
+		function_build_source(handle,entry,handle->func_work_buf);
 
 		// Open IFF file
-		if (iff=IFFOpen(handle->work_buffer,IFF_READ,ID_PREF))
+		if (iff=IFFOpen(handle->func_work_buf,IFF_READ,ID_PREF))
 		{
 			ULONG chunk;
 			while ((chunk=IFFNextChunk(iff,ID_FONT))==ID_FONT)
@@ -126,11 +126,11 @@ GALILEOFM_FUNC(function_loadfonts)
 		if (run_prefs)
 		{
 			// Build command
-			lsprintf(handle->work_buffer+256,"sys:prefs/font from %s use",handle->work_buffer);
+			lsprintf(handle->func_work_buf+256,"sys:prefs/font from %s use",handle->func_work_buf);
 			CLI_Launch(
-				handle->work_buffer+256,
+				handle->func_work_buf+256,
 				GUI->screen_pointer,
-				Lock(handle->source_path,ACCESS_READ),
+				Lock(handle->func_source_path,ACCESS_READ),
 				Open("nil:",MODE_OLDFILE),0,
 				0,0);
 		}

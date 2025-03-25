@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -41,20 +41,20 @@ For more information on Directory Opus for Windows please see:
 void backdrop_icon_position(BackdropInfo *info,BackdropObject *icon,short x,short y)
 {
 	// Set position
-	icon->pos.Left=x;
-	icon->pos.Top=y;
-	icon->flags&=~BDOF_NO_POSITION;
+	icon->bdo_pos.Left=x;
+	icon->bdo_pos.Top=y;
+	icon->bdo_flags&=~BDOF_NO_POSITION;
 
 	// If a backdrop window, check if object off screen now
 	if (info->window->Flags&WFLG_BACKDROP)
 	{
 		// Do bounds check, adjust position if necessary
-		if (icon->pos.Left+icon->pos.Width+4>info->window->Width)
-			icon->pos.Left=info->window->Width-icon->pos.Width-4;
-		if (icon->pos.Left<4) icon->pos.Left=4;
-		if (icon->pos.Top+icon->pos.Height+3>info->window->Height)
-			icon->pos.Top=info->window->Height-icon->pos.Height-3;
-		if (icon->pos.Top<3) icon->pos.Top=3;
+		if (icon->bdo_pos.Left+icon->bdo_pos.Width+4>info->window->Width)
+			icon->bdo_pos.Left=info->window->Width-icon->bdo_pos.Width-4;
+		if (icon->bdo_pos.Left<4) icon->bdo_pos.Left=4;
+		if (icon->bdo_pos.Top+icon->bdo_pos.Height+3>info->window->Height)
+			icon->bdo_pos.Top=info->window->Height-icon->bdo_pos.Height-3;
+		if (icon->bdo_pos.Top<3) icon->bdo_pos.Top=3;
 	}
 }
 
@@ -85,22 +85,22 @@ BOOL backdrop_cleanup(BackdropInfo *info,short type,USHORT flags)
 
 		// First icon must be selected
 		object=(BackdropObject *)info->objects.list.lh_Head;
-		if (object->state)
+		if (object->bdo_state)
 		{
 			// Get rectangle to size within; top-left is first icon
-			rect.MinX=object->show_rect.MinX; // objects are centered in show area
-			rect.MinY=object->pos.Top;
+			rect.MinX=object->bdo_show_rect.MinX; // objects are centered in show area
+			rect.MinY=object->bdo_pos.Top;
 
 			// Find last selected icon
-			for (;object->node.ln_Succ && object->state;
-				last=object,object=(BackdropObject *)object->node.ln_Succ);
+			for (;object->bdo_node.ln_Succ && object->bdo_state;
+				last=object,object=(BackdropObject *)object->bdo_node.ln_Succ);
 
 			// Got last?
 			if (last)
 			{
 				// Bottom-right is last icon
-				rect.MaxX=last->pos.Left+last->pos.Width-1;
-				rect.MaxY=last->pos.Top+last->pos.Height-1;
+				rect.MaxX=last->bdo_pos.Left+last->bdo_pos.Width-1;
+				rect.MaxY=last->bdo_pos.Top+last->bdo_pos.Height-1;
 			}
 
 			// Set pointer
@@ -191,20 +191,20 @@ BOOL backdrop_cleanup_objects(BackdropInfo *info,struct Rectangle *rect,USHORT f
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		short end_col=0;
 
 		// Check object isn't locked
-		if (object->flags&BDOF_LOCKED) continue;
+		if (object->bdo_flags&BDOF_LOCKED) continue;
 
 		// If checking existing positions, skip objects that have a position
-		if (flags&CLEANUPF_CHECK_POS && !(object->flags&BDOF_NO_POSITION))
+		if (flags&CLEANUPF_CHECK_POS && !(object->bdo_flags&BDOF_NO_POSITION))
 			continue;
 
 		// If aligning, break when we reach an unselected icon
-		if (!align || object->state)
+		if (!align || object->bdo_state)
 		{
 			// New column?
 			if (!col_start)
@@ -299,7 +299,7 @@ BOOL backdrop_cleanup_objects(BackdropInfo *info,struct Rectangle *rect,USHORT f
 						}
 
 						// Use this icon again
-						object=(BackdropObject *)object->node.ln_Pred;
+						object=(BackdropObject *)object->bdo_node.ln_Pred;
 						retry=1;
 						continue;
 					}
@@ -309,7 +309,7 @@ BOOL backdrop_cleanup_objects(BackdropInfo *info,struct Rectangle *rect,USHORT f
 				if (vert)
 				{
 					// Store horizontal position
-					object->pos.Left=icon_left;
+					object->bdo_pos.Left=icon_left;
 
 					// Increment left position
 					icon_left+=icon_width;
@@ -322,7 +322,7 @@ BOOL backdrop_cleanup_objects(BackdropInfo *info,struct Rectangle *rect,USHORT f
 				else
 				{
 					// Store icon's vertical position
-					object->pos.Top=icon_top;
+					object->bdo_pos.Top=icon_top;
 
 					// Increment top position
 					icon_top+=icon_height+GUI->icon_space_y;
@@ -340,17 +340,17 @@ BOOL backdrop_cleanup_objects(BackdropInfo *info,struct Rectangle *rect,USHORT f
 			end_col=2;
 
 			// Move back to last icon
-			object=(BackdropObject *)object->node.ln_Pred;
+			object=(BackdropObject *)object->bdo_node.ln_Pred;
 
 			// If locked, or has a position, keep going
-			while (object->flags&BDOF_LOCKED ||
-					(flags&CLEANUPF_CHECK_POS && !(object->flags&BDOF_NO_POSITION)))
+			while (object->bdo_flags&BDOF_LOCKED ||
+					(flags&CLEANUPF_CHECK_POS && !(object->bdo_flags&BDOF_NO_POSITION)))
 			{
 				// Get previous icon
-				object=(BackdropObject *)object->node.ln_Pred;
+				object=(BackdropObject *)object->bdo_node.ln_Pred;
 
 				// Check for valid
-				if (!object->node.ln_Pred) break;
+				if (!object->bdo_node.ln_Pred) break;
 			}
 		}
 
@@ -358,47 +358,47 @@ BOOL backdrop_cleanup_objects(BackdropInfo *info,struct Rectangle *rect,USHORT f
 		retry=0;
 
 		// Test for the last icon
-		if (!end_col && object->node.ln_Succ->ln_Succ)
+		if (!end_col && object->bdo_node.ln_Succ->ln_Succ)
 		{
 			BackdropObject *test;
-			for (test=(BackdropObject *)object->node.ln_Succ;test->node.ln_Succ;test=(BackdropObject *)test->node.ln_Succ)
+			for (test=(BackdropObject *)object->bdo_node.ln_Succ;test->bdo_node.ln_Succ;test=(BackdropObject *)test->bdo_node.ln_Succ)
 			{
 				// Icon that can be used in cleanup? (not locked or with a position already)
-				if (!(test->flags&BDOF_LOCKED) &&
-					(!(flags&CLEANUPF_CHECK_POS) || test->flags&BDOF_NO_POSITION))
+				if (!(test->bdo_flags&BDOF_LOCKED) &&
+					(!(flags&CLEANUPF_CHECK_POS) || test->bdo_flags&BDOF_NO_POSITION))
 					break;
 			}
-			if (!test->node.ln_Succ) end_col=2;
+			if (!test->bdo_node.ln_Succ) end_col=2;
 		}
 
 		// End of a column, or the last icon?
-		if (end_col || !object->node.ln_Succ->ln_Succ)
+		if (end_col || !object->bdo_node.ln_Succ->ln_Succ)
 		{
 			BackdropObject *icon;
 
 			// Go from column start to this icon
-			for (icon=col_start;icon->node.ln_Succ;icon=(BackdropObject *)icon->node.ln_Succ)
+			for (icon=col_start;icon->bdo_node.ln_Succ;icon=(BackdropObject *)icon->bdo_node.ln_Succ)
 			{
 				// Check object isn't locked, or doesn't already have a position
-				if (!(icon->flags&BDOF_LOCKED) &&
-					(!(flags&CLEANUPF_CHECK_POS) || icon->flags&BDOF_NO_POSITION))
+				if (!(icon->bdo_flags&BDOF_LOCKED) &&
+					(!(flags&CLEANUPF_CHECK_POS) || icon->bdo_flags&BDOF_NO_POSITION))
 				{
 					// Vertical?
 					if (vert)
 					{
 						// Center within row
-						icon->pos.Top=icon_top+((col_height-icon->pos.Height)>>1);
+						icon->bdo_pos.Top=icon_top+((col_height-icon->bdo_pos.Height)>>1);
 					}
 
 					// Horizontal
 					else
 					{
 						// Center within column
-						icon->pos.Left=icon_left+((col_width-icon->pos.Width)>>1);
+						icon->bdo_pos.Left=icon_left+((col_width-icon->bdo_pos.Width)>>1);
 					}
 
 					// Now have a valid position
-					icon->flags|=BDOF_TEMP_FLAG;
+					icon->bdo_flags|=BDOF_TEMP_FLAG;
 				}
 
 				// Break if the last icon in column
@@ -429,20 +429,20 @@ BOOL backdrop_cleanup_objects(BackdropInfo *info,struct Rectangle *rect,USHORT f
 			backdrop_check_grid(&icon_left,&icon_top);
 
 			// If an icon didn't fit, use it again next time
-			if (end_col) object=(BackdropObject *)object->node.ln_Pred;
+			if (end_col) object=(BackdropObject *)object->bdo_node.ln_Pred;
 		}
 	}
 
 	// Go through entire list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Temporary flag set?
-		if (object->flags&BDOF_TEMP_FLAG)
+		if (object->bdo_flags&BDOF_TEMP_FLAG)
 		{
 			// Clear temp flag and set (clear) pos flag
-			object->flags&=~(BDOF_TEMP_FLAG|BDOF_NO_POSITION);
+			object->bdo_flags&=~(BDOF_TEMP_FLAG|BDOF_NO_POSITION);
 			ret=1;
 		}
 	}
@@ -476,13 +476,13 @@ void backdrop_sort_objects(BackdropInfo *info,short type,BOOL align)
 
 	// Go through objects
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;)
+		object->bdo_node.ln_Succ;)
 	{
 		BackdropObject *sort_object,*before_object=0;
-		BackdropObject *next=(BackdropObject *)object->node.ln_Succ;
+		BackdropObject *next=(BackdropObject *)object->bdo_node.ln_Succ;
 
 		// If we're aligning, and object is not selected, skip over it
-		if (align && !object->state)
+		if (align && !object->bdo_state)
 		{
 			// Get next and continue
 			object=next;
@@ -495,35 +495,35 @@ void backdrop_sort_objects(BackdropInfo *info,short type,BOOL align)
 			unsigned short left,top;
 
 			// Valid position?
-			if (!(object->flags&BDOF_NO_POSITION))
+			if (!(object->bdo_flags&BDOF_NO_POSITION))
 			{
 				// Sorting with a vertical weighting?
 				if (type==BSORT_NORM)
 				{
 					// Calculate object value from position (center of object)
-					left=(object->pos.Left+(object->pos.Width>>1))>>4;
-					top=object->pos.Top+(object->pos.Height>>1);
-					object->value=(left<<16)|top;
+					left=(object->bdo_pos.Left+(object->bdo_pos.Width>>1))>>4;
+					top=object->bdo_pos.Top+(object->bdo_pos.Height>>1);
+					object->bdo_value=(left<<16)|top;
 				}
 
 				// Horizontal weighting
 				else
 				{
 					// Calculate object value from position (center of object)
-					top=(object->pos.Top+(object->pos.Height>>1))>>4;
-					left=object->pos.Left+(object->pos.Width>>1);
-					object->value=(top<<16)|left;
+					top=(object->bdo_pos.Top+(object->bdo_pos.Height>>1))>>4;
+					left=object->bdo_pos.Left+(object->bdo_pos.Width>>1);
+					object->bdo_value=(top<<16)|left;
 				}
 			}
 
 			// Nope
-			else object->value=0xffffffff;
+			else object->bdo_value=0xffffffff;
 		}
 
 		// Go through temporary list
 		for (sort_object=(BackdropObject *)temp.lh_Head;
-			sort_object->node.ln_Succ;
-			sort_object=(BackdropObject *)sort_object->node.ln_Succ)
+			sort_object->bdo_node.ln_Succ;
+			sort_object=(BackdropObject *)sort_object->bdo_node.ln_Succ)
 		{
 			short sort_type;
 
@@ -536,7 +536,7 @@ void backdrop_sort_objects(BackdropInfo *info,short type,BOOL align)
 				short res;
 
 				// Compare dates
-				if ((res=CompareDates(&object->date,&sort_object->date))>0) break;
+				if ((res=CompareDates(&object->bdo_date,&sort_object->bdo_date))>0) break;
 				else
 				if (res==0) sort_type=BSORT_NAME;
 			}
@@ -546,9 +546,9 @@ void backdrop_sort_objects(BackdropInfo *info,short type,BOOL align)
 			if (type==BSORT_SIZE)
 			{
 				// Compare sizes	
-				if (object->size<sort_object->size) break;
+				if (object->bdo_size<sort_object->bdo_size) break;
 				else
-				if (object->size==sort_object->size) sort_type=BSORT_NAME;
+				if (object->bdo_size==sort_object->bdo_size) sort_type=BSORT_NAME;
 			}
 
 			// Sort by type
@@ -578,8 +578,8 @@ void backdrop_sort_objects(BackdropInfo *info,short type,BOOL align)
 				char *name1,*name2;
 
 				// Get name pointers
-				name1=(object->flags&BDOF_CUSTOM_LABEL)?object->device_name:object->name;
-				name2=(sort_object->flags&BDOF_CUSTOM_LABEL)?sort_object->device_name:sort_object->name;
+				name1=(object->bdo_flags&BDOF_CUSTOM_LABEL)?object->bdo_device_name:object->bdo_name;
+				name2=(sort_object->bdo_flags&BDOF_CUSTOM_LABEL)?sort_object->bdo_device_name:sort_object->bdo_name;
 
 				// Compare names
 				if (stricmp(name1,name2)<0) break;
@@ -587,7 +587,7 @@ void backdrop_sort_objects(BackdropInfo *info,short type,BOOL align)
 
 			// Sort by position
 			else
-			if (sort_type<BSORT_NAME && object->value<sort_object->value)
+			if (sort_type<BSORT_NAME && object->bdo_value<sort_object->bdo_value)
 				break;
 
 			// Remember previous
@@ -598,7 +598,7 @@ void backdrop_sort_objects(BackdropInfo *info,short type,BOOL align)
 		if (align) Remove((struct Node *)object);
 
 		// Valid position?
-		if (sort_object->node.ln_Succ)
+		if (sort_object->bdo_node.ln_Succ)
 		{
 			// Object to add after?
 			if (before_object)
@@ -666,20 +666,20 @@ void backdrop_make_visible(BackdropInfo *info,BackdropObject *object)
 	rect.MaxY=rect.MinY+RECTHEIGHT(&info->size)-1;
 
 	// Icon off to the right?
-	if (object->full_size.MaxX>rect.MaxX)
-		scroll_x=(object->full_size.MaxX-rect.MaxX)+8;
+	if (object->bdo_full_size.MaxX>rect.MaxX)
+		scroll_x=(object->bdo_full_size.MaxX-rect.MaxX)+8;
 
 	// Or off to the left?
-	else if (object->full_size.MinX<rect.MinX)
-		scroll_x=(object->full_size.MinX-rect.MinX)-8;
+	else if (object->bdo_full_size.MinX<rect.MinX)
+		scroll_x=(object->bdo_full_size.MinX-rect.MinX)-8;
 
 	// Icon off to the bottom?
-	if (object->full_size.MaxY>rect.MaxY)
-		scroll_y=(object->full_size.MaxY-rect.MaxY)+8;
+	if (object->bdo_full_size.MaxY>rect.MaxY)
+		scroll_y=(object->bdo_full_size.MaxY-rect.MaxY)+8;
 
 	// Or off to the top?
-	else if (object->full_size.MinY<rect.MinY)
-		scroll_y=(object->full_size.MinY-rect.MinY)-8;
+	else if (object->bdo_full_size.MinY<rect.MinY)
+		scroll_y=(object->bdo_full_size.MinY-rect.MinY)-8;
 
 	// Need to scroll?
 	if (scroll_x || scroll_y)
@@ -734,7 +734,7 @@ void backdrop_icon_size(
 	short w,border=0;
 
 	// Bad disk?
-	if (object->type==BDO_BAD_DISK)
+	if (object->bdo_type==BDO_BAD_DISK)
 	{
 		// Get bad disk name
 		backdrop_bad_disk_name(object,namebuf);
@@ -743,10 +743,10 @@ void backdrop_icon_size(
 
 	// Otherwise, get name pointer from icon
 	else
-	name=(object->flags&BDOF_CUSTOM_LABEL)?object->device_name:object->name;
+	name=(object->bdo_flags&BDOF_CUSTOM_LABEL)?object->bdo_device_name:object->bdo_name;
 
 	// Get icon width
-	w=object->pos.Width;
+	w=object->bdo_pos.Width;
 	if (backdrop_icon_border(object))
 	{
 		w+=ICON_BORDER_X*2;
@@ -779,9 +779,9 @@ void backdrop_icon_size(
 	if (height)
 	{
 		// Get icon height
-		*height=object->pos.Height;
+		*height=object->bdo_pos.Height;
 		if (border) *height+=ICON_BORDER_Y_TOP+ICON_BORDER_Y_BOTTOM-2;
-		if (!(object->flags&BDOF_NO_LABEL)) *height+=extent.te_Height+ICON_LABEL_SPACE;
+		if (!(object->bdo_flags&BDOF_NO_LABEL)) *height+=extent.te_Height+ICON_LABEL_SPACE;
 	}
 
 	// Want width?
@@ -791,7 +791,7 @@ void backdrop_icon_size(
 		*width=w;
 
 		// Icon label?
-		if (!(object->flags&BDOF_NO_LABEL))
+		if (!(object->bdo_flags&BDOF_NO_LABEL))
 		{
 			// See if text is bigger than image
 			if (extent.te_Width>*width) *width=extent.te_Width;
@@ -806,13 +806,13 @@ Cfg_Filetype *backdrop_get_filetype(BackdropInfo *info,BackdropObject *object)
 	Cfg_Filetype *filetype=0;
 
 	// Object has filetype set?
-	if (object->filetype)
+	if (object->bdo_filetype)
 	{
 		// Check filetype is still in list
-		if (filetype_check(object->filetype))
+		if (filetype_check(object->bdo_filetype))
 		{
 			// Use cached pointer
-			return object->filetype;
+			return object->bdo_filetype;
 		}
 	}
 
@@ -822,7 +822,7 @@ Cfg_Filetype *backdrop_get_filetype(BackdropInfo *info,BackdropObject *object)
 		DirEntry *entry;
 
 		// Look for entry in lister
-		if (entry=find_entry(&info->lister->cur_buffer->entry_list,object->name,0,DWF_CASE))
+		if (entry=find_entry(&info->lister->cur_buffer->entry_list,object->bdo_name,0,DWF_CASE))
 		{
 			char *ptr;
 
@@ -847,7 +847,7 @@ Cfg_Filetype *backdrop_get_filetype(BackdropInfo *info,BackdropObject *object)
 			old=CurrentDir(lock);
 
 			// Match filetype
-			filetype=filetype_identify(object->name,FTTYPE_ANY,0,0);
+			filetype=filetype_identify(object->bdo_name,FTTYPE_ANY,0,0);
 
 			// Restore directory, free lock
 			UnLock(CurrentDir(old));
@@ -855,7 +855,7 @@ Cfg_Filetype *backdrop_get_filetype(BackdropInfo *info,BackdropObject *object)
 	}
 
 	// Save filetype pointer
-	object->filetype=filetype;
+	object->bdo_filetype=filetype;
 
 	// Return filetype pointer
 	return filetype;
@@ -871,10 +871,10 @@ void backdrop_show_rect(BackdropInfo *info,BackdropObject *object,short x,short 
 	backdrop_icon_size(info,object,&width,&height);
 
 	// Fake show rectangle
-	object->show_rect.MinX=x-((width-object->pos.Width)>>1);
-	object->show_rect.MinY=y;
-	object->show_rect.MaxX=object->show_rect.MinX+width-1;
-	object->show_rect.MaxY=object->show_rect.MinY+height-1;
+	object->bdo_show_rect.MinX=x-((width-object->bdo_pos.Width)>>1);
+	object->bdo_show_rect.MinY=y;
+	object->bdo_show_rect.MaxX=object->bdo_show_rect.MinX+width-1;
+	object->bdo_show_rect.MaxY=object->bdo_show_rect.MinY+height-1;
 }
 
 
@@ -898,17 +898,17 @@ void backdrop_lineup_objects(BackdropInfo *info)
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		long x,y;
 
 		// Check object isn't locked
-		if (object->flags&BDOF_LOCKED) continue;
+		if (object->bdo_flags&BDOF_LOCKED) continue;
 
 		// Get position
-		x=object->pos.Left;
-		y=object->pos.Top;
+		x=object->bdo_pos.Left;
+		y=object->bdo_pos.Top;
 
 		// Check coordinates against grid
 		backdrop_check_grid(&x,&y);
@@ -918,8 +918,8 @@ void backdrop_lineup_objects(BackdropInfo *info)
 		y-=GUI->icon_grid_y-CLEANUP_START_Y;
 
 		// Store new position
-		object->pos.Left=x;
-		object->pos.Top=y;
+		object->bdo_pos.Left=x;
+		object->bdo_pos.Top=y;
 	}
 
 	// Unlock backdrop list

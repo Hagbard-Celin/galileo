@@ -67,22 +67,22 @@ GALILEOFM_FUNC(function_show)
 			entry=function_get_entry(handle);
 
 			// Build full name
-			function_build_source(handle,entry,handle->work_buffer);
+			function_build_source(handle,entry,handle->func_work_buf);
 
 			// See if file really can't be identified
-			if (!(type=filetype_identify(handle->work_buffer,FTTYPE_ANY,0,0)) ||
+			if (!(type=filetype_identify(handle->func_work_buf,FTTYPE_ANY,0,0)) ||
 				is_default_filetype(type))
 			{
 				// Build requester text
 				lsprintf(
-					handle->work_buffer,
+					handle->func_work_buf,
 					GetString(&locale,MSG_SNIFF_CONFIRMATION),
 					entry->fe_name);
 
 				// Ask for confirmation
 				if ((ret=function_request(
 					handle,
-					handle->work_buffer,
+					handle->func_work_buf,
 					0,
 					GetString(&locale,MSG_SNIFF),
 					GetString(&locale,MSG_SEARCH_READ),
@@ -130,10 +130,10 @@ GALILEOFM_FUNC(function_show)
 	while (entry=function_get_entry(handle))
 	{
 		// Build full name
-		function_build_source(handle,entry,handle->work_buffer);
+		function_build_source(handle,entry,handle->func_work_buf);
 
 		// Add entry to list
-		Att_NewNode(list,handle->work_buffer,(ULONG)entry,0);
+		Att_NewNode(list,handle->func_work_buf,(ULONG)entry,0);
 
 		// Get next entry
 		function_end_entry(handle,entry,1);
@@ -219,7 +219,7 @@ GALILEOFM_FUNC(function_show)
 		}
 
 		// Current lister?
-		if (lister=function_lister_current(&handle->source_paths))
+		if (lister=function_lister_current(&handle->func_source_paths))
 			window=lister->window;
 
 		// Synchronous?
@@ -264,7 +264,7 @@ GALILEOFM_FUNC(function_show)
 		struct Window *window=0;
 
 		// Current lister?
-		if (lister=function_lister_current(&handle->source_paths))
+		if (lister=function_lister_current(&handle->func_source_paths))
 			window=lister->window;
 
 		// Synchronous?
@@ -386,7 +386,7 @@ void function_iconinfo_update(FunctionHandle *handle,Att_List *list)
 			Lister *lister;
 
 			// Do we have a lister?
-			if (lister=function_lister_current(&handle->source_paths))
+			if (lister=function_lister_current(&handle->func_source_paths))
 			{
 				FunctionEntry *entry;
 
@@ -394,8 +394,8 @@ void function_iconinfo_update(FunctionHandle *handle,Att_List *list)
 				entry=(FunctionEntry *)node->att_data;
 
 				// Reload file and icon
-				function_filechange_reloadfile(handle,handle->source_path,entry->fe_name,0);
-				function_filechange_reloadfile(handle,handle->source_path,entry->fe_name,FFLF_ICON);
+				function_filechange_reloadfile(handle,handle->func_source_path,entry->fe_name,0);
+				function_filechange_reloadfile(handle,handle->func_source_path,entry->fe_name,FFLF_ICON);
 			}
 		}
 	}

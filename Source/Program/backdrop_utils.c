@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -160,36 +160,36 @@ BackdropObject *__asm backdrop_get_object(
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Is object position ok?
-		if (!(object->flags&BDOF_NO_POSITION))
+		if (!(object->bdo_flags&BDOF_NO_POSITION))
 		{
 			// See if point is within object
-			if (x>=object->image_rect.MinX &&
-				x<=object->image_rect.MaxX &&
-				y>=object->image_rect.MinY &&
-				y<=object->image_rect.MaxY)
+			if (x>=object->bdo_image_rect.MinX &&
+				x<=object->bdo_image_rect.MaxX &&
+				y>=object->bdo_image_rect.MinY &&
+				y<=object->bdo_image_rect.MaxY)
 			{
 /*
 				// Image mask?
-				if ((flags&BDGOF_CHECK_MASK) && object->state==0 && object->image_mask[0])
+				if ((flags&BDGOF_CHECK_MASK) && object->bdo_state==0 && object->bdo_image_mask[0])
 				{
 					short width,bit,cx,cy;
 
 					// Convert coordinates to image-relative
-					cx=x-object->image_rect.MinX;
-					cy=y-object->image_rect.MinY;
+					cx=x-object->bdo_image_rect.MinX;
+					cy=y-object->bdo_image_rect.MinY;
 
 					// Get width of image in columns
-					width=(((struct Image *)object->icon->do_Gadget.GadgetRender)->Width+15)>>4;
+					width=(((struct Image *)object->bdo_icon->do_Gadget.GadgetRender)->Width+15)>>4;
 
 					// Get column bit
 					bit=15-(cx%16);
 
 					// Is mask set for this pixel?
-					if (object->image_mask[0][(cy*width)+(cx>>4)]&(1<<bit))
+					if (object->bdo_image_mask[0][(cy*width)+(cx>>4)]&(1<<bit))
 						return object;
 				}
 				else
@@ -203,10 +203,10 @@ BackdropObject *__asm backdrop_get_object(
 			if (flags&BDGOF_CHECK_LABEL)
 			{
 				// See if point is within label
-				if (x>=object->show_rect.MinX &&
-					x<=object->show_rect.MaxX &&
-					y>object->image_rect.MaxY &&
-					y<=object->show_rect.MaxY)
+				if (x>=object->bdo_show_rect.MinX &&
+					x<=object->bdo_show_rect.MaxX &&
+					y>object->bdo_image_rect.MaxY &&
+					y<=object->bdo_show_rect.MaxY)
 				{
 					// Use object
 					return object;
@@ -228,14 +228,14 @@ BackdropObject *backdrop_icon_in_rect(
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Is object position ok?
-		if (!(object->flags&BDOF_NO_POSITION))
+		if (!(object->bdo_flags&BDOF_NO_POSITION))
 		{
 			// See if rectangles intersect
-			if (geo_box_intersect(&object->show_rect,testrect))
+			if (geo_box_intersect(&object->bdo_show_rect,testrect))
 			{
 				return object;
 			}
@@ -255,14 +255,14 @@ BackdropObject *backdrop_icon_in_rect_full(
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Is object position ok?
-		if (!(object->flags&BDOF_NO_POSITION))
+		if (!(object->bdo_flags&BDOF_NO_POSITION))
 		{
 			// See if rectangles intersect
-			if (geo_box_intersect(&object->full_size,testrect))
+			if (geo_box_intersect(&object->bdo_full_size,testrect))
 			{
 				return object;
 			}
@@ -298,15 +298,15 @@ void backdrop_fix_count(BackdropInfo *info,BOOL update)
 
 	// Go through list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Increment count
 		++buffer->buf_TotalEntries[1];
 
 		// Drawer?
-		if (object->icon &&
-			(object->icon->do_Type==WBDRAWER || object->icon->do_Type==WBGARBAGE))
+		if (object->bdo_icon &&
+			(object->bdo_icon->do_Type==WBDRAWER || object->bdo_icon->do_Type==WBGARBAGE))
 		{
 			++buffer->buf_TotalDirs[1];
 		}
@@ -315,14 +315,14 @@ void backdrop_fix_count(BackdropInfo *info,BOOL update)
 		else
 		{
 			++buffer->buf_TotalFiles[1];
-		    buffer->buf_TotalBytes[1]+=object->size;
+		    buffer->buf_TotalBytes[1]+=object->bdo_size;
 		}
 
 		// Is object selected?
-		if (object->state)
+		if (object->bdo_state)
 		{
 			// Drawer?
-			if (object->icon->do_Type==WBDRAWER || object->icon->do_Type==WBGARBAGE)
+			if (object->bdo_icon->do_Type==WBDRAWER || object->bdo_icon->do_Type==WBGARBAGE)
 			{
 				++buffer->buf_SelectedDirs[1];
 			}
@@ -331,7 +331,7 @@ void backdrop_fix_count(BackdropInfo *info,BOOL update)
 			else
 			{
 				++buffer->buf_SelectedFiles[1];
-			    buffer->buf_SelectedBytes[1]+=object->size;
+			    buffer->buf_SelectedBytes[1]+=object->bdo_size;
 			}
 		}
 	}
@@ -383,10 +383,10 @@ BackdropObject *backdrop_find_disk(BackdropInfo *info,char *path)
 	while (object=(BackdropObject *)FindNameI(search,name))
 	{
 		// Disk?
-		if (object->type==BDO_DISK)
+		if (object->bdo_type==BDO_DISK)
 		{
 			// Compare dates
-			if (CompareDates(&dl->dol_misc.dol_volume.dol_VolumeDate,&object->date)==0)
+			if (CompareDates(&dl->dol_misc.dol_volume.dol_VolumeDate,&object->bdo_date)==0)
 				break;
 		}
 
@@ -421,21 +421,21 @@ BackdropObject *backdrop_next_object(
 	}
 
 	// Get next object
-	else object=(BackdropObject *)object->node.ln_Succ;
+	else object=(BackdropObject *)object->bdo_node.ln_Succ;
 
 	// If list is empty, return 0
-	if (!object->node.ln_Succ) return 0;
+	if (!object->bdo_node.ln_Succ) return 0;
 
 	// Loop until successful
-	while (object->node.ln_Succ)
+	while (object->bdo_node.ln_Succ)
 	{
 		// If object is ok, return it
-		if (object->icon &&
+		if (object->bdo_icon &&
 			((only_one && only_one==object) ||
-			 (!only_one && object->state))) return object;
+			 (!only_one && object->bdo_state))) return object;
 
 		// Get next object
-		object=(BackdropObject *)object->node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ;
 	}
 
 	return 0;

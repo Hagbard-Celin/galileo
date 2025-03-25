@@ -84,7 +84,7 @@ void backdrop_read_groups(BackdropInfo *info)
 				while (object=(BackdropObject *)FindNameI(search,fib.fib_FileName))
 				{
 					// Is it a group?
-					if (object->type==BDO_GROUP)
+					if (object->bdo_type==BDO_GROUP)
 						break;
 
 					// Continue search
@@ -101,7 +101,7 @@ void backdrop_read_groups(BackdropInfo *info)
 					if (object=backdrop_leftout_new(info,anchor->ap_Buf,0,0))
 					{
 						// Change type to group
-						object->type=BDO_GROUP;
+						object->bdo_type=BDO_GROUP;
 
 						// Get icon
 						backdrop_get_icon(info,object,GETICON_CD);
@@ -127,7 +127,7 @@ void backdrop_open_group(BackdropInfo *info,BackdropObject *object,BOOL activate
 	IPCData *ipc=0;
 
 	// Valid object?
-	if (!object || !object->icon || object->icon->do_Type!=WBDRAWER) return;
+	if (!object || !object->bdo_icon || object->bdo_icon->do_Type!=WBDRAWER) return;
 
 	// See if it's already open
 	lock_listlock(&GUI->group_list,0);
@@ -147,8 +147,8 @@ void backdrop_open_group(BackdropInfo *info,BackdropObject *object,BOOL activate
 
 	// Fill in group packet
 	group->screen=info->window->WScreen;
-	if (object->icon->do_DrawerData)
-		group->dimensions=*((struct IBox *)&object->icon->do_DrawerData->dd_NewWindow.LeftEdge);
+	if (object->bdo_icon->do_DrawerData)
+		group->dimensions=*((struct IBox *)&object->bdo_icon->do_DrawerData->dd_NewWindow.LeftEdge);
 	else
 	{
 		group->dimensions.Left=20;
@@ -156,7 +156,7 @@ void backdrop_open_group(BackdropInfo *info,BackdropObject *object,BOOL activate
 		group->dimensions.Width=200;
 		group->dimensions.Height=150;
 	}
-	strcpy(group->name,object->name);
+	strcpy(group->name,object->bdo_name);
 	group->object=object;
 
 	// Launch process
@@ -879,10 +879,10 @@ void backdrop_free_group(GroupData *group)
 			if (find_backdrop_object(GUI->backdrop,group->object))
 			{
 				// Update window position
-				if (group->object->icon &&
-					group->object->icon->do_DrawerData)
+				if (group->object->bdo_icon &&
+					group->object->bdo_icon->do_DrawerData)
 				{
-					*((struct IBox *)&group->object->icon->do_DrawerData->dd_NewWindow.LeftEdge)=
+					*((struct IBox *)&group->object->bdo_icon->do_DrawerData->dd_NewWindow.LeftEdge)=
 						group->dimensions;
 				}
 			}
@@ -947,18 +947,18 @@ void backdrop_read_group_objects(GroupData *group)
 				if (object=backdrop_leftout_new(group->info,buffer,0,BLNF_CUSTOM_LABEL))
 				{
 					// Set label
-					strcpy(object->device_name,fib->fib_FileName);
+					strcpy(object->bdo_device_name,fib->fib_FileName);
 
 					// Got a position?
 					if (pos.x!=-1 && pos.y!=-1)
 					{
 						// Set position
-						object->flags|=BDOF_LEFTOUT_POS;
-						object->custom_pos=(pos.x<<16)|pos.y;
+						object->bdo_flags|=BDOF_LEFTOUT_POS;
+						object->bdo_custom_pos=(pos.x<<16)|pos.y;
 					}
 
 					// No initial position
-					else object->flags|=BDOF_AUTO_POSITION;
+					else object->bdo_flags|=BDOF_AUTO_POSITION;
 					
 					// Add object
 					backdrop_new_group_object(group->info,object,BDNF_CD);
@@ -1019,14 +1019,14 @@ void backdrop_check_groups(BackdropInfo *info)
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Auto-open group?
-		if (object->type==BDO_GROUP && (object->flags&BDOF_AUTO_OPEN))
+		if (object->bdo_type==BDO_GROUP && (object->bdo_flags&BDOF_AUTO_OPEN))
 		{
 			// Clear auto-open flag
-			object->flags&=~BDOF_AUTO_OPEN;
+			object->bdo_flags&=~BDOF_AUTO_OPEN;
 
 			// Open it
 			backdrop_open_group(info,object,0);
@@ -1089,18 +1089,18 @@ void backdrop_group_add_object(
 		if (object=backdrop_leftout_new(info,path,0,BLNF_CUSTOM_LABEL))
 		{
 			// Set label
-			strcpy(object->device_name,object->name);
+			strcpy(object->bdo_device_name,object->bdo_name);
 
 			// Got a position?
 			if (x!=-1 && y!=-1)
 			{
 				// Set position
-				object->flags|=BDOF_LEFTOUT_POS;
-				object->custom_pos=(x<<16)|y;
+				object->bdo_flags|=BDOF_LEFTOUT_POS;
+				object->bdo_custom_pos=(x<<16)|y;
 			}
 
 			// No initial position
-			else object->flags|=BDOF_AUTO_POSITION;
+			else object->bdo_flags|=BDOF_AUTO_POSITION;
 
 			// Add object
 			backdrop_new_group_object(info,object,BDNF_CD|BDNF_RECALC);
@@ -1132,7 +1132,7 @@ void backdrop_delete_group(BackdropInfo *info,BackdropObject *object)
 	old=CurrentDir(lock);
 
 	// Lock group directory
-	if (!(dir=Lock(object->name,ACCESS_READ)))
+	if (!(dir=Lock(object->bdo_name,ACCESS_READ)))
 	{
 		// Failed
 		UnLock(CurrentDir(old));
@@ -1175,10 +1175,10 @@ void backdrop_delete_group(BackdropInfo *info,BackdropObject *object)
 	}
 
 	// Delete group directory
-	if (DeleteFile(object->name))
+	if (DeleteFile(object->bdo_name))
 	{
 		// Delete icon
-		DeleteDiskObject(object->name);
+		DeleteDiskObject(object->bdo_name);
 	}
 
 	// Restore CD
@@ -1205,16 +1205,16 @@ void backdrop_remove_group_objects(GroupData *data,BackdropObject *only_one)
 
 	// Go through list
 	for (object=(BackdropObject *)data->info->objects.list.lh_Head;
-		object->node.ln_Succ;)
+		object->bdo_node.ln_Succ;)
 	{
-		BackdropObject *next=(BackdropObject *)object->node.ln_Succ;
+		BackdropObject *next=(BackdropObject *)object->bdo_node.ln_Succ;
 
 		// Selected?
 		if ((only_one && only_one==object) ||
-			(!only_one && object->state))
+			(!only_one && object->bdo_state))
 		{
 			// Delete from group directory
-			if (DeleteFile(object->device_name))
+			if (DeleteFile(object->bdo_device_name))
 			{
 				// Erase object
 				backdrop_erase_icon(data->info,object,0);
@@ -1459,11 +1459,11 @@ USHORT group_do_popup(GroupData *group)
 
 					// Go through backdrop list
 					for (object=(BackdropObject *)group->info->objects.list.lh_Head;
-						object->node.ln_Succ;
-						object=(BackdropObject *)object->node.ln_Succ)
+						object->bdo_node.ln_Succ;
+						object=(BackdropObject *)object->bdo_node.ln_Succ)
 					{
 						// Selected icon?
-						if (object->state)
+						if (object->bdo_state)
 						{
 							selicons=0;
 							break;

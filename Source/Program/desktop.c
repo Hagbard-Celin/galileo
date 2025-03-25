@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -164,10 +164,10 @@ BOOL desktop_icon_path(BackdropObject *icon,char *path,short len,BPTR our_lock)
 	if (!our_lock) UnLock(lock);
 
 	// File/drawer?
-	if (icon->icon && icon->icon->do_Type!=WBDISK)
+	if (icon->bdo_icon && icon->bdo_icon->do_Type!=WBDISK)
 	{
 		// Add icon name
-		AddPart(path,icon->name,len);
+		AddPart(path,icon->bdo_name,len);
 	}
 
 	return 1;
@@ -185,11 +185,11 @@ void desktop_refresh_icons(BackdropInfo *info,BOOL show)
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Not AppIcon?
-		if (object->type!=BDO_APP_ICON)
+		if (object->bdo_type!=BDO_APP_ICON)
 		{
 /*
 			char path[256];
@@ -210,10 +210,10 @@ void desktop_refresh_icons(BackdropInfo *info,BOOL show)
 						if (show) backdrop_render_object(info,object,BRENDERF_CLEAR|BRENDERF_CLIP);
 
 						// Store position in icon
-						object->custom_pos=pos;
+						object->bdo_custom_pos=pos;
 
 						// Set "custom position" flag
-						object->flags|=BDOF_CUSTOM_POS;
+						object->bdo_flags|=BDOF_CUSTOM_POS;
 
 						// Fix position
 						backdrop_get_icon(info,object,GETICON_POS_ONLY|GETICON_KEEP);
@@ -228,13 +228,13 @@ void desktop_refresh_icons(BackdropInfo *info,BOOL show)
 			{
 */
 				// Had a custom position?
-				if (object->flags&BDOF_CUSTOM_POS)
+				if (object->bdo_flags&BDOF_CUSTOM_POS)
 				{
 					// Erase object
 					if (show) backdrop_render_object(info,object,BRENDERF_CLEAR|BRENDERF_CLIP);
 
 					// Clear flag
-					object->flags&=~BDOF_CUSTOM_POS;
+					object->bdo_flags&=~BDOF_CUSTOM_POS;
 
 					// Get new position
 					backdrop_get_icon(info,object,GETICON_POS_ONLY|GETICON_KEEP);

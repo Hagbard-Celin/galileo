@@ -157,7 +157,7 @@ void lister_get_icons(FunctionHandle *handle,Lister *lister,char *add_name,short
 			if (object=(BackdropObject *)FindNameI(&info->objects.list,name))
 			{
 				// If found, mark as ok
-				object->flags|=BDOF_OK;
+				object->bdo_flags|=BDOF_OK;
 			}
 
 			// Unlock icons
@@ -182,11 +182,11 @@ void lister_get_icons(FunctionHandle *handle,Lister *lister,char *add_name,short
 						 (fent=find_entry(&buffer->reject_list,name,0,0))))
 					{
 						// Fill out date and size
-						object->date=fent->de_Date;
-						object->size=fent->de_Size;
+						object->bdo_date=fent->de_Date;
+						object->bdo_size=fent->de_Size;
 
 						// Link?
-						if (fent->de_Flags&ENTF_LINK) object->flags|=BDOF_LINK_ICON;
+						if (fent->de_Flags&ENTF_LINK) object->bdo_flags|=BDOF_LINK_ICON;
 					}
 
 					// Try to lock file
@@ -198,23 +198,23 @@ void lister_get_icons(FunctionHandle *handle,Lister *lister,char *add_name,short
 						UnLock(file);
 
 						// Fill out date and size
-						object->date=fib.fib_Date;
-						object->size=fib.fib_Size;
+						object->bdo_date=fib.fib_Date;
+						object->bdo_size=fib.fib_Size;
 
 						// Link?
 						if (fib.fib_DirEntryType==ST_SOFTLINK ||
 							fib.fib_DirEntryType==ST_LINKDIR ||
-							fib.fib_DirEntryType==ST_LINKFILE) object->flags|=BDOF_LINK_ICON;
+							fib.fib_DirEntryType==ST_LINKFILE) object->bdo_flags|=BDOF_LINK_ICON;
 					}
 
 					// Set appropriate flag
-					object->flags|=BDOF_ICON_VIEW|BDOF_OK;
+					object->bdo_flags|=BDOF_ICON_VIEW|BDOF_OK;
 
 					// Get object icon
 					backdrop_get_icon(info,object,0);
 
 					// If no icon, or it's a disk, remove it again
-					if (!object->icon || object->icon->do_Type==WBDISK)
+					if (!object->bdo_icon || object->bdo_icon->do_Type==WBDISK)
 					{
 						backdrop_remove_object(info,object);
 						object=0;
@@ -228,7 +228,7 @@ void lister_get_icons(FunctionHandle *handle,Lister *lister,char *add_name,short
 				unlock_listlock(&info->objects);
 
 				// Tell lister to show icon
-				if (object && !(object->flags&BDOF_NO_POSITION))
+				if (object && !(object->bdo_flags&BDOF_NO_POSITION))
 				{
 					if (handle)
 						IPC_Command(lister->ipc,LISTER_SHOW_ICON,0,object,0,REPLY_NO_PORT);
@@ -377,10 +377,10 @@ void lister_get_device_icons(Lister *lister,BOOL clean)
 			while (object=(BackdropObject *)FindName(search,name))
 			{
 				// Match cache name
-				if (object->device_name &&
-					strcmp(object->device_name,ptr)==0)
+				if (object->bdo_device_name &&
+					strcmp(object->bdo_device_name,ptr)==0)
 				{
-					object->flags|=BDOF_OK;
+					object->bdo_flags|=BDOF_OK;
 					new=0;
 					break;
 				}
@@ -406,10 +406,10 @@ void lister_get_device_icons(Lister *lister,BOOL clean)
 				BDO_DISK))
 			{
 				// Mark object as ok
-				object->flags=BDOF_OK|BDOF_CACHE|BDOF_NO_POSITION;
+				object->bdo_flags=BDOF_OK|BDOF_CACHE|BDOF_NO_POSITION;
 
 				// Add to backdrop list
-				AddTail(&info->objects.list,&object->node);
+				AddTail(&info->objects.list,&object->bdo_node);
 
 				// Get icon
 				backdrop_get_icon(info,object,GETICON_CD|GETICON_SAVE_POS|GETICON_DEFDIR);
@@ -436,10 +436,10 @@ void lister_get_device_icons(Lister *lister,BOOL clean)
 			while (object=(BackdropObject *)FindName(search,ptr))
 			{
 				// Compare dates
-				if (CompareDates(&object->date,&entry->de_Date)==0)
+				if (CompareDates(&object->bdo_date,&entry->de_Date)==0)
 				{
 					// Mark as ok
-					object->flags|=BDOF_OK;
+					object->bdo_flags|=BDOF_OK;
 					new=0;
 					break;
 				}
@@ -465,13 +465,13 @@ void lister_get_device_icons(Lister *lister,BOOL clean)
 				BDO_DISK))
 			{
 				// Get object date
-				object->date=entry->de_Date;
+				object->bdo_date=entry->de_Date;
 
 				// Mark object as ok
-				object->flags=BDOF_OK|BDOF_NO_POSITION;
+				object->bdo_flags=BDOF_OK|BDOF_NO_POSITION;
 
 				// Add to backdrop list
-				AddTail(&info->objects.list,&object->node);
+				AddTail(&info->objects.list,&object->bdo_node);
 
 				// Get icon
 				backdrop_get_icon(info,object,GETICON_CD|GETICON_SAVE_POS);
@@ -491,7 +491,7 @@ void lister_get_device_icons(Lister *lister,BOOL clean)
 			// See if assign is in list
 			if (object=(BackdropObject *)FindName(&info->objects.list,entry->de_Node.dn_Name))
 			{
-				object->flags|=BDOF_OK;
+				object->bdo_flags|=BDOF_OK;
 				new=0;
 			}
 
@@ -512,13 +512,13 @@ void lister_get_device_icons(Lister *lister,BOOL clean)
 				BDO_DISK))
 			{
 				// Get object date
-				object->date=entry->de_Date;
+				object->bdo_date=entry->de_Date;
 
 				// Mark object as ok
-				object->flags=BDOF_OK|BDOF_ASSIGN|BDOF_NO_POSITION;
+				object->bdo_flags=BDOF_OK|BDOF_ASSIGN|BDOF_NO_POSITION;
 
 				// Add to backdrop list
-				AddTail(&info->objects.list,&object->node);
+				AddTail(&info->objects.list,&object->bdo_node);
 
 				// Get icon
 				backdrop_get_icon(info,object,GETICON_CD|GETICON_SAVE_POS|GETICON_DEFDIR);
@@ -555,12 +555,12 @@ short backdrop_check_icons_ok(BackdropInfo *info)
 
 	// Go through icon list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;)
+		object->bdo_node.ln_Succ;)
 	{
-		BackdropObject *next=(BackdropObject *)object->node.ln_Succ;
+		BackdropObject *next=(BackdropObject *)object->bdo_node.ln_Succ;
 
 		// Anything not marked as ok gets removed
-		if (!(object->flags&BDOF_OK))
+		if (!(object->bdo_flags&BDOF_OK))
 		{
 			// Erase object
 			backdrop_erase_icon(info,object,0);
@@ -573,7 +573,7 @@ short backdrop_check_icons_ok(BackdropInfo *info)
 		}
 
 		// Otherwise clear ok flag
-		else object->flags&=~BDOF_OK;
+		else object->bdo_flags&=~BDOF_OK;
 
 		// Get next object
 		object=next;
@@ -599,8 +599,8 @@ void lister_show_icon(Lister *lister,BackdropObject *object)
 
 	// Look for icon in list
 	for (test=(BackdropObject *)lister->backdrop_info->objects.list.lh_Head;
-		test->node.ln_Succ;
-		test=(BackdropObject *)test->node.ln_Succ)
+		test->bdo_node.ln_Succ;
+		test=(BackdropObject *)test->bdo_node.ln_Succ)
 	{
 		// Found?
 		if (test==object)

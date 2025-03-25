@@ -57,7 +57,7 @@ GALILEOFM_FUNC(function_scandir)
 	char *sel_file;
 
 	// Get current lister
-	lister=function_lister_current(&handle->source_paths);
+	lister=function_lister_current(&handle->func_source_paths);
 
 	// Clear buffer
 	if (!(sel_file=AllocVec(256,MEMF_CLEAR)))
@@ -71,7 +71,7 @@ GALILEOFM_FUNC(function_scandir)
 		if (instruction->ipa_funcargs->FA_Arguments[SCANDIR_PATH])
 		{
 			path_flag=1;
-			strcpy(handle->source_path,(char *)instruction->ipa_funcargs->FA_Arguments[SCANDIR_PATH]);
+			strcpy(handle->func_source_path,(char *)instruction->ipa_funcargs->FA_Arguments[SCANDIR_PATH]);
 		}
 
 		// Mode?
@@ -106,7 +106,7 @@ GALILEOFM_FUNC(function_scandir)
 			if (entry->fe_type>0)
 			{
 				// Build path name
-				AddPart(handle->source_path,entry->fe_name,512);
+				AddPart(handle->func_source_path,entry->fe_name,512);
 
 				// Finish with entry
 				function_end_entry(handle,entry,FALSE);
@@ -121,33 +121,33 @@ GALILEOFM_FUNC(function_scandir)
 	}
 
 	// Container?
-	if (cont_flag && *handle->source_path)
+	if (cont_flag && *handle->func_source_path)
 	{
 		char *ptr;
 		BPTR lock;
 
 		// Try to lock path
-		if (lock=Lock(handle->source_path,ACCESS_READ))
+		if (lock=Lock(handle->func_source_path,ACCESS_READ))
 		{
 			// Get full name
-			DevNameFromLock(lock,handle->source_path,512);
+			DevNameFromLock(lock,handle->func_source_path,512);
 			UnLock(lock);
 		}
 
 		// Get pointer to file name	
-		ptr=FilePart(handle->source_path);
+		ptr=FilePart(handle->func_source_path);
 
 		// Directory?
-		if (!ptr || !*ptr || ptr==handle->source_path)
+		if (!ptr || !*ptr || ptr==handle->func_source_path)
 		{
 			short len;
 
 			// Strip last /
-			if (handle->source_path[(len=strlen(handle->source_path)-1)]=='/')
-				handle->source_path[len]=0;
+			if (handle->func_source_path[(len=strlen(handle->func_source_path)-1)]=='/')
+				handle->func_source_path[len]=0;
 
 			// Try again
-			ptr=FilePart(handle->source_path);
+			ptr=FilePart(handle->func_source_path);
 		}
 
 		// Copy name and clear from path
@@ -159,7 +159,7 @@ GALILEOFM_FUNC(function_scandir)
 	if (dest_flag)
 	{
 		// Get destination lister
-		if (dest=function_lister_current(&handle->dest_paths))
+		if (dest=function_lister_current(&handle->func_dest_paths))
 			lister=dest;
 	}
 
@@ -167,7 +167,7 @@ GALILEOFM_FUNC(function_scandir)
 	if (!dest)
 	{
 		// Unlock destination lister
-		function_unlock_paths(handle,&handle->dest_paths,0);
+		function_unlock_paths(handle,&handle->func_dest_paths,0);
 	}
 
 	// Read into current lister?
@@ -178,12 +178,12 @@ GALILEOFM_FUNC(function_scandir)
 		else handle->flags=0;
 
 		// Read directory
-		function_read_directory(handle,lister,handle->source_path);
+		function_read_directory(handle,lister,handle->func_source_path);
 	}
 
 	// Create a new lister
 	else
-	if (cfg=NewLister((path_flag)?handle->source_path:0))
+	if (cfg=NewLister((path_flag)?handle->func_source_path:0))
 	{
 		// Initialise lister
 		lister_init_new(cfg,(new_flag)?0:lister);
@@ -197,8 +197,8 @@ GALILEOFM_FUNC(function_scandir)
 			BPTR lock;
 
 			// Got a path and can lock it?
-			if (path_flag && handle->source_path[0] &&
-				(lock=Lock(handle->source_path,ACCESS_READ)))
+			if (path_flag && handle->func_source_path[0] &&
+				(lock=Lock(handle->func_source_path,ACCESS_READ)))
 			{
 				short mode=0;
 

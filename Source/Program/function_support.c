@@ -112,14 +112,14 @@ check_file_destination(
 		if (entry->fe_type>0) return 1;
 
 		// Can't copy a file over a directory
-		lsprintf(handle->work_buffer,
+		lsprintf(handle->func_work_buf,
 			GetString(&locale,MSG_ERROR_DEST_IS_DIRECTORY),
 			name);
 
 		// Put up requester
 		if (function_request(
 			handle,
-			handle->work_buffer,
+			handle->func_work_buf,
 			0,
 			GetString(&locale,MSG_SKIP),
 			GetString(&locale,MSG_ABORT),0)) return 0;
@@ -132,14 +132,14 @@ check_file_destination(
 		int ret;
 
 		// Build requester text
-		lsprintf(handle->work_buffer,
+		lsprintf(handle->func_work_buf,
 			GetString(&locale,MSG_ERROR_DEST_IS_FILE),
 			name);
 
 		// Put up requester
 		if ((ret=function_request(
 			handle,
-			handle->work_buffer,
+			handle->func_work_buf,
 			0,
 			GetString(&locale,MSG_SKIP),
 			GetString(&locale,MSG_REPLACE),
@@ -164,10 +164,10 @@ check_file_destination(
 		BPTR lock,source_lock;
 
 		// Build source name
-		function_build_source(handle,entry,handle->work_buffer);
+		function_build_source(handle,entry,handle->func_work_buf);
 
 		// Get source information
-		if (!(lock=Lock(handle->work_buffer,ACCESS_READ)))
+		if (!(lock=Lock(handle->func_work_buf,ACCESS_READ)))
 		{
 			UnLock(dest_lock);
 			return 0;
@@ -181,7 +181,7 @@ check_file_destination(
 		UnLock(lock);
 
 		// Get window
-		if ((path=function_path_current(&handle->source_paths)) && path->pn_lister)
+		if ((path=function_path_current(&handle->func_source_paths)) && path->pn_lister)
 			win=path->pn_lister->window;
 
 		// Show requester
@@ -229,14 +229,14 @@ check_file_destination(
 			short ret;
 
 			// Build requester text
-			lsprintf(handle->work_buffer,
+			lsprintf(handle->func_work_buf,
 				GetString(&locale,MSG_DELETE_PROTECTED),
 				name);
 
 			// Put up requester
 			if ((ret=function_request(
 				handle,
-				handle->work_buffer,
+				handle->func_work_buf,
 				0,
 				GetString(&locale,MSG_UNPROTECT),
 				GetString(&locale,MSG_UNPROTECT_ALL),
@@ -296,22 +296,22 @@ function_error(
 	// Get error message
 	if (error_code>0)
 	{
-		Fault(error_code,GetString(&locale,MSG_DOS_ERROR),handle->work_buffer,60);
-		lsprintf(handle->work_buffer+768,handle->work_buffer,error_code);
+		Fault(error_code,GetString(&locale,MSG_DOS_ERROR),handle->func_work_buf,60);
+		lsprintf(handle->func_work_buf+768,handle->func_work_buf,error_code);
 	}
-	else strcpy(handle->work_buffer+768,GetString(&locale,MSG_ERROR_UNKNOWN_CODE));
+	else strcpy(handle->func_work_buf+768,GetString(&locale,MSG_ERROR_UNKNOWN_CODE));
 
 	// Build requester text
-	lsprintf(handle->work_buffer,
+	lsprintf(handle->func_work_buf,
 		GetString(&locale,MSG_ERROR_OCCURED),
 		GetString(&locale,action_msg),
 		name,
-		handle->work_buffer+768);
+		handle->func_work_buf+768);
 
 	// Display requester
 	ret=function_request(
 		handle,
-		handle->work_buffer,
+		handle->func_work_buf,
 		0,
 		GetString(&locale,MSG_TRY_AGAIN),
 		(skip)?GetString(&locale,MSG_SKIP):(unsigned char *)-1,
@@ -348,7 +348,7 @@ void function_abort(FunctionHandle *handle)
 	PathNode *node;
 
 	// Get current lister
-	if ((node=handle->source_paths.current) &&
+	if ((node=handle->func_source_paths.current) &&
 		node->pn_node.mln_Succ)
 	{
 		// Display abort text
@@ -366,7 +366,7 @@ void function_error_text(FunctionHandle *handle,int code)
 	PathNode *node;
 
 	// Get current lister
-	if ((node=handle->source_paths.current) &&
+	if ((node=handle->func_source_paths.current) &&
 		node->pn_node.mln_Succ)
 	{
 		// Display abort text
@@ -384,7 +384,7 @@ void function_text(FunctionHandle *handle,char *text)
 	PathNode *node;
 
 	// Get current lister
-	if ((node=handle->source_paths.current) &&
+	if ((node=handle->func_source_paths.current) &&
 		node->pn_node.mln_Succ)
 	{
 		// Display text
@@ -407,7 +407,7 @@ function_request(
 	short ret;
 
 	// Get window
-	if ((path=function_path_current(&handle->source_paths)) && path->pn_lister)
+	if ((path=function_path_current(&handle->func_source_paths)) && path->pn_lister)
 		parent=path->pn_lister->window;
 
 	// Use screen
@@ -473,7 +473,7 @@ void function_cleanup(FunctionHandle *handle,PathNode *node,BOOL full)
 					if (entry->fe_flags&FUNCENTF_ICON_ACTION)
 					{
 						// Deselect icon
-						((BackdropObject *)entry->fe_entry)->state=0;
+						((BackdropObject *)entry->fe_entry)->bdo_state=0;
 
 						// If icon is borderless, show it immediately
 						if (!backdrop_icon_border((BackdropObject *)entry->fe_entry))
@@ -585,8 +585,8 @@ void function_build_info(FunctionHandle *handle,char *src,char *dst,short which)
 	PathNode *source=0,*dest=0;
 
 	// Get current source and destination
-	if (!src) source=function_path_current(&handle->source_paths);
-	if (!dst && (which&2)) dest=function_path_current(&handle->dest_paths);
+	if (!src) source=function_path_current(&handle->func_source_paths);
+	if (!dst && (which&2)) dest=function_path_current(&handle->func_dest_paths);
 
 	// If no dest, use source
 	if (!dst && !dest && which&2)
@@ -599,30 +599,30 @@ void function_build_info(FunctionHandle *handle,char *src,char *dst,short which)
 	if (!dst && dest) dst=dest->pn_path;
 
 	// Get paths
-	if (src) final_path(src,handle->work_buffer+256);
-	if (dst) final_path(dst,handle->work_buffer+384);
+	if (src) final_path(src,handle->func_work_buf+256);
+	if (dst) final_path(dst,handle->func_work_buf+384);
 
 	// Destination?
 	if (which&2)
 	{
 		// Build information string
-		lsprintf(handle->work_buffer,
+		lsprintf(handle->func_work_buf,
 			GetString(&locale,MSG_FROM_TO),
-			handle->work_buffer+256,
-			handle->work_buffer+384);
+			handle->func_work_buf+256,
+			handle->func_work_buf+384);
 	}
 
 	// Only source
 	else
 	{
 		// Build information string
-		lsprintf(handle->work_buffer,
+		lsprintf(handle->func_work_buf,
 			GetString(&locale,MSG_FROM),
-			handle->work_buffer+256);
+			handle->func_work_buf+256);
 	}
 
 	// Set information string
-	function_progress_info(handle,handle->work_buffer);
+	function_progress_info(handle,handle->func_work_buf);
 }
 
 

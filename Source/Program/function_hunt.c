@@ -126,7 +126,7 @@ GALILEOFM_FUNC(function_hunt)
 				BOOL match=0;
 
 				// Build full path
-				function_build_source(handle,entry,handle->work_buffer+512);
+				function_build_source(handle,entry,handle->func_work_buf+512);
 
 				// Match comments?
 				if (data->comment)
@@ -134,7 +134,7 @@ GALILEOFM_FUNC(function_hunt)
 					struct FileInfoBlock __aligned fib;
 
 					// Get file information
-					if (GetFileInfo(handle->work_buffer+512,&fib))
+					if (GetFileInfo(handle->func_work_buf+512,&fib))
 					{
 						// Match comment
 						match=MatchPatternNoCase(handle->inst_data+64,fib.fib_Comment);
@@ -154,19 +154,19 @@ GALILEOFM_FUNC(function_hunt)
 					char *ptr,name[35];
 
 					// Strip filename
-					if (ptr=FilePart(handle->work_buffer+512)) *ptr=0;
+					if (ptr=FilePart(handle->func_work_buf+512)) *ptr=0;
 					get_trunc_filename(FilePart(entry->fe_name),name);
 
 					// Build requester text
-					lsprintf(handle->work_buffer,
+					lsprintf(handle->func_work_buf,
 						GetString(&locale,MSG_HUNT_FOUND_FILE),
 						name,
-						handle->work_buffer+512);
+						handle->func_work_buf+512);
 
 					// Display requester
 					if (!(ret=function_request(
 						handle,
-						handle->work_buffer,
+						handle->func_work_buf,
 						0,
 						GetString(&locale,MSG_YES),
 						GetString(&locale,MSG_NEW_LISTER),
@@ -184,12 +184,12 @@ GALILEOFM_FUNC(function_hunt)
 						PathNode *path;
 
 						// Get current lister
-						if ((path=function_path_current(&handle->source_paths)) &&
+						if ((path=function_path_current(&handle->func_source_paths)) &&
 							path->pn_lister)
 						{
 							// Read directory
 							handle->flags=GETDIRF_CANCHECKBUFS|GETDIRF_CANMOVEEMPTY;
-							function_read_directory(handle,path->pn_lister,handle->work_buffer+512);
+							function_read_directory(handle,path->pn_lister,handle->func_work_buf+512);
 
 							// Do wildcard selection
 							function_select_file(handle,path->pn_lister,(data->comment)?(char *)FilePart(entry->fe_name):data->pattern);
@@ -209,10 +209,10 @@ GALILEOFM_FUNC(function_hunt)
 						// Open new lister
 						if (lister=
 							lister_open_new(
-								handle->work_buffer+512,
+								handle->func_work_buf+512,
 								0,
 								0,
-								function_lister_current(&handle->source_paths)))
+								function_lister_current(&handle->func_source_paths)))
 						{
 							// Initialise lister
 							IPC_Command(

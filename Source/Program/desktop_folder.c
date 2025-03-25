@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -52,15 +52,15 @@ short read_desktop_folder(BackdropInfo *info,BOOL show)
 
 	// Go through icons, mark desktop folder objects as invalid
 	for (icon=(BackdropObject *)info->objects.list.lh_Head;
-		icon->node.ln_Succ;
-		icon=(BackdropObject *)icon->node.ln_Succ)
+		icon->bdo_node.ln_Succ;
+		icon=(BackdropObject *)icon->bdo_node.ln_Succ)
 	{
 		// Desktop folder object?
-		if (icon->type==BDO_LEFT_OUT &&
-			icon->flags&BDOF_DESKTOP_FOLDER)
+		if (icon->bdo_type==BDO_LEFT_OUT &&
+			icon->bdo_flags&BDOF_DESKTOP_FOLDER)
 		{
 			// Mark as not ok
-			icon->flags&=~BDOF_OK;
+			icon->bdo_flags&=~BDOF_OK;
 		}
 	}
 
@@ -109,11 +109,11 @@ short read_desktop_folder(BackdropInfo *info,BOOL show)
 			while (icon=(BackdropObject *)FindNameI(search,fib.fib_FileName))
 			{
 				// Match?
-				if (icon->type==BDO_LEFT_OUT &&
-					icon->flags&BDOF_DESKTOP_FOLDER)
+				if (icon->bdo_type==BDO_LEFT_OUT &&
+					icon->bdo_flags&BDOF_DESKTOP_FOLDER)
 				{
 					// Mark as ok
-					icon->flags|=BDOF_OK;
+					icon->bdo_flags|=BDOF_OK;
 					break;
 				}
 
@@ -128,7 +128,7 @@ short read_desktop_folder(BackdropInfo *info,BOOL show)
 				if (icon=backdrop_leftout_new(info,fib.fib_FileName,environment->env->desktop_location,0))
 				{
 					// Set 'desktop folder' flag, and mark as ok
-					icon->flags|=BDOF_DESKTOP_FOLDER;
+					icon->bdo_flags|=BDOF_DESKTOP_FOLDER;
 
 					// Link?
 					if (fib.fib_DirEntryType==ST_SOFTLINK ||
@@ -136,14 +136,14 @@ short read_desktop_folder(BackdropInfo *info,BOOL show)
 						fib.fib_DirEntryType==ST_LINKFILE)
 					{
 						// Set flag
-						icon->flags|=BDOF_LINK_ICON;
+						icon->bdo_flags|=BDOF_LINK_ICON;
 					}
 
 					// Get icon
 					backdrop_get_icon(info,icon,GETICON_CD);
 
 					// Set ok flag if we have an icon
-					if (icon->icon) icon->flags|=BDOF_OK;
+					if (icon->bdo_icon) icon->bdo_flags|=BDOF_OK;
 
 					// Increment count
 					count++;
@@ -163,20 +163,20 @@ short read_desktop_folder(BackdropInfo *info,BOOL show)
 
 	// Go through icons, remove old ones
 	for (icon=(BackdropObject *)info->objects.list.lh_Head;
-		icon->node.ln_Succ;)
+		icon->bdo_node.ln_Succ;)
 	{
 		// Cache next icon
-		BackdropObject *next=(BackdropObject *)icon->node.ln_Succ;
+		BackdropObject *next=(BackdropObject *)icon->bdo_node.ln_Succ;
 
 		// Desktop folder object?
-		if (icon->type==BDO_LEFT_OUT &&
-			icon->flags&BDOF_DESKTOP_FOLDER)
+		if (icon->bdo_type==BDO_LEFT_OUT &&
+			icon->bdo_flags&BDOF_DESKTOP_FOLDER)
 		{
 			// Not marked as ok?
-			if (!(icon->flags&BDOF_OK))
+			if (!(icon->bdo_flags&BDOF_OK))
 			{
 				// Erase icon from display
-				if (icon->icon && show)
+				if (icon->bdo_icon && show)
 					backdrop_erase_icon(info,icon,0);
 
 				// Remove and free icon

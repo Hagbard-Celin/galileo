@@ -64,7 +64,7 @@ void backdrop_read_appicons(BackdropInfo *info,short flags)
 			}
 
 			// Mark as ok if we have an icon
-			if (object) object->flags|=BDOF_OK;
+			if (object) object->bdo_flags|=BDOF_OK;
 		}
 	}
 
@@ -73,15 +73,15 @@ void backdrop_read_appicons(BackdropInfo *info,short flags)
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;)
+		object->bdo_node.ln_Succ;)
 	{
-		BackdropObject *next=(BackdropObject *)object->node.ln_Succ;
+		BackdropObject *next=(BackdropObject *)object->bdo_node.ln_Succ;
 
 		// AppIcon?
-		if (object->type==BDO_APP_ICON)
+		if (object->bdo_type==BDO_APP_ICON)
 		{
 			// Marked as ok?
-			if (object->flags&BDOF_OK) object->flags&=~BDOF_OK;
+			if (object->bdo_flags&BDOF_OK) object->bdo_flags&=~BDOF_OK;
 
 			// Not marked; remove icon
 			else
@@ -119,26 +119,26 @@ BackdropObject *backdrop_add_appicon(AppEntry *appicon,BackdropInfo *info,short 
 		if (flags&BDAF_CHANGE)
 		{
 			// Has name changed?
-			if (strcmp(object->name,appicon->ae_text))
+			if (strcmp(object->bdo_name,appicon->ae_text))
 			{
 				// Erase object label
 				backdrop_render_object(info,object,BRENDERF_CLEAR|BRENDERF_CLIP|BRENDERF_LABEL);
 
 				// Get new name
-				strcpy(object->name,appicon->ae_text);
+				strcpy(object->bdo_name,appicon->ae_text);
 			}
 
 			// Update locked state
-			if (appicon->ae_flags&APPENTF_LOCKED) object->flags|=BDOF_LOCKED;
-			else object->flags&=~BDOF_LOCKED;
+			if (appicon->ae_flags&APPENTF_LOCKED) object->bdo_flags|=BDOF_LOCKED;
+			else object->bdo_flags&=~BDOF_LOCKED;
 
 			// Update busy state
-			if (appicon->ae_flags&APPENTF_BUSY) object->flags|=BDOF_BUSY;
-			else object->flags&=~BDOF_BUSY;
+			if (appicon->ae_flags&APPENTF_BUSY) object->bdo_flags|=BDOF_BUSY;
+			else object->bdo_flags&=~BDOF_BUSY;
 
 			// Update ghosted state
-			if (appicon->ae_flags&APPENTF_GHOSTED) object->flags|=BDOF_GHOSTED;
-			else object->flags&=~BDOF_GHOSTED;
+			if (appicon->ae_flags&APPENTF_GHOSTED) object->bdo_flags|=BDOF_GHOSTED;
+			else object->bdo_flags&=~BDOF_GHOSTED;
 
 			// Did image change?
 			if (flags&BDAF_NEW_IMAGE)
@@ -202,30 +202,30 @@ BackdropObject *backdrop_add_appicon(AppEntry *appicon,BackdropInfo *info,short 
 		if (flags&BDAF_LOCK) lock_listlock(&info->objects,1);
 
 		// Store icon and owner
-		object->icon=appicon->ae_object;
-		object->misc_data=(ULONG)appicon;
+		object->bdo_icon=appicon->ae_object;
+		object->bdo_misc_data=(ULONG)appicon;
 
 		// Background colour?
 		if (((AppEntry *)appicon)->ae_flags&APPENTF_BACKGROUND)
 		{
 			// Store background colour
-			object->size=((AppEntry *)appicon)->ae_data;
-			object->flags|=BDOF_BACKGROUND;
+			object->bdo_size=((AppEntry *)appicon)->ae_data;
+			object->bdo_flags|=BDOF_BACKGROUND;
 		}
 
 		// Locked?
 		if (((AppEntry *)appicon)->ae_flags&APPENTF_LOCKED)
-			object->flags|=BDOF_LOCKED;
+			object->bdo_flags|=BDOF_LOCKED;
 
 		// Special?
 		if (((AppEntry *)appicon)->ae_flags&APPENTF_SPECIAL)
-			object->flags|=BDOF_SPECIAL;
+			object->bdo_flags|=BDOF_SPECIAL;
 
 		// Fix size and position
 		backdrop_get_icon(info,object,GETICON_CD);
 
 		// Add to backdrop list
-		AddTail(&info->objects.list,&object->node);
+		AddTail(&info->objects.list,&object->bdo_node);
 
 		// Unlock backdrop list
 		if (flags&BDAF_LOCK) unlock_listlock(&info->objects);
@@ -280,12 +280,12 @@ BackdropObject *backdrop_find_appicon(BackdropInfo *info,AppEntry *appicon)
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Check if we already have this appicon
-		if (object->type==BDO_APP_ICON &&
-			object->misc_data==(ULONG)appicon) return object;
+		if (object->bdo_type==BDO_APP_ICON &&
+			object->bdo_misc_data==(ULONG)appicon) return object;
 	}
 
 	return 0;
@@ -301,15 +301,15 @@ GalileoAppMessage *backdrop_appmessage(BackdropInfo *info,BOOL need_obj)
 
 	// Go through backdrop list, count selections
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Set beep if wrong type
-		if (object->type==BDO_GROUP ||
-			object->type==BDO_BAD_DISK) beep=1;
+		if (object->bdo_type==BDO_GROUP ||
+			object->bdo_type==BDO_BAD_DISK) beep=1;
 
 		// Selected?
-		else if (object->state) ++count;
+		else if (object->bdo_state) ++count;
 	}
 
 	// No objects?
@@ -331,38 +331,38 @@ GalileoAppMessage *backdrop_appmessage(BackdropInfo *info,BOOL need_obj)
 	if (first=info->last_sel_object)
 	{
 		// Save drag offset
-		msg->ga_DragOffset.x=first->image_rect.MinX-first->pos.Left+first->drag_x_offset-info->offset_x;
-		msg->ga_DragOffset.y=first->image_rect.MinY-first->pos.Top+first->drag_y_offset-info->offset_y;
+		msg->ga_DragOffset.x=first->bdo_image_rect.MinX-first->bdo_pos.Left+first->bdo_drag_x_offset-info->offset_x;
+		msg->ga_DragOffset.y=first->bdo_image_rect.MinY-first->bdo_pos.Top+first->bdo_drag_y_offset-info->offset_y;
 	}
 
 	// Go through backdrop list, fill in arguments
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ && arg<count;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ && arg<count;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Selected?
-		if (object->state &&
-			object->type!=BDO_BAD_DISK &&
-			object->type!=BDO_GROUP)
+		if (object->bdo_state &&
+			object->bdo_type!=BDO_BAD_DISK &&
+			object->bdo_type!=BDO_GROUP)
 		{
 			// Got position array?
 			if (first)
 			{
 				// Store object position relative to first object
-				msg->ga_DropPos[arg].x=object->pos.Left-first->pos.Left;
-				msg->ga_DropPos[arg].y=object->pos.Top-first->pos.Top;
+				msg->ga_DropPos[arg].x=object->bdo_pos.Left-first->bdo_pos.Left;
+				msg->ga_DropPos[arg].y=object->bdo_pos.Top-first->bdo_pos.Top;
 			}
 
 			// AppIcon?
-			if (object->type==BDO_APP_ICON)
+			if (object->bdo_type==BDO_APP_ICON)
 			{
 				// Copy name
-				SetWBArg(msg,arg,0,object->name,global_memory_pool);
+				SetWBArg(msg,arg,0,object->bdo_name,global_memory_pool);
 			}
 
 			// Is object a directory?
 			else
-			if (object->icon->do_Type==WBDRAWER || object->icon->do_Type==WBGARBAGE)
+			if (object->bdo_icon->do_Type==WBDRAWER || object->bdo_icon->do_Type==WBGARBAGE)
 			{
 				BPTR old,lock;
 
@@ -373,18 +373,18 @@ GalileoAppMessage *backdrop_appmessage(BackdropInfo *info,BOOL need_obj)
 					old=CurrentDir(lock);
 
 					// Lock sub-directory
-					if (!(msg->ga_Msg.am_ArgList[arg].wa_Lock=Lock(object->name,ACCESS_READ)))
+					if (!(msg->ga_Msg.am_ArgList[arg].wa_Lock=Lock(object->bdo_name,ACCESS_READ)))
 					{
 						char *name;
 
 						// Couldn't lock directory, so steal lock for parent
-						if (name=AllocVec(strlen(object->name)+8,0))
+						if (name=AllocVec(strlen(object->bdo_name)+8,0))
 						{
 							msg->ga_Msg.am_ArgList[arg].wa_Lock=lock;
 							lock=0;
 
 							// Get filename
-							strcpy(name,object->name);
+							strcpy(name,object->bdo_name);
 							strcat(name,".info");
 							SetWBArg(msg,arg,0,name,global_memory_pool);
 						}
@@ -404,9 +404,9 @@ GalileoAppMessage *backdrop_appmessage(BackdropInfo *info,BOOL need_obj)
 					msg->ga_Msg.am_ArgList[arg].wa_Lock=backdrop_icon_lock(object);
 
 				// If not a disk, copy filename
-				if (object->icon->do_Type!=WBDISK)
+				if (object->bdo_icon->do_Type!=WBDISK)
 				{
-					SetWBArg(msg,arg,0,object->name,global_memory_pool);
+					SetWBArg(msg,arg,0,object->bdo_name,global_memory_pool);
 				}
 			}
 
@@ -466,8 +466,8 @@ void backdrop_appicon_message(BackdropObject *object,unsigned short flags)
 	msg->ap_msg.am_Type=MTYPE_APPSNAPSHOT;
 
 	// Set icon position
-	msg->position_x=object->pos.Left;
-	msg->position_y=object->pos.Top;
+	msg->position_x=object->bdo_pos.Left;
+	msg->position_y=object->bdo_pos.Top;
 
 	// Adjust for border
 	if (backdrop_icon_border(object))
@@ -502,7 +502,7 @@ void backdrop_appicon_message(BackdropObject *object,unsigned short flags)
 
 	// Get AppInfo
 	port=WB_AppWindowData(
-		(struct AppWindow *)object->misc_data,
+		(struct AppWindow *)object->bdo_misc_data,
 		&msg->ap_msg.am_ID,
 		&msg->ap_msg.am_UserData);
 

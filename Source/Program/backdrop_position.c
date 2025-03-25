@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -65,32 +65,32 @@ long backdrop_arrange_objects(BackdropInfo *info)
 	{
 		// Go through backdrop list
 		for (object=(BackdropObject *)info->objects.list.lh_Head;
-			object->node.ln_Succ;
-			object=(BackdropObject *)object->node.ln_Succ)
+			object->bdo_node.ln_Succ;
+			object=(BackdropObject *)object->bdo_node.ln_Succ)
 		{
 			// Check if object is outside of display
-			if (!(object->flags&BDOF_NO_POSITION) &&
-				(object->show_rect.MaxX>info->size.MaxX ||
-				object->show_rect.MinX<info->size.MinX ||
-				object->show_rect.MaxY>info->size.MaxY ||
-				object->show_rect.MinY<info->size.MinY))
+			if (!(object->bdo_flags&BDOF_NO_POSITION) &&
+				(object->bdo_show_rect.MaxX>info->size.MaxX ||
+				object->bdo_show_rect.MinX<info->size.MinX ||
+				object->bdo_show_rect.MaxY>info->size.MaxY ||
+				object->bdo_show_rect.MinY<info->size.MinY))
 			{
 				// Erase icon
 				backdrop_render_object(info,object,BRENDERF_CLEAR|BRENDERF_CLIP);
 
 				// Set "no position"
-				object->flags|=BDOF_NO_POSITION;
+				object->bdo_flags|=BDOF_NO_POSITION;
 			}
 		}
 	}
 
 	// Go through backdrop list
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
-		object->node.ln_Succ;
-		object=(BackdropObject *)object->node.ln_Succ)
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
 	{
 		// Invalid position?
-		if (object->flags&BDOF_NO_POSITION)
+		if (object->bdo_flags&BDOF_NO_POSITION)
 		{
 			// Get icon size
 			backdrop_icon_size(info,object,&width,&height);
@@ -184,17 +184,17 @@ void backdrop_position_object(
 	}
 
 	// Does icon have a position?
-	if (!(icon->flags&BDOF_NO_POSITION))
+	if (!(icon->bdo_flags&BDOF_NO_POSITION))
 	{
 		// Temporarily set no position
-		icon->flags|=BDOF_NO_POSITION;
+		icon->bdo_flags|=BDOF_NO_POSITION;
 
 		// If positioning on the desktop, or we don't have an Galileo snapshot, the space has to be clear
-		if ((!(info->flags&BDIF_MAIN_DESKTOP) && GetIconFlags(icon->icon)&ICONF_POSITION_OK) ||
-			 !(backdrop_icon_in_rect_full(info,&icon->full_size)))
+		if ((!(info->flags&BDIF_MAIN_DESKTOP) && GetIconFlags(icon->bdo_icon)&ICONF_POSITION_OK) ||
+			 !(backdrop_icon_in_rect_full(info,&icon->bdo_full_size)))
 		{
 			// Ok to go here	
-			icon->flags&=~BDOF_NO_POSITION;
+			icon->bdo_flags&=~BDOF_NO_POSITION;
 			return;
 		}
 	}
@@ -308,7 +308,7 @@ void backdrop_position_object(
 				if (x==pos_area->ip_Area.Left) first=incumbent;
 
 				// Shunt over to the right ready to try again
-				x=incumbent->show_rect.MaxX+GUI->icon_space_x-CLEANUP_START_X+1;
+				x=incumbent->bdo_show_rect.MaxX+GUI->icon_space_x-CLEANUP_START_X+1;
 
 				// Check coordinates against grid
 				x-=pos_area->ip_Area.Left;
@@ -320,7 +320,7 @@ void backdrop_position_object(
 				{
 					// We need to move down
 					x=pos_area->ip_Area.Left;
-					y+=((first)?RECTHEIGHT(&first->show_rect):height)+GUI->icon_space_y-1;
+					y+=((first)?RECTHEIGHT(&first->bdo_show_rect):height)+GUI->icon_space_y-1;
 
 					// Check coordinates against grid
 					y-=pos_area->ip_Area.Top;
@@ -411,40 +411,40 @@ void backdrop_position_object(
 	}
 
 	// Save position
-	icon->pos.Left=x+border_x+CLEANUP_START_X;
-	icon->pos.Top=y+border_y_top+CLEANUP_START_Y;
-	icon->flags&=~BDOF_NO_POSITION;
+	icon->bdo_pos.Left=x+border_x+CLEANUP_START_X;
+	icon->bdo_pos.Top=y+border_y_top+CLEANUP_START_Y;
+	icon->bdo_flags&=~BDOF_NO_POSITION;
 
 	// Get rectangle for this position
-	rect.MinX=icon->pos.Left+off_x-border_x;
-	rect.MinY=icon->pos.Top+off_y-border_y_top;
+	rect.MinX=icon->bdo_pos.Left+off_x-border_x;
+	rect.MinY=icon->bdo_pos.Top+off_y-border_y_top;
 	rect.MaxX=rect.MinX+width-1;
 	rect.MaxY=rect.MinY+height-1;
 
 	// Get actual image width
-	width=icon->pos.Width+(border_x<<1);
+	width=icon->bdo_pos.Width+(border_x<<1);
 
 	// Move icon across to center within display
-	icon->pos.Left+=(RECTWIDTH(&rect)-width)>>1;
+	icon->bdo_pos.Left+=(RECTWIDTH(&rect)-width)>>1;
 
 	// Use as icon size
-	icon->show_rect=rect;
+	icon->bdo_show_rect=rect;
 
 	// Full size is the same as show_rect but without the offset
-	icon->full_size.MinX=rect.MinX-off_x;
-	icon->full_size.MinY=rect.MinY-off_y;
-	icon->full_size.MaxX=rect.MaxX-off_x;
-	icon->full_size.MaxY=rect.MaxY-off_y;
+	icon->bdo_full_size.MinX=rect.MinX-off_x;
+	icon->bdo_full_size.MinY=rect.MinY-off_y;
+	icon->bdo_full_size.MaxX=rect.MaxX-off_x;
+	icon->bdo_full_size.MaxY=rect.MaxY-off_y;
 
 	// See if icon is outside current virtual size
-	if (icon->full_size.MinX<info->area.MinX)
-		info->area.MinX=icon->full_size.MinX;
-	if (icon->full_size.MinY<info->area.MinY)
-		info->area.MinY=icon->full_size.MinY;
-	if (icon->full_size.MaxX>info->area.MaxX)
-		info->area.MaxX=icon->full_size.MaxX;
-	if (icon->full_size.MaxY>info->area.MaxY)
-		info->area.MaxY=icon->full_size.MaxY;
+	if (icon->bdo_full_size.MinX<info->area.MinX)
+		info->area.MinX=icon->bdo_full_size.MinX;
+	if (icon->bdo_full_size.MinY<info->area.MinY)
+		info->area.MinY=icon->bdo_full_size.MinY;
+	if (icon->bdo_full_size.MaxX>info->area.MaxX)
+		info->area.MaxX=icon->bdo_full_size.MaxX;
+	if (icon->bdo_full_size.MaxY>info->area.MaxY)
+		info->area.MaxY=icon->bdo_full_size.MaxY;
 }
 
 
@@ -569,19 +569,19 @@ ULONG get_list_type(BackdropObject *icon)
 {
 	ULONG type=0;
 
-	if (icon->type==BDO_DISK ||
-		icon->type==BDO_BAD_DISK) type=ICONPOSF_DISKS;
+	if (icon->bdo_type==BDO_DISK ||
+		icon->bdo_type==BDO_BAD_DISK) type=ICONPOSF_DISKS;
 	else
-	if (icon->type==BDO_APP_ICON)
+	if (icon->bdo_type==BDO_APP_ICON)
 	{
-		if (icon->flags&BDOF_SPECIAL) type=ICONPOSF_LISTERS;
+		if (icon->bdo_flags&BDOF_SPECIAL) type=ICONPOSF_LISTERS;
 		else type=ICONPOSF_APPICONS;
 	}
 	else
-	if (icon->type==BDO_GROUP)
+	if (icon->bdo_type==BDO_GROUP)
 		type=ICONPOSF_GROUPS;
 	else
-	if (icon->type==BDO_LEFT_OUT)
+	if (icon->bdo_type==BDO_LEFT_OUT)
 		type=ICONPOSF_LEFTOUTS;	
 
 	return type;

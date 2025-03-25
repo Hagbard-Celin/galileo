@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -182,11 +182,11 @@ void buttons_update_icon(Buttons *buttons)
 		ULONG iflags;
 
 		// Get position
-		x=object->pos.Left;
-		y=object->pos.Top;
+		x=object->bdo_pos.Left;
+		y=object->bdo_pos.Top;
 
 		// Adjust for borders?
-		if (!((iflags=GetIconFlags(object->icon))&ICONF_BORDER_OFF) &&
+		if (!((iflags=GetIconFlags(object->bdo_icon))&ICONF_BORDER_OFF) &&
 			(!(environment->env->desktop_flags&DESKTOPF_NO_BORDERS) || (iflags&ICONF_BORDER_ON)))
 		{
 			// Shift back by border size

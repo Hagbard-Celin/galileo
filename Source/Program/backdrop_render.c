@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -275,15 +275,15 @@ void backdrop_show_objects(BackdropInfo *info,USHORT flags)
 		{
 			// Go through backdrop list (backwards)
 			for (object=(BackdropObject *)info->objects.list.lh_TailPred;
-				object->node.ln_Pred;
-				object=(BackdropObject *)object->node.ln_Pred)
+				object->bdo_node.ln_Pred;
+				object=(BackdropObject *)object->bdo_node.ln_Pred)
 			{
 				// Reset?
 				if (flags&BDSF_RESET)
 				{
 					// Need to get masks?
 					if (!backdrop_icon_border(object) &&
-						!object->image_mask[0])
+						!object->bdo_image_mask[0])
 					{
 						// Get masks for this icon
 						backdrop_get_masks(object);
@@ -291,7 +291,7 @@ void backdrop_show_objects(BackdropInfo *info,USHORT flags)
 				}
 
 				// Valid position?
-				if (!(object->flags&BDOF_NO_POSITION))
+				if (!(object->bdo_flags&BDOF_NO_POSITION))
 				{
 					// Render this object
 					backdrop_draw_object(
@@ -299,8 +299,8 @@ void backdrop_show_objects(BackdropInfo *info,USHORT flags)
 						object,
 						BRENDERF_REAL,
 						&info->rp,
-						object->pos.Left,
-						object->pos.Top);
+						object->bdo_pos.Left,
+						object->bdo_pos.Top);
 				}
 			}
 		}
@@ -379,8 +379,8 @@ void backdrop_render_object(
 			object,
 			flags|BRENDERF_REAL,
 			&info->rp,
-			object->pos.Left,
-			object->pos.Top);
+			object->bdo_pos.Left,
+			object->bdo_pos.Top);
 
 		// Remove clip region
 		if (flags&BRENDERF_CLIP && info->clip_region)
@@ -410,7 +410,7 @@ void backdrop_draw_object(
 	short has_border;
 
 	// No icon?
-	if (!object->icon) return;
+	if (!object->bdo_icon) return;
 
 	// See if icon has no border
 	has_border=backdrop_icon_border(object);
@@ -419,17 +419,17 @@ void backdrop_draw_object(
 	if (!(flags&BRENDERF_CLEAR))
 	{
 		// Get image to render
-		if (image=(struct Image *)object->icon->do_Gadget.GadgetRender)
+		if (image=(struct Image *)object->bdo_icon->do_Gadget.GadgetRender)
 			imagedata=image->ImageData;
 
 		// Is icon selected?
-		if (object->state)
+		if (object->bdo_state)
 		{
 			// Is there a select image?
-			if (object->icon->do_Gadget.SelectRender &&
-				(object->icon->do_Gadget.Flags&GFLG_GADGHIMAGE))
+			if (object->bdo_icon->do_Gadget.SelectRender &&
+				(object->bdo_icon->do_Gadget.Flags&GFLG_GADGHIMAGE))
 			{
-				if (image=(struct Image *)object->icon->do_Gadget.SelectRender)
+				if (image=(struct Image *)object->bdo_icon->do_Gadget.SelectRender)
 					imagedata=image->ImageData;
 				state=1;
 			}
@@ -452,20 +452,20 @@ void backdrop_draw_object(
 		}
 
 		// Calculate full size
-		object->full_size.MinX=left-border_x;
-		object->full_size.MinY=top-border_y_top;
-		object->full_size.MaxX=left+object->pos.Width+border_x-1;
-		object->full_size.MaxY=top+object->pos.Height+border_y_bottom-1;
+		object->bdo_full_size.MinX=left-border_x;
+		object->bdo_full_size.MinY=top-border_y_top;
+		object->bdo_full_size.MaxX=left+object->bdo_pos.Width+border_x-1;
+		object->bdo_full_size.MaxY=top+object->bdo_pos.Height+border_y_bottom-1;
 
 		// Get image rectangle
-		rect.MinX=object->full_size.MinX+(info->size.MinX-info->offset_x);
-		rect.MinY=object->full_size.MinY+(info->size.MinY-info->offset_y);
-		rect.MaxX=object->full_size.MaxX+(info->size.MinX-info->offset_x);
-		rect.MaxY=object->full_size.MaxY+(info->size.MinY-info->offset_y);
+		rect.MinX=object->bdo_full_size.MinX+(info->size.MinX-info->offset_x);
+		rect.MinY=object->bdo_full_size.MinY+(info->size.MinY-info->offset_y);
+		rect.MaxX=object->bdo_full_size.MaxX+(info->size.MinX-info->offset_x);
+		rect.MaxY=object->bdo_full_size.MaxY+(info->size.MinY-info->offset_y);
 
 		// Store position
-		object->show_rect=rect;
-		object->image_rect=rect;
+		object->bdo_show_rect=rect;
+		object->bdo_image_rect=rect;
 
 		// Is object offscreen?
 		if (rect.MaxX<info->size.MinX ||
@@ -481,8 +481,8 @@ void backdrop_draw_object(
 	{
 		rect.MinX=left;
 		rect.MinY=top;
-		rect.MaxX=left+object->pos.Width-1;
-		rect.MaxY=top+object->pos.Height-1;
+		rect.MaxX=left+object->bdo_pos.Width-1;
+		rect.MaxY=top+object->bdo_pos.Height-1;
 	}
 
 	// Clear area?
@@ -504,12 +504,12 @@ void backdrop_draw_object(
 
 	// Object state changed?
 	else
-	if (object->flags&BDOF_STATE_CHANGE)
+	if (object->bdo_flags&BDOF_STATE_CHANGE)
 	{
 		// Need to clear if transparent
 		if (!has_border)
 			EraseRect(rp,rect.MinX,rect.MinY,rect.MaxX,rect.MaxY);
-		object->flags&=~BDOF_STATE_CHANGE;
+		object->bdo_flags&=~BDOF_STATE_CHANGE;
 	}
 
 	// Draw as normal
@@ -531,13 +531,13 @@ void backdrop_draw_object(
 				if (has_border)
 				{
 					// Draw border around icon
-					DrawBox(rp,&rect,GUI->draw_info,object->state);
+					DrawBox(rp,&rect,GUI->draw_info,object->bdo_state);
 
 					// Get background colour
 					SetAPen(
 						rp,
-						(object->flags&BDOF_BACKGROUND)?
-							object->size:
+						(object->bdo_flags&BDOF_BACKGROUND)?
+							object->bdo_size:
 							GUI->draw_info->dri_Pens[BACKGROUNDPEN]);
 
 					// Clear boundary around image
@@ -552,7 +552,7 @@ void backdrop_draw_object(
 			backdrop_image_bitmap(info,image,imagedata,&bitmap);
 
 			// Using a mask (no border)?
-			if (!has_border && object->image_mask[state])
+			if (!has_border && object->bdo_image_mask[state])
 			{
 				// Draw using a mask
 				BltMaskBitMapRastPort(
@@ -560,7 +560,7 @@ void backdrop_draw_object(
 					rp,left,top,
 					image->Width,image->Height,
 					0xe0,
-					(PLANEPTR)object->image_mask[state]);
+					(PLANEPTR)object->bdo_image_mask[state]);
 				use_mask=1;
 			}
 
@@ -586,8 +586,8 @@ void backdrop_draw_object(
 				SetWrMsk(rp,image->PlanePick);
 
 				// Need backfill?
-				if ((object->icon->do_Gadget.Flags&GFLG_GADGBACKFILL) &&
-					(drag_info=GetDragInfo(info->window,0,-object->pos.Width,-object->pos.Height,0)))
+				if ((object->bdo_icon->do_Gadget.Flags&GFLG_GADGBACKFILL) &&
+					(drag_info=GetDragInfo(info->window,0,-object->bdo_pos.Width,-object->bdo_pos.Height,0)))
 				{
 					// Draw icon into drag buffer
 					BltBitMapRastPort(
@@ -633,8 +633,8 @@ void backdrop_draw_object(
 
 			// Left out (on desktop), or a link?
 			if (!(environment->env->desktop_flags&DESKTOPF_NO_ARROW) &&
-				((object->type==BDO_LEFT_OUT && !(object->flags&BDOF_DESKTOP_FOLDER) && info->flags&BDIF_MAIN_DESKTOP) ||
-					object->flags&BDOF_LINK_ICON))
+				((object->bdo_type==BDO_LEFT_OUT && !(object->bdo_flags&BDOF_DESKTOP_FOLDER) && info->flags&BDIF_MAIN_DESKTOP) ||
+					object->bdo_flags&BDOF_LINK_ICON))
 			{
 				struct Image *image;
 
@@ -642,8 +642,8 @@ void backdrop_draw_object(
 				image=(GUI->screen_info&SCRI_LORES)?&arrow_image[1]:&arrow_image[0];
 
 				// Is object big enough for the 'shortcut arrow'?
-				if (object->pos.Width>(image->Width<<1) &&
-					object->pos.Height>image->Height+4)
+				if (object->bdo_pos.Width>(image->Width<<1) &&
+					object->bdo_pos.Height>image->Height+4)
 				{
 					// Draw arrow in bottom-left corner
 					DrawImage(rp,image,rect.MinX,rect.MaxY-image->Height+1);
@@ -651,10 +651,10 @@ void backdrop_draw_object(
 			}
 
 			// Ghosted icon?
-			if (object->flags&BDOF_GHOSTED)
+			if (object->bdo_flags&BDOF_GHOSTED)
 			{
 				// Draw ghosting over the icon
-				backdrop_draw_icon_ghost(rp,&rect,(use_mask)?(PLANEPTR)object->image_mask[state]:0);
+				backdrop_draw_icon_ghost(rp,&rect,(use_mask)?(PLANEPTR)object->bdo_image_mask[state]:0);
 			}
 		}
 
@@ -696,12 +696,12 @@ void backdrop_draw_object(
 	}
 
 	// Full icon?
-	if (flags&BRENDERF_REAL && !(object->flags&BDOF_NO_LABEL))
+	if (flags&BRENDERF_REAL && !(object->bdo_flags&BDOF_NO_LABEL))
 	{
 		char *name,namebuf[40];
 
 		// Bad disk?
-		if (object->type==BDO_BAD_DISK)
+		if (object->bdo_type==BDO_BAD_DISK)
 		{
 			// Get bad disk name
 			backdrop_bad_disk_name(object,namebuf);
@@ -710,10 +710,10 @@ void backdrop_draw_object(
 
 		// Custom label?
 		else
-		if (object->flags&BDOF_CUSTOM_LABEL) name=object->device_name;
+		if (object->bdo_flags&BDOF_CUSTOM_LABEL) name=object->bdo_device_name;
 
 		// Get name pointer
-		else name=object->name;
+		else name=object->bdo_name;
 
 		// Get text length
 		if (len=strlen(name))
@@ -756,17 +756,17 @@ void backdrop_draw_object(
 
 			// Stretch out rectangle sides if necessary
 			if (extent.te_Extent.MinX<rect.MinX)
-				object->full_size.MinX-=rect.MinX-extent.te_Extent.MinX;
+				object->bdo_full_size.MinX-=rect.MinX-extent.te_Extent.MinX;
 			if (extent.te_Extent.MaxX>rect.MaxX)
-				object->full_size.MaxX+=extent.te_Extent.MaxX-rect.MaxX;
-			if (object->show_rect.MinX>extent.te_Extent.MinX)
-				object->show_rect.MinX=extent.te_Extent.MinX;
-			if (object->show_rect.MaxX<extent.te_Extent.MinX+extent.te_Width-1)
-				object->show_rect.MaxX=extent.te_Extent.MinX+extent.te_Width-1;
+				object->bdo_full_size.MaxX+=extent.te_Extent.MaxX-rect.MaxX;
+			if (object->bdo_show_rect.MinX>extent.te_Extent.MinX)
+				object->bdo_show_rect.MinX=extent.te_Extent.MinX;
+			if (object->bdo_show_rect.MaxX<extent.te_Extent.MinX+extent.te_Width-1)
+				object->bdo_show_rect.MaxX=extent.te_Extent.MinX+extent.te_Width-1;
 
 			// Save bottom of text
-			object->show_rect.MaxY+=ICON_LABEL_SPACE+extent.te_Height; // +((galileo_drawmode==MODE_OUTLINE)?1:0);
-			object->full_size.MaxY+=ICON_LABEL_SPACE+extent.te_Height; // +((galileo_drawmode==MODE_OUTLINE)?1:0);
+			object->bdo_show_rect.MaxY+=ICON_LABEL_SPACE+extent.te_Height; // +((galileo_drawmode==MODE_OUTLINE)?1:0);
+			object->bdo_full_size.MaxY+=ICON_LABEL_SPACE+extent.te_Height; // +((galileo_drawmode==MODE_OUTLINE)?1:0);
 
 			// Clear?
 			if (flags&BRENDERF_CLEAR)
@@ -780,7 +780,7 @@ void backdrop_draw_object(
 			else
 			{
 				// Is object selected?
-				if (object->flags&BDOF_SELECTED)
+				if (object->bdo_flags&BDOF_SELECTED)
 				{
 					if (drawmode==JAM2) SetDrMd(rp,INVERSVID|JAM2);
 					else
@@ -855,7 +855,7 @@ void backdrop_draw_object(
 				}
 
 				// Reset draw mode if necessary
-				if (object->flags&BDOF_SELECTED)
+				if (object->bdo_flags&BDOF_SELECTED)
 					SetDrMd(rp,drawmode);
 			}
 		}
@@ -922,22 +922,22 @@ void backdrop_get_masks(BackdropObject *object)
 	// Free existing masks
 	for (a=0;a<2;a++)
 	{
-        if (object->image_mask[a])
-		FreeVec(object->image_mask[a]);
-		object->image_mask[a]=0;
+	if (object->bdo_image_mask[a])
+		FreeVec(object->bdo_image_mask[a]);
+		object->bdo_image_mask[a]=0;
 	}
 
 	// See if icon has border - no mask if so
 	if (!backdrop_icon_border(object))
 	{
 		// Get first image data
-		image=(struct Image *)object->icon->do_Gadget.GadgetRender;
+		image=(struct Image *)object->bdo_icon->do_Gadget.GadgetRender;
 
 		// Do two images
 		for (a=0;a<2;a++)
 		{
 			// Allocate mask
-			if (!(object->image_mask[a]=
+			if (!(object->bdo_image_mask[a]=
 				AllocVec(
 					((image->Width+15)>>4)*image->Height*sizeof(USHORT),
 					MEMF_CHIP|MEMF_CLEAR)))
@@ -959,7 +959,7 @@ void backdrop_get_masks(BackdropObject *object)
 						for (col=0;col<width;col++,word++,off++)
 						{
 							// Build mask
-							object->image_mask[a][word]|=image->ImageData[off];
+							object->bdo_image_mask[a][word]|=image->ImageData[off];
 						}
 					}
 				}
@@ -970,7 +970,7 @@ void backdrop_get_masks(BackdropObject *object)
 			{
 				// Build mask
 				BuildTransDragMask(
-					object->image_mask[a],
+					object->bdo_image_mask[a],
 					image->ImageData,
 					image->Width,
 					image->Height,
@@ -978,7 +978,7 @@ void backdrop_get_masks(BackdropObject *object)
 			}
 
 			// Get second image
-			if (!(image=(struct Image *)object->icon->do_Gadget.SelectRender)) break;
+			if (!(image=(struct Image *)object->bdo_icon->do_Gadget.SelectRender)) break;
 		}
 	}
 }
@@ -1041,24 +1041,24 @@ void backdrop_erase_icon(BackdropInfo *info,BackdropObject *object,USHORT flags)
 		// Erase icon area
 		EraseRect(
 			&info->rp,
-			object->show_rect.MinX,
-			object->show_rect.MinY,
-			object->show_rect.MaxX,
-			object->show_rect.MaxY);
+			object->bdo_show_rect.MinX,
+			object->bdo_show_rect.MinY,
+			object->bdo_show_rect.MaxX,
+			object->bdo_show_rect.MaxY);
 
 		// Got through icons
 		for (icon=(BackdropObject *)info->objects.list.lh_Head;
-			icon->node.ln_Succ;
-			icon=(BackdropObject *)icon->node.ln_Succ)
+			icon->bdo_node.ln_Succ;
+			icon=(BackdropObject *)icon->bdo_node.ln_Succ)
 		{
 			// Valid position?
-			if (icon->flags&BDOF_NO_POSITION) continue;
+			if (icon->bdo_flags&BDOF_NO_POSITION) continue;
 
 			// Not the one we just removed?
 			if (icon==object) continue;
 
 			// Did its box intersect the one we removed?
-			if (geo_box_intersect(&object->show_rect,&icon->show_rect))
+			if (geo_box_intersect(&object->bdo_show_rect,&icon->bdo_show_rect))
 			{
 				// ReDraw object
 				backdrop_draw_object(
@@ -1066,8 +1066,8 @@ void backdrop_erase_icon(BackdropInfo *info,BackdropObject *object,USHORT flags)
 					icon,
 					BRENDERF_REAL,
 					&info->rp,
-					icon->pos.Left,
-					icon->pos.Top);
+					icon->bdo_pos.Left,
+					icon->bdo_pos.Top);
 			}
 		}
 
@@ -1191,7 +1191,7 @@ BOOL backdrop_icon_border(BackdropObject *icon)
 	ULONG iflags;
 
 	// See if icon has no border
-	if (((iflags=GetIconFlags(icon->icon))&ICONF_BORDER_OFF) ||
+	if (((iflags=GetIconFlags(icon->bdo_icon))&ICONF_BORDER_OFF) ||
 		(environment->env->desktop_flags&DESKTOPF_NO_BORDERS && !(iflags&ICONF_BORDER_ON))) return 0;
 	return 1;
 }
@@ -1205,10 +1205,10 @@ void backdrop_bad_disk_name(BackdropObject *object,char *namebuf)
 	short num;
 
 	// Build name
-	strcpy(namebuf,object->name);
+	strcpy(namebuf,object->bdo_name);
 
 	// Get dos type; quick null-padding using ULONGs
-	pad[0]=object->misc_data;
+	pad[0]=object->bdo_misc_data;
 	pad[1]=0;
 	ptr=(char *)pad;
 

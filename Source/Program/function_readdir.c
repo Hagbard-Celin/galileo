@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -42,8 +42,8 @@ For more information on Directory Opus for Windows please see:
 read_dir(DirBuffer *,Lister *,FunctionHandle *,BPTR,struct InfoData *,ReselectionData *);
 void readdir_check_format(Lister *lister,char *path,ListFormat *,BOOL);
 
-#define PATH_FULL_DEVICE	handle->work_buffer
-#define PATH_FULL_NAME		handle->work_buffer+768
+#define PATH_FULL_DEVICE	handle->func_work_buf
+#define PATH_FULL_NAME		handle->func_work_buf+768
 
 // Sets up and reads a new directory
 // Called from FUNCTION PROCESS

@@ -63,7 +63,7 @@ GALILEOFM_FUNC(function_rename)
 	BOOL progress=0;
 
 	// Get current source path
-	if (!(path=function_path_current(&handle->source_paths)))
+	if (!(path=function_path_current(&handle->func_source_paths)))
 		return 0;
 
 	// Get pointer to data
@@ -220,7 +220,7 @@ ask_point:
 			if (strcmp(dest_name,entry->fe_name)!=0)
 			{
 				// Get destination path
-				strcpy(dest_file,handle->source_path);
+				strcpy(dest_file,handle->func_source_path);
 				AddPart(dest_file,dest_name,256);
 
 				// Check destination is ok

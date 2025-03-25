@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -51,10 +51,10 @@ void backdrop_object_open(
 	BPTR old,lock;
 
 	// Valid object?
-	if (!object || !object->icon) return;
+	if (!object || !object->bdo_icon) return;
 
 	// Is object a group?
-	if (object->type==BDO_GROUP)
+	if (object->bdo_type==BDO_GROUP)
 	{
 		// Open group
 		backdrop_open_group(info,object,1);
@@ -62,7 +62,7 @@ void backdrop_object_open(
 	}
 
 	// Bad disk?
-	if (object->type==BDO_BAD_DISK)
+	if (object->bdo_type==BDO_BAD_DISK)
 	{
 		// Error
 		DisplayBeep(info->window->WScreen);
@@ -70,13 +70,13 @@ void backdrop_object_open(
 	}
 
 	// Is object an appicon?
-	if (object->type==BDO_APP_ICON)
+	if (object->bdo_type==BDO_APP_ICON)
 	{
 		GalileoAppMessage *msg;
 		struct MsgPort *port;
 
 		// Is icon busy?
-		if (object->flags&BDOF_BUSY)
+		if (object->bdo_flags&BDOF_BUSY)
 		{
 			DisplayBeep(info->window->WScreen);
 			return;
@@ -90,7 +90,7 @@ void backdrop_object_open(
 
 		// Get AppInfo
 		port=WB_AppWindowData(
-			(struct AppWindow *)object->misc_data,
+			(struct AppWindow *)object->bdo_misc_data,
 			&msg->ga_Msg.am_ID,
 			&msg->ga_Msg.am_UserData);
 
@@ -100,7 +100,7 @@ void backdrop_object_open(
 	}
 
 	// If we're not trying to start a tool, see if there is one selected
-	if (object->icon->do_Type!=WBTOOL && info->first_sel_tool && info->first_sel_tool!=object)
+	if (object->bdo_icon->do_Type!=WBTOOL && info->first_sel_tool && info->first_sel_tool!=object)
 	{
 		// Check that it's valid
 		if (find_backdrop_object(info,info->first_sel_tool))
@@ -118,9 +118,9 @@ void backdrop_object_open(
 	old=CurrentDir(lock);
 
 	// Directory to read?
-	if (object->icon->do_Type==WBDISK ||
-		object->icon->do_Type==WBDRAWER ||
-		object->icon->do_Type==WBGARBAGE)
+	if (object->bdo_icon->do_Type==WBDISK ||
+		object->bdo_icon->do_Type==WBDRAWER ||
+		object->bdo_icon->do_Type==WBGARBAGE)
 	{
 		char path[256];
 
@@ -128,10 +128,10 @@ void backdrop_object_open(
 		DevNameFromLock(lock,path,256);
 
 		// Drawer to read?
-		if (object->icon->do_Type==WBDRAWER || object->icon->do_Type==WBGARBAGE)
+		if (object->bdo_icon->do_Type==WBDRAWER || object->bdo_icon->do_Type==WBGARBAGE)
 		{
 			// Add to path
-			AddPart(path,object->name,256);
+			AddPart(path,object->bdo_name,256);
 			AddPart(path,"",256);
 		}
 
@@ -217,8 +217,8 @@ void backdrop_object_open(
 
 	// Something to run?
 	else
-	if (object->icon->do_Type==WBTOOL ||
-		object->icon->do_Type==WBPROJECT)
+	if (object->bdo_icon->do_Type==WBTOOL ||
+		object->bdo_icon->do_Type==WBPROJECT)
 	{
 		char *default_tool=0;
 		char path[256];
@@ -226,9 +226,9 @@ void backdrop_object_open(
 		struct DiskObject *got_icon=0,*icon;
 
 		// Get icon
-		if (object->icon->do_Type==WBPROJECT &&
-			(got_icon=GetDiskObject(object->name))) icon=got_icon;
-		else icon=object->icon;
+		if (object->bdo_icon->do_Type==WBPROJECT &&
+			(got_icon=GetDiskObject(object->bdo_name))) icon=got_icon;
+		else icon=object->bdo_icon;
 
 		// Is object a project?
 		if (icon->do_Type==WBPROJECT)
@@ -240,7 +240,7 @@ void backdrop_object_open(
 				default_tool=icon->do_DefaultTool;
 
 				// Trap more?
-				if (file_trap_more(object->name,default_tool)) ok=0;
+				if (file_trap_more(object->bdo_name,default_tool)) ok=0;
 
 				// And ignore execute for fake icons
 				else
@@ -255,7 +255,7 @@ void backdrop_object_open(
 				BPTR test;
 
 				// Lock and examine file
-				if (test=Lock(object->name,ACCESS_READ))
+				if (test=Lock(object->bdo_name,ACCESS_READ))
 				{
 					// Examine object
 					Examine(test,&fib);
@@ -265,7 +265,7 @@ void backdrop_object_open(
 					if (fib.fib_Protection&FIBF_SCRIPT)
 					{
 						// Execute it
-						default_tool=object->name;
+						default_tool=object->bdo_name;
 						execute=1;
 					}
 				}
@@ -293,7 +293,7 @@ void backdrop_object_open(
 						0,
 						0,0,
 						path,0,
-						BuildArgArray(object->name,0),
+						BuildArgArray(object->bdo_name,0),
 						0,
 						(Buttons *)WBArgArray(arglist,numargs,AAF_ALLOW_DIRS));
 				}
@@ -308,7 +308,7 @@ void backdrop_object_open(
 			BPTR test;
 
 			// Build icon name
-			StrCombine(buf,object->name,".info",sizeof(buf));
+			StrCombine(buf,object->bdo_name,".info",sizeof(buf));
 
 			// Does icon exist?
 			if (test=Lock(buf,ACCESS_READ))
@@ -321,7 +321,7 @@ void backdrop_object_open(
 			else
 			{
 				// Launch proc to run as AmigaDOS
-				misc_startup("galileo_run",MENU_EXECUTE,info->window,(APTR)object->name,0);
+				misc_startup("galileo_run",MENU_EXECUTE,info->window,(APTR)object->bdo_name,0);
 				ok=0;
 			}
 		}
@@ -340,7 +340,7 @@ void backdrop_object_open(
 				struct Node *node;
 
 				// Program to actually launch
-				launchprog=(icon->do_Type==WBTOOL)?object->name:(char *)FilePart(default_tool);
+				launchprog=(icon->do_Type==WBTOOL)?object->bdo_name:(char *)FilePart(default_tool);
 
 				// Set screen title
 				lsprintf(info->buffer,GetString(&locale,MSG_LAUNCHING_PROGRAM),launchprog);
@@ -376,7 +376,7 @@ void backdrop_object_open(
 					len+=strlen(node->ln_Name)+3;
 
 				// Add length of name
-				len+=strlen(object->name)+3;
+				len+=strlen(object->bdo_name)+3;
 
 				// Execute?
 				if (execute) len+=8;
@@ -387,8 +387,8 @@ void backdrop_object_open(
 					char *ptr;
 
 					// Build command
-					if (execute) lsprintf(command,"execute \"%s\"",object->name);
-					else lsprintf(command,"\"%s\"",object->name);
+					if (execute) lsprintf(command,"execute \"%s\"",object->bdo_name);
+					else lsprintf(command,"\"%s\"",object->bdo_name);
 
 					// Get pointer to end of string
 					ptr=command+strlen(command);
@@ -460,38 +460,38 @@ void backdrop_run_build_args(Att_List *list,BackdropInfo *info,BackdropObject *e
 
 	// Go through backdrop list backwards (to maintain compatibility with Workbench icon ordering)
 	for (object=(BackdropObject *)info->objects.list.lh_TailPred;
-		object->node.ln_Pred;
-		object=(BackdropObject *)object->node.ln_Pred)
+		object->bdo_node.ln_Pred;
+		object=(BackdropObject *)object->bdo_node.ln_Pred)
 	{
 		// Is object selected (and not the one we're running) with a valid path?
-		if (object->state && object!=exclude && (object->path || object->type==BDO_DISK))
+		if (object->bdo_state && object!=exclude && (object->bdo_path || object->bdo_type==BDO_DISK))
 		{
 			BOOL ok=0;
 			char name[256];
 
 			// Is icon for a disk?
-			if (object->type==BDO_DISK) ok=1;
+			if (object->bdo_type==BDO_DISK) ok=1;
 
 			// Is object a real one?
 			else
-			if (object->type==BDO_LEFT_OUT)
+			if (object->bdo_type==BDO_LEFT_OUT)
 			{
 				// In a lister, it's ok
-				if (info->lister || object->flags&BDOF_DESKTOP_FOLDER) ok=1;
+				if (info->lister || object->bdo_flags&BDOF_DESKTOP_FOLDER) ok=1;
 			}
 
 			// Ok to use?
 			if (ok)
 			{
 				// Disk?
-				if (object->type==BDO_DISK)
-					stccpy(name,object->device_name,sizeof(name));
+				if (object->bdo_type==BDO_DISK)
+					stccpy(name,object->bdo_device_name,sizeof(name));
 
 				// Build name
 				else
 				{
-					stccpy(name,object->path,sizeof(name));
-					AddPart(name,object->name,256);
+					stccpy(name,object->bdo_path,sizeof(name));
+					AddPart(name,object->bdo_name,256);
 				}
 
 				// Add to list
@@ -517,14 +517,14 @@ void backdrop_selection_list(BackdropInfo *info,BackdropObject *object)
 		char name[256];
 
 		// Disk?
-		if (object->type==BDO_DISK)
-			strcpy(name,object->device_name);
+		if (object->bdo_type==BDO_DISK)
+			strcpy(name,object->bdo_device_name);
 
 		// Build name
 		else
 		{
-			strcpy(name,object->path);
-			AddPart(name,object->name,256);
+			strcpy(name,object->bdo_path);
+			AddPart(name,object->bdo_name,256);
 		}
 
 		// Add to list

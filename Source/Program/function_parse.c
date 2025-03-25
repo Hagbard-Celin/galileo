@@ -716,7 +716,7 @@ function_build_instruction(FunctionHandle *handle,
     if (*instruction=='#') ++instruction;
 
     // Get length of source path and instruction string
-    source_len=strlen(handle->source_path);
+    source_len=strlen(handle->func_source_path);
     func_len=strlen(instruction);
 
     // Get cll limit
@@ -750,12 +750,12 @@ function_build_instruction(FunctionHandle *handle,
     quote_flag=0;
 
     // Get current paths
-    if (!(path=function_path_current(&handle->source_paths)) || !(source=path->pn_lister))
+    if (!(path=function_path_current(&handle->func_source_paths)) || !(source=path->pn_lister))
     {
 	if (!(source=handle->source_lister))
 	    source=handle->saved_source_lister;
     }
-    if (!(path=function_path_current(&handle->dest_paths)) || !(dest=path->pn_lister))
+    if (!(path=function_path_current(&handle->func_dest_paths)) || !(dest=path->pn_lister))
 	dest=handle->dest_lister;
 
     // Go through parsed function string
@@ -808,7 +808,7 @@ function_build_instruction(FunctionHandle *handle,
 
 	    // Single pathname
 	    case FUNC_ONE_PATH:
-		    path_str=handle->source_path;
+		    path_str=handle->func_source_path;
 
 	    // Single filename
 	    case FUNC_ONE_FILE:
@@ -844,7 +844,7 @@ function_build_instruction(FunctionHandle *handle,
 					                (wb_func && entry->fe_type>ENTRY_DEVICE));
 
 		        // Store name
-		        strcpy(handle->last_filename,handle->source_path);
+		        strcpy(handle->last_filename,handle->func_source_path);
 		        AddPart(handle->last_filename,entry->fe_name,512);
 
 		        // Reload this file?
@@ -853,7 +853,7 @@ function_build_instruction(FunctionHandle *handle,
 			    !(entry->fe_flags&FUNCENTF_ICON_ACTION))
 		        {
 			    // Add for reload
-			    function_filechange_reloadfile(handle,handle->source_path,entry->fe_name,FFLF_DEFERRED);
+			    function_filechange_reloadfile(handle,handle->func_source_path,entry->fe_name,FFLF_DEFERRED);
 		        }
 
 		        // Say we're done with this entry
@@ -903,7 +903,7 @@ function_build_instruction(FunctionHandle *handle,
 
 	    // All selected paths
 	    case FUNC_ALL_PATHS:
-		    path_str=handle->source_path;
+		    path_str=handle->func_source_path;
 		    path_len=source_len;
 
 	    // All selected files
@@ -965,7 +965,7 @@ function_build_instruction(FunctionHandle *handle,
 				!(entry->fe_flags&FUNCENTF_ICON_ACTION))
 			    {
 				// Add for reload
-				function_filechange_reloadfile(handle,handle->source_path,entry->fe_name,FFLF_DEFERRED);
+				function_filechange_reloadfile(handle,handle->func_source_path,entry->fe_name,FFLF_DEFERRED);
 			    }
 
 			    // Done with this entry
@@ -1008,8 +1008,8 @@ function_build_instruction(FunctionHandle *handle,
 		    }
 
 		    // Add on path to function
-		    StrConcat(function_buf,handle->source_path,max_len);
-		    func_pos+=strlen(handle->source_path);
+		    StrConcat(function_buf,handle->func_source_path,max_len);
+		    func_pos+=strlen(handle->func_source_path);
 		    break;
 
 
@@ -1027,8 +1027,8 @@ function_build_instruction(FunctionHandle *handle,
 		    }
 
 		    // Add on path to function
-		    StrConcat(function_buf,handle->dest_path,max_len);
-		    func_pos+=strlen(handle->dest_path);
+		    StrConcat(function_buf,handle->func_dest_path,max_len);
+		    func_pos+=strlen(handle->func_dest_path);
 		    break;
 
 
@@ -1113,15 +1113,15 @@ function_build_instruction(FunctionHandle *handle,
 			    if (instruction[pos]==FUNC_END_ARG)
 				break;
 			    if (varpos<79)
-				handle->work_buffer[varpos++]=instruction[pos];
+				handle->func_work_buf[varpos++]=instruction[pos];
 			}
-			handle->work_buffer[varpos]=0;
+			handle->func_work_buf[varpos]=0;
 
 			// Get variable
-			if ((len=GetVar(handle->work_buffer,handle->work_buffer+80,512,0))>0)
+			if ((len=GetVar(handle->func_work_buf,handle->func_work_buf+80,512,0))>0)
 			{
 			    // Add value on to function
-			    StrConcat(function_buf,handle->work_buffer+80,max_len);
+			    StrConcat(function_buf,handle->func_work_buf+80,max_len);
 			    func_pos+=len;
 			}
 		    }
@@ -1303,12 +1303,12 @@ void function_build_default(
 
 		// Source
 		case 's':
-			strncpy(&buffer[buf_pos],handle->source_path,511-buf_pos);
+			strncpy(&buffer[buf_pos],handle->func_source_path,511-buf_pos);
 			break;
 
 		// Destination
 		case 'd':
-			strncpy(&buffer[buf_pos],handle->dest_path,511-buf_pos);
+			strncpy(&buffer[buf_pos],handle->func_dest_path,511-buf_pos);
 			break;
 
 		// Other
@@ -1444,11 +1444,11 @@ short func_requester(FunctionHandle *handle,
 	short ret=0;
 
 	// Initialise buffer pointers
-	default_val=handle->work_buffer;
+	default_val=handle->func_work_buf;
 	*default_val=0;
-	req_title=handle->work_buffer+256;
+	req_title=handle->func_work_buf+256;
 	*req_title=0;
-	temp_buffer=handle->work_buffer+512;
+	temp_buffer=handle->func_work_buf+512;
 	*temp_buffer=0;
 
 	// Get requester type

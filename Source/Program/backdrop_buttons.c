@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -93,10 +93,10 @@ BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned
 			if (sel_object=backdrop_get_object(info,msg->MouseX,msg->MouseY,BDGOF_CHECK_LABEL))
 			{
 				// Remove object from list
-				Remove(&sel_object->node);
+				Remove(&sel_object->bdo_node);
 
 				// Add to head of list
-				AddHead(&info->objects.list,&sel_object->node);
+				AddHead(&info->objects.list,&sel_object->bdo_node);
 			}
 
 			// Unlock exclusive lock
@@ -110,32 +110,32 @@ BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned
 
 			// Go through backdrop list
 			for (object=(BackdropObject *)info->objects.list.lh_Head;
-				object->node.ln_Succ;
-				object=(BackdropObject *)object->node.ln_Succ)
+				object->bdo_node.ln_Succ;
+				object=(BackdropObject *)object->bdo_node.ln_Succ)
 			{
 				// Is object selected?
-				if (object->state && object!=sel_object)
+				if (object->bdo_state && object!=sel_object)
 				{
 					++count;
 				}
 			}
 
 			// Deselect all objects?
-			if (!(msg->Qualifier&IEQUAL_ANYSHIFT) && (!sel_object || !sel_object->state))
+			if (!(msg->Qualifier&IEQUAL_ANYSHIFT) && (!sel_object || !sel_object->bdo_state))
 			{
 				short num;
 
 				// Go through again
 				for (object=(BackdropObject *)info->objects.list.lh_Head,num=0;
-					object->node.ln_Succ && num<count;
-					object=(BackdropObject *)object->node.ln_Succ)
+					object->bdo_node.ln_Succ && num<count;
+					object=(BackdropObject *)object->bdo_node.ln_Succ)
 				{
 					// Is object selected?
-					if (object->state && object!=sel_object)
+					if (object->bdo_state && object!=sel_object)
 					{
 						// Deselect object
-						object->state=0;
-						object->flags|=BDOF_STATE_CHANGE;
+						object->bdo_state=0;
+						object->bdo_flags|=BDOF_STATE_CHANGE;
 
 						// Refresh object if count is small enough
 						if (count<4) backdrop_render_object(info,object,BRENDERF_CLIP);
@@ -164,11 +164,11 @@ BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned
 				(DoubleClick(info->seconds,info->micros,msg->Seconds,msg->Micros))) dblclk=1;
 
 			// If icon is not already selected, select it
-			if (!sel_object->state)
+			if (!sel_object->bdo_state)
 			{
 				// Select object
-				sel_object->state=1;
-				sel_object->flags|=BDOF_STATE_CHANGE;
+				sel_object->bdo_state=1;
+				sel_object->bdo_flags|=BDOF_STATE_CHANGE;
 
 				// If we had nothing else selected before, we need to fix menus
 				if (count==0) fix_menus=1;
@@ -179,8 +179,8 @@ BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned
 			if (msg->Qualifier&IEQUAL_ANYSHIFT && !dblclk)
 			{
 				// Deselect object
-				sel_object->state=0;
-				sel_object->flags|=BDOF_STATE_CHANGE;
+				sel_object->bdo_state=0;
+				sel_object->bdo_flags|=BDOF_STATE_CHANGE;
 
 				// If we had one thing selected before, we need to fix menus
 				if (count==1) fix_menus=1;
@@ -190,11 +190,11 @@ BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned
 			backdrop_render_object(info,sel_object,BRENDERF_CLIP);
 
 			// Was object actually selected?
-			if (sel_object->state)
+			if (sel_object->bdo_state)
 			{
 				// Is this a tool?
-				if (sel_object->type!=BDO_APP_ICON &&
-					sel_object->icon->do_Type==WBTOOL)
+				if (sel_object->bdo_type!=BDO_APP_ICON &&
+					sel_object->bdo_icon->do_Type==WBTOOL)
 				{
 					// If no tools selected, remember this one
 					if (!info->first_sel_tool)
@@ -211,15 +211,15 @@ BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned
 
 						// Go through icons
 						for (object=(BackdropObject *)info->objects.list.lh_Head,num=0;
-							object->node.ln_Succ && num<count;
-							object=(BackdropObject *)object->node.ln_Succ)
+							object->bdo_node.ln_Succ && num<count;
+							object=(BackdropObject *)object->bdo_node.ln_Succ)
 						{
 							// Is object selected, and not the one we double-clicked on?
-							if (object->state && object!=sel_object)
+							if (object->bdo_state && object!=sel_object)
 							{
 								// Deselect object
-								object->state=0;
-								object->flags|=BDOF_STATE_CHANGE;
+								object->bdo_state=0;
+								object->bdo_flags|=BDOF_STATE_CHANGE;
 
 								// Refresh object if count is small enough
 								if (count<4) backdrop_render_object(info,object,BRENDERF_CLIP);
@@ -270,10 +270,10 @@ BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned
 					}
 
 					// Calculate drag offset
-					sel_object->drag_x_offset=
-						sel_object->pos.Left-msg->MouseX;
-					sel_object->drag_y_offset=
-						sel_object->pos.Top-msg->MouseY;
+					sel_object->bdo_drag_x_offset=
+						sel_object->bdo_pos.Left-msg->MouseX;
+					sel_object->bdo_drag_y_offset=
+						sel_object->bdo_pos.Top-msg->MouseY;
 				}
 			}
 		}
@@ -456,34 +456,34 @@ BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned
 								// Check it's not dropped on itself
 								else
 								if (drop_obj!=info->last_sel_object &&
-									!drop_obj->state)
+									!drop_obj->bdo_state)
 								{
 									// Can drop on appicons...
-									if (drop_obj->type==BDO_APP_ICON)
+									if (drop_obj->bdo_type==BDO_APP_ICON)
 									{
 										// If the icon isn't busy
-										if (!(drop_obj->flags&BDOF_BUSY)) ok=1;
+										if (!(drop_obj->bdo_flags&BDOF_BUSY)) ok=1;
 									}
 
 									// On groups...
 									else
-									if (drop_obj->type==BDO_GROUP) ok=1;
+									if (drop_obj->bdo_type==BDO_GROUP) ok=1;
 
 									// On leftouts, if...
 									else
-									if (drop_obj->type==BDO_LEFT_OUT)
+									if (drop_obj->bdo_type==BDO_LEFT_OUT)
 									{
 										// They're tools, drawers, projects or trashcans
-										if (drop_obj->icon->do_Type==WBTOOL ||
-											drop_obj->icon->do_Type==WBDRAWER ||
-											drop_obj->icon->do_Type==WBPROJECT ||
-											drop_obj->icon->do_Type==WBGARBAGE) ok=1;
+										if (drop_obj->bdo_icon->do_Type==WBTOOL ||
+											drop_obj->bdo_icon->do_Type==WBDRAWER ||
+											drop_obj->bdo_icon->do_Type==WBPROJECT ||
+											drop_obj->bdo_icon->do_Type==WBGARBAGE) ok=1;
 									}
 
 									// On disks if this is a left-out
 									else
-									if (drop_obj->type==BDO_DISK &&
-										info->last_sel_object->type==BDO_LEFT_OUT) ok=1;
+									if (drop_obj->bdo_type==BDO_DISK &&
+										info->last_sel_object->bdo_type==BDO_LEFT_OUT) ok=1;
 								}
 							}
 
@@ -527,25 +527,25 @@ BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned
 				if (!fail)
 				{
 					// Get new position
-					x=msg->MouseX+info->last_sel_object->drag_x_offset;
-					y=msg->MouseY+info->last_sel_object->drag_y_offset;
+					x=msg->MouseX+info->last_sel_object->bdo_drag_x_offset;
+					y=msg->MouseY+info->last_sel_object->bdo_drag_y_offset;
 
 					// Has position changed?
-					if (x!=info->last_sel_object->pos.Left ||
-						y!=info->last_sel_object->pos.Top)
+					if (x!=info->last_sel_object->bdo_pos.Left ||
+						y!=info->last_sel_object->bdo_pos.Top)
 					{
 						BackdropObject *object,*on_object;
 
 						// Convert to delta
-						x-=info->last_sel_object->pos.Left;
-						y-=info->last_sel_object->pos.Top;
+						x-=info->last_sel_object->bdo_pos.Left;
+						y-=info->last_sel_object->bdo_pos.Top;
 
 						// Lock backdrop list
 						lock_listlock(&info->objects,0);
 
 						// See if we dropped it on an object
 						if ((on_object=backdrop_get_object(info,msg->MouseX,msg->MouseY,0)) &&
-							!on_object->state)
+							!on_object->bdo_state)
 						{
 							// Handle drop onto another object
 							backdrop_drop_object(info,on_object);
@@ -559,31 +559,31 @@ BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned
 
 							// Go through backdrop list
 							for (object=(BackdropObject *)info->objects.list.lh_Head;
-								object->node.ln_Succ;
-								object=(BackdropObject *)object->node.ln_Succ)
+								object->bdo_node.ln_Succ;
+								object=(BackdropObject *)object->bdo_node.ln_Succ)
 							{
 								// Object selected, and not locked?
-								if (object->state && !(object->flags&BDOF_LOCKED))
+								if (object->bdo_state && !(object->bdo_flags&BDOF_LOCKED))
 								{
 									struct Rectangle new;
 									short old_left,old_top;
 
 									// Remember old position
-									old_left=object->pos.Left;
-									old_top=object->pos.Top;
+									old_left=object->bdo_pos.Left;
+									old_top=object->bdo_pos.Top;
 
 									// Set new position
 									backdrop_icon_position(info,object,old_left+x,old_top+y);
 
 									// Get new movement delta
-									x=object->pos.Left-old_left;
-									y=object->pos.Top-old_top;
+									x=object->bdo_pos.Left-old_left;
+									y=object->bdo_pos.Top-old_top;
 
 									// Add old position to region
-									backdrop_add_region(info,&object->show_rect);
+									backdrop_add_region(info,&object->bdo_show_rect);
 
 									// Get new position
-									new=object->show_rect;
+									new=object->bdo_show_rect;
 									new.MinX+=x;
 									new.MinY+=y;
 									new.MaxX+=x;
@@ -593,10 +593,10 @@ BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned
 									backdrop_add_region(info,&new);
 
 									// Fix show rectangle
-									object->full_size.MinX-=x;
-									object->full_size.MaxX-=x;
-									object->full_size.MinY-=y;
-									object->full_size.MaxY-=y;
+									object->bdo_full_size.MinX-=x;
+									object->bdo_full_size.MaxX-=x;
+									object->bdo_full_size.MinY-=y;
+									object->bdo_full_size.MaxY-=y;
 								}
 							}
 

@@ -62,21 +62,21 @@ void backdrop_replace_icon_image(BackdropInfo *info,char *source_name,BackdropOb
 
 	// Go through backdrop list
 	for (icon=(BackdropObject *)info->objects.list.lh_Head;
-	     icon->node.ln_Succ;
-	     icon=(BackdropObject *)icon->node.ln_Succ)
+	     icon->bdo_node.ln_Succ;
+	     icon=(BackdropObject *)icon->bdo_node.ln_Succ)
 	{
 	    // Is icon selected?
-	    if (icon->state)
+	    if (icon->bdo_state)
 	    {
 		// Get icon lock
 		if (lock=backdrop_icon_lock(icon))
 		{
 		    // Build name
 		    DevNameFromLock(lock,buffer,512);
-		    if (icon->type==BDO_DISK)
+		    if (icon->bdo_type==BDO_DISK)
 			AddPart(buffer,"Disk",512);
 		    else
-			AddPart(buffer,icon->name,512);
+			AddPart(buffer,icon->bdo_name,512);
 
 		    // Unlock lock
 		    UnLock(lock);
@@ -111,10 +111,10 @@ void backdrop_replace_icon_image(BackdropInfo *info,char *source_name,BackdropOb
 
     // Build destination name
     DevNameFromLock(lock,buffer+512,512);
-    if (dest->type==BDO_DISK)
+    if (dest->bdo_type==BDO_DISK)
 	AddPart(buffer+512,"Disk",512);
     else
-	AddPart(buffer+512,dest->name,512);
+	AddPart(buffer+512,dest->bdo_name,512);
 
     // Unlock lock
     UnLock(lock);

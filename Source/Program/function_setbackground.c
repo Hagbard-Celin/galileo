@@ -69,7 +69,7 @@ GALILEOFM_FUNC(function_setbackground)
 		return 0;
 
 	// Build full name
-	function_build_source(handle,entry,handle->work_buffer);
+	function_build_source(handle,entry,handle->func_work_buf);
 
 	// Arguments?
 	if (instruction->ipa_funcargs)
@@ -166,7 +166,7 @@ GALILEOFM_FUNC(function_setbackground)
 	environment->env->display_options&=~DISPOPTF_USE_WBPATTERN;
 
 	// Store picture in appropriate pattern
-	stccpy(environment->env->env_BackgroundPic[which],handle->work_buffer,sizeof(environment->env->env_BackgroundPic[which])-1);
+	stccpy(environment->env->env_BackgroundPic[which],handle->func_work_buf,sizeof(environment->env->env_BackgroundPic[which])-1);
 
 	// Set flags and colour
 	environment->env->env_BackgroundFlags[which]=flags;

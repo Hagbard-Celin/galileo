@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -94,7 +94,7 @@ GALILEOFM_FUNC(function_set)
 	if ((set=rexx_match_keyword(&args,set_keys,0))==-1) return 0;
 
 	// Get current lister
-	lister=function_lister_current(&handle->source_paths);
+	lister=function_lister_current(&handle->func_source_paths);
 
 	// Set what?
 	switch (set)

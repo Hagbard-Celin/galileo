@@ -67,15 +67,15 @@ void function_run_function(FunctionHandle *handle)
 		}
 
 		// Do final changes to lists
-		function_do_lister_changes(handle,&handle->source_paths);
-		function_do_lister_changes(handle,&handle->dest_paths);
+		function_do_lister_changes(handle,&handle->func_source_paths);
+		function_do_lister_changes(handle,&handle->func_dest_paths);
 
 		// Display final message (if appropriate)
 		if (handle->final_message[0] &&
-			handle->source_paths.list.mlh_Head->mln_Succ)
+			handle->func_source_paths.list.mlh_Head->mln_Succ)
 		{
 			status_text(
-				((PathNode *)handle->source_paths.list.mlh_Head)->pn_lister,
+				((PathNode *)handle->func_source_paths.list.mlh_Head)->pn_lister,
 				handle->final_message);
 		}
 	}
@@ -123,7 +123,7 @@ short function_run(FunctionHandle *handle)
 		return 0;
 
 	// Get first path
-	path=function_path_next(&handle->source_paths);
+	path=function_path_next(&handle->func_source_paths);
 
 	// Count the instructions
 	handle->instruction_count=Att_NodeCount((Att_List *)&handle->func_instructions);
@@ -139,10 +139,10 @@ short function_run(FunctionHandle *handle)
 		// Get source path
 		if (path)
 		{
-			strcpy(handle->source_path,path->pn_path);
-			AddPart(handle->source_path,"",512);
+			strcpy(handle->func_source_path,path->pn_path);
+			AddPart(handle->func_source_path,"",512);
 		}
-		else handle->source_path[0]=0;
+		else handle->func_source_path[0]=0;
 
 		// Reset iteration count
 		handle->func_iterations=0;
@@ -202,7 +202,7 @@ short function_run(FunctionHandle *handle)
 				}
 
 				// Check instruction path
-				function_check_ins_path(handle,instruction,&handle->dest_paths,'d',0);
+				function_check_ins_path(handle,instruction,&handle->func_dest_paths,'d',0);
 
 				// Haven't done path check yet?
 				if (!done_paths)
@@ -210,7 +210,7 @@ short function_run(FunctionHandle *handle)
 					// Check valid destination if needed
 					if (handle->func_flags&FUNCF_NEED_DEST &&
 						handle->func_flags&FUNCF_ASK_PATH &&
-						(IsListEmpty((struct List *)&handle->dest_paths)))
+						(IsListEmpty((struct List *)&handle->func_dest_paths)))
 					{
 						// If we fail on source, don't ask for dest                  *****
 						if ((handle->func_flags&FUNCF_NEED_SOURCE &&
@@ -267,7 +267,7 @@ short function_run(FunctionHandle *handle)
 		function_close_script(handle,run_okay);
 
 		// Done with this path
-		function_path_end(handle,&handle->source_paths,1);
+		function_path_end(handle,&handle->func_source_paths,1);
 
 		// Check abort
 		if (!run_okay || function_check_abort(handle))
@@ -277,7 +277,7 @@ short function_run(FunctionHandle *handle)
 		++handle->func_source_num;
 
 		// Get next path
-		path=function_path_next(&handle->source_paths);
+		path=function_path_next(&handle->func_source_paths);
 	} while (path);
 
 	return run_okay;
@@ -370,7 +370,7 @@ BOOL function_check_paths(FunctionHandle *handle)
 			// Build list of sources
 			if (function_get_paths(
 				handle,
-				&handle->source_paths,
+				&handle->func_source_paths,
 				LISTERF_SOURCE,
 				handle->func_flags&FUNCF_SINGLE_SOURCE))
 			{
@@ -393,7 +393,7 @@ BOOL function_check_paths(FunctionHandle *handle)
 					IPC_Command(lister->ipc,LISTER_OPEN,0,GUI->screen_pointer,0,0);
 
 					// Add this lister
-					function_add_path(handle,&handle->source_paths,lister,0);
+					function_add_path(handle,&handle->func_source_paths,lister,0);
 
 					// Set flag to say we made our own
 					handle->result_flags|=FRESULTF_MADE_LISTER;
@@ -403,7 +403,7 @@ BOOL function_check_paths(FunctionHandle *handle)
 
 		// If we got source, lock it
 		if (handle->func_flags&FUNCF_GOT_SOURCE &&
-			!(function_lock_paths(handle,&handle->source_paths,1)))
+			!(function_lock_paths(handle,&handle->func_source_paths,1)))
 			handle->func_flags&=~FUNCF_GOT_SOURCE;
 	}
 
@@ -417,7 +417,7 @@ BOOL function_check_paths(FunctionHandle *handle)
 			if (!(handle->flags&FUNCF_ASK_DEST) &&
 				function_get_paths(
 					handle,
-					&handle->dest_paths,
+					&handle->func_dest_paths,
 					LISTERF_DEST,
 					handle->func_flags&FUNCF_SINGLE_DEST))
 			{
@@ -427,7 +427,7 @@ BOOL function_check_paths(FunctionHandle *handle)
 
 		// If we got destination, lock it
 		if (handle->func_flags&FUNCF_GOT_DEST &&
-			!(function_lock_paths(handle,&handle->dest_paths,0)))
+			!(function_lock_paths(handle,&handle->func_dest_paths,0)))
 			handle->func_flags&=~FUNCF_GOT_DEST;
 
 		// Do single destination check
@@ -466,8 +466,8 @@ short function_check_single(
 	PathNode *current=0;
 
 	// Get pathlist pointer
-	if (type==LISTERF_SOURCE) path_list=&handle->source_paths;
-	else path_list=&handle->dest_paths;
+	if (type==LISTERF_SOURCE) path_list=&handle->func_source_paths;
+	else path_list=&handle->func_dest_paths;
 
 	// Got a current lister?
 	if (usetype &&
@@ -531,7 +531,7 @@ short function_check_single(
 		}
 
 		// Clear buffer
-		handle->work_buffer[0]=0;
+		handle->func_work_buf[0]=0;
 
 		// Are there no paths in the list?
 		if (IsListEmpty((struct List *)list))
@@ -549,8 +549,8 @@ short function_check_single(
 				TAG_END))
 			{
 				// Build path name
-				strcpy(handle->work_buffer,handle->filereq->fr_Drawer);
-				AddPart(handle->work_buffer,handle->filereq->fr_File,256);
+				strcpy(handle->func_work_buf,handle->filereq->fr_Drawer);
+				AddPart(handle->func_work_buf,handle->filereq->fr_File,256);
 				sel=-1;
 			}
 
@@ -570,13 +570,13 @@ short function_check_single(
 				0,GUI->screen_pointer,
 				GetString(&locale,(type==LISTERF_SOURCE)?MSG_SELECT_SOURCE:MSG_SELECT_DESTINATION),
 				sel,
-				SLF_DIR_FIELD,handle->work_buffer,
+				SLF_DIR_FIELD,handle->func_work_buf,
 				GetString(&locale,MSG_OKAY),
 				GetString(&locale,MSG_ABORT),0,0);
 		}
 
 		// Cancelled?
-		if (sel==-2 || (sel==-1 && !handle->work_buffer[0]))
+		if (sel==-2 || (sel==-1 && !handle->func_work_buf[0]))
 		{
 			// Cancelled
 			ret=0;
@@ -596,7 +596,7 @@ short function_check_single(
 
 		// New path?
 		else	
-		if (handle->work_buffer[0] ||
+		if (handle->func_work_buf[0] ||
 			(node=Att_FindNode(list,sel)) && (!current || node->att_data!=(ULONG)current))
 		{
 			// Already got a path?
@@ -613,9 +613,9 @@ short function_check_single(
 			if (current=AllocMemH(handle->memory,sizeof(PathNode)))
 			{
 				// Typed-in path name?
-				if (handle->work_buffer[0])
+				if (handle->func_work_buf[0])
 				{
-					strcpy(current->pn_path_buf,handle->work_buffer);
+					strcpy(current->pn_path_buf,handle->func_work_buf);
 					current->pn_path=current->pn_path_buf;
 				}
 
@@ -710,18 +710,18 @@ void function_check_ins_path(
 			short num=atoi(ptr+1);
 
 			// Clear work buffer
-			*handle->work_buffer=0;
+			*handle->func_work_buf=0;
 
 			// Copy to buffer
 			if (instruction->ipa_funcargs->FA_Arguments[num])
-				strcpy(handle->work_buffer,(char *)instruction->ipa_funcargs->FA_Arguments[num]);
+				strcpy(handle->func_work_buf,(char *)instruction->ipa_funcargs->FA_Arguments[num]);
 
 			// Valid path?
-			if (handle->work_buffer[0])
+			if (handle->func_work_buf[0])
 			{
 				// Replace existing paths with new one
-				function_replace_paths(handle,path_list,handle->work_buffer,locker);
-				strcpy((path_type=='d')?handle->dest_path:handle->source_path,handle->work_buffer);
+				function_replace_paths(handle,path_list,handle->func_work_buf,locker);
+				strcpy((path_type=='d')?handle->func_dest_path:handle->func_source_path,handle->func_work_buf);
 			}
 		}
 	}

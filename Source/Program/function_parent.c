@@ -44,7 +44,7 @@ GALILEOFM_FUNC(function_parent)
 	short ret=0,a;
 
 	// Get current source lister
-	if (!(path=function_path_current(&handle->source_paths)) ||
+	if (!(path=function_path_current(&handle->func_source_paths)) ||
 		!path->pn_lister) return 0;
 
 	// Get current path
