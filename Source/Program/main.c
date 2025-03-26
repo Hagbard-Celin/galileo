@@ -306,7 +306,8 @@ void startup_check_duplicate()
 		quit(0);
 
 	}
-	Permit();
+	else
+	    Permit();
 }
 
 

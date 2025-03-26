@@ -1815,6 +1815,8 @@ BOOL icon_send_appmsg( icon_data *data, struct Window *window, char *name )
 	    }
 	    DeleteMsgPort( replyport );
 	}
+	// FindAppWindow left us in (nested) Forbid()
+	Permit();
     }
 
     return ok;

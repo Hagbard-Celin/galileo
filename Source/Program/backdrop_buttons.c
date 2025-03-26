@@ -509,6 +509,9 @@ BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned
 									appwindow,
 									x-window->LeftEdge,
 									y-window->TopEdge);
+
+								// FindAppWindow left us in (nested) Forbid()
+								Permit();
 							}
 
 							// Permit

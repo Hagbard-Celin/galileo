@@ -77,7 +77,6 @@ short __stdargs rexx_handler_msg_args(
 	// Create message packet
 	if (!(msg=CreateRexxMsg(port,0,GUI->rexx_port_name)))
 	{
-		Permit();
 		FreeVec(desp);
 		return 0;
 	}

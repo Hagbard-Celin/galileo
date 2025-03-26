@@ -129,9 +129,6 @@ BPTR __asm __saveds L_GetDosPathList(register __a0 BPTR copy_list)
 	    (cli=(struct CommandLineInterface *)BADDR(proc->pr_CLI)) &&
 	    (copy_list=cli->cli_CommandDir)))
 	{
-	    // Better forbid for this
-	    Forbid();
-
 	    // Go through path list
 	    for (path=(PathListEntry *)BADDR(copy_list);
 		 path;
@@ -163,9 +160,6 @@ BPTR __asm __saveds L_GetDosPathList(register __a0 BPTR copy_list)
 	    // Did we get a path
 	    if (new_path)
 	    {  
-		// Enable multitasking
-		Permit();
-
 		// If not duplicating, add Galileo:C
     	        if (!duplicate)
     	        {
@@ -194,9 +188,6 @@ BPTR __asm __saveds L_GetDosPathList(register __a0 BPTR copy_list)
 	// Nowhere else to look?
 	if (!path_places[num])
 	{
-	    // Enable multitasking
-	    Permit();
-
     	    break;
 	}
 
@@ -206,6 +197,9 @@ BPTR __asm __saveds L_GetDosPathList(register __a0 BPTR copy_list)
 	// Find next process
 	proc=(struct Process *)FindTask(path_places[num]);
     }
+
+    // Enable multitasking
+    Permit();
 
     // Return new path (if we got one)
     return new_path;
