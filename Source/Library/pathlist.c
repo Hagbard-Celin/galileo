@@ -32,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -57,158 +57,158 @@ typedef struct
 // Get a usable path list
 BPTR __asm __saveds L_GetDosPathList(register __a0 BPTR copy_list)
 {
-	short num;
-	struct Process *proc;
-	struct CommandLineInterface *cli;
-	PathListEntry *path,*new_entry,*last_entry=0;
-	BPTR new_path=0;
-	APTR file;
+    short num;
+    struct Process *proc;
+    struct CommandLineInterface *cli;
+    PathListEntry *path,*new_entry,*last_entry=0;
+    BPTR new_path=0;
+    APTR file;
     BOOL duplicate=FALSE;
 
     if (copy_list)
-        duplicate=TRUE;
+	duplicate=TRUE;
 
-	// See if path environment variable exists
-	if ((!duplicate) && (file=L_OpenBuf("env:Galileo/paths",MODE_OLDFILE,4096)))
+    // See if path environment variable exists
+    if ((!duplicate) && (file=L_OpenBuf("env:Galileo/paths",MODE_OLDFILE,4096)))
+    {
+	char buf[300];
+
+	// Read paths from file
+	while (L_ReadBufLine(file,buf,sizeof(buf)-1)>0)
 	{
-		char buf[300];
+	    // Allocate a new path entry
+	    if (new_entry=AllocVec(sizeof(PathListEntry),0))
+	    {
+		// Link to previous
+		if (!new_path) new_path=MKBADDR(new_entry);
+		else last_entry->next=MKBADDR(new_entry);
+		last_entry=new_entry;
+		new_entry->next=0;
 
-		// Read paths from file
-		while (L_ReadBufLine(file,buf,sizeof(buf)-1)>0)
-		{
-			// Allocate a new path entry
-			if (new_entry=AllocVec(sizeof(PathListEntry),0))
-			{
-				// Link to previous
-				if (!new_path) new_path=MKBADDR(new_entry);
-				else last_entry->next=MKBADDR(new_entry);
-				last_entry=new_entry;
-				new_entry->next=0;
-
-				// Get lock on path
-				new_entry->lock=Lock(buf,ACCESS_READ);
-			}
-		}
-
-		// Close file
-		L_CloseBuf(file);
-
-        // If we got a path then return it
-		if (new_path)
-        {
-
-        	// Add Galileo:C before returning
-#ifdef RESOURCE_TRACKING
-        	if (new_entry=NRT_AllocVec(sizeof(PathListEntry),0))
-#else
-			if (new_entry=AllocVec(sizeof(PathListEntry),0))
-#endif
-        	{
-                // Add to head of list
-                new_entry->next=new_path;
-                new_path=MKBADDR(new_entry);
-            	new_entry->lock=Lock("Galileo:C",ACCESS_READ);
-        	}
-
-        	return new_path;
-        }
+		// Get lock on path
+		new_entry->lock=Lock(buf,ACCESS_READ);
+	    }
 	}
 
-	// Start with current process
-	proc=(struct Process *)FindTask(0);
+	// Close file
+	L_CloseBuf(file);
+
+	// If we got a path then return it
+	if (new_path)
+	{
+
+    	    // Add Galileo:C before returning
+#ifdef RESOURCE_TRACKING
+    	    if (new_entry=NRT_AllocVec(sizeof(PathListEntry),0))
+#else
+	    if (new_entry=AllocVec(sizeof(PathListEntry),0))
+#endif
+    	    {
+		// Add to head of list
+		new_entry->next=new_path;
+		new_path=MKBADDR(new_entry);
+	    	new_entry->lock=Lock("Galileo:C",ACCESS_READ);
+    	    }
+
+    	    return new_path;
+	}
+    }
+
+    // Start with current process
+    proc=(struct Process *)FindTask(0);
 
     // Forbid so processes do not disappear on us
     Forbid();
 
-	// Go through all possible places
-	for (num=0;;num++)
+    // Go through all possible places
+    for (num=0;;num++)
+    {
+	// Get CLI structure, see if it has a path
+	if (copy_list ||
+	    (proc &&
+	    (cli=(struct CommandLineInterface *)BADDR(proc->pr_CLI)) &&
+	    (copy_list=cli->cli_CommandDir)))
 	{
-		// Get CLI structure, see if it has a path
-		if (copy_list ||
-			(proc &&
-				(cli=(struct CommandLineInterface *)BADDR(proc->pr_CLI)) &&
-				(copy_list=cli->cli_CommandDir)))
+	    // Better forbid for this
+	    Forbid();
+
+	    // Go through path list
+	    for (path=(PathListEntry *)BADDR(copy_list);
+		 path;
+		 path=BADDR(path->next))
+	    {
+		// Allocate a new entry
+#ifdef RESOURCE_TRACKING
+		if (new_entry=NRT_AllocVec(sizeof(PathListEntry),0))
+#else
+		if (new_entry=AllocVec(sizeof(PathListEntry),0))
+#endif
 		{
-			// Better forbid for this
-			Forbid();
+		    // Link to previous
+		    if (!new_path) new_path=MKBADDR(new_entry);
+		    else last_entry->next=MKBADDR(new_entry);
+		    last_entry=new_entry;
+		    new_entry->next=0;
 
-			// Go through path list
-			for (path=(PathListEntry *)BADDR(copy_list);
-				path;
-				path=BADDR(path->next))
-			{
-				// Allocate a new entry
+		    // Duplicate lock
 #ifdef RESOURCE_TRACKING
-                if (new_entry=NRT_AllocVec(sizeof(PathListEntry),0))
+		    new_entry->lock=NRT_DupLock(path->lock);
 #else
-				if (new_entry=AllocVec(sizeof(PathListEntry),0))
+		    new_entry->lock=DupLock(path->lock);
 #endif
-				{
-					// Link to previous
-					if (!new_path) new_path=MKBADDR(new_entry);
-					else last_entry->next=MKBADDR(new_entry);
-					last_entry=new_entry;
-					new_entry->next=0;
-
-					// Duplicate lock
-#ifdef RESOURCE_TRACKING
-					new_entry->lock=NRT_DupLock(path->lock);
-#else
-					new_entry->lock=DupLock(path->lock);
-#endif
-				}
-			}
-
-
-            // Did we get a path
-            if (new_path)
-            {  
-				// Enable multitasking
-				Permit();
-
-	            // If not duplicating, add Galileo:C
-    	        if (!duplicate)
-        	    {
-#ifdef RESOURCE_TRACKING
-            		if (new_entry=NRT_AllocVec(sizeof(PathListEntry),0))
-#else
-					if (new_entry=AllocVec(sizeof(PathListEntry),0))
-#endif
-	            	{
-                        // Add to head of list
-                		new_entry->next=new_path;
-                		new_path=MKBADDR(new_entry);
-#ifdef RESOURCE_TRACKING
-                		new_entry->lock=NRT_Lock("Galileo:C",ACCESS_READ);
-#else
-                		new_entry->lock=Lock("Galileo:C",ACCESS_READ);
-#endif
-            		}
-            	}
-
-                // Return it
-				break;
-            }
 		}
+	    }
 
-		// Nowhere else to look?
-		if (!path_places[num])
-        {
-            // Enable multitasking
-            Permit();
 
-        	break;
-        }
+	    // Did we get a path
+	    if (new_path)
+	    {  
+		// Enable multitasking
+		Permit();
 
-        // Reset copy_list
-        copy_list=0;
+		// If not duplicating, add Galileo:C
+    	        if (!duplicate)
+    	        {
+#ifdef RESOURCE_TRACKING
+		    if (new_entry=NRT_AllocVec(sizeof(PathListEntry),0))
+#else
+		    if (new_entry=AllocVec(sizeof(PathListEntry),0))
+#endif
+		    {
+			// Add to head of list
+			new_entry->next=new_path;
+			new_path=MKBADDR(new_entry);
+#ifdef RESOURCE_TRACKING
+			new_entry->lock=NRT_Lock("Galileo:C",ACCESS_READ);
+#else
+			new_entry->lock=Lock("Galileo:C",ACCESS_READ);
+#endif
+		    }
+	    	}
 
-		// Find next process
-		proc=(struct Process *)FindTask(path_places[num]);
+		// Return it
+		break;
+	    }
 	}
 
-	// Return new path (if we got one)
-	return new_path;
+	// Nowhere else to look?
+	if (!path_places[num])
+	{
+	    // Enable multitasking
+	    Permit();
+
+    	    break;
+	}
+
+	// Reset copy_list
+	copy_list=0;
+
+	// Find next process
+	proc=(struct Process *)FindTask(path_places[num]);
+    }
+
+    // Return new path (if we got one)
+    return new_path;
 }
 
 
@@ -216,25 +216,25 @@ BPTR __asm __saveds L_GetDosPathList(register __a0 BPTR copy_list)
 void __asm __saveds L_UpdatePathList(
 	register __a6 struct MyLibrary *libbase)
 {
-	struct LibData *data;
+    struct LibData *data;
 
-	// Get library data
-	data=(struct LibData *)libbase->ml_UserData;
+    // Get library data
+    data=(struct LibData *)libbase->ml_UserData;
 
-	// Lock path list
-	L_GetSemaphore(&data->path_lock,SEMF_EXCLUSIVE,0);
+    // Lock path list
+    L_GetSemaphore(&data->path_lock,SEMF_EXCLUSIVE,0);
 
-	// Free path list
-	L_FreeDosPathList(data->path_list);
+    // Free path list
+    L_FreeDosPathList(data->path_list);
 
-	// Get new path list
-	data->path_list=L_GetDosPathList(0);
+    // Get new path list
+    data->path_list=L_GetDosPathList(0);
 
-	// Unlock path list
-	L_FreeSemaphore(&data->path_lock);
+    // Unlock path list
+    L_FreeSemaphore(&data->path_lock);
 
-	// Send command to launcher to reset it
-	L_IPC_Command(launcher_ipc,IPC_RESET,0,0,0,NO_PORT_IPC);
+    // Send command to launcher to reset it
+    L_IPC_Command(launcher_ipc,IPC_RESET,0,0,0,NO_PORT_IPC);
 }
 ///
 
@@ -242,147 +242,146 @@ void __asm __saveds L_UpdatePathList(
 void __asm __saveds L_UpdateMyPaths(
 	register __a6 struct MyLibrary *libbase)
 {
-	BPTR pathlist;
-	struct Process *proc;
-	struct LibData *data;
-	struct CommandLineInterface *cli;
+    BPTR pathlist;
+    struct Process *proc;
+    struct LibData *data;
+    struct CommandLineInterface *cli;
 
-	// Get library data
-	data=(struct LibData *)libbase->ml_UserData;
+    // Get library data
+    data=(struct LibData *)libbase->ml_UserData;
 
-	// Get this process
-	proc=(struct Process *)FindTask(0);
+    // Get this process
+    proc=(struct Process *)FindTask(0);
 
-	// Get CLI structure
-	if (!(cli=(struct CommandLineInterface *)BADDR(proc->pr_CLI)))
-		return;
+    // Get CLI structure
+    if (!(cli=(struct CommandLineInterface *)BADDR(proc->pr_CLI)))
+	return;
 
-	// Lock path list
-	L_GetSemaphore(&data->path_lock,SEMF_SHARED,0);
+    // Lock path list
+    L_GetSemaphore(&data->path_lock,SEMF_SHARED,0);
 
-	// Get path list copy
-	pathlist=L_GetDosPathList(data->path_list);
+    // Get path list copy
+    pathlist=L_GetDosPathList(data->path_list);
 
-	// Unlock path list
-	L_FreeSemaphore(&data->path_lock);
+    // Unlock path list
+    L_FreeSemaphore(&data->path_lock);
 
-	// Got valid path list?
-	if (pathlist)
-	{
-		// Free existing process path list
-		if (cli->cli_CommandDir)
-			L_FreeDosPathList(cli->cli_CommandDir);
+    // Got valid path list?
+    if (pathlist)
+    {
+	// Free existing process path list
+	if (cli->cli_CommandDir)
+	    L_FreeDosPathList(cli->cli_CommandDir);
 
-		// Store new path list
-		cli->cli_CommandDir=pathlist;
-	}
+	// Store new path list
+	cli->cli_CommandDir=pathlist;
+    }
 }
 ///
 
 /// Free a path list
 void __asm __saveds L_FreeDosPathList(register __a0 BPTR list)
 {
-	PathListEntry *path;
+    PathListEntry *path;
 
-	// Valid list?
-	if (!(path=(PathListEntry *)BADDR(list)))
-		return;
+    // Valid list?
+    if (!(path=(PathListEntry *)BADDR(list)))
+	return;
 
-	// Go through list
-	for (;path;)
-	{
-		PathListEntry *next=(PathListEntry *)BADDR(path->next);
+    // Go through list
+    for (;path;)
+    {
+	PathListEntry *next=(PathListEntry *)BADDR(path->next);
 
-		// Unlock this lock
+	// Unlock this lock
 #ifdef RESOURCE_TRACKING
-		NRT_UnLock(path->lock);
+	NRT_UnLock(path->lock);
 #else
-		UnLock(path->lock);
+	UnLock(path->lock);
 #endif
 
-		// Free this entry
+	// Free this entry
 #ifdef RESOURCE_TRACKING
-        NRT_FreeVec(path);
+	NRT_FreeVec(path);
 #else
-        FreeVec(path);
+	FreeVec(path);
 #endif
 
-		// Get next
-		path=next;
-	}
+	// Get next
+	path=next;
+    }
 }
 ///
 
 // Copy local environment variables to current process
 void __asm __saveds L_CopyLocalEnv(register __a0 struct Library *DOSBase)
 {
-	short num;
-	struct Process *proc=0;
-	struct LocalVar *var;
+    short num;
+    struct Process *proc=0;
+    struct LocalVar *var;
 
-	// Go through all possible places
-	for (num=0;;num++)
+    // Go through all possible places
+    for (num=0;;num++)
+    {
+	// Any variables set?
+	if (proc &&
+	    !(IsListEmpty((struct List *)&proc->pr_LocalVars)))
 	{
-		// Any variables set?
-		if (proc &&
-			!(IsListEmpty((struct List *)&proc->pr_LocalVars)))
+	    // Better forbid for this
+	    Forbid();
+
+	    // Go through variable list
+	    for (var=(struct LocalVar *)proc->pr_LocalVars.mlh_Head;
+		 var->lv_Node.ln_Succ;
+		 var=(struct LocalVar *)var->lv_Node.ln_Succ)
+	    {
+		// Is this a variable?
+		if (var->lv_Node.ln_Type==LV_VAR)
 		{
-			// Better forbid for this
-			Forbid();
-
-			// Go through variable list
-			for (var=(struct LocalVar *)proc->pr_LocalVars.mlh_Head;
-				var->lv_Node.ln_Succ;
-				var=(struct LocalVar *)var->lv_Node.ln_Succ)
-			{
-				// Is this a variable?
-				if (var->lv_Node.ln_Type==LV_VAR)
-				{
-					// Copy this variable
-					SetVar(
-						var->lv_Node.ln_Name,
-						var->lv_Value,
-						var->lv_Len,
-						var->lv_Flags|GVF_LOCAL_ONLY);
-				}
-			}
-
-			// Enable multitasking
-			Permit();
-			break;
+		    // Copy this variable
+		    SetVar(var->lv_Node.ln_Name,
+			   var->lv_Value,
+			   var->lv_Len,
+			   var->lv_Flags|GVF_LOCAL_ONLY);
 		}
+	    }
 
-		// Nowhere else to look?
-		if (!path_places[num]) break;
-
-		// Find next process
-		else
-        {
-            Forbid();
-        	proc=(struct Process *)FindTask(path_places[num]);
-            Permit();
-        }
+	    // Enable multitasking
+	    Permit();
+	    break;
 	}
+
+	// Nowhere else to look?
+	if (!path_places[num]) break;
+
+	// Find next process
+	else
+	{
+	    Forbid();
+    	    proc=(struct Process *)FindTask(path_places[num]);
+	    Permit();
+	}
+    }
 }
 
 
 // Get a copy of the Galileo path list
 BPTR __asm __saveds L_GetGalileoPathList(register __a6 struct MyLibrary *libbase)
 {
-	BPTR copy;
-	struct LibData *data;
+    BPTR copy;
+    struct LibData *data;
 
-	// Get library data
-	data=(struct LibData *)libbase->ml_UserData;
+    // Get library data
+    data=(struct LibData *)libbase->ml_UserData;
 
-	// Lock path list
-	L_GetSemaphore(&data->path_lock,SEMF_SHARED,0);
+    // Lock path list
+    L_GetSemaphore(&data->path_lock,SEMF_SHARED,0);
 
-	// Copy it
-	copy=L_GetDosPathList(data->path_list);
+    // Copy it
+    copy=L_GetDosPathList(data->path_list);
 
-	// Unlock path list
-	L_FreeSemaphore(&data->path_lock);
+    // Unlock path list
+    L_FreeSemaphore(&data->path_lock);
 
-	return copy;
+    return copy;
 }
