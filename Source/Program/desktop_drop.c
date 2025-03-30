@@ -54,7 +54,7 @@ void desktop_drop(BackdropInfo *info,GalileoAppMessage *msg,USHORT qual)
 	if ((drop_obj=backdrop_get_object(info,msg->ga_Msg.am_MouseX,msg->ga_Msg.am_MouseY,0)))
 	{
 		// Is shift/alt down?
-		if (qual&(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT)==(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))
+		if ((qual&(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))==(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))
 		{
 			char pathname[256];
 

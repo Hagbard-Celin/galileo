@@ -156,7 +156,7 @@ void lister_receive_drop(Lister *dest,GalileoAppMessage *msg)
 		if (drop_on=backdrop_get_object(info,msg->ga_Msg.am_MouseX,msg->ga_Msg.am_MouseY,0))
 		{
 			// Is shift/alt down?
-			if (qual&(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT)==(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))
+			if ((qual&(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))==(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))
 			{
 				// Get path of first file
 				GetWBArgPath(&msg->ga_Msg.am_ArgList[0],pathname,256);

@@ -255,7 +255,7 @@ void __saveds backdrop_group_handler(void)
 						qual=(InputBase)?PeekQualifier():0;
 	
 						// Is shift/alt down?
-						if (qual&(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT)==(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))
+						if ((qual&(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))==(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))
 						{
 							// Get path of first file
 							GetWBArgPath(&amsg->ga_Msg.am_ArgList[0],path,256);

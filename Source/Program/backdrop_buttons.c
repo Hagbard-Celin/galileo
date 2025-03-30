@@ -447,7 +447,7 @@ BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned
 							    drop_obj!=info->last_sel_object && !drop_obj->bdo_state)
 							{
 								// Is shift/alt down?
-								if (msg->Qualifier&(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT)==(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))
+								if ((msg->Qualifier&(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))==(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))
 								{
 									// Replace the image
 									backdrop_replace_icon_image(info,0,drop_obj);
