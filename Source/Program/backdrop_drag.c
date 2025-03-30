@@ -72,9 +72,6 @@ BOOL backdrop_start_drag(BackdropInfo *info,short x,short y)
 	info->tick_count=1;
 	info->last_tick=0;
 
-	// Get start time
-	CurrentTime(&info->drag_sec,&info->drag_mic);
-
 	// Last selected icon?
 	if ((object=info->last_sel_object) && object->bdo_state)
 	{
@@ -243,6 +240,8 @@ BOOL backdrop_stop_drag(BackdropInfo *info)
 			// If drag was less than a fifth of a second, nothing moves
 			if (mic1<mic2+200000) ret=1;
 		}
+		else
+		    ret = 1;
 
 		// Go through backdrop list
 		for (object=(BackdropObject *)info->objects.list.lh_Head;
@@ -359,6 +358,9 @@ void backdrop_show_drag(
 
 			// Lock layer
 			LockLayers(&info->window->WScreen->LayerInfo);
+
+			// Get start time
+			CurrentTime(&info->drag_sec,&info->drag_mic);
 		}
 
 		// Sort GELs list

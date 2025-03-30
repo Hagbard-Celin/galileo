@@ -442,8 +442,9 @@ BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned
 							// Lock backdrop list
 							lock_listlock(&info->objects,0);
 
-							// See if it's dropped on anything
-							if (drop_obj=backdrop_get_object(info,msg->MouseX,msg->MouseY,0))
+							// See if it's dropped on anything but itself
+							if ((drop_obj=backdrop_get_object(info,msg->MouseX,msg->MouseY,0)) &&
+							    drop_obj!=info->last_sel_object && !drop_obj->bdo_state)
 							{
 								// Is shift/alt down?
 								if (msg->Qualifier&(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT)==(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))
@@ -455,36 +456,32 @@ BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned
 
 								// Check it's not dropped on itself
 								else
-								if (drop_obj!=info->last_sel_object &&
-									!drop_obj->bdo_state)
+								// Can drop on appicons...
+								if (drop_obj->bdo_type==BDO_APP_ICON)
 								{
-									// Can drop on appicons...
-									if (drop_obj->bdo_type==BDO_APP_ICON)
-									{
-										// If the icon isn't busy
-										if (!(drop_obj->bdo_flags&BDOF_BUSY)) ok=1;
-									}
-
-									// On groups...
-									else
-									if (drop_obj->bdo_type==BDO_GROUP) ok=1;
-
-									// On leftouts, if...
-									else
-									if (drop_obj->bdo_type==BDO_LEFT_OUT)
-									{
-										// They're tools, drawers, projects or trashcans
-										if (drop_obj->bdo_icon->do_Type==WBTOOL ||
-											drop_obj->bdo_icon->do_Type==WBDRAWER ||
-											drop_obj->bdo_icon->do_Type==WBPROJECT ||
-											drop_obj->bdo_icon->do_Type==WBGARBAGE) ok=1;
-									}
-
-									// On disks if this is a left-out
-									else
-									if (drop_obj->bdo_type==BDO_DISK &&
-										info->last_sel_object->bdo_type==BDO_LEFT_OUT) ok=1;
+									// If the icon isn't busy
+									if (!(drop_obj->bdo_flags&BDOF_BUSY)) ok=1;
 								}
+
+								// On groups...
+								else
+								if (drop_obj->bdo_type==BDO_GROUP) ok=1;
+
+								// On leftouts, if...
+								else
+								if (drop_obj->bdo_type==BDO_LEFT_OUT)
+								{
+									// They're tools, drawers, projects or trashcans
+									if (drop_obj->bdo_icon->do_Type==WBTOOL ||
+										drop_obj->bdo_icon->do_Type==WBDRAWER ||
+										drop_obj->bdo_icon->do_Type==WBPROJECT ||
+										drop_obj->bdo_icon->do_Type==WBGARBAGE) ok=1;
+								}
+
+								// On disks if this is a left-out
+								else
+								if (drop_obj->bdo_type==BDO_DISK &&
+									info->last_sel_object->bdo_type==BDO_LEFT_OUT) ok=1;
 							}
 
 							// Unlock backdrop list
