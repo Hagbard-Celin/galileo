@@ -72,6 +72,9 @@ void lister_get_icons(FunctionHandle *handle,Lister *lister,char *add_name,short
 		return;
 	dir=CurrentDir(lock);
 
+	// Make sure only one process at a time runs this
+	ObtainSemaphore(&info->icon_lock);
+
 	// Lock lister buffer
 	buffer=lister->cur_buffer;
 	if (!add_name) buffer_lock(buffer,0);
@@ -334,6 +337,8 @@ void lister_get_icons(FunctionHandle *handle,Lister *lister,char *add_name,short
 		backdrop_show_objects(info,0);
 	}
 
+	ReleaseSemaphore(&info->icon_lock);
+
 	// Restore current dir
 	UnLock(CurrentDir(dir));
 }
@@ -348,6 +353,9 @@ void lister_get_device_icons(Lister *lister,BOOL clean)
 	BackdropObject *object;
 	BackdropInfo *info=lister->backdrop_info;
 	BOOL new=1;
+
+	// Make sure only one process at a time runs this
+	ObtainSemaphore(&info->icon_lock);
 
 	// Lock lister buffer
 	buffer_lock((buffer=lister->cur_buffer),0);
@@ -541,6 +549,8 @@ void lister_get_device_icons(Lister *lister,BOOL clean)
 
 	// Show backdrop objects (including newly arranged icons)
 	backdrop_show_objects(lister->backdrop_info,BDSF_CLEAR|BDSF_RECALC);
+
+	ReleaseSemaphore(&info->icon_lock);
 }
 
 

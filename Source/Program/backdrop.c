@@ -53,6 +53,7 @@ BackdropInfo *backdrop_new(IPCData *ipc,ULONG flags)
 	InitListLock(&info->objects,0);
 	InitSemaphore(&info->window_lock);
 	InitSemaphore(&info->idcmp_lock);
+	InitSemaphore(&info->icon_lock);
 	NewList(&info->boopsi_list);
 	info->ipc=ipc;
 	info->flags=flags;

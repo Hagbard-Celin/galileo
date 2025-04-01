@@ -141,6 +141,7 @@ typedef struct _BackdropInfo
 	ULONG			drag_mic;		// Drag start micros
 
 	struct Region		*temp_region;
+	struct SignalSemaphore	icon_lock;		// lister_get_icons lock
 } BackdropInfo;
 
 
