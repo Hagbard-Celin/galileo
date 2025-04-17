@@ -37,7 +37,6 @@ The prototype for this function is as follows:
                             register __a1 struct Screen *screen,
                             register __a2 IPCData *ipc,
                             register __a3 IPCData *mainipc,
-                            register __a4 APTR *memhandlep,
                             register __d0 ULONG mod_id,
                             register __d1 EXT_FUNC(callback)  );
 
@@ -58,10 +57,6 @@ Module_Entry() function are as follows:
                       each module command as a new process
 
         mainipc     - a pointer to the main IPCData structure for Galileo
-
-        memhandlerp - NULL if running synchronously, pointer to MemHandle if
-                      running asynchronously
-                      (see Documentation/Module-Changes.txt)
 
         mod_id      - the ID code of the command selected by the user
 

@@ -1607,7 +1607,7 @@ ULONG __asm __saveds L_PatchedWBInfo(
 			node.ln_Name=name;
 
 			// Call the module
-			res=Module_Entry(&files,screen,0,main_ipc,0,0,0x96604497);
+			res=Module_Entry(&files,screen,0,main_ipc,0,0x96604497);
 
 			// Restore current directory
 			CurrentDir(old);

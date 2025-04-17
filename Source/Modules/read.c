@@ -59,7 +59,6 @@ int __asm __saveds L_Module_Entry(
 	register __a1 struct Screen *screen,
 	register __a2 IPCData *ipc,
 	register __a3 IPCData *main_ipc,
-	register __a4 APTR *memhandlep,
 	register __d0 ULONG mod_id,
 	register __d1 ULONG mod_data)
 {
@@ -3969,7 +3968,7 @@ void read_print(read_data *data)
 		AddTail(&list,&node);
 
 		// Print file
-		Module_Entry(&list,data->window->WScreen,data->ipc,data->main_ipc,0,0,0);
+		Module_Entry(&list,data->window->WScreen,data->ipc,data->main_ipc,0,0);
 
 		// Close library
 		CloseLibrary(ModuleBase);

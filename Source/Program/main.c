@@ -320,7 +320,7 @@ void startup_run_update()
 	if (ModuleBase=OpenLibrary("PROGDIR:modules/update.gfmmodule",0))
 	{
 		// Launch update function
-		Module_Entry(0,0,0,0,0,0,0);
+		Module_Entry(0,0,0,0,0,0);
 
 		// Expunge library
 		LibExpunge();

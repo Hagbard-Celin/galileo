@@ -89,6 +89,9 @@ void __saveds async_command(void)
 	return;
     }
 
+    // Set async flag
+    ipc->flags|=IPCF_ASYNC;
+
     // Swap in new IPCData
     ipc->userdata = adata->handle;
     adata->handle->ipc = ipc;
@@ -104,7 +107,6 @@ void __saveds async_command(void)
 		 adata->screen,
 		 ipc,
 		 adata->main_ipc,
-		 adata->memhandlep,
 		 adata->command->function,
 		 adata->function_external_hook);
 

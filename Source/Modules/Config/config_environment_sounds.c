@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -142,7 +142,6 @@ void config_env_test_sound(config_env_data *data)
 				data->window->WScreen,
 				data->ipc,
 				data->main_ipc,
-				0,
 				(ULONG)data->window,
 				sound->gse_Volume<<8);
 			ok=1;

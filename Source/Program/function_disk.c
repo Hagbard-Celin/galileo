@@ -100,7 +100,7 @@ GALILEOFM_FUNC(function_disk)
 	if (ModuleBase)
 	{
 		// Call module
-		ret=Module_Entry(&list,GUI->screen_pointer,handle->ipc,&main_ipc,0,0,0);
+		ret=Module_Entry(&list,GUI->screen_pointer,handle->ipc,&main_ipc,0,0);
 		CloseLibrary(ModuleBase);
 	}
 

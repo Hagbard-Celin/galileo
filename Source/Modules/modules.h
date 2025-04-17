@@ -88,7 +88,7 @@ typedef struct
 
 #define FUNCID_STARTUP			0xffffffff
 
-int		Module_Entry(struct List *,struct Screen *,IPCData *,IPCData *,APTR *,ULONG,ULONG);
+int		Module_Entry(struct List *,struct Screen *,IPCData *,IPCData *,ULONG,ULONG);
 ModuleInfo	*__asm __saveds Module_Identify(register __d0 int num);
 
 // Callback commands

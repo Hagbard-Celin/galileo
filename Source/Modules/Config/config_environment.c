@@ -763,7 +763,7 @@ unsigned long __asm __saveds L_Config_Environment(
 										(struct Screen *)data->window,
 										ipc,
 										data->main_ipc,
-										0,0,0);
+										0,0);
 									CloseLibrary(ModuleBase);
 								}
 

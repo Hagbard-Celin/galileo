@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -309,7 +309,6 @@ void init_commands_scan(short type)
 							Module_Entry(
 								0,0,
 								&main_ipc,&main_ipc,
-								0,
 								FUNCID_STARTUP,
 								(ULONG)function_external_hook);
 						}

@@ -97,7 +97,6 @@ GALILEOFM_FUNC(function_show)
 							GUI->screen_pointer,
 							handle->ipc,
 							&main_ipc,
-							0,
 							0,	// FindFileType
 							(ULONG)function_external_hook);
 
@@ -168,7 +167,6 @@ GALILEOFM_FUNC(function_show)
 						GUI->screen_pointer,
 						handle->ipc,
 						&main_ipc,
-						0,
 						(ULONG)startup,
 						funcid-FUNC_READ);
 
@@ -234,7 +232,6 @@ GALILEOFM_FUNC(function_show)
 					GUI->screen_pointer,
 					handle->ipc,
 					&main_ipc,
-					0,
 					(ULONG)window,
 					(volume<<8)|((func==FUNC_PLAY_QUIET)?(1<<0):0))==1) ret=1;
 
@@ -280,7 +277,6 @@ GALILEOFM_FUNC(function_show)
 					handle->ipc,
 					&main_ipc,
 					0,
-					0,
 					(environment->env->desktop_flags&DESKTOPF_NO_REMAP)?1:0)) ret=1;
 
 				// Close module
@@ -322,7 +318,7 @@ GALILEOFM_FUNC(function_show)
 				GUI->screen_pointer,
 				handle->ipc,
 				&main_ipc,
-				0,0,0);
+				0,0);
 
 			// Close show module
 			CloseLibrary(ModuleBase);

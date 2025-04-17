@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -178,7 +178,6 @@ if	(GalileoFMBase = OpenLibrary( "galileofm.library", VERSION_GALILEOFMLIB ))
 				(struct Screen *)data->fd_win,
 				data->fd_ipc,
 				data->fd_main_ipc,
-				0,
 				function_no,(ULONG)&data->fd_f);
 				CloseLibrary(ModuleBase);
 			}

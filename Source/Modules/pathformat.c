@@ -46,7 +46,6 @@ int __asm __saveds L_Module_Entry(
 	register __a1 struct Screen *screen,
 	register __a2 IPCData *ipc,
 	register __a3 IPCData *main_ipc,
-	register __a4 APTR *memhandlep,
 	register __d0 ULONG mod_id,
 	register __d1 ULONG mod_data)
 {
@@ -788,7 +787,7 @@ void config_paths_edit(config_path_data *data)
 				(struct Screen *)data->window,
 				data->ipc,
 				data->main_ipc,
-				0,0,0);
+				0,0);
 			CloseLibrary(ModuleBase);
 		}
 		else DisplayBeep(data->window->WScreen);

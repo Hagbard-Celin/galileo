@@ -66,6 +66,11 @@ typedef struct
 // ID passed to Module_Entry() if module is run on startup
 #define FUNCID_STARTUP			0xffffffff
 
+#define FUNC_IS_ASYNC			(1<<4) // running asynchronously
+
+#define FUNCASYNC(ipc)			(ipc->flags&FUNC_IS_ASYNC)
+
+
 // Callback commands
 #define EXTCMD_GET_SOURCE	0	// Get current source path
 #define EXTCMD_NEXT_SOURCE	1	// Get next source path

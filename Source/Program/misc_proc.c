@@ -527,7 +527,7 @@ void __saveds misc_proc(void)
 							environment->env->desktop_flags&DESKTOPF_NO_REMAP) flags=1;
 
 						// Show info
-						Module_Entry(&list,startup->window->WScreen,ipc,&main_ipc,0,0,flags);
+						Module_Entry(&list,startup->window->WScreen,ipc,&main_ipc,0,flags);
 						CloseLibrary(ModuleBase);
 					}
 				}
@@ -683,7 +683,6 @@ void __saveds misc_proc(void)
 							read->files,
 							GUI->screen_pointer,
 							ipc,&main_ipc,
-							0,
 							(ULONG)read,
 							startup->command-FUNC_READ);
 
@@ -714,7 +713,7 @@ void __saveds misc_proc(void)
 							(struct List *)startup->data,
 							GUI->screen_pointer,
 							ipc,&main_ipc,
-							0,0,0);
+							0,0);
 
 						// Close module
 						CloseLibrary(ModuleBase);
@@ -878,7 +877,7 @@ void __saveds misc_proc(void)
 					if (ModuleBase=OpenModule("show.gfmmodule"))
 					{
 						// Show picture
-						Module_Entry(&list,0,ipc,&main_ipc,0,666,0);
+						Module_Entry(&list,0,ipc,&main_ipc,666,0);
 						CloseLibrary(ModuleBase);
 					}
 				}
@@ -932,7 +931,6 @@ void __saveds misc_proc(void)
 							GUI->screen_pointer,
 							ipc,
 							&main_ipc,
-							0,
 							(ULONG)startup->window,
 							flags);
 
@@ -960,7 +958,6 @@ void __saveds misc_proc(void)
 							GUI->screen_pointer,
 							ipc,
 							&main_ipc,
-							0,
 							FUNCID_STARTUP,
 							(ULONG)function_external_hook);
 

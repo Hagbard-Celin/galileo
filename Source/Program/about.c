@@ -83,7 +83,7 @@ void show_about(struct Screen *screen,IPCData *ipc)
 		short ret;
 
 		// Show about
-		ret=Module_Entry((struct List *)list,screen,ipc,&main_ipc,0,0,0);
+		ret=Module_Entry((struct List *)list,screen,ipc,&main_ipc,0,0);
 		CloseLibrary(ModuleBase);
 
 		// If it displayed ok, return

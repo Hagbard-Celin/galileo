@@ -159,7 +159,7 @@ GALILEOFM_FUNC(function_printdir)
 		AddTail(&list,&node);
 
 		// Print file
-		Module_Entry(&list,GUI->screen_pointer,handle->ipc,&main_ipc,0,0,0);
+		Module_Entry(&list,GUI->screen_pointer,handle->ipc,&main_ipc,0,0);
 
 		// Close print module
 		CloseLibrary(ModuleBase);

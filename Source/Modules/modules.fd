@@ -3,6 +3,6 @@
 ##bias 30
 *
 ##public
-Module_Entry(files,screen,ipc,main_ipc,memhandlep,id,data)(a0/a1/a2/a3/a4,d0/d1)
+Module_Entry(files,screen,ipc,main_ipc,id,data)(a0/a1/a2/a3,d0/d1)
 Module_Identify(num)(d0)
 ##end

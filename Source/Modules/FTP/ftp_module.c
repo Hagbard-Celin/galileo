@@ -487,7 +487,6 @@ int __asm __saveds L_Module_Entry(
 	register __a1 struct Screen *screen,
 	register __a2 IPCData       *function_ipc,	// 'galileo_function' - the spawned module process
 	register __a3 IPCData       *galileo_ipc,		// 'Galileo' - the main Galileo process
-	register __a4 APTR          *memhandlep,
 	register __d0 ULONG          mod_id,
 	register __d1 EXT_FUNC(func_callback))
 {

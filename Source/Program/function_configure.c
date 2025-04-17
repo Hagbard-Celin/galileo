@@ -67,7 +67,7 @@ GALILEOFM_FUNC(function_configure)
 		(struct Screen *)lister->window,
 		handle->ipc,
 		&main_ipc,
-		0,1,
+		1,
 		(ULONG)&environment->env->list_format);
 
 	// Close library

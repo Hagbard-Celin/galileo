@@ -2843,7 +2843,6 @@ int __asm __saveds L_Module_Entry(
 	register __a1 struct Screen *screen,
 	register __a2 IPCData *ipc,
 	register __a3 IPCData *main_ipc,
-	register __a4 APTR *memhandlep,
 	register __d0 ULONG mod_id,
 	register __d1 EXT_FUNC(func_callback))
 {

@@ -1134,7 +1134,7 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 
     arcname[0]=0;
 
-    if (memhandlep && *memhandlep)
+    if (FUNCASYNC(data.ipc))
     {
 	async=TRUE;
     }
@@ -1195,10 +1195,7 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 	return 0;
     }
 
-    if (async)
-    	data.memhandle = *memhandlep;
-    else
-	if (!(data.memhandle = NewMemHandle(NULL, NULL, MEMF_CLEAR))) return(0);
+    if (!(data.memhandle = NewMemHandle(NULL, NULL, MEMF_CLEAR))) return(0);
 
     if (!(data.password=AllocMemH(data.memhandle,512))) goto end_1;
 
@@ -1636,9 +1633,8 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
     memset(data.password,0,512);
 
     if (xadMasterBase) CloseLibrary((struct Library *)xadMasterBase);
- 	
-    if (!async)
-    	FreeMemHandle(data.memhandle);
+
+    FreeMemHandle(data.memhandle);
 
     return(1);
 
@@ -1676,8 +1672,8 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 	data.hook.gc_UnlockSource(IPCDATA(ipc));
 	data.hook.gc_FreePointerDirect(IPCDATA(ipc),GETPTR_HANDLE,NULL);
     }
-    if (!async)
-		FreeMemHandle(data.memhandle);
+
+    FreeMemHandle(data.memhandle);
     end_0:
 
     return (0);

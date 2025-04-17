@@ -283,7 +283,6 @@ function_internal_command(CommandList *command,
 				 GUI->screen_pointer,
 				 (handle)?handle->ipc:0,
 				 &main_ipc,
-				 0,
 				 command->function,
 				 (ULONG)function_external_hook);
 	    }
