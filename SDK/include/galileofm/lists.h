@@ -23,7 +23,7 @@ typedef struct _Att_Node
 {
 	struct Node		node;		// Node structure
 	Att_List		*list;		// Pointer back to list
-	ULONG			data;		// User data
+	ULONG			att_data;	    // User data
 } Att_Node;
 
 #define ADDNODEF_SORT		1		// Sort names
