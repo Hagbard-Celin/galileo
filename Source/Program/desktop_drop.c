@@ -405,7 +405,7 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 				}
 
 				// Restore CD
-				CurrentDir(old);
+				UnLock(CurrentDir(old));
 			}
 		}
 
