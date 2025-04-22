@@ -103,6 +103,10 @@ int function_build_list(FunctionHandle *handle,
 		    funcentry->fe_type=external->een_type;
 		    funcentry->fe_flags=FUNCENTF_TOP_LEVEL;
 
+		    // Lister in icon mode?
+		    if (external->een_flags&FUNCENTF_ICON_ACTION)
+			    funcentry->fe_flags|=FUNCENTF_ICON_ACTION;
+
 		    // Link?
 		    if (external->een_flags&FUNCENTF_LINK)
 			    funcentry->fe_flags|=FUNCENTF_LINK;

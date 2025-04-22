@@ -240,6 +240,9 @@ GALILEOFM_FUNC(function_user)
 					// Save pointer to lister entry
 					exentry->een_entry=entry->fe_entry;
 
+					// Copy icon mode flag
+					exentry->een_flags |= entry->fe_flags&FUNCENTF_ICON_ACTION;
+
 					// Add to external entry list
 					AddTail((struct List *)&handle->external_list,(struct Node *)exentry);
 				}
