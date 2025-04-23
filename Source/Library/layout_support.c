@@ -1759,8 +1759,11 @@ void __asm __saveds L_SetWindowID(
 	// Valid ID pointer?
 	if (!id) return;
 
+	// Set magic
+	window->ExtData = (UBYTE *)WINDOW_MAGIC;
+	window->UserPort->mp_Node.ln_Name = (UBYTE *)WINDOW_MAGIC;
+
 	// Fill out fields
-	id->magic=WINDOW_MAGIC;
 	id->window=window;
 	id->window_id=window_id;
 	id->app_port=port;
@@ -1776,14 +1779,14 @@ ULONG __asm __saveds L_GetWindowID(register __a0 struct Window *window)
 	WindowID *id;
 
 	// Valid window?
-	if (!window) return WINDOW_UNKNOWN;
+	if (!window || !window->UserPort || window->ExtData != (UBYTE *)WINDOW_MAGIC ||
+	    window->UserPort->mp_Node.ln_Name != (BYTE *)WINDOW_MAGIC)
+	{
+	    return WINDOW_UNKNOWN;
+	}
 
-	// Get ID pointer
-	if (!(id=(WindowID *)window->UserData) || id<(WindowID *)0x1000 || TypeOfMem(id)==0)
-		return WINDOW_UNKNOWN;
-
-	// Check ID is valid
-	if (id->magic!=WINDOW_MAGIC || id->window!=window) return WINDOW_UNKNOWN;
+	if (!(id=(WindowID *)window->UserData) || id->window != window)
+	    return WINDOW_UNKNOWN;
 
 	// Return ID code
 	return id->window_id;
@@ -1805,7 +1808,11 @@ struct MsgPort *__asm __saveds L_GetWindowAppPort(register __a0 struct Window *w
 	if (!(id=(WindowID *)window->UserData)) return 0;
 
 	// Check ID is valid
-	if (id->magic!=WINDOW_MAGIC || id->window!=window) return 0;
+	if (window->ExtData != (UBYTE *)WINDOW_MAGIC || !window->UserPort ||
+	    window->UserPort->mp_Node.ln_Name != (BYTE *)WINDOW_MAGIC || id->window!=window)
+	{
+	    return 0;
+	}
 
 	// Return app port
 	return id->app_port;

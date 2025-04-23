@@ -255,9 +255,6 @@ struct Window *__asm __saveds L_OpenConfigWindow(
 	// Store data and window pointer
 	window->UserData=(APTR)data;
 
-	// Initialise ID
-	L_SetWindowID(window,0,WINDOW_UNDEFINED,0);
-
 	// Back-fill?
 #ifndef BACKFILL
 	if (flags&WINDOW_REQ_FILL)
@@ -293,6 +290,9 @@ struct Window *__asm __saveds L_OpenConfigWindow(
 	// Set the window's font and draw mode
 	SetFont(window->RPort,font);
 	SetDrMd(window->RPort,JAM1);
+
+	// Initialise ID
+	L_SetWindowID(window,0,WINDOW_UNDEFINED,0);
 
 	// Allocate window filerequester
 	data->request=AllocAslRequest(ASL_FileRequest,0);

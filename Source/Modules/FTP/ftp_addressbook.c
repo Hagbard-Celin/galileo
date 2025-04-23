@@ -4488,7 +4488,8 @@ if 	(dg)
 	if	(dg->idcmp_port)
 		{
 		dump_IDCMP_messages(dg);
-		DeletePort(dg->idcmp_port);
+
+		DeleteMsgPort(dg->idcmp_port);
 		}
 
 	// free the last node for dg window
@@ -4533,7 +4534,7 @@ if	(dg=AllocVec(sizeof (struct display_globals), MEMF_CLEAR))
 		if	(!dg->dg_og->og_SiteList)
 			read_build_addressbook(dg->dg_og,dg->dg_ipc);
 
-		if	(dg->idcmp_port = (struct MsgPort *)CreatePort(NULL,NULL))
+		if	(dg->idcmp_port = CreateMsgPort())
 			{
 			dg->win_sig = 1L<<dg->idcmp_port->mp_SigBit;
 			return(dg);

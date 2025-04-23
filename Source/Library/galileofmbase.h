@@ -326,13 +326,12 @@ typedef struct _MenuData {
 
 typedef struct
 {
-    ULONG	    magic;	// Magic ID
     struct Window   *window;	// Pointer back to window
     ULONG	    window_id;	// User window ID
     struct MsgPort  *app_port;	// "Window's" application port
 } WindowID;
 
-#define WINDOW_MAGIC		0x83224948
+#define WINDOW_MAGIC		0x83224947
 #define WINDOW_UNKNOWN		(ULONG)-1
 #define WINDOW_UNDEFINED	0
 
