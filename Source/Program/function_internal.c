@@ -206,7 +206,7 @@ function_internal_command(CommandList *command,
 	    KPrintF("function_internal_command instruction->flags: %lx \n", instruction->ipa_flags);
 #endif
 	    // Async by '&'? Set appropriate flags
-	    if ((handle) && (instruction->ipa_flags&FUNCF_RUN_ASYNC))
+	    if (handle && instruction && instruction->ipa_flags&FUNCF_RUN_ASYNC)
 	    {
 		handle->func_parameters.flags|=FUNCF_RUN_ASYNC;
 		handle->func_parameters.flags&=~(FUNCF_RELOAD_FILES|FUNCF_RESCAN_SOURCE|FUNCF_RESCAN_DEST);
