@@ -5,6 +5,13 @@ and Workbench replacement by GPSoftware.
 Re-licensing to GPL by permission of Dr Greg Perry, Managing Director of
 GPSoftware.
 
+        ---WARNING--- 25 Apr 2025 Commit: 0914e87  ---WARNING---
+         Any compiles done before this commit includes the file:
+                 "Storage/Modules/recyclebin.gfmmodule".
+   Including it in the compile was a mistake, as it is far from complete.
+  It only works as an AppIcon that simply deletes files, and is thus quite
+ dangerous if someone should mistake it for a real recycle-bin with restore
+       functionality. I recommend deleting the file to avoid this.
 
 First, a word of warning: This fork exists mainly because I chose this code-base
 to as my training-ground for my latest attempt at finally learning Amiga

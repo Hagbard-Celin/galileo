@@ -171,7 +171,6 @@ all:    modules_pragmas.h \
 	$(BIN)themes.gfmmodule \
 	$(BIN)filetype.gfmmodule \
 	$(BIN)cleanup.gfmmodule \
-	$(SBIN)recyclebin.gfmmodule \
 	$(BIN)about.gfmmodule \
 	$(BIN)ftp.gfmmodule \
 	$(BIN)pathformat.gfmmodule \
