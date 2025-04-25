@@ -5,7 +5,7 @@ and Workbench replacement by GPSoftware.
 Re-licensing to GPL by permission of Dr Greg Perry, Managing Director of
 GPSoftware.
 
-        ---WARNING--- 25 Apr 2025 Commit: 0914e87  ---WARNING---
+        ---WARNING--- 25 Apr 2025 Commit: 25c6019  ---WARNING---
          Any compiles done before this commit includes the file:
                  "Storage/Modules/recyclebin.gfmmodule".
    Including it in the compile was a mistake, as it is far from complete.
