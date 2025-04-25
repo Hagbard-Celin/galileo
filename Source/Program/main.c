@@ -232,7 +232,7 @@ void startup_check_assign()
         rem_galileo_assign=1;
 	}
 
-	// See if we have a D5THEMES: lock
+	// See if we have a G_THEMES: lock
 	if (lock=Lock("G_THEMES:",ACCESS_READ))
 		UnLock(lock);
 

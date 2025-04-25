@@ -252,7 +252,7 @@ int __asm __saveds L_Module_Entry(
 				// Re-open with new path
 				strcpy(path,filename);
 
-				// Assign D5THEMES to the new directory
+				// Assign G_THEMES to the new directory
 				if ((lock=Lock(filename,ACCESS_READ)) &&
 					!(AssignLock("G_THEMES",lock)))
 					UnLock(lock);
@@ -539,7 +539,7 @@ long save_theme(struct Screen *screen,GalileoCallbackInfo *info,char *filename,B
 void write_theme_intro(APTR file,char *filename)
 {
 	char buf[400];
-	lsprintf(buf,	"/* D5THEME\n\n"
+	lsprintf(buf,	"/* G_THEME\n\n"
 					"   %s\n\n"
 					"   Galileo Theme File\n"
 					"*/\n\n",	FilePart(filename));
