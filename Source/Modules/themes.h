@@ -40,15 +40,6 @@ For more information on Directory Opus for Windows please see:
 #include "modules_lib.h"
 #include <galileofm/hooks.h>
 
-typedef struct _FunctionEntry
-{
-	struct MinNode		fe_node;
-	char			*fe_name;
-	struct DirEntry		*fe_entry;
-	short			fe_type;
-	short			fe_flags;
-} FunctionEntry;
-
 #define SAVETHEME	0
 #define LOADTHEME	1
 #define BUILDTHEME	2

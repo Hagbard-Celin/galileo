@@ -52,6 +52,28 @@ typedef struct
 	char	*template;	// Command template
 } ModuleFunction;
 
+#ifndef _GALILEOFM_FUNCTION_LAUNCH
+
+typedef struct _PathNode
+{
+	struct MinNode		pn_node;
+	char			pn_path_buf[512];
+	char			*pn_path;
+	APTR			pn_lister;
+	ULONG			pn_flags;
+} PathNode;
+
+typedef struct _FunctionEntry
+{
+	struct MinNode		fe_node;
+	char			*fe_name;
+	struct DirEntry		*fe_entry;
+	short			fe_type;
+	short			fe_flags;
+} FunctionEntry;
+
+#endif
+
 // Function flags
 #define FUNCF_NEED_SOURCE		(1<<0)	// Needs a source directory
 #define FUNCF_NEED_DEST			(1<<1)	// Needs a destination directory

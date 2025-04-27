@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -242,13 +242,5 @@ typedef struct
 	short			lock_count;
 	short			pad;
 } CfgDragInfo;
-
-typedef struct _FunctionEntry {
-	Att_Node	*node;		// Points back to node
-	int		type;		// Entry type
-	char		buffer[256];	// Entry buffer
-} FunctionEntry;
-
-
 
 #endif

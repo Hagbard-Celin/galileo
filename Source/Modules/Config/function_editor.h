@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -147,11 +147,11 @@ extern ObjectDef
 #define FUNCTYPE_FILETYPE	3
 #define FUNCTYPE_HOTKEY		4
 
-typedef struct _FunctionEntry {
+typedef struct _FunctionEditorEntry {
 	Att_Node	*node;		// Points back to node
 	int		type;		// Entry type
 	char		buffer[256];	// Entry buffer
-} FunctionEntry;
+} FunctionEditorEntry;
 
 extern long _funced_flaglist[];
 extern USHORT _function_type_labels[];
@@ -217,10 +217,10 @@ void funced_update_flaglist(FuncEdData *);
 void funced_decompile(FuncEdData *);
 void funced_compile(FuncEdData *);
 void funced_build_display(FuncEdData *);
-void funced_build_entrydisplay(FuncEdData *,Att_Node *,FunctionEntry *);
+void funced_build_entrydisplay(FuncEdData *,Att_Node *,FunctionEditorEntry *);
 void funced_start_edit(FuncEdData *);
 BOOL funced_end_edit(FuncEdData *,Att_Node *,int,USHORT);
-Att_Node *funced_new_entry(FuncEdData *,Att_Node *,FunctionEntry *);
+Att_Node *funced_new_entry(FuncEdData *,Att_Node *,FunctionEditorEntry *);
 void funced_check_flag(ULONG *,ULONG);
 void funced_edit_insertstring(ObjectList *,ULONG,char *,struct Library *,struct Library *);
 void funced_store_edits(FuncEdData *);
@@ -229,7 +229,7 @@ BOOL funced_command_req(FuncEdData *,char *,short);
 void funced_appmsg(FuncEdData *,struct AppMessage *);
 short funced_appmsg_arg(struct WBArg *,char *,struct Library *);
 void functioned_end_drag(FuncEdData *,short);
-void functioned_copy_line(FuncEdData *,FunctionEntry *,unsigned short,Point *);
+void functioned_copy_line(FuncEdData *,FunctionEditorEntry *,unsigned short,Point *);
 short functioned_get_line(struct Window *,GL_Object *,unsigned short,unsigned short,struct Library *);
 void funced_show_key(FuncEdData *data);
 BOOL funced_rexx_args(char *name,char *buffer);

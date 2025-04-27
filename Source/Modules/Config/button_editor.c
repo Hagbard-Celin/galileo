@@ -1119,7 +1119,7 @@ void buttoned_end_drag(ButtonEdData *data,BOOL ok)
 		{
 			Point *pos;
 			Cfg_Instruction *ins;
-			FunctionEntry *entry,*first=0,*last=0;
+			FunctionEditorEntry *entry,*first=0,*last=0;
 
 			// Store position (screen relative)
 			if (pos=AllocVec(sizeof(Point),0))
@@ -1134,7 +1134,7 @@ void buttoned_end_drag(ButtonEdData *data,BOOL ok)
 				ins=(Cfg_Instruction *)ins->node.mln_Succ)
 			{
 				// Create a function entry
-				if (entry=AllocVec(sizeof(FunctionEntry),MEMF_CLEAR))
+				if (entry=AllocVec(sizeof(FunctionEditorEntry),MEMF_CLEAR))
 				{
 					// Copy function data
 					entry->type=ins->type;

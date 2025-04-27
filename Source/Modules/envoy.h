@@ -124,12 +124,3 @@ ULONG VerifyUserCrypt( STRPTR userName, STRPTR password,
 #define ACTION_UID_TO_USERINFO      1037
 #define ACTION_GID_TO_GROUPINFO     1038
 
-
-typedef struct _FunctionEntry
-{
-	struct MinNode		fe_node;
-	char			*fe_name;
-	struct DirEntry		*fe_entry;
-	short			fe_type;
-	short			fe_flags;
-} FunctionEntry;

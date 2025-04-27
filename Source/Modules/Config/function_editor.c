@@ -185,21 +185,21 @@ void FunctionEditor(void)
 			else
 			if (submsg->command==FUNCTIONEDIT_COPY_LINE)
 			{
-				FunctionEntry *entry,*next;
+				FunctionEditorEntry *entry,*next;
 
 				// Copy function
 				functioned_copy_line(
 					data,
-					(FunctionEntry *)submsg->data,
+					(FunctionEditorEntry *)submsg->data,
 					0,
 					(Point *)submsg->data_free);
 
 				// Free function
-				entry=(FunctionEntry *)submsg->data;
+				entry=(FunctionEditorEntry *)submsg->data;
 				while (entry)
 				{
 					// Get next
-					next=(FunctionEntry *)entry->node;
+					next=(FunctionEditorEntry *)entry->node;
 
 					// Free entry
 					FreeVec(entry);
@@ -226,7 +226,7 @@ void FunctionEditor(void)
 						(struct List *)&((Cfg_Button *)submsg->data)->function_list,
 						FTYPE_LEFT_BUTTON))
 				{
-					FunctionEntry dummy;
+					FunctionEditorEntry dummy;
 					Cfg_Instruction *ins;
 
 					// Go through instructions
@@ -528,7 +528,7 @@ void FunctionEditor(void)
 								if (!data->edit_node) break;
 
 								// Store type
-								((FunctionEntry *)data->edit_node->att_data)->type=msg.Code;
+								((FunctionEditorEntry *)data->edit_node->att_data)->type=msg.Code;
 
 								// Disable popup button if no functions
 								DisableObject(
@@ -550,7 +550,7 @@ void FunctionEditor(void)
 									if (!(funced_command_req(
 										data,
 										buffer,
-										((FunctionEntry *)data->edit_node->att_data)->type)))
+										((FunctionEditorEntry *)data->edit_node->att_data)->type)))
 										break;
 
 									// Insert string in edit line
@@ -1029,7 +1029,7 @@ void funced_update_flaglist(FuncEdData *data)
 // Decompile function string into list of functions
 void funced_decompile(FuncEdData *data)
 {
-	FunctionEntry *entry;
+	FunctionEditorEntry *entry;
 	Cfg_Instruction *ins;
 
 	// Clear list
@@ -1049,7 +1049,7 @@ void funced_decompile(FuncEdData *data)
 		}
 
 		// Allocate function entry
-		if (entry=AllocVec(sizeof(FunctionEntry),MEMF_CLEAR))
+		if (entry=AllocVec(sizeof(FunctionEditorEntry),MEMF_CLEAR))
 		{
 			// Store function data
 			entry->type=ins->type;
@@ -1066,7 +1066,7 @@ void funced_decompile(FuncEdData *data)
 // Compile function list into function
 void funced_compile(FuncEdData *data)
 {
-	FunctionEntry *entry;
+	FunctionEditorEntry *entry;
 	Cfg_Instruction *ins;
 	Att_Node *node;
 
@@ -1087,7 +1087,7 @@ void funced_compile(FuncEdData *data)
 		node=(Att_Node *)node->node.ln_Succ)
 	{
 		// Get function entry
-		entry=(FunctionEntry *)node->att_data;
+		entry=(FunctionEditorEntry *)node->att_data;
 
 		// Create a new instruction
 		if (ins=NewInstruction(0,entry->type,entry->buffer))
@@ -1116,7 +1116,7 @@ void funced_build_display(FuncEdData *data)
 		node=(Att_Node *)node->node.ln_Succ)
 	{
 		// Build display string for this node
-		funced_build_entrydisplay(data,0,(FunctionEntry *)node->att_data);
+		funced_build_entrydisplay(data,0,(FunctionEditorEntry *)node->att_data);
 	}
 
 	// Attach list to gadget
@@ -1128,7 +1128,7 @@ void funced_build_display(FuncEdData *data)
 void funced_build_entrydisplay(
 	FuncEdData *data,
 	Att_Node *node,
-	FunctionEntry *entry)
+	FunctionEditorEntry *entry)
 {
 	// If node is 0, create a new one
 	if (!node) node=Att_NewNode(data->func_display_list,0,(ULONG)entry,0);
@@ -1167,14 +1167,14 @@ void funced_start_edit(FuncEdData *data)
 	SetGadgetValue(
 		data->objlist,
 		GAD_FUNCED_EDIT,
-		(ULONG)((FunctionEntry *)data->edit_node->att_data)->buffer);
+		(ULONG)((FunctionEditorEntry *)data->edit_node->att_data)->buffer);
 	DisableObject(data->objlist,GAD_FUNCED_EDIT,FALSE);
 
 	// Set function type
 	SetGadgetValue(
 		data->objlist,
 		GAD_FUNCED_FUNCTION_TYPE,
-		((FunctionEntry *)data->edit_node->att_data)->type);
+		((FunctionEditorEntry *)data->edit_node->att_data)->type);
 	DisableObject(data->objlist,GAD_FUNCED_FUNCTION_TYPE,FALSE);
 
 	// Enable some gadgets
@@ -1183,9 +1183,9 @@ void funced_start_edit(FuncEdData *data)
 
 	// Enable popup list if not a command, or if command & we have function list
 	DisableObject(data->objlist,GAD_FUNCED_EDIT_GLASS,
-		(((FunctionEntry *)data->edit_node->att_data)->type==INST_COMMAND && !data->startup->func_list));
+		(((FunctionEditorEntry *)data->edit_node->att_data)->type==INST_COMMAND && !data->startup->func_list));
 	DisableObject(data->objlist,GAD_FUNCED_EDIT_ARGUMENT,
-		(((FunctionEntry *)data->edit_node->att_data)->type==INST_COMMAND && !data->startup->func_list));
+		(((FunctionEditorEntry *)data->edit_node->att_data)->type==INST_COMMAND && !data->startup->func_list));
 
 	// Activate gadget
 	ActivateStrGad(GADGET(GetObject(data->objlist,GAD_FUNCED_EDIT)),data->window);
@@ -1205,7 +1205,7 @@ BOOL funced_end_edit(
 	if (node)
 	{
 		// Get entry data
-		FunctionEntry *entry=(FunctionEntry *)node->att_data;
+		FunctionEditorEntry *entry=(FunctionEditorEntry *)node->att_data;
 
 		// Detach existing list
 		SetGadgetValue(data->objlist,GAD_FUNCED_LISTER,(ULONG)~0);
@@ -1331,13 +1331,13 @@ BOOL funced_end_edit(
 Att_Node *funced_new_entry(
 	FuncEdData *data,
 	Att_Node *insert,
-	FunctionEntry *copy)
+	FunctionEditorEntry *copy)
 {
 	Att_Node *node=0;
-	FunctionEntry *entry;
+	FunctionEditorEntry *entry;
 
-	// Allocate FunctionEntry
-	if (entry=AllocVec(sizeof(FunctionEntry),MEMF_CLEAR))
+	// Allocate FunctionEditorEntry
+	if (entry=AllocVec(sizeof(FunctionEditorEntry),MEMF_CLEAR))
 	{
 		// Copy existing node if it exists
 		if (copy)
@@ -1358,7 +1358,7 @@ Att_Node *funced_new_entry(
 		// If insert, position nodes
 		if (insert)
 		{
-			Att_PosNode(data->function_list,entry->node,((FunctionEntry *)insert->att_data)->node);
+			Att_PosNode(data->function_list,entry->node,((FunctionEditorEntry *)insert->att_data)->node);
 			Att_PosNode(data->func_display_list,node,insert);
 		}
 
@@ -1368,7 +1368,7 @@ Att_Node *funced_new_entry(
 		// If it's valid, get the type of that entry
 		if (!copy && insert && insert->node.ln_Pred)
 		{
-			((FunctionEntry *)node->att_data)->type=((FunctionEntry *)insert->att_data)->type;
+			((FunctionEditorEntry *)node->att_data)->type=((FunctionEditorEntry *)insert->att_data)->type;
 		}
 
 		// Build display node
@@ -1381,7 +1381,7 @@ Att_Node *funced_new_entry(
 		SetGadgetValue(
 			data->objlist,
 			GAD_FUNCED_FUNCTION_TYPE,
-			((FunctionEntry *)node->att_data)->type);
+			((FunctionEditorEntry *)node->att_data)->type);
 	}
 
 	// Return node
@@ -1616,7 +1616,7 @@ BOOL funced_command_req(FuncEdData *data,char *buffer,short type)
 
 		// Command arguments?
 		else
-		if (((FunctionEntry *)data->edit_node->att_data)->type==INST_COMMAND)
+		if (((FunctionEditorEntry *)data->edit_node->att_data)->type==INST_COMMAND)
 		{
 			char *cmd;
 
@@ -1865,11 +1865,11 @@ void funced_appmsg(FuncEdData *data,struct AppMessage *msg)
 		// Create instruction
 		if (ins=instruction_from_wbarg(&msg->am_ArgList[num],0))
 		{
-			FunctionEntry *entry;
+			FunctionEditorEntry *entry;
 			Att_Node *node;
 
-			// Allocate FunctionEntry
-			if (entry=AllocVec(sizeof(FunctionEntry),MEMF_CLEAR))
+			// Allocate FunctionEditorEntry
+			if (entry=AllocVec(sizeof(FunctionEditorEntry),MEMF_CLEAR))
 			{
 				// Create new function node
 				entry->node=Att_NewNode(data->function_list,0,(ULONG)entry,0);
@@ -2099,7 +2099,7 @@ void functioned_end_drag(FuncEdData *data,short ok)
 		if (id==WINDOW_FUNCTION_EDITOR)
 		{
 			Att_Node *node;
-			FunctionEntry *entry,*copy,*first=0,*last=0;
+			FunctionEditorEntry *entry,*copy,*first=0,*last=0;
 			Point *pos;
 
 			// Store position (screen relative)
@@ -2119,8 +2119,8 @@ void functioned_end_drag(FuncEdData *data,short ok)
 			while (node && node->node.ln_Succ)
 			{
 				// Copy function entry
-				copy=(FunctionEntry *)node->att_data;
-				if (entry=AllocVec(sizeof(FunctionEntry),MEMF_CLEAR))
+				copy=(FunctionEditorEntry *)node->att_data;
+				if (entry=AllocVec(sizeof(FunctionEditorEntry),MEMF_CLEAR))
 				{
 					// Copy function data
 					entry->type=copy->type;
@@ -2161,7 +2161,7 @@ void functioned_end_drag(FuncEdData *data,short ok)
 // Copy a function
 void functioned_copy_line(
 	FuncEdData *data,
-	FunctionEntry *entry,
+	FunctionEditorEntry *entry,
 	unsigned short type,
 	Point *pos)
 {
@@ -2202,7 +2202,7 @@ void functioned_copy_line(
 		data->edit_node=funced_new_entry(data,before,entry);
 
 		// Get next
-		if (entry) entry=(FunctionEntry *)entry->node;
+		if (entry) entry=(FunctionEditorEntry *)entry->node;
 	} while (entry);
 
 	// Valid note?

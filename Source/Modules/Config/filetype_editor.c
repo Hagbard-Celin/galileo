@@ -1360,7 +1360,7 @@ BOOL filetypeed_end_drag(filetype_ed_data *data,BOOL ok)
 				{
 					Point *pos;
 					Cfg_Instruction *ins;
-					FunctionEntry *entry,*first=0,*last=0;
+					FunctionEditorEntry *entry,*first=0,*last=0;
 
 					// Store position (screen relative)
 					if (pos=AllocVec(sizeof(Point),0))
@@ -1378,7 +1378,7 @@ BOOL filetypeed_end_drag(filetype_ed_data *data,BOOL ok)
 						if (ins->type!=INST_LABEL)
 						{
 							// Create a function entry
-							if (entry=AllocVec(sizeof(FunctionEntry),MEMF_CLEAR))
+							if (entry=AllocVec(sizeof(FunctionEditorEntry),MEMF_CLEAR))
 							{
 								// Copy function data
 								entry->type=ins->type;

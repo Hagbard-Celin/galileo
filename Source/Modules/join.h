@@ -120,14 +120,6 @@ typedef struct
 	FuncArgs		*args;
 } join_data;
 
-typedef struct _FunctionEntry
-{
-	struct MinNode		fe_node;
-	char			*fe_name;
-	struct DirEntry		*fe_entry;
-	short			fe_type;
-	short			fe_flags;
-} FunctionEntry;
 
 BOOL join_open(join_data *);
 void join_close(join_data *);

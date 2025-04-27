@@ -51,12 +51,3 @@ enum
 	FI_SGW,
 	FI_REPORT
 };
-
-typedef struct _FunctionEntry
-{
-	struct MinNode		fe_node;
-	char			*fe_name;
-	struct DirEntry		*fe_entry;
-	short			fe_type;
-	short			fe_flags;
-} FunctionEntry;

@@ -242,17 +242,6 @@ FTOP_AND,		// And (254)
 FTOP_ENDSECTION		// End of a section (255)
 };
 
-/* YUCK! should not be here */
-typedef struct _FunctionEntry
-{
-	struct MinNode		fe_node;
-	char			*fe_name;
-	struct DirEntry		*fe_entry;
-	short			fe_type;
-	short			fe_flags;
-} FunctionEntry;
-
-
 long local_IPC_Launch(
 	struct ListLock *list,
 	IPCData **storage,

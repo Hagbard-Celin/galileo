@@ -56,14 +56,6 @@ void init_locale_data(struct GalileoLocale *);
 extern ULONG callerid;
 #endif
 
-typedef struct _PathNode
-{
-	struct MinNode		pn_node;
-	char			pn_path_buf[512];
-	char			*pn_path;
-	ULONG 			*pn_lister;
-	ULONG			pn_flags;
-};
 
 struct DirDate
 {
