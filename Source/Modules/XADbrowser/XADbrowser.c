@@ -1230,8 +1230,6 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 	if (!(data.listpath[0]))
 	{
 	    if (!(data.destp = data.hook.gc_GetDest(IPCDATA(ipc), data.listpath))) goto end_2;
-
-	    data.hook.gc_EndDest(IPCDATA(ipc), 0);
 	}
 
 	if (data.listp2)
@@ -1384,8 +1382,6 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 	// Store lister for restoring deststination status later
 	data.desth=(ULONG)data.destp->pn_lister;
 
-	data.hook.gc_EndDest(IPCDATA(ipc), 0);
-
 	// Have to do this, or destination lister will be locked busy
 	sprintf(buf,"lister set %lu busy off wait",data.desth);
 	data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
@@ -1406,7 +1402,6 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
     if (filename)
     {
 	data.hook.gc_EndEntry(IPCDATA(ipc), Entry, TRUE);
-	data.hook.gc_EndSource(IPCDATA(ipc), 1);
     }
 
     if (data.newlister)
@@ -1660,8 +1655,6 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 	{
 	    // Get lister pointer
 	    data.desth=(ULONG)data.destp->pn_lister;
-
-	    data.hook.gc_EndDest(IPCDATA(ipc), 0);
 
 	    // Have to do this, or destination lister will be locked busy
 	    sprintf(buf,"lister set %lu busy off wait",data.desth);

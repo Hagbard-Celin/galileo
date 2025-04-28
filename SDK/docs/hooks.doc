@@ -303,8 +303,11 @@ Added in Galileo:
     APTR gc_EndSource(    APTR handle,
                           long ununsed)
 
-    Call this hook if you are aborting early and do not wish to process
-    further source paths. Set the 'unused' parameter to 0.
+    If your module is handling multiple source paths, you should call this
+    hook if you are aborting early and do not wish to process further source
+    paths. Set the 'unused' parameter to 0.
+    If you module is handling only one destnation path, it shuld not be
+    called.
     This hook is the same as the old EXTCMD_END_SOURCE callback function.
 
 
@@ -340,8 +343,10 @@ Added in Galileo:
     void gc_EndDest(    APTR handle,
                         long continue)
 
-    You must call this command when you have finished with one destination path,
-    prior to calling gc_GetDest().
+    If your module is handling multiple destination paths, you must call this
+    command when you have finished with one destination path, prior to
+    calling gc_GetDest().
+    If you do not handle multiple destination paths you sould not call this.
     This hook is the same as the old EXTCMD_END_DEST callback function.
 
 

@@ -250,8 +250,11 @@ specific to it.
         Purpose : Finishes and cleans up current source path
         Packet  : Set to 0
         Returns : <none>
-        Notes   : Call this command if you are aborting early and do not
-                  wish to process further source paths.
+        Notes   : If your module is handling multiple source paths, you
+                  should call this command if you are aborting early and do
+                  not wish to process further source paths.
+                  If it is handling only one destnation path, it shuld not be
+                  called.
 
         Command : EXTCMD_NEXT_SOURCE
         Purpose : Gets the next source path
@@ -287,8 +290,11 @@ specific to it.
         Purpose : Ends the current destination path
         Packet  : FALSE to abort, TRUE to continue
         Returns : <none>
-        Notes   : You must call this command when you have finished with one
+        Notes   : If your module is handling multiple destination paths, you
+                  must call this command when you have finished with one
                   destination path, prior to calling EXTCMD_GET_DEST.
+                  If it is handling only one destnation path, it shuld not be
+                  called.
 
         Command : EXTCMD_GET_ENTRY
         Purpose : Get the next entry to work with
