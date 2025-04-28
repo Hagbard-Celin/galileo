@@ -87,7 +87,7 @@ int __asm __saveds L_Module_Entry(
 	func_callback(EXTCMD_GET_SOURCE,IPCDATA(ipc),data->source);
 
 	// Get destination path
-	func_callback(EXTCMD_GET_DEST,IPCDATA(ipc),data->dest);
+	data->dest_path = (PathNode *)func_callback(EXTCMD_GET_DEST,IPCDATA(ipc),data->dest);
 
 	// Files supplied?
 	if (data->args && data->args->FA_Arguments[JOINARG_FROM])
@@ -893,6 +893,10 @@ BOOL join_join_files(join_data *data)
 		return 0;
 	}
 
+	// Set flag to rescan dest lister
+	if (data->dest_path)
+	    data->dest_path->pn_flags |= LISTNF_RESCAN;
+
 	// Go through files
 	for (node=(Att_Node *)data->join_list->list.lh_Head,count=1;
 		node->node.ln_Succ;
@@ -1435,6 +1439,10 @@ short split_split_file(join_data *data)
 
 		// Failed?
 		if (fail) break;
+
+		// Set flag to rescan dest lister
+		if (data->dest_path)
+		    data->dest_path->pn_flags |= LISTNF_RESCAN;
 
 		// Do this chunk
 		for (read=0;read<chunksize;)

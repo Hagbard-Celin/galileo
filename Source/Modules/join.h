@@ -110,6 +110,8 @@ typedef struct
 	char			source[256];
 	char			dest[256];
 
+	PathNode		*dest_path;
+
 	struct timerequest	timer_req;
 	struct Library		*TimerBase;
 
