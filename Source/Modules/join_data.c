@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -49,11 +49,11 @@ ModuleInfo
 		"join.catalog",
 		0,
 		2,
-		{JOIN,"Join",MSG_JOIN_DESC,FUNCF_WANT_ENTRIES|FUNCF_WANT_DEST,ARG_1}};
+		{JOIN,"Join",MSG_JOIN_DESC,FUNCF_WANT_ENTRIES|FUNCF_WANT_DEST|FUNCF_SINGLE_DEST,ARG_1}};
 
 ModuleFunction
 	more_functions[]={
-		{SPLIT,"Split",MSG_SPLIT_DESC,FUNCF_WANT_ENTRIES|FUNCF_WANT_DEST,ARG_2}};
+		{SPLIT,"Split",MSG_SPLIT_DESC,FUNCF_WANT_ENTRIES|FUNCF_WANT_DEST|FUNCF_SINGLE_DEST,ARG_2}};
 
 ConfigWindow
 	join_window={
