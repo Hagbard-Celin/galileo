@@ -72,6 +72,9 @@ typedef struct _FunctionEntry
 	short			fe_flags;
 } FunctionEntry;
 
+#define LISTNF_UPDATE_STAMP	(1<<5)	// Update datestamp
+#define LISTNF_RESCAN		(1<<6)	// Rescan this lister
+
 #endif
 
 // Function flags

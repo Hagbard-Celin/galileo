@@ -1349,12 +1349,8 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 
 	    if (data.destp)
 	    {
-		// Needed for the following scandir not to open a new window
-		sprintf(buf,"lister set %lu busy off wait",data.destp->pn_lister);
-		data.hook.gc_SendCommand(IPCDATA(ipc),buf,NULL,NULL);
-
-  	        sprintf(buf,"command source %lu ScanDir %s",data.destp->pn_lister,data.destp->pn_path);
-		data.hook.gc_SendCommand(IPCDATA(ipc),buf,NULL,NULL);
+		// Set flag to rescan dest lister
+		data.destp->pn_flags |= LISTNF_RESCAN;
 	    }
 	    xadFreeObject(data.ArcInf,NULL);
 	}
