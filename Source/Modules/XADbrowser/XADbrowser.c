@@ -1238,11 +1238,9 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 	{
     		data.listh = (ULONG)data.listp2->pn_lister;
     		data.listw = data.hook.gc_GetWindow(data.listp2);
-    		sprintf(data.lists, "%lu", data.listh);
 
-    		sprintf(buf,"lister query %s numselentries", data.lists);
-    		total=data.hook.gc_SendCommand(IPCDATA(ipc),buf,NULL,NULL);
-		}
+		total = data.hook.gc_EntryCount(IPCDATA(ipc));
+	}
 	else
 	{
 	    short a=archnum;
