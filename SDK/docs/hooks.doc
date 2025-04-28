@@ -212,6 +212,64 @@ directly (ie no message passing).
     guide of the node to display.
 
 
+Present but undocumented in Maggelan II:
+
+    BOOL gc_SetFileComment(    ULONG lister,
+                               char *name,
+                               char *comment)
+
+    This function sets the comment on a file. Pass it the lister handle, the
+    filename of the file in 'name' and the comment to set in 'comment'.
+
+
+    long gc_RexxCommand(    char *command,
+                            char *result,
+                            long length,
+                            struct MsgPort *replyport,
+                            ULONG flags)
+
+    This function does the same as gc_SendCommand, but works without the need
+    for a function-handle. It also needs a pre-allocated buffer for 'result' and
+    the size of this buffer in 'length'. It uses the presence of 'result' and
+    'length' to indicate that we want the result as opposed to 'flags' for
+    gc_SendCommand. If 'result' is not needed, both 'result' and 'length' MUST
+    be NULL. 'flags' MUST be NULL.
+
+
+    long gc_FileRequest(    struct Window *parent,
+                            char *title,
+                            char *initial_path,
+                            char *pathname,
+                            ULONG flags,
+                            char *pattern)
+
+    This function opens a file requester.
+
+
+    void gc_GetThemes(    char *buffer)
+
+	This function places the themes path into 'buffer'.
+
+
+Added in Galileo:
+
+    void gc_FreePointerDirect(    APTR pointer,
+                                  ULONG type,
+                                  ULONG flags)
+
+    This function is the equivalent of gc_FreePointer, without the need for a
+    GetPointerPkt. It is useful for closing the function-handle of the
+    originating lister for asynchronous gfmmodules. This is done by using
+    IPCDATA(ipc) for 'pointer', GETPTR_HANDLE for 'type' and GETPTRF_DELPORT for
+    'flags'.
+
+
+    BOOL gc_IsSourceDestLock(    ULONG lister)
+
+    This function take a lister handle and returns TRUE if the lister is locked
+    as source or destination or FLASE otherwise.
+
+
     *** The following hooks are a new interface to the old module callback
         system, and take and return similar parameters. The 'handle' parameter
         in any functions that take it is passed to the Module_Entry() function
@@ -584,61 +642,3 @@ directly (ie no message passing).
     gc_GetPointer(), you MUST call gc_FreePointer. You must pass
     gc_FreePointer() the same GetPointerPkt structure that you passed
     to gc_GetPointer.
-
-
-Present but undocumented in Maggelan II:
-
-    BOOL gc_SetFileComment(    ULONG lister,
-			       			   char *name,
-			                   char *comment)
-
-    This function sets the comment on a file. Pass it the lister handle, the
-    filename of the file in 'name' and the comment to set in 'comment'.
-
-
-    long gc_RexxCommand(    char *command,
-			                char *result,
-			                long length,
-			                struct MsgPort *replyport,
-			                ULONG flags)
-
-    This function does the same as gc_SendCommand, but works without the need
-    for a function-handle. It also needs a pre-allocated buffer for 'result' and
-    the size of this buffer in 'length'. It uses the presence of 'result' and
-    'length' to indicate that we want the result as opposed to 'flags' for
-    gc_SendCommand. If 'result' is not needed, both 'result' and 'length' MUST
-    be NULL. 'flags' MUST be NULL.
-
-	
-    long gc_FileRequest(    struct Window *parent,
-			                char *title,
-			                char *initial_path,
-			                char *pathname,
-			                ULONG flags,
-			                char *pattern)
-
-    This function opens a file requester.
-
-
-    void gc_GetThemes(    char *buffer)
-
-	This function places the themes path into 'buffer'.
-
-
-Added in Galileo:
-
-    void gc_FreePointerDirect(    APTR pointer,
-    			 				  ULONG type,
-    			 				  ULONG flags)
-
-    This function is the equivalent of gc_FreePointer, without the need for a
-    GetPointerPkt. It is useful for closing the function-handle of the
-    originating lister for asynchronous gfmmodules. This is done by using
-    IPCDATA(ipc) for 'pointer', GETPTR_HANDLE for 'type' and GETPTRF_DELPORT for
-    'flags'.
-
-
-    BOOL gc_IsSourceDestLock(    ULONG lister)
-
-    This function take a lister handle and returns TRUE if the lister is locked
-    as source or destination or FLASE otherwise.
