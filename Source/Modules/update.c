@@ -224,6 +224,16 @@ int __asm __saveds L_Module_Entry(
 		// Set flag
 		flags|=UPDATEF_DONE_PATH_KEYS;
 	}
+	else
+	if (!(flags&UPDATEF_DONE_PATHFORMAT))
+	{
+	    // Delete pathformat module
+	    DeleteFile("PROGDIR:modules/pathformat.gfmmodule");
+
+	    // Set flag
+	    flags|=UPDATEF_DONE_PATHFORMAT;
+
+	}
 
 	// Haven't done theme stuff
 	if (!(flags&UPDATEF_DONE_THEMES))

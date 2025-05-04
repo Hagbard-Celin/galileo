@@ -132,15 +132,11 @@ ENVOYOBJS   =   $(OBJ)envoy.o $(OBJ)envoy_data.o $(OBJ)envoy_strings.o
 ENVOYVER    =   0
 ENVOYREV    =   2
 
-PATHFORMATOBJS = $(OBJ)pathformat.o $(OBJ)pathformat_data.o $(OBJ)pathformat_strings.o
-PATHFORMATVER  = 0
-PATHFORMATREV  = 2
-
 MODINITOBJS = $(SOBJ)modinit.o $(SOBJ)modinitmffp.o
 
 STRINGS = cleanup.strings debug.strings diskcopy.strings filetype.strings fixicons.strings \
      format.strings icon.strings iconclock.strings join.strings listerformat.strings misc.strings \
-     pathformat.strings play.strings print.strings read.strings recyclebin.strings show.strings themes.strings \
+     play.strings print.strings read.strings recyclebin.strings show.strings themes.strings \
      update.strings $(FTPDIR)ftp.strings $(CONFIGDIR)config.strings $(XADDIR)XADbrowser.strings
 
 OBJS1 = $(STDOBJS) $(FFPOBJS) $(SHOWOBJS) $(PLAYOBJS) $(MISCOBJS) $(ICONOBJS) $(FORMATOBJS) $(DISKCOPYOBJS) \
@@ -170,10 +166,10 @@ all:    modules_pragmas.h \
 	$(BIN)fixicons.gfmmodule \
 	$(BIN)themes.gfmmodule \
 	$(BIN)filetype.gfmmodule \
+	$(BIN)update.gfmmodule \
 	$(BIN)cleanup.gfmmodule \
 	$(BIN)about.gfmmodule \
 	$(BIN)ftp.gfmmodule \
-	$(BIN)pathformat.gfmmodule \
 	$(SBIN)iconclock.gfmmodule \
 	$(CONFIGDIR)galileoconfig_pragmas.h \
 	$(BIN)XADbrowser.gfmmodule \
@@ -191,7 +187,6 @@ core:   modules_pragmas.h \
 	filetype.strings $(BIN)filetype.gfmmodule \
 	cleanup.strings $(BIN)cleanup.gfmmodule \
 	$(BIN)about.gfmmodule \
-	pathformat.strings $(BIN)pathformat.gfmmodule \
 	$(CONFIGDIR)galileoconfig_pragmas.h $(CONFIGDIR)config.strings $(BIN)galileoconfig.gfmmodule
 
 ftp:    ftp/ftp.strings $(BIN)ftp.gfmmodule
@@ -495,13 +490,13 @@ sc sd
 
 #########################################################################
 
-$(SBIN)update.gfmmodule: $(STDOBJS) $(UPDATEOBJS) 
+$(BIN)update.gfmmodule: $(STDOBJS) $(UPDATEOBJS)
 	slink with lib:utillib.with with <<
 define __ctype=___ctype
 libprefix _L_
 libfd modules.fd
 $(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(UPDATEOBJS) 
-to $(SBIN)update.gfmmodule
+to $(BIN)update.gfmmodule
 lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(UPDATEVER)
 librevision $(UPDATEREV)
@@ -557,22 +552,6 @@ libversion $(ENVOYVER)
 librevision $(ENVOYREV)
 $(STRIPDEBUG) noicons
 sc sd 
-<
-
-#########################################################################
-
-$(BIN)pathformat.gfmmodule: $(STDOBJS) $(PATHFORMATOBJS) 
-	slink with lib:utillib.with with <<
-define __ctype=___ctype
-libprefix _L_
-libfd modules.fd
-$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(PATHFORMATOBJS) 
-to $(BIN)pathformat.gfmmodule
-lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
-libversion $(PATHFORMATVER)
-librevision $(PATHFORMATREV)
-$(STRIPDEBUG) noicons
-sc sd
 <
 
 #########################################################################
@@ -878,21 +857,6 @@ $(OBJ)about_data.o: about_data.c about.h modules_lib.h
 $(OBJ)about_data.o: /Library/galileofmbase.h /Include/galileo/os.h
 $(OBJ)about_data.o: /Program/galileo_config.h /Library/galileofmpragmas.h
 $(OBJ)about_data.o: modules.h modules_pragmas.h
-$(OBJ)pathformat.o: pathformat.c pathformat.h pathformat.strings
-$(OBJ)pathformat.o: modules_lib.h /Library/galileofmbase.h
-$(OBJ)pathformat.o: /Include/galileo/os.h /Program/galileo_config.h
-$(OBJ)pathformat.o: /Library/galileofmpragmas.h modules.h modules_pragmas.h
-$(OBJ)pathformat.o: Config/galileoconfig.h Config/galileoconfig_pragmas.h
-$(OBJ)pathformat.o: /Program/position.h
-$(OBJ)pathformat_data.o: pathformat_data.c pathformat.h pathformat.strings
-$(OBJ)pathformat_data.o: modules_lib.h /Library/galileofmbase.h
-$(OBJ)pathformat_data.o: /Include/galileo/os.h /Program/galileo_config.h
-$(OBJ)pathformat_data.o: /Library/galileofmpragmas.h modules.h
-$(OBJ)pathformat_data.o: modules_pragmas.h
-$(OBJ)pathformat_strings.o: pathformat_strings.c pathformat.strings
-$(OBJ)pathformat_strings.o: /Library/galileofmbase.h /Include/galileo/os.h
-$(OBJ)pathformat_strings.o: /Program/galileo_config.h
-$(OBJ)pathformat_strings.o: /Library/galileofmpragmas.h
 
 $(OBJ)envoy.o: envoy.c envoy.h modules_lib.h /Library/galileofmbase.h
 $(OBJ)envoy.o: /Include/galileo/os.h /Program/galileo_config.h

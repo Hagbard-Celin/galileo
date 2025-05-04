@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -49,6 +49,7 @@ For more information on Directory Opus for Windows please see:
 #define UPDATEF_DONE_COMMANDS	(1<<7)
 #define UPDATEF_DONE_DESKTOP	(1<<8)
 #define UPDATEF_DONE_THEMES 	(1<<9)
+#define UPDATEF_DONE_PATHFORMAT	(1<<11)
 
 struct Window *open_status(struct Screen *);
 BOOL update_do_leftouts(struct List *,APTR);
