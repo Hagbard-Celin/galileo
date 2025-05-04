@@ -103,12 +103,15 @@ manually.
 5.  Option 1 - Fresh install:
     Unpack "galileo/Basedir.lha" to where you want the program installed.
     Option 2 - Upgrade:
-    Make a copy of the main directory of a previous installation. Rename it
-    to "Galileo", and delete the main-exe, all (gfm)modules and the main
-    library.
+    Make a backup of the main directory of a previous installation. If
+    upgrading from a GPSoftware version you also need to:
+    - Rename the main directory to "Galileo".
+    - Delete the main program, all modules, and the main library.
+    - Get the "Galileo.info" from "galileo/Basedir.lha" and copy it to the
+      newly renamed "Galileo" directory.
 
-6.  Copy the contents of "Build/Binary/" into the "Galileo" directory at install
-    location.
+6.  Copy the contents of "Build/Binary/" into the "Galileo" directory at
+    install location.
 
 7.  (Optional) Copy "<install_location>/Galileo/C/LoadGB" to "c:LoadGB".
     Add "Assign Galileo: <install_location>/Galileo/" to "s:User-Startup".
