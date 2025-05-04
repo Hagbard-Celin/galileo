@@ -52,6 +52,7 @@ For more information on Directory Opus for Windows please see:
 #define UPDATEF_DONE_THEMES 	(1<<9)
 #define UPDATEF_DONE_IFFCHUNK	(1<<10)
 #define UPDATEF_DONE_PATHFORMAT	(1<<11)
+#define UPDATEF_DONE_FIXGROUPS	(1<<13)
 
 struct Window *open_status(struct Screen *);
 BOOL update_do_leftouts(struct List *,APTR);

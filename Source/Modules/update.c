@@ -165,13 +165,13 @@ int __asm __saveds L_Module_Entry(
 	}
 
 	// Haven't done groups?
-	if (!(flags&UPDATEF_DONE_GROUPS))
+	if (!(flags&UPDATEF_DONE_GROUPS) || !(flags&UPDATEF_DONE_FIXGROUPS))
 	{
 		// Open status window
 		if (!window) window=open_status(screen);
 
 		if (update_groups())
-			flags|=UPDATEF_DONE_GROUPS;
+			flags|=UPDATEF_DONE_GROUPS|UPDATEF_DONE_FIXGROUPS;
 	}
 
 	// Haven't done storage?
@@ -589,6 +589,7 @@ BOOL update_groups(void)
 			else
 			if (file=Open(anchor->ap_Buf,MODE_OLDFILE))
 			{
+				ULONG data, *old_data;
 				char buf[264];
 				short len;
 
@@ -599,16 +600,40 @@ BOOL update_groups(void)
 				// Close file
 				Close(file);
 
+				data = MAKE_ID('G','R','P','\0');
+
 				// Got data?
 				if (len>5)
 				{
-					// Re-create file
-					if (file=Open(anchor->ap_Buf,MODE_NEWFILE))
+					WORD tmp_len;
+
+					old_data = (ULONG *)buf;
+
+					tmp_len = len - 9;
+
+					// Valid data?
+					if (*old_data == data)
 					{
-						// Write data
-						Write(file,buf,len);
-						Write(file,newstuff,9);
-						Close(file);
+					    // File already converted?
+					    if(len > 14 && buf[tmp_len] == '\n')
+					    {
+						// Multiple times?
+						while (tmp_len > 9 && buf[tmp_len - 9] == '\n')
+						    tmp_len -= 9;
+
+						// Adjust length to exclude multiple "newstuff[]"
+						len = tmp_len + 9;
+					    }
+
+					    // Re-create file
+					    if (file=Open(anchor->ap_Buf,MODE_NEWFILE))
+					    {
+						    // Write data
+						    Write(file,buf,len);
+						    if (buf[tmp_len] != '\n')
+							Write(file,newstuff,9);
+						    Close(file);
+					    }
 					}
 				}
 			}
