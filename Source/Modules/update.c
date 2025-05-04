@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -197,6 +198,16 @@ int __asm __saveds L_Module_Entry(
 
 		// Set flag
 		flags|=UPDATEF_DONE_FILETYPES;
+	}
+
+	// Haven't done iffchunk?
+	if (!(flags&UPDATEF_DONE_IFFCHUNK))
+	{
+		// Open status window
+		if (!window) window=open_status(screen);
+
+		if (update_iffchunk())
+		    flags|=UPDATEF_DONE_IFFCHUNK;
 	}
 
 	// Haven't done path keys
@@ -426,6 +437,85 @@ BOOL update_do_leftouts(struct List *list,APTR memory)
 		// Close file
 		IFFClose(iff);
 	}
+
+	return 1;
+}
+
+
+BOOL update_iffchunk(void)
+{
+	struct AnchorPath *anchor;
+	long error;
+
+	// Allocate anchor
+	if (!(anchor=AllocVec(sizeof(struct AnchorPath)+256,MEMF_CLEAR)))
+		return 0;
+
+	// Initialise anchor
+	anchor->ap_Strlen=256;
+
+	// Start match
+	error=MatchFirst("PROGDIR:(Buttons|Commands|Environment|Settings|Filetypes|Storage)/#?",anchor);
+	while (!error)
+	{
+		// Directory?
+		if (anchor->ap_Info.fib_DirEntryType>0)
+		{
+			// New directory?
+			if (!(anchor->ap_Flags&APF_DIDDIR))
+			{
+				// Set bit to enter directory
+				anchor->ap_Flags|=APF_DODIR;
+			}
+
+			// Old directory
+			else
+			{
+				// Clear bit
+				anchor->ap_Flags&=~APF_DIDDIR;
+			}
+		}
+
+		// File
+		else
+		{
+			BPTR file;
+
+			// Try to open
+			if (file = Open(anchor->ap_Buf,MODE_OLDFILE))
+			{
+				ULONG data;
+
+				// Read header
+				data = 0;
+				Read(file, &data, sizeof(data));
+
+				if (data == 0x464F524D)
+				{
+				    data = 0;
+
+				    Seek(file, 4, OFFSET_CURRENT);
+				    Read(file, &data, 4);
+				    if (data == 0x4F505553)
+				    {
+					data = ID_GILO;
+
+					Seek(file, -4, OFFSET_CURRENT);
+					Write(file, &data, 4);
+				    }
+				}
+
+				Close(file);
+			}
+		}
+
+		// Get next
+		error=MatchNext(anchor);
+	}
+
+	// Clean up
+	MatchEnd(anchor);
+	FreeVec(anchor);
 
 	return 1;
 }

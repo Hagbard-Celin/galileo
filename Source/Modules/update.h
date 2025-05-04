@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -49,11 +50,13 @@ For more information on Directory Opus for Windows please see:
 #define UPDATEF_DONE_COMMANDS	(1<<7)
 #define UPDATEF_DONE_DESKTOP	(1<<8)
 #define UPDATEF_DONE_THEMES 	(1<<9)
+#define UPDATEF_DONE_IFFCHUNK	(1<<10)
 #define UPDATEF_DONE_PATHFORMAT	(1<<11)
 
 struct Window *open_status(struct Screen *);
 BOOL update_do_leftouts(struct List *,APTR);
 BOOL update_groups(void);
+BOOL update_iffchunk(void);
 short update_convert_leftouts(APTR file,APTR memory,struct List *list);
 BOOL update_storage(void);
 void update_filetypes(void);
