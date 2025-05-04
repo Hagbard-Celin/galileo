@@ -82,23 +82,35 @@ the amount of available memory.
 
 With this in place, these are the steps to compile and install:
 
+Note: The Upgrade option in Step 5 only works for upgrading from earlier
+Galileo builds up until Commit: fb69809 - 04 May 2025. After that upgrading
+from earlier versions by GPSoftware is supported as follows. Upgrading from
+v5.8x works. Upgrading from v5.5 should work and upgrading from 5.x might
+work, but these are untested. ARexx scripts including themes must be updated
+manually.
+
 1.  Unpack the Galileo_Source_<ver>.<rev>.lha to your preferred directory.
 
-1b. (Optional) Copy move the directory "galileo/Build" to another location.
+2.  (Optional) Copy move the directory "galileo/Build" to another location.
     And change the variable "$builddir" in the script "galileo/buildme"
     accordingly.
 
-2.  Open a shell and cd to the "galileo" directory at the location where you
+3.  Open a shell and cd to the "galileo" directory at the location where you
     extracted archive.
 
-3.  Run the script "buildme".
+4.  Run the script "buildme".
 
-4.  Unpack "galileo/Basedir.lha" to where you want the program installed.
+5.  Option 1 - Fresh install:
+    Unpack "galileo/Basedir.lha" to where you want the program installed.
+    Option 2 - Upgrade:
+    Make a copy of the main directory of a previous installation. Rename it
+    to "Galileo", and delete the main-exe, all (gfm)modules and the main
+    library.
 
-5.  Copy the contents of "Build/Binary/" into the "Galileo" directory at install
+6.  Copy the contents of "Build/Binary/" into the "Galileo" directory at install
     location.
 
-5b. (Optional) Copy "<install_location>/Galileo/C/LoadGB" to "c:LoadGB".
+7.  (Optional) Copy "<install_location>/Galileo/C/LoadGB" to "c:LoadGB".
     Add "Assign Galileo: <install_location>/Galileo/" to "s:User-Startup".
     Replace "LoadWB" with "LoadGB" at end of "s:startup-sequence".
 
