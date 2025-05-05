@@ -605,24 +605,28 @@ BOOL update_groups(void)
 				// Got data?
 				if (len>5)
 				{
-					WORD tmp_len;
+					WORD tmp_len = 0;
 
 					old_data = (ULONG *)buf;
-
-					tmp_len = len - 9;
 
 					// Valid data?
 					if (*old_data == data)
 					{
-					    // File already converted?
-					    if(len > 14 && buf[tmp_len] == '\n')
+					    // File bigger than header plus "newstuff[]"?
+					    if(len > 14)
 					    {
-						// Multiple times?
-						while (tmp_len > 9 && buf[tmp_len - 9] == '\n')
-						    tmp_len -= 9;
+						tmp_len = len - 9;
 
-						// Adjust length to exclude multiple "newstuff[]"
-						len = tmp_len + 9;
+						// File already converted?
+						if (buf[tmp_len] == '\n')
+						{
+						    // Multiple times?
+						    while (tmp_len > 9 && buf[tmp_len - 9] == '\n')
+						        tmp_len -= 9;
+
+						    // Adjust length to exclude multiple "newstuff[]"
+						    len = tmp_len + 9;
+						}
 					    }
 
 					    // Re-create file
