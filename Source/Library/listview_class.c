@@ -1356,6 +1356,70 @@ ULONG __asm __saveds listview_dispatch(register __a0 Class *cl,
 	    listview_resize(cl,gadget,data,(struct gpResize *)msg);
 	    break;
 
+	case GM_HANDLESCROLL:
+	    {
+		struct gpInput *input;
+		short redraw=0;
+
+		// Get input pointer
+		input=(struct gpInput *)msg;
+
+		if (input->gpi_IEvent->ie_Class == IECLASS_RAWKEY && !(data->flags&LVF_NO_SCROLLING))
+		{
+		    switch (input->gpi_IEvent->ie_Code)
+		    {
+			case RAWKEY_WHEEL_UP:
+			    if (data->top>0)
+			    {
+				// Scroll up
+				--data->top;
+				data->top_item=data->top_item->ln_Pred;
+
+				data->flags|=LVF_SCROLL_FLAG;
+
+				// Redraw the list
+				data->last_sel=-1;
+				redraw=1;
+			    }
+			    break;
+
+			case RAWKEY_WHEEL_DOWN:
+			    if (data->top+data->lines<data->count)
+			    {
+				// Scroll down
+				++data->top;
+				data->top_item=data->top_item->ln_Succ;
+
+				data->flags|=LVF_SCROLL_FLAG;
+
+				// Redraw the list
+				data->last_sel=-1;
+				redraw=1;
+			    }
+			    break;
+
+			default:
+			    break;
+		    }
+		}
+
+		// Redraw needed?
+		if (redraw)
+		{
+		    struct RastPort *rp;
+
+		    // Get rastport
+		    if (rp=ObtainGIRPort(input->gpi_GInfo))
+		    {
+			// Send redraw
+			DoMethod(obj,GM_RENDER,input->gpi_GInfo,rp,GREDRAW_UPDATE);
+			ReleaseGIRPort(rp);
+		    }
+		}
+		retval = GMR_NOREUSE;
+
+	    }
+	    break;
 
 	// Unknown method
 	default:
