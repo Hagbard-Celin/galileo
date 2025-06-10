@@ -1051,10 +1051,10 @@ void __saveds misc_proc(void)
 					name=FindTask(0)->tc_Node.ln_Name;
 
 					// See if an OpenWith item is specified
-					if (isdigit(name[6]))
+					if (isdigit(name[8]))
 					{
 						// Get flags
-						flags=(1<<30)|atoi(name+6);
+						flags=(1<<30)|atoi(name+8);
 					}
 
 					// Open with
