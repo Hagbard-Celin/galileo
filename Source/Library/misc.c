@@ -305,7 +305,7 @@ void __asm __saveds L_CloseIFFFile(register __a0 struct IFFHandle *iff)
 }
 */
 
-unsigned long place_lookup[]={
+static const unsigned long place_lookup[]={
 	1,
 	10,
 	100,
@@ -416,7 +416,7 @@ void __asm __saveds L_ItoaU(
 	*str=0;
 }
 
-ULONG quad_lookpup[][2] =
+static const ULONG quad_lookpup[][2] =
 {
     {0,1},
     {0,10},
