@@ -52,11 +52,14 @@ struct Library 		*LayersBase;
 struct Library 		*CxBase;
 struct Library 		*IconBase;
 struct Library 		*WorkbenchBase;
-struct Library 		*DataTypesBase=0;
-struct Library 		*P96Base=0;
-struct NewIconBase 	*NewIconBase=0;
-struct RxsLib 		*RexxSysBase=0;
-struct Library 		*ResTrackBase=0;
+struct Library		*DataTypesBase;
+struct Library		*P96Base;
+struct NewIconBase	*NewIconBase;
+struct RxsLib		*RexxSysBase;
+#ifdef RESOURCE_TRACKING
+struct Library		*ResTrackBase;
+#endif
+
 struct TextFont 	*topaz_font;
 
 struct List				image_list;
