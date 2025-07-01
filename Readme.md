@@ -109,6 +109,13 @@ manually.
     Make a backup of the main directory of a previous installation. If
     upgrading from a GPSoftware version you also need to:
     - Rename the main directory to "Galileo".
+      Warning: Do not do this the other way around, as in copying to original
+      directory to "Galileo". If you want to keep the old installation
+      working, you can restore it to the original location from the backup
+      after step 8.
+    - Remove or comment out the assign for the original install in
+      "S:user-startup".
+    - Make sure the "C:LoadWB" is the original OS command.
     - Delete the main program, all modules, and the main library.
     - Get the "Galileo.info" from "galileo/Basedir.lha" and copy it to the
       newly renamed "Galileo" directory.
