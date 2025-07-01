@@ -7,7 +7,7 @@ GPSoftware.
 
         ---WARNING--- 25 Apr 2025 Commit: 25c6019  ---WARNING---
          Any compiles done before this commit includes the file:
-                 "Storage/Modules/recyclebin.gfmmodule".
+                 "Storage/Modules/recyclebin.gfmmodule"
    Including it in the compile was a mistake, as it is far from complete.
   It only works as an AppIcon that simply deletes files, and is thus quite
  dangerous if someone should mistake it for a real recycle-bin with restore
@@ -101,8 +101,11 @@ manually.
 4.  Run the script "buildme".
 
 5.  Option 1 - Fresh install:
+
     Unpack "galileo/Basedir.lha" to where you want the program installed.
+
     Option 2 - Upgrade:
+
     Make a backup of the main directory of a previous installation. If
     upgrading from a GPSoftware version you also need to:
     - Rename the main directory to "Galileo".
@@ -116,6 +119,13 @@ manually.
 7.  (Optional) Copy "<install_location>/Galileo/C/LoadGB" to "c:LoadGB".
     Add "Assign Galileo: <install_location>/Galileo/" to "s:User-Startup".
     Replace "LoadWB" with "LoadGB" at end of "s:startup-sequence".
+
+8.  In case of upgrade: The upgrade will make older configuration files load.
+    But all paths that are set in the config will still point to the old
+    locations, and must be updated manually.
+
+    Warning: Until this is done, you must make sure that the old paths are
+    not valid, least you risk messing up you original install.
 
 For building the SDK only replace the script in step 3 with
 "buildme Only SDK". This will fill/update the directories "SDK/source" and
