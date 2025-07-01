@@ -74,6 +74,9 @@ void __asm __saveds lister_process_msg(
 		// Window closed
 		case IDCMP_CLOSEWINDOW:
 
+			// Clear down gadget
+			lister->down_gadget = 0;
+
 			// Send ourselves a quit message, will handle busy state correctly
 			IPC_Command(lister->ipc,IPC_QUIT,0,0,0,0);
 			break;
