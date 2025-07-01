@@ -129,7 +129,8 @@ manually.
 
 8.  In case of upgrade: The upgrade will make older configuration files load.
     But all paths that are set in the config will still point to the old
-    locations, and must be updated manually.
+    locations, and must be updated manually. To Update the paths of
+    button-banks and start-menus the layout must be saved.
 
     Warning: Until this is done, you must make sure that the old paths are
     not valid, least you risk messing up you original install.
