@@ -859,7 +859,7 @@ void lister_build_icon_name(Lister *lister)
 		}
 
 		// Otherwise copy object name
-		else strcpy(name_ptr,lister->cur_buffer->buf_ObjectName);
+		else stccpy(name_ptr,lister->cur_buffer->buf_ObjectName,32);
 
 		// Get name pointer
 		if (!*name_ptr)
