@@ -430,7 +430,7 @@ int __asm __saveds L_Module_Entry(
 	for (a=0;names[a];a++)
 	{
 	    // Add name to list
-	    Att_NewNode(files,names[a],0,0);			    
+	    Att_NewNode(files,names[a],0,0);
 	}
     }
 
