@@ -194,22 +194,22 @@ void lister_fix_menus(Lister *lister,BOOL sel_only)
 }
 
 
-USHORT lister_listerpopup(Lister *lister,USHORT code)
+UWORD lister_listerpopup(Lister *lister,UWORD code)
 {
 	short a,num=0;
-	USHORT res;
+	UWORD res;
 	PopUpHandle *menu;
 	PopUpItem *item;
 	PopUpExt *ext;
 
 	// Allocate menu handle
 	if (!(menu=PopUpNewHandle((ULONG)lister,lister->backdrop_info->callback,&locale)))
-		return (USHORT)-1;
+		return (UWORD)-1;
 
 	// Build default lister popup
 	for (a=0;lister_popup_data[a];a+=2)
 	{
-		if (lister_popup_data[a]==(USHORT)-1)
+		if (lister_popup_data[a]==(UWORD)-1)
 			PopUpSeparator(menu);
 		else
 		if (item=PopUpNewItem(menu,lister_popup_data[a],lister_popup_data[a+1],0))
@@ -259,7 +259,7 @@ USHORT lister_listerpopup(Lister *lister,USHORT code)
 
 	// Do popup menu
 	item=0;
-	if ((res=DoPopUpMenu(lister->window,&menu->ph_Menu,&item,code))!=(USHORT)-1 &&
+	if ((res=DoPopUpMenu(lister->window,&menu->ph_Menu,&item,code))!=(UWORD)-1 &&
 		res>=MENU_EXTENSION)
 	{
 		// Got valid pointer?
@@ -288,7 +288,7 @@ USHORT lister_listerpopup(Lister *lister,USHORT code)
 			}
 
 			// Clear result code
-			res=(USHORT)-1;
+			res=(UWORD)-1;
 		}
 	}
 

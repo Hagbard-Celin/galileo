@@ -676,7 +676,7 @@ function_change_get_protect(
 		while (msg=GetWindowMsg(window->UserPort))
 		{
 			struct IntuiMessage copy_msg;
-			USHORT gadgetid=0;
+			UWORD gadgetid=0;
 
 			// Copy message and reply
 			copy_msg=*msg;

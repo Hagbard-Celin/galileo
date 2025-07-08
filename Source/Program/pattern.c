@@ -67,13 +67,13 @@ void GetPattern(PatternData *pattern,struct Screen *screen,ULONG border_col)
 	// Bitmap pattern?
 	if (pattern->prefs.wbp_Flags&WBPF_PATTERN)
 	{
-		USHORT *ptr,*planes[MAXDEPTH];
+		UWORD *ptr,*planes[MAXDEPTH];
 		short num,row,col,pen;
 
 		// Get plane pointers
 		for (num=0;num<pattern->prefs.wbp_Depth;num++)
 		{
-			planes[num]=((USHORT *)pattern->data)+(PAT_HEIGHT*num);
+			planes[num]=((UWORD *)pattern->data)+(PAT_HEIGHT*num);
 		}
 		pattern->fill_plane_key=0;
 
@@ -89,7 +89,7 @@ void GetPattern(PatternData *pattern,struct Screen *screen,ULONG border_col)
 				CopyMem(
 					(char *)planes[num],
 					(char *)pattern->fill[num],
-					PAT_HEIGHT*sizeof(USHORT));
+					PAT_HEIGHT*sizeof(UWORD));
 			}
 			pattern->fill_plane_key=pattern->prefs.wbp_Depth;
 		}

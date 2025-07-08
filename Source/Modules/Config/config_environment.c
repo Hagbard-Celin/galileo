@@ -45,17 +45,17 @@ For more information on Directory Opus for Windows please see:
 
 void funced_edit_insertstring(ObjectList *,ULONG,char *string,struct Library *,struct Library *);
 BOOL config_env_popkey(config_env_data *);
-void config_env_load(config_env_data *,USHORT);
+void config_env_load(config_env_data *,UWORD);
 BOOL config_env_save(config_env_data *,short);
 char *strstri(char *string,char *substring);
 
 unsigned long __asm __saveds L_Config_Environment(
 	register __a0 Cfg_Environment *env,
 	register __a1 struct Screen *screen,
-	register __a2 USHORT *pen_table,
+	register __a2 UWORD *pen_table,
 	register __a3 IPCData *ipc,
 	register __a4 IPCData *main_ipc,
-	register __d0 USHORT pen_alloc,
+	register __d0 UWORD pen_alloc,
 	register __a5 ULONG *change_flags,
 	register __d1 char *settings_name,
 	register __d2 Att_List *script_list)
@@ -402,7 +402,7 @@ unsigned long __asm __saveds L_Config_Environment(
 			{
 				struct IntuiMessage msg_copy;
 				struct Gadget *gadget;
-				USHORT gadgetid=0;
+				UWORD gadgetid=0;
 
 				// Copy message and reply
 				msg_copy=*msg;
@@ -2907,7 +2907,7 @@ BOOL config_env_popkey(config_env_data *data)
 
 
 // Load environment
-void config_env_load(config_env_data *data,USHORT id)
+void config_env_load(config_env_data *data,UWORD id)
 {
 	char path[256];
 	short ret=0,ask=1;

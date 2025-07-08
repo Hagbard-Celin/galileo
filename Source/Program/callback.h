@@ -228,7 +228,7 @@ void __asm HookCheckDesktop(
 BOOL __asm HookMatchDesktop(
 	register __a0 char *path);
 
-USHORT __asm HookGetDesktop(
+UWORD __asm HookGetDesktop(
 	register __a0 char *path);
 
 void __asm HookGetThemes(
@@ -273,7 +273,7 @@ BOOL __asm __saveds HookIsFakeDir(
 
 typedef struct
 {
-	USHORT	gc_Count;
+	UWORD	gc_Count;
 
 	APTR	gc_CreateFileEntry;
 	APTR	gc_FileSet;

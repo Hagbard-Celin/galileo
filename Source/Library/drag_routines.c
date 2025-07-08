@@ -351,7 +351,7 @@ void __asm __saveds L_GetDragMask(register __a0 DragInfo *drag)
 	{
 		short depth;
 		struct BitMap *imagebm,*tempbm;
-		USHORT *image;
+		UWORD *image;
 		BOOL ok=0;
 
 		// Get image depth
@@ -379,7 +379,7 @@ void __asm __saveds L_GetDragMask(register __a0 DragInfo *drag)
 				short mask[2]={0xff,0xff},bit_pos,x_count;
 				long pixfmt,count,num,array_pos,word_pos;
 				ULONG colour0[3];
-				USHORT word_data;
+				UWORD word_data;
                 struct TrueColorInfo image_array_info = {3,0,0,0,0};
             	image_array_info.BytesPerRow=drag->sprite.Width*3;
             	image_array_info.RedData=image_array;
@@ -457,7 +457,7 @@ void __asm __saveds L_GetDragMask(register __a0 DragInfo *drag)
 					if (bit_pos==0)
 					{
 						// Set word in mask
-						((USHORT *)drag->bob.ImageShadow)[word_pos++]=word_data;
+						((UWORD *)drag->bob.ImageShadow)[word_pos++]=word_data;
 
 						// Reset word
 						word_data=0;
@@ -471,7 +471,7 @@ void __asm __saveds L_GetDragMask(register __a0 DragInfo *drag)
 				// Fill rest of the mask
 				while (word_pos<count)
 				{
-					((USHORT *)drag->bob.ImageShadow)[word_pos++]=word_data;
+					((UWORD *)drag->bob.ImageShadow)[word_pos++]=word_data;
 					word_data=0;
 				}
 
@@ -506,7 +506,7 @@ void __asm __saveds L_GetDragMask(register __a0 DragInfo *drag)
 			for (plane=0;plane<depth;plane++)
 			{
 				// Get image pointer
-				image=(USHORT *)tempbm->Planes[plane];
+				image=(UWORD *)tempbm->Planes[plane];
 
 				// Invalid?
 				if (!image) continue;
@@ -514,7 +514,7 @@ void __asm __saveds L_GetDragMask(register __a0 DragInfo *drag)
 				// Build image
 				for (row=0,off=0,word=0;row<drag->sprite.Height;row++)
 					for (col=0;col<columns;col++)
-						((USHORT *)drag->bob.ImageShadow)[word++]|=image[off++];
+						((UWORD *)drag->bob.ImageShadow)[word++]|=image[off++];
 			}
 
 			// Free temporary bitmap
@@ -533,7 +533,7 @@ void __asm __saveds L_GetDragMask(register __a0 DragInfo *drag)
 			planesize=((drag->width+15)>>4)*drag->height;
 
 			// Fill mask with ones
-			for (x=0;x<planesize;x++) ((USHORT *)drag->bob.ImageShadow)[x]=0xffff;
+			for (x=0;x<planesize;x++) ((UWORD *)drag->bob.ImageShadow)[x]=0xffff;
 		}
 
 		// Opaque/transparent?
@@ -541,8 +541,8 @@ void __asm __saveds L_GetDragMask(register __a0 DragInfo *drag)
 		if (drag->flags&DRAGF_OPAQUE && drag->flags&DRAGF_TRANSPARENT)
 		{
 			L_BuildTransDragMask(
-				(USHORT *)drag->bob.ImageShadow,
-				(USHORT *)drag->sprite.ImageData,
+				(UWORD *)drag->bob.ImageShadow,
+				(UWORD *)drag->sprite.ImageData,
 				drag->sprite.Width,
 				drag->sprite.Height,
 				drag->sprite.Depth,
@@ -562,8 +562,8 @@ void __asm __saveds L_GetDragMask(register __a0 DragInfo *drag)
 		if (drag->flags&DRAGF_OPAQUE && drag->flags&DRAGF_TRANSPARENT)
 		{
 			if (L_BuildTransDragMask(
-				(USHORT *)drag->bob.ImageShadow,
-				(USHORT *)drag->sprite.ImageData,
+				(UWORD *)drag->bob.ImageShadow,
+				(UWORD *)drag->sprite.ImageData,
 				drag->sprite.Width<<4,
 				drag->sprite.Height,
 				drag->sprite.Depth,
@@ -728,8 +728,8 @@ void lock_layers(DragInfo *drag,BOOL lock)
 
 // Build a transparent/opaque drag mask
 BOOL __asm __saveds L_BuildTransDragMask(
-	register __a0 USHORT *mask,
-	register __a1 USHORT *image,
+	register __a0 UWORD *mask,
+	register __a1 UWORD *image,
 	register __d0 short width,
 	register __d1 short height,
 	register __d2 short depth,

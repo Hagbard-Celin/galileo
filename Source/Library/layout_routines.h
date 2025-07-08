@@ -42,7 +42,7 @@ struct backfill_hook
 {
 	struct Hook		hook;
 	struct Library		*GfxBase;
-	USHORT			dither[2];
+	UWORD			dither[2];
 	struct RastPort		rp;
 	short			shinepen;
 	short			shadowpen;

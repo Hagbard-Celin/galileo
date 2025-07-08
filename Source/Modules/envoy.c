@@ -44,7 +44,7 @@ typedef struct _PathNode
 	char			*path;
 	struct _Lister			*lister;
 	struct MinList		change_list;
-	USHORT			flags;
+	UWORD			flags;
 } PathNode;
 
 static const char *version="$VER: envoy.gfmmodule 0.2 "__AMIGADATE__" ";

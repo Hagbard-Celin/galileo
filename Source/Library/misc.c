@@ -149,7 +149,7 @@ void __asm __saveds L_BuildKeyString(
 
 
 // Get valid qualifiers
-USHORT __asm __saveds L_QualValid(register __d0 USHORT qual)
+UWORD __asm __saveds L_QualValid(register __d0 UWORD qual)
 {
 	qual&=	IEQUALIFIER_LCOMMAND|IEQUALIFIER_RCOMMAND|
 			IEQUALIFIER_LSHIFT|IEQUALIFIER_RSHIFT|
@@ -161,8 +161,8 @@ USHORT __asm __saveds L_QualValid(register __d0 USHORT qual)
 
 // Convert a key from the raw key code
 BOOL __asm __saveds L_ConvertRawKey(
-	register __d0 USHORT code,
-	register __d1 USHORT qual,
+	register __d0 UWORD code,
+	register __d1 UWORD qual,
 	register __a0 char *key)
 {
 	struct Device *ConsoleDevice;
@@ -260,7 +260,7 @@ static const struct TagItem
 		{WA_PointerDelay,TRUE},
 		{TAG_DONE,0}};
 
-static USHORT __chip
+static UWORD __chip
 	busydata20[]={
 		0x0000,0x0000,
 		0x0400,0x07c0,0x0000,0x07c0,0x0100,0x0380,0x0000,0x07e0,

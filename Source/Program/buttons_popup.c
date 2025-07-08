@@ -38,7 +38,7 @@ For more information on Directory Opus for Windows please see:
 #include "galileofm.h"
 
 // Do popup
-void buttons_do_popup(Buttons *buttons,USHORT code)
+void buttons_do_popup(Buttons *buttons,UWORD code)
 {
 	if (buttons_button_popup(buttons,code))
 	{
@@ -55,7 +55,7 @@ void buttons_do_popup(Buttons *buttons,USHORT code)
 }
 
 
-BOOL buttons_button_popup(Buttons *buttons,USHORT code)
+BOOL buttons_button_popup(Buttons *buttons,UWORD code)
 {
 	Cfg_Button *button;
 	Cfg_ButtonFunction *func;
@@ -159,10 +159,10 @@ BOOL buttons_button_popup(Buttons *buttons,USHORT code)
 
 
 // Popup over border
-USHORT button_border_popup(Buttons *buttons)
+UWORD button_border_popup(Buttons *buttons)
 {
 	PopUpHandle *menu;
-	USHORT res;
+	UWORD res;
 
 	// Create menu
 	if (!(menu=PopUpNewHandle((ULONG)buttons,buttons_refresh_callback,&locale)))

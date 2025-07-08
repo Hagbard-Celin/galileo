@@ -59,7 +59,7 @@ typedef struct _BackdropObject
 	struct Rectangle	bdo_image_rect;	    // Rectangle for image
 	ULONG			bdo_custom_pos;	    // Custom position
 
-	USHORT			*bdo_image_mask[2]; // Image mask
+	UWORD			*bdo_image_mask[2]; // Image mask
 
 	DragInfo		*bdo_drag_info;	    // Drag info for this object
 	short			bdo_drag_x_offset;
@@ -272,20 +272,20 @@ void backdrop_free_info(BackdropInfo *);
 void backdrop_free_list(BackdropInfo *);
 void backdrop_remove_object(BackdropInfo *,BackdropObject *);
 void backdrop_scroll_objects(BackdropInfo *,short,short);
-void backdrop_show_objects(BackdropInfo *,USHORT);
-void backdrop_render_object(BackdropInfo *,BackdropObject *,USHORT);
-void backdrop_draw_object(BackdropInfo *,BackdropObject *,USHORT,struct RastPort *,short,short);
-BOOL backdrop_cleanup_objects(BackdropInfo *,struct Rectangle *,USHORT);
+void backdrop_show_objects(BackdropInfo *,UWORD);
+void backdrop_render_object(BackdropInfo *,BackdropObject *,UWORD);
+void backdrop_draw_object(BackdropInfo *,BackdropObject *,UWORD,struct RastPort *,short,short);
+BOOL backdrop_cleanup_objects(BackdropInfo *,struct Rectangle *,UWORD);
 void backdrop_lineup_objects(BackdropInfo *);
 long backdrop_arrange_objects(BackdropInfo *);
 BackdropObject *__asm backdrop_get_object(
 	register __a0 BackdropInfo *info,
 	register __d0 short x,
 	register __d1 short y,
-	register __d2 USHORT flags);
+	register __d2 UWORD flags);
 BackdropObject *backdrop_icon_in_rect(BackdropInfo *,struct Rectangle *);
 BackdropObject *backdrop_icon_in_rect_full(BackdropInfo *,struct Rectangle *);
-void backdrop_object_open(BackdropInfo *,BackdropObject *,USHORT,BOOL,long,struct WBArg *);
+void backdrop_object_open(BackdropInfo *,BackdropObject *,UWORD,BOOL,long,struct WBArg *);
 void backdrop_update_window(BackdropInfo *,BackdropObject *,struct ListerWindow *);
 BOOL backdrop_start_drag(BackdropInfo *,short,short);
 BOOL backdrop_drag_object(BackdropInfo *,BackdropObject *);
@@ -296,7 +296,7 @@ void backdrop_check_pos(BackdropInfo *);
 void backdrop_info(BackdropInfo *,BackdropObject *);
 void backdrop_snapshot(BackdropInfo *,BOOL,BOOL,BackdropObject *);
 void backdrop_select_all(BackdropInfo *,short);
-BOOL backdrop_cleanup(BackdropInfo *,short,USHORT);
+BOOL backdrop_cleanup(BackdropInfo *,short,UWORD);
 void backdrop_check_change(BackdropInfo *,BackdropObject *);
 void backdrop_get_leftouts(BackdropInfo *,BackdropObject *);
 BackdropObject *backdrop_leftout_new(BackdropInfo *,char *,char *,ULONG);
@@ -326,7 +326,7 @@ void backdrop_rem_appicon(BackdropInfo *info,AppEntry *icon);
 struct _GalileoAppMessage *backdrop_appmessage(BackdropInfo *info,BOOL);
 void backdrop_drop_appwindow(BackdropInfo *info,struct AppWindow *appwindow,short,short);
 void backdrop_sort_objects(BackdropInfo *info,short,BOOL);
-void backdrop_image_bitmap(BackdropInfo *,struct Image *,USHORT *,struct BitMap *);
+void backdrop_image_bitmap(BackdropInfo *,struct Image *,UWORD *,struct BitMap *);
 
 BPTR backdrop_icon_lock(BackdropObject *object);
 
@@ -380,7 +380,7 @@ void backdrop_refresh_drives(BackdropInfo *info,BOOL);
 void backdrop_remove_leftouts(BackdropInfo *info,BackdropObject *disk);
 
 BOOL backdrop_test_rmb(BackdropInfo *,struct IntuiMessage *,struct IntuiMessage *,BOOL);
-BOOL backdrop_popup(BackdropInfo *,short,short,USHORT,long,char *,DirEntry *);
+BOOL backdrop_popup(BackdropInfo *,short,short,UWORD,long,char *,DirEntry *);
 
 #define BPOPF_ICONS	(1<<0)
 #define BPOPF_DIRENTRY	(1<<1)
@@ -457,7 +457,7 @@ short backdrop_check_icons_ok(BackdropInfo *info);
 
 BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned short flags);
 
-void backdrop_erase_icon(BackdropInfo *info,BackdropObject *object,USHORT flags);
+void backdrop_erase_icon(BackdropInfo *info,BackdropObject *object,UWORD flags);
 
 void backdrop_run_build_args(Att_List *list,BackdropInfo *info,BackdropObject *exclude);
 

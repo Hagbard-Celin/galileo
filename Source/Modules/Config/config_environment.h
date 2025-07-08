@@ -110,7 +110,7 @@ typedef struct
 	IPCData			*main_ipc;
 
 	short			option;
-	USHORT			initial_pen_alloc;
+	UWORD			initial_pen_alloc;
 	Att_Node		*option_node;
 
 	unsigned long		font_pens;
@@ -166,8 +166,8 @@ void _config_env_colours_init(config_env_data *data);
 void _config_env_update_output(config_env_data *data);
 void _config_env_update_output_dims(config_env_data *data);
 
-IPCMessage *_config_env_output_window_set(config_env_data *data,USHORT);
-void _config_env_size_instructions(struct Window *window,USHORT);
+IPCMessage *_config_env_output_window_set(config_env_data *data,UWORD);
+void _config_env_size_instructions(struct Window *window,UWORD);
 void _config_env_reset_palette(config_env_data *data);
 void _config_env_grabwb(config_env_data *data);
 void _config_env_update_listersize(config_env_data *data);
@@ -241,7 +241,7 @@ void config_env_path_del(config_env_data *);
 void config_env_path_edit(config_env_data *);
 void config_env_paths_end_drag(config_env_data *,BOOL);
 
-extern USHORT _environment_iconsettings_labels[];
+extern UWORD _environment_iconsettings_labels[];
 
 void config_env_show_sound(config_env_data *);
 void config_env_store_sound(config_env_data *);

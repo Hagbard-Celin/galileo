@@ -42,8 +42,8 @@ For more information on Directory Opus for Windows please see:
 // Match a key press against a function
 // Really should have some locking in here!
 Cfg_Function *match_function_key(
-	USHORT code,
-	USHORT qual,
+	UWORD code,
+	UWORD qual,
 	Cfg_ButtonBank *bank,
 	Lister *lister,
 	ULONG window_id,
@@ -215,8 +215,8 @@ Cfg_Function *match_function_key(
 
 // See if a keypress matches a function
 Cfg_Function *match_function_key_list(
-	USHORT code,
-	USHORT qual,
+	UWORD code,
+	UWORD qual,
 	Cfg_ButtonBank *bank,
 	BOOL global_check)
 {
@@ -353,7 +353,7 @@ void key_finder(IPCData *ipc)
 			else
 			if (imsg->command==KFIPC_KEYCODE)
 			{
-				USHORT code,qual,qual_mask,qual_same;
+				UWORD code,qual,qual_mask,qual_same;
 				char buf[128];
 
 				// Get code and qualifier

@@ -128,7 +128,7 @@ short _config_buttons_remove_empty_rows(config_buttons_data *data,short max);
 short _config_buttons_remove_empty_columns(config_buttons_data *data,short max);
 void _config_buttons_remove_rows(config_buttons_data *data,short pos,short count);
 void _config_buttons_remove_columns(config_buttons_data *data,short pos,short count);
-BOOL _config_buttons_handle_key(config_buttons_data *data,USHORT code,USHORT qual);
+BOOL _config_buttons_handle_key(config_buttons_data *data,UWORD code,UWORD qual);
 BOOL _config_buttons_delete_row(config_buttons_data *data,short);
 BOOL _config_buttons_delete_column(config_buttons_data *data,short);
 

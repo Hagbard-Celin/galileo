@@ -147,7 +147,7 @@ enum
 typedef struct _CommandList
 {
 	struct MinNode	node;
-	USHORT		function;	// Function ID
+	UWORD		function;	// Function ID
 	char		*name;		// Function name
 	ULONG		desc;		// Function description
 	ULONG		flags;		// Function flags

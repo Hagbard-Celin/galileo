@@ -38,12 +38,12 @@ For more information on Directory Opus for Windows please see:
 #include "galileofmlib.h"
 #include "layout_routines.h"
 
-#define GAD_POPUP_ID	(USHORT)-7
-#define GAD_CHECK_ID	(USHORT)-6
-#define GAD_SIGNAL	(USHORT)-5
-#define GAD_STRING2_ID	(USHORT)-4
-#define GAD_TEXT_ID	(USHORT)-3
-#define GAD_STRING_ID	(USHORT)-1
+#define GAD_POPUP_ID	(UWORD)-7
+#define GAD_CHECK_ID	(UWORD)-6
+#define GAD_SIGNAL	(UWORD)-5
+#define GAD_STRING2_ID	(UWORD)-4
+#define GAD_TEXT_ID	(UWORD)-3
+#define GAD_STRING_ID	(UWORD)-1
 
 typedef struct
 {

@@ -371,7 +371,7 @@ ULONG __asm __saveds L_Config_Menu(
 			while (msg=GetWindowMsg(data->window->UserPort))
 			{
 				struct IntuiMessage msg_copy;
-				USHORT gadgetid=0;
+				UWORD gadgetid=0;
 
 				// Copy message and reply (unless IDCMPUPDATE)
 				msg_copy=*msg;

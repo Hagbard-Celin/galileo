@@ -116,8 +116,8 @@ typedef struct galileohotkey {
 } Hotkey;
 
 struct Config {
-	USHORT version;
-	USHORT magic;
+	UWORD version;
+	UWORD magic;
 
 	char copyflags,deleteflags,errorflags,generalflags,iconflags;
 	char existflags,_invalid_sepflags,_invalid_sortflags,dynamicflags;
@@ -142,7 +142,7 @@ struct Config {
 
 	char pubscreen_name[80];
 
-	USHORT Palette[16];
+	UWORD Palette[16];
 	char gadgettopcol,gadgetbotcol;
 	char statusfg,statusbg;
 	char _invalid_filesfg,_invalid_filesbg,_invalid_filesselfg,_invalid_filesselbg;
@@ -251,8 +251,8 @@ struct galileotaskmsg {
 struct RLEinfo {
 	unsigned char *sourceptr;
 	UBYTE **destplanes;
-	USHORT imagebpr,imageheight,imagedepth;
-	USHORT destbpr,destheight,destdepth;
+	UWORD imagebpr,imageheight,imagedepth;
+	UWORD destbpr,destheight,destdepth;
 	char masking,compression;
 	int offset;
 };

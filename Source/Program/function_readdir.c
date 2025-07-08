@@ -531,8 +531,8 @@ void network_get_info(
 	NetworkInfo *network,
 	DirBuffer *buffer,
 	struct DevProc *proc,
-	USHORT owner,
-	USHORT group,
+	UWORD owner,
+	UWORD group,
 	ULONG protection)
 {
 	char *ptr;

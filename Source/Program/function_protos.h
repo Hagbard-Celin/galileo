@@ -95,7 +95,7 @@ GALILEOFM_FUNC(function_stopsniffer);
 BOOL rename_get_wild(char *,char *,char *,char *);
 ExternalEntry *new_external_entry(FunctionHandle *handle,char *path);
 
-void network_get_info(NetworkInfo *,DirBuffer *,struct DevProc *,USHORT,USHORT,ULONG);
+void network_get_info(NetworkInfo *,DirBuffer *,struct DevProc *,UWORD,UWORD,ULONG);
 
 void function_user_run(FunctionHandle *handle,Cfg_Function *function);
 

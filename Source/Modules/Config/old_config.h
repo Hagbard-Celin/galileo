@@ -185,8 +185,8 @@ typedef struct galileohotkey {
 } Hotkey;
 
 struct Config {
-	USHORT version;
-	USHORT magic;
+	UWORD version;
+	UWORD magic;
 
 	char copyflags;
 	char deleteflags;
@@ -218,7 +218,7 @@ struct Config {
 
 	char pubscreen_name[80];
 
-	USHORT Palette[16];
+	UWORD Palette[16];
 	char gadgettopcol,gadgetbotcol;
 	char statusfg,statusbg;
 	char filesfg,filesbg,filesselfg,filesselbg;

@@ -228,7 +228,7 @@ void backdrop_replace_icon_image(BackdropInfo *info,char *source_name,BackdropOb
 		if (dest=GetNewDiskObject(buffer+512))
 		{
 		    APTR old_GadgetRender,old_SelectRender;
-		    USHORT old_Flags;
+		    UWORD old_Flags;
 		    struct ChunkyImage *old_Normal,*old_Selected;
 
 		    // Backup old image settings
@@ -283,7 +283,7 @@ void backdrop_replace_icon_image(BackdropInfo *info,char *source_name,BackdropOb
 		if (dest=GetDiskObject(buffer+512))
 		{
 		    APTR old_GadgetRender,old_SelectRender;
-		    USHORT old_Flags;
+		    UWORD old_Flags;
 
 		    // Backup old image settings
 		    old_GadgetRender=dest->do_Gadget.GadgetRender;

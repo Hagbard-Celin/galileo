@@ -106,7 +106,7 @@ void lister_change_format(Lister *lister,ListFormat *format)
 
 
 // Change a lister's sort method
-void lister_set_sort(Lister *lister,short item,USHORT qual)
+void lister_set_sort(Lister *lister,short item,UWORD qual)
 {
 	ListFormat format;
 	BOOL busy=0;
@@ -370,7 +370,7 @@ void lister_parent_popup(Lister *lister,unsigned short code)
 	}
 
 	// Do pop-up menu
-	if ((res=DoPopUpMenu(lister->window,parent_menu,&item,code))!=(USHORT)-1)
+	if ((res=DoPopUpMenu(lister->window,parent_menu,&item,code))!=(UWORD)-1)
 	{
 		// Help?
 		if (res&POPUP_HELPFLAG)

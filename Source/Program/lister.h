@@ -422,7 +422,7 @@ typedef struct ListerWindow
 	char				edit_buffer[256];	// Edit buffer
 	short				edit_field_pos;		// Field position
 
-	USHORT				flags2;			// More flags
+	UWORD				flags2;			// More flags
 
 	char				*edit_ptr;		// Edit pointer
 	char				*edit_old_ptr;		// Old edit pointer
@@ -510,7 +510,7 @@ typedef struct ListerWindow
 #define EDITF_OFFSET		(1<<1)	// Calculate offset
 #define EDITF_NO_TITLE		(1<<2)	// Don't refresh title
 
-extern USHORT lister_popup_data[];
+extern UWORD lister_popup_data[];
 
 #define REFRESHF_SLIDERS	(1<<0)     // 95, 185, 85, A5
 #define REFRESHF_NAME		(1<<1)
@@ -593,7 +593,7 @@ void lister_split_display(Lister *lister,Lister *other_lister);
 
 void lister_configure(Lister *);
 void lister_change_format(Lister *,ListFormat *);
-void lister_set_sort(Lister *lister,short item,USHORT);
+void lister_set_sort(Lister *lister,short item,UWORD);
 BOOL lister_resort(Lister *,short);
 int resort_test(ListFormat *,ListFormat *);
 void lister_parent_popup(Lister *lister,unsigned short code);
@@ -729,8 +729,8 @@ BOOL lister_edit_init(Lister *,BOOL);
 short lister_edit_next(Lister *,short);
 BOOL lister_edit_check_item(Lister *);
 BOOL lister_edit_check_cursor(Lister *,short);
-BOOL lister_edit_key_press(Lister *,unsigned char,USHORT);
-BOOL lister_edit_key_string(Lister *,unsigned char,USHORT);
+BOOL lister_edit_key_press(Lister *,unsigned char,UWORD);
+BOOL lister_edit_key_string(Lister *,unsigned char,UWORD);
 BOOL lister_edit_key_protect(Lister *,unsigned char);
 BOOL lister_edit_key_netprotect(Lister *,unsigned char);
 
@@ -762,7 +762,7 @@ void lister_zoom_window(Lister *);
 
 struct BitMap *builddisplaystring_prop(struct DirectoryEntry *,char *,Lister *,short);
 
-USHORT lister_listerpopup(Lister *,USHORT);
+UWORD lister_listerpopup(Lister *,UWORD);
 
 void lister_edit_calc_position(Lister *lister,short type);
 

@@ -277,7 +277,7 @@ struct title_entry
 // Prototypes
 // dirlist_read.c
 void read_directory(Lister *,char *,int);
-Lister *read_new_lister(char *path,Lister *parent,USHORT qual);
+Lister *read_new_lister(char *path,Lister *parent,UWORD qual);
 void removefile(DirBuffer *,DirEntry *);
 
 // dirlist_scroll.c

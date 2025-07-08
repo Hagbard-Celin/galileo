@@ -71,7 +71,7 @@ buttons_process_msg(Buttons *buttons,struct IntuiMessage *msg)
 			{
 				struct MenuItem *item;
 				struct Menu *oldstrip=buttons->window->MenuStrip;
-				USHORT nextselect;
+				UWORD nextselect;
 
 				// Get item
 				nextselect=msg->Code;
@@ -368,13 +368,13 @@ buttons_process_msg(Buttons *buttons,struct IntuiMessage *msg)
 						// Right button does pop-up menu
 						if (msg->Code==MENUDOWN)
 						{
-							USHORT res;
+							UWORD res;
 
 							// Do pop-up menu
 							res=button_border_popup(buttons);
 
 							// Do function
-							if (res!=(USHORT)-1)
+							if (res!=(UWORD)-1)
 							{
 								// Help?
 								if (res&POPUP_HELPFLAG) help_menu_help(res&~POPUP_HELPFLAG,0);

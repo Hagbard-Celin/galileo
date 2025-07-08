@@ -313,7 +313,7 @@ int __asm __saveds L_Module_Entry(
 			while (msg=GetWindowMsg(data->window->UserPort))
 			{
 				struct IntuiMessage msg_copy;
-				USHORT id=0;
+				UWORD id=0;
 
 				// Copy message and reply
 				msg_copy=*msg;

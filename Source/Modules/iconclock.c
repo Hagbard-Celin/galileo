@@ -626,10 +626,10 @@ void iconclock_init(iconclock_data *data,struct Screen *screen)
 
 		// Allocate clock bitmap
 		if (data->clock_image.ImageData=
-			(USHORT *)AllocVec(RASSIZE(CLOCK_WIDTH,CLOCK_HEIGHT)*depth,MEMF_CHIP|MEMF_CLEAR))
+			(UWORD *)AllocVec(RASSIZE(CLOCK_WIDTH,CLOCK_HEIGHT)*depth,MEMF_CHIP|MEMF_CLEAR))
 		{
 			struct TagItem tags[7];
-			USHORT *ptr;
+			UWORD *ptr;
 			short a;
 
 			// Get bitmap pointers

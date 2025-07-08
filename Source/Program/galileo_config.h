@@ -364,10 +364,10 @@ typedef struct {
 	char			pri_main[2];		// Main priority
 	char			pri_lister[2];		// Lister priority
 	unsigned long		flags;
-	USHORT			pop_code;
-	USHORT			pop_qual;
-	USHORT			pop_qual_mask;
-	USHORT			pop_qual_same;
+	UWORD			pop_code;
+	UWORD			pop_qual;
+	UWORD			pop_qual_mask;
+	UWORD			pop_qual_same;
 	short			popup_delay;
 	short			max_openwith;
 	short			command_line_length;
@@ -482,10 +482,10 @@ typedef struct
 	ULONG		pad[17];		// Save recompilation
 
 	char		env_BackgroundPic[4][256];	// Background pictures
-	USHORT		env_BackgroundFlags[4];		// Background flags
+	UWORD		env_BackgroundFlags[4];		// Background flags
 
 	CFG_SETS	settings;
-	USHORT		pad2;
+	UWORD		pad2;
 
 	ULONG		env_BackgroundBorderColour[4];
 
@@ -657,8 +657,8 @@ typedef struct {
 
 // Desktop entry
 typedef struct {
-	USHORT		dt_Type;
-	USHORT		dt_Size;
+	UWORD		dt_Type;
+	UWORD		dt_Size;
 	ULONG		dt_Flags;
 	ULONG		dt_Data;
 } CFG_DESK;

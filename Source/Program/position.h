@@ -76,10 +76,10 @@ typedef struct position_record
 
 	ListFormatStorage	format;		// Format of lister
 
-	USHORT			code;		// Hotkey
-	USHORT			qual;
-	USHORT			qual_mask;
-	USHORT			qual_same;
+	UWORD			code;		// Hotkey
+	UWORD			qual;
+	UWORD			qual_mask;
+	UWORD			qual_same;
 
 	ULONG			flags;		// Flags
 

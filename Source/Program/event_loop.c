@@ -825,7 +825,7 @@ void event_loop()
 						{
 							struct MenuItem *item;
 							struct Menu *oldstrip=GUI->window->MenuStrip;
-							USHORT nextselect;
+							UWORD nextselect;
 
 							// Get item
 							nextselect=msg_copy.Code;

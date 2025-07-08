@@ -50,7 +50,7 @@ ReadOldConfig(char *name,ConfigStuff *cstuff)
 {
 	int a,pos,b,bk,gad;
 	ULONG size;
-	USHORT ver,mag;
+	UWORD ver,mag;
 	char *cbuf,*buf,*tbuf;
 	struct galileofiletype *newtype;
 	struct galileohotkey *curhotkey=0;

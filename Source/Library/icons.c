@@ -61,7 +61,7 @@ BOOL __asm __saveds L_WB_PutDiskObject(
 	data=(struct LibData *)libbase->ml_UserData;
 
 	// See if icon type is set to inverse magic
-	if (diskobj->do_Magic==(USHORT)~WB_DISKMAGIC)
+	if (diskobj->do_Magic==(UWORD)~WB_DISKMAGIC)
 	{
 		// Fix it
 		diskobj->do_Magic=WB_DISKMAGIC;
@@ -266,7 +266,7 @@ BOOL __asm __saveds L_WriteIcon(
 
 		// This is heavy magic, which stops us from notifying things twice
 		// (PutNewDiskObject calls PutDiskObject..)
-		write_obj.do_Magic=(USHORT)~WB_DISKMAGIC;
+		write_obj.do_Magic=(UWORD)~WB_DISKMAGIC;
 
 		// Write the NewIcon
 		result=PutNewDiskObject(name,nido->nido_NewDiskObject);

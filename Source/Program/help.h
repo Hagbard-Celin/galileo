@@ -56,7 +56,7 @@ For more information on Directory Opus for Windows please see:
 
 typedef struct
 {
-	USHORT		id;
+	UWORD		id;
 	char		*name;
 } MenuHelp;
 

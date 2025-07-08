@@ -37,7 +37,7 @@ For more information on Directory Opus for Windows please see:
 
 #include "galileofm.h"
 
-USHORT
+UWORD
 	_select_cycle_labels[]={
 		MSG_SELECT_IGNORE,
 		MSG_SELECT_MATCH,

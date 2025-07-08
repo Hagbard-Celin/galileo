@@ -276,7 +276,7 @@ struct Menu *__asm __saveds L_BuildMenuStrip(
 // Find a menu by userdata ID
 struct MenuItem *__asm __saveds L_FindMenuItem(
 	register __a0 struct Menu *menu,
-	register __d0 USHORT id)
+	register __d0 UWORD id)
 {
 	if (!menu) return 0;
 
@@ -291,13 +291,13 @@ struct MenuItem *__asm __saveds L_FindMenuItem(
 			struct MenuItem *sub;
 
 			// Is this what we're looking for?
-			if (id==(USHORT)GTMENUITEM_USERDATA(item)) return item;
+			if (id==(UWORD)GTMENUITEM_USERDATA(item)) return item;
 
 			// Go through sub items
 			for (sub=item->SubItem;sub;sub=sub->NextItem)
 			{
 				// Is this what we're looking for?
-				if (id==(USHORT)GTMENUITEM_USERDATA(sub)) return sub;
+				if (id==(UWORD)GTMENUITEM_USERDATA(sub)) return sub;
 			}
 		}
 	}

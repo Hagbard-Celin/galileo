@@ -48,7 +48,7 @@ void lister_receive_drop(Lister *dest,GalileoAppMessage *msg)
 	Cfg_Function *function;
 	BackdropInfo *info;
 	DirEntry *over_entry=0;
-	USHORT qual;
+	UWORD qual;
 	BOOL ok=1;
 
 	// Cache backdrop pointer

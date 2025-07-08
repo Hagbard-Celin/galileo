@@ -221,7 +221,7 @@ struct Gadget *__asm __saveds L_AddScrollBars(
 // Find a gadget in a BOOPSI list
 struct Gadget *__asm __saveds L_FindBOOPSIGadget(
 	register __a0 struct List *list,
-	register __d0 USHORT id)
+	register __d0 UWORD id)
 {
 	APTR object_ptr;
 	Object *object;

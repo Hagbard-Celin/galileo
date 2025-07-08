@@ -1186,7 +1186,7 @@ short
 		WBKICK,MSG_ICON_KICK,
 		0};
 
-USHORT __aligned
+UWORD __aligned
 	oldicon_imagedata[1]={0xffff};
 
 struct Image

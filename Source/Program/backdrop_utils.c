@@ -154,7 +154,7 @@ BackdropObject *__asm backdrop_get_object(
 	register __a0 BackdropInfo *info,
 	register __d0 short x,
 	register __d1 short y,
-	register __d2 USHORT flags)
+	register __d2 UWORD flags)
 {
 	register BackdropObject *object;
 

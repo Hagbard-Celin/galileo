@@ -48,7 +48,7 @@ typedef struct
 	short	height;
 	short	depth;
 	short	planesize;
-	USHORT	*imagedata;
+	UWORD	*imagedata;
 	ULONG	*palette;
 } image_data;
 
@@ -57,7 +57,7 @@ typedef struct
 
 extern ConfigWindow	about_window;
 extern ObjectDef	about_objects[];
-extern __far USHORT 	  logo_image[logo_frames][472];
+extern __far UWORD 	  logo_image[logo_frames][472];
 
 extern struct Library *DataTypesBase;
 extern APTR logo_obj[logo_frames];

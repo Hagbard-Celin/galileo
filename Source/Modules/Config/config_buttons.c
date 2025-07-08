@@ -217,7 +217,7 @@ int __asm __saveds L_Config_Buttons(
 				// Process a key
 				case BUTTONEDIT_PROCESS_KEY:
 					if (!pending_quit && data->window &&
-						(_config_buttons_handle_key(data,(USHORT)imsg->flags,(USHORT)imsg->data)))
+						(_config_buttons_handle_key(data,(UWORD)imsg->flags,(UWORD)imsg->data)))
 					{
 						ret=CONFIG_CHANGE_BUTTONS;
 						data->change=1;

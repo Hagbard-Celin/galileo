@@ -52,7 +52,7 @@ ConfigWindow
 		{0,0,74,95}};
 
 
-USHORT
+UWORD
 	print_quality_labels[]={
 		MSG_PRINT_QUALITY_DRAFT,
 		MSG_PRINT_QUALITY_LETTER,

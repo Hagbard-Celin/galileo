@@ -150,7 +150,7 @@ void __asm __saveds L_StoreGadgetValue(
 void __asm __saveds L_UpdateGadgetValue(
 	register __a0 ObjectList *list,
 	register __a1 struct IntuiMessage *msg,
-	register __d0 USHORT id,
+	register __d0 UWORD id,
 	register __a6 struct MyLibrary *libbase)
 {
 	GL_Object *object;
@@ -475,7 +475,7 @@ void __asm __saveds L_UpdateGadgetList(
 
 void __asm __saveds L_SetGadgetValue(
 	register __a0 ObjectList *list,
-	register __d0 USHORT id,
+	register __d0 UWORD id,
 	register __d1 ULONG value)
 {
 	GL_Object *object;
@@ -755,7 +755,7 @@ void __asm __saveds L_SetGadgetValue(
 
 long __asm __saveds L_GetGadgetValue(
 	register __a0 ObjectList *list,
-	register __a1 USHORT id,
+	register __a1 UWORD id,
 	register __a6 struct MyLibrary *libbase)
 {
 	GL_Object *object;
@@ -910,7 +910,7 @@ struct Gadget *__asm __saveds L_FindKeyEquivalent(
 	ObjectList *list;
 	struct Gadget *gadget;
 	int no_case;
-	USHORT key;
+	UWORD key;
 
 	// Plain vanilla key?
 	if (msg->Class==IDCMP_VANILLAKEY)
@@ -1415,7 +1415,7 @@ void __asm __saveds L_ShowProgressBar(
 void __asm __saveds L_SetObjectKind(
 	register __a0 ObjectList *list,
 	register __d0 ULONG id,
-	register __d1 USHORT kind)
+	register __d1 UWORD kind)
 {
 	GL_Object *object;
 

@@ -254,7 +254,7 @@ struct Library *DataTypesBase;
 APTR logo_obj[logo_frames];
 ImageRemap remap;
 
-__far USHORT
+__far UWORD
 	logo_image[logo_frames][472]={
 		{
         0x0000,0x0000,0x0000,0x0420,0x0000,0x0000,0x0000,0x0040,

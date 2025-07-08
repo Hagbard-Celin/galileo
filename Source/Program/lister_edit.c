@@ -155,7 +155,7 @@ void lister_end_edit(Lister *lister,short flags)
 					if (network=(NetworkInfo *)GetTagData(DE_NetworkInfo,0,lister->edit_entry->de_Tags))
 					{
 						ULONG owner;
-						USHORT val=0;
+						UWORD val=0;
 						char *ptr=lister->edit_ptr;
 						BOOL ok=1;
 
@@ -184,7 +184,7 @@ void lister_end_edit(Lister *lister,short flags)
 								lsprintf(lister->edit_ptr,"%ld",v);
 
 								// Get value
-								if ((val=(USHORT)v)==0)
+								if ((val=(UWORD)v)==0)
 								{
 									// No string
 									*lister->edit_ptr=0;
@@ -1631,7 +1631,7 @@ BOOL lister_edit_check_cursor(Lister *lister,short show)
 
 
 // Key pressed in edit
-BOOL lister_edit_key_press(Lister *lister,unsigned char key,USHORT qual)
+BOOL lister_edit_key_press(Lister *lister,unsigned char key,UWORD qual)
 {
 	BOOL ret=0;
 
@@ -1721,7 +1721,7 @@ BOOL lister_edit_key_press(Lister *lister,unsigned char key,USHORT qual)
 
 
 // Normal key edit
-BOOL lister_edit_key_string(Lister *lister,unsigned char key,USHORT qual)
+BOOL lister_edit_key_string(Lister *lister,unsigned char key,UWORD qual)
 {
 	BOOL fail=0;
 	char *temp=GUI->global_undo_buffer+512;

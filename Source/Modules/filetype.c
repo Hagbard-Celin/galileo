@@ -57,7 +57,7 @@ For more information on Directory Opus for Windows please see:
 	char			*path;
 	struct _Lister		*lister;
 	struct MinList		change_list;
-	USHORT			flags;
+	UWORD			flags;
 } PathNode;
 */
 

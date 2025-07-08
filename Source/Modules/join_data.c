@@ -64,7 +64,7 @@ ConfigWindow
 		{POS_CENTER,POS_CENTER,48,5},
 		{0,0,32,52}};
 
-USHORT
+UWORD
 	chunk_labels[]={
 		MSG_CHUNK_CUSTOM,
 		MSG_CHUNK_FLOPPY_FFS,

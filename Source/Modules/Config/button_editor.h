@@ -166,7 +166,7 @@ void buttoned_del_function(ButtonEdData *);
 void buttoned_build_function_list(ButtonEdData *data);
 BOOL buttoned_swap_functions(ButtonEdData *,short,short);
 void buttoned_refresh_functionlist(ButtonEdData *data);
-void _button_editor_change_label(ButtonEdData *data,USHORT id,BOOL);
+void _button_editor_change_label(ButtonEdData *data,UWORD id,BOOL);
 void _buttoned_close_window(ButtonEdData *data);
 void buttoned_delete_function(ButtonEdData *data,Cfg_ButtonFunction *func,BOOL);
 BOOL buttoned_check_empty(Cfg_ButtonFunction *func);

@@ -58,7 +58,7 @@ struct ArgArray
 struct ArgArrayEntry
 {
 	struct MinNode	aae_Node;
-	USHORT		aae_Flags;
+	UWORD		aae_Flags;
 	char		aae_String[1];
 };
 

@@ -144,7 +144,7 @@ int lister_do_function(Lister *lister,ULONG func)
 				// Custom handler?
 				if (lister->cur_buffer->buf_CustomHandler[0])
 				{
-					USHORT qual=0;
+					UWORD qual=0;
 
 					// Build command
 					if (func==MENU_LISTER_PARENT || func==MENU_LISTER_PARENT_NEW)

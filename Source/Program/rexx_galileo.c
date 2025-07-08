@@ -388,7 +388,7 @@ BOOL rexx_galileo_cmd(struct RexxMsg *msg,short command,char *args)
 		// Get desktop path
 		case RXCMD_GETDESKTOP:
 			{
-				USHORT res;
+				UWORD res;
 
 				// Get desktop path
 				res=HookGetDesktop(result);
@@ -433,7 +433,7 @@ BOOL rexx_galileo_cmd(struct RexxMsg *msg,short command,char *args)
 					{
 						char buf[256];
 						short which=0,custom=0;
-						USHORT flags;
+						UWORD flags;
 						ULONG colour;
 
 						// Get name

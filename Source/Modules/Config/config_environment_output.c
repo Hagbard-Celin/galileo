@@ -107,7 +107,7 @@ void _config_env_update_output_dims(config_env_data *data)
 
 
 // Set output dimensions
-IPCMessage *_config_env_output_window_set(config_env_data *data,USHORT id)
+IPCMessage *_config_env_output_window_set(config_env_data *data,UWORD id)
 {
 	struct Window *window;
 	IPCMessage *ret=0;
@@ -251,7 +251,7 @@ IPCMessage *_config_env_output_window_set(config_env_data *data,USHORT id)
 }
 
 // Show instructions
-void _config_env_size_instructions(struct Window *window,USHORT id)
+void _config_env_size_instructions(struct Window *window,UWORD id)
 {
 	short a,len,inst[2];
 	struct TextExtent extent;

@@ -44,11 +44,11 @@ For more information on Directory Opus for Windows please see:
 #define SHADOW_Y	4
 
 // Do a pop-up menu
-USHORT __asm __saveds L_DoPopUpMenu(
+UWORD __asm __saveds L_DoPopUpMenu(
 	register __a0 struct Window *window,
 	register __a1 PopUpMenu *menu,
 	register __a2 PopUpItem **sel_item,
-	register __d0 USHORT code,
+	register __d0 UWORD code,
 	register __a6 struct MyLibrary *libbase)
 {
 	PopUpData *data;
@@ -61,7 +61,7 @@ USHORT __asm __saveds L_DoPopUpMenu(
 	if (sel_item) *sel_item=0;
 
 	// Check valid pointers
-	if (!window || !menu) return (USHORT)-1;
+	if (!window || !menu) return (UWORD)-1;
 
 	// Code we need to end the menu
 	if (code==SELECTDOWN)
@@ -75,11 +75,11 @@ USHORT __asm __saveds L_DoPopUpMenu(
 		code=MENUUP;
 		qual=IEQUALIFIER_RBUTTON;
 	}
-	else return (USHORT)-1;
+	else return (UWORD)-1;
 
 	// Allocate data
 	if (!(data=AllocVec(sizeof(PopUpData),MEMF_CLEAR)))
-		return (USHORT)-1;
+		return (UWORD)-1;
 
 	// Get popup delay
 	if ((still_ticks=((struct LibData *)libbase->ml_UserData)->popup_delay)<1)
@@ -99,7 +99,7 @@ USHORT __asm __saveds L_DoPopUpMenu(
 	{
 		DeleteMsgPort(data->port);
 		FreeVec(data);
-		return (USHORT)-1;
+		return (UWORD)-1;
 	}
 
 	// Store some pointers, get font we use
@@ -173,10 +173,10 @@ USHORT __asm __saveds L_DoPopUpMenu(
 	}
 
 	// Allocate image data
-	if (!(data->bullet_data=AllocVec((data->bullet_height+data->sub_height+(SCROLLIMAGE_HEIGHT<<1))*sizeof(USHORT),MEMF_CHIP)))
+	if (!(data->bullet_data=AllocVec((data->bullet_height+data->sub_height+(SCROLLIMAGE_HEIGHT<<1))*sizeof(UWORD),MEMF_CHIP)))
 	{
 		popup_cleanup(data);
-		return (USHORT)-1;
+		return (UWORD)-1;
 	}
 
 	// Get sub image pointer
@@ -344,7 +344,7 @@ USHORT __asm __saveds L_DoPopUpMenu(
 	if (!(popup_init_list(data,0)))
 	{
         popup_cleanup(data);
-		return (USHORT)-1;
+		return (UWORD)-1;
 	}
 
 	// Start timer
@@ -389,7 +389,7 @@ USHORT __asm __saveds L_DoPopUpMenu(
 					// Menu locked?
 					if (data->locked)
 					{
-						USHORT ret=(USHORT)-1;
+						UWORD ret=(UWORD)-1;
 						BOOL ok=1;
 
 						// Selected item?
@@ -603,7 +603,7 @@ USHORT __asm __saveds L_DoPopUpMenu(
 							if (data->menu_list[data->menu_current].sel_item &&
 								data->menu_list[data->menu_current].sel_item->item_name!=POPUP_BARLABEL)
 							{
-								USHORT ret;
+								UWORD ret;
 
 								// Store ID
 								ret=data->menu_list[data->menu_current].sel_item->id;
@@ -626,13 +626,13 @@ USHORT __asm __saveds L_DoPopUpMenu(
 				case IDCMP_INACTIVEWINDOW:
 
                     popup_cleanup(data);
-					return (USHORT)-1;
+					return (UWORD)-1;
 
 
 				// Mouse button
 				case IDCMP_MOUSEBUTTONS:
 				{
-					USHORT ret=(USHORT)-1;
+					UWORD ret=(UWORD)-1;
                 
 					// Is it the code we want?
 					if (msg_copy.Code==code)
@@ -856,7 +856,7 @@ void popup_init_display(PopUpData *data,short which)
 	{
 		short shadowx,shadowy;
 		struct RastPort rp;
-		USHORT dither[2];
+		UWORD dither[2];
 
 		// Get shadow size
 		shadowx=data->menu_list[which].window->Width-data->menu_list[which].pos.Width;
@@ -1202,7 +1202,7 @@ short popup_show_item(PopUpData *data,short which,PopUpItem *item,short item_y,B
 			// Disabled?
 			if (item->flags&POPUPF_DISABLED)
 			{
-				USHORT ghost[2];
+				UWORD ghost[2];
 
 				// Set ghosting pattern
 				ghost[0]=0x8888;
@@ -1381,19 +1381,19 @@ BOOL popup_select(PopUpData *data,short which,short x,short y)
 	return 0;
 }
 
-PopUpItem *getpopupitem(struct MinList *,USHORT);
+PopUpItem *getpopupitem(struct MinList *,UWORD);
 
 
 // Get item in a pop-up menu
 PopUpItem *__asm __saveds L_GetPopUpItem(
 	register __a0 PopUpMenu *menu,
-	register __d0 USHORT id)
+	register __d0 UWORD id)
 {
 	if (!menu) return 0;
 	return getpopupitem(&menu->item_list,id);
 }
 
-PopUpItem *getpopupitem(struct MinList *list,USHORT id)
+PopUpItem *getpopupitem(struct MinList *list,UWORD id)
 {
 	PopUpItem *item;
 

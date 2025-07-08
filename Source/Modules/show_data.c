@@ -57,7 +57,7 @@ ConfigWindow
 
 
 
-USHORT
+UWORD
 	print_aspect_labels[]={
 		MSG_PRINT_ASPECT_PORTRAIT,
 		MSG_PRINT_ASPECT_LANDSCAPE,

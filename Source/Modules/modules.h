@@ -171,7 +171,7 @@ struct endentry_packet
 struct addchange_packet
 {
 	struct _PathNode	*path;
-	USHORT			change;
+	UWORD			change;
 	APTR			data;
 };
 

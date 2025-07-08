@@ -48,7 +48,7 @@ __asm __saveds L_DoSimpleRequest(
 {
 	APTR memory;
 	simplereq_data *data;
-	USHORT gadgetid=0;
+	UWORD gadgetid=0;
 
 	// Allocate memory handle
 	if (!(memory=L_NewMemHandle(0,0,MEMF_CLEAR)))
@@ -151,7 +151,7 @@ __asm __saveds L_DoSimpleRequest(
 					if (imsg->command==IPC_QUIT || imsg->command==IPC_ABORT)
 					{
 						break_flag=1;
-						gadgetid=(USHORT)-1;
+						gadgetid=(UWORD)-1;
 					}
 					L_IPC_Reply(imsg);
 				}
@@ -274,7 +274,7 @@ __asm __saveds L_DoSimpleRequest(
 			else
 			if (data->signal!=-1 && (waitres&(1<<data->signal)))
 			{
-				gadgetid=(USHORT)-5;
+				gadgetid=(UWORD)-5;
 				break;
 			}
 		}

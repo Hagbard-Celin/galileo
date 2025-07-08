@@ -1675,7 +1675,7 @@ void buttoned_refresh_functionlist(ButtonEdData *data)
 
 
 // Change name or label
-void _button_editor_change_label(ButtonEdData *data,USHORT id,BOOL refresh)
+void _button_editor_change_label(ButtonEdData *data,UWORD id,BOOL refresh)
 {
 	char *str;
 	Cfg_ButtonFunction *func;

@@ -249,7 +249,7 @@ void __saveds backdrop_group_handler(void)
 					// Dropped on an object?
 					if (drop_obj=backdrop_get_object(group->info,amsg->ga_Msg.am_MouseX,amsg->ga_Msg.am_MouseY,0))
 					{
-						USHORT qual;
+						UWORD qual;
 
 						// Get qualifiers
 						qual=(InputBase)?PeekQualifier():0;
@@ -614,10 +614,10 @@ void __saveds backdrop_group_handler(void)
 							// Right button?
 							if (msg_copy.Code==MENUDOWN)
 							{
-								USHORT res;
+								UWORD res;
 
 								// Do popup menu
-								if ((res=group_do_popup(group))!=(USHORT)-1)
+								if ((res=group_do_popup(group))!=(UWORD)-1)
 								{
 									// Help?
 									if (res&POPUP_HELPFLAG)
@@ -642,7 +642,7 @@ void __saveds backdrop_group_handler(void)
 						case IDCMP_MENUHELP:
 							{
 								struct Menu *oldstrip=group->window->MenuStrip;
-								USHORT nextselect;
+								UWORD nextselect;
 
 								// Get item
 								nextselect=msg_copy.Code;
@@ -1430,10 +1430,10 @@ BOOL backdrop_group_do_function(GroupData *group,ULONG id,struct MenuItem *item)
 }
 
 
-USHORT group_do_popup(GroupData *group)
+UWORD group_do_popup(GroupData *group)
 {
 	PopUpHandle *menu;
-	USHORT res=(USHORT)-1;
+	UWORD res=(UWORD)-1;
 
 	// Initialise popup menu
 	if (menu=PopUpNewHandle(0,0,&locale))

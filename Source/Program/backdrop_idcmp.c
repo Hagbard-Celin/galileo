@@ -60,7 +60,7 @@ BOOL backdrop_idcmp(BackdropInfo *info,struct IntuiMessage *msg,unsigned short f
 			// If we haven't already refreshed
 			if (!(info->flags&BDIF_REFRESHED))
 			{
-				USHORT ref_flags;
+				UWORD ref_flags;
 
 				// Get flags for refreshing
 				ref_flags=BDSF_REFRESH;

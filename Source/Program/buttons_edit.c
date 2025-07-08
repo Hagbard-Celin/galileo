@@ -38,7 +38,7 @@ For more information on Directory Opus for Windows please see:
 #include "galileofm.h"
 
 // Handles key press in edit mode
-void buttons_edit_key(Buttons *buttons,USHORT code,USHORT qual)
+void buttons_edit_key(Buttons *buttons,UWORD code,UWORD qual)
 {
 	// Look at key
 	switch (code)

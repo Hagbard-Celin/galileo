@@ -60,7 +60,7 @@ void backdrop_icon_position(BackdropInfo *info,BackdropObject *icon,short x,shor
 
 
 // Clean up object positions
-BOOL backdrop_cleanup(BackdropInfo *info,short type,USHORT flags)
+BOOL backdrop_cleanup(BackdropInfo *info,short type,UWORD flags)
 {
 	struct Rectangle rect,*rect_ptr=0;
 	BOOL align=0;
@@ -124,7 +124,7 @@ BOOL backdrop_cleanup(BackdropInfo *info,short type,USHORT flags)
 
 
 // Cleanup backdrop objects
-BOOL backdrop_cleanup_objects(BackdropInfo *info,struct Rectangle *rect,USHORT flags)
+BOOL backdrop_cleanup_objects(BackdropInfo *info,struct Rectangle *rect,UWORD flags)
 {
 	BackdropObject *object,*col_start=0,*last_icon=0;
 	long col_width=0,icon_left=0;

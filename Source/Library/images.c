@@ -506,7 +506,7 @@ short __asm __saveds L_RenderImage(
 
 				// Go through image
 				for (word=0;word<planesize;word++)
-					mask_plane[word]|=((USHORT *)planeptrs[plane])[word];
+					mask_plane[word]|=((UWORD *)planeptrs[plane])[word];
 			}
 		}
 

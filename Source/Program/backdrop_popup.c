@@ -107,7 +107,7 @@ BOOL backdrop_test_rmb(
 BOOL backdrop_popup(
 	BackdropInfo *info,
 	short x,short y,
-	USHORT qual,
+	UWORD qual,
 	long bpflags,
 	char *filename,
 	DirEntry *entry)
@@ -374,7 +374,7 @@ BOOL backdrop_popup(
 	}
 
 	// Do pop-up menu
-	if ((res=DoPopUpMenu(info->window,&menu->ph_Menu,&item,MENUDOWN))!=(USHORT)-1)
+	if ((res=DoPopUpMenu(info->window,&menu->ph_Menu,&item,MENUDOWN))!=(UWORD)-1)
 	{
 		// Set busy pointer
 		SetBusyPointer(info->window);
@@ -507,7 +507,7 @@ BOOL backdrop_popup(
 				// Send back code; this is kludgy, but it works
 				filename[0]=0;
 				filename[1]=1;
-				*((USHORT *)(filename+2))=(USHORT)(res-MENU_CUSTOM);
+				*((UWORD *)(filename+2))=(UWORD)(res-MENU_CUSTOM);
 			}
 		}
 
@@ -518,7 +518,7 @@ BOOL backdrop_popup(
 			// Send back code; this is kludgy, but it works
 			filename[0]=0;
 			filename[1]=0;
-			*((USHORT *)(filename+2))=res;
+			*((UWORD *)(filename+2))=res;
 
 			// Copy to?
 			if (res==MENU_ICON_COPY_TO && item)
@@ -527,7 +527,7 @@ BOOL backdrop_popup(
 				if (backdrop_get_copy_path(item,filename+4))
 				{
 					// Copy to script
-					*((USHORT *)(filename+2))=MENU_ICON_COPY_TO_SCRIPT;
+					*((UWORD *)(filename+2))=MENU_ICON_COPY_TO_SCRIPT;
 				}
 			}
 

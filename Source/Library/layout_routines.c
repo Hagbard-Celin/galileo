@@ -1126,16 +1126,16 @@ ObjectList *__asm __saveds L_AddObjectList(
 							char **labels;
 
 							// Count labels
-							for (count=0;((USHORT *)tag->ti_Data)[count];count++);
+							for (count=0;((UWORD *)tag->ti_Data)[count];count++);
 
 							// Allocate label buffer
 							if (labels=alloc_object_memory(&new_object->memory,sizeof(char *)*(count+1)))
 							{
 								// Get labels
-								for (count=0;((USHORT *)tag->ti_Data)[count];count++)
+								for (count=0;((UWORD *)tag->ti_Data)[count];count++)
 									labels[count]=
 										L_GetString(data->locale,
-											((USHORT *)tag->ti_Data)[count]);
+											((UWORD *)tag->ti_Data)[count]);
 
 							}
 
@@ -2506,7 +2506,7 @@ void _req_backfill(struct Window *window)
 {
 	struct RastPort copy;
 	WindowData *data;
-	USHORT dither_pattern[2];
+	UWORD dither_pattern[2];
 
 	// Copy rastport
 	copy=*window->RPort;

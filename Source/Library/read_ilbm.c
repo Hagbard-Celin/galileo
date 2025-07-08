@@ -937,7 +937,7 @@ void __asm __saveds L_DecodeRLE(register __a0 RLEinfo *rle)
 
 // Fake an ILBM structure from data
 ILBMHandle *__asm __saveds L_FakeILBM(
-	register __a0 USHORT *imagedata,
+	register __a0 UWORD *imagedata,
 	register __a1 ULONG *palette,
 	register __d0 short width,
 	register __d1 short height,

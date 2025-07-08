@@ -41,7 +41,7 @@ For more information on Directory Opus for Windows please see:
 void backdrop_object_open(
 	BackdropInfo *info,
 	BackdropObject *object,
-	USHORT qual,
+	UWORD qual,
 	BOOL activate,
 	long numargs,
 	struct WBArg *arglist)

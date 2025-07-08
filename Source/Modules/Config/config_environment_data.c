@@ -64,7 +64,7 @@ static void __asm __saveds _palette_slider_callback(
 
 
 // Labels
-USHORT
+UWORD
 	_environment_listeredit_labels[]={
 		MSG_LISTEREDIT_DISABLED,
 		MSG_LISTEREDIT_LEFT,

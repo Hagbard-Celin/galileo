@@ -98,8 +98,8 @@ struct Hook *__stdargs __saveds GetEditHookTags(
 short __stdargs __saveds RenderImageTags(
 	struct RastPort *rp,
 	APTR image,
-	USHORT left,
-	USHORT top,
+	UWORD left,
+	UWORD top,
 	Tag tag,...)
 {
 	return RenderImage(rp,image,left,top,(struct TagItem *)&tag);

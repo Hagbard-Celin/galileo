@@ -60,10 +60,10 @@ typedef struct
 	ConfigWindow		*req_win_def;
 	ObjectDef		*req_obj_def;
 
-	USHORT			*func_labels;
+	UWORD			*func_labels;
 	long			*flag_list;
 	ULONG			func_list;
-	USHORT			*arg_list;
+	UWORD			*arg_list;
 
 	APTR			object;
 	ULONG			object_flags;
@@ -154,8 +154,8 @@ typedef struct _FunctionEditorEntry {
 } FunctionEditorEntry;
 
 extern long _funced_flaglist[];
-extern USHORT _function_type_labels[];
-extern USHORT _argument_list[];
+extern UWORD _function_type_labels[];
+extern UWORD _argument_list[];
 
 #define END_DELETE	1
 #define END_DISABLE	2
@@ -219,7 +219,7 @@ void funced_compile(FuncEdData *);
 void funced_build_display(FuncEdData *);
 void funced_build_entrydisplay(FuncEdData *,Att_Node *,FunctionEditorEntry *);
 void funced_start_edit(FuncEdData *);
-BOOL funced_end_edit(FuncEdData *,Att_Node *,int,USHORT);
+BOOL funced_end_edit(FuncEdData *,Att_Node *,int,UWORD);
 Att_Node *funced_new_entry(FuncEdData *,Att_Node *,FunctionEditorEntry *);
 void funced_check_flag(ULONG *,ULONG);
 void funced_edit_insertstring(ObjectList *,ULONG,char *,struct Library *,struct Library *);

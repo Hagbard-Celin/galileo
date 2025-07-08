@@ -68,7 +68,7 @@ static char
 		"SmartRead",
 		0};
 
-static USHORT
+static UWORD
 	script_flags[]={
 		SCRIPTF_STARTUP,				// Startup
 		SCRIPTF_STARTUP|SCRIPTF_SYNC,	// Shutdown

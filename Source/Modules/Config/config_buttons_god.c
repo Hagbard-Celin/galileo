@@ -402,8 +402,8 @@ void _config_buttons_remove_columns(
 // Handles key press in edit mode
 BOOL _config_buttons_handle_key(
 	config_buttons_data *data,
-	USHORT code,
-	USHORT qual)
+	UWORD code,
+	UWORD qual)
 {
 	Cfg_Button *button;
 	Cfg_Button *redraw_1=0,*redraw_2=0;

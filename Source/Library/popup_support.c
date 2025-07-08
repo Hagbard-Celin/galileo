@@ -186,7 +186,7 @@ void __asm __saveds L_PopUpEndSub(register __a0 PopUpHandle *menu)
 
 
 // Set flags of an item (by ID only)
-ULONG __asm __saveds L_PopUpSetFlags(register __a0 PopUpMenu *menu,register __d0 USHORT id,register __d1 ULONG value,register __d2 ULONG mask)
+ULONG __asm __saveds L_PopUpSetFlags(register __a0 PopUpMenu *menu,register __d0 UWORD id,register __d1 ULONG value,register __d2 ULONG mask)
 {
 	PopUpItem *item;
 	ULONG old=0;

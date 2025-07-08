@@ -132,15 +132,15 @@ typedef struct
 	BOOL			was_active;	// Was window active?
 	TimerHandle		*timer;		// A timer
 
-	USHORT			*bullet_data;	// Bullet image
+	UWORD			*bullet_data;	// Bullet image
 	short			bullet_width;
 	short			bullet_height;
 
-	USHORT			*sub_data;	// Submenu image
+	UWORD			*sub_data;	// Submenu image
 	short			sub_width;
 	short			sub_height;
 
-	USHORT			*scroll_image[2];
+	UWORD			*scroll_image[2];
 
 	PopUpList		menu_list[MENU_DEPTH];	// Menu info
 	short			menu_current;	// Current active one

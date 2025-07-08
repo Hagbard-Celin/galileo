@@ -51,7 +51,7 @@ typedef struct
 } ButtonsStartup;
 
 void Test(void);
-unsigned long Config_Environment(Cfg_Environment *,struct Screen *,USHORT *,IPCData *,IPCData *,USHORT,ULONG *,char *,Att_List *);
+unsigned long Config_Environment(Cfg_Environment *,struct Screen *,UWORD *,IPCData *,IPCData *,UWORD,ULONG *,char *,Att_List *);
 int Config_Buttons(ButtonsStartup *,IPCData *,IPCData *,struct Screen *,ULONG);
 short Config_Filetypes(struct Screen *,IPCData *,IPCData *,ULONG,char *);
 ULONG Config_Menu(char *,IPCData *,IPCData *,struct Screen *,Cfg_ButtonBank *,char *,ULONG,char *,short,Att_List *);

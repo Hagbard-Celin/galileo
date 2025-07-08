@@ -57,7 +57,7 @@ GALILEOFM_FUNC(function_setbackground)
 {
 	FunctionEntry *entry;
 	short which=PATTERN_MAIN;
-	USHORT flags;
+	UWORD flags;
 	ULONG colour;
 
 	// Can only do this under v39

@@ -512,12 +512,12 @@ BOOL check_closescreen(struct Screen *screen)
 
 // See if qualifier matches
 BOOL check_qualifier(
-	USHORT qual,
-	USHORT qual_match,
-	USHORT qual_mask,
-	USHORT qual_same)
+	UWORD qual,
+	UWORD qual_match,
+	UWORD qual_mask,
+	UWORD qual_same)
 {
-	USHORT key_qual,match_qual;
+	UWORD key_qual,match_qual;
 
 	// Get qualifiers to match
 	match_qual=qual_match&qual_mask;
@@ -544,7 +544,7 @@ BOOL check_qualifier(
 }
 
 
-iconopen_packet *get_icon_packet(BackdropInfo *info,BackdropObject *object,char *data,USHORT qual)
+iconopen_packet *get_icon_packet(BackdropInfo *info,BackdropObject *object,char *data,UWORD qual)
 {
 	iconopen_packet *packet;
 

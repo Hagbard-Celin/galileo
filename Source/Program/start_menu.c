@@ -193,7 +193,7 @@ void __saveds start_proc(void)
 				if (msg_copy.Class==IDCMP_MOUSEBUTTONS &&
 					!(msg_copy.Code&IECODE_UP_PREFIX))
 				{
-					USHORT res;
+					UWORD res;
 					PopUpItem *item;
 
 					// Over the drag gadget?
@@ -238,7 +238,7 @@ void __saveds start_proc(void)
 
 						// Do pop-up menu
 						if (menu->menu &&
-							(res=DoPopUpMenu(menu->window,&menu->menu->ph_Menu,&item,msg_copy.Code))!=(USHORT)-1)
+							(res=DoPopUpMenu(menu->window,&menu->menu->ph_Menu,&item,msg_copy.Code))!=(UWORD)-1)
 						{
 							// Get item; check it's not a sub-item header
 							if (item && !(item->flags&POPUPF_SUB))
@@ -861,7 +861,7 @@ BOOL start_popup(StartMenu *menu)
 {
 	PopUpHandle *handle;
 	PopUpItem *item;
-	USHORT res;
+	UWORD res;
 
 	// Create menu
 	if (!(handle=PopUpNewHandle(0,0,&locale)))

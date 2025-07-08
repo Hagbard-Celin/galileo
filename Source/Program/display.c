@@ -74,7 +74,7 @@ BOOL display_open(long flags)
 		environment->env->screen_mode!=MODE_WORKBENCHUSE &&
 		environment->env->screen_mode!=MODE_PUBLICSCREEN)
 	{
-		USHORT pens[1];
+		UWORD pens[1];
 		ULONG screen_mode, width, height, depth, likewb = TAG_IGNORE;
 		BOOL offscr_drag = FALSE;
 
@@ -145,7 +145,7 @@ BOOL display_open(long flags)
 
 
 		// Initialise pen array
-		pens[0]=(USHORT)~0;
+		pens[0]=(UWORD)~0;
 
 		// Want a font?
 		if (environment->env->font_name[FONT_SCREEN][0] &&
@@ -801,7 +801,7 @@ void display_gui_clear(GUI_Element *gui)
 
 
 // See if a point is within a GUI element
-BOOL point_in_element(GUI_Element *element,USHORT x,USHORT y)
+BOOL point_in_element(GUI_Element *element,UWORD x,UWORD y)
 {
 	return (BOOL)(x>=element->rect.MinX &&
 			x<=element->rect.MaxX &&

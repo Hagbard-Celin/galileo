@@ -88,7 +88,7 @@ void __asm __saveds lister_process_msg(
 			{
 				struct MenuItem *item;
 				struct Menu *oldstrip=lister->window->MenuStrip;
-				USHORT nextselect;
+				UWORD nextselect;
 
 				// End a direct edit
 				lister_end_edit(lister,0);
@@ -1490,13 +1490,13 @@ void __asm __saveds lister_process_msg(
 						msg->MouseX,
 						msg->MouseY))
 				{
-					USHORT res;
+					UWORD res;
 
 					// Do pop-up menu
 					res=lister_listerpopup(lister,msg->Code);
 
 					// Do function
-					if (res!=(USHORT)-1)
+					if (res!=(UWORD)-1)
 					{
 						// Help?
 						if (res&POPUP_HELPFLAG) help_menu_help(res&~POPUP_HELPFLAG,0);
@@ -1527,7 +1527,7 @@ void __asm __saveds lister_process_msg(
 						msg->MouseY) &&
 					lister->lister_tool_menu)
 				{
-					USHORT res;
+					UWORD res;
 					PopUpItem *item;
 					BOOL help=0;
 
@@ -1535,7 +1535,7 @@ void __asm __saveds lister_process_msg(
 					GetSemaphore(&GUI->lister_menu_lock,SEMF_SHARED,0);
 
 					// Do pop-up menu
-					if ((res=DoPopUpMenu(lister->window,&lister->lister_tool_menu->ph_Menu,&item,msg->Code))!=(USHORT)-1)
+					if ((res=DoPopUpMenu(lister->window,&lister->lister_tool_menu->ph_Menu,&item,msg->Code))!=(UWORD)-1)
 					{
 						// Help?
 						if (res&POPUP_HELPFLAG) help=1;

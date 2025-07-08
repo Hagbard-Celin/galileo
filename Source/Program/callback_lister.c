@@ -821,7 +821,7 @@ BOOL __asm __saveds HookMatchDesktop(
 }
 
 
-USHORT __asm __saveds HookGetDesktop(
+UWORD __asm __saveds HookGetDesktop(
 	register __a0 char *path)
 {
 	BPTR lock;
@@ -841,13 +841,13 @@ USHORT __asm __saveds HookGetDesktop(
 	if (!(environment->env->env_flags&ENVF_DESKTOP_FOLDER))
 		return 0;
 	else
-		return (USHORT)(environment->env->desktop_popup_default+1);
+		return (UWORD)(environment->env->desktop_popup_default+1);
 }
 
 
 short __asm __saveds HookDesktopPopup(register __a0 ULONG flags)
 {
-	USHORT res;
+	UWORD res;
 	PopUpItem *item;
 
 	// Main window open?

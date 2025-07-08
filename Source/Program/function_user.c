@@ -59,7 +59,7 @@ GALILEOFM_FUNC(function_user)
 	short action;
 	char *cmd_ptr=0,cmd_buf[10],*dest_path=0;
 	Lister *dest_lister=0,*source_lister=0;
-	USHORT qual=0;
+	UWORD qual=0;
 
 	// Get user filetype type
 	if (command->function==FUNC_USER1)

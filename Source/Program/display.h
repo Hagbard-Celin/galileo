@@ -70,8 +70,8 @@ typedef struct
 	APTR			visual_info;			// VisualInfo for the screen
 	struct AppWindow	*appwindow;			// AppWindow pointer
 
-	USHORT			pens[16];			// Pen table
-	USHORT			pen_alloc;			// Allocation flags
+	UWORD			pens[16];			// Pen table
+	UWORD			pen_alloc;			// Allocation flags
 
 	struct Menu		*menus;				// Menu strip
 	struct GalileoRemember	*menu_memory;			// Memory for the menus
@@ -304,7 +304,7 @@ typedef struct
 	short			icon_grid_y;
 
 	char			env_BackgroundPic[4][256];	// Background pictures
-	USHORT			env_BackgroundFlags[4];		// Background flags
+	UWORD			env_BackgroundFlags[4];		// Background flags
 	ULONG			env_BackgroundBorderColour[4];	// Border colour
 } GUI_Glue;
 
@@ -374,10 +374,10 @@ void display_box_to_rect(struct IBox *,struct Rectangle *);
 void display_gui_complete(GUI_Element *,struct RastPort *);
 void display_gui_border(GUI_Element *);
 void display_gui_clear(GUI_Element *);
-BOOL point_in_element(GUI_Element *,USHORT,USHORT);
+BOOL point_in_element(GUI_Element *,UWORD,UWORD);
 void display_lock_all(int);
 void display_popup(short);
-struct MenuItem *find_menu_item(struct Menu *menu,USHORT id);
+struct MenuItem *find_menu_item(struct Menu *menu,UWORD id);
 void display_build_user_menu(void);
 void display_reset_menus(BOOL main_only,BOOL fix_only);
 void display_get_menu(struct Window *window);

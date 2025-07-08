@@ -122,18 +122,18 @@ int __asm __saveds L_Module_Entry(
 			char *ptr=data->line_buffer;
 
 			// Parse settings
-			read_parse_set(&ptr,(USHORT *)&dims.Left);
-			read_parse_set(&ptr,(USHORT *)&dims.Top);
-			read_parse_set(&ptr,(USHORT *)&dims.Width);
-			read_parse_set(&ptr,(USHORT *)&dims.Height);
+			read_parse_set(&ptr,(UWORD *)&dims.Left);
+			read_parse_set(&ptr,(UWORD *)&dims.Top);
+			read_parse_set(&ptr,(UWORD *)&dims.Width);
+			read_parse_set(&ptr,(UWORD *)&dims.Height);
 			if (!run_once)
 			{
-				read_parse_set(&ptr,(USHORT *)&data->tab_size);
-				read_parse_set(&ptr,(USHORT *)&data->search_flags);
-				read_parse_set(&ptr,(USHORT *)&use_screen);
+				read_parse_set(&ptr,(UWORD *)&data->tab_size);
+				read_parse_set(&ptr,(UWORD *)&data->search_flags);
+				read_parse_set(&ptr,(UWORD *)&use_screen);
 				read_parse_set(&ptr,&temp); modeid=temp<<16;
 				read_parse_set(&ptr,&temp); modeid|=temp;
-				read_parse_set(&ptr,(USHORT *)&fontsize);
+				read_parse_set(&ptr,(UWORD *)&fontsize);
 
 				// No font set?
 				if (*ptr=='/') fontname[0]=0;
@@ -343,7 +343,7 @@ struct Window *read_open_window(read_data *data)
 	// Open our own screen?
 	if (use_screen)
 	{
-		USHORT pens[1];
+		UWORD pens[1];
 
 		// Get mode ID to use
 		if (!modeid || ModeNotAvailable(modeid))
@@ -353,7 +353,7 @@ struct Window *read_open_window(read_data *data)
 		lsprintf(data->screen_name,"galileo text viewer - %lx",data);
 
 		// Open screen
-		pens[0]=(USHORT)~0;
+		pens[0]=(UWORD)~0;
 		if (data->my_screen=OpenScreenTags(0,
 			SA_Depth,(data->mode==MODE_ANSI)?4:2,
 			SA_DisplayID,modeid,
@@ -1346,10 +1346,10 @@ BOOL read_view(read_data *data)
 						short itemid;
 
 						// Loop while valid items
-						while (item=ItemAddress(data->window->MenuStrip,(USHORT)msg_copy.Code))
+						while (item=ItemAddress(data->window->MenuStrip,(UWORD)msg_copy.Code))
 						{
 							// Get real ID
-							itemid=(USHORT)(GTMENUITEM_USERDATA(item));
+							itemid=(UWORD)(GTMENUITEM_USERDATA(item));
 
 							switch (itemid)
 							{

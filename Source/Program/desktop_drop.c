@@ -37,7 +37,7 @@ For more information on Directory Opus for Windows please see:
 
 #include "galileofm.h"
 
-void desktop_drop(BackdropInfo *info,GalileoAppMessage *msg,USHORT qual)
+void desktop_drop(BackdropInfo *info,GalileoAppMessage *msg,UWORD qual)
 {
 	BackdropObject *drop_obj;
 	short ok=0,x,y;
@@ -93,7 +93,7 @@ void desktop_drop(BackdropInfo *info,GalileoAppMessage *msg,USHORT qual)
 	// Popup menu?
 	if (environment->env->env_flags&ENVF_DESKTOP_FOLDER)
 	{
-		USHORT res;
+		UWORD res;
 
 		// Activate the underlying menu
 		ActivateWindow(info->window);
@@ -108,7 +108,7 @@ void desktop_drop(BackdropInfo *info,GalileoAppMessage *msg,USHORT qual)
 
 		// Ask user what they want to do
 		else
-		if ((res=DoPopUpMenu(info->window,&GUI->desktop_menu->ph_Menu,0,SELECTDOWN))==(USHORT)-1 || res==MENU_DESKTOP_CANCEL)
+		if ((res=DoPopUpMenu(info->window,&GUI->desktop_menu->ph_Menu,0,SELECTDOWN))==(UWORD)-1 || res==MENU_DESKTOP_CANCEL)
 		{
 			// Cancelled	
 			FreeVec(name);
@@ -276,7 +276,7 @@ void desktop_drop(BackdropInfo *info,GalileoAppMessage *msg,USHORT qual)
 
 
 // Handle drop on an object
-BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropObject *drop_obj,USHORT qual)
+BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropObject *drop_obj,UWORD qual)
 {
 	char *name;
 	short ret=1;

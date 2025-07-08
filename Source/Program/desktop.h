@@ -43,13 +43,13 @@ void desktop_refresh_icons(BackdropInfo *info,BOOL);
 
 void desktop_delete(IPCData *,BackdropInfo *,BackdropObject *);
 
-void desktop_drop(BackdropInfo *,struct _GalileoAppMessage *,USHORT);
+void desktop_drop(BackdropInfo *,struct _GalileoAppMessage *,UWORD);
 
 void notify_disk_name_change(BackdropInfo *,char *,char *);
 void backdrop_update_disk(BackdropInfo *info,devname_change *change,BOOL show);
 
 BOOL desktop_add_hidden(char *name);
 
-BOOL desktop_drop_on_object(BackdropInfo *,GalileoAppMessage **,BackdropObject *,USHORT);
+BOOL desktop_drop_on_object(BackdropInfo *,GalileoAppMessage **,BackdropObject *,UWORD);
 
 short read_desktop_folder(BackdropInfo *,BOOL);

@@ -166,7 +166,7 @@ ULONG __asm __saveds propgadget_dispatch(register __a0 Class *cl,
 		struct gpInput *gpi = (struct gpInput *)msg;
 		struct InputEvent	*ie = gpi->gpi_IEvent;
 		BOOL render = FALSE;
-		SHORT *KnobPos, *KnobEnd, *Mouse, *GadPos, *GadEnd;
+		WORD *KnobPos, *KnobEnd, *Mouse, *GadPos, *GadEnd;
 
 		// Default is active
 		ret = GMR_MEACTIVE;
@@ -500,7 +500,7 @@ ULONG propgadget_render(Class *cl, struct Gadget *gadget, struct GadgetInfo *GIn
     ULONG retval = TRUE;
     UWORD *pens = GInfo->gi_DrInfo->dri_Pens;
 
-    static const USHORT ditherData[] = {0xAAAA, 0x5555};
+    static const UWORD ditherData[] = {0xAAAA, 0x5555};
 
     // Use supplied rastport or get from gadgetinfo
     if (msg->MethodID == GM_RENDER)

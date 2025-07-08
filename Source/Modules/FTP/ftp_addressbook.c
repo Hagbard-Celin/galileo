@@ -1190,7 +1190,7 @@ for	(a=0;menu[a].type!=NM_END;a++)
  *
  */
 
-static ObjectDef *find_ObjectDef(ObjectDef *obj,USHORT id)
+static ObjectDef *find_ObjectDef(ObjectDef *obj,UWORD id)
 {
 
 while	(obj->type)
@@ -3679,7 +3679,7 @@ while	(TRUE)
 			{
 			struct window_params *wp;
 			struct IntuiMessage msg_copy;
-			USHORT gadgetid=0;
+			UWORD gadgetid=0;
 			
 			// Copy message and reply
 			msg_copy=*msg;

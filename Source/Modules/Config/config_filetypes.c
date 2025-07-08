@@ -194,7 +194,7 @@ short __asm __saveds L_Config_Filetypes(
 			while (msg=GetWindowMsg(data->window->UserPort))
 			{
 				struct IntuiMessage msg_copy;
-				USHORT id;
+				UWORD id;
 
 				// Copy message and reply
 				msg_copy=*msg;

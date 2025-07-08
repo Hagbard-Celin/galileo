@@ -1293,7 +1293,7 @@ struct DiskObject *__asm __saveds L_CopyDiskObject(
 			// Allocate image data and copy
 			if (copy->doc_Image1=AllocVec(planesize,MEMF_CHIP|MEMF_CLEAR))
 			{
-				copy->doc_GadgetRender.ImageData=(USHORT *)copy->doc_Image1;
+				copy->doc_GadgetRender.ImageData=(UWORD *)copy->doc_Image1;
 				CopyMem(
 					(char *)(((struct Image *)icon->do_Gadget.GadgetRender)->ImageData),
 					(char *)copy->doc_GadgetRender.ImageData,
@@ -1327,7 +1327,7 @@ struct DiskObject *__asm __saveds L_CopyDiskObject(
 			// Allocate image data and copy
 			if (copy->doc_Image2=AllocVec(planesize,MEMF_CHIP|MEMF_CLEAR))
 			{
-				copy->doc_SelectRender.ImageData=(USHORT *)copy->doc_Image2;
+				copy->doc_SelectRender.ImageData=(UWORD *)copy->doc_Image2;
 				CopyMem(
 					(char *)(((struct Image *)icon->do_Gadget.SelectRender)->ImageData),
 					(char *)copy->doc_SelectRender.ImageData,

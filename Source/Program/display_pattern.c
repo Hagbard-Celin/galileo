@@ -319,7 +319,7 @@ short display_get_pattern(BOOL use_custom)
 					// Compare data
 					for (d=0;d<num;d++)
 					{
-						if (((USHORT *)data[a])[d]!=((USHORT *)GUI->pattern[a].data)[d])
+						if (((UWORD *)data[a])[d]!=((UWORD *)GUI->pattern[a].data)[d])
 						{
 							diff=1;
 							break;

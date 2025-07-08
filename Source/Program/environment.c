@@ -819,7 +819,7 @@ void __saveds environment_proc(void)
 						GUI->pens,
 						ipc,
 						&main_ipc,
-						(USHORT)(GUI->pen_alloc&0xff),
+						(UWORD)(GUI->pen_alloc&0xff),
 						change_flags,
 						path,
 						script_list))

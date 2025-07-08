@@ -202,7 +202,7 @@ void backdrop_scroll_objects(BackdropInfo *info,short off_x,short off_y)
 
 
 // Show the backdrop objects
-void backdrop_show_objects(BackdropInfo *info,USHORT flags)
+void backdrop_show_objects(BackdropInfo *info,UWORD flags)
 {
 	BackdropObject *object;
 
@@ -361,7 +361,7 @@ void backdrop_show_objects(BackdropInfo *info,USHORT flags)
 void backdrop_render_object(
 	BackdropInfo *info,
 	BackdropObject *object,
-	USHORT flags)
+	UWORD flags)
 {
 	// Lock window
 	GetSemaphore(&info->window_lock,SEMF_EXCLUSIVE,0);
@@ -396,13 +396,13 @@ void backdrop_render_object(
 void backdrop_draw_object(
 	BackdropInfo *info,
 	BackdropObject *object,
-	USHORT flags,
+	UWORD flags,
 	struct RastPort *rp,
 	short left,
 	short top)
 {
 	UBYTE fpen=1,bpen=0,drawmode=JAM2,galileo_drawmode=JAM2;
-	USHORT *imagedata=0;
+	UWORD *imagedata=0;
 	struct Image *image=0;
 	struct Rectangle rect;
 	short len;
@@ -867,7 +867,7 @@ void backdrop_draw_object(
 void backdrop_image_bitmap(
 	BackdropInfo *info,
 	struct Image *image,
-	USHORT *imagedata,
+	UWORD *imagedata,
 	struct BitMap *bitmap)
 {
 	short depth,plane=1;
@@ -939,7 +939,7 @@ void backdrop_get_masks(BackdropObject *object)
 			// Allocate mask
 			if (!(object->bdo_image_mask[a]=
 				AllocVec(
-					((image->Width+15)>>4)*image->Height*sizeof(USHORT),
+					((image->Width+15)>>4)*image->Height*sizeof(UWORD),
 					MEMF_CHIP|MEMF_CLEAR)))
 				break;
 
@@ -1021,7 +1021,7 @@ void backdrop_region_bounds(BackdropInfo *info)
 
 
 // Erase an icon
-void backdrop_erase_icon(BackdropInfo *info,BackdropObject *object,USHORT flags)
+void backdrop_erase_icon(BackdropInfo *info,BackdropObject *object,UWORD flags)
 {
 	BackdropObject *icon;
 
@@ -1091,13 +1091,13 @@ void backdrop_draw_icon_ghost(struct RastPort *rp,struct Rectangle *rect,PLANEPT
 {
 	struct BitMap *ghost_bm;
 	struct RastPort ghost_rp;
-	USHORT *new_mask;
+	UWORD *new_mask;
 	unsigned short width,height,words;
 
 	// No mask?
 	if (!mask)
 	{
-		static USHORT stipple[2]={0xaaaa,0x5555};
+		static UWORD stipple[2]={0xaaaa,0x5555};
 
 		// Set stipple fill
 		SetAfPt(rp,stipple,1);
@@ -1131,13 +1131,13 @@ void backdrop_draw_icon_ghost(struct RastPort *rp,struct Rectangle *rect,PLANEPT
 	words=((width+15)>>4)*height;
 
 	// Allocate a copy of the mask
-	if (new_mask=AllocVec(words*sizeof(USHORT),MEMF_CHIP))
+	if (new_mask=AllocVec(words*sizeof(UWORD),MEMF_CHIP))
 	{
 		short word,line,count;
 		unsigned short mask_word=0xaaaa;
 
 		// Copy mask
-		CopyMem((char *)mask,(char *)new_mask,words*sizeof(USHORT));
+		CopyMem((char *)mask,(char *)new_mask,words*sizeof(UWORD));
 
 		// Words per line
 		line=(width+15)>>4;

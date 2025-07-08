@@ -164,7 +164,7 @@ typedef struct
 
 extern short filetype_action_lookup[];
 extern short fileclass_match_lookup[];
-extern USHORT matchtype_labels[];
+extern UWORD matchtype_labels[];
 
 enum
 {

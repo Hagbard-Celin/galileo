@@ -86,7 +86,7 @@ typedef struct ButtonWindow
 	int			button_top;		// Button top offset
 	int			button_left;		// Button left offset
 
-	USHORT			button_sel_code;	// Mouse button code
+	UWORD			button_sel_code;	// Mouse button code
 	Cfg_Button		*button_sel_button;	// Button selected
 	short			button_sel_col;		// Button column
 	short			button_sel_row;		// Button row
@@ -237,7 +237,7 @@ void buttons_saveas(Buttons *buttons);
 buttons_load(Buttons *buttons,struct Screen *screen,char *);
 int buttons_check_change(Buttons *buttons,BOOL);
 
-void buttons_edit_key(Buttons *buttons,USHORT code,USHORT qual);
+void buttons_edit_key(Buttons *buttons,UWORD code,UWORD qual);
 BOOL buttons_visible_select(Buttons *buttons);
 void buttons_start_drag(Buttons *,short,short,short,short);
 void buttons_show_drag(Buttons *,short,short);
@@ -250,8 +250,8 @@ short buttons_get_max_size(Buttons *,unsigned short *,unsigned short *);
 void buttons_highlight_button(Buttons *buttons,short state,short);
 void buttons_show_button(Buttons *,Cfg_Button *,short,short,short,struct RastPort *);
 
-void buttons_do_popup(Buttons *,USHORT);
-BOOL buttons_button_popup(Buttons *,USHORT);
+void buttons_do_popup(Buttons *,UWORD);
+BOOL buttons_button_popup(Buttons *,UWORD);
 
 int buttons_do_function(Buttons *buttons,ULONG func);
 void buttons_new_bank(Buttons *buttons,short func,Cfg_ButtonBank *);
@@ -278,7 +278,7 @@ void buttons_remap(Buttons *buttons,short remap);
 
 void buttons_update_icon(Buttons *buttons);
 
-USHORT button_border_popup(Buttons *buttons);
+UWORD button_border_popup(Buttons *buttons);
 
 #define DRAG_WIDTH	8
 #define DRAG_HI_HEIGHT	8

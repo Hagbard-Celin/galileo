@@ -272,10 +272,10 @@ void __asm L_BuildKeyString(
 	register __d2 unsigned short,
 	register __d3 unsigned short,
 	register __a0 char *);
-USHORT __asm L_QualValid(register __d0 unsigned short);
+UWORD __asm L_QualValid(register __d0 unsigned short);
 BOOL __asm L_ConvertRawKey(
-	register __d0 USHORT code,
-	register __d1 USHORT qual,
+	register __d0 UWORD code,
+	register __d1 UWORD qual,
 	register __a0 char *key);
 void __asm L_SetBusyPointer(register __a0 struct Window *);
 void __asm L_ActivateStrGad(
@@ -382,8 +382,8 @@ void __asm L_StampDragImage(
 BOOL __asm L_CheckDragDeadlock(
 	register __a0 DragInfo *drag);
 BOOL __asm L_BuildTransDragMask(
-	register __a0 USHORT *mask,
-	register __a1 USHORT *image,
+	register __a0 UWORD *mask,
+	register __a1 UWORD *image,
 	register __d0 short width,
 	register __d1 short height,
 	register __d2 short depth,
@@ -438,15 +438,15 @@ void __asm L_StoreGadgetValue(
 void __asm L_UpdateGadgetValue(
 	register __a0 ObjectList *list,
 	register __a1 struct IntuiMessage *msg,
-	register __d0 USHORT id,
+	register __d0 UWORD id,
 	register __a6 struct MyLibrary *);
 void __asm L_SetGadgetValue(
 	register __a0 ObjectList *list,
-	register __d0 USHORT id,
+	register __d0 UWORD id,
 	register __d1 ULONG value);
 long __asm L_GetGadgetValue(
 	register __a0 ObjectList *list,
-	register __a1 USHORT id,
+	register __a1 UWORD id,
 	register __a6 struct MyLibrary *);
 __asm L_CheckObjectArea(
 	register __a0 GL_Object *object,
@@ -480,7 +480,7 @@ void __asm L_ShowProgressBar(
 void __asm L_SetObjectKind(
 	register __a0 ObjectList *list,
 	register __d0 ULONG id,
-	register __d1 USHORT kind);
+	register __d1 UWORD kind);
 void __asm L_DisableObject(
 	register __a0 ObjectList *list,
 	register __d0 ULONG id,
@@ -526,7 +526,7 @@ struct Menu *__asm L_BuildMenuStrip(
 	register __a1 struct GalileoLocale *locale);
 struct MenuItem *__asm L_FindMenuItem(
 	register __a0 struct Menu *menu,
-	register __d0 USHORT id);
+	register __d0 UWORD id);
 
 
 // list_management.c
@@ -653,8 +653,8 @@ Cfg_Function *__asm L_FindFunctionType(
 
 
 // popup menus
-USHORT __asm L_DoPopUpMenu(register __a0 struct Window *,register __a1 PopUpMenu *,register __a2 PopUpItem **,register __d0 USHORT,register __a6 struct MyLibrary *);
-PopUpItem *__asm L_GetPopUpItem(register __a0 PopUpMenu *menu,register __d0 USHORT id);
+UWORD __asm L_DoPopUpMenu(register __a0 struct Window *,register __a1 PopUpMenu *,register __a2 PopUpItem **,register __d0 UWORD,register __a6 struct MyLibrary *);
+PopUpItem *__asm L_GetPopUpItem(register __a0 PopUpMenu *menu,register __d0 UWORD id);
 void __asm L_SetPopUpDelay(register __d0 short delay,register __a6 struct MyLibrary *libbase);
 
 
@@ -775,7 +775,7 @@ void __asm L_DecodeILBM(
 	register __d4 char comp);
 void __asm L_DecodeRLE(register __a0 RLEinfo *rle);
 ILBMHandle *__asm L_FakeILBM(
-	register __a0 USHORT *imagedata,
+	register __a0 UWORD *imagedata,
 	register __a1 ULONG *palette,
 	register __d0 short width,
 	register __d1 short height,
@@ -849,7 +849,7 @@ struct Gadget *__asm L_AddScrollBars(
 	register __d0 short noidcmpupdate);
 struct Gadget *__asm L_FindBOOPSIGadget(
 	register __a0 struct List *list,
-	register __d0 USHORT id);
+	register __d0 UWORD id);
 void __asm L_BOOPSIFree(register __a0 struct List *list);
 struct Gadget *__asm L_CreateTitleGadget(
 	register __a0 struct Screen *screen,

@@ -94,7 +94,7 @@ void GetPattern(PatternData *,struct Screen *,ULONG);
 void GetPatternBorder(PatternData *,struct Screen *,ULONG);
 void FreePattern(PatternData *);
 
-void __asm backdrop_pattern_rotate(register __a0 USHORT *,register __d0 short);
+void __asm backdrop_pattern_rotate(register __a0 UWORD *,register __d0 short);
 void __asm __saveds PatternBackfill(
 	register __a0 PatternInstance *,
 	register __a1 struct BackFillInfo *,

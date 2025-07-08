@@ -342,7 +342,7 @@ void display_reset_menus(BOOL main_only,BOOL fix_only)
 // Find a menu by userdata ID
 struct MenuItem *find_menu_item(
 	struct Menu *menu,
-	USHORT id)
+	UWORD id)
 {
 	// Go through all menus
 	for (;menu;menu=menu->NextMenu)
@@ -350,7 +350,7 @@ struct MenuItem *find_menu_item(
 		struct MenuItem *item;
 
 		// Is this what we're looking for?
-		if (id==(USHORT)GTMENU_USERDATA(menu)) return (struct MenuItem *)menu;
+		if (id==(UWORD)GTMENU_USERDATA(menu)) return (struct MenuItem *)menu;
 
 		// Go through items
 		for (item=menu->FirstItem;item;item=item->NextItem)
@@ -358,13 +358,13 @@ struct MenuItem *find_menu_item(
 			struct MenuItem *sub;
 
 			// Is this what we're looking for?
-			if (id==(USHORT)GTMENUITEM_USERDATA(item)) return item;
+			if (id==(UWORD)GTMENUITEM_USERDATA(item)) return item;
 
 			// Go through sub items
 			for (sub=item->SubItem;sub;sub=sub->NextItem)
 			{
 				// Is this what we're looking for?
-				if (id==(USHORT)GTMENUITEM_USERDATA(sub)) return sub;
+				if (id==(UWORD)GTMENUITEM_USERDATA(sub)) return sub;
 			}
 		}
 	}

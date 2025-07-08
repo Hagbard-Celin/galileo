@@ -445,7 +445,7 @@ search_get_data(
 			// Gadget?
 			if (copy_msg.Class==IDCMP_GADGETUP)
 			{
-				USHORT gadgetid;
+				UWORD gadgetid;
 
 				// Get gadget id
 				gadgetid=((struct Gadget *)copy_msg.IAddress)->GadgetID;

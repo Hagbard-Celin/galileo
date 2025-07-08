@@ -65,7 +65,7 @@ ConfigWindow
 
 
 // Labels
-USHORT
+UWORD
 	lister_separation_labels[]={
 		MSG_LISTER_SEPARATION_MIX,
 		MSG_LISTER_SEPARATION_DIRS,

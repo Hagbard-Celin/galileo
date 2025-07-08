@@ -54,7 +54,7 @@ ConfigWindow
 
 
 // Labels
-USHORT
+UWORD
 
 	matchtype_labels[]={
 		MSG_CLASSED_MATCH_MATCH,MSG_CLASSED_MATCH_MATCH_DESC,

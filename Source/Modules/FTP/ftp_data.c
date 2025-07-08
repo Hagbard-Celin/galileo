@@ -322,7 +322,7 @@ ConfigWindow
 		{0,0,36,64+4}};
 
 // Labels
-static const USHORT
+static const UWORD
 	allow_resume_labels[]={
 		MSG_REPLACE_ALWAYS,
 		MSG_REPLACE_NEVER,
@@ -1312,7 +1312,7 @@ ConfigWindow
 		{0,0,24,64}};
 
 // Labels
-USHORT	custom_options_labels[]={
+UWORD	custom_options_labels[]={
 		MSG_DEFAULT_OPTIONS,
 		MSG_CUSTOM_OPTIONS,
 		0};

@@ -106,7 +106,7 @@ void ShowDragImage(DragInfo *,ULONG,ULONG);
 void HideDragImage(DragInfo *);
 void StampDragImage(DragInfo *,ULONG,ULONG);
 BOOL CheckDragDeadlock(DragInfo *);
-BOOL BuildTransDragMask(USHORT *,USHORT *,short,short,short,long);
+BOOL BuildTransDragMask(UWORD *,UWORD *,short,short,short,long);
 BOOL InitDragDBuf(DragInfo *);
 void DrawDragList(struct RastPort *,struct ViewPort *,long);
 void RemoveDragImage(DragInfo *);
@@ -177,7 +177,7 @@ typedef struct _ObjectDef {
 	struct IBox fine_dims;
 	ULONG gadget_text;
 	ULONG flags;
-	USHORT gadgetid;
+	UWORD gadgetid;
 	struct TagItem *taglist;
 } ObjectDef;
 
@@ -239,7 +239,7 @@ typedef struct _GL_Object
     struct IBox		    dims;	    // Object dimensions
     ULONG		    flags;	    // Object flags
     char		    *text;	    // Text
-    USHORT		    object_kind;    // Object kind
+    UWORD		    object_kind;    // Object kind
 
     union
     {
@@ -837,8 +837,8 @@ enum
 typedef struct {
     struct MinNode  node;
     char	    *item_name;		    // Menu item name
-    USHORT	    id;			    // Menu ID
-    USHORT	    flags;		    // Menu item flags
+    UWORD	    id;			    // Menu ID
+    UWORD	    flags;		    // Menu item flags
     APTR	    data;		    // Menu item data
     APTR	    image;		    // Menu item image
     APTR	    userdata;		    // Menu item user data
@@ -877,8 +877,8 @@ typedef struct {
 
 #define POPUP_HELPFLAG		(1<<15)
 
-USHORT DoPopUpMenu(struct Window *,PopUpMenu *,PopUpItem **,USHORT);
-PopUpItem *GetPopUpItem(PopUpMenu *,USHORT);
+UWORD DoPopUpMenu(struct Window *,PopUpMenu *,PopUpItem **,UWORD);
+PopUpItem *GetPopUpItem(PopUpMenu *,UWORD);
 void GetPopUpImageSize(struct Window *,PopUpMenu *,short *,short *);
 void SetPopUpDelay(short);
 
@@ -905,7 +905,7 @@ PopUpItem *PopUpNewItem(PopUpHandle *,ULONG,ULONG,ULONG);
 void PopUpSeparator(PopUpHandle *);
 BOOL PopUpItemSub(PopUpHandle *,PopUpItem *);
 void PopUpEndSub(PopUpHandle *);
-ULONG PopUpSetFlags(PopUpMenu *,USHORT,ULONG,ULONG);
+ULONG PopUpSetFlags(PopUpMenu *,UWORD,ULONG,ULONG);
 
 struct ListLock {
     struct List		    list;
@@ -1061,7 +1061,7 @@ typedef struct
 
 typedef struct
 {
-    USHORT  *oi_ImageData;
+    UWORD  *oi_ImageData;
     ULONG   *oi_Palette;
     short   oi_Width;
     short   oi_Height;
@@ -1072,8 +1072,8 @@ APTR OpenImage(char *name,OpenImageInfo *);
 void CloseImage(APTR image);
 APTR CopyImage(APTR image);
 void FlushImages(void);
-short RenderImage(struct RastPort *,APTR,USHORT,USHORT,struct TagItem *tags);
-short RenderImageTags(struct RastPort *,APTR,USHORT,USHORT,Tag,...);
+short RenderImage(struct RastPort *,APTR,UWORD,UWORD,struct TagItem *tags);
+short RenderImageTags(struct RastPort *,APTR,UWORD,UWORD,Tag,...);
 void GetImageAttrs(APTR image,struct TagItem *tags);
 ULONG *GetImagePalette(APTR image);
 void FreeImageRemap(ImageRemap *);
@@ -1173,7 +1173,7 @@ short SelectionList(Att_List *,struct Window *,struct Screen *,char *,short,ULON
 void Seed(int);
 Random(int);
 BuildKeyString(unsigned short,unsigned short,unsigned short,unsigned short,char *);
-USHORT QualValid(unsigned short);
+UWORD QualValid(unsigned short);
 ConvertRawKey(unsigned short,unsigned short,char *);
 void SetBusyPointer(struct Window *);
 StrCombine(char *,char *,char *,int);
@@ -1195,10 +1195,10 @@ void FreeObject(ObjectList *,GL_Object *);
 void FreeObjectList(ObjectList *);
 GL_Object *GetObject(ObjectList *,int);
 void StoreGadgetValue(ObjectList *,struct IntuiMessage *);
-void UpdateGadgetValue(ObjectList *,struct IntuiMessage *,USHORT);
+void UpdateGadgetValue(ObjectList *,struct IntuiMessage *,UWORD);
 void UpdateGadgetList(ObjectList *);
-void SetGadgetValue(ObjectList *,USHORT,ULONG);
-long GetGadgetValue(ObjectList *,USHORT);
+void SetGadgetValue(ObjectList *,UWORD,ULONG);
+long GetGadgetValue(ObjectList *,UWORD);
 void SetGadgetChoices(ObjectList *list,ULONG id,APTR choices);
 CheckObjectArea(GL_Object *,int,int);
 void DisplayObject(struct Window *,GL_Object *,int fg,int bg,char *txt);
@@ -1212,12 +1212,12 @@ void ClearWindowBusy(struct Window *);
 STRPTR GetString(struct GalileoLocale *,LONG);
 struct Gadget *FindKeyEquivalent(ObjectList *,struct IntuiMessage *,int);
 void ShowProgressBar(struct Window *,GL_Object *,ULONG,ULONG);
-void SetObjectKind(ObjectList *,ULONG,USHORT);
+void SetObjectKind(ObjectList *,ULONG,UWORD);
 void DisableObject(ObjectList *,ULONG,BOOL);
 BoundsCheckGadget(ObjectList *,ULONG,int,int);
 void RefreshObjectList(struct Window *,ObjectList *);
 struct Menu *BuildMenuStrip(MenuData *,struct GalileoLocale *);
-struct MenuItem *FindMenuItem(struct Menu *,USHORT);
+struct MenuItem *FindMenuItem(struct Menu *,UWORD);
 
 void SetWindowID(struct Window *,WindowID *,ULONG,struct MsgPort *);
 ULONG GetWindowID(struct Window *);
@@ -1346,7 +1346,7 @@ long ReadBufLine(APTR file,char *data,long size);
 
 // boopsi
 struct Gadget *AddScrollBars(struct Window *,struct List *,struct DrawInfo *,short);
-struct Gadget *FindBOOPSIGadget(struct List *,USHORT);
+struct Gadget *FindBOOPSIGadget(struct List *,UWORD);
 void BOOPSIFree(struct List *);
 struct Gadget *CreateTitleGadget(struct Screen *,struct List *,BOOL,short,short,unsigned short);
 struct Gadget *FindGadgetType(struct Gadget *,UWORD);

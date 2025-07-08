@@ -50,7 +50,7 @@ void read_directory(Lister *lister,char *path,int flags)
 
 
 // Create a new lister and read a directory into it
-Lister *read_new_lister(char *path,Lister *parent,USHORT qual)
+Lister *read_new_lister(char *path,Lister *parent,UWORD qual)
 {
 	Cfg_Lister *cfg;
 	Lister *new_lister=0;

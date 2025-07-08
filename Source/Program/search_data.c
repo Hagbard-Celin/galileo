@@ -44,7 +44,7 @@ ConfigWindow
 		{POS_CENTER,POS_CENTER,48,6},
 		{0,0,0,52}};
 
-USHORT
+UWORD
 	search_labels[]={
 		MSG_SEARCH_PROMPT,
 		MSG_SEARCH_LEAVE_SELECTED,

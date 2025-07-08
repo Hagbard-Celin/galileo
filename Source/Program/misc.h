@@ -97,13 +97,13 @@ void abort_io(struct IORequest *ioreq);
 LONG GetDiskInfo(char *device,struct InfoData *info);
 BOOL VolumePresent(DirBuffer *buffer);
 char *find_public_screen(struct Screen *screen,BOOL lock);
-Cfg_Function *match_function_key(USHORT,USHORT,Cfg_ButtonBank *,Lister *,ULONG,ULONG *);
-Cfg_Function *match_function_key_list(USHORT,USHORT,Cfg_ButtonBank *,BOOL);
+Cfg_Function *match_function_key(UWORD,UWORD,Cfg_ButtonBank *,Lister *,ULONG,ULONG *);
+Cfg_Function *match_function_key_list(UWORD,UWORD,Cfg_ButtonBank *,BOOL);
 void fix_literals(char *dest,char *srce);
 struct Node *FindNameI(struct List *list,char *name);
 short error_saving(short err,struct Window *window,long txt,long buttons);
 BOOL check_closescreen(struct Screen *screen);
-BOOL check_qualifier(USHORT,USHORT,USHORT,USHORT);
+BOOL check_qualifier(UWORD,UWORD,UWORD,UWORD);
 
 struct read_startup
 {
@@ -118,12 +118,12 @@ typedef struct
 {
 	struct _BackdropInfo	*backdrop;
 	struct _BackdropObject	*object;
-	USHORT			qual;
+	UWORD			qual;
 	ULONG			flags;
 	char			data[1];
 } iconopen_packet;
 
-iconopen_packet *get_icon_packet(struct _BackdropInfo *,struct _BackdropObject *,char *,USHORT);
+iconopen_packet *get_icon_packet(struct _BackdropInfo *,struct _BackdropObject *,char *,UWORD);
 
 struct IntuiMessage *check_refresh_msg(struct Window *window,ULONG mask);
 

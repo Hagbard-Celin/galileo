@@ -300,7 +300,7 @@ ObjectDef
 
 
 // Labels
-USHORT
+UWORD
 	creator_cycle_labels[]={
 		MSG_CREATE_CASE,
 		MSG_CREATE_NOCASE,

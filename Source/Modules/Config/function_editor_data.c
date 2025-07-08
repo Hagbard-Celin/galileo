@@ -52,7 +52,7 @@ ConfigWindow
 		{0,0,44,60}};
 
 // Labels
-USHORT
+UWORD
 	_function_type_labels[]={
 		MSG_FUNCED_FUNCTYPE_COMMAND,
 		MSG_FUNCED_FUNCTYPE_AMIGADOS,

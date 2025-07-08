@@ -103,5 +103,5 @@ void iconclock_show(iconclock_data *);
 void read_parse_set(char **,long *);
 void iconclock_init(iconclock_data *,struct Screen *);
 
-extern USHORT __chip numeral_data[10][13],colon_data[3][13];
+extern UWORD __chip numeral_data[10][13],colon_data[3][13];
 void iconclock_info(iconclock_data *);

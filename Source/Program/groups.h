@@ -39,4 +39,4 @@ void groups_new(BackdropInfo *,IPCData *);
 BOOL group_dereference(BPTR,char *,char *,Point *,ULONG *);
 BOOL group_write_data(char *,char *,short,short,ULONG);
 void group_snapshot_icon(BackdropInfo *,BackdropObject *,short,short);
-USHORT group_do_popup(GroupData *);
+UWORD group_do_popup(GroupData *);

@@ -51,7 +51,7 @@ void FunctionEditor(void)
 {
 	struct IntuiMessage *gmsg,msg;
 	int break_flag=0;
-	USHORT gadgetid=0;
+	UWORD gadgetid=0;
 	ULONG waitbits;
 	FuncEdData *data;
 	IPCData *ipc;
@@ -1197,7 +1197,7 @@ BOOL funced_end_edit(
 	FuncEdData *data,
 	Att_Node *node,
 	int endflag,
-	USHORT qual)
+	UWORD qual)
 {
 	BOOL delete=0;
 

@@ -44,7 +44,7 @@ For more information on Directory Opus for Windows please see:
 
 void calc_daymonyr(long days,long *day,long *month,long *year);
 
-extern USHORT __chip moon_big_data[8][2][13],moon_small_data[8][2][9];
+extern UWORD __chip moon_big_data[8][2][13],moon_small_data[8][2][9];
 
 #define MOON_BIG_SIZE	13
 #define MOON_SMALL_SIZE	9

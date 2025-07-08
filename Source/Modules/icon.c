@@ -651,7 +651,7 @@ int openwindow( icon_data *data, int next )
 
 		    if (htmp)
 		    {
-			SHORT i;
+			WORD i;
 
 			// Skip leading space
 			if (htmp[0] == ' ') htmp++;
@@ -1148,7 +1148,7 @@ int openwindow( icon_data *data, int next )
 
 	    // Name
 	    {
-	        USHORT a;
+	        UWORD a;
 
 	        for (a = 0; data->object_name[a]; a++)
 		    temp->buf[a] = data->object_name[a];
@@ -3715,7 +3715,7 @@ void save_protection(icon_data *data, char *save_name)
 {
     Att_Node *node;
     ULONG     prot;
-    SHORT a;
+    WORD a;
 
     // Get all bits we don't change
     prot =  data->fib.fib_Protection;

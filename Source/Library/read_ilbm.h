@@ -161,7 +161,7 @@ void DecodeILBM(
 	char comp);
 void DecodeRLE(RLEinfo *rle);
 ILBMHandle *FakeILBM(
-	USHORT *imagedata,
+	UWORD *imagedata,
 	ULONG *palette,
 	short width,
 	short height,

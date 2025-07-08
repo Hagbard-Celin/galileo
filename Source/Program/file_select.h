@@ -52,9 +52,9 @@ For more information on Directory Opus for Windows please see:
 #define SELECT_SPECIAL	2	// Special result from selection
 
 // Prototypes
-short select_select_files(Lister *,USHORT,short,short);
+short select_select_files(Lister *,UWORD,short,short);
 void select_rmb_scroll(Lister *,short,short);
-select_toggle_entry(Lister *,int,USHORT,BOOL);
+select_toggle_entry(Lister *,int,UWORD,BOOL);
 select_off_entry(Lister *,DirEntry *);
 void deselect_entry(DirBuffer *,DirEntry *);
 short select_default_state(Lister *,int,int);
@@ -66,7 +66,7 @@ void select_check_off(DirEntry *,Lister *);
 void select_global_wild(Lister *,SelectData *,PathList *);
 void entry_change_state(Lister *lister,DirEntry *entry,short position);
 short select_key_select(Lister *lister,BOOL doubleclick);
-void file_doubleclick(Lister *lister,DirEntry *entry,USHORT);
+void file_doubleclick(Lister *lister,DirEntry *entry,UWORD);
 void file_run_function(Lister *lister,DirEntry *entry,Cfg_Function *func,char *,ULONG);
 BOOL lister_subdrop_ok(Lister *lister,struct IntuiMessage *);
 

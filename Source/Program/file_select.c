@@ -41,7 +41,7 @@ For more information on Directory Opus for Windows please see:
 
 // Select files with the mouse
 // Called from LISTER PROCESS
-short select_select_files(Lister *lister,USHORT qual,short mouse_x,short mouse_y)
+short select_select_files(Lister *lister,UWORD qual,short mouse_x,short mouse_y)
 {
 	char drag_ok=DRAG_OK,drag_status=DRAG_OK;
 	short old_mouse_x,old_mouse_y,drag_immediate=0;
@@ -1371,13 +1371,13 @@ void select_rmb_scroll(Lister *lister,short x,short y)
 						lister->work_buffer,
 						pass_entry))
 					{
-						USHORT id=0;
+						UWORD id=0;
 
 						// Got a code?
 						if (!lister->work_buffer[0])
 						{
 							// Get code
-							id=*((USHORT *)(lister->work_buffer+2));
+							id=*((UWORD *)(lister->work_buffer+2));
 
 							// Custom function?
 							if (lister->work_buffer[1])
@@ -1615,7 +1615,7 @@ void select_rmb_scroll(Lister *lister,short x,short y)
 // Toggle selection of an entry (specified by position in visible display)
 // Returns new selection status
 // Called from the LISTER PROCESS
-select_toggle_entry(Lister *lister,int position,USHORT qual,BOOL show)
+select_toggle_entry(Lister *lister,int position,UWORD qual,BOOL show)
 {
 	short num;
 	BOOL double_click;
@@ -1692,7 +1692,7 @@ select_toggle_entry(Lister *lister,int position,USHORT qual,BOOL show)
 
 
 // Do double-click on a file
-void file_doubleclick(Lister *lister,DirEntry *entry,USHORT qual)
+void file_doubleclick(Lister *lister,DirEntry *entry,UWORD qual)
 {
 	// Look at type of entry
 	switch (ENTRYTYPE(entry->de_Node.dn_Type))

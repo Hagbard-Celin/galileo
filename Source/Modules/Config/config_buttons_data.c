@@ -49,7 +49,7 @@ ConfigWindow
 
 
 // Labels
-USHORT
+UWORD
 
 	_buttons_dragbar_labels[]={
 		MSG_BUTTONS_DRAG_AUTO,
