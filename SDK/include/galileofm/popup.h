@@ -11,8 +11,8 @@
 typedef struct {
 	struct MinNode	node;
 	char		*item_name;		// Menu item name
-	USHORT		id;			// Menu ID
-	USHORT		flags;			// Menu item flags
+	UWORD		id;			// Menu ID
+	UWORD		flags;			// Menu item flags
 	APTR		data;			// Menu item data
 } PopUpItem;
 
@@ -44,7 +44,7 @@ typedef struct {
 #define POPUPMF_REFRESH		(1<<1)		// Use refresh callback
 #define POPUPMF_ABOVE		(1<<2)		// Open above parent window
 
-USHORT DoPopUpMenu(struct Window *,PopUpMenu *,PopUpItem **,USHORT);
-PopUpItem *GetPopUpItem(PopUpMenu *,USHORT);
+UWORD DoPopUpMenu(struct Window *,PopUpMenu *,PopUpItem **,UWORD);
+PopUpItem *GetPopUpItem(PopUpMenu *,UWORD);
 
 #endif

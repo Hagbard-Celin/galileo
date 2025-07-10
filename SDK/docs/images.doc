@@ -251,7 +251,7 @@ galileofm.library/CloseImage                           galileofm.library/CloseIm
         RenderImage(rp, image, left, top, tags)
                     A0    A1    D0   D1    A2
 
-        short RenderImage(struct RastPort *, APTR, USHORT, USHORT,
+        short RenderImage(struct RastPort *, APTR, UWORD, UWORD,
                           struct TagItem *);
 
     FUNCTION

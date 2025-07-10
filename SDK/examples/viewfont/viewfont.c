@@ -132,7 +132,7 @@ void main(int argc,char **argv)
 			while (msg=GetWindowMsg(data->window->UserPort))
 			{
 				struct IntuiMessage msg_copy;
-				USHORT id;
+				UWORD id;
 
 				// Copy message and reply
 				msg_copy=*msg;
@@ -172,7 +172,7 @@ void main(int argc,char **argv)
 								break;
 
 							// Get ID
-							id=(USHORT)GTMENUITEM_USERDATA(item);
+							id=(UWORD)GTMENUITEM_USERDATA(item);
 
 							// Fall through
 						}
@@ -1021,10 +1021,10 @@ void font_read_settings(font_data *data)
 	ptr=buf;
 
 	// Parse settings
-	read_parse_set(&ptr,(USHORT *)&dims.Left);
-	read_parse_set(&ptr,(USHORT *)&dims.Top);
-	read_parse_set(&ptr,(USHORT *)&dims.Width);
-	read_parse_set(&ptr,(USHORT *)&dims.Height);
+	read_parse_set(&ptr,(UWORD *)&dims.Left);
+	read_parse_set(&ptr,(UWORD *)&dims.Top);
+	read_parse_set(&ptr,(UWORD *)&dims.Width);
+	read_parse_set(&ptr,(UWORD *)&dims.Height);
 
 	// Got valid size?
 	if (dims.Height>0)

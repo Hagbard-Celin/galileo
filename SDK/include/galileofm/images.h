@@ -36,7 +36,7 @@ typedef struct
 // Open an image in memory (for remapping)
 typedef struct
 {
-	USHORT	*oi_ImageData;
+	UWORD	*oi_ImageData;
 	ULONG	*oi_Palette;
 	short	oi_Width;
 	short	oi_Height;

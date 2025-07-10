@@ -183,7 +183,7 @@ galileofm.library/IFFChunkID                           galileofm.library/IFFChun
         IFFOpen(name, mode, form)
                  A0    D0    D1
 
-        APTR IFFOpen(char *, USHORT, ULONG);
+        APTR IFFOpen(char *, UWORD, ULONG);
 
     FUNCTION
         This routine opens either a disk-based file or the clipboard for

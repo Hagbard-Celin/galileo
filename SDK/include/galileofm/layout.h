@@ -78,7 +78,7 @@ typedef struct {
 	struct IBox	od_FineDims;
 	ULONG		od_GadgetText;
 	ULONG		od_Flags;
-	USHORT		od_ID;
+	UWORD		od_ID;
 	struct TagItem *od_TagList;
 } ObjectDef;
 
@@ -138,7 +138,7 @@ typedef struct _GL_Object
 	struct IBox		dims;		// Object dimensions
 	ULONG			flags;		// Object flags
 	char			*text;		// Text
-	USHORT			object_kind;	// Object kind
+	UWORD			object_kind;	// Object kind
 
 	union
 	{
@@ -456,8 +456,8 @@ void ReplyWindowMsg(struct IntuiMessage *);
 ObjectList *AddObjectList(struct Window *,ObjectDef *);
 void FreeObjectList(ObjectList *);
 GL_Object *GetObject(ObjectList *,ULONG);
-void SetGadgetValue(ObjectList *,USHORT,ULONG);
-long GetGadgetValue(ObjectList *,USHORT);
+void SetGadgetValue(ObjectList *,UWORD,ULONG);
+long GetGadgetValue(ObjectList *,UWORD);
 void SetGadgetChoices(ObjectList *list,ULONG id,APTR choices);
 BOOL CheckObjectArea(GL_Object *,long,long);
 void DisableObject(ObjectList *,ULONG,BOOL);
@@ -477,7 +477,7 @@ void StartRefreshConfigWindow(struct Window *,long);
 void EndRefreshConfigWindow(struct Window *);
 
 struct Menu *BuildMenuStrip(MenuData *,struct GalileoLocale *);
-struct MenuItem *FindMenuItem(struct Menu *,USHORT);
+struct MenuItem *FindMenuItem(struct Menu *,UWORD);
 void SetWindowID(struct Window *,WindowID *,ULONG,struct MsgPort *);
 ULONG GetWindowID(struct Window *);
 struct MsgPort *GetWindowAppPort(struct Window *);

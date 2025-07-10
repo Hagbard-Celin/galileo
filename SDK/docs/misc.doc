@@ -50,7 +50,7 @@ galileofm.library/Atoh                                       galileofm.library/A
         BuildKeyString(code, qual, qual_mask, qual_same, buffer)
                         D0    D1      D2         D3        A0
 
-        void BuildKeyString(USHORT, USHORT, USHORT, USHORT, char *);
+        void BuildKeyString(UWORD, UWORD, UWORD, UWORD, char *);
 
     FUNCTION
         Takes the supplied key code and qualifier and converts them to an
@@ -128,7 +128,7 @@ galileofm.library/Atoh                                       galileofm.library/A
         ConvertRawKey(code, qual, keybuf)
                        D0    D1     A0
 
-        BOOL ConvertRawKey(USHORT, USHORT, char *);
+        BOOL ConvertRawKey(UWORD, UWORD, char *);
 
     FUNCTION
         Takes the supplied code and qualifier and returns the equivalent
@@ -330,7 +330,7 @@ galileofm.library/Atoh                                       galileofm.library/A
         QualValid(qual)
                    D0
 
-        USHORT QualValid(USHORT);
+        UWORD QualValid(UWORD);
 
     FUNCTION
         Masks out invalid qualifiers from the supplied value and returns

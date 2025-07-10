@@ -25,7 +25,7 @@ void GetPalette32(struct ViewPort *,unsigned long *,unsigned short,short);
 
 
 // BOOPSI
-struct Gadget *FindBOOPSIGadget(struct List *,USHORT);
+struct Gadget *FindBOOPSIGadget(struct List *,UWORD);
 void BOOPSIFree(struct List *);
 
 

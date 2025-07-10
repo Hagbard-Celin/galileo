@@ -462,10 +462,10 @@ specific to it.
         Returns : struct GalileoScreenData {
                     struct Screen   *screen;        // Pointer to Galileo screen
                     struct DrawInfo *draw_info;     // DrawInfo structure
-                    USHORT          depth;          // Depth of screen
-                    USHORT          pen_alloc;      // Pen allocation flag
-                    USHORT          pen_array[16];  // User pen array
-                    USHORT          pen_count;      // Number of pens;
+                    UWORD          depth;          // Depth of screen
+                    UWORD          pen_alloc;      // Pen allocation flag
+                    UWORD          pen_array[16];  // User pen array
+                    UWORD          pen_count;      // Number of pens;
                   };
         Notes   : Returns a structure with useful information about the Galileo
                   screen. This structure is READ ONLY!

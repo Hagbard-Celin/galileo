@@ -21,7 +21,7 @@
 typedef struct
 {
 	// Set to the number of hooks you want
-	USHORT		gc_Count;
+	UWORD		gc_Count;
 
 	// Create a file entry
 	APTR __asm	(*gc_CreateFileEntry)

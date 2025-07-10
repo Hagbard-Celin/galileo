@@ -45,7 +45,7 @@ long Random(long);
 void BuildKeyString(unsigned short,unsigned short,unsigned short,unsigned short,char *);
 
 // Valid key qualifiers
-USHORT QualValid(unsigned short);
+UWORD QualValid(unsigned short);
 
 // Convert rawkey values to a character
 BOOL ConvertRawKey(unsigned short,unsigned short,char *);

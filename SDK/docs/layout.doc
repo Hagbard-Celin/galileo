@@ -223,7 +223,7 @@ structure is defined as follows:
         Object-specific taglist. For GadTools gadgets, all the standard
         GadTools flags apply.
 
-            GTCustom_LocaleLabels - (USHORT *)
+            GTCustom_LocaleLabels - (UWORD *)
 
             Used with : MX_KIND, CYCLE_KIND
 
@@ -254,7 +254,7 @@ structure is defined as follows:
             Tag will be re-evaluated with the new contents.
 
 
-            GTCustom_LayoutRel - USHORT
+            GTCustom_LayoutRel - UWORD
 
             Used with : All types
 
@@ -278,7 +278,7 @@ structure is defined as follows:
             tag as well.
             
 
-            GTCustom_LayoutPos - USHORT
+            GTCustom_LayoutPos - UWORD
 
             Used with : All types
 
@@ -320,7 +320,7 @@ structure is defined as follows:
             tag when you supply this tag.
 
 
-            GTCustom_Control - USHORT
+            GTCustom_Control - UWORD
 
             Used with : CHECKBOX_KIND, FILE_BUTTON_KIND, DIR_BUTTON_KIND,
                         FONT_BUTTON_KIND
@@ -917,7 +917,7 @@ cw_FineDims fields, analagous to the fields in ObjectDef structures.
         FindMenuItem(menu, id)
                       A0   D0
 
-        struct MenuItem *FindMenuItem(struct Menu *, USHORT);
+        struct MenuItem *FindMenuItem(struct Menu *, UWORD);
 
     FUNCTION
         Traverses the menu list from the supplied pointer, searching for
@@ -1004,7 +1004,7 @@ cw_FineDims fields, analagous to the fields in ObjectDef structures.
         GetGadgetValue(list, id)
                         A0   A1
 
-        long GetGadgetValue(ObjectList *, USHORT);
+        long GetGadgetValue(ObjectList *, UWORD);
 
     FUNCTION
         This returns the current value of the gadget, specified by gadget ID.
@@ -1323,7 +1323,7 @@ cw_FineDims fields, analagous to the fields in ObjectDef structures.
         SetGadgetValue(list, id, value)
                         A0   D0    D1
 
-        void SetGadgetValue(ObjectList *, USHORT, ULONG);
+        void SetGadgetValue(ObjectList *, UWORD, ULONG);
 
     FUNCTION
         Sets the value of a gadget. See the instructions for GetGadgetValue()

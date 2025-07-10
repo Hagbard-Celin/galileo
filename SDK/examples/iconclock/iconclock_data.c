@@ -10,7 +10,7 @@ ModuleInfo
 		0};
 
 
-USHORT __chip
+UWORD __chip
 
 	numeral_data[10][13]={
 

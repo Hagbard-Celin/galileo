@@ -181,7 +181,7 @@ galileofm.library/ActivateStrGad                   galileofm.library/ActivateStr
         FindBOOPSIGadget(list, id)
                           A0   D0
 
-        struct Gadget *FindBOOPSIGadget(struct List *, USHORT);
+        struct Gadget *FindBOOPSIGadget(struct List *, UWORD);
 
     FUNCTION
         This routine iterates through the supplied list of gadgets looking
@@ -210,7 +210,7 @@ galileofm.library/ActivateStrGad                   galileofm.library/ActivateStr
         GetPalette32(vp, palette, count, first)
                      A0    A1       D0     D1
 
-        void GetPalette32(struct ViewPort *, ULONG, USHORT, short);
+        void GetPalette32(struct ViewPort *, ULONG, UWORD, short);
 
     FUNCTION
         This routine copies the palette from the supplied ViewPort into

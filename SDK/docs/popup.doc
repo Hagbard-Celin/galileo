@@ -7,7 +7,7 @@ galileofm.library/DoPopUpMenu                         galileofm.library/DoPopUpM
         DoPopUpMenu(window, menu, itemptr, button)
                       A0     A1      A2      D0
 
-        USHORT DoPopUpMenu(struct Window *, PopUpMenu *, PopUpItem **, USHORT);
+        UWORD DoPopUpMenu(struct Window *, PopUpMenu *, PopUpItem **, UWORD);
 
     FUNCTION
         This routine displays a popup menu. The PopUpMenu structure must be
@@ -110,7 +110,7 @@ galileofm.library/DoPopUpMenu                         galileofm.library/DoPopUpM
         GetPopUpItem(menu, id)
                       A0   D0
 
-        PopUpItem *GetPopUpItem(PopUpMenu *, USHORT);
+        PopUpItem *GetPopUpItem(PopUpMenu *, UWORD);
 
     FUNCTION
         This searches the supplied menu for a PopUpItem with the specified ID,
