@@ -1088,6 +1088,25 @@ ExtractF(struct ModuleData *data)
 }                       
 ///
 
+BOOL is_dest_customhandler(struct ModuleData *data, char *lister)
+{
+    char result[32];
+    BOOL ret = FALSE;
+
+    result[0] = 0;
+
+    if (lister[0] != '0')
+    {
+	sprintf(data->buf,"lister query %s handler", lister);
+	data->hook.gc_RexxCommand(data->buf, result, sizeof(result), NULL, NULL);
+
+	if (result[0])
+	    ret = TRUE;
+    }
+
+    return ret;
+}
+
 int __saveds __asm L_Module_Entry(register __a0 char *args,
 				  register __a1 struct Screen *screen,
 				  register __a2 IPCData *ipc,
@@ -1570,18 +1589,31 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 			    }
 			    else if (!strcmp(a0, "dropfrom"))
 			    {
-				_copy(&data, a2, a5, FALSE);
-				_scandir(&data, a3, a5);
+				if (!(is_dest_customhandler(&data, a3)))
+				{
+				    _copy(&data, a2, a5, FALSE);
+				    _scandir(&data, a3, a5);
+				}
 			    }
 			    else if ((!stricmp(a0, "copy")) || (!stricmp(a0, "move")))
 			    {
-				_copy(&data, a2, a7, FALSE);
-				_scandir(&data, a3, a7);
+				if (is_dest_customhandler(&data, a3))
+				    DisplayBeep(screen);
+				else
+				{
+				    _copy(&data, a2, a7, FALSE);
+				    _scandir(&data, a3, a7);
+				}
 			    }
 			    else if ((!stricmp(a0, "copyas")) || (!stricmp(a0, "moveas")))
 			    {
-				_copy(&data, a2, a7, TRUE);
-				_scandir(&data, a3, a7);
+				if (is_dest_customhandler(&data, a3))
+				    DisplayBeep(screen);
+				else
+				{
+				    _copy(&data, a2, a7, TRUE);
+				    _scandir(&data, a3, a7);
+				}
 			    }
 			    ReplyMsg((struct Message *)pkt);
 			}
