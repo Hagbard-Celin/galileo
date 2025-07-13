@@ -521,8 +521,6 @@ void _copy(struct ModuleData *data,char *name, char *Dest, BOOL CopyAs)
     xadERROR err;
     BOOL retry;
     struct DirDate *toSet;
-    BPTR parent;
-    char dirtest[256];
 
     FileName=AllocVec(1024,0);
     TreeName=AllocVec(1024,0);
@@ -642,12 +640,6 @@ void _copy(struct ModuleData *data,char *name, char *Dest, BOOL CopyAs)
 		}
 	    	else
 		{
-
-		    if ((parent = Lock(FileName, SHARED_LOCK)))
-  		    {
-		    	UnLock(parent);
-		    }
-
 		    xfi=data->ArcInf->xai_FileInfo;
 		    strcpy(Drawer,&data->listpath[strlen(data->rootpath)]);
 		    AddPart(Drawer,tmp->fib.fib_FileName,1024);
@@ -676,15 +668,6 @@ void _copy(struct ModuleData *data,char *name, char *Dest, BOOL CopyAs)
 			if (!(xfi->xfi_Flags & (XADFIF_INFOTEXT | XADFIF_NOFILENAME))
 			    && (xfi->xfi_Flags & XADFIF_DIRECTORY))
 			{
-			    strcpy(dirtest, TreeName);
-			    /* path=PathPart(dirtest);
-			    path='\0'; */
-
-			    if ((parent = Lock(dirtest, SHARED_LOCK)))
-	            	    {
-			    	UnLock(parent);
-			    }
-
 			    if (dir=CreateDir(TreeName))
 			    {
 				UnLock(dir);
