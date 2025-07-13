@@ -1086,6 +1086,9 @@ BOOL is_dest_customhandler(struct ModuleData *data, char *lister)
 	if (result[0])
 	    ret = TRUE;
     }
+    // TODO: handle desktop folder correctly
+    else
+	ret = TRUE;
 
     return ret;
 }
