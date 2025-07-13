@@ -1520,7 +1520,7 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 		if (!err)
 		{
 		    BuildTree(&data);
-		    ChangeDir(&data, &root);
+		    _cd(&data, &root);
 
 		    sprintf(buf, "lister set %s title XADbrowser: %s", data.lists, FilePart(arcname));
 		    data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
