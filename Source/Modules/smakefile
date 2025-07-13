@@ -142,7 +142,7 @@ STRINGS = cleanup.strings debug.strings diskcopy.strings filetype.strings fixico
 OBJS1 = $(STDOBJS) $(FFPOBJS) $(SHOWOBJS) $(PLAYOBJS) $(MISCOBJS) $(ICONOBJS) $(FORMATOBJS) $(DISKCOPYOBJS) \
 	$(READOBJS) $(JOINOBJS) $(PRINTOBJS) $(LISTFORMATOBJS) $(FIXICONSOBJS) \
 	$(THEMESOBJS) $(FILETYPEOBJS) $(RECYCLEBINOBJS) $(ICONCLOCKOBJS) \
-	$(UPDATEOBJS) $(CLEANUPOBJS) $(ABOUTOBJS) $(PATHFORMATOBJS)
+	$(UPDATEOBJS) $(CLEANUPOBJS) $(ABOUTOBJS)
 OBJS2 = $(ENVOYOBJS) $(FTPOBJS) $(XADOBJS)
 
 OBJS3 = $(CONFIGOBJS)
@@ -181,7 +181,6 @@ core:   modules_pragmas.h \
 	format.strings $(BIN)format.gfmmodule \
 	diskcopy.strings $(BIN)diskcopy.gfmmodule \
 	listerformat.strings $(BIN)listerformat.gfmmodule \
-	diskinfo.strings $(BIN)diskinfo.gfmmodule \
 	fixicons.strings $(BIN)fixicons.gfmmodule \
 	themes.strings $(BIN)themes.gfmmodule \
 	filetype.strings $(BIN)filetype.gfmmodule \
