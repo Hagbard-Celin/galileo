@@ -44,6 +44,7 @@ For more information on Directory Opus for Windows please see:
 *		2 ftp type with no reset 
 *		3 ftp type with reset to ftp defaults button
 */		
+
 #include "listerformat.h"
 #include "Config/galileoconfig.h"
 
@@ -60,7 +61,7 @@ ListFormat 	*format_ftp;
 
 
 	
-ULONG __asm __saveds L_Module_Entry(
+ULONG __asm __saveds L_Module_Entry_Internal(
 	register __a0 struct List *files,
 	register __a1 struct Screen *screen,
 	register __a2 IPCData *ipc,

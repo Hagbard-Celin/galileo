@@ -47,6 +47,7 @@ For more information on Directory Opus for Windows please see:
 #include "ftp/ftp_ipc.h"
 #include "ftp/ftp_addressbook.h"
 #include "ftp/ftp_addrformat.h"
+#include "//Modules/modules_internal_protos.h"
 
 /************ used in listerformat.gfmmodule ******************/
 
@@ -91,21 +92,21 @@ struct ftp_environment	*fd_env;
 */
 ListFormat *get_galileo_format(struct galileoftp_globals *og)
 {
-struct GetPointerPkt pp;
+struct pointer_packet pp;
 ListFormat *galileo;
 
-pp.gpp_Type    = MODPTR_DEFFORMAT;
-pp.gpp_Ptr = 0;
-pp.gpp_Flags   = 0;
+pp.type    = MODPTR_DEFFORMAT;
+pp.pointer = 0;
+pp.flags   = 0;
 
-if	(og->og_hooks.gc_GetPointer(&pp ))
+if	(og->og_gci->gc_GetPointer(&pp ))
 	{
-	galileo=(ListFormat *)pp.gpp_Ptr;
+	galileo=(ListFormat *)pp.pointer;
 
 	*(&og->og_galileo_format)=*galileo;
 
-	if	(pp.gpp_Flags & POINTERF_LOCKED)
-		og->og_hooks.gc_FreePointer(&pp );
+	if	(pp.flags & POINTERF_LOCKED)
+		og->og_gci->gc_FreePointer(&pp );
 	}
 
 return(&og->og_galileo_format);
@@ -144,7 +145,7 @@ static void format_code(void)
 {
 struct Library	*GalileoFMBase;
 struct format_data *data = 0;
-struct Library *ModuleBase;
+struct Library *InternalModuleBase;
 BOOL result=0;
 int function_no=2;
 
@@ -170,16 +171,16 @@ if	(GalileoFMBase = OpenLibrary( "galileofm.library", VERSION_GALILEOFMLIB ))
 				function_no=3;
 
 		// Get lister format module
-		if	(ModuleBase=OpenLibrary("PROGDIR:modules/listerformat.gfmmodule",0))
+		if	(InternalModuleBase=OpenLibrary("PROGDIR:modules/listerformat.gfmmodule",0))
 			{
 			// Edit format
-			result=Module_Entry(
+			result=Module_Entry_Internal(
 				(struct List *)data->fd_f.current,
 				(struct Screen *)data->fd_win,
 				data->fd_ipc,
 				data->fd_main_ipc,
 				function_no,(ULONG)&data->fd_f);
-				CloseLibrary(ModuleBase);
+				CloseLibrary(InternalModuleBase);
 			}
 
 

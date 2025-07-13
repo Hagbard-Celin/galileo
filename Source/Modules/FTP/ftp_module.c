@@ -72,10 +72,10 @@ struct galileoftp_globals og;
 //	Setup global variables and launch main task
 //	Must be done only once for the life of the module
 //
-static int mod_init( EXT_FUNC(func_callback), IPCData *galileo_ipc, IPCData *function_ipc )
+static int mod_init( IPCData *galileo_ipc, IPCData *function_ipc )
 {
 struct modlaunch_data *mldata;		// Startup data we send to new process
-GalileoCallbackInfo register *hooks;
+CONST GalileoCallbackInfo register *gci;
 int okay = FALSE;
 
 // Setup global constants
@@ -99,16 +99,10 @@ og.og_listercount	= 0;
 og.og_addrbook_open	= FALSE;
 
 // Fill in callback hooks
-hooks = &og.og_hooks;
-hooks->gc_Count = GALILEOFM_HOOK_COUNT;
-
-// What is this doing??
-hooks->gc_RemoveFileEntry = 0;
-
-IPC_Command( galileo_ipc, HOOKCMD_GET_CALLBACKS, 0, &og.og_hooks, 0, REPLY_NO_PORT );
+gci = og.og_gci;
 
 // No callback hooks, no play
-if	(!hooks->gc_CheckDesktop) // new 2/5/97
+if	(!gci->gc_CheckDesktop) // new 2/5/97
 	{
 	display_msg( &og, function_ipc, NULL, 0, GetString(locale,MSG_BADVER) );
 	return FALSE;
@@ -122,7 +116,6 @@ if	(mldata = AllocVec( sizeof(struct modlaunch_data), MEMF_CLEAR ))
 	mldata->mld_a4            = getreg(REG_A4);	// Instead of __saveds
 	mldata->mld_screen        = og.og_screen;	// Galileo's screen (should be passed to support multiple Galileos)
 	mldata->mld_function_ipc  = function_ipc;	// Module IPC for new callback hooks
-	mldata->mld_func_callback = func_callback;	// Galileo's old callback hook
 	mldata->mld_og            = &og;		// Global info
 
 	// Launch a new task - returns TRUE if CreateNewProc() succeeds
@@ -488,7 +481,7 @@ int __asm __saveds L_Module_Entry(
 	register __a2 IPCData       *function_ipc,	// 'galileo_function' - the spawned module process
 	register __a3 IPCData       *galileo_ipc,		// 'Galileo' - the main Galileo process
 	register __d0 ULONG          mod_id,
-	register __d1 EXT_FUNC(func_callback))
+	register __d1 CONST GalileoCallbackInfo *gci)
 {
 struct Library             *GalileoFMBase, *DOSBase;	// Avoid stomping on the global bases!
 struct MsgPort             *ftpport;			// If we find this GalileoFTP is already running
@@ -507,6 +500,8 @@ void *m = AllocMem( 101, MEMF_ANY );
 FreeMem( m, 101 );
 }
 */
+
+og.og_gci = gci;
 
 // Screen may be different because of mode change or hide/show
 // Screen pointer should not be global to support multiple Galileos
@@ -539,7 +534,7 @@ if	(GalileoFMBase = OpenLibrary( "PROGDIR:libs/galileofm.library", VERSION_GALIL
 		Permit();
 
 		// Get Galileo's ARexx port name
-		func_callback( EXTCMD_GET_PORT, IPCDATA(function_ipc), og.og_galileoname );
+		og.og_gci->gc_GetPort(  og.og_galileoname );
 
 		if	(mod_id == ID_QUIT || ftpport )
 			{
@@ -564,7 +559,7 @@ if	(GalileoFMBase = OpenLibrary( "PROGDIR:libs/galileofm.library", VERSION_GALIL
 
 			if	(!og.og_ftp_launched)
 				{
-				if	(!(okay = mod_init( func_callback, galileo_ipc, function_ipc )))
+				if	(!(okay = mod_init( galileo_ipc, function_ipc )))
 					og.og_ftp_launched = FALSE;
 				}
 			}

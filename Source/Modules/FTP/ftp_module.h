@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -40,9 +40,6 @@ For more information on Directory Opus for Windows please see:
 
 #define CATCOMP_NUMBERS
 #include "ftp.strings"
-#include "modules_lib.h"
-
-#include "modules.h"
 
 // This is what 'galileo_ftp' gets sent when we launch it
 struct modlaunch_data
@@ -54,7 +51,6 @@ BOOL          mld_okay;			// proc_init() sets this to TRUE so it can be checked 
 struct Screen *mld_screen;		// Screen we're on
 IPCData       *mld_galileo_ipc;		// The main Galileo process's ipc
 IPCData       *mld_function_ipc;	// galileo_function's ipc, needed for callback hooks
-EXT_FUNC      (mld_func_callback);
 
 struct galileoftp_globals *mld_og;		// Points back to global info
 };

@@ -40,7 +40,7 @@ For more information on Directory Opus for Windows please see:
 static const unsigned short pens[1]={(unsigned short)~0};
 char *version="$VER: show.gfmmodule 0.2 "__AMIGADATE__" ";
 
-int __asm __saveds L_Module_Entry(
+int __asm __saveds L_Module_Entry_Internal(
 	register __a0 struct List *files,
 	register __a1 struct Screen *screen,
 	register __a2 IPCData *ipc,

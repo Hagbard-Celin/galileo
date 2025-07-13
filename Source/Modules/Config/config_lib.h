@@ -31,14 +31,18 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
+#ifndef _GALILEOFM_MODULES_LIB
+#define _GALILEOFM_MODULES_LIB
 
 #include "//Library/galileofmbase.h"
 #include "//Library/galileofmpragmas.h"
 #include "//Program/galileo_config.h"
 #include "galileoconfig.h"
+#include "//Modules/modules.h"
+
 
 #define CATCOMP_NUMBERS
 #include "config.strings"
@@ -166,3 +170,5 @@ short error_saving(short,struct Window *);
 #include "function_editor.h"
 #include "select_colours.h"
 #include "button_editor.h"
+
+#endif

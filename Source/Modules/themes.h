@@ -38,7 +38,7 @@ For more information on Directory Opus for Windows please see:
 #define CATCOMP_NUMBERS
 #include "themes.strings"
 #include "modules_lib.h"
-#include <galileofm/hooks.h>
+#include "module.h"
 
 #define SAVETHEME	0
 #define LOADTHEME	1
@@ -50,19 +50,19 @@ For more information on Directory Opus for Windows please see:
 
 extern char *func_templates[];
 
-long save_theme(struct Screen *,GalileoCallbackInfo *,char *,BOOL);
+long save_theme(struct Screen *,CONST GalileoCallbackInfo *,char *,BOOL);
 void rexx_skip_space(char **);
 short rexx_parse_word(char **,char *,short);
-BOOL save_theme_background(APTR,GalileoCallbackInfo *,char *,struct MsgPort *,char *,APTR);
-BOOL save_theme_sound(APTR,GalileoCallbackInfo *,char *,struct MsgPort *,char *,APTR);
-BOOL save_theme_font(APTR,GalileoCallbackInfo *,char *,struct MsgPort *);
-BOOL save_theme_pens(APTR,GalileoCallbackInfo *,char *,struct MsgPort *);
-BOOL save_theme_palette(APTR,GalileoCallbackInfo *,struct MsgPort *);
+BOOL save_theme_background(APTR,CONST GalileoCallbackInfo *,char *,struct MsgPort *,char *,APTR);
+BOOL save_theme_sound(APTR,CONST GalileoCallbackInfo *,char *,struct MsgPort *,char *,APTR);
+BOOL save_theme_font(APTR,CONST GalileoCallbackInfo *,char *,struct MsgPort *);
+BOOL save_theme_pens(APTR,CONST GalileoCallbackInfo *,char *,struct MsgPort *);
+BOOL save_theme_palette(APTR,CONST GalileoCallbackInfo *,struct MsgPort *);
 BOOL theme_copy_file(char *,char *);
 Att_List *theme_build_list(char *path);
 void write_theme_intro(APTR,char *);
 void write_theme_outro(APTR);
-short convert_theme(GalileoCallbackInfo *,char *,char *);
+short convert_theme(CONST GalileoCallbackInfo *,char *,char *);
 void convert_theme_file(char *);
 
 extern char *pen_settings[];

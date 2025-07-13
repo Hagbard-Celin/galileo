@@ -47,7 +47,7 @@ int __asm __saveds L_Module_Entry(
 	register __a2 IPCData *ipc,
 	register __a3 IPCData *main_ipc,
 	register __d0 ULONG mod_id,
-	register __d1 EXT_FUNC(func_callback))
+	register __d1 CONST GalileoCallbackInfo *gci)
 {
 	join_data *data;
 	FunctionEntry *entry;
@@ -84,10 +84,10 @@ int __asm __saveds L_Module_Entry(
 	}
 
 	// Get source path
-	func_callback(EXTCMD_GET_SOURCE,IPCDATA(ipc),data->source);
+	gci->gc_GetSource(IPCDATA(ipc), data->source);
 
 	// Get destination path
-	data->dest_path = (PathNode *)func_callback(EXTCMD_GET_DEST,IPCDATA(ipc),data->dest);
+	data->dest_path = gci->gc_GetDest(IPCDATA(ipc), data->dest);
 
 	// Files supplied?
 	if (data->args && data->args->FA_Arguments[JOINARG_FROM])
@@ -172,10 +172,11 @@ int __asm __saveds L_Module_Entry(
 	// Otherwise
 	else
 	{
+		gci->gc_FirstEntry(IPCDATA(ipc));
+
 		// Get entries
-		while (entry=(FunctionEntry *)func_callback(EXTCMD_GET_ENTRY,IPCDATA(ipc),0))
+		while (entry = gci->gc_GetEntry(IPCDATA(ipc)))
 		{
-			struct endentry_packet packet;
 			char buf[256];
 
 			// Build path
@@ -185,12 +186,8 @@ int __asm __saveds L_Module_Entry(
 			// Add entry to list
 			join_add_file(data,buf,1);
 
-			// Fill out packet to end entry
-			packet.entry=entry;
-			packet.deselect=1;
-
 			// End entry
-			func_callback(EXTCMD_END_ENTRY,IPCDATA(ipc),&packet);
+			gci->gc_EndEntry(IPCDATA(ipc), entry, TRUE);
 		}
 
 		// Set destination path

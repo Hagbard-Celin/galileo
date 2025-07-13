@@ -39,7 +39,7 @@ For more information on Directory Opus for Windows please see:
 
 char *version="$VER: misc.gfmmodule 0.2 "__AMIGADATE__" ";
 
-int __asm __saveds L_Module_Entry(
+int __asm __saveds L_Module_Entry_Internal(
 	register __a0 struct List *files,
 	register __a1 struct Screen *screen,
 	register __a2 IPCData *ipc,

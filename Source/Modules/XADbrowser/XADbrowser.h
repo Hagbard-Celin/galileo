@@ -24,9 +24,7 @@
 //#define _GALILEOFM_MODULE_DEF
 //#include <galileofm/modules.h>
 #include "modules_lib.h"
-
-// FIXME: This makes a mix of internal and external interfaces.
-#include <galileofm/hooks.h>
+#include "module.h"
 
 #define XADOPEN_ARGS  "ARCHIVE,NEWLISTER/S"
 #define XADEXTRACT_ARGS "ARCHIVE/M,TO/K"
@@ -106,17 +104,17 @@ struct ModuleData
 	struct GalileoLocale *locale;
 	struct Library *GalileoFMBase;
 	struct DosLibrary *DOSBase;
-    struct Library *UtilityBase;
-    struct xadMasterBase *xadMasterBase;
-	struct _PathNode *listp2, *destp;
+	struct Library *UtilityBase;
+	struct xadMasterBase *xadMasterBase;
+	PathNode *listp2, *destp;
 	APTR ptr;
-	GalileoCallbackInfo hook;
+	CONST GalileoCallbackInfo *gci;
 	struct MinList Temp, DirDates;
-	struct _PathNode *listp;
+	PathNode *listp;
 	BOOL All, over, newlister;
-    FuncArgs		*args;
-    //struct _dirdate *dirdatep;
-    char *password;
+	FuncArgs	    *args;
+	//struct _dirdate *dirdatep;
+	char *password;
 //    char password[512];
 };
 

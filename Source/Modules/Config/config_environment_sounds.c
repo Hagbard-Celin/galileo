@@ -37,7 +37,7 @@ For more information on Directory Opus for Windows please see:
 
 #include "config_lib.h"
 #include "config_environment.h"
-#include "//Modules/modules.h"
+#include "//Modules/modules_internal_protos.h"
 
 void config_env_show_sound(config_env_data *data)
 {
@@ -111,14 +111,14 @@ void config_env_store_sound(config_env_data *data)
 
 void config_env_test_sound(config_env_data *data)
 {
-	struct Library *ModuleBase;
+	struct Library *InternalModuleBase;
 	BOOL ok=0;
 
 	// Busy the window
 	SetWindowBusy(data->window);
 
 	// Open play.gfmmodule
-	if (ModuleBase=OpenLibrary("PROGDIR:modules/play.gfmmodule",0))
+	if (InternalModuleBase=OpenLibrary("PROGDIR:modules/play.gfmmodule",0))
 	{
 		short num;
 		Cfg_SoundEntry *sound;
@@ -137,7 +137,7 @@ void config_env_test_sound(config_env_data *data)
 			AddTail(&list,&node);
 
 			// Play the sound
-			Module_Entry(
+			Module_Entry_Internal(
 				&list,
 				data->window->WScreen,
 				data->ipc,
@@ -148,7 +148,7 @@ void config_env_test_sound(config_env_data *data)
 		}
 
 		// Close module
-		CloseLibrary(ModuleBase);
+		CloseLibrary(InternalModuleBase);
 	}
 
 	// Unbusy the window

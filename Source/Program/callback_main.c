@@ -32,96 +32,71 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
 
-ULONG
-	HookTable[GALILEOFM_HOOK_COUNT]={
-		(ULONG)HookCreateFileEntry,
-		(ULONG)HookFileSet,
-		(ULONG)HookSortFileList,
-		(ULONG)HookAddFileEntry,
-		(ULONG)HookResortLister,
-		(ULONG)HookRefreshLister,
-		(ULONG)HookLockFileList,
-		(ULONG)HookUnlockFileList,
-		(ULONG)HookFindFileEntry,
-		(ULONG)HookSetFileComment,
-		(ULONG)HookRemoveFileEntry,
-		(ULONG)HookFileQuery,
-		(ULONG)HookShowHelp,
-		(ULONG)HookConvertEntry,
-		(ULONG)HookGetLister,
-		(ULONG)HookGetSource,
-		(ULONG)HookNextSource,
-		(ULONG)HookUnlockSource,
-		(ULONG)HookGetDest,
-		(ULONG)HookEndSource,
-		(ULONG)HookEndDest,
-		(ULONG)HookGetEntry,
-		(ULONG)HookExamineEntry,
-		(ULONG)HookEndEntry,
-		(ULONG)HookRemoveEntry,
-		(ULONG)HookEntryCount,
-		(ULONG)HookReloadEntry,
-		(ULONG)HookAddFile,
-		(ULONG)HookDelFile,
-		(ULONG)HookLoadFile,
-		(ULONG)HookDoChanges,
-		(ULONG)HookCheckAbort,
-		(ULONG)HookGetWindow,
-		(ULONG)HookGetPort,
-		(ULONG)HookGetScreen,
-		(ULONG)HookGetScreenData,
-		(ULONG)HookFreeScreenData,
-		(ULONG)HookOpenProgress,
-		(ULONG)HookUpdateProgress,
-		(ULONG)HookCloseProgress,
-		(ULONG)HookReplaceReq,
-		(ULONG)HookGetPointer,
-		(ULONG)HookFreePointer,
-		(ULONG)HookSendCommand,
-		(ULONG)HookCheckDesktop,
-		(ULONG)HookGetDesktop,
-		(ULONG)HookScript,
-		(ULONG)HookDesktopPopup,
-		(ULONG)HookFirstEntry,
-		(ULONG)HookRexxCommand,
-		(ULONG)HookFileRequest,
-		(ULONG)HookGetThemes,
-        (ULONG)HookFreePointerDirect,
-        (ULONG)HookIsSourceDestLock,
-        (ULONG)HookFakeDir,
-        (ULONG)HookIsFakeDir,
-	};
-
-
-long HookInitHooks(GalileoCallbackInfo *info)
-{
-	ULONG *srcptr,*dstptr;
-	short num;
-
-	// Get pointer to start of function table
-	srcptr=(ULONG *)HookTable;
-
-	// Get pointer to storage space in structure
-	dstptr=(ULONG *)&info->gc_CreateFileEntry;
-
-	// Fill it out, up to count entries
-	for (num=0;num<info->gc_Count;num++,srcptr++,dstptr++)
-	{
-		// Copy entry if valid
-		if (num<GALILEOFM_HOOK_COUNT) *dstptr=*srcptr;
-
-		// Just clear entry in table
-		else *dstptr=0;
-	}
-
-	return (num>GALILEOFM_HOOK_COUNT)?GALILEOFM_HOOK_COUNT:num;
-}
+CONST GalileoCallbackInfo CallBackInfo = {
+		GALILEOFM_CALLBACK_COUNT,
+		(APTR)HookCreateFileEntry,
+		(APTR)HookFileSet,
+		(APTR)HookSortFileList,
+		(APTR)HookAddFileEntry,
+		(APTR)HookResortLister,
+		(APTR)HookRefreshLister,
+		(APTR)HookLockFileList,
+		(APTR)HookUnlockFileList,
+		(APTR)HookFindFileEntry,
+		(APTR)HookSetFileComment,
+		(APTR)HookRemoveFileEntry,
+		(APTR)HookFileQuery,
+		(APTR)HookShowHelp,
+		(APTR)HookConvertEntry,
+		(APTR)HookGetLister,
+		(APTR)HookGetSource,
+		(APTR)HookNextSource,
+		(APTR)HookUnlockSource,
+		(APTR)HookGetDest,
+		(APTR)HookEndSource,
+		(APTR)HookEndDest,
+		(APTR)HookGetEntry,
+		(APTR)HookExamineEntry,
+		(APTR)HookEndEntry,
+		(APTR)HookRemoveEntry,
+		(APTR)HookEntryCount,
+		(APTR)HookReloadEntry,
+		(APTR)HookAddFile,
+		(APTR)HookDelFile,
+		(APTR)HookLoadFile,
+		(APTR)HookDoChanges,
+		(APTR)HookCheckAbort,
+		(APTR)HookGetWindow,
+		(APTR)HookGetPort,
+		(APTR)HookGetScreen,
+		(APTR)HookGetScreenData,
+		(APTR)HookFreeScreenData,
+		(APTR)HookOpenProgress,
+		(APTR)HookUpdateProgress,
+		(APTR)HookCloseProgress,
+		(APTR)HookReplaceReq,
+		(APTR)HookGetPointer,
+		(APTR)HookFreePointer,
+		(APTR)HookSendCommand,
+		(APTR)HookCheckDesktop,
+		(APTR)HookGetDesktop,
+		(APTR)HookScript,
+		(APTR)HookDesktopPopup,
+		(APTR)HookFirstEntry,
+		(APTR)HookRexxCommand,
+		(APTR)HookFileRequest,
+		(APTR)HookGetThemes,
+		(APTR)HookFreePointerDirect,
+		(APTR)HookIsSourceDestLock,
+		(APTR)HookFakeDir,
+		(APTR)HookIsFakeDir,
+};
 
 
 // Run a script

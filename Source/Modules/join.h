@@ -38,6 +38,7 @@ For more information on Directory Opus for Windows please see:
 #define CATCOMP_NUMBERS
 #include "join.strings"
 #include "modules_lib.h"
+#include "module.h"
 
 #define COPY_INITIAL_BUFFER 8192
 #define COPY_MIN_BUFFER		2048

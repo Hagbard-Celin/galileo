@@ -36,7 +36,6 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "read.h"
-#include "modules.h"
 
 #define H_EXTRA		1
 
@@ -54,7 +53,7 @@ static char fontname[40];
 static char editor[3][80];
 static short fontsize;
 
-int __asm __saveds L_Module_Entry(
+int __asm __saveds L_Module_Entry_Internal(
 	register __a0 struct List *files,
 	register __a1 struct Screen *screen,
 	register __a2 IPCData *ipc,
@@ -3951,13 +3950,13 @@ BOOL __stdargs my_LayoutMenus(struct Menu *menu,APTR vi,Tag tag,...)
 // Print
 void read_print(read_data *data)
 {
-	struct Library *ModuleBase;
+	struct Library *InternalModuleBase;
 
 	// Set busy pointer
 	SetBusyPointer(data->window);
 
 	// Get print module
-	if (ModuleBase=OpenLibrary("PROGDIR:modules/print.gfmmodule",0))
+	if (InternalModuleBase=OpenLibrary("PROGDIR:modules/print.gfmmodule",0))
 	{
 		struct List list;
 		struct Node node;
@@ -3968,10 +3967,10 @@ void read_print(read_data *data)
 		AddTail(&list,&node);
 
 		// Print file
-		Module_Entry(&list,data->window->WScreen,data->ipc,data->main_ipc,0,0);
+		Module_Entry_Internal(&list,data->window->WScreen,data->ipc,data->main_ipc,0,0);
 
 		// Close library
-		CloseLibrary(ModuleBase);
+		CloseLibrary(InternalModuleBase);
 	}
 
 	// Clear busy pointer

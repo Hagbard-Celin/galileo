@@ -38,6 +38,7 @@ For more information on Directory Opus for Windows please see:
 #define CATCOMP_NUMBERS
 #include "filetype.strings"
 #include "modules_lib.h"
+#include "module.h"
 
 #include "Config/galileoconfig.h"
 #include "Config/galileoconfig_pragmas.h"
@@ -62,7 +63,7 @@ typedef struct
     struct Screen	    *screen;
     IPCData		    *ipc;
     IPCData		    *main_ipc;
-    EXT_FUNC		    (func_callback);
+    CONST GalileoCallbackInfo     *gci;
 
     NewConfigWindow	    new_win;
     struct Window	    *window;
@@ -121,7 +122,6 @@ typedef struct
     IPCData		    *ipc;
     IPCData		    *main_ipc;
     IPCData		    *galileo_ipc;
-    EXT_FUNC		    (func_callback);
 
     APTR		    memh;
 

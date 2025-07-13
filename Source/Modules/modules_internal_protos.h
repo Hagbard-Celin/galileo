@@ -35,55 +35,13 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#include "galileofm.h"
-#include "/Modules/modules_internal_protos.h"
+#ifndef _GALILEOFM_MODULES_INTERNAL_PROTOS
+#define _GALILEOFM_MODULES_INTERNAL_PROTOS
 
-// CONFIGURE a lister
-GALILEOFM_FUNC(function_configure)
-{
-	Lister *lister;
-	struct Library *InternalModuleBase;
-	ListFormat format;
-	ListFormat *pass_format=0;
-	ULONG ret;
+#include "/Modules/modules_internal_pragmas.h"
 
-	// Get current lister
-	if (!(lister=function_lister_current(&handle->func_source_paths)))
-		return 0;
 
-	// Get current format
-	format=lister->cur_buffer->buf_ListFormat;
+int		Module_Entry_Internal(struct List *,struct Screen *,IPCData *,IPCData *,ULONG,ULONG);
 
-	// Open lister format module
-	if (!(InternalModuleBase=OpenModule("listerformat.gfmmodule")))
-		return 0;
 
-	// Send message to say hello
-	IPC_Command(lister->ipc,LISTER_CONFIGURE,1,0,0,0);
-
-	// Edit list format
-	ret=Module_Entry_Internal(
-		(struct List *)&format,
-		(struct Screen *)lister->window,
-		handle->ipc,
-		&main_ipc,
-		1,
-		(ULONG)&environment->env->list_format);
-
-	// Close library
-	CloseLibrary(InternalModuleBase);
-
-	// Need to refresh the lister?
-	if (ret)
-	{
-		// Allocate format
-		if (pass_format=AllocVec(sizeof(ListFormat),0))
-		{
-			// Copy format in
-			CopyMem((char *)&format,(char *)pass_format,sizeof(ListFormat));
-		}
-	}
-
-	// Send message to say goodbye
-	IPC_Command(lister->ipc,LISTER_CONFIGURE,0,(APTR)ret,pass_format,0);
-}
+#endif

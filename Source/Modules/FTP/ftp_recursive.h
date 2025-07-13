@@ -31,13 +31,14 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #ifndef _FTP_RECURSIVE_H
 #define _FTP_RECURSIVE_H
 
+#include "modules_lib.h"
 #include "ftp_lister.h"
 
 // End of a connection for recursive transfer - FTP or file system

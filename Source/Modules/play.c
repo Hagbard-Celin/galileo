@@ -42,7 +42,7 @@ char *version="$VER: play.gfmmodule 0.2 "__AMIGADATE__" ";
 
 static char *modtypes[]={"SoundTracker","MED","Octalyzer","SoundTracker 15"};
 
-int __asm __saveds L_Module_Entry(
+int __asm __saveds L_Module_Entry_Internal(
 	register __a0 struct List *files,
 	register __a1 struct Screen *screen,
 	register __a2 IPCData *ipc,

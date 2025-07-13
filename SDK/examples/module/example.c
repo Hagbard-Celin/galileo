@@ -12,7 +12,7 @@ int __asm __saveds L_Module_Entry(
 	register __a2 IPCData *ipc,				// Our IPC pointer
 	register __a3 IPCData *main_ipc,		// Main Galileo IPC pointer
 	register __d0 ULONG mod_id,				// ID of module function
-	register __d1 EXT_FUNC(func_callback))	// Galileo callback function
+	register __d1 CONST GalileoCallbackInfo *gci)	// Galileo callback function
 {
 	char buf[256];
 

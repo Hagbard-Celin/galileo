@@ -1365,7 +1365,7 @@ if	(xm->xm_otherhandle)
 
 
 // Trigger script
-if	(remotenode->fn_og->og_hooks.gc_Script
+if	(remotenode->fn_og->og_gci->gc_Script
 	&& !(remotenode->fn_flags & LST_ABORT)
 	&& timer && CheckTimer( timer ))
 	{
@@ -1376,12 +1376,12 @@ if	(remotenode->fn_og->og_hooks.gc_Script
 	if	(rexx_result && remotenode->fn_site.se_env->e_script_copy_ok)
 		{
 		kprintf( "** script copy success\n" );
-		remotenode->fn_og->og_hooks.gc_Script( "FTP copy success", handle );
+		remotenode->fn_og->og_gci->gc_Script( "FTP copy success", handle );
 		}
 	else if	(!rexx_result && remotenode->fn_site.se_env->e_script_copy_fail)
 		{
 		kprintf( "** script copy fail\n" );
-		remotenode->fn_og->og_hooks.gc_Script( "FTP copy fail", handle );
+		remotenode->fn_og->og_gci->gc_Script( "FTP copy fail", handle );
 		}
 	}
 
@@ -2224,7 +2224,7 @@ rexx_lst_unlock( thisnode->fn_galileo, thisnode->fn_handle );
 rexx_lst_unlock( thisnode->fn_galileo, xm->xm_rm_dest->fn_handle );
 
 // Trigger script
-if	(thisnode->fn_og->og_hooks.gc_Script
+if	(thisnode->fn_og->og_gci->gc_Script
 	&& !(prognode->fn_flags & LST_ABORT)
 	&& timer && CheckTimer( timer ))
 	{
@@ -2236,12 +2236,12 @@ if	(thisnode->fn_og->og_hooks.gc_Script
 		&& (srcnode->fn_site.se_env->e_script_copy_ok
 		|| destnode->fn_site.se_env->e_script_copy_ok))
 		{
-		thisnode->fn_og->og_hooks.gc_Script( "FTP copy success", handle );
+		thisnode->fn_og->og_gci->gc_Script( "FTP copy success", handle );
 		}
 	else if	(srcnode->fn_site.se_env->e_script_copy_fail
 		|| destnode->fn_site.se_env->e_script_copy_fail)
 		{
-		thisnode->fn_og->og_hooks.gc_Script( "FTP copy fail", handle );
+		thisnode->fn_og->og_gci->gc_Script( "FTP copy fail", handle );
 		}
 	}
 

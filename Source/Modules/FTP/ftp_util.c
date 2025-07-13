@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -1363,19 +1363,17 @@ return result;
 //
 unsigned long ftpmod_options( struct galileoftp_globals *og, int type )
 {
-struct GetPointerPkt pp;
+struct pointer_packet pp;
 CFG_SETS              *options;
 unsigned long          rv = 0;
 
-pp.gpp_Type    = MODPTR_OPTIONS;
-pp.gpp_Ptr = 0;
-pp.gpp_Flags   = 0;
+pp.type    = MODPTR_OPTIONS;
+pp.pointer = 0;
+pp.flags   = 0;
 
-og->og_func_callback(
-	EXTCMD_GET_POINTER,
-	IPCDATA(og->og_main_ipc), &pp );
+og->og_gci->gc_GetPointer( &pp );
 
-options = (CFG_SETS *)pp.gpp_Ptr;
+options = (CFG_SETS *)pp.pointer;
 
 // Copy options?
 if	(type == OPTION_COPY && options)
@@ -1385,8 +1383,8 @@ if	(type == OPTION_COPY && options)
 else if	(type == OPTION_DELETE)
 	rv = options->delete_flags;
 
-if	(pp.gpp_Flags & POINTERF_LOCKED)
-	og->og_func_callback(EXTCMD_FREE_POINTER,IPCDATA(og->og_main_ipc), &pp );
+if	(pp.flags & POINTERF_LOCKED)
+	og->og_gci->gc_FreePointer( &pp );
 
 return rv;
 }

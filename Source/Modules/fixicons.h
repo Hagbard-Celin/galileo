@@ -38,6 +38,7 @@ For more information on Directory Opus for Windows please see:
 #define CATCOMP_NUMBERS
 #include "fixicons.strings"
 #include "modules_lib.h"
+#include "module.h"
 
 extern char *arg_template;
 

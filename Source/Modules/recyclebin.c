@@ -45,7 +45,7 @@ int __asm __saveds L_Module_Entry(
 	register __a2 IPCData *ipc,
 	register __a3 IPCData *main_ipc,
 	register __d0 ULONG mod_id,
-	register __d1 EXT_FUNC(func_callback))
+	register __d1 CONST GalileoCallbackInfo *info)
 {
 	RecyclePacket *packet;
 	RecycleSemaphore *sem;

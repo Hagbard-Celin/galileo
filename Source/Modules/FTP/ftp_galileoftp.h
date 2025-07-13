@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -52,6 +52,7 @@ For more information on Directory Opus for Windows please see:
 
 #include "//Library/galileofmbase.h"
 #include "modules.h"
+#include "module.h"
 
 /********************************/
 
@@ -81,9 +82,6 @@ typedef struct
 #include "//Program/dirlist.h"
 
 /********************************/
-
-// FIXME: This makes a mix of internal and external interfaces.
-#include <galileofm/hooks.h>
 
 #ifdef DEBUG
 #define err(s)		(kprintf(s),kprintf("\n"))
@@ -393,14 +391,11 @@ int                      og_listercount;		// Number of connected FTP listers
 IPCData			*og_addrproc;
 BOOL			 og_addrbook_open;		// So we don't have to queue address book messages
 
-// Unsure - Global or One per Galileo?
-EXT_FUNC		(og_func_callback);		// Function callback
-
 // Should be seperate for each lister, addressbook (multiple Galileos)
 char			 og_galileoname[PORTNAMELEN + 1];
 struct Screen		*og_screen;
 
-GalileoCallbackInfo	 og_hooks; 			// gp
+CONST GalileoCallbackInfo      *og_gci; 		       // gp
 
 struct ftp_config	 og_oc;
 

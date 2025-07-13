@@ -1,27 +1,100 @@
-#ifndef _GALILEOFM_HOOK
-#define _GALILEOFM_HOOK
+/*
 
-/*****************************************************************************
+Galileo Amiga File-Manager and Workbench Replacement
+Copyright 1993-2012 Jonathan Potter & GP Software
 
- Galileo Direct Hooks
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
 
- *****************************************************************************/
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-// Use this command to get the address of the hooks from the Galileo process.
-// Send it to the main Galileo IPC, and supply the address of a GalileoCallbackInfo
-// structure in the data field of the message.
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#define HOOKCMD_GET_CALLBACKS	0x40100
+This program is based on the source code of Directory Opus Magellan II, 
+released by GPSoftware under the APL license in 2012. Re-licensed under GPL by 
+permission of Dr Greg Perry, Managing Director of GPSoftware.
 
-#define GALILEOFM_HOOK_COUNT	56
+Opus® and Directory Opus® and associated images are registered trademarks of GPSoftware.
+DOpus(TM), DirOpus(TM) and Opus File Manager(TM) are trademarked 1991 by GPSoftware.
+Opus Magellan (TM) is trademarked 1996 GPSoftware.
+All other trademarks are the property of their respective owners.
 
-// This structure will grow in the future, correct use of the gc_Count field
-// ensures innocent memory won't get overwritten.
+The release of Directory Opus 5 under the GPL in NO WAY affects
+the existing commercial status of Directory Opus for Windows.
+
+For more information on Directory Opus for Windows please see:
+
+		 http://www.gpsoft.com.au
+
+*/
+
+#ifndef _GALILEOFM_MODULE
+#define _GALILEOFM_MODULE
+
+typedef struct _PathNode
+{
+	struct MinNode		pn_node;
+	char			pn_path_buf[512];
+	char			*pn_path;
+	APTR			pn_lister;
+	ULONG			pn_flags;
+} PathNode;
+
+typedef struct _FunctionEntry
+{
+	struct MinNode		fe_node;
+	char			*fe_name;
+	struct DirEntry		*fe_entry;
+	short			fe_type;
+	short			fe_flags;
+} FunctionEntry;
+
+#define LISTNF_UPDATE_STAMP	(1<<5)	// Update datestamp
+#define LISTNF_RESCAN		(1<<6)	// Rescan this lister
+
+
+
+// Flags for gc_RefreshLister()
+#define HOOKREFRESH_DATE	(1<<0)
+#define HOOKREFRESH_FULL	(1<<1)
+
+
+// Type value for gc_ExamineEntry()
+enum
+{
+	EE_NAME,		// Get pointer to name (READ ONLY!)
+	EE_TYPE,		// Get type (<0 = file, >0 = dir)
+};
+
+// Values for gc_FileSet/gc_FileQuery
+
+#define HFFS_NAME		( TAG_USER + 0x1 )	// char * 		- Entry name
+#define HFFS_SIZE		( TAG_USER + 0x2 )	// ULONG 		- Entry size
+#define HFFS_PROTECTION		( TAG_USER + 0x3 )	// ULONG 		- Protection flags
+#define HFFS_DATE		( TAG_USER + 0x4 )	// struct Datestamp *	- Entry date
+#define HFFS_COMMENT		( TAG_USER + 0x5 )	// char *		- Comment
+#define HFFS_SELECTED		( TAG_USER + 0x6 )	// BOOL			- Selected state
+#define HFFS_LINK		( TAG_USER + 0x7 )	// BOOL			- Set if a link
+#define HFFS_COLOUR		( TAG_USER + 0x8 )	// ULONG		- 1 = device, 2 = assign
+#define HFFS_USERDATA		( TAG_USER + 0x9 )	// ULONG		- Userdata
+#define HFFS_FILETYPE		( TAG_USER + 0xa )	// char *		- Filetype description
+#define HFFS_DISPLAY		( TAG_USER + 0xb )	// char *		- Custom display string
+#define HFFS_VERSION		( TAG_USER + 0xc )	// VersionInfo *	- Version information
+#define HFFS_MENU		( TAG_USER + 0xd )	// struct List *	- Custom menus for entry
+#define HFFS_ICON		( TAG_USER + 0xe )	// struct DiskObject *	- not implemented
+
 
 typedef struct
 {
 	// Set to the number of hooks you want
-	UWORD		gc_Count;
+	ULONG		gc_Count;
 
 	// Create a file entry
 	APTR __asm	(*gc_CreateFileEntry)
@@ -227,9 +300,9 @@ typedef struct
 	struct GalileoScreenData *__asm	(*gc_GetScreenData)(void);
 
 
-	// Free screen data structure			
+	// Free screen data structure
 	void __asm	(*gc_FreeScreenData)(void);
-			
+
 
 	// Open progress indicator in a lister
 	void __asm	(*gc_OpenProgress)
@@ -262,9 +335,9 @@ typedef struct
 
 	// Get pointer to Galileo internal things
 	APTR __asm	(*gc_GetPointer)
-				(register __a0 struct GetPointerPkt *);
+				(register __a0 struct pointer_packet *);
 	void __asm	(*gc_FreePointer)
-				(register __a0 struct GetPointerPkt *);
+				(register __a0 struct pointer_packet *);
 
 
 	// Send an ARexx command direct to Galileo
@@ -318,179 +391,31 @@ typedef struct
 	void __asm	(*gc_GetThemes)
 				(register __a0 char *buffer);
 
-    // Free pointer without struct pointer_packet
-    void __asm	(*gc_FreePointerDirect)
+	// Free pointer without struct pointer_packet
+	void __asm  (*gc_FreePointerDirect)
 				(register __a0 APTR pointer,
-    			 register __d0 ULONG type,
-    			 register __d1 ULONG flags);
+	    			 register __d0 ULONG type,
+	    			 register __d1 ULONG flags);
 
-    // Check if lister source/dest status is locked
-    BOOL __asm  (*gc_IsSourceDestLock)
-                (register __a0 ULONG lister);
+	// Check if lister source/dest status is locked
+	BOOL __asm  (*gc_IsSourceDestLock)
+				(register __a0 ULONG lister);
 
-    void __asm  (*gc_FakeDir)
-           	    (register __a0 ULONG lister,
-                 register __d0 BOOL fakedir);
+	void __asm  (*gc_FakeDir)
+		       	        (register __a0 ULONG lister,
+				 register __d0 BOOL fakedir);
 
 	BOOL __asm  (*gc_IsFakeDir)
-                (register __a0 ULONG lister);
+				(register __a0 ULONG lister);
 
 } GalileoCallbackInfo;
 
+int __saveds __asm L_Module_Entry(register __a0 char *args,
+				  register __a1 struct Screen *screen,
+				  register __a2 IPCData *ipc,
+				  register __a3 IPCData *main_ipc,
+				  register __d0 ULONG mod_id,
+				  register __d1 CONST GalileoCallbackInfo *gci);
 
-// Values for gc_FileSet/gc_FileQuery
-
-#define HFFS_NAME		( TAG_USER + 0x1 )	// char * 		- Entry name
-#define HFFS_SIZE		( TAG_USER + 0x2 )	// ULONG 		- Entry size
-#define HFFS_PROTECTION		( TAG_USER + 0x3 )	// ULONG 		- Protection flags
-#define HFFS_DATE		( TAG_USER + 0x4 )	// struct Datestamp *	- Entry date
-#define HFFS_COMMENT		( TAG_USER + 0x5 )	// char *		- Comment
-#define HFFS_SELECTED		( TAG_USER + 0x6 )	// BOOL			- Selected state
-#define HFFS_LINK		( TAG_USER + 0x7 )	// BOOL			- Set if a link
-#define HFFS_COLOUR		( TAG_USER + 0x8 )	// ULONG		- 1 = device, 2 = assign
-#define HFFS_USERDATA		( TAG_USER + 0x9 )	// ULONG		- Userdata
-#define HFFS_FILETYPE		( TAG_USER + 0xa )	// char *		- Filetype description
-#define HFFS_DISPLAY		( TAG_USER + 0xb )	// char *		- Custom display string
-#define HFFS_VERSION		( TAG_USER + 0xc )	// VersionInfo *	- Version information
-#define HFFS_MENU		( TAG_USER + 0xd )	// struct List *	- Custom menus for entry
-#define HFFS_ICON		( TAG_USER + 0xe )	// struct DiskObject *	- not implemented
-
-
-// Additional file requester flags
-#define GCRFF_PATTERN		(1<<29)
-#define GCRFF_SCREENPARENT	(1<<30)
-#define GCRFF_REJECTICONS	(1<<31)
-
-#ifndef _GALILEOFM_DIRLIST
-// Holds version information (used by HFFS_VERSION)
-typedef struct _VersionInfo {
-	UWORD		vi_Version;		// Major version #
-	UWORD		vi_Revision;		// Minor revision #
-	long		vi_Days;		// Days of date
-	ULONG		vi_Flags;		// Flags
-	char		vi_Char;		// Version character
-	char		vi_String[1];		// Version string
-} VersionInfo;
-#endif
-
-
-// Flags for gc_RefreshLister()
-#define HOOKREFRESH_DATE	(1<<0)
-#define HOOKREFRESH_FULL	(1<<1)
-
-
-
-// Type value for gc_ExamineEntry()
-enum
-{
-	EE_NAME,		// Get pointer to name (READ ONLY!)
-	EE_TYPE,		// Get type (<0 = file, >0 = dir)
-};
-
-
-// Flags for gc_ReplaceReq()
-#define REPREQF_NOVERSION	(1<<16)		// No 'version' button
-
-
-// Define this if you want to use gc_ResortLister
-#ifdef	GALILEOFMHOOK_INCLUDE_FORMAT
-
-
-
-// Sort format
-struct SortFormat {
-	BYTE	sf_Sort;			// Sort method
-	BYTE	sf_SortFlags;			// Sort flags
-	BYTE	sf_Separation;			// File separation
-};
-
-#define SORT_REVERSE			(1<<0)	// Sort in reverse order
-
-// List format
-struct ListFormat {
-
-	// Colour fields, not used at present
-	UBYTE			lf_FilesUnsel[2];	// Unselected files
-	UBYTE			lf_FilesSel[2];		// Selected files
-	UBYTE			lf_DirsUnsel[2];	// Unselected directories
-	UBYTE			lf_DirsSel[2];		// Selected directories
-
-	// Sort information
-	struct SortFormat	lf_Sort;		// Sort method
-	BYTE			lf_DisplayPos[16];	// Item display position
-	BYTE			lf_DisplayLen[15];	// Display length (not used)
-
-	UBYTE			lf_Flags;		// See LFORMATF_xxx below
-
-	// Not used
-	BYTE			lf_ShowFree;		// Show free space type
-
-	// You must call ParsePattern() yourself
-	char			lf_ShowPattern[40];	// Show pattern
-	char			lf_HidePattern[40];	// Hide pattern
-	char			lf_ShowPatternP[40];	// Show pattern parsed
-	char			lf_HidePatternP[40];	// Hide pattern parsed
-};
-
-#define LFORMATF_REJECT_ICONS		(1<<0)	// Reject icons
-#define LFORMATF_HIDDEN_BIT		(1<<1)	// Respect the H bit
-#define LFORMATF_ICON_VIEW		(1<<2)	// Default to icon view
-#define LFORMATF_SHOW_ALL		(1<<3)	// Show all
-
-// Used for the sf_Sort and lf_DisplayPos fields
-enum
-{
-	DISPLAY_NAME,
-	DISPLAY_SIZE,
-	DISPLAY_PROTECT,
-	DISPLAY_DATE,
-	DISPLAY_COMMENT,
-	DISPLAY_FILETYPE,
-	DISPLAY_OWNER,
-	DISPLAY_GROUP,
-	DISPLAY_NETPROT,
-	DISPLAY_VERSION,
-
-	DISPLAY_LAST
-};
-
-// Used for the sf_Separation field
-enum
-{
-	SEPARATE_MIX,
-	SEPARATE_DIRSFIRST,
-	SEPARATE_FILESFIRST,
-};
-
-#endif
-
-
-// Used for the gc_GetPointer/gc_FreePointer hooks
-struct GetPointerPkt
-{
-	ULONG		gpp_Type;
-	APTR		gpp_Ptr;
-	ULONG		gpp_Flags;
-};
-
-#define GETPTR_HANDLE		2	// Get a function handle
-#define GETPTR_COMMANDS		4	// Get internal command list
-
-#define GETPTRF_DELPORT     (1<<1)
-
-#ifndef DEF_GALILEOFMCOMMANDLIST
-#define DEF_GALILEOFMCOMMANDLIST
-
-struct GalileoCommandList
-{
-	struct Node	gcl_Node;		// Command name in ln_Name
-	ULONG		gcl_Flags;		// Function flags
-	char		*gcl_Description;	// Description string
-	char		*gcl_Template;		// Command template
-	char		*gcl_Module;		// Module command resides in
-	char		*gcl_Help;		// Help file for command
-};
-
-#endif
 
 #endif

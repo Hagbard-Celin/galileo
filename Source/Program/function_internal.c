@@ -38,6 +38,9 @@ For more information on Directory Opus for Windows please see:
 
 #include "galileofm.h"
 #include "/Modules/modules.h"
+#include "/Modules/modules_protos.h"
+
+extern CONST GalileoCallbackInfo CallBackInfo;
 
 function_internal_command(CommandList *command,
 	                  char *args,
@@ -243,7 +246,6 @@ function_internal_command(CommandList *command,
 				adata->screen = GUI->screen_pointer;
 				adata->main_ipc	= &main_ipc;
 				adata->command = command;
-				adata->function_external_hook = (ULONG)function_external_hook;
 				adata->module = ModuleBase;
 				adata->library = GalileoFMBase;
 				adata->memhandlep = memhandlep;
@@ -284,7 +286,7 @@ function_internal_command(CommandList *command,
 				 (handle)?handle->ipc:0,
 				 &main_ipc,
 				 command->function,
-				 (ULONG)function_external_hook);
+				 &CallBackInfo);
 	    }
 	    // Close module
 	    CloseLibrary(ModuleBase);
@@ -301,188 +303,4 @@ function_internal_command(CommandList *command,
 	    ret=(int)((int (*)())(command->stuff.code)(command,handle,args,instruction));
 
     return ret;
-}
-
-
-// Hook for external commands
-ULONG __asm __saveds function_external_hook(register __d0 ULONG command,
-	                                    register __a0 FunctionHandle *handle,
-	                                    register __a1 APTR packet)
-{
-    // Look at command
-    switch (command)
-    {
-	// Get current source path
-	case EXTCMD_GET_SOURCE:
-		return (ULONG)HookGetSource(handle,(char *)packet);
-
-	// Get next source path
-	case EXTCMD_NEXT_SOURCE:
-		return (ULONG)HookNextSource(handle,(char *)packet);
-
-	// Unlock source paths
-	case EXTCMD_UNLOCK_SOURCE:
-		HookUnlockSource(handle);
-		break;
-
-	// Get destination path
-	case EXTCMD_GET_DEST:
-		return (ULONG)HookGetDest(handle,(char *)packet);
-
-	// Finished with this source
-	case EXTCMD_END_SOURCE:
-		HookEndSource(handle,(long)packet);
-		break;
-
-	// Finished with this destination
-	case EXTCMD_END_DEST:
-		HookEndDest(handle,(long)packet);
-		break;
-
-	// Get next entry
-	case EXTCMD_GET_ENTRY:
-		return (ULONG)HookGetEntry(handle);
-
-	// End this entry
-	case EXTCMD_END_ENTRY:
-		HookEndEntry(
-			handle,
-			((struct endentry_packet *)packet)->entry,
-			((struct endentry_packet *)packet)->deselect);
-		break;
-
-	// Remove a file
-	case EXTCMD_REMOVE_ENTRY:
-		HookRemoveEntry((FunctionEntry *)packet);
-		break;
-
-	// Get entry count
-	case EXTCMD_ENTRY_COUNT:
-		return (ULONG)HookEntryCount(handle);
-
-	// Reload a file
-	case EXTCMD_RELOAD_ENTRY:
-		HookReloadEntry(handle,(FunctionEntry *)packet);
-		break;
-
-	// Add a file to a path
-	case EXTCMD_ADD_FILE:
-		HookAddFile(
-			handle,
-			((struct addfile_packet *)packet)->path,
-			((struct addfile_packet *)packet)->fib,
-			((struct addfile_packet *)packet)->lister);
-		break;
-
-	// Delete a file in a path
-	case EXTCMD_DEL_FILE:
-		HookDelFile(
-			handle,
-			((struct delfile_packet *)packet)->path,
-			((struct delfile_packet *)packet)->name,
-			((struct delfile_packet *)packet)->lister);
-		break;
-
-	// Load a file in a path
-	case EXTCMD_LOAD_FILE:
-		HookLoadFile(
-			handle,
-			((struct loadfile_packet *)packet)->path,
-			((struct loadfile_packet *)packet)->name,
-			((struct loadfile_packet *)packet)->flags,
-			((struct loadfile_packet *)packet)->reload);
-		break;
-
-	// Perform changes
-	case EXTCMD_DO_CHANGES:
-		HookDoChanges(handle);
-		break;
-
-	// Check abort status
-	case EXTCMD_CHECK_ABORT:
-		return (ULONG)HookCheckAbort(handle);
-
-	// Get a window handle
-	case EXTCMD_GET_WINDOW:
-		return (ULONG)HookGetWindow((PathNode *)packet);
-		break;
-
-	// Get help on a topic
-	case EXTCMD_GET_HELP:
-		HookShowHelp(0,(char *)packet);
-		break;
-
-	// Get rexx portname
-	case EXTCMD_GET_PORT:
-		return (ULONG)HookGetPort((char *)packet);
-
-	// Get screen name
-	case EXTCMD_GET_SCREEN:
-		return (ULONG)HookGetScreen((char *)packet);
-
-	// Get screen data
-	case EXTCMD_GET_SCREENDATA:
-		return (ULONG)HookGetScreenData();
-
-	// Free screen data
-	case EXTCMD_FREE_SCREENDATA:
-		HookFreeScreenData(packet);
-		break;
-
-	// Open progress indicator
-	case EXTCMD_OPEN_PROGRESS:
-		HookOpenProgress(
-			((struct progress_packet *)packet)->path,
-			((struct progress_packet *)packet)->name,
-			((struct progress_packet *)packet)->count);
-		break;
-
-	// Update progress indicator
-	case EXTCMD_UPDATE_PROGRESS:
-		HookUpdateProgress(
-			((struct progress_packet *)packet)->path,
-			((struct progress_packet *)packet)->name,
-			((struct progress_packet *)packet)->count);
-		break;
-
-	// Close progress indicator
-	case EXTCMD_CLOSE_PROGRESS:
-		HookCloseProgress(((struct progress_packet *)packet)->path);
-		break;
-
-	// Show exists/replace? requester
-	case EXTCMD_REPLACE_REQ:
-		return (ULONG)HookReplaceReq(
-			((struct replacereq_packet *)packet)->window,
-			((struct replacereq_packet *)packet)->screen,
-			((struct replacereq_packet *)packet)->ipc,
-			((struct replacereq_packet *)packet)->file1,
-			((struct replacereq_packet *)packet)->file2,
-			((struct replacereq_packet *)packet)->default_option);
-		break;
-
-
-	// Get a pointer
-	case EXTCMD_GET_POINTER:
-		return HookGetPointer((struct pointer_packet *)packet);
-
-	// Free a pointer
-	case EXTCMD_FREE_POINTER:
-		HookFreePointer((struct pointer_packet *)packet);
-		break;
-
-
-	// Send an ARexx command to Galileo
-	case EXTCMD_SEND_COMMAND:
-		((struct command_packet *)packet)->rc=
-			HookSendCommand(
-				handle,
-				((struct command_packet *)packet)->command,
-				&((struct command_packet *)packet)->result,
-				((struct command_packet *)packet)->flags);
-		return 1;
-    }
-
-    // Unknown command
-    return 0;
 }

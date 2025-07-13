@@ -67,7 +67,7 @@ Cfg_FiletypeList *creator_generic(
 	IPCData *ipc,
 	IPCData *main_ipc,
 	IPCData *galileo_ipc,
-	EXT_FUNC(func_callback),
+	CONST GalileoCallbackInfo *gci,
 	Att_List *list,
 	char *path );
 
@@ -682,7 +682,7 @@ void __saveds finder_creator_proc_code( void )
 			                  data->creator_ipc,	  //	  IPCData *ipc,
 			                  data->ipc,		  //	  IPCData *main_ipc,
 			                  data->main_ipc,
-			                  data->func_callback,	  //	  EXT_FUNC(func_callback)
+					  data->gci,    //      EXT_FUNC(func_callback)
 			                  list,
 			                  path );
 
@@ -1137,7 +1137,7 @@ int finder_build_cache( finder_data *data )
 	/* Get filetypes from Galileo itself */
 
 	data->pointer_packet.type = MODPTR_FILETYPES;
-	(data->func_callback)( EXTCMD_GET_POINTER, IPCDATA(data->ipc), &data->pointer_packet );
+	data->gci->gc_GetPointer( &data->pointer_packet );
 
 	if (data->pointer_packet.pointer)
 	{
@@ -1188,7 +1188,7 @@ int finder_build_cache( finder_data *data )
 	    }
 
 	    if (data->pointer_packet.flags & POINTERF_LOCKED)
-		data->func_callback( EXTCMD_FREE_POINTER, IPCDATA(data->ipc), &data->pointer_packet );
+		data->gci->gc_FreePointer( &data->pointer_packet );
 	}
 
 	/* Get filetypes from disk */
@@ -1247,11 +1247,10 @@ void finder_free_cache( finder_data *data )
 int finder(struct Screen *screen,
 	   IPCData *ipc,
 	   IPCData *main_ipc,
-	   EXT_FUNC(func_callback) )
+	   CONST GalileoCallbackInfo *gci )
 {
     finder_data *data;
     FunctionEntry *entry;
-    struct endentry_packet end_pkt = { 0 };
     int retval = 0;
     struct Message *msg;
 
@@ -1263,7 +1262,7 @@ int finder(struct Screen *screen,
 	data->screen = screen;
 	data->ipc = ipc;
 	data->main_ipc = main_ipc;
-	data->func_callback = func_callback;
+	data->gci = gci;
 
 	// Create message port
 	data->app_port = CreateMsgPort();
@@ -1271,10 +1270,12 @@ int finder(struct Screen *screen,
 	if (finder_openwindow( data ))
 	{
 	    // Get path
-	    func_callback( EXTCMD_GET_SOURCE, IPCDATA(ipc), data->path );
+	    gci->gc_GetSource( IPCDATA(ipc), data->path );
+
+	    gci->gc_FirstEntry( IPCDATA(ipc) );
 
 	    // Get first entry
-	    while (entry = (FunctionEntry *)func_callback( EXTCMD_GET_ENTRY, IPCDATA(ipc), 0 ))
+	    while (entry = gci->gc_GetEntry( IPCDATA(ipc) ))
 	    {
 		strcpy( data->current_entry_path, data->path );
 		AddPart( data->current_entry_path, entry->fe_name, 256 );
@@ -1317,12 +1318,8 @@ int finder(struct Screen *screen,
 		    finder_free_listview( data );
 		}
 
-		// Fill out packet with results
-		end_pkt.entry = entry;
-		end_pkt.deselect = TRUE;
-
 		// End this entry
-		func_callback( EXTCMD_END_ENTRY, IPCDATA(ipc), &end_pkt );
+		gci->gc_EndEntry( IPCDATA(ipc), entry, TRUE );
 	    }
 
 	    finder_free_cache( data );
@@ -2668,7 +2665,7 @@ Cfg_FiletypeList *creator_generic(
 	IPCData *ipc,
 	IPCData *main_ipc,
 	IPCData *galileo_ipc,
-	EXT_FUNC(func_callback),
+	CONST GalileoCallbackInfo *gci,
 	Att_List *list,
 	char *path )
 {
@@ -2683,7 +2680,6 @@ Cfg_FiletypeList *creator_generic(
 	data->ipc = ipc;
 	data->main_ipc = main_ipc;
 	data->galileo_ipc = galileo_ipc;
-	data->func_callback = func_callback;
 
 	// Create message port
 	data->app_port = CreateMsgPort();
@@ -2757,23 +2753,24 @@ int creator(
 	struct Screen *screen,
 	IPCData *ipc,
 	IPCData *main_ipc,
-	EXT_FUNC(func_callback) )
+	CONST GalileoCallbackInfo *gci )
 {
     Att_List *list;
     FunctionEntry *entry;
     Att_Node *node;
-    struct endentry_packet end_pkt = { 0 };
     char path[256];
     struct filetype_info *fti;
     Cfg_FiletypeList *ftl;
     int ok = FALSE;
 
-    if (func_callback( EXTCMD_GET_SOURCE, IPCDATA(ipc), path ))
+    if (gci->gc_GetSource( IPCDATA(ipc), path ))
     {
 	if (list = Att_NewList( LISTF_POOL ))
 	{
+	    gci->gc_FirstEntry( IPCDATA(ipc) );
+
 	    // Go through files
-	    while (entry = (FunctionEntry *)func_callback( EXTCMD_GET_ENTRY, IPCDATA(ipc), 0 ))
+	    while (entry = gci->gc_GetEntry( IPCDATA(ipc) ))
 	    {
 		if (file_exists( NULL, path, entry->fe_name, EXISTF_FILE ))
 		{
@@ -2793,12 +2790,8 @@ int creator(
 		    }
 		}
 
-		// Fill out packet with results
-		end_pkt.entry = entry;
-		end_pkt.deselect = TRUE;
-
 		// End this entry
-		func_callback( EXTCMD_END_ENTRY, IPCDATA(ipc), &end_pkt );
+		gci->gc_EndEntry( IPCDATA(ipc), entry, TRUE );
 	    }
 
 	    if (ftl = creator_generic(args,
@@ -2806,7 +2799,7 @@ int creator(
 			              ipc,
 			              main_ipc,
 			              main_ipc,
-			              func_callback,
+				      gci,
 			              list,
 			              path ))
 	    {
@@ -2831,7 +2824,7 @@ int __asm __saveds L_Module_Entry(
 	register __a2 IPCData *ipc,
 	register __a3 IPCData *main_ipc,
 	register __d0 ULONG mod_id,
-	register __d1 EXT_FUNC(func_callback))
+	register __d1 CONST GalileoCallbackInfo *gci)
 {
     BPTR olddir=0, newdir;
     int ret = 0;
@@ -2843,9 +2836,9 @@ int __asm __saveds L_Module_Entry(
     }
 
     if (mod_id == MODID_FIND_FT)
-	ret = finder( screen, ipc, main_ipc, func_callback );
+	ret = finder( screen, ipc, main_ipc, gci );
     else if (mod_id == MODID_CREATE_FT)
-	ret = creator( args, screen, ipc, main_ipc, func_callback );
+	ret = creator( args, screen, ipc, main_ipc, gci );
 
     if (newdir)
 	UnLock(CurrentDir( olddir ));

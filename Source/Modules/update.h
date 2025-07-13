@@ -39,6 +39,7 @@ For more information on Directory Opus for Windows please see:
 #define CATCOMP_NUMBERS
 #include "update.strings"
 #include "modules_lib.h"
+#include "module.h"
 
 #define UPDATEF_DONE_PATHS	(1<<0)
 #define UPDATEF_DONE_LEFTOUTS	(1<<1)

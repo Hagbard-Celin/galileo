@@ -1,14 +1,17 @@
 Module changes:
 
-C module filename extention is changed from ".module" to ".gfmmodule"
+   C module filename extention is changed from ".module" to ".gfmmodule"
 
-The prefix for callbacks is changed to from dc_ to gc_ for GaileoCallback.
 
-Some previously undocumented callbacks are now documented, and some new ones
-added. See "SDK/docs/hooks.doc".
+   The prefix for callbacks is changed to from dc_ to gc_ for GaileoCallback.
 
-Commands from gfmmodules now detach if the user selects "Run Asynchronously" in
-the Function Editor.
+
+   Some previously undocumented callbacks are now documented, and some new
+ones added. See "SDK/docs/hooks.doc".
+
+
+   Commands from gfmmodules now detach if the user selects "Run
+Asynchronously" in the Function Editor.
 
 The following macro will return TRUE if the module was started asynchronously:
 
@@ -31,3 +34,14 @@ If you don't want to support running asynchronously. Or are porting a .module to
 .gfmmodule and just want it to work as before. You will have to add FUNCF_SYNC
 to your command flags in in you function definition(s). The effect of the
 "Run Asynchronously" setting will then be as before this change.
+
+
+   
+   The original packet-based callbacks (from now "legacy callbacks") has been
+removed and replaced with the direct hook callbacks (from now "callbacks").
+
+Module_Entry() now gets a pointer to the GalileoCallbackInfo structure in
+place of the func_callback() pointer.
+
+HOOKCMD_GET_CALLBACKS is changed to fill in a pointer to GalileoCallbackInfo
+as opposed to the structure itself.

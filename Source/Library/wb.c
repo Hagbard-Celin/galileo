@@ -42,7 +42,7 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofmlib.h"
-#include "/Modules/modules.h"
+#include "/Modules/modules_internal_protos.h"
 #include <proto/newicon.h>
 
 #define UtilityBase	(wb_data->utility_base)
@@ -1588,10 +1588,10 @@ ULONG __asm __saveds L_PatchedWBInfo(
 	// Patch WBInfo() ?
 	if (main_ipc && GetVar("Galileo/PatchWBInfo",buf,2,GVF_GLOBAL_ONLY)>0 && buf[0]=='1')
 	{
-		struct Library *ModuleBase;
+		struct Library *InternalModuleBase;
 
 		// Open the icon.gfmmodule
-		if (ModuleBase=OpenLibrary("Galileo:modules/icon.gfmmodule",0))
+		if (InternalModuleBase=OpenLibrary("Galileo:modules/icon.gfmmodule",0))
 		{
 			BPTR old;
 			struct List files;
@@ -1607,13 +1607,13 @@ ULONG __asm __saveds L_PatchedWBInfo(
 			node.ln_Name=name;
 
 			// Call the module
-			res=Module_Entry(&files,screen,0,main_ipc,0,0x96604497);
+			res=Module_Entry_Internal(&files,screen,0,main_ipc,0,0x96604497);
 
 			// Restore current directory
 			CurrentDir(old);
 
 			// Close the module
-			CloseLibrary(ModuleBase);
+			CloseLibrary(InternalModuleBase);
 			return res;
 		}
 	}

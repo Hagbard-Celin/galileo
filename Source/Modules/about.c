@@ -58,7 +58,7 @@ void get_message(about_data *data);
 
 short count=0,first=1;
 
-int __asm __saveds L_Module_Entry(
+int __asm __saveds L_Module_Entry_Internal(
 	register __a0 struct List *files,
 	register __a1 struct Screen *screen,
 	register __a2 IPCData *ipc,

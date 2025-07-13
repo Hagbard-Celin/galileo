@@ -37,7 +37,11 @@ For more information on Directory Opus for Windows please see:
 
 #include "galileofm.h"
 #include "/Modules/modules.h"
+#include "/Modules/modules_protos.h"
+#include "/Modules/modules_internal_protos.h"
 #include "scripts.h"
+
+extern CONST GalileoCallbackInfo CallBackInfo;
 
 #define HISTORY_MAX		20
 
@@ -508,12 +512,12 @@ void __saveds misc_proc(void)
 			// Show info on an object
 			case MENU_ICON_INFO:
 				{
-					struct Library *ModuleBase;
+					struct Library *InternalModuleBase;
 					struct List list;
 					struct Node node;
 
 					// Get icon module
-					if (ModuleBase=OpenModule("icon.gfmmodule"))
+					if (InternalModuleBase=OpenModule("icon.gfmmodule"))
 					{
 						long flags=0;
 
@@ -527,8 +531,8 @@ void __saveds misc_proc(void)
 							environment->env->desktop_flags&DESKTOPF_NO_REMAP) flags=1;
 
 						// Show info
-						Module_Entry(&list,startup->window->WScreen,ipc,&main_ipc,0,flags);
-						CloseLibrary(ModuleBase);
+						Module_Entry_Internal(&list,startup->window->WScreen,ipc,&main_ipc,0,flags);
+						CloseLibrary(InternalModuleBase);
 					}
 				}
 				break;
@@ -669,17 +673,17 @@ void __saveds misc_proc(void)
 			case FUNC_HEXREAD:
 			case FUNC_SMARTREAD:
 				{
-					struct Library *ModuleBase;
+					struct Library *InternalModuleBase;
 					struct read_startup *read;
 
 					// Get startup
 					read=(struct read_startup *)startup->data;
 
 					// Get read module
-					if (ModuleBase=OpenModule("read.gfmmodule"))
+					if (InternalModuleBase=OpenModule("read.gfmmodule"))
 					{
 						// Read files
-						Module_Entry(
+						Module_Entry_Internal(
 							read->files,
 							GUI->screen_pointer,
 							ipc,&main_ipc,
@@ -687,7 +691,7 @@ void __saveds misc_proc(void)
 							startup->command-FUNC_READ);
 
 						// Close module
-						CloseLibrary(ModuleBase);
+						CloseLibrary(InternalModuleBase);
 					}
 
 					// Failed, need to free
@@ -703,20 +707,20 @@ void __saveds misc_proc(void)
 			// Print
 			case MENU_PRINT:
 				{
-					struct Library *ModuleBase;
+					struct Library *InternalModuleBase;
 
 					// Get print module
-					if (ModuleBase=OpenModule("print.gfmmodule"))
+					if (InternalModuleBase=OpenModule("print.gfmmodule"))
 					{
 						// Print files
-						Module_Entry(
+						Module_Entry_Internal(
 							(struct List *)startup->data,
 							GUI->screen_pointer,
 							ipc,&main_ipc,
 							0,0);
 
 						// Close module
-						CloseLibrary(ModuleBase);
+						CloseLibrary(InternalModuleBase);
 					}
 
 					// Free list
@@ -864,7 +868,7 @@ void __saveds misc_proc(void)
 			// Show startup picture
 			case SHOW_PICTURE:
 				{
-					struct Library *ModuleBase;
+					struct Library *InternalModuleBase;
 					struct List list;
 					struct Node node;
 
@@ -874,11 +878,11 @@ void __saveds misc_proc(void)
 					AddTail(&list,&node);
 
 					// Get show module
-					if (ModuleBase=OpenModule("show.gfmmodule"))
+					if (InternalModuleBase=OpenModule("show.gfmmodule"))
 					{
 						// Show picture
-						Module_Entry(&list,0,ipc,&main_ipc,666,0);
-						CloseLibrary(ModuleBase);
+						Module_Entry_Internal(&list,0,ipc,&main_ipc,666,0);
+						CloseLibrary(InternalModuleBase);
 					}
 				}
 				break;
@@ -891,10 +895,10 @@ void __saveds misc_proc(void)
 			case FUNC_PLAY_ICON:
 			case FUNC_ICONINFO:
 				{
-					struct Library *ModuleBase;
+					struct Library *InternalModuleBase;
 
 					// Open module
-					if (ModuleBase=OpenModule(
+					if (InternalModuleBase=OpenModule(
 						(startup->command==FUNC_SHOW)?"show.gfmmodule":
 							((startup->command==FUNC_ICONINFO)?	"icon.gfmmodule":
 																"play.gfmmodule")))
@@ -926,7 +930,7 @@ void __saveds misc_proc(void)
 						}
 
 						// Do the thing
-						Module_Entry(
+						Module_Entry_Internal(
 							(struct List *)startup->data,
 							GUI->screen_pointer,
 							ipc,
@@ -935,7 +939,7 @@ void __saveds misc_proc(void)
 							flags);
 
 						// Close module
-						CloseLibrary(ModuleBase);
+						CloseLibrary(InternalModuleBase);
 					}
 
 					// Free list
@@ -959,7 +963,7 @@ void __saveds misc_proc(void)
 							ipc,
 							&main_ipc,
 							FUNCID_STARTUP,
-							(ULONG)function_external_hook);
+							&CallBackInfo);
 
 						// Close library
 						CloseLibrary(ModuleBase);

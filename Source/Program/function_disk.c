@@ -36,12 +36,12 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
-#include "/Modules/modules.h"
+#include "/Modules/modules_internal_protos.h"
 
 // DISKCOPY, FORMAT internal functions
 GALILEOFM_FUNC(function_disk)
 {
-	struct Library *ModuleBase=0;
+	struct Library *InternalModuleBase=0;
 	struct List list;
 	struct Node *node;
 	short ret=0;
@@ -88,20 +88,20 @@ GALILEOFM_FUNC(function_disk)
 	{
 		// Diskcopy
 		case FUNC_DISKCOPY:
-			ModuleBase=OpenModule("diskcopy.gfmmodule");
+			InternalModuleBase=OpenModule("diskcopy.gfmmodule");
 			break;
 
 		// Format
 		case FUNC_FORMAT:
-			ModuleBase=OpenModule("format.gfmmodule");
+			InternalModuleBase=OpenModule("format.gfmmodule");
 			break;
 	}
 
-	if (ModuleBase)
+	if (InternalModuleBase)
 	{
 		// Call module
-		ret=Module_Entry(&list,GUI->screen_pointer,handle->ipc,&main_ipc,0,0);
-		CloseLibrary(ModuleBase);
+		ret=Module_Entry_Internal(&list,GUI->screen_pointer,handle->ipc,&main_ipc,0,0);
+		CloseLibrary(InternalModuleBase);
 	}
 
 	return ret;

@@ -73,7 +73,7 @@ static CONST_STRPTR gethandlerver(BPTR seglist);
 
 #define NewIconBase	(data->newicon_base)
 
-int __asm __saveds L_Module_Entry(register __a0 struct List *files,
+int __asm __saveds L_Module_Entry_Internal(register __a0 struct List *files,
 	                          register __a1 struct Screen *screen,
 	                          register __a2 IPCData *ipc,
 	                          register __a3 IPCData *main_ipc,

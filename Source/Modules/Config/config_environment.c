@@ -37,7 +37,7 @@ For more information on Directory Opus for Windows please see:
 
 #include "config_lib.h"
 #include "config_environment.h"
-#include "//Modules/modules.h"
+#include "//Modules/modules_internal_protos.h"
 
 //#define FUCKOFF
 
@@ -749,22 +749,22 @@ unsigned long __asm __saveds L_Config_Environment(
 							// Edit list format
 							case GAD_ENVIRONMENT_LISTER_EDIT_FORMAT:
 							{
-								struct Library *ModuleBase;
+								struct Library *InternalModuleBase;
 
 								// Make window busy
 								SetWindowBusy(data->window);
 
 								// Get lister format module
-								if (ModuleBase=OpenLibrary("PROGDIR:modules/listerformat.gfmmodule",0))
+								if (InternalModuleBase=OpenLibrary("PROGDIR:modules/listerformat.gfmmodule",0))
 								{
 									// Edit format
-									Module_Entry(
+									Module_Entry_Internal(
 										(struct List *)&data->config->list_format,
 										(struct Screen *)data->window,
 										ipc,
 										data->main_ipc,
 										0,0);
-									CloseLibrary(ModuleBase);
+									CloseLibrary(InternalModuleBase);
 								}
 
 								// Make window unbusy

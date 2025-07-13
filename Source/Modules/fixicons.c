@@ -337,7 +337,6 @@ static int fix_icon( APTR progress, char *path, long *args, int xoff, int yoff, 
     if (!l->isicon && (l->lock = Lock( path, ACCESS_READ )))
     {
 	// is a directory?
-
 	if (Examine( l->lock, &l->fib ) && l->fib.fib_DirEntryType >= 0)
 	{
 	    // yes is a directory
@@ -392,7 +391,7 @@ int __asm __saveds L_Module_Entry(
 	register __a2 IPCData *ipc,
 	register __a3 IPCData *main_ipc,
 	register __d0 ULONG mod_id,
-	register __d1 EXT_FUNC(func_callback))
+	register __d1 CONST GalileoCallbackInfo *gci)
 {
     Att_List *files;
     Att_Node *node;
@@ -412,7 +411,7 @@ int __asm __saveds L_Module_Entry(
 	    return 0;
 
     // Get source path
-    func_callback(EXTCMD_GET_SOURCE,IPCDATA(ipc),source);
+    gci->gc_GetSource(IPCDATA(ipc),source);
 
     // Parse arguments
     args=ParseArgs(arg_template,argstring);
@@ -439,20 +438,16 @@ int __asm __saveds L_Module_Entry(
     {
 	FunctionEntry *entry;
 
-	// Get entries
-	while (entry=(FunctionEntry *)func_callback(EXTCMD_GET_ENTRY,IPCDATA(ipc),0))
-	{
-	    struct endentry_packet packet;
+	gci->gc_FirstEntry( IPCDATA(ipc) );
 
+	// Get entries
+	while (entry = gci->gc_GetEntry(IPCDATA(ipc)))
+	{
 	    // Add name to list
 	    Att_NewNode(files,entry->fe_name,0,0);
 
-	    // Fill out packet to end entry
-	    packet.entry=entry;
-	    packet.deselect=1;
-
 	    // End entry
-	    func_callback(EXTCMD_END_ENTRY,IPCDATA(ipc),&packet);
+	    gci->gc_EndEntry(IPCDATA(ipc), entry, TRUE);
 	}
     }
 
@@ -574,7 +569,6 @@ int __asm __saveds L_Module_Entry(
     // Need to show results?
     if (outfile)
     {
-	struct command_packet packet = {0};
 	char                  buf[256];
 
 	// No files changed?
@@ -589,9 +583,8 @@ int __asm __saveds L_Module_Entry(
 
 	lsprintf( buf, "galileo read delete %s", temp_filename );
 
-	packet.command = buf;
 
-	func_callback( EXTCMD_SEND_COMMAND, IPCDATA(ipc), &packet );
+	gci->gc_SendCommand( IPCDATA(ipc), buf, NULL, NULL);
     }
 
     Att_RemList(files,0);

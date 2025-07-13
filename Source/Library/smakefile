@@ -314,7 +314,8 @@ $(OBJ)diskio.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
 $(OBJ)wb.o: wb.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
 $(OBJ)wb.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
 $(OBJ)wb.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
-$(OBJ)wb.o: /Modules/modules.h /Modules/modules_pragmas.h
+$(OBJ)wb.o: /Modules/modules_internal_protos.h
+$(OBJ)wb.o: /Modules/modules_internal_pragmas.h
 $(OBJ)launcher.o: launcher.c galileofmlib.h galileofmbase.h
 $(OBJ)launcher.o: /Include/galileo/os.h /Program/galileo_config.h
 $(OBJ)launcher.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h

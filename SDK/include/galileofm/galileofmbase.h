@@ -38,7 +38,6 @@
 #include <galileofm/memory.h>
 #include <galileofm/dos.h>
 #include <galileofm/rexx.h>
-#include <galileofm/hooks.h>
 
 #ifndef GALILEOFM_PRAG
 #include <pragmas/galileofm_pragmas.h>

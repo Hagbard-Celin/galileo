@@ -31,13 +31,14 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #define CATCOMP_NUMBERS
 #include "iconclock.strings"
 #include "modules_lib.h"
+#include "module.h"
 
 #define ENV_ICONCLOCK		"Galileo/Icon Clock"
 #define NAME_ICONCLOCK		"Icon Clock"

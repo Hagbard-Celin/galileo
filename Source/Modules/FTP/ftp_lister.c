@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -225,13 +225,13 @@ seconds_to_datestamp( &fib.fib_Date, seconds );
 
 fib.fib_Protection = prot;
 
-if	(entry = node->fn_og->og_hooks.gc_CreateFileEntry( (ULONG)node->fn_handle, &fib, NULL ))
+if	(entry = node->fn_og->og_gci->gc_CreateFileEntry( (ULONG)node->fn_handle, &fib, NULL ))
 	{
-	node->fn_og->og_hooks.gc_AddFileEntry( (ULONG)node->fn_handle, entry, TRUE );
+	node->fn_og->og_gci->gc_AddFileEntry( (ULONG)node->fn_handle, entry, TRUE );
 
 	tags[0].ti_Data = (ULONG)name;
 
-	node->fn_og->og_hooks.gc_FileSet( (ULONG)node->fn_handle, entry, tags );
+	node->fn_og->og_gci->gc_FileSet( (ULONG)node->fn_handle, entry, tags );
 	}
 
 if	(node->fn_site.se_env->e_index_enable)
@@ -264,7 +264,7 @@ if	(!node)
 	return;
 	}
 
-//node->fn_og->og_hooks.gc_RefreshLister( node->fn_handle, date );
+//node->fn_og->og_gci->gc_RefreshLister( node->fn_handle, date );
 
 rexx_lst_refresh( node->fn_galileo, node->fn_handle, HOOKREFRESH_DATE ? REFRESH_DATE : 0 );
 }
@@ -892,13 +892,13 @@ if	(!og || !displaynode || !errnode || !errnode->fn_ipc)
 	return 0;
 
 // Trigger script
-if	(og->og_hooks.gc_Script
+if	(og->og_gci->gc_Script
 	&& ((errnode->fn_flags & LST_LOCAL) && og->og_oc.oc_env.e_script_error)
 	|| errnode->fn_site.se_env->e_script_error)
 	{
 	sprintf( handle, "%lu", errnode->fn_handle );
 
-	og->og_hooks.gc_Script( "FTP error", handle );
+	og->og_gci->gc_Script( "FTP error", handle );
 	}
 
 // Requesters disabled due to shutdown?
@@ -958,12 +958,12 @@ if	(!og || !ftpnode)
 	return 0;
 
 // Trigger script
-if	(og->og_hooks.gc_Script	&& ((ftpnode->fn_flags & LST_LOCAL) && og->og_oc.oc_env.e_script_error)
+if	(og->og_gci->gc_Script	&& ((ftpnode->fn_flags & LST_LOCAL) && og->og_oc.oc_env.e_script_error)
 	|| ftpnode->fn_site.se_env->e_script_error)
 	{
 	sprintf( handle, "%lu", ftpnode->fn_handle );
 
-	og->og_hooks.gc_Script( "FTP error", handle );
+	og->og_gci->gc_Script( "FTP error", handle );
 	}
 
 if	(!og->og_noreq)

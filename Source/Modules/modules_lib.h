@@ -31,9 +31,11 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
+#ifndef _GALILEOFM_MODULES_LIB
+#define _GALILEOFM_MODULES_LIB
 
 #include "/Library/galileofmbase.h"
 #include "/Library/galileofmpragmas.h"
@@ -74,3 +76,5 @@ extern struct Library * ResTrackBase;
 void init_locale_data(struct GalileoLocale *);
 /*void KPrintF __ARGS((char *,...));*/
 void lsprintf __ARGS((char *,...));
+
+#endif

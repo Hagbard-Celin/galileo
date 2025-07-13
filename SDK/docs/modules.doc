@@ -38,7 +38,7 @@ The prototype for this function is as follows:
                             register __a2 IPCData *ipc,
                             register __a3 IPCData *mainipc,
                             register __d0 ULONG mod_id,
-                            register __d1 EXT_FUNC(callback)  );
+                            register __d1 CONST GalileoCallbackInfo *gci  );
 
     This function must be at offset -0x1e in the library, and take parameters
 in the specified registers.
@@ -60,7 +60,7 @@ Module_Entry() function are as follows:
 
         mod_id      - the ID code of the command selected by the user
 
-        callback    - address of Galileo callback function (see below)
+        gci         - address of the GalileoCallbackInfo structure (see below)
 
 
 3. The second entry point is a function that the module uses to identify
@@ -215,25 +215,665 @@ this file.
 ¹There is also modinitmffp.o for gfmmodules compiled with MATH=FFP. It will
 open mathffp.library and mathtrans.library for you.
 
-7. The "callback" parameter to the Module_Entry() function provides the
-address of a callback function within Galileo. This function allows you to access
-information that your module command may need. The callback function is
-defined as follows:
+7. The "gci" parameter to the Module_Entry() function provides the
+address of the GalileoCallbackInfo structure within Galileo. This structure
+holds first the number of callbacks in "gc_Count", then the function-pointers
+for the callbacks. A crude compatibility check can be done like this:
 
-        ULONG callback(     register __d0 ULONG command,
-                            register __a0 APTR handle,
-                            register __a1 APTR packet   );
+   if (gci->gc_Count < GALILEOFM_CALLBACK_COUNT)
+       return 0;
 
-        command     - the callback command, see below for the list
+    Should you for some reason need any of the callbacks in code that is not
+a module, the pointer to the GalileoCallbackInfo structure can be acquired by
+sending the HOOKCMD_GET_CALLBACKS IPC-command to the Galileo main process.
 
-        handle      - the callback handle. You must pass the value of
-                      IPCDATA(ipc) for this parameter ("ipc" is the argument
-                      passed to the Module_Entry() function)
+   GalileoCallbackInfo *gci;
 
-        packet      - a command-specific packet
+   IPC_Command(galileo_main_ipc,HOOKCMD_GET_CALLBACKS,0,&gci,0,REPLY_NO_PORT);
 
-    Following is the list of callback commands. Each command takes a packet
-specific to it.
+    More callback functions will be added in the future, and this structure
+will grow appropriately. You should verify that "gci->gc_Count" is greater or
+equal to the "GALILEOFM_CALLBACK_COUNT" of the SDK version you are using.
+(** This paragraph was included so it would not be forgotten by the time of a
+possible future version 1.0 or greater. As long as the current version is
+0.x, all bets are off. **)
+
+    Once you have the pointer to the GalileoCallbackInfo structure you can
+call the callback functions directly.
+
+
+    APTR gc_CreateFileEntry(   ULONG lister,
+                               struct FileInfoBlock *fib,
+                               BPTR lock);
+
+    This function creates a file entry, ready to be added to a lister. Pass it
+    the lister handle and a filled out FileInfoBlock structure. The 'lock'
+    argument is optional; if not set to NULL it should be a lock on the
+    directory containing the FileInfoBlock (and is used for resolving links).
+    The information in the FileInfoBlock structure is copied and can be
+    disposed of when this function returns. The FileInfoBlock structure does
+    not need to be longword-aligned.
+
+
+    void gc_FileSet(   ULONG lister,
+                       APTR entry,
+                       struct TagItem *tags);
+
+    This command allows you to add or modify entry information. It is mainly
+    used BEFORE an entry has been added to a list but can be used after. Pass
+    an array of tags with the item ID in ti_Tag and the new value in ti_Data.
+    Valid tags for this function are:
+
+        HFFS_NAME       - The name of the entry (char *)
+        HFFS_SIZE       - The size of the entry (ULONG)
+        HFFS_PROTECTION - Protection flags      (ULONG)
+        HFFS_DATE       - Entry date            (struct Datestamp *)
+        HFFS_COMMENT    - Comment               (char *)
+        HFFS_SELECTED   - Selected state        (BOOL)
+        HFFS_LINK       - Indicates a 'link'    (BOOL)
+        HFFS_COLOUR     - Entry colour          (1 = device colour,
+                                                 2 = assign colour)
+        HFFS_USERDATA   - User-defined data     (ULONG)
+        HFFS_FILETYPE   - Filetype description  (char *)
+        HFFS_DISPLAY    - Custom display string (char *)
+        HFFS_VERSION    - Version Information   (VersionInfo *)
+        HFFS_MENU       - Custom menus          (struct List *)
+
+    A note about custom menus: To add custom menus to the pop-up menu for an
+    entry, use the HFFS_MENU tag. ti_Data should point to a struct List *, the
+    ln_Name field of the nodes should contain the names of the menu items.
+    Note that the names of menu items are NOT copied (to conserve memory) and
+    so must remain valid while the entry is in use.
+
+
+    void gc_SortFileList(   ULONG lister,
+                            struct List *list,
+                            long file_count,
+                            long dir_count);
+
+    This function allows you to add and quicksort a list of entries at once.
+    It is much faster than multiple gc_AddFileEntry() commands. To use it, you
+    should add the return values from your calls to gc_CreateFileEntry() to an
+    initialised exec List structure. Then, pass the list structure along with a
+    count of the number of files and number of directories in the list to this
+    function. Eg,
+
+        struct List file_list;
+        long file_count=0,dir_count=0;
+        GalileoCallbackInfo info;
+
+        NewList(&file_list);
+
+        while (entries_to_add)
+        {
+            entry=info.gc_CreateFileEntry(lister,fib,0);
+            AddTail(&file_list,(struct Node *)entry);
+
+            if (fib->fib_DirEntryType<0) ++file_count;
+            else ++dir_count;
+        }
+
+        info.gc_SortFileList(lister,&list,file_count,dir_count);
+
+
+
+    APTR gc_AddFileEntry(    ULONG lister,
+                             APTR entry,
+                             BOOL sort);
+
+    This function adds a file entry to a lister. Pass it the lister handle
+    and the return value of the gc_CreateFileEntry() command. If sort==TRUE,
+    the entry will be added using the lister's current sort method, otherwise
+    it will just be added to the end of the list. If you have a whole directory
+    to add, gc_SortFileList() is quicker. However, using gc_AddFileEntry() with
+    sort==FALSE and then calling gc_ResortLister() isn't that much slower.
+
+
+    void gc_ResortLister(    ULONG lister,
+                             ListFormat *format);
+
+    This hook allows you to resort the lister, optionally with a new sort
+    format. If you pass NULL for the format parameter, the list will be
+    resorted using the current settings. Use this hook if you have added
+    multiple files with the gc_AddFileEntry() hook and now wish to sort them
+    (a quicksort will be used).
+
+
+    void gc_RefreshLister(    ULONG lister,
+                             ULONG flags);
+
+    Allows you to refresh a lister; you should call it after adding entries
+    with the above commands. The HOOKREFRESH_DATE flag indicates that the
+    lister should update its datestamp (to prevent it being automatically
+    re-read). The HOOKREFRESH_FULL flag causes a total refresh of the lister,
+    including the title.
+
+
+    void gc_LockFileList(    ULONG lister,
+                             BOOL exclusive)
+
+    You should use this to protect the file list from changes by other tasks.
+    Set 'exclusive' to TRUE if you are going to be adding or removing entries
+    from the list; set to FALSE if you are just looking at list entries.
+
+
+    void gc_UnlockFileList(   ULONG lister)
+
+    If you have locked the list with gc_LockFileList() you MUST call this
+    function when you have finished.
+
+
+    APTR gc_FindFileEntry(   ULONG lister,
+                             char *name)
+
+    Searches the file list for a named entry, and returns a handle to it if
+    found. This handle can then be used with gc_FileSet() and gc_FileQuery(),
+    or gc_RemoveFileEntry().
+
+
+    void gc_RemoveFileEntry(   ULONG lister,
+                               APTR entry)
+
+    Removed an entry from a list and frees the memory associated with it. The
+    lister display is not updated automatically.
+
+
+    BOOL gc_FileQuery(   ULONG lister,
+                         APTR entry,
+                         struct TagItem *tags)
+
+    Lets you query a file entry. This function uses the same tags as the
+    gc_FileSet() function does. The ti_Data field of each TagItem should point
+    to the appropriate memory area to store the result. That is,
+
+        HFFS_NAME
+        HFFS_COMMENT
+        HFFS_FILETYPE
+        HFFS_DISPLAY
+
+            For the string items, ti_Data MUST point to a buffer big enough to
+            receive the string (256 characters is safe in most cases).
+
+        HFFS_SIZE
+        HFFS_PROTECTION
+        HFFS_SELECTED
+        HFFS_LINK
+        HFFS_USERDATA
+
+            For these items, ti_Data must point to a ULONG, in which the value
+            will be stored.
+
+        HFFS_DATE
+
+            ti_Data must point to a (struct DateStamp), which will be used to
+            store the date.
+
+        HFFS_VERSION
+
+            This tag is slightly different. ti_Data must point to a
+            VersionInfo * (ie a 4-byte pointer, NOT an instance of a
+            VersionInfo structure itself). Galileo will allocate a VersionInfo
+            structure and store a pointer to it in the address you provide in
+            ti_Data. When you have finished with the version information, you
+            must call FreeVec() on the memory.
+
+
+    void gc_ShowHelp(    char *file_name,
+                         char *node_name)
+
+    Calls the internal Galileo help system to display help (via AmigaGuide) on the
+    given topic. If file_name is specified, it must be the name of an AmigaGuide
+    help file in the Galileo:Help/ directory. If NULL is given for the file name,
+    the default Galileo help file will be used. node_name is the name within the
+    guide of the node to display.
+
+
+Present but undocumented in Maggelan II:
+----------------------------------------
+
+    BOOL gc_SetFileComment(    ULONG lister,
+                               char *name,
+                               char *comment)
+
+    This function sets the comment on a file. Pass it the lister handle, the
+    filename of the file in 'name' and the comment to set in 'comment'.
+
+
+    long gc_RexxCommand(    char *command,
+                            char *result,
+                            long length,
+                            struct MsgPort *replyport,
+                            ULONG flags)
+
+    This function does the same as gc_SendCommand, but works without the need
+    for a function-handle. It also needs a pre-allocated buffer for 'result' and
+    the size of this buffer in 'length'. It uses the presence of 'result' and
+    'length' to indicate that we want the result as opposed to 'flags' for
+    gc_SendCommand. If 'result' is not needed, both 'result' and 'length' MUST
+    be NULL. 'flags' MUST be NULL.
+
+
+    long gc_FileRequest(    struct Window *parent,
+                            char *title,
+                            char *initial_path,
+                            char *pathname,
+                            ULONG flags,
+                            char *pattern)
+
+    This function opens a file requester.
+
+
+    void gc_GetThemes(    char *buffer)
+
+	This function places the themes path into 'buffer'.
+
+
+Added in Galileo:
+-----------------
+
+    void gc_FreePointerDirect(    APTR pointer,
+                                  ULONG type,
+                                  ULONG flags)
+
+    This function is the equivalent of gc_FreePointer, without the need for a
+    GetPointerPkt. It is useful for closing the function-handle of the
+    originating lister for asynchronous gfmmodules. This is done by using
+    IPCDATA(ipc) for 'pointer', GETPTR_HANDLE for 'type' and GETPTRF_DELPORT for
+    'flags'.
+
+
+    BOOL gc_IsSourceDestLock(    ULONG lister)
+
+    This function take a lister handle and returns TRUE if the lister is locked
+    as source or destination or FLASE otherwise.
+
+
+*****************************************************************************
+     The following callbacks are the new interface to the removed legacy
+   callback system, and take and return similar parameters (see below). The
+   'handle' parameter in any functions that take it is passed to the
+   Module_Entry() function in your module
+*****************************************************************************
+
+    APTR gc_ConvertEntry(    APTR entry)
+
+    Takes an entry as returned by the gc_GetEntry() function and converts it to
+    an entry you can use with the gc_FileSet()/gc_FileQuery()/etc.. functions.
+    You MUST use this as the two entry types are not compatible with each other.
+    Use the return value from this as the entry pointer to pass (the old entry
+    pointer is still valid too).
+
+
+    ULONG gc_GetLister(   APTR path)
+
+    Takes a path as returned by the gc_GetSource(), etc functions, and converts
+    it to a lister handle that you can use with the gc_AddFileEntry() and similar
+    functions.
+
+
+    APTR gc_GetSource(    APTR handle,
+                          char *path)
+
+    Copies the current source path into the supplied buffer (must be at least
+    512 bytes in size). The return value is a pointer to the path handle; you
+    can use this with other hook functions.
+    This hook is the same as the old EXTCMD_GET_SOURCE callback function.
+
+
+    APTR gc_EndSource(    APTR handle,
+                          long ununsed)
+
+    If your module is handling multiple source paths, you should call this
+    hook if you are aborting early and do not wish to process further source
+    paths. Set the 'unused' parameter to 0.
+    If you module is handling only one destnation path, it shuld not be
+    called.
+    This hook is the same as the old EXTCMD_END_SOURCE callback function.
+
+
+    APTR gc_NextSource(    APTR handle,
+                           char *path)
+
+    Call this hook when you have finished with the first source path and want
+    to move onto the next one. The return value is the new path handle, or
+    NULL if there are no more source paths.
+    This hook is the same as the old EXTCMD_NEXT_SOURCE callback function.
+
+
+    void gc_UnlockSource(    APTR handle)
+
+    When your module command is called, any source listers are locked
+    automatically. Call this command when you want to unlock them (they
+    are unlocked automatically when your module returns).
+    This hook is the same as the old EXTCMD_UNLOCK_SOURCE callback function.
+
+
+    void gc_GetDest(    APTR handle,
+                        char *path)
+
+    Copies the current destination path into the supplied buffer (must be at least
+    512 bytes in size). The return value is a pointer to the path handle; you
+    can use this with other hook functions. Call this command repeatedly to move
+    through the destination paths. When all the destination paths have been used,
+    this command will return NULL. If you call this command again, it will start
+    again with the first destination path.
+    This hook is the same as the old EXTCMD_GET_DEST callback function.
+
+
+    void gc_EndDest(    APTR handle,
+                        long continue)
+
+    If your module is handling multiple destination paths, you must call this
+    command when you have finished with one destination path, prior to
+    calling gc_GetDest().
+    If you do not handle multiple destination paths you sould not call this.
+    This hook is the same as the old EXTCMD_END_DEST callback function.
+
+
+    void gc_FirstEntry(    APTR handle)
+
+    You must call this hook before you call gc_GetEntry() for the first time.
+    You can call it any time you want to reset the file list to the first
+    entry.
+
+    APTR gc_GetEntry(    APTR handle)
+
+    This returns a pointer to the next entry in the current source path. Use
+    the gc_ExamineEntry() hook function to get information about the entry.
+    This hook is the same as the old EXTCMD_GET_ENTRY callback function. You
+    must call gc_FirstEntry() before you call this hook for the first time.
+
+
+    ULONG gc_ExamineEntry(    APTR entry,
+                              long type)
+
+    Returns information about an entry handle retrieved with gc_GetEntry().
+    'type' can be either EE_NAME, which returns a pointer to the name,
+    or EE_TYPE, which returns the type of the entry.
+
+
+    void gc_EndEntry(    APTR handle,
+                         APTR entry,
+                         BOOL deselect)
+
+    Call this hook when you have finished working with one entry and want
+    to move on to the next. 'entry' is the pointer that was returned by
+    gc_GetEntry(). Set 'deselect' to TRUE to have the entry deselected
+    in the lister.
+    This hook is the same as the old EXTCMD_NEXT_ENTRY callback function.
+
+
+    void gc_ReloadEntry(    APTR handle,
+                            APTR entry)
+
+    This function marks the specified entry to be reloaded. When the
+    function finishes, the entry will be reloaded to update any changes
+    that your module might have made to it.
+    This hook is the same as the old EXTCMD_RELOAD_ENTRY callback function.
+
+
+    void gc_RemoveEntry(    APTR entry)
+
+    This function marks the specified entry to be removed. When the
+    function finishes, the entry will be removed from the lister it is
+    in.
+    This hook is the same as the old EXTCMD_REMOVE_ENTRY callback function.
+
+
+    long gc_EntryCount(    APTR handle)
+
+    Returns the number of selected entries for the function.
+    This hook is the same as the old EXTCMD_ENTRY_COUNT callback function.
+
+
+    long gc_AddFile(    APTR handle,
+                        char *path,
+                        struct FileInfoBlock *fib,
+                        APTR lister)
+
+    Allows you to add a file or directory to a lister. The 'path' field
+    points to the full path of the file to add. 'fib' is an initialised
+    FileInfoBlock which is used to create the file entry. The 'lister'
+    pointer is obtained via a call to the gc_GetLister() function.
+    The display is not updated until you call gc_DoChanges(), or your
+    function returns.
+    This hook is the same as the old EXTCMD_ADD_FILE callback function.
+
+
+    void gc_DelFile(    APTR handle,
+                        char *path,
+                        char *name,
+                        APTR lister)
+
+    This removes the specified file from any listers it is currently
+    shown in. The file itself is not deleted, only the display of it in
+    the lister. The display is not updated until you call gc_DoChanges(),
+    or your function returns.
+    This hook is the same as the old EXTCMD_DEL_FILE callback function.
+
+
+    void gc_LoadFile(    APTR handle,
+                         char *path,
+                         char *name,
+                         long flags,
+                         BOOL reload)
+
+    This function is similar to gc_AddFile() except that it takes a
+    filename and path and supplies the FileInfoBlock structure itself.
+    'path' is the full path of the file and 'name' is the file name. If
+    'flags' is set to LFF_ICON, the icon of the supplied file will be
+    loaded instead of the file itself. If 'reload' is set to TRUE, an
+    existing file will be reloaded (ie the old entry in the lister
+    will be removed).
+    This hook is the same as the old EXTCMD_LOAD_FILE callback function.
+
+
+    void gc_DoChanges(    APTR handle)
+
+    This command causes any changes made to listers by the gc_AddFile(),
+    gc_DelFile() and gc_LoadFile() commands to be displayed. If your
+    function returns without calling this command, the changes are
+    displayed automatically.
+    This hook is the same as the old EXTCMD_DO_CHANGES callback function.
+
+
+    BOOL gc_CheckAbort(    APTR handle)
+
+    This hook returns TRUE if your function has been aborted by the user.
+    This could have occurred because the user pressed escape or clicked the
+    close button on a lister, clicked the Abort button in the progress
+    window or quit the program.
+    This hook is the same as the old EXTCMD_CHECK_ABORT callback function.
+
+
+    struct Window *gc_GetWindow(    APTR path)
+
+    This function returns a pointer to the Window for the lister specified
+    by the supplied path handle (as returned by gc_GetSource(), etc). This
+    is useful if you want to open a requester over a lister window.
+    This hook is the same as the old EXTCMD_GET_WINDOW callback function.
+
+
+    struct MsgPort *gc_GetPort(    char *name)
+
+    This function copies the name of the Galileo ARexx port into the supplied
+    buffer (max 40 bytes), and returns a pointer to the message port.
+    This hook is the same as the old EXTCMD_GET_PORT callback function.
+
+
+    struct Screen *gc_GetScreen(    char *name)
+
+    This function copies the name of the Galileo public screen into the
+    supplied buffer (max 40 bytes), and returns a pointer to the screen.
+    This hook is the same as the old EXTCMD_GET_SCREEN callback function.
+
+
+    long gc_ReplaceReq(    struct Window *window,
+                           struct Screen *screen,
+                           IPCData *ipc,
+                           struct FileInfoBlock *file1,
+                           struct FileInfoBlock *file2,
+                           long flags)
+
+    This function shows a 'file exists - replace?' requester, comparing
+    the two supplied files. Set either the value of 'window' or 'screen'
+    to specify where the requester is to open. 'ipc' is your IPC pointer.
+    'file1' and 'file2' are the two files.
+
+    If the REPREQF_NOVERSION flag value is set for the 'flags' parameter,
+    the requester will not display a button to allow version checking.
+
+    The result of this function is REPLACE_ABORT for abort, REPLACE_LEAVE
+    for skip or REPLACE_REPLACE for replace. If the REPLACEF_ALL flag is
+    set in the result, it indicates an 'All' gagdet (ie Skip All, Replace
+    All).
+
+    This hook is the same as the old EXTCMD_REPLACE_REQ callback function.
+
+
+    GalileoScreenData *gc_GetScreenData(void)
+
+    Returns a structure with useful information about the Galileo screen. This
+    structure is READ_ONLY! You must call gc_FreeScreenData() to free the
+    structure when you have finished with it.
+    This hook is the same as the old EXTCMD_GET_SCREENDATA callback function.
+
+
+    void gc_FreeScreenData(    GalileoScreenData *data)
+
+    Frees the result of a gc_GetScreenData() function call.
+    This hook is the same as the old EXTCMD_FREE_SCREENDATA callback function.
+
+
+    void gc_OpenProgress(    APTR path,
+                             char *operation,
+                             long total)
+
+    This opens the lister progress indicator for the specified path handle.
+    'operation' is the operation string displayed in the title bar, and
+    'total' is the total number of files to process.
+    This hook is the same as the old EXTCMD_OPEN_PROGRESS callback function.
+
+
+    void gc_UpdateProgress(    APTR path,
+                               char *name,
+                               long count)
+
+    This updates an open progress indicator. 'path' is the path handle that
+    you previously opened a progress indicator for. 'name' is the new
+    filename to display, and 'count' is the new count of files processed.
+    This hook is the same as the old EXTCMD_UPDATE_PROGRESS callback function.
+
+
+    void gc_CloseProgress(    APTR path)
+
+    Closes the progress indicator for the specified path.
+    This hook is the same as the old EXTCMD_CLOSE_PROGRESS callback function.
+
+
+    long gc_SendCommand(    APTR handle,
+                            char *command,
+                            char **result,
+                            ULONG flags)
+
+    This command sends an ARexx instruction directly to the Galileo ARexx port.
+    If you want a result string returned, pass a pointer to a char * in
+    'result', and set 'flags' to COMMANDF_RESULT. If a string is returned,
+    your supplied pointer will have the address of the string stored in it.
+    You MUST call FreeVec() on this pointer when you have finished with the
+    result. This function returns the RC result of the call.
+    This hook is the same as the old EXTCMD_SEND_COMMAND callback function.
+
+
+    void gc_CheckDesktop(   char *path)
+
+    This command is used when your program has just copied one or more files
+    to a directory. You pass it the destination path that you copied the
+    files to, and Galileo compares this path with the location of the Desktop
+    folder. If they are the same, Galileo will then scan the Desktop folder and
+    update the icons on-screen if necessary.
+    This slightly clumsy method has been used because of problems in the
+    system notification routines.
+
+
+    short gc_GetDesktop(    char *buffer);
+
+    This command lets you get the path of the Galileo Desktop Folder. The
+    buffer you supply MUST be at least 256 bytes. The current Desktop Folder
+    path will be copied to this buffer. The return value of this hook
+    indicates the user's desktop settings:
+
+                    0    desktop popup disabled
+                    1    no default action
+                    2    default : create leftout
+                    3    default : move
+                    4    default : copy
+
+
+    short gc_Script(    char *name, char *data);
+
+    This command lets you get trigger one of the internal Galileo script
+    functions. The script is specified by name (which is not case-sensitive),
+    and the optional data provided is made available to the script function
+    in the {Qa} parameter.
+
+
+    short gc_DesktopPopup(    ULONG flags)
+
+    This command causes Galileo to display the desktop popup menu. The
+    menu will be displayed at the current mouse position. The value
+    returns is one of the following:
+
+                    0    cancelled
+                    1    create leftout
+                    2    copy to desktop
+                    3    move to desktop
+
+    While you can not configure the items in the menu, you can use
+    the flags value to disable the standard items. Set the appropriate
+    bit in the flags value to disable each item in the menu (eg set
+    bit 1 to disable the 'create leftout' option).
+
+    If you want to have your own items in the popup menu, you will have
+    to implement it yourself.
+
+
+    APTR gc_GetPointer(    struct GetPointerPkt *)
+
+    This command lets you retrieve internal information from Galileo. You
+    pass it an initialised struct GetPointerPkt, and it returns a
+    pointer to the information you requested.
+
+    The packet must be initialised with the gpp_Type field set to the
+    information type you desire. The gpp_Ptr and gpp_Flags fields
+    MUST be initialised to 0.
+
+    Currently, the only defined type is GETPTR_COMMANDS, which returns
+    a list of the Galileo internal commands.
+
+    When this function returns, gpp_Ptr will point to the information
+    you requested. If this function fails, it returns 0 and gpp_Ptr
+    is left unchanged. The gpp_Flags field is not currently used.
+
+    You MUST call gc_FreePointer when you have finished with the data.
+
+    In the case of GETPTR_COMMANDS, gpp_Ptr points to a struct List *
+    which contains a list of struct GalileoCommandList entries.
+
+
+    void gc_FreePointer(    struct GetPointerPkt *)
+
+    When you have finished with the information returned by
+    gc_GetPointer(), you MUST call gc_FreePointer. You must pass
+    gc_FreePointer() the same GetPointerPkt structure that you passed
+    to gc_GetPointer.
+
+
+*****************************************************************************
+    Following is the list of the now removed legacy callback commands. Kept
+for reference until the above documentation of the callback functions are
+fully updated.
+*****************************************************************************
 
 
         Command : EXTCMD_GET_SOURCE

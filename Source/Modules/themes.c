@@ -39,28 +39,17 @@ For more information on Directory Opus for Windows please see:
 
 char *version="$VER: themes.gfmmodule 0.2 "__AMIGADATE__" ";
 
-int __asm __saveds L_Module_Entry(
-	register __a0 char *argstring,
-	register __a1 struct Screen *screen,
-	register __a2 IPCData *ipc,
-	register __a3 IPCData *main_ipc,
-	register __d0 ULONG mod_id,
-	register __d1 EXT_FUNC(func_callback))
+int __asm __saveds L_Module_Entry(register __a0 char *argstring,
+	                          register __a1 struct Screen *screen,
+	                          register __a2 IPCData *ipc,
+	                          register __a3 IPCData *main_ipc,
+	                          register __d0 ULONG mod_id,
+				  register __d1 CONST GalileoCallbackInfo *gci)
 {
-    GalileoCallbackInfo info;
 	char filename[300];
 	FuncArgs *args;
+	PathNode *source;
 
-	// Get callbacks
-    info.gc_Count=GALILEOFM_HOOK_COUNT;
-    info.gc_RexxCommand=0;
-    info.gc_FileRequest=0;
-    info.gc_GetThemes=0;
-    info.gc_UnlockSource=0;
-    IPC_Command(main_ipc,HOOKCMD_GET_CALLBACKS,0,&info,0,REPLY_NO_PORT);
-
-	// Must be able to send rexx commands and show file requester
-	if (!info.gc_RexxCommand || !info.gc_FileRequest) return 0;
 
 	// See if filename is supplied
 	filename[0]=0;
@@ -78,25 +67,23 @@ int __asm __saveds L_Module_Entry(
 	{
 		FunctionEntry *entry;
 
-		// Get first entries
-		if (entry=(FunctionEntry *)func_callback(EXTCMD_GET_ENTRY,IPCDATA(ipc),0))
-		{
-			struct endentry_packet packet;
+		gci->gc_FirstEntry( IPCDATA(ipc) );
 
+		// Get first entries
+		if (entry=gci->gc_GetEntry(IPCDATA(ipc)))
+		{
 			// Build filename
-			func_callback(EXTCMD_GET_SOURCE,IPCDATA(ipc),filename);
+			source = gci->gc_GetSource(IPCDATA(ipc), filename);
 			AddPart(filename,entry->fe_name,256);
 
-			// Fill out packet to end entry
-			packet.entry=entry;
-			packet.deselect=1;
-			func_callback(EXTCMD_END_ENTRY,IPCDATA(ipc),&packet);
+
+			gci->gc_EndEntry(IPCDATA(ipc), entry, TRUE);
 		}
 	}
 
 	// Unlock source lister
-	if (info.gc_UnlockSource)
-		info.gc_UnlockSource(IPCDATA(ipc));
+	if (gci->gc_UnlockSource)
+		gci->gc_UnlockSource(IPCDATA(ipc));
 
 	// Save theme?
 	if (mod_id==SAVETHEME || mod_id==BUILDTHEME)
@@ -104,14 +91,14 @@ int __asm __saveds L_Module_Entry(
 		char buf[256];
 
 		// Get themes path
-		if (info.gc_GetThemes)
-			info.gc_GetThemes(buf);
+		if (gci->gc_GetThemes)
+			gci->gc_GetThemes(buf);
 		else
 			strcpy(buf,"G_THEMES:");
 
 		// Get filename
 		if (filename[0] ||
-			info.gc_FileRequest(
+			gci->gc_FileRequest(
 				(struct Window *)screen,
 				GetString(locale,(mod_id==SAVETHEME)?MSG_SAVE_THEME_MSG:MSG_BUILD_THEME_MSG),
 				buf,
@@ -130,7 +117,7 @@ int __asm __saveds L_Module_Entry(
 				if (*ptr==' ') *ptr='_';
 
 			// Save theme
-			if (res=save_theme(screen,&info,filename,(mod_id==BUILDTHEME)?TRUE:FALSE))
+			if (res=save_theme(screen,gci,filename,(mod_id==BUILDTHEME)?TRUE:FALSE))
 			{
 				// Build error
 				lsprintf(filename,GetString(locale,MSG_SAVE_ERROR),res);
@@ -243,8 +230,8 @@ int __asm __saveds L_Module_Entry(
 				if (!filename[0])
 				{
 					// Get themes path
-					if (info.gc_GetThemes)
-						info.gc_GetThemes(filename);
+					if (gci->gc_GetThemes)
+						gci->gc_GetThemes(filename);
 					else
 						strcpy(filename,"PROGDIR:Themes/");
 				}
@@ -274,11 +261,11 @@ int __asm __saveds L_Module_Entry(
 			*ptr=0;
 
 			// Get ARexx port name
-			info.gc_GetPort(port);
+			gci->gc_GetPort(port);
 
 			// Build ARexx command to send to Galileo
 			lsprintf(command,"%s %s %s",filename,port,apply);
-			info.gc_SendCommand(0,command,0,COMMANDF_RUN_SCRIPT);
+			gci->gc_SendCommand(0,command,0,COMMANDF_RUN_SCRIPT);
 		}
 	}
 
@@ -288,7 +275,7 @@ int __asm __saveds L_Module_Entry(
 	{
 		// Get filename
 		if (filename[0] ||
-			info.gc_FileRequest(
+			gci->gc_FileRequest(
 				(struct Window *)screen,
 				GetString(locale,MSG_CONVERT_THEME_MSG),
 				0,
@@ -310,15 +297,15 @@ int __asm __saveds L_Module_Entry(
 			if (!dest[0])
 			{
 				// Get themes path
-				if (info.gc_GetThemes)
-					info.gc_GetThemes(buf);
+				if (gci->gc_GetThemes)
+					gci->gc_GetThemes(buf);
 				else
 					strcpy(buf,"G_THEMES:");
 			}	
 
 			// Get save filename
 			if (dest[0] ||
-				(info.gc_FileRequest(
+				(gci->gc_FileRequest(
 					(struct Window *)screen,
 					GetString(locale,MSG_SAVE_THEME_MSG),
 					buf,
@@ -336,7 +323,7 @@ int __asm __saveds L_Module_Entry(
 					if (*ptr==' ') *ptr='_';
 
 				// Convert the file
-				if (res=convert_theme(&info,filename,dest))
+				if (res=convert_theme(gci,filename,dest))
 				{
 					// Build error
 					lsprintf(filename,GetString(locale,MSG_SAVE_ERROR),res);
@@ -363,13 +350,13 @@ int __asm __saveds L_Module_Entry(
 
 
 // Save theme file
-long save_theme(struct Screen *screen,GalileoCallbackInfo *info,char *filename,BOOL build)
+long save_theme(struct Screen *screen,CONST GalileoCallbackInfo *gci,char *filename,BOOL build)
 {
 	APTR file;
 	APTR progress=0;
 	char build_path[300];
 	struct MsgPort *reply_port;
-	struct GetPointerPkt pkt;
+	struct pointer_packet pkt;
 	Att_List *list;
 	long res=0;
 	short a;
@@ -396,12 +383,12 @@ long save_theme(struct Screen *screen,GalileoCallbackInfo *info,char *filename,B
 
 		// Get file count
 		count=3;
-		pkt.gpp_Type=MODPTR_SCRIPTS;
-		pkt.gpp_Ptr=0;
-		if (list=info->gc_GetPointer(&pkt))
+		pkt.type=MODPTR_SCRIPTS;
+		pkt.pointer=0;
+		if (list=gci->gc_GetPointer(&pkt))
 		{
 			count+=Att_NodeCount(list);
-			info->gc_FreePointer(&pkt);
+			gci->gc_FreePointer(&pkt);
 		}
 
 		// Open progress indicator
@@ -426,8 +413,8 @@ long save_theme(struct Screen *screen,GalileoCallbackInfo *info,char *filename,B
 	// Create a reply port
 	if (!(reply_port=CreateMsgPort()))
     {
-        res=1;
-        goto cleanup;
+	res=1;
+	goto cleanup;
     }
 
 	// Write file introduction
@@ -437,9 +424,9 @@ long save_theme(struct Screen *screen,GalileoCallbackInfo *info,char *filename,B
 	WriteBuf(file,	"/* Set background pictures */\n", -1);
 	WriteBuf(file,	"if index( apply_flags , \"B\") ~= 0 then do\n", -1);
 	WriteBuf(file,	"\tgalileo  set  background on\n", -1);
-	if (!save_theme_background(file,info,"desktop",reply_port,build_path,progress) ||
-		!save_theme_background(file,info,"lister",reply_port,build_path,progress) ||
-		!save_theme_background(file,info,"req",reply_port,build_path,progress))
+	if (!save_theme_background(file,gci,"desktop",reply_port,build_path,progress) ||
+		!save_theme_background(file,gci,"lister",reply_port,build_path,progress) ||
+		!save_theme_background(file,gci,"req",reply_port,build_path,progress))
 	{
 		res=IoErr();
 		goto cleanup;
@@ -451,9 +438,9 @@ long save_theme(struct Screen *screen,GalileoCallbackInfo *info,char *filename,B
 	WriteBuf(file,	"if index( apply_flags , \"S\") ~= 0 then do\n", -1);
 
 	// Get script list (for sounds)
-	pkt.gpp_Type=MODPTR_SCRIPTS;
-	pkt.gpp_Ptr=0;
-	if (list=info->gc_GetPointer(&pkt))
+	pkt.type=MODPTR_SCRIPTS;
+	pkt.pointer=0;
+	if (list=gci->gc_GetPointer(&pkt))
 	{
 		Att_Node *node;
 
@@ -469,7 +456,7 @@ long save_theme(struct Screen *screen,GalileoCallbackInfo *info,char *filename,B
 			}
 
 			// Save the sound
-			if (!save_theme_sound(file,info,node->node.ln_Name,reply_port,build_path,progress))
+			if (!save_theme_sound(file,gci,node->node.ln_Name,reply_port,build_path,progress))
 				break;
 		}
 
@@ -477,7 +464,7 @@ long save_theme(struct Screen *screen,GalileoCallbackInfo *info,char *filename,B
 		if (node->node.ln_Succ) res=IoErr();
 
 		// Free list
-		info->gc_FreePointer(&pkt);
+		gci->gc_FreePointer(&pkt);
 
 		// Failed?
 		if (res) goto cleanup;
@@ -488,10 +475,10 @@ long save_theme(struct Screen *screen,GalileoCallbackInfo *info,char *filename,B
 	// Fonts
 	WriteBuf(file,	"/* Set fonts */\n", -1);
 	WriteBuf(file,	"if index( apply_flags , \"F\") ~= 0 then do\n", -1);
-	if (!save_theme_font(file,info,"screen",reply_port) ||
-		!save_theme_font(file,info,"listers",reply_port) ||
-		!save_theme_font(file,info,"iconsd",reply_port) ||
-		!save_theme_font(file,info,"iconsw",reply_port))
+	if (!save_theme_font(file,gci,"screen",reply_port) ||
+		!save_theme_font(file,gci,"listers",reply_port) ||
+		!save_theme_font(file,gci,"iconsd",reply_port) ||
+		!save_theme_font(file,gci,"iconsw",reply_port))
 	{
 		res=IoErr();
 		goto cleanup;
@@ -503,10 +490,10 @@ long save_theme(struct Screen *screen,GalileoCallbackInfo *info,char *filename,B
 	WriteBuf(file,	"if index( apply_flags , \"P\") ~= 0 then do\n", -1);
 	for (a=0;pen_settings[a];a++)
 	{
-		if (!save_theme_pens(file,info,pen_settings[a],reply_port))
+		if (!save_theme_pens(file,gci,pen_settings[a],reply_port))
 			break;
 	}
-	if (pen_settings[a] || !(save_theme_palette(file,info,reply_port)))
+	if (pen_settings[a] || !(save_theme_palette(file,gci,reply_port)))
 	{
 		// Failure
 		res=IoErr();
@@ -525,8 +512,8 @@ long save_theme(struct Screen *screen,GalileoCallbackInfo *info,char *filename,B
 	// Free message port
 	if (reply_port)
     {
-        struct Message *msg;
-        while (msg=GetMsg(reply_port))
+	struct Message *msg;
+	while (msg=GetMsg(reply_port))
 		ReplyFreeMsg(msg);
     	DeleteMsgPort(reply_port);
     }
@@ -571,7 +558,7 @@ void write_theme_outro(APTR file)
 
 
 // Save background picture
-BOOL save_theme_background(APTR file,GalileoCallbackInfo *info,char *type,struct MsgPort *reply_port,char *build_path,APTR progress)
+BOOL save_theme_background(APTR file,CONST GalileoCallbackInfo *gci,char *type,struct MsgPort *reply_port,char *build_path,APTR progress)
 {
 	char buf[400],buf2[340],temp[340],*ptr;
 	BOOL ret=1;
@@ -583,7 +570,7 @@ BOOL save_theme_background(APTR file,GalileoCallbackInfo *info,char *type,struct
 
 	// Get settings
 	lsprintf(buf,"galileo query background %s",type);
-	info->gc_RexxCommand(buf,buf2,sizeof(buf2),reply_port,0);
+	gci->gc_RexxCommand(buf,buf2,sizeof(buf2),reply_port,0);
 
 	// Build command
 	ptr=buf2;
@@ -630,7 +617,7 @@ BOOL save_theme_background(APTR file,GalileoCallbackInfo *info,char *type,struct
 
 
 // Save sound event
-BOOL save_theme_sound(APTR file,GalileoCallbackInfo *info,char *type,struct MsgPort *reply_port,char *build_path,APTR progress)
+BOOL save_theme_sound(APTR file,CONST GalileoCallbackInfo *gci,char *type,struct MsgPort *reply_port,char *build_path,APTR progress)
 {
 	char buf[400],buf2[340],temp[340],*ptr;
 	BOOL ret=1;
@@ -642,7 +629,7 @@ BOOL save_theme_sound(APTR file,GalileoCallbackInfo *info,char *type,struct MsgP
 
 	// Get settings
 	lsprintf(buf,"galileo query sound \"%s\"",type);
-	info->gc_RexxCommand(buf,buf2,sizeof(buf2),reply_port,0);
+	gci->gc_RexxCommand(buf,buf2,sizeof(buf2),reply_port,0);
 
 	// Build command
 	ptr=buf2;
@@ -689,13 +676,13 @@ BOOL save_theme_sound(APTR file,GalileoCallbackInfo *info,char *type,struct MsgP
 
 
 // Save font setting
-BOOL save_theme_font(APTR file,GalileoCallbackInfo *info,char *type,struct MsgPort *reply_port)
+BOOL save_theme_font(APTR file,CONST GalileoCallbackInfo *gci,char *type,struct MsgPort *reply_port)
 {
 	char buf[200],buf2[140],temp[80],*ptr;
 
 	// Get settings
 	lsprintf(buf,"galileo query font %s",type);
-	info->gc_RexxCommand(buf,buf2,sizeof(buf2),reply_port,0);
+	gci->gc_RexxCommand(buf,buf2,sizeof(buf2),reply_port,0);
 
 	// Put result in quotes
 	ptr=buf2;
@@ -711,13 +698,13 @@ BOOL save_theme_font(APTR file,GalileoCallbackInfo *info,char *type,struct MsgPo
 
 
 // Save pens setting
-BOOL save_theme_pens(APTR file,GalileoCallbackInfo *info,char *type,struct MsgPort *reply_port)
+BOOL save_theme_pens(APTR file,CONST GalileoCallbackInfo *gci,char *type,struct MsgPort *reply_port)
 {
 	char buf[150],buf2[100];
 
 	// Get settings
 	lsprintf(buf,"galileo query pens %s",type);
-	info->gc_RexxCommand(buf,buf2,sizeof(buf2),reply_port,0);
+	gci->gc_RexxCommand(buf,buf2,sizeof(buf2),reply_port,0);
 
 	// Write command to rexx script
 	lsprintf(buf,"\tgalileo set pens %s %s\n",type,buf2);
@@ -727,12 +714,12 @@ BOOL save_theme_pens(APTR file,GalileoCallbackInfo *info,char *type,struct MsgPo
 
 
 // Save palette
-BOOL save_theme_palette(APTR file,GalileoCallbackInfo *info,struct MsgPort *reply_port)
+BOOL save_theme_palette(APTR file,CONST GalileoCallbackInfo *gci,struct MsgPort *reply_port)
 {
 	char buf[300],buf2[260];
 
 	// Get settings
-	info->gc_RexxCommand("galileo query palette",buf2,sizeof(buf2),reply_port,0);
+	gci->gc_RexxCommand("galileo query palette",buf2,sizeof(buf2),reply_port,0);
 
 	// Write command to rexx script
 	lsprintf(buf,"\tgalileo set palette %s\n",buf2);
@@ -885,7 +872,7 @@ Att_List *theme_build_list(char *path)
 
 
 // Convert Windows95 theme
-short convert_theme(GalileoCallbackInfo *info,char *source,char *dest)
+short convert_theme(CONST GalileoCallbackInfo *gci,char *source,char *dest)
 {
 	APTR in,file;
 	BPTR lock,old;

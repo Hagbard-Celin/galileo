@@ -936,16 +936,16 @@ if	(imsg && (cm = imsg->data_free))
 	}
 
 // Trigger connect script
-if	(!cld.cld_aborted && ogp->og_hooks.gc_Script && handle)
+if	(!cld.cld_aborted && ogp->og_gci->gc_Script && handle)
 	{
 	char script_arg[13];
 
 	sprintf( script_arg, "%lu", handle );
 
 	if	(cm->cm_site.se_env->e_script_connect_ok && cld.cld_okay)
-		ogp->og_hooks.gc_Script( "FTP connect success", script_arg );
+		ogp->og_gci->gc_Script( "FTP connect success", script_arg );
 	else if	(cm->cm_site.se_env->e_script_connect_fail && !cld.cld_okay)
-		ogp->og_hooks.gc_Script( "FTP connect fail", script_arg );
+		ogp->og_gci->gc_Script( "FTP connect fail", script_arg );
 	}
 
 // Reply to message from main process?
@@ -1090,7 +1090,7 @@ handle = ftpnode->fn_handle;
 // And only ones that had been successfully connected
 if	((ftpnode->fn_flags & (LST_CONNECTED | LST_LOCAL)) == LST_CONNECTED
 	&& ftpnode->fn_site.se_env->e_script_close
-	&& og->og_hooks.gc_Script)
+	&& og->og_gci->gc_Script)
 	do_script = 1;
 
 // Need to remember last path?
@@ -1197,7 +1197,7 @@ if	(do_script)
 	char handlebuf[13];
 	sprintf( handlebuf, "%lu", handle );
 
-	og->og_hooks.gc_Script( "FTP close connection", handlebuf );
+	og->og_gci->gc_Script( "FTP close connection", handlebuf );
 	}
 }
 

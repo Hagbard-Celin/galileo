@@ -182,12 +182,12 @@ ULONG handle_from_function_handle( struct galileoftp_globals *og, APTR function_
 APTR  path_handle;
 ULONG handle = 0;
 
-if	(path_handle = og->og_hooks.gc_GetSource( function_handle, 0 ))
+if	(path_handle = og->og_gci->gc_GetSource( function_handle, 0 ))
 	{
-	if	(!(handle = og->og_hooks.gc_GetLister( path_handle )))
+	if	(!(handle = og->og_gci->gc_GetLister( path_handle )))
 		;
 
-	og->og_hooks.gc_EndSource( function_handle, 0 );
+	og->og_gci->gc_EndSource( function_handle, 0 );
 	}
 
 return handle;
@@ -509,7 +509,7 @@ sm = msg->data;
 // Default options?
 if	(msg->flags)
 	{
-	og->og_hooks.gc_UnlockSource( sm->cm_function_handle );
+	og->og_gci->gc_UnlockSource( sm->cm_function_handle );
 
 	need_reply = 0;
 
@@ -949,7 +949,7 @@ return retval;
 static int galileo_doubleclick(
 	struct galileoftp_globals	 *og,
 	struct RexxMsg		 *rxmsg,
-        int			  argc,
+	int			  argc,
 	char			**argv )
 {
 struct ftp_node		*node;
@@ -1112,7 +1112,7 @@ char              *p;
 
 kprintf( "galileo_leaveout()\n" );
 
-og->og_hooks.gc_GetDesktop( desktop );
+og->og_gci->gc_GetDesktop( desktop );
 
 strcpy( path, desktop );
 
@@ -1216,7 +1216,7 @@ Also, if the user changes the dir in the site or details then it will not work.
 	}
 
 // Make icons appear
-og->og_hooks.gc_CheckDesktop( desktop );
+og->og_gci->gc_CheckDesktop( desktop );
 }
 
 /********************************/
@@ -1346,16 +1346,16 @@ else
 		if	(!stricmp( argv[5], "desktop" ))
 			{
 			// Get desktop path and popup setting
-			int result = og->og_hooks.gc_GetDesktop( desktop );
+			int result = og->og_gci->gc_GetDesktop( desktop );
 
 			// Popup not disabled?
 			if	(result == 1
 				|| (argv[6] && strstr( argv[6], "shift" )))
 				{
 				// Galileo version supports callback?
-				if	(og->og_hooks.gc_DesktopPopup)
+				if	(og->og_gci->gc_DesktopPopup)
 					{
-					result = og->og_hooks.gc_DesktopPopup( 0 );
+					result = og->og_gci->gc_DesktopPopup( 0 );
 
 					switch	(result)
 						{
@@ -2132,7 +2132,7 @@ int                dflags = 0;		// New delete-specific flags
 FuncArgs          *fa;
 char              *args = argv[5];
 int                retval = 0;
-GalileoCallbackInfo *h = &og->og_hooks;
+CONST GalileoCallbackInfo *h = og->og_gci;
 APTR               function_handle;
 APTR               entry, entry2;
 int                num;
@@ -3155,14 +3155,12 @@ if	(ourbase = OpenLibrary( "ftp.gfmmodule", 0 ))
 			// Fix pointer to global info
 			og = mldata->mld_og;
 
-			og->og_func_callback = mldata->mld_func_callback;
-
 			// IPC for "galileo_ftp" process
 			og->og_main_ipc = mldata->mld_ftp_ipc;
 			med.med_ipc = mldata->mld_ftp_ipc;
 
 			// Get Galileo ARexx port name via callbacks
-			mldata->mld_func_callback( EXTCMD_GET_PORT, IPCDATA(mldata->mld_ftp_ipc), med.med_galileo );
+			og->og_gci->gc_GetPort( med.med_galileo );
 
 			// Scan configuration file
 			med.med_log_fp = setup_config( og );

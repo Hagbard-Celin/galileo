@@ -102,14 +102,14 @@ void ChangeDir(struct ModuleData *data, struct Tree *cur)
     struct List list;
     UWORD dc=0, fc=0;
 
-    data->hook.gc_LockFileList(data->listh,TRUE);
+    data->gci->gc_LockFileList(data->listh,TRUE);
 	
     if (data->cur)
     {
 	tmp=data->cur->Child;
 	while (tmp)
 	{
-	    data->hook.gc_RemoveFileEntry(data->listh,tmp->entry);
+	    data->gci->gc_RemoveFileEntry(data->listh,tmp->entry);
 	    tmp=tmp->Next;
 	}
     }
@@ -121,7 +121,7 @@ void ChangeDir(struct ModuleData *data, struct Tree *cur)
 	
     while (cur)
     {
-	cur->entry=data->hook.gc_CreateFileEntry(data->listh, &cur->fib, NULL);
+	cur->entry=data->gci->gc_CreateFileEntry(data->listh, &cur->fib, NULL);
 	AddTail(&list,cur->entry);
 
 	if (cur->fib.fib_DirEntryType<0) fc++;
@@ -130,9 +130,9 @@ void ChangeDir(struct ModuleData *data, struct Tree *cur)
 	cur=cur->Next;
     }
 
-    data->hook.gc_SortFileList(data->listh, &list, fc, dc);
-    data->hook.gc_UnlockFileList(data->listh);
-    data->hook.gc_RefreshLister(data->listh, HOOKREFRESH_DATE|HOOKREFRESH_FULL);
+    data->gci->gc_SortFileList(data->listh, &list, fc, dc);
+    data->gci->gc_UnlockFileList(data->listh);
+    data->gci->gc_RefreshLister(data->listh, HOOKREFRESH_DATE|HOOKREFRESH_FULL);
 }
 ///
 
@@ -269,28 +269,28 @@ BOOL AllocPort(struct ModuleData *data)
 	AddPort(data->mp);
 
 	sprintf(data->buf,"lister set %s handler %s quotes",data->lists,data->mp_name);
-	data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+	data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
 	sprintf(data->buf,"galileo addtrap * %s",data->mp_name);
-	data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+	data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
 	sprintf(data->buf,"galileo remtrap All %s",data->mp_name);
-	data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+	data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
 	sprintf(data->buf,"galileo remtrap None %s",data->mp_name);
-	data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+	data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
 	sprintf(data->buf,"galileo remtrap Select %s",data->mp_name);
-	data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+	data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
 	sprintf(data->buf,"galileo remtrap Toggle %s",data->mp_name);
-	data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+	data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
 	sprintf(data->buf,"galileo remtrap CacheList %s",data->mp_name);
-	data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+	data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
 	sprintf(data->buf,"galileo remtrap DeviceList %s",data->mp_name);
-	data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+	data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
 	return(TRUE);
     }
@@ -330,20 +330,20 @@ void
 LaunchCommand(struct ModuleData *data, char *cmd, char *name, char *qual)
 {
     sprintf(data->buf,"lister set %s busy on wait",data->lists);
-    data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+    data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
     sprintf(data->buf,"galileo remtrap %s %s",cmd,data->mp_name);
-    data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+    data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
     // Need data->lists here or command might end at wrong XADbrowser lister
     sprintf(data->buf,"command wait source %s %s %s %s", data->lists, cmd, qual, name);
-    data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+    data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
     sprintf(data->buf,"galileo addtrap %s %s",cmd,data->mp_name);
-    data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+    data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
     sprintf(data->buf,"lister set %s busy off wait",data->lists);
-    data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+    data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
 }
 
@@ -351,14 +351,14 @@ void
 _scandir(struct ModuleData *data, char *listh, char *path)
 {
     sprintf(data->buf,"command source %s ScanDir %s",listh,path);
-    data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+    data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 }
 
 void
 _cd(struct ModuleData *data, struct Tree *cur)
 {
     sprintf(data->buf,"lister set %s path %s",data->lists,data->listpath);
-    data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+    data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
     ChangeDir(data,cur);
 }
@@ -418,7 +418,7 @@ _parent(struct ModuleData *data)
        (!stricmp(data->listpath,data->rootpath)))
     {
 	sprintf(data->buf,"lister read %s %s",data->lists,data->orgpath);
-	data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+	data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
     }
     else
     {
@@ -438,7 +438,7 @@ _root(struct ModuleData *data)
 {
     strcpy(data->listpath, data->rootpath);
     sprintf(data->buf,"lister set %s path %s",data->lists,data->listpath);
-    data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+    data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
     ChangeDir(data,data->root);
 }
@@ -486,9 +486,9 @@ _viewcommand(struct ModuleData *data,char *com,char *name)
 		} while (retry && !data->over);
 
 		sprintf(data->buf,"lister select %s \"%s\" off",data->lists,tmp->fib.fib_FileName);
-		data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+		data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
-		data->hook.gc_RefreshLister(data->listh, NULL);
+		data->gci->gc_RefreshLister(data->listh, NULL);
 		LaunchCommand(data,com,tf->FileName,"");
 	    }
 	    tmp=tmp->Next;
@@ -750,9 +750,9 @@ void _copy(struct ModuleData *data,char *name, char *Dest, BOOL CopyAs)
 		    }
 		}
 		sprintf(data->buf,"lister select %s \"%s\" off",data->lists,FilePart(tmp->fib.fib_FileName));
-		data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+		data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
-		data->hook.gc_RefreshLister(data->listh, NULL);
+		data->gci->gc_RefreshLister(data->listh, NULL);
 	    }
 	    tmp=tmp->Next;
 	}
@@ -803,7 +803,7 @@ BOOL _path(struct ModuleData *data, char *path)
     if (*path!=':')
     {
 	sprintf(data->buf,"lister read %s %s",data->lists,old);
-	data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+	data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
 	return(TRUE);
     }
@@ -1081,7 +1081,7 @@ BOOL is_dest_customhandler(struct ModuleData *data, char *lister)
     if (lister[0] != '0')
     {
 	sprintf(data->buf,"lister query %s handler", lister);
-	data->hook.gc_RexxCommand(data->buf, result, sizeof(result), NULL, NULL);
+	data->gci->gc_RexxCommand(data->buf, result, sizeof(result), NULL, NULL);
 
 	if (result[0])
 	    ret = TRUE;
@@ -1098,7 +1098,7 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 				  register __a2 IPCData *ipc,
 				  register __a3 IPCData *main_ipc,
 				  register __d0 ULONG mod_id,
-				  register __d1 EXT_FUNC(func_callback))
+				  register __d1 CONST GalileoCallbackInfo *gci)
 {
     char arcname[512];
     char buf[512];
@@ -1113,7 +1113,7 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 
     int openwinret;
 	
-    struct function_entry *Entry=0;
+    FunctionEntry *Entry=0;
 
     ULONG err, total;
     STRPTR filename=0;
@@ -1133,6 +1133,7 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
     data.GalileoFMBase = GalileoFMBase;
     data.DOSBase = DOSBase;
     data.UtilityBase = UtilityBase;
+    data.gci = gci;
 
     data.screen = screen;
 
@@ -1191,14 +1192,6 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 
     NewList((struct List *)&data.Temp);
 
-    data.hook.gc_Count=GALILEOFM_HOOK_COUNT;
-
-    if (IPC_Command(main_ipc, HOOKCMD_GET_CALLBACKS, 0, &data.hook, 0, REPLY_NO_PORT) != GALILEOFM_HOOK_COUNT)
-    {
-	ErrorReq(&data, GetString(locale, MSG_NO_HOOKS_ERR));
-	return 0;
-    }
-
     if (!(data.memhandle = NewMemHandle(NULL, NULL, MEMF_CLEAR))) return(0);
 
     if (!(data.password=AllocMemH(data.memhandle,512))) goto end_1;
@@ -1215,13 +1208,13 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
     // Ignore selected files in listers if archivenames on commandline
     if (!(arcname[0]))
     {
-	if ( !(data.listp2 = data.hook.gc_GetSource(IPCDATA(ipc), data.orgpath)) ) goto end_2;
+	if ( !(data.listp2 = gci->gc_GetSource(IPCDATA(ipc), data.orgpath)) ) goto end_2;
 
-    	data.hook.gc_FirstEntry(IPCDATA(ipc));
+    	gci->gc_FirstEntry(IPCDATA(ipc));
 
-    	if ( !(Entry=data.hook.gc_GetEntry(IPCDATA(ipc))) ) goto end_2;
+    	if ( !(Entry=gci->gc_GetEntry(IPCDATA(ipc))) ) goto end_2;
 
-    	filename = (STRPTR)data.hook.gc_ExamineEntry(Entry, EE_NAME);
+    	filename = (STRPTR)gci->gc_ExamineEntry(Entry, EE_NAME);
 
 	strcpy(arcname, data.orgpath);
 
@@ -1233,15 +1226,15 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
     {
 	if (!(data.listpath[0]))
 	{
-	    if (!(data.destp = data.hook.gc_GetDest(IPCDATA(ipc), data.listpath))) goto end_2;
+	    if (!(data.destp = gci->gc_GetDest(IPCDATA(ipc), data.listpath))) goto end_2;
 	}
 
 	if (data.listp2)
 	{
     		data.listh = (ULONG)data.listp2->pn_lister;
-    		data.listw = data.hook.gc_GetWindow(data.listp2);
+    		data.listw = gci->gc_GetWindow(data.listp2);
 
-		total = data.hook.gc_EntryCount(IPCDATA(ipc));
+		total = gci->gc_EntryCount(IPCDATA(ipc));
 	}
 	else
 	{
@@ -1330,12 +1323,12 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 
 		if (filename)
 		{
-		    data.hook.gc_EndEntry(IPCDATA(ipc),Entry,TRUE);
-		    Entry=data.hook.gc_GetEntry(IPCDATA(ipc));
+		    gci->gc_EndEntry(IPCDATA(ipc),Entry,TRUE);
+		    Entry=gci->gc_GetEntry(IPCDATA(ipc));
 		    if (Entry)
 		    {
 			*((char *)PathPart(arcname))=0;
-			AddPart(arcname,Entry->name,512);
+			AddPart(arcname,Entry->fe_name,512);
 		    }
 		}
 		else
@@ -1377,14 +1370,14 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
     strcat(data.rootpath, ":");
 
     // Do we have a destination lister?
-    if (data.destp=data.hook.gc_GetDest(IPCDATA(ipc), data.listpath))
+    if (data.destp=gci->gc_GetDest(IPCDATA(ipc), data.listpath))
     {
 	// Store lister for restoring deststination status later
 	data.desth=(ULONG)data.destp->pn_lister;
 
 	// Have to do this, or destination lister will be locked busy
 	sprintf(buf,"lister set %lu busy off wait",data.desth);
-	data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+	gci->gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
     }
 
     if (data.listp2)
@@ -1395,18 +1388,18 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 	{
 	     sprintf(data.lists, "%lu", data.listh2);
 	     data.listh=data.listh2;
-	     data.listw=data.hook.gc_GetWindow(data.listp2);
+	     data.listw=gci->gc_GetWindow(data.listp2);
 	}
     }
 
     if (filename)
     {
-	data.hook.gc_EndEntry(IPCDATA(ipc), Entry, TRUE);
+	gci->gc_EndEntry(IPCDATA(ipc), Entry, TRUE);
     }
 
     if (data.newlister)
     {
-	openwinret=data.hook.gc_RexxCommand("lister new", result, sizeof(result), NULL, NULL);
+	openwinret=gci->gc_RexxCommand("lister new", result, sizeof(result), NULL, NULL);
 #ifdef _DEBUG
 	KPrintF("lister new returned: %ld result: %s\n", openwinret, result);
 #endif
@@ -1424,30 +1417,30 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 	{
 	    struct _PathNode listp;
 
-	    data.hook.gc_UnlockSource(IPCDATA(ipc));
+	    gci->gc_UnlockSource(IPCDATA(ipc));
 
 	    // Free the FunctionHandle, detaching completely from originating lister
-	    data.hook.gc_FreePointerDirect(IPCDATA(ipc),MODPTR_HANDLE,POINTERF_DELPORT);
+	    gci->gc_FreePointerDirect(IPCDATA(ipc),MODPTR_HANDLE,POINTERF_DELPORT);
 
 	    data.listp=&listp;
 
 	    // To avoid usless snapshot attempt when quitting
-	    data.hook.gc_FakeDir(data.listh,TRUE);
+	    gci->gc_FakeDir(data.listh,TRUE);
 
 	    strcpy(data.listpath, data.rootpath);
 	    sprintf(buf, "lister set %s path %s", data.lists, data.listpath);
-	    data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+	    gci->gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
 	    sprintf(buf, "lister clear %s", data.lists);
-	    data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+	    gci->gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
 	    sprintf(buf, "lister set %s title %s", data.lists, GetString(locale, MSG_READING_ARCHIVE));
-	    data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+	    gci->gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
 	    if (data.newlister)
 	    {
 		sprintf(buf, "lister set %s source", data.lists);
-	        data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+	        gci->gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 	    }
 
 	    // Quit and cleanup if user closed window
@@ -1456,7 +1449,7 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 		if (!strcmp((char *)pkt->sp_Pkt.dp_Arg1, "inactive"))
 		{
 		    sprintf(buf, "galileo remtrap * %s", data.mp_name);
-		    data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+		    gci->gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
 		    ReplyMsg((struct Message *)pkt);
 
@@ -1465,14 +1458,14 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 		else ReplyMsg((struct Message *)pkt);
 	    }
 
-	    data.hook.gc_RefreshLister(data.listh, HOOKREFRESH_FULL);
+	    gci->gc_RefreshLister(data.listh, HOOKREFRESH_FULL);
 
 	    sprintf(buf, "lister wait %s quick", data.lists);
-	    data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+	    gci->gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
 	    // Block lister until we are ready to handle events
 	    sprintf(buf, "lister set %s busy on wait", data.lists);
-	    data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+	    gci->gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
 	    if (data.newlister)
 	    {
@@ -1480,17 +1473,17 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 		if (data.desth)
 		{
 		    // Restore destination status
-		    if (!(data.hook.gc_IsSourceDestLock(data.desth)))
+		    if (!(gci->gc_IsSourceDestLock(data.desth)))
 		    {
 			sprintf(buf, "lister set %lu dest", data.desth);
-	                data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+	                gci->gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 		    }
 		}
 
 	        data.listp->pn_lister = (APTR)data.listh;
 	        *data.listp->pn_path_buf = data.listp->pn_flags = 0;
 	        data.listp->pn_path = data.listp->pn_path_buf;
-	        data.listw = data.hook.gc_GetWindow(data.listp);
+	        data.listw = gci->gc_GetWindow(data.listp);
 	    }
 
 	    if (data.ArcInf = xadAllocObject(XADOBJ_ARCHIVEINFO, NULL))
@@ -1526,13 +1519,13 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 		    _cd(&data, &root);
 
 		    sprintf(buf, "lister set %s title XADbrowser: %s", data.lists, FilePart(arcname));
-		    data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+		    gci->gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
-		    data.hook.gc_RefreshLister(data.listh, HOOKREFRESH_FULL);
+		    gci->gc_RefreshLister(data.listh, HOOKREFRESH_FULL);
 
 		    // Ready to handle input, unblock lister
 		    sprintf(buf, "lister set %s busy off wait", data.lists);
-		    data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+		    gci->gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
 		    while (!over)
 		    {
@@ -1549,7 +1542,7 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 			    if (!strcmp(a0, "inactive"))
 			    {
 				sprintf(buf, "galileo remtrap * %s", data.mp_name);
-				data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+				gci->gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
 				over=TRUE;
 			    }
@@ -1609,13 +1602,13 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 		else
 		{
 		    sprintf(buf, "galileo remtrap * %s", data.mp_name);
-		    data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+		    gci->gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
 		    ErrorReq(&data, xadGetErrorText(err));
 
 		    // unblock lister
 		    sprintf(buf, "lister set %s busy off wait", data.lists);
-		    data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+		    gci->gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 
 		}
 		xadFreeObject(data.ArcInf,NULL);
@@ -1624,10 +1617,10 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
 	}
 	else
 	{
-	    data.hook.gc_UnlockSource(IPCDATA(ipc));
+	    gci->gc_UnlockSource(IPCDATA(ipc));
 
 	    // Free the FunctionHandle, detaching completely from originating lister
-	    data.hook.gc_FreePointerDirect(IPCDATA(ipc),MODPTR_HANDLE,POINTERF_DELPORT);
+	    gci->gc_FreePointerDirect(IPCDATA(ipc),MODPTR_HANDLE,POINTERF_DELPORT);
 	}
     }
 #ifdef _DEBUG
@@ -1664,17 +1657,17 @@ int __saveds __asm L_Module_Entry(register __a0 char *args,
     if (async)
     {
 	// Get deatination pathnode
-	if (data.destp=data.hook.gc_GetDest(IPCDATA(ipc), data.listpath))
+	if (data.destp=gci->gc_GetDest(IPCDATA(ipc), data.listpath))
 	{
 	    // Get lister pointer
 	    data.desth=(ULONG)data.destp->pn_lister;
 
 	    // Have to do this, or destination lister will be locked busy
 	    sprintf(buf,"lister set %lu busy off wait",data.desth);
-	    data.hook.gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
+	    gci->gc_RexxCommand(buf, NULL, NULL, NULL, NULL);
 	}
-	data.hook.gc_UnlockSource(IPCDATA(ipc));
-	data.hook.gc_FreePointerDirect(IPCDATA(ipc),GETPTR_HANDLE,NULL);
+	gci->gc_UnlockSource(IPCDATA(ipc));
+	gci->gc_FreePointerDirect(IPCDATA(ipc), MODPTR_HANDLE, NULL);
     }
 
     FreeMemHandle(data.memhandle);

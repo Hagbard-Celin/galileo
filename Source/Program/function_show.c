@@ -37,13 +37,16 @@ For more information on Directory Opus for Windows please see:
 
 #include "galileofm.h"
 #include "/Modules/modules.h"
+#include "/Modules/modules_protos.h"
+#include "/Modules/modules_internal_protos.h"
+
+extern CONST GalileoCallbackInfo CallBackInfo;
 
 // SHOW/PLAY/READ/PRINT/ICONINFO internal function
 GALILEOFM_FUNC(function_show)
 {
 	FunctionEntry *entry;
 	Att_List *list;
-	struct Library *ModuleBase;
 	short ret=0,count=0,funcid;
 	BOOL sync_flag=0;
 
@@ -62,6 +65,7 @@ GALILEOFM_FUNC(function_show)
 		if (environment->env->settings.general_flags&GENERALF_FILETYPE_SNIFFER)
 		{
 			Cfg_Filetype *type;
+			struct Library *ModuleBase;
 
 			// Get first entry
 			entry=function_get_entry(handle);
@@ -98,7 +102,7 @@ GALILEOFM_FUNC(function_show)
 							handle->ipc,
 							&main_ipc,
 							0,	// FindFileType
-							(ULONG)function_external_hook);
+							&CallBackInfo);
 
 						// Close module
 						CloseLibrary(ModuleBase);
@@ -156,13 +160,13 @@ GALILEOFM_FUNC(function_show)
 			// Synchronous?
 			if (sync_flag)
 			{
-				struct Library *ModuleBase;
+				struct Library *InternalModuleBase;
 
 				// Get read module
-				if (ModuleBase=OpenModule("read.gfmmodule"))
+				if (InternalModuleBase=OpenModule("read.gfmmodule"))
 				{
 					// Read files
-					Module_Entry(
+					Module_Entry_Internal(
 						startup->files,
 						GUI->screen_pointer,
 						handle->ipc,
@@ -171,7 +175,7 @@ GALILEOFM_FUNC(function_show)
 						funcid-FUNC_READ);
 
 					// Close module
-					CloseLibrary(ModuleBase);
+					CloseLibrary(InternalModuleBase);
 					return 1;
 				}
 			}
@@ -223,11 +227,13 @@ GALILEOFM_FUNC(function_show)
 		// Synchronous?
 		if (sync_flag)
 		{
+			struct Library *InternalModuleBase;
+
 			// Open module
-			if (ModuleBase=OpenModule("play.gfmmodule"))
+			if (InternalModuleBase=OpenModule("play.gfmmodule"))
 			{
 				// Play files
-				if (Module_Entry(
+				if (Module_Entry_Internal(
 					(struct List *)list,
 					GUI->screen_pointer,
 					handle->ipc,
@@ -236,7 +242,7 @@ GALILEOFM_FUNC(function_show)
 					(volume<<8)|((func==FUNC_PLAY_QUIET)?(1<<0):0))==1) ret=1;
 
 				// Close module
-				CloseLibrary(ModuleBase);
+				CloseLibrary(InternalModuleBase);
 			}
 		}
 					
@@ -267,11 +273,13 @@ GALILEOFM_FUNC(function_show)
 		// Synchronous?
 		if (sync_flag)
 		{
+			struct Library *InternalModuleBase;
+
 			// Open module
-			if (ModuleBase=OpenModule("icon.gfmmodule"))
+			if (InternalModuleBase=OpenModule("icon.gfmmodule"))
 			{
 				// Show IconInfo
-				if (Module_Entry(
+				if (Module_Entry_Internal(
 					(struct List *)list,
 					GUI->screen_pointer,
 					handle->ipc,
@@ -280,7 +288,7 @@ GALILEOFM_FUNC(function_show)
 					(environment->env->desktop_flags&DESKTOPF_NO_REMAP)?1:0)) ret=1;
 
 				// Close module
-				CloseLibrary(ModuleBase);
+				CloseLibrary(InternalModuleBase);
 
 				// Do update
 				function_iconinfo_update(handle,list);
@@ -299,6 +307,8 @@ GALILEOFM_FUNC(function_show)
 	// Show
 	else
 	{
+		struct Library *InternalModuleBase;
+
 		// Can we detach?
 		if (count==1 && handle->instruction_count==1 && !sync_flag)
 		{
@@ -308,12 +318,12 @@ GALILEOFM_FUNC(function_show)
 		
 		// Open module
 		else
-		if (ModuleBase=OpenModule("show.gfmmodule"))
+		if (InternalModuleBase=OpenModule("show.gfmmodule"))
 		{
 			Att_Node *node;
 
 			// Show files
-			ret=Module_Entry(
+			ret=Module_Entry_Internal(
 				(struct List *)list,
 				GUI->screen_pointer,
 				handle->ipc,
@@ -321,7 +331,7 @@ GALILEOFM_FUNC(function_show)
 				0,0);
 
 			// Close show module
-			CloseLibrary(ModuleBase);
+			CloseLibrary(InternalModuleBase);
 
 			// Clear external list
 			NewList((struct List *)&handle->external_list);

@@ -36,7 +36,7 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
-#include "/Modules/modules.h"
+#include "/Modules/modules_internal_protos.h"
 
 extern short revision_num, version_num;
 extern char *version_string;
@@ -45,7 +45,7 @@ extern char *version_string;
 void show_about(struct Screen *screen,IPCData *ipc)
 {
 	char buf[80],*buffer;
-	struct Library *ModuleBase;
+	struct Library *InternalModuleBase;
 	Att_List *list;
 	Att_Node *node;
 
@@ -78,13 +78,13 @@ void show_about(struct Screen *screen,IPCData *ipc)
     Att_NewNode(list,"Directory Opus® is a registered trademarks of GPSoftware.",1,0);
 
 	// Try for external about library
-	if ((ModuleBase=OpenLibrary("PROGDIR:modules/about.gfmmodule",0)))
+	if ((InternalModuleBase=OpenLibrary("PROGDIR:modules/about.gfmmodule",0)))
 	{
 		short ret;
 
 		// Show about
-		ret=Module_Entry((struct List *)list,screen,ipc,&main_ipc,0,0);
-		CloseLibrary(ModuleBase);
+		ret=Module_Entry_Internal((struct List *)list,screen,ipc,&main_ipc,0,0);
+		CloseLibrary(InternalModuleBase);
 
 		// If it displayed ok, return
 		if (ret)

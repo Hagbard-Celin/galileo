@@ -38,6 +38,7 @@ For more information on Directory Opus for Windows please see:
 
 #include "galileofm.h"
 #include "/Modules/modules.h"
+#include "/Modules/modules_protos.h"
 #include "eliza.h"
 #include "scripts.h"
 

@@ -37,6 +37,8 @@ For more information on Directory Opus for Windows please see:
 
 #include "galileofm.h"
 
+extern CONST GalileoCallbackInfo CallBackInfo;
+
 #define DELETE_TIMER	300
 #define MENU_TIMER		5
 #define FILETYPE_TIMER	5
@@ -548,14 +550,11 @@ void event_loop()
 				// Get callbacks
 				case MAINCMD_GET_CALLBACKS:
 					{
-						GalileoCallbackInfo *info;
-
 						// Get info pointer
-						if (info=(GalileoCallbackInfo *)ipc_msg->data)
-						{
-							// Initialise hooks
-							ipc_msg->command=HookInitHooks(info);
-						}
+						*(CONST GalileoCallbackInfo **)ipc_msg->data = &CallBackInfo;
+
+						// Return callback count
+						ipc_msg->command = CallBackInfo.gc_Count;
 					}
 					break;
 

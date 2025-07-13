@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -61,6 +61,7 @@ For more information on Directory Opus for Windows please see:
 
 #include <stdarg.h>
 
+#include "modules_lib.h"
 #include "ftp_arexx.h"
 #include "ftp_galileoftp.h"
 

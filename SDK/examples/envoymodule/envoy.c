@@ -16,7 +16,7 @@ int __asm __saveds L_Module_Entry(
 	register __a2 IPCData *ipc,				// Our IPC pointer
 	register __a3 IPCData *main_ipc,		// Main Galileo IPC pointer
 	register __d0 ULONG mod_id,				// ID of module function
-	register __d1 EXT_FUNC(func_callback))	// Galileo callback function
+	register __d1 CONST GalileoCallbackInfo *gci)	// Galileo callbacks
 {
 	struct Window *window=0;
 	NewConfigWindow newwin;
@@ -30,19 +30,21 @@ int __asm __saveds L_Module_Entry(
 	APTR path_node;
 	char path[256];
 
+
 	// Get first selected entry from Galileo
-	if (!(entry=(struct function_entry *)func_callback(EXTCMD_GET_ENTRY,IPCDATA(ipc),0)))
+	gci->gc_FirstEntry( IPCDATA(ipc) );
+	if (!(entry = (struct function_entry *)gci->gc_GetEntry(IPCDATA(ipc))))
 		return 0;
 
 	// Get source path
-	path_node=(APTR)func_callback(EXTCMD_GET_SOURCE,IPCDATA(ipc),path);
+	path_node = gci->gc_GetSource(IPCDATA(ipc), path);
 
 	// Open accounts.library
 	if (!(AccountsBase=OpenLibrary("accounts.library",0)))
 		return 0;
 
 	// Try and get window to open over
-	if (!(newwin.nw_Parent=(void *)func_callback(EXTCMD_GET_WINDOW,IPCDATA(ipc),path_node)))
+	if (!(newwin.nw_Parent=gci->gc_GetWindow(path_node)))
 	{
 		// If no window, use screen
 		newwin.nw_Parent=screen;
@@ -206,7 +208,7 @@ int __asm __saveds L_Module_Entry(
 								SetWindowBusy(window);
 
 								// Send help request
-								func_callback(EXTCMD_GET_HELP,IPCDATA(ipc),"NetSet");
+								gci->gc_ShowHelp(0, "NetSet");
 
 								// Clear busy pointer
 								ClearWindowBusy(window);
@@ -254,18 +256,18 @@ int __asm __saveds L_Module_Entry(
 				// Open progress indicator
 				progress=
 					OpenProgressWindowTags(
-						PW_Window,func_callback(EXTCMD_GET_WINDOW,IPCDATA(ipc),path_node),
+						PW_Window,gci->gc_GetWindow(path_node),
 						PW_Title,GalileoGetString(locale,MSG_ENVOY_PROGRESS_TITLE),
-						PW_FileCount,func_callback(EXTCMD_ENTRY_COUNT,IPCDATA(ipc),0),
+						PW_FileCount,gci->gc_EntryCount(IPCDATA(ipc)),
 						PW_Flags,	PWF_FILENAME|
 									PWF_GRAPH|
 									PWF_ABORT,
 						TAG_END);
 
 				// Go through entries
-				while (entry=(struct function_entry *)func_callback(EXTCMD_GET_ENTRY,IPCDATA(ipc),0))
+				while (entry = (struct function_entry *)gci->gc_GetEntry(IPCDATA(ipc)))
 				{
-					struct endentry_packet packet;
+					BOOL deselect;
 
 					// Update progress info
 					SetProgressWindowTags(progress,
@@ -274,7 +276,7 @@ int __asm __saveds L_Module_Entry(
 						TAG_END);
 
 					// Check abort
-					if ((func_callback(EXTCMD_CHECK_ABORT,IPCDATA(ipc),0)) ||
+					if ((gci->gc_CheckAbort(IPCDATA(ipc))) ||
 						CheckProgressAbort(progress))
 						break;
 
@@ -296,15 +298,15 @@ int __asm __saveds L_Module_Entry(
 					}
 
 					// Set owner, fill out packet with results
-					packet.entry=entry;
-					packet.deselect=SetOwner(entry->name,owner_info);
+
+					deselect=SetOwner(entry->name,owner_info);
 
 					// Mark function for reload (if successful)
-					if (packet.deselect)
-						func_callback(EXTCMD_RELOAD_ENTRY,IPCDATA(ipc),entry);
+					if (deselect)
+						gci->gc_ReloadEntry(IPCDATA(ipc),entry);
 
 					// End this entry
-					func_callback(EXTCMD_END_ENTRY,IPCDATA(ipc),&packet);
+					gci->gc_EndEntry(IPCDATA(ipc), entry, deselect);
 				}
 
 				// Turn progress indicator off
@@ -379,7 +381,7 @@ void envoy_owner_list(
 			SetGadgetValue(
 				objlist,
 				GAD_ENVOY_OWNER_FIELD,
-				(node->data)?(ULONG)node->node.ln_Name:0);
+				(node->att_data)?(ULONG)node->node.ln_Name:0);
 		}
 	}
 
@@ -445,7 +447,7 @@ void envoy_group_list(
 			SetGadgetValue(
 				objlist,
 				GAD_ENVOY_GROUP_FIELD,
-				(node->data)?(ULONG)node->node.ln_Name:0);
+				(node->att_data)?(ULONG)node->node.ln_Name:0);
 		}
 	}
 

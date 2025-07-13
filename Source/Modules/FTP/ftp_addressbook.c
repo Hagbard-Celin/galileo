@@ -486,7 +486,7 @@ if	(node = Att_FindNode( dg->dg_og->og_SiteList, dg->dg_drag_item ))
 			}
 
 		// Get desktop path
-		dg->dg_og->og_hooks.gc_GetDesktop( path );
+		dg->dg_og->og_gci->gc_GetDesktop( path );
 
 		// Get site name
 		AddPart( path, name, PATHLEN+1 );
@@ -503,7 +503,7 @@ if	(node = Att_FindNode( dg->dg_og->og_SiteList, dg->dg_drag_item ))
 			*PathPart( path ) = 0;
 
 			// Make icon appear
-			dg->dg_og->og_hooks.gc_CheckDesktop( path );
+			dg->dg_og->og_gci->gc_CheckDesktop( path );
 			}
 		FreeVec( name );
 		}

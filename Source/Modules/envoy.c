@@ -37,25 +37,15 @@ For more information on Directory Opus for Windows please see:
 
 #include "envoy.h"
 
-typedef struct _PathNode
-{
-	struct MinNode		node;
-	char			path_buf[512];
-	char			*path;
-	struct _Lister			*lister;
-	struct MinList		change_list;
-	UWORD			flags;
-} PathNode;
-
 static const char *version="$VER: envoy.gfmmodule 0.2 "__AMIGADATE__" ";
 
 int __asm __saveds L_Module_Entry(
-	register __a0 struct List *files,
+	register __a0 char *args,
 	register __a1 struct Screen *screen,
 	register __a2 IPCData *ipc,
 	register __a3 IPCData *main_ipc,
 	register __d0 ULONG mod_id,
-	register __d1 EXT_FUNC(func_callback))
+	register __d1 CONST GalileoCallbackInfo *gci)
 {
 	struct Window *window=0;
 	NewConfigWindow newwin;
@@ -70,11 +60,12 @@ int __asm __saveds L_Module_Entry(
 	char path[256];
 
 	// Get first entry
-	if (!(entry=(FunctionEntry *)func_callback(EXTCMD_GET_ENTRY,IPCDATA(ipc),0)))
+	gci->gc_FirstEntry( IPCDATA(ipc) );
+	if (!(entry = (FunctionEntry *)gci->gc_GetEntry(IPCDATA(ipc))))
 		return 0;
 
 	// Get path
-	path_node=(struct _PathNode *)func_callback(EXTCMD_GET_SOURCE,IPCDATA(ipc),path);
+	path_node=(struct _PathNode *)gci->gc_GetSource(IPCDATA(ipc), path);
 
 //KPrintF("Lister handle %ld\n",path_node->lister);
 
@@ -83,7 +74,7 @@ int __asm __saveds L_Module_Entry(
 		return 0;
 
 	// Try and get window to open over
-	newwin.parent=(void *)func_callback(EXTCMD_GET_WINDOW,IPCDATA(ipc),path_node);
+	newwin.parent=(void *)gci->gc_GetWindow(path_node);
 	newwin.flags=0;
 
 	// Fill out new window
@@ -115,7 +106,7 @@ int __asm __saveds L_Module_Entry(
 			olddir=CurrentDir(dirlock);
 
 			// Lock first file
-			if (lock=Lock(entry->name,ACCESS_READ))
+			if (lock=Lock(entry->fe_name,ACCESS_READ))
 			{
 				short a;
 
@@ -246,7 +237,7 @@ int __asm __saveds L_Module_Entry(
 								SetWindowBusy(window);
 
 								// Send help request
-								func_callback(EXTCMD_GET_HELP,IPCDATA(ipc),"NetSet");
+								gci->gc_ShowHelp(0, "NetSet");
 
 								// Clear busy pointer
 								ClearWindowBusy(window);
@@ -269,7 +260,7 @@ int __asm __saveds L_Module_Entry(
 				ULONG protect=0;
 				ULONG owner_info;
 				short a;
-				struct progress_packet progress;
+				long count;
 
 				// Look at protection gadgets
 				for (a=0;a<4;a++)
@@ -291,31 +282,29 @@ int __asm __saveds L_Module_Entry(
 				owner_info=(owner_id<<16)|group_id;
 
 				// Get entry count
-				progress.count=func_callback(EXTCMD_ENTRY_COUNT,IPCDATA(ipc),0);
+				count = gci->gc_EntryCount(IPCDATA(ipc));
 
 				// Open progress indicator
-				progress.path=path_node;
-				progress.name=GetString(locale,MSG_ENVOY_PROGRESS_TITLE);
-				func_callback(EXTCMD_OPEN_PROGRESS,IPCDATA(ipc),&progress);
-				progress.count=0;
+				gci->gc_OpenProgress(path_node, GetString(locale,MSG_ENVOY_PROGRESS_TITLE), count);
+				count = 0;
 
 				// Go through entries
-				while (entry=(FunctionEntry *)func_callback(EXTCMD_GET_ENTRY,IPCDATA(ipc),0))
+				while (entry=(FunctionEntry *)gci->gc_GetEntry(IPCDATA(ipc)))
 				{
-					struct endentry_packet packet;
+					BOOL deselect;
 
 					// Update progress info
-					if (progress.name=AllocMemH(0,strlen(entry->name)+1))
-						strcpy(progress.name,entry->name);
-					++progress.count;
-					func_callback(EXTCMD_UPDATE_PROGRESS,IPCDATA(ipc),&progress);
+					//if (progress.name=AllocMemH(0,strlen(entry->fe_name)+1))
+					//	  strcpy(progress.name,entry->fe_name);
+					++count;
+					gci->gc_UpdateProgress(path_node, entry->fe_name, count);
 
 					// Check abort
-					if (func_callback(EXTCMD_CHECK_ABORT,IPCDATA(ipc),0))
+					if (gci->gc_CheckAbort(IPCDATA(ipc)))
 						break;
 
 					// Try to lock entry
-					if (lock=Lock(entry->name,ACCESS_READ))
+					if (lock=Lock(entry->fe_name,ACCESS_READ))
 					{
 						// Examine file
 						Examine(lock,&fib);
@@ -328,23 +317,23 @@ int __asm __saveds L_Module_Entry(
 						fib.fib_Protection|=protect;
 
 						// Set protection bits
-						SetProtection(entry->name,fib.fib_Protection);
+						SetProtection(entry->fe_name,fib.fib_Protection);
 					}
 
 					// Set owner, fill out packet with results
-					packet.entry=entry;
-					packet.deselect=SetOwner(entry->name,owner_info);
+
+					deselect=SetOwner(entry->fe_name,owner_info);
 
 					// Mark function for reload (if successful)
-					if (packet.deselect)
-						func_callback(EXTCMD_RELOAD_ENTRY,IPCDATA(ipc),entry);
+					if (deselect)
+						gci->gc_ReloadEntry(IPCDATA(ipc),entry);
 
 					// End this entry
-					func_callback(EXTCMD_END_ENTRY,IPCDATA(ipc),&packet);
+					gci->gc_EndEntry(IPCDATA(ipc), entry, deselect);
 				}
 
 				// Turn progress indicator off
-				func_callback(EXTCMD_CLOSE_PROGRESS,IPCDATA(ipc),path_node);
+				gci->gc_CloseProgress(path_node);
 			}
 
 			// Restore directory
@@ -406,7 +395,7 @@ void envoy_owner_list(
 		0,
 		0,
 		GetString(locale,MSG_OK),
-		GetString(locale,MSG_CANCEL)))!=-1)
+		GetString(locale,MSG_CANCEL),0,0))!=-1)
 	{
 		// Get selected node
 		if (node=Att_FindNode(owner_list,sel))
@@ -415,7 +404,7 @@ void envoy_owner_list(
 			SetGadgetValue(
 				objlist,
 				GAD_ENVOY_OWNER_FIELD,
-				(node->data)?(ULONG)node->node.ln_Name:0);
+				(node->att_data)?(ULONG)node->node.ln_Name:0);
 		}
 	}
 
@@ -472,7 +461,7 @@ void envoy_group_list(
 		0,
 		0,
 		GetString(locale,MSG_OK),
-		GetString(locale,MSG_CANCEL)))!=-1)
+		GetString(locale,MSG_CANCEL),0,0))!=-1)
 	{
 		// Get selected node
 		if (node=Att_FindNode(group_list,sel))
@@ -481,7 +470,7 @@ void envoy_group_list(
 			SetGadgetValue(
 				objlist,
 				GAD_ENVOY_GROUP_FIELD,
-				(node->data)?(ULONG)node->node.ln_Name:0);
+				(node->att_data)?(ULONG)node->node.ln_Name:0);
 		}
 	}
 

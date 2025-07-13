@@ -36,7 +36,7 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
-#include "/Modules/modules.h"
+#include "/Modules/modules_internal_protos.h"
 
 // PRINTDIR internal function
 GALILEOFM_FUNC(function_printdir)
@@ -45,7 +45,7 @@ GALILEOFM_FUNC(function_printdir)
 	Lister *lister;
 	BPTR lock;
 	APTR outfile;
-	struct Library *ModuleBase;
+	struct Library *InternalModuleBase;
 
 	// Get source path
 	if (!(path=function_path_current(&handle->func_source_paths)))
@@ -148,7 +148,7 @@ GALILEOFM_FUNC(function_printdir)
 	CloseBuf(outfile);
 
 	// Open print module
-	if (ModuleBase=OpenModule("print.gfmmodule"))
+	if (InternalModuleBase=OpenModule("print.gfmmodule"))
 	{
 		struct List list;
 		struct Node node;
@@ -159,10 +159,10 @@ GALILEOFM_FUNC(function_printdir)
 		AddTail(&list,&node);
 
 		// Print file
-		Module_Entry(&list,GUI->screen_pointer,handle->ipc,&main_ipc,0,0);
+		Module_Entry_Internal(&list,GUI->screen_pointer,handle->ipc,&main_ipc,0,0);
 
 		// Close print module
-		CloseLibrary(ModuleBase);
+		CloseLibrary(InternalModuleBase);
 	}
 
 	// Delete temporary file

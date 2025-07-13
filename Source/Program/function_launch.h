@@ -93,7 +93,6 @@ typedef struct _AsyncData
     struct Screen 		*screen;
     IPCData 			*main_ipc;
     struct _CommandList		*command;
-    ULONG			function_external_hook;
     struct Library 		*module;
     struct Library  		*library;
     APTR            		*memhandlep;
@@ -442,10 +441,6 @@ void __saveds async_command(void);
 struct _CommandList *function_find_internal(char **,short);
 ULONG parse_internal_function(char *str,char *template,ULONG orig_flags);
 char *parse_find_path(char *str);
-ULONG __asm __saveds function_external_hook(
-	register __d0 ULONG command,
-	register __a0 struct _FunctionHandle *handle,
-	register __a1 APTR packet);
 
 function_external_command(FunctionHandle *,InstructionParsed *);
 function_open_script(FunctionHandle *);

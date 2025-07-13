@@ -38,6 +38,7 @@ For more information on Directory Opus for Windows please see:
 #define CATCOMP_NUMBERS
 #include "envoy.strings"
 #include "modules_lib.h"
+#include "module.h"
 
 extern ConfigWindow _envoy_window;
 extern ObjectDef _envoy_objects[];

@@ -48,7 +48,7 @@ ULONG __saveds __asm ProgressHook(register __a0 struct Hook *hook, register __a1
 	if(!(GalileoFMBase=data->GalileoFMBase)) return(NULL);
 	if(!(DOSBase=data->DOSBase)) return(NULL);
 	if(!(UtilityBase=data->UtilityBase)) return(NULL);
-    if(!(xadMasterBase=data->xadMasterBase)) return(NULL);
+	if(!(xadMasterBase=data->xadMasterBase)) return(NULL);
 
 	SetProgressWindow(data->ptr, tags);
 
@@ -60,11 +60,12 @@ ULONG __saveds __asm ProgressHook(register __a0 struct Hook *hook, register __a1
 				data->lists, xadGetErrorText(xpi->xpi_Error),
 				GetString(data->locale, MSG_OK),
 				GetString(data->locale, MSG_ABORT));
-            if (!(data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL)))
-            {
-                data->over=TRUE;
-				ret &= ~XADPIF_OK;
-            }
+
+		        if (!(data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL)))
+		        {
+			    data->over=TRUE;
+			    ret &= ~XADPIF_OK;
+		        }
 
 			break;
 		}
@@ -95,7 +96,7 @@ ULONG __saveds __asm ProgressHook(register __a0 struct Hook *hook, register __a1
 					GetString(data->locale, MSG_REPLACE_ALL), GetString(data->locale, MSG_SKIP),
 					GetString(data->locale, MSG_SKIP_ALL), GetString(data->locale, MSG_ABORT));
 				
-				rc = data->hook.gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+				rc = data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
 
 				if(!rc) ret = NULL;
 				else

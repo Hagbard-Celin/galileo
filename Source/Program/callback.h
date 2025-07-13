@@ -273,7 +273,7 @@ BOOL __asm __saveds HookIsFakeDir(
 
 typedef struct
 {
-	UWORD	gc_Count;
+	ULONG	gc_Count;
 
 	APTR	gc_CreateFileEntry;
 	APTR	gc_FileSet;
@@ -328,13 +328,13 @@ typedef struct
 	APTR	gc_RexxCommand;
 	APTR	gc_FileRequest;
 	APTR	gc_GetThemes;
-    APTR    gc_FreePointerDirect;
-    APTR    gc_IsSourceDestLock;
-    APTR    gc_FakeDir;
-    APTR    gc_IsFakeDir;
+	APTR    gc_FreePointerDirect;
+	APTR    gc_IsSourceDestLock;
+	APTR    gc_FakeDir;
+	APTR    gc_IsFakeDir;
 } GalileoCallbackInfo;
 
-#define GALILEOFM_HOOK_COUNT	56
+#define GALILEOFM_CALLBACK_COUNT    56
 
 // Values for HookFileSet
 
@@ -357,7 +357,6 @@ typedef struct
 #define HOOKREFRESH_DATE	(1<<0)
 #define HOOKREFRESH_FULL	(1<<1)
 
-long HookInitHooks(GalileoCallbackInfo *);
 
 enum
 {

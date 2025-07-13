@@ -37,6 +37,9 @@ For more information on Directory Opus for Windows please see:
 
 #include "galileofm.h"
 #include "/Modules/modules.h"
+#include "/Modules/modules_protos.h"
+
+extern CONST GalileoCallbackInfo CallBackInfo;
 
 
 function_internal_async(AsyncData *adata)
@@ -108,7 +111,7 @@ void __saveds async_command(void)
 		 ipc,
 		 adata->main_ipc,
 		 adata->command->function,
-		 adata->function_external_hook);
+		 &CallBackInfo);
 
 
     // Free mem

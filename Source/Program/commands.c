@@ -37,6 +37,9 @@ For more information on Directory Opus for Windows please see:
 
 #include "galileofm.h"
 #include "/Modules/modules.h"
+#include "/Modules/modules_protos.h"
+
+extern CONST GalileoCallbackInfo CallBackInfo;
 
 char
 	*module_exclusions[]={
@@ -310,7 +313,7 @@ void init_commands_scan(short type)
 								0,0,
 								&main_ipc,&main_ipc,
 								FUNCID_STARTUP,
-								(ULONG)function_external_hook);
+								&CallBackInfo);
 						}
 
 						// Run module function in background
