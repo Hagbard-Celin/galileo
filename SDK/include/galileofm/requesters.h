@@ -53,7 +53,7 @@ long __stdargs AsyncRequestTags(IPCData *,long,struct Window *,REF_CALLBACK(),AP
 
 #define SLF_DIR_FIELD			(1<<0)	// Directory field
 
-short SelectionList(Att_List *,struct Window *,struct Screen *,char *,short,ULONG,char *,char *,char *);
+short SelectionList(Att_List *,struct Window *,struct Screen *,char *,short,ULONG,char *,char *,char *,char **,ULONG *);
 
 
 // Status window

@@ -370,7 +370,7 @@ void envoy_owner_list(
 		0,
 		0,
 		GalileoGetString(locale,MSG_OK),
-		GalileoGetString(locale,MSG_CANCEL)))!=-1)
+		GalileoGetString(locale,MSG_CANCEL),0,0))!=-1)
 	{
 		// Get selected node
 		if (node=Att_FindNode(owner_list,sel))
@@ -436,7 +436,7 @@ void envoy_group_list(
 		0,
 		0,
 		GalileoGetString(locale,MSG_OK),
-		GalileoGetString(locale,MSG_CANCEL)))!=-1)
+		GalileoGetString(locale,MSG_CANCEL),0,0))!=-1)
 	{
 		// Get selected node
 		if (node=Att_FindNode(group_list,sel))
