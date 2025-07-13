@@ -194,38 +194,45 @@ galileofm.library/AsyncRequest                       galileofm.library/AsyncRequ
     SYNOPSIS
         SelectionList(  list, window, screen,
                         title, initialsel, flags,
-                        buffer, okay_txt, cancel_txt )
+                        buffer, okay_txt, cancel_txt
+                        switch_txt, switch_flags )
 
         short SelectionList(    Att_List *, struct Window *, struct Screen *,
                                 char *, short, ULONG,
-                                char *, char *, char * );
+                                char *, char *, char *, char **, ULONG * );
 
     FUNCTION
         This routine displays a requester containing a listview gadget,
         prompting the user to select an item from the list. The requester
         can optionally have a directory field, which allows the user to open
         an ASL file requester to locate a directory that is not in the list.
+        It can also optionally have a selecton of checkboxes below the other
+        fields.
 
     INPUTS
-        list       - Att_List to display (the name of each node is displayed)
-        window     - parent window
-        screen     - screen to open on if no window specified
-        title      - title of requester
-        initialsel - initially selected item, or -1 for no selection
-        flags      - control flags. Specify SLF_DIR_FIELD to get a directory
-                     field
-        buffer     - If SLF_DIR_FIELD is specified, this must point to a
-                     buffer (256 bytes or greater) to contain the path name
-                     chosen by the user
-        okay_txt   - text for the "Ok" gadget
-        cancel_txt - text for the "Cancel" gadget
+        list          - Att_List to display (the name of each node is displayed)
+        window        - parent window
+        screen        - screen to open on if no window specified
+        title         - title of requester
+        initialsel    - initially selected item, or -1 for no selection
+        flags         - control flags. Specify SLF_DIR_FIELD to get a directory
+                        field
+        buffer        - If SLF_DIR_FIELD is specified, this must point to a
+                        buffer (256 bytes or greater) to contain the path name
+                        chosen by the user
+        okay_txt      - text for the "Ok" gadget
+        cancel_txt    - text for the "Cancel" gadget
+        switch_txt    - Null terminated array of checkbox labels
+        switch_flags  - Pointer to receive status of check-boxes
 
     RESULT
         Returns the number of the selected item in the list, or -1 if the
         user made no selection. If a directory field was specified with
         SLF_DIR_FIELD, and -1 is returned, you should check the supplied
         buffer to see if it is empty. If not, the user selected a path
-        manually.
+        manually. If switch_text and switch_flags is supplied it will also
+        return the status of the check-boxes in switch_flags, one bit for
+        each checkbox.
 
     SEE ALSO
         Att_NewList()
