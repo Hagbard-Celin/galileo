@@ -108,22 +108,6 @@ char *version="$VER: fixicons.gfmmodule 0.2 "__AMIGADATE__" ";
 *
 ****************************************************************************/
 
-// Local variables kept in this structure to conserve recursive stack space
-struct locals
-{
-    __aligned struct FileInfoBlock fib;
-
-    struct DiskObject	    *obj;
-    ULONG		    iconflags;
-    short		    galileo_x, galileo_y;
-    int			    put, set;
-    int			    isicon;
-    BPTR		    lock;
-    char		    newpath[256];
-    int			    newxoff, newyoff;
-    ULONG		    flags;
-};
-
 // Routine copied from Jon's code
 BPTR open_temp_file( char *filename, IPCData *ipc )
 {
@@ -183,203 +167,274 @@ void print_result( BPTR outfile, char *path, BOOL result, ULONG flags )
     FPuts( outfile, buf );
 }
 
-// The main recursive routine
+static struct locals *next_state(APTR memhandle, struct MinList *dirs, char *path, int xoff, int yoff)
+{
+    struct locals *l;
+
+    if (!(l = AllocMemH( memhandle, sizeof(struct locals))))
+	return 0;
+    
+    AddHead((struct List *)dirs, (struct Node *)l);
+
+    strcpy(l->path, path);
+    l->xoff = xoff;
+    l->yoff = yoff;
+
+    return l;
+}
+
+
+// The main routine
 static int fix_icon( APTR progress, char *path, long *args, int xoff, int yoff, BPTR outfile, int *changes )
 {
+    struct MinList dirs;
+    APTR memhandle;
     struct locals *l;
 
     // Check abort
     if (CheckProgressAbort( progress ))
 	return 0;
 
-    if (!(l = AllocVec( sizeof(struct locals), MEMF_CLEAR )))
+    NewList((struct List *)&dirs);
+
+    if (!(memhandle = NewMemHandle(sizeof(struct locals) << 3, sizeof(struct locals), MEMF_CLEAR)))
 	return 0;
 
-    // Trim .info if needed
-    if (strlen(path) >= 5 && !stricmp( path + strlen(path) - 5, ".info" ))
+    if (!(l = AllocMemH( memhandle, sizeof(struct locals))))
+	goto fi_failure;;
+    
+    stccpy(l->path, path, sizeof(l->path));
+    l->xoff = xoff;
+    l->yoff = yoff;
+
+    AddHead((struct List *)&dirs, (struct Node *)l);
+
+    do
     {
-	path[strlen(path) - 5] = 0;
-	l->isicon = 1;
-    }
-
-    if (l->obj = GetDiskObject( path ))
-    {
-	// Get flags
-	l->iconflags = GetIconFlags( l->obj );
-
-	// Get position
-	GetIconPosition( l->obj, &l->galileo_x, &l->galileo_y );
-
-	// Reset border flags?
-	if (!args || (args && !args[FI_ANB]))
+fi_iter1:
 	{
-	    if (l->iconflags & (ICONF_BORDER_ON | ICONF_BORDER_OFF))
+	    ULONG len;
+
+	    // Trim .info if needed
+	    if ((len = strlen(l->path)) >= 5 && !stricmp( l->path + len - 5, ".info" ))
 	    {
-		l->iconflags &= ~(ICONF_BORDER_ON | ICONF_BORDER_OFF);
-		l->set = 1;
+		l->path[len - 5] = 0;
+		l->isicon = 1;
 	    }
 	}
 
-	// Reset label flag?
-	if (!args || (args && !args[FI_ANL]))
+	if (l->obj = GetDiskObject( l->path ))
 	{
-	    if (l->iconflags & ICONF_NO_LABEL)
+	    // Get flags
+	    l->iconflags = GetIconFlags( l->obj );
+
+	    // Get position
+	    GetIconPosition( l->obj, &l->galileo_x, &l->galileo_y );
+
+	    // Reset border flags?
+	    if (!args || (args && !args[FI_ANB]))
 	    {
-		l->iconflags &= ~ICONF_NO_LABEL;
-		l->set = 1;
-	    }
-	}
-
-	if ((!args || (args && !args[FI_NFO])))
-	{
-	    if (l->obj->do_DrawerData &&
-		(l->obj->do_Type == WBDISK ||
-		 l->obj->do_Type == WBDRAWER ||
-		 l->obj->do_Type == WBGARBAGE ||
-		 l->obj->do_Type == WBDEVICE))
-
-
-	    {
-		// Need to adjust x?
-		if (xoff && l->obj->do_CurrentX && l->obj->do_CurrentX != NO_ICON_POSITION)
-		{
-		    l->obj->do_CurrentX -= xoff;
-		    l->put = 1;
-		    l->flags |= (1<<FI_NFO);
-		}
-
-		// Need to adjust y?
-		if (yoff && l->obj->do_CurrentY && l->obj->do_CurrentY != NO_ICON_POSITION)
-		{
-		    l->obj->do_CurrentY -= yoff;
-		    l->put = 1;
-		    l->flags |= (1<<FI_NFO);
-		}
-
-		// Remember offsets for next recursion level
-		l->newxoff = l->obj->do_DrawerData->dd_CurrentX;
-		l->newyoff = l->obj->do_DrawerData->dd_CurrentY;
-
-		// Need to reset offsets?
-		if (l->obj->do_DrawerData->dd_CurrentX ||
-		    l->obj->do_DrawerData->dd_CurrentY)
-		{
-		    l->obj->do_DrawerData->dd_CurrentX = 0;
-		    l->obj->do_DrawerData->dd_CurrentY = 0;
-
-		    l->put = 1;
-		    l->flags |= (1<<FI_NFO);
-		}
-	    }
-	}
-
-	// Sync WB to Galileo?  (Only if there is an Galileo pos)
-	if (args && args[FI_SWG] && (l->iconflags & ICONF_POSITION_OK))
-	{
-	    // Need to change?
-	    if (l->obj->do_CurrentX != l->galileo_x ||
-		l->obj->do_CurrentY != l->galileo_y)
-	    {
-		l->obj->do_CurrentX = l->galileo_x;
-		l->obj->do_CurrentY = l->galileo_y;
-		l->put = 1;
-		l->flags |= (1<<FI_SWG);
-	    }
-	}
-
-	// Sync Galileo to WB?  (Syncs position and resets pos flag)
-	else if (args && args[FI_SGW])
-	{
-	    // Need to change position?
-	    if (l->obj->do_CurrentX != l->galileo_x ||
-		l->obj->do_CurrentY != l->galileo_y)
-	    {
-		SetIconPosition( l->obj, l->obj->do_CurrentX, l->obj->do_CurrentY );
-		l->put = 1;
-		l->flags |= (1<<FI_SGW);
+	        if (l->iconflags & (ICONF_BORDER_ON | ICONF_BORDER_OFF))
+	        {
+		    l->iconflags &= ~(ICONF_BORDER_ON | ICONF_BORDER_OFF);
+		    l->set = 1;
+	        }
 	    }
 
-	    // Need to reset flag?
-	    if (l->iconflags & ICONF_POSITION_OK)
+	    // Reset label flag?
+	    if (!args || (args && !args[FI_ANL]))
 	    {
-		l->iconflags &= ~ICONF_POSITION_OK;
-		l->set = 1;
-		l->flags |= (1<<FI_SGW);
+	        if (l->iconflags & ICONF_NO_LABEL)
+	        {
+		    l->iconflags &= ~ICONF_NO_LABEL;
+		    l->set = 1;
+	        }
 	    }
-	}
 
-	// Need to set flags?
-	if (l->set)
-	{
-	    SetIconFlags( l->obj, l->iconflags );
-	    l->put = 1;
-	}
-
-	// only write if it was an icon to start with
-	// skip if just a plain file
-
-	if (l->isicon && l->put)
-	{
-	    register BOOL r;
-
-	    if (r = PutDiskObject( path, l->obj ))
-		++ *changes;
-
-	    if (outfile)
-		print_result( outfile, path, r, l->flags );
-	}
-
-	FreeDiskObject( l->obj );
-    }
-
-    // if not an icon then lock it and check if it is a directory
-
-    if (!l->isicon && (l->lock = Lock( path, ACCESS_READ )))
-    {
-	// is a directory?
-	if (Examine( l->lock, &l->fib ) && l->fib.fib_DirEntryType >= 0)
-	{
-	    // yes is a directory
-	    if (ExNext( l->lock, &l->fib ))
+	    if ((!args || (args && !args[FI_NFO])))
 	    {
-		int more_files;
+	        if (l->obj->do_DrawerData &&
+		    (l->obj->do_Type == WBDISK ||
+		     l->obj->do_Type == WBDRAWER ||
+		     l->obj->do_Type == WBGARBAGE ||
+		     l->obj->do_Type == WBDEVICE))
 
-		strcpy( l->newpath, path );
-		AddPart( l->newpath, l->fib.fib_FileName, 256 );
 
-		more_files = ExNext( l->lock, &l->fib );
-
-		// Update progress window
-		SetProgressWindowTags(progress,PW_FileName,FilePart(path),TAG_END);
-
-		fix_icon( progress, l->newpath, args, l->newxoff, l->newyoff, outfile, changes );
-
-		if (more_files)
-		{
-		    do
+	        {
+		    // Need to adjust x?
+		    if (l->xoff && l->obj->do_CurrentX && l->obj->do_CurrentX != NO_ICON_POSITION)
 		    {
-			// Check abort
-			if (CheckProgressAbort( progress ))
-			    break;
+		        l->obj->do_CurrentX -= l->xoff;
+		        l->put = 1;
+		        l->flags |= (1<<FI_NFO);
+		    }
 
-			strcpy( l->newpath, path );
-			AddPart( l->newpath, l->fib.fib_FileName, 256 );
+		    // Need to adjust y?
+		    if (l->yoff && l->obj->do_CurrentY && l->obj->do_CurrentY != NO_ICON_POSITION)
+		    {
+		        l->obj->do_CurrentY -= l->yoff;
+		        l->put = 1;
+		        l->flags |= (1<<FI_NFO);
+		    }
 
-			if (more_files)
-			    more_files = ExNext( l->lock, &l->fib );
+		    // Remember offsets for next recursion level
+		    l->newxoff = l->obj->do_DrawerData->dd_CurrentX;
+		    l->newyoff = l->obj->do_DrawerData->dd_CurrentY;
 
-			// Update progress window
-			SetProgressWindowTags(progress,PW_FileName,FilePart(path),TAG_END);
+		    // Need to reset offsets?
+		    if (l->obj->do_DrawerData->dd_CurrentX ||
+		        l->obj->do_DrawerData->dd_CurrentY)
+		    {
+		        l->obj->do_DrawerData->dd_CurrentX = 0;
+		        l->obj->do_DrawerData->dd_CurrentY = 0;
 
-			fix_icon( progress, l->newpath, args, l->newxoff, l->newyoff, outfile, changes );
-		    } while (more_files);
-		}
+		        l->put = 1;
+		        l->flags |= (1<<FI_NFO);
+		    }
+	        }
+	    }
+
+	    // Sync WB to Galileo?  (Only if there is an Galileo pos)
+	    if (args && args[FI_SWG] && (l->iconflags & ICONF_POSITION_OK))
+	    {
+	        // Need to change?
+	        if (l->obj->do_CurrentX != l->galileo_x ||
+		    l->obj->do_CurrentY != l->galileo_y)
+	        {
+		    l->obj->do_CurrentX = l->galileo_x;
+		    l->obj->do_CurrentY = l->galileo_y;
+		    l->put = 1;
+		    l->flags |= (1<<FI_SWG);
+	        }
+	    }
+
+	    // Sync Galileo to WB?  (Syncs position and resets pos flag)
+	    else if (args && args[FI_SGW])
+	    {
+	        // Need to change position?
+	        if (l->obj->do_CurrentX != l->galileo_x ||
+		    l->obj->do_CurrentY != l->galileo_y)
+	        {
+		    SetIconPosition( l->obj, l->obj->do_CurrentX, l->obj->do_CurrentY );
+		    l->put = 1;
+		    l->flags |= (1<<FI_SGW);
+	        }
+
+	        // Need to reset flag?
+	        if (l->iconflags & ICONF_POSITION_OK)
+	        {
+		    l->iconflags &= ~ICONF_POSITION_OK;
+		    l->set = 1;
+		    l->flags |= (1<<FI_SGW);
+	        }
+	    }
+
+	    // Need to set flags?
+	    if (l->set)
+	    {
+	        SetIconFlags( l->obj, l->iconflags );
+	        l->put = 1;
+	    }
+
+	    // only write if it was an icon to start with
+	    // skip if just a plain file
+
+	    if (l->isicon && l->put)
+	    {
+	        register BOOL r;
+
+		if (r = PutDiskObject(l->path, l->obj ))
+		    ++ *changes;
+
+	        if (outfile)
+		    print_result( outfile, l->path, r, l->flags );
+	    }
+
+	    FreeDiskObject( l->obj );
+	}
+
+	// if not an icon then lock it and check if it is a directory
+	if (!l->isicon && (l->lock = Lock( l->path, ACCESS_READ )))
+	{
+	    // is a directory?
+	    if (Examine( l->lock, &l->fib ) && l->fib.fib_DirEntryType >= 0)
+	    {
+	        // yes is a directory
+	        if (ExNext( l->lock, &l->fib ))
+	        {
+		    //int more_files;
+
+		    stccpy( l->newpath, l->path, sizeof(l->newpath) );
+		    AddPart( l->newpath, l->fib.fib_FileName, 256 );
+
+		    l->more_files = ExNext( l->lock, &l->fib );
+
+		    // Update progress window
+		    SetProgressWindowTags(progress,PW_FileName,FilePart(l->path),TAG_END);
+
+		    l->return_to = 2;
+		    if (!(l = next_state(memhandle, &dirs, l->newpath, l->newxoff, l->newyoff)))
+			goto fi_failure;
+		    
+		    goto fi_iter1;
+
+fi_iter2:
+
+		    if (l->more_files)
+		    {
+		        do
+		        {
+			    // Check abort
+			    if (CheckProgressAbort( progress ))
+			        break;
+
+			    stccpy( l->newpath, l->path, sizeof(l->newpath) );
+			    AddPart( l->newpath, l->fib.fib_FileName, 256 );
+
+			    if (l->more_files)
+			        l->more_files = ExNext( l->lock, &l->fib );
+
+			    // Update progress window
+			    SetProgressWindowTags(progress,PW_FileName,FilePart(l->path),TAG_END);
+
+			    l->return_to = 3;
+			    if (!(l = next_state(memhandle, &dirs, l->newpath, l->newxoff, l->newyoff)))
+				goto fi_failure;
+
+			    goto fi_iter1;
+fi_iter3:
+			    ;
+			} while (l->more_files);
+		    }
+	        }
+	    }
+	    UnLock( l->lock );
+	}
+
+	Remove((struct Node *)l);
+	FreeMemH( l );
+	l = (struct locals *)dirs.mlh_Head;
+
+	if (l->node.mln_Succ)
+	{
+	    switch (l->return_to)
+	    {
+		case 3:
+		    goto fi_iter3;
+
+		case 2:
+		    goto fi_iter2;
+
+		default:
+		      continue;
 	    }
 	}
-	UnLock( l->lock );
-    }
+	else
+	    break;
+    } while (TRUE);
+fi_failure:
 
-    FreeVec( l );
+    FreeMemHandle(memhandle);
 
     return 0;
 }

@@ -52,3 +52,24 @@ enum
 	FI_SGW,
 	FI_REPORT
 };
+
+// Local variables for fix_icon() kept in this structure to support iteration
+struct locals
+{
+    struct MinNode	    node;
+    __aligned struct FileInfoBlock fib;
+
+    struct DiskObject	    *obj;
+    ULONG		    iconflags;
+    short		    galileo_x, galileo_y;
+    int			    put, set;
+    int			    isicon;
+    BPTR		    lock;
+    char		    newpath[256];
+    int			    newxoff, newyoff;
+    ULONG		    flags;
+    char		    path[256];
+    int			    xoff, yoff;
+    int			    more_files;
+    ULONG		    return_to;
+};
