@@ -87,7 +87,11 @@ __saveds __UserLibInit()
 		!(MathBase=OpenLibrary("mathffp.library",37)) ||
 		!(MathTransBase=OpenLibrary("mathtrans.library",37)) ||
 #endif
-		!(UtilityBase=OpenLibrary("utility.library",37))) return 1;
+		!(UtilityBase=OpenLibrary("utility.library",37)))
+	{
+	    __UserLibCleanup();
+	    return 1;
+	}
 
 	// Libraries we don't need but want
 	WorkbenchBase=OpenLibrary("workbench.library",0);
@@ -95,7 +99,11 @@ __saveds __UserLibInit()
 
 	// Allocate and open locale data
 	if (!(locale=AllocVec(sizeof(struct GalileoLocale),MEMF_CLEAR)))
-		return 1;
+	{
+	        __UserLibCleanup();
+	        return 1;
+	}
+
 	init_locale_data(locale);
 
 	// Open locale library
@@ -145,19 +153,19 @@ void __saveds __UserLibCleanup()
 	// Close libraries
 	if (RexxSysBase) CloseLibrary((struct Library *)RexxSysBase);
 	if (WorkbenchBase) CloseLibrary(WorkbenchBase);
-	CloseLibrary(UtilityBase);
+	if (UtilityBase) CloseLibrary(UtilityBase);
 #ifdef _FFP
-	CloseLibrary(MathTransBase);
-	CloseLibrary(MathBase);
+	if (MathTransBase) CloseLibrary(MathTransBase);
+	if (MathBase) CloseLibrary(MathBase);
 #endif
-	CloseLibrary(DiskfontBase);
-	CloseLibrary(AslBase);
-	CloseLibrary(GadToolsBase);
-	CloseLibrary(LayersBase);
-	CloseLibrary(IconBase);
-	CloseLibrary((struct Library *)GfxBase);
-	CloseLibrary((struct Library *)IntuitionBase);
-	CloseLibrary(GalileoFMBase);
+	if (DiskfontBase) CloseLibrary(DiskfontBase);
+	if (AslBase) CloseLibrary(AslBase);
+	if (GadToolsBase) CloseLibrary(GadToolsBase);
+	if (LayersBase) CloseLibrary(LayersBase);
+	if (IconBase) CloseLibrary(IconBase);
+	if (GfxBase) CloseLibrary((struct Library *)GfxBase);
+	if (IntuitionBase) CloseLibrary((struct Library *)IntuitionBase);
+	if (GalileoFMBase) CloseLibrary(GalileoFMBase);
 	CloseLibrary((struct Library *)DOSBase);
 }
 

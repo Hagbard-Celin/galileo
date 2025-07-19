@@ -47,6 +47,7 @@ char *_ProgramName="galileofm.library";
 
 void init_locale_data(struct GalileoLocale *locale);
 void free_locale_data(struct GalileoLocale *locale);
+void free_libdata(struct MyLibrary *libbase);
 
 static const struct TextAttr topaz_attr={"topaz.font",8,0,0};
 
@@ -59,6 +60,91 @@ ULONG callerid;
 
 #define ExecLib		((struct ExecBase *)*((ULONG *)4))
 #define SysBase		((struct ExecBase *)*((ULONG *)4))
+
+
+void free_libdata(struct MyLibrary *libbase)
+{
+    struct LibData *data;
+
+    // Library data?
+    if ((data=(struct LibData *)libbase->ml_UserData))
+    {
+	    WB_Data *wb_data;
+
+	    // Get workbench data
+	    wb_data=&data->wb_data;
+
+	    // Remove low-memory handler
+	    if (data->low_mem_handler.is_Node.ln_Pri==50)
+		    RemMemHandler(&data->low_mem_handler);
+
+	    // Remove patch information
+	    if (wb_data)
+	    {
+		    if (wb_data->patch_count>0)
+		    {
+			    wb_data->patch_count=1;
+			    L_WB_Remove_Patch(libbase);
+		    }
+	    }
+
+	    // Free path list
+	    if (data->path_list) L_FreeDosPathList(data->path_list);
+
+	    // Free locale stuff
+	    free_locale_data(&data->locale);
+
+	    // Free memory
+	    if (data->memory) L_FreeMemHandle(data->memory);
+	    if (data->dos_list_memory) L_FreeMemHandle(data->dos_list_memory);
+
+	    // Close timer
+	    if (data->TimerBase) CloseDevice(&data->timer_io);
+
+	    // Free library data
+	    FreeVec(data);
+    }
+
+    if (listview_class) FreeClass(listview_class);
+    if (propgadget_class) FreeClass(propgadget_class);
+    if (button_class) FreeClass(button_class);
+    if (string_class) FreeClass(string_class);
+    if (check_class) FreeClass(check_class);
+    if (view_class) FreeClass(view_class);
+    if (frame_class) FreeClass(frame_class);
+    if (palette_class) FreeClass(palette_class);
+    if (gauge_class) FreeClass(gauge_class);
+    if (image_class) FreeClass(image_class);
+    if (topaz_font) CloseFont(topaz_font);
+    if (NewIconBase) CloseLibrary((struct Library *)NewIconBase);
+    if (RexxSysBase) CloseLibrary((struct Library *)RexxSysBase);
+    if (P96Base) CloseLibrary(P96Base);
+    if (DataTypesBase) CloseLibrary(DataTypesBase);
+    if (IconBase) CloseLibrary(IconBase);
+    if (CxBase) CloseLibrary(CxBase);
+    if (LayersBase) CloseLibrary(LayersBase);
+    if (UtilityBase) CloseLibrary(UtilityBase);
+    if (AslBase) CloseLibrary(AslBase);
+    if (GadToolsBase) CloseLibrary(GadToolsBase);
+    if (WorkbenchBase) CloseLibrary(WorkbenchBase);
+    if (GfxBase) CloseLibrary((struct Library *)GfxBase);
+    if (IntuitionBase) CloseLibrary((struct Library *)IntuitionBase);
+    if (DOSBase) CloseLibrary((struct Library *)DOSBase);
+
+#ifdef _DEBUG
+    KPrintF("Main Library\n");
+#ifdef RESOURCE_TRACKING
+    //PrintTrackedResources();
+    if (ResTrackBase->lib_OpenCnt==2)
+	EndResourceTracking(); /* Generate a memory usage report */
+
+    REALL_CloseLibrary(ResTrackBase);
+#endif
+
+    KPrintF("Quitting......\n");
+#endif
+
+}
 
 
 // Initialise libraries we need
@@ -119,7 +205,11 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 		!(LayersBase=OpenLibrary("layers.library",37)) ||
 		!(CxBase=OpenLibrary("commodities.library",37)) ||
 		!(IconBase=OpenLibrary("icon.library",37)) ||
-		!(WorkbenchBase=OpenLibrary("workbench.library",37))) return 1;
+		!(WorkbenchBase=OpenLibrary("workbench.library",37)))
+	{
+	    free_libdata(NULL);
+	    return 1;
+	}
 
 
 	// Get non-necessary libraries
@@ -129,7 +219,10 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 
 	// Get library data
 	if (!(data=AllocVec(sizeof(struct LibData),MEMF_CLEAR)))
+	{
+		free_libdata(NULL);
 		return 1;
+	}
 
 	libbase->ml_UserData=(ULONG)data;
 
@@ -149,7 +242,11 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 	data->TimerBase=(struct Library *)data->timer_io.io_Device;
 
 	// Get topaz font
-	if (!(topaz_font=OpenFont(&topaz_attr))) return 1;
+	if (!(topaz_font=OpenFont(&topaz_attr)))
+	{
+	    free_libdata(libbase);
+	    return 1;
+	}
 
 	// Initialise stuff
 	data->low_mem_signal=-1;
@@ -317,7 +414,10 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 				"gadgetclass",
 				(unsigned long (*)())listview_dispatch,
 				sizeof(ListViewData))))
+	{
+		free_libdata(libbase);
 		return 1;
+	}
 
 	// Set flag to identify some classes
 	if (string_class) string_class->cl_UserData=CLASS_STRINGGAD;
@@ -346,7 +446,11 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 		"GALILEO_LAUNCHER",
 		(ULONG)launcher_proc,
 		STACK_LARGE|IPCF_GETPATH,
-		(ULONG)data,(struct Library *)DOSBase,libbase)) || !launcher_ipc) return 1;
+		(ULONG)data,(struct Library *)DOSBase,libbase)) || !launcher_ipc)
+	{
+	    free_libdata(libbase);
+	    return 1;
+	}
 	data->launcher=launcher_ipc;
 
 	// Initialise low-memory handler
@@ -371,9 +475,6 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 // Clean up
 void __asm __saveds __UserLibCleanup(register __a6 struct MyLibrary *libbase)
 {
-	WB_Data *wb_data;
-	struct LibData *data;
-
 	L_FlushImages();
 
 	// Launcher?
@@ -382,80 +483,7 @@ void __asm __saveds __UserLibCleanup(register __a6 struct MyLibrary *libbase)
 		L_IPC_Command(launcher_ipc,IPC_QUIT,0,0,0,REPLY_NO_PORT_IPC);
 	}
 
-	// Library data?
-	if ((data=(struct LibData *)libbase->ml_UserData))
-	{
-		// Get workbench data
-		wb_data=&data->wb_data;
-
-		// Remove low-memory handler
-		if (data->low_mem_handler.is_Node.ln_Pri==50)
-			RemMemHandler(&data->low_mem_handler);
-
-		// Remove patch information
-		if (wb_data)
-		{
-			if (wb_data->patch_count>0)
-			{
-				wb_data->patch_count=1;
-				L_WB_Remove_Patch(libbase);
-			}
-		}
-
-		// Free path list
-		L_FreeDosPathList(data->path_list);
-
-		// Free locale stuff
-		free_locale_data(&data->locale);
-
-		// Free memory
-		L_FreeMemHandle(data->memory);
-		L_FreeMemHandle(data->dos_list_memory);
-		// Close timer
-		if (data->TimerBase) CloseDevice(&data->timer_io);
-
-		// Free library data
-		FreeVec(data);
-	}
-
-	FreeClass(listview_class);
-	FreeClass(propgadget_class);
-	FreeClass(button_class);
-	FreeClass(string_class);
-	FreeClass(check_class);
-	FreeClass(view_class);
-	FreeClass(frame_class);
-	FreeClass(palette_class);
-	FreeClass(gauge_class);
-	FreeClass(image_class);
-	if (topaz_font) CloseFont(topaz_font);
-	if (NewIconBase) CloseLibrary((struct Library *)NewIconBase);
-	if (RexxSysBase) CloseLibrary((struct Library *)RexxSysBase);
-	if (P96Base) CloseLibrary(P96Base);
-	if (DataTypesBase) CloseLibrary(DataTypesBase);
-	CloseLibrary(IconBase);
-	CloseLibrary(CxBase);
-	CloseLibrary(LayersBase);
-	CloseLibrary(UtilityBase);
-	CloseLibrary(AslBase);
-	CloseLibrary(GadToolsBase);
-	CloseLibrary(WorkbenchBase);
-	CloseLibrary((struct Library *)GfxBase);
-	CloseLibrary((struct Library *)IntuitionBase);
-	CloseLibrary((struct Library *)DOSBase);
-
-#ifdef _DEBUG
-	KPrintF("Main Library\n");
-#ifdef RESOURCE_TRACKING
-	//PrintTrackedResources();
-	if (ResTrackBase->lib_OpenCnt==2)
-	    EndResourceTracking(); /* Generate a memory usage report */
-
-	REALL_CloseLibrary(ResTrackBase);
-#endif
-
-	KPrintF("Quitting......\n");
-#endif
+	free_libdata(libbase);
 }
 
 
