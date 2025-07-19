@@ -245,7 +245,7 @@ position_rec *GetListerPosition(
 	{
 		// Look for device
 		search=(struct List *)&GUI->positions;
-		while (entry=FindNameI(search,path))
+		while (entry=FindNameI(search,device))
 		{
 			// Position info?
 			if (entry->ln_Type==PTYPE_POSITION) break;
