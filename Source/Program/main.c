@@ -274,6 +274,11 @@ void startup_open_galileofmlib()
 			// Close library
 			CloseLibrary(IntuitionBase);
 		}
+
+		// Remove assigns?
+		if (rem_g_themes_assign) AssignLock("G_THEMES",NULL);
+		if (rem_galileo_assign) AssignLock("Galileo",NULL);
+
 		exit(0);
 	}
 }

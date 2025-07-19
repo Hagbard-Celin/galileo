@@ -32,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -224,22 +224,22 @@ void quit(BOOL script)
 	if (ConsoleDevice) CloseDevice((struct IORequest *)&console_req);
 
 	// Close libraries
-    if (muBase) CloseLibrary((struct Library *)muBase);
-    if (NewIconBase) CloseLibrary((struct Library *)NewIconBase);
-    if (P96Base) CloseLibrary(P96Base);
+	if (muBase) CloseLibrary((struct Library *)muBase);
+	if (NewIconBase) CloseLibrary((struct Library *)NewIconBase);
+	if (P96Base) CloseLibrary(P96Base);
 	if (AmigaGuideBase) CloseLibrary(AmigaGuideBase);
 	if (DataTypesBase) CloseLibrary(DataTypesBase);
-	CloseLibrary(AslBase);
-	CloseLibrary(IconBase);
-	CloseLibrary(DiskfontBase);
-	CloseLibrary(WorkbenchBase);
-	CloseLibrary(CxBase);
-	CloseLibrary((struct Library *)RexxSysBase);
-	CloseLibrary(UtilityBase);
-	CloseLibrary(GadToolsBase);
-	CloseLibrary((struct Library *)LayersBase);
-	CloseLibrary((struct Library *)GfxBase);
-	CloseLibrary((struct Library *)IntuitionBase);
+	if (AslBase) CloseLibrary(AslBase);
+	if (IconBase) CloseLibrary(IconBase);
+	if (DiskfontBase) CloseLibrary(DiskfontBase);
+	if (WorkbenchBase) CloseLibrary(WorkbenchBase);
+	if (CxBase) CloseLibrary(CxBase);
+	if (RexxSysBase) CloseLibrary((struct Library *)RexxSysBase);
+	if (UtilityBase) CloseLibrary(UtilityBase);
+	if (GadToolsBase) CloseLibrary(GadToolsBase);
+	if (LayersBase) CloseLibrary((struct Library *)LayersBase);
+	if (GfxBase) CloseLibrary((struct Library *)GfxBase);
+	if (IntuitionBase) CloseLibrary((struct Library *)IntuitionBase);
 
 	// Restore old current directory?
 	if (old_current_dir)
@@ -247,9 +247,9 @@ void quit(BOOL script)
 		UnLock(CurrentDir(old_current_dir));
 	}
 
-    // Remove assigns?
-    if (rem_g_themes_assign) AssignLock("G_THEMES",NULL);
-    if (rem_galileo_assign) AssignLock("Galileo",NULL);
+	// Remove assigns?
+	if (rem_g_themes_assign) AssignLock("G_THEMES",NULL);
+	if (rem_galileo_assign) AssignLock("Galileo",NULL);
 
 	// Close the galileofm.library
 	CloseLibrary(GalileoFMBase);
