@@ -692,9 +692,6 @@ void __asm __saveds lister_refresh_callback(
 					// Initialise lister for new size
 					lister_init_display(lister);
 
-					// Refresh sliders
-					lister_refresh_display(lister,REFRESHF_SLIDERS);
-
 					// In text mode?
 					if (!(lister->flags&LISTERF_VIEW_ICONS))
 					{
@@ -712,6 +709,9 @@ void __asm __saveds lister_refresh_callback(
 						// Get icons
 						IPC_Command(lister->ipc,LISTER_GET_ICONS,0,0,0,0);
 					}
+
+					// Refresh sliders
+					lister_refresh_display(lister,REFRESHF_SLIDERS);
 				}
 
 				// In icon mode?
