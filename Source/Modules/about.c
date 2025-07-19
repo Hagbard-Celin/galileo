@@ -38,8 +38,6 @@ For more information on Directory Opus for Windows please see:
 #include "about.h"
 #include "modules.h"
 
-//#define MAKE_MESSAGE
-
 #define DO_MESSAGE
 
 #define SPIN_TIME	50000
@@ -68,13 +66,13 @@ int __asm __saveds L_Module_Entry_Internal(
 {
 	ConfigWindow dims;
 	NewConfigWindow newwin;
-	ObjectList *objlist=0;
+	ObjectList *objlist;
 	TimerHandle *timer;
 	short frame=1;
-	GL_Object *object=0;
+	GL_Object *object;
 	short left=0,top=0,a;
 	struct Node *node;
-	short show_jon=0,need_open=1,scroll_text=0,ctrl_down=0;
+	short show_jon=0,need_open=1,scroll_text=0;
 	short ret=0;
 	struct Image logo;
 	about_data data;
@@ -117,22 +115,7 @@ int __asm __saveds L_Module_Entry_Internal(
 	if (count>0) return 0;
 	count=1;
 
-/*
-	// First time?
-	if (first)
-	{
-		unsigned char *buf;
 
-		// Decrypt text
-		buf=about_message;
-		while (*buf)
-		{
-			*buf=~((*buf)-1);
-			++buf;
-		}
-		first=0;
-	}
-*/
 	// Get datatypes library
 	DataTypesBase=OpenLibrary("datatypes.library",0);
 
@@ -366,11 +349,6 @@ int __asm __saveds L_Module_Entry_Internal(
 			}
 
 			// Send timer request again
-/*
-			if (scroll_text && ctrl_down)
-				StartTimer(timer,0,timer_val/10);
-			else
-*/
 			StartTimer(timer,0,timer_val);
 		}
 
@@ -385,18 +363,6 @@ int __asm __saveds L_Module_Entry_Internal(
 				copy_msg=*msg;
 				ReplyWindowMsg(msg);
 
-/*
-				// Track right mouse button
-				if (copy_msg.Class==IDCMP_MOUSEBUTTONS)
-				{
-					if (copy_msg.Code==SELECTDOWN)
-						ctrl_down=1;
-					else
-					if (copy_msg.Code==SELECTUP)
-						ctrl_down=0;
-				}
-*/
-
 				// Close window?
 				if (copy_msg.Class==IDCMP_CLOSEWINDOW ||
 					(copy_msg.Class==IDCMP_VANILLAKEY && copy_msg.Code==0x1b))
@@ -404,38 +370,6 @@ int __asm __saveds L_Module_Entry_Internal(
 					break_flag=1;
 					break;
 				}
-/*
-				// Shift-Mouse button in image box, gfx 39+ and >=16 colours to remap
-				if (copy_msg.Class==IDCMP_MOUSEBUTTONS &&
-					copy_msg.Code==SELECTDOWN &&
-					copy_msg.Qualifier&(IEQUALIFIER_LSHIFT|IEQUALIFIER_RSHIFT) &&
-					CheckObjectArea(object,copy_msg.MouseX,copy_msg.MouseY) &&
-					GfxBase->LibNode.lib_Version>=39 &&
-					data.window->RPort->BitMap->Depth>=4)
-				{
-					short which;
-
-					// Clear area
-					SetGadgetValue(objlist,GAD_ABOUT_LOGO,0);
-
-					// Free last remapped image
-					free_logo_remap();
-
-					// Which one to do?
-					which=show_jon%image_count;
-					if (which>=image_special && ((copy_msg.Qualifier&(IEQUALIFIER_LSHIFT|IEQUALIFIER_RSHIFT))!=(IEQUALIFIER_LSHIFT|IEQUALIFIER_RSHIFT)))
-					{
-						show_jon=0;
-						which=0;
-					}
-
-					// Show image
-					about_show_image(data.window,object,&images[which]);
-
-					// Increment count
-					++show_jon;
-				}
-*/
 			}
 		}
 
@@ -539,54 +473,6 @@ void remap_logo(struct Screen *scr)
 	// Failed to get all?
 	if (frame<logo_frames) free_logo_remap();
 }
-/*
-void about_show_image(struct Window *win,GL_Object *object,image_data *image)
-{
-	OpenImageInfo info;
-	APTR im;
-	short x,y;
-
-	// Fill out info
-	info.oi_ImageData=image->imagedata;
-	info.oi_Palette=image->palette;
-	info.oi_Width=image->width;
-	info.oi_Height=image->height;
-	info.oi_Depth=image->depth;
-
-	// Get image
-	if (!(im=OpenImage(0,&info)))
-		return;
-
-	// Remap image
-	remap.ir_Flags=IRF_REMAP_COL0;
-	RemapImage(im,win->WScreen,&remap);
-
-	// Get location
-	x=AREA(object).area_pos.Left+((AREA(object).area_pos.Width-image->width)>>1);
-	y=AREA(object).area_pos.Top+((AREA(object).area_pos.Height-image->height)>>1);
-
-	// Render image
-	RenderImage(win->RPort,im,x,y,0);
-
-	// Fill background
-	SetAPen(win->RPort,ReadPixel(win->RPort,x,y));
-	if (AREA(object).area_pos.Left+1<=x-1)
-		RectFill(win->RPort,
-			AREA(object).area_pos.Left+1,
-			AREA(object).area_pos.Top+1,
-			x-1,
-			AREA(object).area_pos.Top+AREA(object).area_pos.Height-2);
-	if (x+image->width<=AREA(object).area_pos.Left+AREA(object).area_pos.Width-2)
-		RectFill(win->RPort,
-			x+image->width,
-			AREA(object).area_pos.Top+1,
-			AREA(object).area_pos.Left+AREA(object).area_pos.Width-2,
-			AREA(object).area_pos.Top+AREA(object).area_pos.Height-2);
-	
-	// Free the image
-	CloseImage(im);
-}
-*/
 
 void free_logo_remap(void)
 {
