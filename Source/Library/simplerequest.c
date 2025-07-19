@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -675,7 +675,7 @@ BOOL simple_build(simplereq_data *data)
 
 		// Add height
 		data->req_dims.char_dim.Height++;
-		data->req_dims.fine_dim.Height+=5;
+		data->req_dims.fine_dim.Height+=7;
 
 		// Second string gadget?
 		if (data->string_len<0)
@@ -687,7 +687,7 @@ BOOL simple_build(simplereq_data *data)
 
 			// Adjust height
 			data->req_dims.char_dim.Height++;
-			data->req_dims.fine_dim.Height+=5;
+			data->req_dims.fine_dim.Height+=7;
 		}
 		else
 		if (simple->flags&SRF_BUFFER2)
@@ -697,7 +697,7 @@ BOOL simple_build(simplereq_data *data)
 
 			// Adjust height
 			data->req_dims.char_dim.Height++;
-			data->req_dims.fine_dim.Height+=5;
+			data->req_dims.fine_dim.Height+=7;
 		}
 	}
 
@@ -807,7 +807,7 @@ BOOL simple_build(simplereq_data *data)
 			data->objects[object].fine_dims.Left=3;
 			data->objects[object].fine_dims.Top=-16;
 			data->objects[object].fine_dims.Width=-3;
-			data->objects[object].fine_dims.Height=4;
+			data->objects[object].fine_dims.Height=6;
 			data->objects[object].gadgetid=GAD_STRING2_ID;
 			data->objects[object].taglist=data->tags2;
 
@@ -843,7 +843,7 @@ BOOL simple_build(simplereq_data *data)
 			data->objects[object].fine_dims.Left=3;
 			data->objects[object].fine_dims.Top=-11;
 			data->objects[object].fine_dims.Width=28;
-			data->objects[object].fine_dims.Height=4;
+			data->objects[object].fine_dims.Height=6;
 			data->objects[object].gadgetid=GAD_POPUP_ID;
 			data->objects[object].taglist=0;
 
@@ -860,7 +860,7 @@ BOOL simple_build(simplereq_data *data)
 		data->objects[object].fine_dims.Left=(simple->flags&SRF_FILEREQ && simple->filereq)?31:3;
 		data->objects[object].fine_dims.Top=-11;
 		data->objects[object].fine_dims.Width=-3;
-		data->objects[object].fine_dims.Height=4;
+		data->objects[object].fine_dims.Height=6;
 		data->objects[object].gadgetid=GAD_STRING_ID;
 		data->objects[object].taglist=data->tags;
 
