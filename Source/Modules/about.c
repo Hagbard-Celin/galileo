@@ -46,6 +46,8 @@ For more information on Directory Opus for Windows please see:
 
 char *version="$VER: about.gfmmodule 0.2 "__AMIGADATE__" ";
 
+static const struct TextAttr topaz_attr={"topaz.font",8,0,0};
+
 void remap_logo(struct Screen *scr);
 void free_logo_remap(void);
 void about_show_image(struct Window *,GL_Object *,image_data *);
@@ -77,6 +79,7 @@ int __asm __saveds L_Module_Entry_Internal(
 	struct Image logo;
 	about_data data;
 	long timer_val=SPIN_TIME,timer_count=0;
+	struct TextFont *topaz_font;
 
 #ifdef MAKE_MESSAGE
 	{
@@ -115,6 +118,8 @@ int __asm __saveds L_Module_Entry_Internal(
 	if (count>0) return 0;
 	count=1;
 
+	if (!(topaz_font=OpenFont(&topaz_attr)))
+	    return ret;
 
 	// Get datatypes library
 	DataTypesBase=OpenLibrary("datatypes.library",0);
@@ -212,7 +217,7 @@ int __asm __saveds L_Module_Entry_Internal(
 			newwin.locale=0;
 			newwin.port=0;
 			newwin.flags=WINDOW_VISITOR|WINDOW_AUTO_KEYS|WINDOW_REQ_FILL|WINDOW_SCREEN_PARENT;
-			newwin.font=0;
+			newwin.font=topaz_font;
 
 			// Remap image
 			remap_logo(screen);
@@ -392,6 +397,7 @@ int __asm __saveds L_Module_Entry_Internal(
 	// Free timer
 	FreeTimer(timer);
 	CloseLibrary(DataTypesBase);
+	CloseFont(topaz_font);
 
 	count=0;
 	return ret;
