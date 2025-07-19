@@ -95,43 +95,17 @@ struct DiskObject *__asm __saveds L_GetCachedDefDiskObject(
 		}
 	
 	
-	if	(IconBase->lib_Version>=44)
+	if (IconBase->lib_Version>=44)
 	{
-		struct LibData *libdata;
+	        if (name) icon=GetIconTags(name,
+		        ICONGETA_FailIfUnavailable,TRUE,
+		        ICONGETA_RemapIcon,FALSE,
+		        TAG_DONE);
 
-		// Get data pointer
-		libdata=(struct LibData *)libbase->ml_UserData;
-
-	        // There are several bugs in icon.library v44 revisions 506 and below that all add up to:
-		// Remapping after the fact breaks something.
-	        // So on those wersions we do remapping on open.
-		if (IconBase->lib_Version==44 && IconBase->lib_Revision<=506)
-		{
-		    if (libdata->backfill_screen)
-		    {
-			if (name) icon=GetIconTags(name,
-				ICONGETA_FailIfUnavailable,TRUE,
-				ICONGETA_Screen,*libdata->backfill_screen,
-				TAG_DONE);
-					
-			if (!icon) icon=GetIconTags(NULL,
-					ICONGETA_GetDefaultType,type,
-					ICONGETA_Screen,*libdata->backfill_screen,
-					TAG_DONE);
-		    }
-		}
-		else
-		{
-		    if (name) icon=GetIconTags(name,
-			    ICONGETA_FailIfUnavailable,TRUE,
-			    ICONGETA_RemapIcon,FALSE,
-			    TAG_DONE);
-
-		    if (!icon) icon=GetIconTags(NULL,
-				    ICONGETA_GetDefaultType,type,
-				    ICONGETA_RemapIcon,FALSE,
-				    TAG_DONE);
-		}
+	        if (!icon) icon=GetIconTags(NULL,
+			        ICONGETA_GetDefaultType,type,
+			        ICONGETA_RemapIcon,FALSE,
+			        TAG_DONE);
 		return icon;
 	}
 
@@ -232,33 +206,12 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObject(
 
 	if (IconBase->lib_Version>=44)
 	{
-	    icon=NULL;
-
-		//old method with no remap. 
-		// icon=GetIconTags(name,ICONGETA_FailIfUnavailable,TRUE,ICONGETA_RemapIcon,FALSE,TAG_DONE);
-			
-
-	    // There are several bugs in icon.library v44 revisions 506 and below that all add up to:
-	    // Remapping after the fact breaks something.
-	    // So on those wersions we do remapping on open.
-	    if (IconBase->lib_Version==44 && IconBase->lib_Revision<=506)
-	    {
-		if (data->backfill_screen)
-		    icon=GetIconTags(name,
-			    ICONGETA_FailIfUnavailable,TRUE,
-			    ICONGETA_Screen,*data->backfill_screen,
-			    TAG_DONE);
-	    }
-	    else
-		icon=GetIconTags(name,ICONGETA_FailIfUnavailable,TRUE,ICONGETA_RemapIcon,FALSE,TAG_DONE);
+	    icon=GetIconTags(name,ICONGETA_FailIfUnavailable,TRUE,ICONGETA_RemapIcon,FALSE,TAG_DONE);
 
 	    return icon;
 	}
 
-		
-
 	// Got NewIcons, and NewIcons is enabled?
-
 	if (NewIconBase && data->NewIconsFlags&ENVNIF_ENABLE)
 	{
 		struct NewDiskObject *ndo;
@@ -432,7 +385,7 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObjectNew(
 		// Drawer?
 		if (fib.fib_DirEntryType>0)
 		{
-        	type=WBDRAWER;
+		type=WBDRAWER;
 
 			// Unlock lock
 			UnLock(lock);

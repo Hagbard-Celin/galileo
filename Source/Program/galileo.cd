@@ -1039,6 +1039,10 @@ New
 MSG_FILE_EXISTS (//)
 File '%s' already exists!
 ;
+MSG_UNSUPPORTED_ICONLIB (//)
+Unsupported icon.library version!\n\
+Please install OS3.5 BoingBag 2.
+;
 ;
 ;
 ;

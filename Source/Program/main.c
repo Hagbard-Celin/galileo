@@ -356,6 +356,17 @@ void startup_open_libraries()
 		!(RexxSysBase=(struct RxsLib *)main_open_library("rexxsyslib.library",0)) ||
 		!(AslBase=main_open_library("asl.library",37))) quit(0);
 
+	// There are to many severe bugs in OS3.5 icon.library prior to BoingBag 2
+	if (IconBase->lib_Version == 44 && IconBase->lib_Revision < 543)
+	{
+	    SimpleRequest(0,
+			  galileo_name,
+			  GetString(&locale,MSG_OKAY),
+			  GetString(&locale,MSG_UNSUPPORTED_ICONLIB),0,0,0,0);
+
+	    quit(0);
+	}
+
 	// Some other useful libraries
 	DataTypesBase=OpenLibrary("datatypes.library",0);
 	AmigaGuideBase=OpenLibrary("amigaguide.library",0);
