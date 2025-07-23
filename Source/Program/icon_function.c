@@ -119,7 +119,7 @@ void icon_function(BackdropInfo *info,BackdropObject *only_one,char *data,Cfg_Fu
 			// Is object selected?
 			if ((only_one || object->bdo_state) && object->bdo_icon)
 			{
-				char name[80];
+				char name[108];
 				BOOL dir=0,link=0,icon=0;
 				DirEntry *entry=0;
 				struct ArgArrayEntry *aae;

@@ -1461,7 +1461,7 @@ short show_print(
 			// Print title?
 			if (GetGadgetValue(list,GAD_PRINT_PRINT_TITLE))
 			{
-				char title[80];
+				char title[256];
 
 				// Build title
 				if (data->anim_ok)
