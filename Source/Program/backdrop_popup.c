@@ -1216,7 +1216,7 @@ void popup_build_copyto(PopUpHandle *menu,PopUpItem *item)
 							if (name=AllocMemH(menu->ph_Memory,strlen(fib.fib_FileName)+23))
 							{
 								// Build full name of script
-								strcpy(name+1,"PROGDIR:System/CopyTo/");
+								strcpy(name+1,"Galileo:System/CopyTo/");
 								strcat(name+1,fib.fib_FileName);
 								new->data=name;
 							}
