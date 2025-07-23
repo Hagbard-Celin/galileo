@@ -87,7 +87,7 @@ GALILEOFM_FUNC(function_runprog)
 					// Set screen title
 					if (lister->window)
 					{
-						char buf[80];
+						char buf[144];
 
 						if (tool) lsprintf(buf,GetString(&locale,MSG_LAUNCHING_PROGRAM),tool);
 						title_error(buf,0);
