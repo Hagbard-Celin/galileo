@@ -67,9 +67,9 @@ BOOL function_launch(
 	// Allocate handle
 	if (!(handle=function_new_handle(0,0)))
 	{
-		// Free handle
-		if (handle) handle->function=function;
-		function_free(handle);
+		// Free function?
+		if (function && function->function.flags2&FUNCF2_FREE_FUNCTION)
+			FreeFunction(handle->function);
 		return 0;
 	}
 
