@@ -695,11 +695,21 @@ ObjectDef
 		{OD_GADGET,
 			CHECKBOX_KIND,
 			{14,8,0,1},
-			{5,20,26,6},
+			{5,20,28,6},
 			MSG_ENVIRONMENT_FIELD_TITLES,
 			PLACETEXT_RIGHT,
 			GAD_ENVIRONMENT_FIELD_TITLES,
 			_environment_relative_taglist},
+
+		// Line spacing
+		{OD_GADGET,
+			INTEGER_KIND,
+			{14,9,0,1},
+			{5,28,28,6},
+			MSG_ENVIRONMENT_LISTER_VERTSPACE,
+			PLACETEXT_RIGHT,
+			GAD_ENVIRONMENT_LISTER_VERTSPACE,
+			_environment_fontsize_taglist},
 
 		{OD_END}},
 

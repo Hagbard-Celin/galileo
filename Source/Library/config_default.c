@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -209,6 +209,7 @@ void __asm __saveds L_DefaultEnvironment(register __a0 CFG_ENVR *env)
 	env->lister_options=0;
 	env->lister_width=320;
 	env->lister_height=200;
+	env->lister_vert_space = 1;
 
 	// Gauge colour
 	env->gauge_col[0]=3;
@@ -240,7 +241,7 @@ void __asm __saveds L_DefaultEnvironment(register __a0 CFG_ENVR *env)
 	env->env_NewIconsPrecision=16;
 
 	// Set version
-	env->version=CONFIG_VERSION_12;
+	env->version=CONFIG_VERSION_13;
 
 	// Get default settings
 	L_DefaultSettings(&env->settings);
@@ -442,10 +443,16 @@ void __asm __saveds L_UpdateEnvironment(register __a0 CFG_ENVR *env)
 		env->settings.max_filename=30;
 	}
 
-	// Fix version
-	env->version=CONFIG_VERSION_12;
-
 	// Is themes path empty?
 	if (!env->themes_location[0])
 		strcpy(env->themes_location,"Galileo:Themes/");
+
+	// Pre-version 13
+	if (env->version<CONFIG_VERSION_13)
+	{
+		env->lister_vert_space = 1;
+	}
+
+	// Fix version
+	env->version=CONFIG_VERSION_13;
 }

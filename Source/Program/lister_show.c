@@ -53,6 +53,8 @@ void lister_display_dir(Lister *lister)
 	DirEntry *entry;
 	short scroll_x_amount=0,scroll_y_amount;
 	BOOL refresh=0;
+	BYTE vert_space = environment->env->lister_vert_space;
+	BYTE vert_space_over = (vert_space >> 1) + (vert_space&1);
 
 	// If invalid window, return
 	if (!lister || !lister_valid_window(lister)) return;
@@ -163,7 +165,7 @@ void lister_display_dir(Lister *lister)
 	}
 
 	// Get amount to scroll vertically
-	scroll_y_amount=delta*lister->text_area.font->tf_YSize;
+	scroll_y_amount=delta * (lister->text_area.font->tf_YSize + vert_space);
 
 	// Any scrolling to do?
 	if (scroll_x_amount || scroll_y_amount)
@@ -252,11 +254,11 @@ void lister_display_dir(Lister *lister)
 
 		// Start printing at the bottom
 		y_pos=lister->text_area.box.Height-
-				(lister->text_area.font->tf_YSize*delta);
+				((lister->text_area.font->tf_YSize + vert_space) * delta);
 	}
 
 	// Add window top offset on
-	y_pos+=lister->text_area.rect.MinY+lister->text_area.font->tf_Baseline;
+	y_pos += lister->text_area.rect.MinY+lister->text_area.font->tf_Baseline + vert_space_over;
 
 	// Non-proportional font?
 	if (!(lister->more_flags&LISTERF_PROP_FONT))
@@ -280,7 +282,7 @@ void lister_display_dir(Lister *lister)
 		}
 
 		// Increment y position
-		y_pos+=lister->text_area.font->tf_YSize;
+		y_pos += lister->text_area.font->tf_YSize + vert_space;
 
 		// Update keyboard selector
 		if (lister->flags&LISTERF_KEY_SELECTION && lister->selector_pos==line)
@@ -307,6 +309,8 @@ void lister_display_dir(Lister *lister)
 void display_entry(DirEntry *entry,Lister *lister,int position)
 {
 	short width=lister->text_width,offset=0;
+	BYTE vert_space = environment->env->lister_vert_space;
+	BYTE vert_space_over = (vert_space >> 1) + (vert_space&1);
 
 	// If iconified or in icon view, return
 	if (!lister_valid_window(lister) || (lister->flags&LISTERF_VIEW_ICONS)) return;
@@ -325,8 +329,8 @@ void display_entry(DirEntry *entry,Lister *lister,int position)
 		entry,
 		lister->text_area.rect.MinX,
 		lister->text_area.rect.MinY+
-			lister->text_area.font->tf_Baseline+
-			(lister->text_area.font->tf_YSize*position),
+			lister->text_area.font->tf_Baseline + vert_space_over +
+			((lister->text_area.font->tf_YSize + vert_space) * position),
 		offset,
 		width,
 		position);
@@ -347,6 +351,9 @@ void lister_draw_entry(
 	short width,
 	short line)
 {
+	BYTE vert_space = environment->env->lister_vert_space;
+	BYTE vert_space_over = (vert_space >> 1) + (vert_space&1);
+	BYTE vert_space_under = vert_space - vert_space_over;
 	// Set pen colours
 	setdispcol(entry,lister);
 
@@ -382,17 +389,36 @@ void lister_draw_entry(
 		RectFill(
 			&lister->text_area.rast,
 			lister->list_area.rect.MinX,
-			y-lister->text_area.rast.TxBaseline,
+			y-(lister->text_area.rast.TxBaseline + vert_space_over),
 			lister->text_area.rect.MinX-1,
 			y+lister->text_area.rast.TxHeight-lister->text_area.rast.TxBaseline-1);
 	if (lister->text_area.rect.MaxX<lister->list_area.rect.MaxX)
 		RectFill(
 			&lister->text_area.rast,
 			lister->text_area.rect.MaxX+1,
-			y-lister->text_area.rast.TxBaseline,
+			y-(lister->text_area.rast.TxBaseline + vert_space_over),
 			lister->list_area.rect.MaxX,
 			y+lister->text_area.rast.TxHeight-lister->text_area.rast.TxBaseline-1);
-				
+
+	if (vert_space_over)
+	{
+	    BYTE a;
+
+	    // Erase above text
+	    for (a = vert_space_over; a > 0; a--)
+	    {
+		Move(&lister->text_area.rast, lister->list_area.rect.MinX, y - (lister->text_area.rast.TxBaseline + a));
+		Draw(&lister->text_area.rast, lister->list_area.rect.MaxX, y - (lister->text_area.rast.TxBaseline + a));
+	    }
+
+	    // Erase below text
+	    for (a = 0; a < vert_space_under; a++)
+	    {
+		Move(&lister->text_area.rast, lister->list_area.rect.MinX, y + (lister->text_area.rast.TxHeight - lister->text_area.rast.TxBaseline + a));
+		Draw(&lister->text_area.rast, lister->list_area.rect.MaxX, y + (lister->text_area.rast.TxHeight - lister->text_area.rast.TxBaseline + a));
+	    }
+	}
+
 	// Valid entry?
 	if (entry->de_Node.dn_Succ)
 	{
@@ -935,6 +961,8 @@ void entry_highlight(Lister *lister,short y)
 {
 	short x,x1,y1,sides=0;
 	struct RastPort *rp=&lister->text_area.rast;
+	BYTE vert_space = environment->env->lister_vert_space;
+	BYTE vert_space_over = (vert_space >> 1) + (vert_space&1);
 
 	// Switch to COMPLEMENT
 	SetDrMd(rp,COMPLEMENT);
@@ -944,9 +972,9 @@ void entry_highlight(Lister *lister,short y)
 
 	// Get coordinates
 	x=lister->text_area.rect.MinX;
-	y-=lister->text_area.font->tf_Baseline;
+	y -= lister->text_area.font->tf_Baseline + vert_space_over;
 	x1=lister->text_area.rect.MaxX;
-	y1=y+lister->text_area.font->tf_YSize-1;
+	y1 = y + lister->text_area.font->tf_YSize - 1 + vert_space;
 
 	// Do sides?
 	if (lister->cur_buffer->buf_HorizOffset==0) sides|=1;

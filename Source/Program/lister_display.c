@@ -213,6 +213,7 @@ void lister_init_display(Lister *lister)
 	if (!icons)
 	{
 		short a;
+		BYTE vert_space = environment->env->lister_vert_space;
 
 		// Initialise file list size
 		lister_init_filelist(lister);
@@ -225,10 +226,10 @@ void lister_init_display(Lister *lister)
 		lister->scroll_border.MaxX=lister->text_area.rect.MaxX-a;
 		lister->scroll_border.MinY=
 			lister->text_area.rect.MinY+
-				((lister->text_height/3)*lister->window->RPort->TxHeight);
+				((lister->text_height/3)*(lister->window->RPort->TxHeight + vert_space));
 		lister->scroll_border.MaxY=
 			lister->text_area.rect.MaxY-
-				((lister->text_height/3)*lister->window->RPort->TxHeight);
+				((lister->text_height/3)*(lister->window->RPort->TxHeight + vert_space));
 
 		// Need to add path field?
 		if (!(lister->flags&LISTERF_PATH_FIELD))
@@ -359,8 +360,9 @@ void lister_refresh(Lister *lister,unsigned short mode)
 // Initialise file list area size
 void lister_init_filelist(Lister *lister)
 {
-	short width;
 	struct Rectangle *rect;
+	short width;
+	BYTE vert_space = environment->env->lister_vert_space;
 
 	// Rectangle at top
 	if (lister->more_flags&LISTERF_TITLE) rect=&lister->title_area.rect;
@@ -387,14 +389,14 @@ void lister_init_filelist(Lister *lister)
 
 	// Calculate text dimensions
 	lister->text_width=(lister->more_flags&LISTERF_PROP_FONT)?width:((width/lister->window->RPort->TxWidth)*lister->window->RPort->TxWidth);
-	lister->text_height=(lister->list_area.box.Height-2)/lister->window->RPort->TxHeight;
+	lister->text_height = lister->list_area.box.Height / (lister->window->RPort->TxHeight + vert_space);
 
 	// Initialise lister text area
 	lister->text_area.box.Width=lister->text_width;
-	lister->text_area.box.Height=lister->text_height*lister->window->RPort->TxHeight;
+	lister->text_area.box.Height = lister->text_height * (lister->window->RPort->TxHeight + vert_space);
 	lister->text_area.box.Left=lister->list_area.box.Left+1;
 	if (lister->flags&LISTERF_KEY_SELECTION) lister->text_area.box.Left+=KEY_SEL_OFFSET;
-	lister->text_area.box.Top=lister->list_area.box.Top+1;
+	lister->text_area.box.Top=lister->list_area.box.Top;
 	lister->text_area.font=0;
 	display_gui_complete(&lister->text_area,lister->window->RPort);
 }

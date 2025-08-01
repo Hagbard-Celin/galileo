@@ -66,6 +66,7 @@ short select_select_files(Lister *lister,UWORD qual,short mouse_x,short mouse_y)
 	ListFormat *def_format;
 	Lister *over_lister=0;
 	DirEntry *over_entry=0;
+	BYTE vert_space = environment->env->lister_vert_space;
 
 #ifdef DEBUG
 	check_call("select_select_files",lister);
@@ -110,7 +111,7 @@ short select_select_files(Lister *lister,UWORD qual,short mouse_x,short mouse_y)
 	lister->selected_entry=0;
 
 	// Get line clicked on
-	line=(mouse_y-lister->text_area.rect.MinY)/lister->text_area.font->tf_YSize;
+	line = (mouse_y - lister->text_area.rect.MinY) / (lister->text_area.font->tf_YSize + vert_space);
 	old_line=line;
 	first_line=line;
 
@@ -341,7 +342,7 @@ short select_select_files(Lister *lister,UWORD qual,short mouse_x,short mouse_y)
 							int line;
 
 							// Get line we're over
-							line=(mouse_y-lister->text_area.rect.MinY)/lister->text_area.font->tf_YSize;
+							line = (mouse_y - lister->text_area.rect.MinY) / (lister->text_area.font->tf_YSize + vert_space);
 							if (line>lister->text_height-1) line=lister->text_height-1;
 							if (line<0) line=0;
 
@@ -679,12 +680,12 @@ short select_select_files(Lister *lister,UWORD qual,short mouse_x,short mouse_y)
 						drag_offset_x-=lister->window->LeftEdge;
 
 						// Get y offset
-						drag_offset_y=mouse_y-
-							(lister->text_area.rect.MinY+line*lister->text_area.font->tf_YSize);
+						drag_offset_y = mouse_y -
+							(lister->text_area.rect.MinY + line * (lister->text_area.font->tf_YSize + vert_space));
 						if (multi_drag)
 						{
-							drag_offset_y+=
-								(buffer->buf_VertOffset+line-first_sel)*lister->text_area.font->tf_YSize;
+							drag_offset_y +=
+								(buffer->buf_VertOffset + line-first_sel) * (lister->text_area.font->tf_YSize + vert_space);
 						}
 						if (drag_offset_y<0) drag_offset_y=0;
 						else
@@ -1209,11 +1210,12 @@ short select_select_files(Lister *lister,UWORD qual,short mouse_x,short mouse_y)
 void select_rmb_scroll(Lister *lister,short x,short y)
 {
 	struct IntuiMessage *msg;
-	char break_flag=0;
 	ULONG wait;
 	short line,show_line=0;
 	long total_timer=1000;
 	DirEntry *entry=0;
+	char break_flag=0;
+	BYTE vert_space = environment->env->lister_vert_space;
 
 #ifdef DEBUG
 	check_call("select_rmb_scroll",lister);
@@ -1230,7 +1232,7 @@ void select_rmb_scroll(Lister *lister,short x,short y)
 		!(lister->flags&LISTERF_BUSY))
 	{
 		// Get line clicked on
-		show_line=UDivMod32(y-lister->text_area.rect.MinY,lister->text_area.font->tf_YSize);
+		show_line = UDivMod32(y - lister->text_area.rect.MinY, lister->text_area.font->tf_YSize + vert_space);
 
 		// Not out of display?
 		if (show_line<0 || show_line>=lister->text_height) line=-1;
@@ -1572,7 +1574,7 @@ void select_rmb_scroll(Lister *lister,short x,short y)
 					lister_scroll(lister,0,-1);
 
 					// Slow?
-					if (mouse_y>lister->scroll_border.MinY-(lister->text_area.font->tf_YSize*4))
+					if (mouse_y > lister->scroll_border.MinY - ((lister->text_area.font->tf_YSize + vert_space) * 4))
 						delay=20000;
 				}
 
@@ -1583,7 +1585,7 @@ void select_rmb_scroll(Lister *lister,short x,short y)
 					lister_scroll(lister,0,1);
 
 					// Slow?
-					if (mouse_y<lister->scroll_border.MaxY+(lister->text_area.font->tf_YSize*4))
+					if (mouse_y < lister->scroll_border.MaxY + ((lister->text_area.font->tf_YSize + vert_space) * 4))
 						delay=20000;
 				}
 			}

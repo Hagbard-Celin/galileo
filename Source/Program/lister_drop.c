@@ -388,6 +388,7 @@ DirEntry *lister_highlight(Lister *lister,short x,short y,DragInfo *drag)
 {
 	DirEntry *entry=0;
 	short line=0,scroll=0;
+	BYTE vert_space = environment->env->lister_vert_space;
 
 	// Ignore if in icon mode or no window
 	if (lister->flags&LISTERF_VIEW_ICONS || !lister_valid_window(lister))
@@ -406,7 +407,7 @@ DirEntry *lister_highlight(Lister *lister,short x,short y,DragInfo *drag)
 	{
 		// Scroll down?
 		if (y>lister->text_area.rect.MaxY &&
-			y<lister->text_area.rect.MaxY+lister->text_area.font->tf_YSize)
+			y<lister->text_area.rect.MaxY+(lister->text_area.font->tf_YSize + vert_space))
 		{
 			// Ok to scroll?
 			if (lister->cur_buffer->buf_VertOffset+lister->text_height<lister->cur_buffer->buf_TotalEntries[0])
@@ -419,7 +420,7 @@ DirEntry *lister_highlight(Lister *lister,short x,short y,DragInfo *drag)
 		// Scroll up?
 		else
 		if (y<lister->text_area.rect.MinY &&
-			y>lister->text_area.rect.MinY-lister->text_area.font->tf_YSize)
+			y>lister->text_area.rect.MinY-(lister->text_area.font->tf_YSize + vert_space))
 		{
 			// Ok to scroll?
 			if (lister->cur_buffer->buf_VertOffset>0)
@@ -436,7 +437,7 @@ DirEntry *lister_highlight(Lister *lister,short x,short y,DragInfo *drag)
 			short num;
 
 			// Get line clicked on
-			line=(y-lister->text_area.rect.MinY)/lister->text_area.font->tf_YSize;
+			line=(y-lister->text_area.rect.MinY)/(lister->text_area.font->tf_YSize + vert_space);
 			num=line+lister->cur_buffer->buf_VertOffset;
 
 			// Valid entry?

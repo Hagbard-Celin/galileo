@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -49,6 +49,7 @@ For more information on Directory Opus for Windows please see:
 #define CONFIG_VERSION_10		10
 #define CONFIG_VERSION_11		11
 #define CONFIG_VERSION_12		12
+#define CONFIG_VERSION_13		13
 
 // Sort format
 typedef struct {
@@ -413,7 +414,9 @@ typedef struct
 
 	UBYTE		font_size[4];		// Font sizes
 
-	char		pad4[12];
+	BYTE		lister_vert_space;	// Vertical space between lister items
+
+	char		pad4[11];
 
 	UWORD		display_options;	// Display options
 	UWORD		main_window_type;	// Main window type

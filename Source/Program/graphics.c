@@ -62,7 +62,7 @@ void show_list_selector(Lister *lister,short line,BOOL erase)
 
 	// Get width and height
 	width=KEY_SEL_OFFSET;
-	height=lister->text_area.rast.TxHeight;
+	height=lister->text_area.rast.TxHeight + environment->env->lister_vert_space;
 
 	// Get position
 	left=lister->text_area.rect.MinX-KEY_SEL_OFFSET;

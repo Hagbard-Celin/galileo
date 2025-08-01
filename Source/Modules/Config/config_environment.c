@@ -1353,6 +1353,10 @@ unsigned long __asm __saveds L_Config_Environment(
 		if ((data->config->lister_options&LISTEROPTF_TITLES)!=
 			(env->env->lister_options&LISTEROPTF_TITLES)) change_flags[0]|=CONFIG_CHANGE_LISTER_TITLES;
 
+		// Lister vertical space
+		if (data->config->lister_vert_space != env->env->lister_vert_space)
+		    change_flags[0] |= CONFIG_CHANGE_LIST_DISPLAY|CONFIG_CHANGE_LIST_FONT;
+
 		// Background pictures
 		if (((data->config->display_options&DISPOPTF_NO_BACKDROP)!=(env->env->display_options&DISPOPTF_NO_BACKDROP)) ||
 			((data->config->display_options&DISPOPTF_USE_WBPATTERN)!=(env->env->display_options&DISPOPTF_USE_WBPATTERN)) ||
@@ -1900,6 +1904,10 @@ void _config_env_set(config_env_data *data,short option)
 				data->option_list,
 				GAD_ENVIRONMENT_FIELD_TITLES,
 				data->config->lister_options&LISTEROPTF_TITLES);
+
+			// Vertical space
+			SetGadgetValue(data->option_list,GAD_ENVIRONMENT_LISTER_VERTSPACE,(ULONG)data->config->lister_vert_space);
+
 			break;
 
 
@@ -2411,6 +2419,10 @@ void _config_env_store(config_env_data *data,short option)
 				data->config->lister_options|=LISTEROPTF_TITLES;
 			else
 				data->config->lister_options&=~LISTEROPTF_TITLES;
+
+			// Vertical space
+			data->config->lister_vert_space = GetGadgetValue(data->option_list, GAD_ENVIRONMENT_LISTER_VERTSPACE);
+
 			break;
 
 

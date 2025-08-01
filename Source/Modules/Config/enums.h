@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -477,6 +477,7 @@ enum
 	GAD_ENVIRONMENT_THEMES_FIELD,
 	GAD_SETTINGS_MAX_FILENAME,
 	GAD_SETTINGS_VOLUME_SLIDER,
+	GAD_ENVIRONMENT_LISTER_VERTSPACE
 };
 
 enum {

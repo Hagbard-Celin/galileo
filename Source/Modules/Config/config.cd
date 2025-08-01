@@ -583,6 +583,9 @@ Directory Caching...
 MSG_ERROR_WRONG_TYPE_ENV (//)
 '%s' is not a valid environment file!
 ;
+MSG_ENVIRONMENT_LISTER_VERTSPACE (//)
+Text mode line spacing
+;
 ;
 ;
 ;

@@ -671,7 +671,7 @@ BOOL lister_start_edit(Lister *lister,short x,short y,short item)
 	}
 
 	// Get line clicked on
-	else line=(y-lister->text_area.rect.MinY)/lister->text_area.font->tf_YSize;
+	else line=(y-lister->text_area.rect.MinY)/(lister->text_area.font->tf_YSize + environment->env->lister_vert_space);
 
 	// Different line?
 	if (line!=lister->cursor_line)
