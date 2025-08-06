@@ -1118,27 +1118,39 @@ ULONG __asm __saveds listview_dispatch(register __a0 Class *cl,
 					    // Part of compound-gadget?
 					    if (data->compoundgadget)
 					    {
-						CompoundObject * node;
-						UWORD x,y;
+						struct Layer *layer;
 
-						x = input->gpi_Mouse.X + gadget->LeftEdge + input->gpi_GInfo->gi_Domain.Left;
-						y = input->gpi_Mouse.Y + gadget->TopEdge + input->gpi_GInfo->gi_Domain.Top;
-
-						// Walk through gadgets in compound-gadget
-						for (node = (CompoundObject *)data->compoundgadget->mlh_Head; node->node.mln_Succ;
-						     node = (CompoundObject *)node->node.mln_Succ)
+						// Find which layer we dropped it on
+						if (layer=WhichLayer(&input->gpi_GInfo->gi_Screen->LayerInfo,
+								     input->gpi_GInfo->gi_Screen->MouseX,
+								     input->gpi_GInfo->gi_Screen->MouseY))
 						{
-						    // In gadgets list-area?
-						    if ((x >= node->coords.MinX) &&
-						        (x <= node->coords.MaxX) &&
-						        (y >= node->coords.MinY) &&
-						        (y <= node->coords.MaxY))
+						    // Does layer have a window?
+						    if (layer->Window == input->gpi_GInfo->gi_Window)
 						    {
-							// Switch active gadget
-							data->flags|=LVF_CANCEL|LVF_COMPOUND_ACTIVATE;
-							retval=GMR_NOREUSE;
+							CompoundObject * node;
+							UWORD x,y;
 
-							break;
+							x = input->gpi_Mouse.X + gadget->LeftEdge + input->gpi_GInfo->gi_Domain.Left;
+							y = input->gpi_Mouse.Y + gadget->TopEdge + input->gpi_GInfo->gi_Domain.Top;
+
+							// Walk through gadgets in compound-gadget
+							for (node = (CompoundObject *)data->compoundgadget->mlh_Head; node->node.mln_Succ;
+							     node = (CompoundObject *)node->node.mln_Succ)
+							{
+							    // In gadgets list-area?
+							    if ((x >= node->coords.MinX) &&
+							        (x <= node->coords.MaxX) &&
+							        (y >= node->coords.MinY) &&
+							        (y <= node->coords.MaxY))
+							    {
+								// Switch active gadget
+								data->flags|=LVF_CANCEL|LVF_COMPOUND_ACTIVATE;
+								retval=GMR_NOREUSE;
+
+								break;
+							    }
+							}
 						    }
 						}
 					    }
