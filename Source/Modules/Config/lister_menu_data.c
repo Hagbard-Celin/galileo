@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -40,7 +40,7 @@ For more information on Directory Opus for Windows please see:
 ConfigWindow
 	hotkeys_window={
 		{POS_CENTER,POS_CENTER,64,12},
-		{0,0,32,70}},
+		{0,0,32,72}},
 
 	scripts_window={
 		{POS_CENTER,POS_CENTER,44,8},
@@ -142,7 +142,7 @@ ObjectDef
 		{OD_GADGET,
 			STRING_KIND,	
 			{10,POS_RIGHT_JUSTIFY-1,SIZE_MAXIMUM,1},
-			{20,-10,-4,4},
+			{20,-8,-4,6},
 			MSG_LISTER_MENU_NAME,
 			0,
 			GAD_LISTER_MENU_NAME,
@@ -152,7 +152,7 @@ ObjectDef
 		{OD_GADGET,
 			CHECKBOX_KIND,
 			{10,POS_RIGHT_JUSTIFY,0,1},
-			{20,-4,26,4},
+			{20,-2,26,4},
 			MSG_HOTKEYS_GLOBAL,
 			PLACETEXT_RIGHT,
 			GAD_HOTKEYS_GLOBAL,

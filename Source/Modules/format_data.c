@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -49,7 +49,7 @@ ModuleInfo
 ConfigWindow
 	format_window={
 		{POS_CENTER,POS_CENTER,40,9},
-		{0,0,44,77}};
+		{0,0,44,79}};
 
 
 struct TagItem
@@ -84,7 +84,7 @@ ObjectDef
 		{OD_GADGET,
 			MY_LISTVIEW_KIND,
 			{0,0,10,7},
-			{4,4,24,45},
+			{4,4,24,50},
 			0,
 			LISTVIEWFLAG_CURSOR_KEYS,
 			GAD_FORMAT_DEVICES,
@@ -94,7 +94,7 @@ ObjectDef
 		{OD_GADGET,
 			STRING_KIND,
 			{16,0,SIZE_MAXIMUM,1},
-			{36,4,-4,4},
+			{36,4,-4,6},
 			MSG_FORMAT_NAME,
 			0,
 			GAD_FORMAT_NAME,
@@ -104,7 +104,7 @@ ObjectDef
 		{OD_GADGET,
 			CHECKBOX_KIND,	
 			{10,1,0,1},
-			{36,10,26,4},
+			{36,12,26,4},
 			MSG_FORMAT_FFS,
 			PLACETEXT_RIGHT,
 			GAD_FORMAT_FFS,
@@ -114,7 +114,7 @@ ObjectDef
 		{OD_GADGET,
 			CHECKBOX_KIND,
 			{10,2,0,1},
-			{36,15,26,4},
+			{36,17,26,4},
 			MSG_FORMAT_INTERNATIONAL,
 			PLACETEXT_RIGHT,
 			GAD_FORMAT_INTERNATIONAL,
@@ -124,7 +124,7 @@ ObjectDef
 		{OD_GADGET,
 			CHECKBOX_KIND,
 			{10,3,0,1},
-			{36,20,26,4},
+			{36,22,26,4},
 			MSG_FORMAT_CACHING,
 			PLACETEXT_RIGHT,
 			GAD_FORMAT_CACHING,
@@ -134,7 +134,7 @@ ObjectDef
 		{OD_GADGET,
 			CHECKBOX_KIND,
 			{10,4,0,1},
-			{36,25,26,4},
+			{36,27,26,4},
 			MSG_FORMAT_LONG,
 			PLACETEXT_RIGHT,
 			GAD_FORMAT_LONG,
@@ -144,7 +144,7 @@ ObjectDef
 		{OD_GADGET,
 			CHECKBOX_KIND,
 			{10,5,0,1},
-			{36,30,26,4},
+			{36,32,26,4},
 			MSG_FORMAT_INSTALL,
 			PLACETEXT_RIGHT,
 			GAD_FORMAT_INSTALL,
@@ -154,7 +154,7 @@ ObjectDef
 		{OD_GADGET,
 			CHECKBOX_KIND,
 			{10,6,0,1},
-			{36,35,26,4},
+			{36,37,26,4},
 			MSG_FORMAT_TRASHCAN,
 			PLACETEXT_RIGHT,
 			GAD_FORMAT_TRASHCAN,
@@ -164,7 +164,7 @@ ObjectDef
 		{OD_GADGET,
 			CHECKBOX_KIND,
 			{10,7,0,1},
-			{36,40,26,4},
+			{36,42,26,4},
 			MSG_FORMAT_VERIFY,
 			PLACETEXT_RIGHT,
 			GAD_FORMAT_VERIFY,
@@ -174,7 +174,7 @@ ObjectDef
 		{OD_AREA,
 			TEXTPEN,
 			{0,8,SIZE_MAXIMUM,1},
-			{4,48,-4,6},
+			{4,50,-4,6},
 			0,
 			AREAFLAG_RECESSED|AREAFLAG_ERASE|TEXTFLAG_CENTER,
 			GAD_FORMAT_STATUS,

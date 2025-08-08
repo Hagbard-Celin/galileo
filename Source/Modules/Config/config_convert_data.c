@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -40,7 +40,7 @@ For more information on Directory Opus for Windows please see:
 ConfigWindow
 	_config_convert_window={
 		{POS_CENTER,POS_CENTER,40,11},
-		{0,0,16,78}};
+		{0,0,16,80}};
 
 struct TagItem
 	_convert_layout_taglist[]={
@@ -139,7 +139,7 @@ ObjectDef
 		{OD_GADGET,
 			CHECKBOX_KIND,
 			{12,8,0,1},
-			{0,44,26,4},
+			{0,44,26,6},
 			MSG_CONVERT_HOTKEYS,
 			PLACETEXT_RIGHT,
 			GAD_CONVERT_HOTKEYS,
@@ -149,7 +149,7 @@ ObjectDef
 		{OD_GADGET,
 			STRING_KIND,
 			{12,POS_RIGHT_JUSTIFY,SIZE_MAX_LESS-2,1},
-			{0,-3,0,4},
+			{0,-3,0,6},
 			MSG_CONVERT_BASENAME,
 			PLACETEXT_LEFT,
 			GAD_CONVERT_BASENAME,

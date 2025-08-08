@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -372,7 +372,7 @@ ObjectDef
 		{OD_GADGET,
 			STRING_KIND,
 			{7,0,24,1},
-			{8,10,12,4},
+			{8,8,12,6},
 			MSG_CLASSED_CLASS_NAME,
 			0,
 			GAD_CLASSED_CLASS_NAME,
@@ -382,7 +382,7 @@ ObjectDef
 		{OD_GADGET,
 			STRING_KIND,
 			{35,0,9,1},
-			{18,10,12,4},
+			{18,8,12,6},
 			MSG_CLASSED_CLASS_ID,
 			0,
 			GAD_CLASSED_CLASS_ID,
@@ -392,7 +392,7 @@ ObjectDef
 		{OD_GADGET,
 			INTEGER_KIND,
 			{POS_RIGHT_JUSTIFY,0,4,1},
-			{-8,10,12,4},
+			{-8,8,12,6},
 			MSG_CLASSED_CLASS_PRI,
 			0,
 			GAD_CLASSED_CLASS_PRI,

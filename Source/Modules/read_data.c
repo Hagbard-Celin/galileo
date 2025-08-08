@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -115,7 +115,7 @@ ObjectDef
 		{OD_GADGET,
 			STRING_KIND,
 			{0,1,SIZE_MAXIMUM,1},
-			{4,10,-4,4},
+			{4,8,-4,6},
 			MSG_ENTER_SEARCH_STRING,
 			PLACETEXT_ABOVE,
 			GAD_SEARCH_TEXT,

@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -41,7 +41,7 @@ For more information on Directory Opus for Windows please see:
 ConfigWindow
 	_function_editor_label_window={
 		{POS_RIGHT_JUSTIFY,POS_RIGHT_JUSTIFY,50,12},
-		{0,0,44,68}},
+		{0,0,44,80}},
 
 	_function_editor_window={
 		{POS_RIGHT_JUSTIFY,POS_RIGHT_JUSTIFY,50,11},
@@ -123,7 +123,7 @@ ObjectDef
 		{OD_GADGET,
 			STRING_KIND,
 			{8,0,SIZE_MAXIMUM,1},
-			{4,4,-4,4},
+			{4,4,-4,6},
 			MSG_FUNCED_LABEL,
 			PLACETEXT_LEFT,
 			GAD_FUNCED_LABEL,
@@ -133,7 +133,7 @@ ObjectDef
 		{OD_AREA,
 			0,
 			{0,1,SIZE_MAXIMUM,SIZE_MAX_LESS-1},
-			{2,10,-2,-10},
+			{2,12,-2,-10},
 			0,
 			AREAFLAG_NOFILL,
 			GAD_FUNCED_LAYOUT,
@@ -157,7 +157,7 @@ ObjectDef
 		{OD_GADGET,
 			FILE_BUTTON_KIND,
 			{8,0,0,1},
-			{4,4,28,4},
+			{4,4,28,6},
 			MSG_FUNCED_IMAGE,
 			PLACETEXT_LEFT,
 			GAD_FUNCED_IMAGE_REQ,
@@ -167,7 +167,7 @@ ObjectDef
 		{OD_GADGET,
 			STRING_KIND,
 			{8,0,SIZE_MAXIMUM,1},
-			{32,4,-4,4},
+			{32,4,-4,6},
 			0,
 			0,
 			GAD_FUNCED_LABEL,
@@ -177,7 +177,7 @@ ObjectDef
 		{OD_AREA,
 			0,
 			{0,1,SIZE_MAXIMUM,SIZE_MAX_LESS-1},
-			{2,10,-2,-10},
+			{2,12,-2,-10},
 			0,
 			AREAFLAG_NOFILL,
 			GAD_FUNCED_LAYOUT,
@@ -295,7 +295,7 @@ ObjectDef
 		{OD_GADGET,
 			HOTKEY_KIND,
 			{POS_RIGHT_JUSTIFY,9,24,1},
-			{-4,38,20,4},
+			{-4,38,20,6},
 			MSG_FUNCED_KEY,
 			PLACETEXT_LEFT,
 			GAD_FUNCED_KEY,

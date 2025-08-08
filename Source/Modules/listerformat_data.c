@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -49,19 +49,19 @@ ModuleInfo
 ConfigWindow
 	listformat_window={
 		{POS_CENTER,POS_CENTER,32,12},
-		{0,0,74,78}},
+		{0,0,74,82}},
 
 	listformat_window_ftp={
 		{POS_CENTER,POS_CENTER,32,12},
-		{0,0,74,78+4}},
+		{0,0,74,82+4}},
 
 	listformat_window_ftp_big={
 		{POS_CENTER,POS_CENTER,32,13},
-		{0,0,74,85+7}},
+		{0,0,74,82+7}},
 
 	listformat_window_big={
 		{POS_CENTER,POS_CENTER,32,13},
-		{0,0,74,85}};
+		{0,0,74,89}};
 
 
 // Labels
@@ -203,7 +203,7 @@ ObjectDef
 		{OD_GADGET,
 			STRING_KIND,
 			{14,9,SIZE_MAXIMUM,1},
-			{33,52,-5,4},
+			{33,52,-5,6},
 			MSG_LISTER_SHOW,
 			PLACETEXT_LEFT,
 			GAD_LISTER_SHOW,
@@ -213,7 +213,7 @@ ObjectDef
 		{OD_GADGET,
 			STRING_KIND,	
 			{14,10,SIZE_MAXIMUM,1},
-			{33,57,-5,4},
+			{33,59,-5,6},
 			MSG_LISTER_HIDE,
 			PLACETEXT_LEFT,
 			GAD_LISTER_HIDE,
@@ -376,7 +376,7 @@ ObjectDef
 		{OD_GADGET,
 			STRING_KIND,
 			{14,8,SIZE_MAXIMUM,1},
-			{33,47,-5,4},
+			{33,47,-5,6},
 			MSG_LISTER_SHOW,
 			PLACETEXT_LEFT,
 			GAD_LISTER_SHOW,
@@ -386,7 +386,7 @@ ObjectDef
 		{OD_GADGET,
 			STRING_KIND,	
 			{14,9,SIZE_MAXIMUM,1},
-			{33,52,-5,4},
+			{33,54,-5,6},
 			MSG_LISTER_HIDE,
 			PLACETEXT_LEFT,
 			GAD_LISTER_HIDE,
