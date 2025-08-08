@@ -114,6 +114,9 @@ GALILEOFM_FUNC(function_makedir)
 	// If no path, and we need one, return
 	if (!function_valid_path(path) && lister_flag) return 0;
 
+	// Clear name
+	dir_name[0] = 0;
+
 	// Loop until successful or aborted
 	FOREVER
 	{
