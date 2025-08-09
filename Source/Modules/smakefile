@@ -152,6 +152,7 @@ OBJS3 = $(CONFIGOBJS)
 #		ftp/ftp.strings ftp.gfmmodule \
 
 all:    modules_pragmas.h \
+	modules_internal_pragmas.h \
 	$(BIN)galileoconfig.gfmmodule \
 	$(BIN)show.gfmmodule \
 	$(BIN)play.gfmmodule \
