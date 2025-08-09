@@ -59,6 +59,9 @@ void kprintf( const char *, ... );
 
 char *version="$VER: icon.gfmmodule 0.2 "__AMIGADATE__" ";
 
+struct Library *MathBase;
+struct Library *MathTransBase;
+
 void icon_drop_44( icon_data *data, int x, int y );
 BOOL icon_save_44( icon_data *data, char *save_name ,BOOL err);
 static struct seglist *bptrtoseglist(BPTR bptr);
@@ -312,6 +315,18 @@ void closewindow(icon_data *data)
 {
     if (data)
     {
+	// Close math libs if we opened them
+	if (data->MathBase)
+	{
+	    CloseLibrary(data->MathBase);
+	    data->MathBase = 0;
+	}
+	if (data->MathTransBase)
+	{
+	    CloseLibrary(data->MathTransBase);
+	    data->MathTransBase = 0;
+	}
+
 	// Remove AppWindow
 	if (data->app_window)
 	{
@@ -561,12 +576,28 @@ int openwindow( icon_data *data, int next )
     ULONG size;
     icon_temp *temp;
 
+    if (data->icon_type == WBDEVICE || data->icon_type == WBKICK)
+	data->icon_type = WBDISK;
+
+    // If it is a disk, we need math libs
+    if (data->icon_type = WBDISK)
+    {
+	if (!(data->MathBase=OpenLibrary("mathffp.library",37)) ||
+	!(data->MathTransBase=OpenLibrary("mathtrans.library",37)))
+	{
+	    if (data->MathTransBase)
+		CloseLibrary(data->MathTransBase);
+	    return 0;
+	}
+	else
+	{
+	    MathBase =  data->MathBase;
+	    MathTransBase = data->MathTransBase;
+	}
+    }
+
     if (temp=AllocVec(sizeof(icon_temp),MEMF_CLEAR))
     {
-
-	if (data->icon_type == WBDEVICE || data->icon_type == WBKICK)
-	    data->icon_type = WBDISK;
-
 	// If this is a disk icon, strip away everything after the colon
 	if (data->icon_type == WBDISK &&
 	   (ptr = strchr( data->prog_name, ':' )) &&

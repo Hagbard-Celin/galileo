@@ -57,10 +57,6 @@ struct Library *AslBase;
 struct Library *DiskfontBase;
 struct Device  *TimerBase;
 struct RxsLib  *RexxSysBase;
-#ifdef _FFP
-struct Library *MathBase;
-struct Library *MathTransBase;
-#endif
 struct GalileoLocale *locale;
 
 #ifdef RESOURCE_TRACKING
@@ -97,10 +93,6 @@ __asm __saveds __UserLibInit()
 	DiskfontBase=0;
 	AslBase=0;
 	RexxSysBase=0;
-#ifdef _FFP
-	MathBase=0;
-	MathTransBase=0;
-#endif
 	locale=0;
 
 	// DOS
@@ -116,10 +108,6 @@ __asm __saveds __UserLibInit()
 		!(AslBase=OpenLibrary("asl.library",37)) ||
 		!(DiskfontBase=OpenLibrary("diskfont.library",37)) ||
 		!(TimerBase=(struct Device *)GetTimerBase()) ||
-#ifdef _FFP
-		!(MathBase=OpenLibrary("mathffp.library",37)) ||
-		!(MathTransBase=OpenLibrary("mathtrans.library",37)) ||
-#endif
 		!(UtilityBase=OpenLibrary("utility.library",37)))
 	{
 	    __UserLibCleanup();
@@ -180,10 +168,6 @@ void __asm  __saveds __UserLibCleanup()
 	if (RexxSysBase) CloseLibrary((struct Library *)RexxSysBase);
 	if (WorkbenchBase) CloseLibrary(WorkbenchBase);
 	if (UtilityBase) CloseLibrary(UtilityBase);
-#ifdef _FFP
-	if (MathTransBase) CloseLibrary(MathTransBase);
-	if (MathBase) CloseLibrary(MathBase);
-#endif
 	if (DiskfontBase) CloseLibrary(DiskfontBase);
 	if (AslBase) CloseLibrary(AslBase);
 	if (GadToolsBase) CloseLibrary(GadToolsBase);

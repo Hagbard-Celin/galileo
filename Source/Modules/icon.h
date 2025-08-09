@@ -192,6 +192,8 @@ typedef struct
 	short			icon_mode;
 
 	struct Library		*newicon_base;
+	struct Library		*MathBase;
+	struct Library		*MathTransBase;
 
 	struct DiskObject	*new_oldicon;
 	struct DiskObject	*new_newicon;

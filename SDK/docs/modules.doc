@@ -67,7 +67,7 @@ Module_Entry() function are as follows:
 itself. When Galileo starts up it scans the contents of the modules directory,
 and calls this function in each of the modules.
 
-    The standard modinit.o¹ module startup code supplies this function for you.
+    The standard modinit.o module startup code supplies this function for you.
 It is not recommended that you change it. If you need to supply your own
 function, the prototype is as follows :
 
@@ -78,9 +78,6 @@ ID number that Galileo is enquiring about. If "num" is equal to -1, you must
 return a pointer to the ModuleInfo structure for the module. If "num" is equal
 to a valid command ID code, you must return a pointer to a description string
 for that command. If "num" is an invalid value, you must return 0.
-
-¹There is also modinitmffp.o for gfmmodules compiled with MATH=FFP. It will
-open mathffp.library and mathtrans.library for you.
 
 4. The contents of the module are identified with a ModuleInfo structure. All
 fields of the ModuleInfo structure must be initialised. The meaning of the

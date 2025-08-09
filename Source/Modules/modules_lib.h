@@ -63,10 +63,6 @@ extern struct Library *DiskfontBase;
 extern struct Library *AslBase;
 extern struct RxsLib  *RexxSysBase;
 extern struct GalileoLocale *locale;
-#ifdef _FFP
-extern struct Library *MathBase;
-extern struct Library *MathTransBase;
-#endif
 extern ModuleInfo module_info;
 
 #ifdef RESOURCE_TRACKING

@@ -4,7 +4,6 @@ XADDIR      = xadbrowser/
 FTPDIR      = ftp/
 
 STDOBJS     =   $(OBJ)libinit.o $(OBJ)lsprintf.o
-FFPOBJS     =   $(OBJ)libinitmffp.o $(OBJ)lsprintf.o
 
 SHOWOBJS    =   $(OBJ)show.o $(OBJ)show_data.o $(OBJ)show_strings.o
 SHOWVER     =       0
@@ -132,14 +131,14 @@ ENVOYOBJS   =   $(OBJ)envoy.o $(OBJ)envoy_data.o $(OBJ)envoy_strings.o
 ENVOYVER    =   0
 ENVOYREV    =   2
 
-MODINITOBJS = $(SOBJ)modinit.o $(SOBJ)modinitmffp.o
+MODINITOBJS = $(SOBJ)modinit.o
 
 STRINGS = cleanup.strings debug.strings diskcopy.strings filetype.strings fixicons.strings \
      format.strings icon.strings iconclock.strings join.strings listerformat.strings misc.strings \
      play.strings print.strings read.strings recyclebin.strings show.strings themes.strings \
      update.strings $(FTPDIR)ftp.strings $(CONFIGDIR)config.strings $(XADDIR)XADbrowser.strings
 
-OBJS1 = $(STDOBJS) $(FFPOBJS) $(SHOWOBJS) $(PLAYOBJS) $(MISCOBJS) $(ICONOBJS) $(FORMATOBJS) $(DISKCOPYOBJS) \
+OBJS1 = $(STDOBJS) $(SHOWOBJS) $(PLAYOBJS) $(MISCOBJS) $(ICONOBJS) $(FORMATOBJS) $(DISKCOPYOBJS) \
 	$(READOBJS) $(JOINOBJS) $(PRINTOBJS) $(LISTFORMATOBJS) $(FIXICONSOBJS) \
 	$(THEMESOBJS) $(FILETYPEOBJS) $(RECYCLEBINOBJS) $(ICONCLOCKOBJS) \
 	$(UPDATEOBJS) $(CLEANUPOBJS) $(ABOUTOBJS)
@@ -211,17 +210,6 @@ modules_internal_pragmas.h: modules_internal.fd
 $(OBJ)lsprintf.o: lsprintf.asm
 $(OBJ)$(FTPDIR)ftp_ver.o: $(FTPDIR)ftp_ver.c
 
-libinitmffp.c: libinit.c
-    copy libinit.c CLONE libinitmffp.c FORCE
-
-modinitmffp.c: modinit.c
-    copy modinit.c CLONE modinitmffp.c FORCE
-
-$(OBJ)libinitmffp.o: libinitmffp.c
-    sc libinitmffp.c $(SCFLAGS) math=ffp globalsymboltable=include:osffp.gst objname $@
-
-$(SOBJ)modinitmffp.o: modinitmffp.c
-    sc modinitmffp.c $(SCFLAGS) math=ffp globalsymboltable=include:osffp.gst objname $@
 
 #########################################################################
 
@@ -280,12 +268,12 @@ sc sd
 $(OBJ)icon.o: icon.c
 	sc $*.c $(SCFLAGS) math=ffp globalsymboltable=include:osffp.gst objname $@
 
-$(BIN)icon.gfmmodule: $(FFPOBJS) $(ICONOBJS)
+$(BIN)icon.gfmmodule: $(STDOBJS) $(ICONOBJS)
 	slink with lib:utillib.with with <<
 define __ctype=___ctype
 libprefix _L_
 libfd modules_internal.fd
-$(ADDSYM) from lib:libent.o lib:libinit.o $(FFPOBJS) $(ICONOBJS)
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(ICONOBJS)
 to $(BIN)icon.gfmmodule
 lib lib:scmffp.lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(ICONVER)
@@ -605,7 +593,7 @@ maxhunk 51200
 
 #########################################################################
 
-depend: libinitmffp.c modinitmffp.c pragmas $(STRINGS)
+depend: pragmas $(STRINGS)
     makedepend -Y//SDK/include/ -p$$(OBJ) -Q$(OBJ) $(OBJS1)
     makedepend -a -Y//SDK/include/ -p$$(OBJ) -Q$(OBJ)  $(OBJS2)
     makedepend -a -Y//SDK/include/ -p$$(OBJ) -Q$(OBJ)  $(OBJS3)
@@ -645,9 +633,6 @@ configclean:
 $(OBJ)libinit.o: libinit.c modules_lib.h /Library/galileofmbase.h
 $(OBJ)libinit.o: /Include/galileo/os.h /Program/galileo_config.h
 $(OBJ)libinit.o: /Library/galileofmpragmas.h modules.h
-$(OBJ)libinitmffp.o: libinitmffp.c modules_lib.h /Library/galileofmbase.h
-$(OBJ)libinitmffp.o: /Include/galileo/os.h /Program/galileo_config.h
-$(OBJ)libinitmffp.o: /Library/galileofmpragmas.h modules.h
 $(OBJ)show.o: show.c show.h show.strings modules_lib.h
 $(OBJ)show.o: /Library/galileofmbase.h /Include/galileo/os.h
 $(OBJ)show.o: /Program/galileo_config.h /Library/galileofmpragmas.h modules.h
@@ -1650,31 +1635,3 @@ $(SOBJ)modinit.o: //SDK/include/galileofm/memory.h
 $(SOBJ)modinit.o: //SDK/include/galileofm/dos.h
 $(SOBJ)modinit.o: //SDK/include/galileofm/rexx.h
 $(SOBJ)modinit.o: //SDK/include/pragmas/galileofm_pragmas.h
-$(SOBJ)modinitmffp.o: modinitmffp.c //SDK/include/galileofm/modules.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/galileofmbase.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/args.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/bufferedio.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/gui.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/clipboard.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/images.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/iff.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/misc.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/64bit.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/progress.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/appicon.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/drag.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/locale.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/lists.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/timer.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/notify.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/ipc.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/requesters.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/layout.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/popup.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/diskio.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/edithook.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/icon.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/memory.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/dos.h
-$(SOBJ)modinitmffp.o: //SDK/include/galileofm/rexx.h
-$(SOBJ)modinitmffp.o: //SDK/include/pragmas/galileofm_pragmas.h

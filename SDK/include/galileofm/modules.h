@@ -641,10 +641,6 @@ extern struct RxsLib	    *RexxSysBase;
 extern struct Device	    *TimerBase;
 extern struct LocaleBase    *LocaleBase;
 extern struct Library	    *WorkbenchBase;
-#ifdef _FFP
-extern struct Library	    *MathBase;
-extern struct Library	    *MathTransBase;
-#endif
 
 #ifdef RESOURCE_TRACKING
 extern struct Library       *ResTrackBase;
