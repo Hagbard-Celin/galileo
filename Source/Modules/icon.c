@@ -580,7 +580,7 @@ int openwindow( icon_data *data, int next )
 	data->icon_type = WBDISK;
 
     // If it is a disk, we need math libs
-    if (data->icon_type = WBDISK)
+    if (data->icon_type == WBDISK)
     {
 	if (!(data->MathBase=OpenLibrary("mathffp.library",37)) ||
 	!(data->MathTransBase=OpenLibrary("mathtrans.library",37)))
