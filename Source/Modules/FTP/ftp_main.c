@@ -1074,6 +1074,12 @@ else
 
 	kprintf( "** icons dropped from desktop\n" );
 	flags |= XFER_DROP_FROM_DESKTOP;
+	// Development seems to have stopped at this point.
+	// The above flag is not used anywhere. And the following
+	// code-path just generates MuForce hits due to empty
+	// string-pointers. So just beep and bail out for now.
+	DisplayBeep( og->og_screen );
+	return 0;
 	}
 
 // Build and send xfer message
