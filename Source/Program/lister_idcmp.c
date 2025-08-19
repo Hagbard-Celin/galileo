@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,22 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "dirlist_protos.h"
+#include "misc_protos.h"
+#include "app_msg_protos.h"
+#include "reselect_protos.h"
+#include "function_launch_protos.h"
+#include "buffers_protos.h"
+#include "backdrop_protos.h"
+#include "cx.h"
+#include "rexx_protos.h"
+#include "menu_data.h"
+#include "help.h"
+#include "graphics.h"
+#include "file_select.h"
+#include "handler.h"
+#include "status_text_protos.h"
 
 // Process lister IDCMP messages
 void __asm __saveds lister_process_msg(
@@ -125,7 +142,7 @@ void __asm __saveds lister_process_msg(
 							// Match?
 							if (menuitem==(APTR)(GTMENUITEM_USERDATA(item)))
 							{
-								GalileoAppMessage *msg;
+								struct AppMessage *msg;
 								struct MsgPort *port;
 
 								// Set flag
@@ -138,13 +155,13 @@ void __asm __saveds lister_process_msg(
 								if (msg=alloc_appmsg_files(0,lister->cur_buffer,1))
 								{
 									// Set message type
-									msg->ga_Msg.am_Type=MTYPE_APPMENUITEM;
+									msg->am_Type=MTYPE_APPMENUITEM;
 
 									// Get port and info
 									port=WB_AppWindowData(
 										(struct AppWindow *)menuitem,
-										&msg->ga_Msg.am_ID,
-										&msg->ga_Msg.am_UserData);
+										&msg->am_ID,
+										&msg->am_UserData);
 
 									// Send the message
 									PutMsg(port,(struct Message *)msg);
@@ -596,7 +613,12 @@ void __asm __saveds lister_process_msg(
 						}
 
 						// Activate path field
-						if (key_ok) ActivateStrGad(lister->path_field,lister->window);
+						if (key_ok)
+						{
+						    if (!(lister->path_field->Flags&GFLG_SELECTED) && !(lister->path_field->Flags&GFLG_DISABLED))
+							ActivateGadget(lister->path_field,lister->window,0);
+						}
+
 						break;
 
 					// Escape
@@ -1053,6 +1075,13 @@ void __asm __saveds lister_process_msg(
 						// Custom handler?
 						if (lister->cur_buffer->buf_CustomHandler[0])
 						{
+						    if (*(ULONG *)lister->cur_buffer->buf_CustomHandler == CUSTH_TYPE_GFMMODULE)
+							galileo_handler_msg(0, "path",
+									    0, lister,
+									    0, 0, lister->path_buffer, 0,
+									    0,
+									    0, 0);
+						    else
 							// Send message
 							rexx_handler_msg(
 								0,
@@ -1062,7 +1091,7 @@ void __asm __saveds lister_process_msg(
 								HA_Value,1,lister,
 								HA_String,2,lister->path_buffer,
 								TAG_END);
-							break;
+						    break;
 						}
 
 						// Make this window active
@@ -1077,20 +1106,40 @@ void __asm __saveds lister_process_msg(
 						}
 
 						// Check path for FTP
-						if (!(lister_check_ftp(lister,lister->path_buffer)))
+						if (lister->path_buffer && !(lister_check_ftp(lister,lister->path_buffer)))
 						{
-							// See if path has changed
-							if (stricmp(lister->path_buffer,lister->cur_buffer->buf_ExpandedPath))
-							{
-								// Read directory
-								read_directory(lister,lister->path_buffer,GETDIRF_CANMOVEEMPTY|GETDIRF_CANCHECKBUFS);
-							}
+							BPTR lock;
 
-							// Same path; force reread
-							else
+							// Stay on same disk if volume-name did not change
+							if (lister->cur_buffer->buf_Lock &&
+							    lister->cur_buffer->buf_ExpandedPath &&
+							    lister->cur_buffer->buf_ExpandedPath[0] &&
+							    !memcmp(lister->path_buffer, lister->cur_buffer->buf_ExpandedPath, lister->cur_buffer->buf_VolNameLength + 1))
 							{
-								read_directory(lister,lister->path_buffer,0);
+							    lock = LockFromVolIdPath(lister->cur_buffer->buf_VolumeLabel, lister->path_buffer,
+										     &lister->cur_buffer->buf_VolumeDate, lister->cur_buffer->buf_VolNameLength, NULL);
 							}
+							else
+							    lock = LockFromPath(lister->path_buffer, NULL, FALSE);
+
+							// Try lock
+							if (lock)
+							{
+							    // See if path has changed
+							    if (SameLock(lock,lister->cur_buffer->buf_Lock) != LOCK_SAME)
+							    {
+								// Read directory
+								read_directory(lister,lister->path_buffer,lock,GETDIRF_CANMOVEEMPTY|GETDIRF_CANCHECKBUFS);
+							    }
+
+							    // Same path; force reread
+							    else
+							    {
+								read_directory(lister,lister->path_buffer,lock,0);
+							    }
+							}
+							else
+							    status_display_error(lister,-1);
 						}
 					}
 					break;

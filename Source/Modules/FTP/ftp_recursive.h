@@ -159,7 +159,7 @@ struct update_info       hc_ui;				// Used for xfer bar update
 
 char                    *hc_galileo;			// Galileo port name for ARexx calls
 struct ftp_node         *hc_prognode;			// FTP node of lister with progress bar
-ULONG                    hc_proghandle;			// Handle of lister with progress bar
+APTR                     hc_proghandle;			// Handle of lister with progress bar
 struct ftp_environment  *hc_env;
 char                     hc_fromdirname[FILENAMELEN+1];	// From 'xxx'
 char                     hc_todirname[FILENAMELEN+1];	// To 'yyy'

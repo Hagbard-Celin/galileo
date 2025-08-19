@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -271,7 +271,7 @@ Cfg_ButtonBank *config_menus_load_bank(
 	if (!data->bank && path)
 	{
 		// Try to load bank
-		if (data->bank=OpenButtonBank(path))
+		if (data->bank=OpenButtonBank(path, NULL))
 		{
 			// Lister menu?
 			if (data->type==MENUTYPE_LISTER)

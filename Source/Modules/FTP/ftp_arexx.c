@@ -135,7 +135,7 @@ return result;
 
 // Add an entry to a lister which is NOT under our control
 
-void rexx_lst_add( const char *galileo, ULONG handle,
+void rexx_lst_add( const char *galileo, APTR handle,
 	 char *name, unsigned int size, int type, ULONG seconds, LONG prot,
 	 char *comment )
 {
@@ -179,7 +179,7 @@ send_rexxa( galileo, REXX_REPLY_NONE, "command doubleclick %s", path );
 //
 //	Refresh a lister
 //
-void rexx_lst_refresh( const char *galileo, ULONG handle, int date )
+void rexx_lst_refresh( const char *galileo, APTR handle, int date )
 {
 //kprintf("Refresh lister - start - ");
 
@@ -197,7 +197,7 @@ if	(date == REFRESH_DATE)
  *	Set or clear a lister's busy state
  */
 
-void rexx_lst_busy( const char *galileo, ULONG handle, int val )
+void rexx_lst_busy( const char *galileo, APTR handle, int val )
 {
 /*
 if	(val)
@@ -218,7 +218,7 @@ send_rexxa( galileo, REXX_REPLY_NONE, "lister set %lu busy %d wait", handle, val
  *
  */
 
-void rexx_lst_empty( const char *galileo, ULONG handle )
+void rexx_lst_empty( const char *galileo, APTR handle )
 {
 //kprintf( "rexx_lst_empty(%ld)\n", handle );
 
@@ -234,7 +234,7 @@ send_rexxa( galileo, REXX_REPLY_NONE, "lister set %lu case on", handle );
  *	Galileo clears the current buffer, does not move to a new one
  */
 
-void rexx_lst_clear( const char *galileo, ULONG handle )
+void rexx_lst_clear( const char *galileo, APTR handle )
 {
 //kprintf( "rexx_lst_clear(%ld)\n", handle );
 
@@ -247,7 +247,7 @@ send_rexxa( galileo, REXX_REPLY_NONE, "lister clear %lu", handle );
  *	Close a lister and clear cache buffers
  */
 
-void rexx_lst_close( const char *galileo, ULONG handle )
+void rexx_lst_close( const char *galileo, APTR handle )
 {
 // new command : lister freecaches <handle> <handler>
 // eg, lister freecaches 129384849 _GALILEO_FTP_
@@ -266,7 +266,7 @@ send_rexxa( galileo, REXX_REPLY_NONE, "lister close %lu", handle );
  *	
  *	returns 1/0 for entry cached or not
  */
-int rexx_lst_findcache( const char *galileo, ULONG handle, char *path )
+int rexx_lst_findcache( const char *galileo, APTR handle, char *path )
 {
 char *string;
 int   value = 0;
@@ -281,7 +281,7 @@ return value;
 }
 
 // Remember to do a refresh after this
-void rexx_lst_title( const char *galileo, ULONG handle, char *title )
+void rexx_lst_title( const char *galileo, APTR handle, char *title )
 {
 if	(strncmp( title, "FTP:", 4 ))
 	send_rexxa( galileo, REXX_REPLY_NONE, "lister set %lu title FTP:%s", handle, title );
@@ -290,7 +290,7 @@ else
 }
 
 // Remember to do a refresh after this
-char *rexx_lst_title_swap( const char *galileo, ULONG handle, char *title )
+char *rexx_lst_title_swap( const char *galileo, APTR handle, char *title )
 {
 if	(strncmp( title, "FTP:", 4 ))
 	return (char *)send_rexxa( galileo, REXX_REPLY_RESULT, "lister set %lu title FTP:%s", handle, title );
@@ -303,7 +303,7 @@ else
 //
 //	Set the label that the lister will have while iconified
 //
-void rexx_lst_label ( const char *galileo, ULONG handle, 
+void rexx_lst_label ( const char *galileo, APTR handle,
 	 char *pref, char *label, char *suff )
 {
 if	(!pref)
@@ -322,7 +322,7 @@ else
 //
 //	Ensure a lister becomes busy
 //
-void rexx_lst_lock( const char *galileo, ULONG handle )
+void rexx_lst_lock( const char *galileo, APTR handle )
 {
 int		notdone = 1;
 char *		r;
@@ -351,10 +351,10 @@ while	(notdone)
 //
 //	Create a new lister and set it's title and handler
 //
-ULONG rexx_lst_new( const char *galileo, ULONG handle, char *host, const char *toolbar )
+APTR rexx_lst_new( const char *galileo, APTR handle, char *host, const char *toolbar )
 {
 char  *asciihandle;
-ULONG  new_handle;
+APTR  new_handle;
 BPTR   dir_lock = 0, cd = 0, toolbar_lock = 0;
 
 if	(toolbar && *toolbar && (dir_lock = Lock( "PROGDIR:Buttons/", ACCESS_READ )))
@@ -380,7 +380,7 @@ else
 		asciihandle = (char *)send_rexxa( galileo, REXX_REPLY_RESULT, "lister new toolbar %s", toolbar );
 	else
 		asciihandle = (char *)send_rexxa( galileo, REXX_REPLY_RESULT, "lister new" );
-	new_handle = atoi(asciihandle);
+	new_handle = (APTR)atoi(asciihandle);
 	DeleteArgstring( asciihandle );
 	}
 	
@@ -413,7 +413,7 @@ return new_handle;
 
 /*********************************/
 
-BOOL rexx_lst_query_handler( const char *galileo, ULONG handle )
+BOOL rexx_lst_query_handler( const char *galileo, APTR handle )
 {
 char *handler;
 BOOL  result = FALSE;
@@ -439,7 +439,7 @@ return result;
 //	Is lister visible? 
 //	Still there after an inactive msg?
 //
-int rexx_lst_query_visible( const char *galileo, ULONG handle)
+int rexx_lst_query_visible( const char *galileo, APTR handle)
 {
 char *string;
 int   value = 0;
@@ -460,14 +460,14 @@ return value;
  *	Returns 1st dest handle
  */
 
-ULONG rexx_lst_query_dest1( const char *galileo )
+APTR rexx_lst_query_dest1( const char *galileo )
 {
 char *dst;
-ULONG result = 0;
+APTR result = 0;
 
 if	(dst = (char*)send_rexx( galileo, REXX_REPLY_RESULT, "lister query dest" ))
 	{
-	result = atoi(dst);
+	result = (APTR)atoi(dst);
 	DeleteArgstring( dst );
 	}
 
@@ -480,14 +480,14 @@ return result;
  *	Get the fileinfo string for a list entry
  */
 
-char *rexx_lst_query_entry( const char *galileo, ULONG handle, char *entry )
+char *rexx_lst_query_entry( const char *galileo, APTR handle, char *entry )
 {
 return (char *)send_rexxa( galileo, REXX_REPLY_RESULT, "lister query %lu entry \"%s\"", handle, entry );
 }
 
 /********************************/
 
-static int rexx_lst_query_numblah( const char *galileo, ULONG handle, const char *blah )
+static int rexx_lst_query_numblah( const char *galileo, APTR handle, const char *blah )
 {
 char *s;
 int   n = 0;
@@ -503,42 +503,42 @@ return n;
 
 /********************************/
 
-int rexx_lst_query_numentries( const char *galileo, ULONG handle )
+int rexx_lst_query_numentries( const char *galileo, APTR handle )
 {
 return rexx_lst_query_numblah( galileo, handle, "entries" );
 }
 
 /********************************/
 
-int rexx_lst_query_numfiles( const char *galileo, ULONG handle )
+int rexx_lst_query_numfiles( const char *galileo, APTR handle )
 {
 return rexx_lst_query_numblah( galileo, handle, "files" );
 }
 
 /********************************/
 
-int rexx_lst_query_numseldirs( const char *galileo, ULONG handle )
+int rexx_lst_query_numseldirs( const char *galileo, APTR handle )
 {
 return rexx_lst_query_numblah( galileo, handle, "seldirs" );
 }
 
 /********************************/
 
-int rexx_lst_query_numselentries( const char *galileo, ULONG handle )
+int rexx_lst_query_numselentries( const char *galileo, APTR handle )
 {
 return rexx_lst_query_numblah( galileo, handle, "selentries" );
 }
 
 /********************************/
 
-int rexx_lst_query_numselfiles( const char *galileo, ULONG handle )
+int rexx_lst_query_numselfiles( const char *galileo, APTR handle )
 {
 return rexx_lst_query_numblah( galileo, handle, "selfiles" );
 }
 
 /********************************/
 
-char *rexx_lst_query_path( const char *galileo, ULONG handle )
+char *rexx_lst_query_path( const char *galileo, APTR handle )
 {
 char *path;
 
@@ -556,14 +556,14 @@ return path;
 //
 //	Returns 1st source handle
 //
-ULONG rexx_lst_query_src1( const char *galileo )
+APTR rexx_lst_query_src1( const char *galileo )
 {
 char  *src;
-ULONG  result = 0;
+APTR   result = 0;
 
 if	(src = (char*)send_rexx( galileo, REXX_REPLY_RESULT, "lister query source" ))
 	{
-	result = atoi(src);
+	result = (APTR)atoi(src);
 	DeleteArgstring( src );
 	}
 
@@ -572,7 +572,7 @@ return result;
 
 /********************************/
 
-void rexx_lst_remove( const char *galileo, ULONG handle, char *name )
+void rexx_lst_remove( const char *galileo, APTR handle, char *name )
 {
 send_rexxa( galileo, REXX_REPLY_NONE, "lister remove %lu \"%s\"", handle, name );
 }
@@ -583,14 +583,14 @@ send_rexxa( galileo, REXX_REPLY_NONE, "lister remove %lu \"%s\"", handle, name )
  *	Select or deselect an entry in a lister
  */
 
-void rexx_lst_select( const char *galileo, ULONG handle, char *name, int state )
+void rexx_lst_select( const char *galileo, APTR handle, char *name, int state )
 {
 send_rexxa( galileo, REXX_REPLY_NONE, "lister select %lu \"%s\" %d", handle, name, state );
 }
 
 /********************************/
 
-void rexx_lst_set_path( const char *galileo, ULONG handle, char *path )
+void rexx_lst_set_path( const char *galileo, APTR handle, char *path )
 {
 //kprintf( "rexx_lst_set_path(%ld)\n", handle );
 //kprintf( "-> '%s'\n", path );
@@ -604,7 +604,7 @@ send_rexxa( galileo, REXX_REPLY_NONE, "lister set %lu path %s", handle, path );
 
 /********************************/
 
-void rexx_prog_bar( const char *galileo, ULONG handle, int type, int total, int count )
+void rexx_prog_bar( const char *galileo, APTR handle, int type, int total, int count )
 {
 if	(type == PROGRESS_FREE)
 	send_rexxa( galileo, REXX_REPLY_NONE, "galileo progress %lu bar %ld %ld", handle, total, count );
@@ -614,7 +614,7 @@ else
 
 /********************************/
 
-void rexx_prog_bytes( const char *galileo, ULONG handle, int type, int total, int count )
+void rexx_prog_bytes( const char *galileo, APTR handle, int type, int total, int count )
 {
 if	(type == PROGRESS_FREE)
 	send_rexxa( galileo, REXX_REPLY_NONE, "galileo progress %lu file %ld %ld", handle, total, count );
@@ -624,7 +624,7 @@ else
 
 /********************************/
 
-void rexx_prog_clear( const char *galileo, ULONG handle, int type )
+void rexx_prog_clear( const char *galileo, APTR handle, int type )
 {
 if	(type == PROGRESS_FREE)
 	send_rexxa( galileo, REXX_REPLY_NONE, "galileo progress %lu off", handle );
@@ -639,9 +639,9 @@ else
 //	If no handle is passed in, a free-floating progress bar will be created.
 //	Returns the handle passed in or the handle of the free-floating bar.
 //
-ULONG rexx_prog_init(
+APTR rexx_prog_init(
 	const char *galileo,
-	ULONG       handle,
+	APTR	    handle,
 	int         type,
 	char       *title,
 	char       *info,
@@ -667,7 +667,7 @@ if	(type == PROGRESS_FREE)
 	{
 	if	(str = (char *)send_rexx( galileo, REXX_REPLY_RESULT, buf ))
 		{
-		handle = atoi(str);
+		handle = (APTR)atoi(str);
 		DeleteArgstring( str );
 		}
 	}
@@ -706,9 +706,9 @@ return handle;
 //	If no handle is passed in, a free-floating progress bar will be created.
 //	Returns the handle passed in or the handle of the free-floating bar.
 //
-ULONG rexx_prog_init3(
+APTR rexx_prog_init3(
 	const char *galileo,
-	ULONG       handle,
+	APTR	    handle,
 	int         type,
 	char       *title,
 	char       *info,
@@ -739,7 +739,7 @@ if	(type == PROGRESS_FREE)
 	{
 	if	(str = (char *)send_rexx( galileo, REXX_REPLY_RESULT, buf ))
 		{
-		handle = atoi(str);
+		handle = (APTR)atoi(str);
 		DeleteArgstring( str );
 		}
 	}
@@ -772,7 +772,7 @@ return handle;
 
 /********************************/
 
-void rexx_prog_name( const char *galileo, ULONG handle, int type, char *name )
+void rexx_prog_name( const char *galileo, APTR handle, int type, char *name )
 {
 if	(type == PROGRESS_FREE)
 	send_rexxa( galileo, REXX_REPLY_NONE, "galileo progress %lu name %s", handle, name );
@@ -782,7 +782,7 @@ else
 
 /********************************/
 
-void rexx_prog_info( const char *galileo, ULONG handle, int type, char *info )
+void rexx_prog_info( const char *galileo, APTR handle, int type, char *info )
 {
 if	(type == PROGRESS_FREE)
 	send_rexxa( galileo, REXX_REPLY_NONE, "galileo progress %lu info %s", handle, info );
@@ -791,7 +791,7 @@ else
 }
 
 
-void rexx_prog_info2( const char *galileo, ULONG handle, int type, char *info )
+void rexx_prog_info2( const char *galileo, APTR handle, int type, char *info )
 {
 if	(type == PROGRESS_FREE)
 	send_rexxa( galileo, REXX_REPLY_NONE, "galileo progress %lu info2 %s", handle, info );
@@ -799,7 +799,7 @@ else
 	send_rexxa( galileo, REXX_REPLY_NONE, "lister set %lu newprogress info2 %s", handle, info );
 }
 
-void rexx_prog_info3( const char *galileo, ULONG handle, int type, char *info )
+void rexx_prog_info3( const char *galileo, APTR handle, int type, char *info )
 {
 if	(type == PROGRESS_FREE)
 	send_rexxa( galileo, REXX_REPLY_NONE, "galileo progress %lu info %s", handle, info );

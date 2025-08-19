@@ -31,21 +31,23 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 
 //#define BACKFILL
 
+#define IS_LAYOUTREL (1<<1)
+
 struct backfill_hook
 {
-	struct Hook		hook;
-	struct Library		*GfxBase;
-	UWORD			dither[2];
-	struct RastPort		rp;
-	short			shinepen;
-	short			shadowpen;
+    struct Hook		hook;
+    struct Library	*GfxBase;
+    UWORD		dither[2];
+    struct RastPort	rp;
+    short		shinepen;
+    short		shadowpen;
 };
 
 #ifdef BACKFILL

@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,11 +32,13 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "rexx_protos.h"
+#include "lsprintf_protos.h"
 
 #define is_digit(c) ((c)>='0' && (c)<='9')
 #define is_space(c) ((c)==' ' || (c)=='\t')
@@ -116,6 +119,60 @@ BOOL rexx_parse_number_byte(char **ptr,UBYTE *val)
 		return 1;
 	}
 	return 0;
+}
+
+
+// Parse a word out of a string
+STRPTR rexx_parse_word_alloch(char **ptrptr,ULONG *ret_len)
+{
+	short len=0,quote=0;
+	char *ptr, *word = 0, tmp;
+
+	// Skip preceeding spaces
+	rexx_skip_space(ptrptr);
+	ptr=*ptrptr;
+
+	// Copy until end, whitespace or buffer full
+	while (*ptr)
+	{
+		// Quote?
+		if (*ptr=='\"' && quote!=2)
+		{
+			if (quote==0) quote=1;
+			else quote=0;
+		}
+
+		// Other quote?
+		else if (*ptr=='\'' && quote!=1)
+		{
+			if (quote==0) quote=2;
+			else quote=0;
+		}
+
+		// White space?
+		else if (is_space(*ptr) && !quote)
+			break;
+
+		// Count character
+		len++;
+
+		// Increment pointer
+		++ptr;
+		++*ptrptr;
+	}
+
+	if (len)
+	{
+	    tmp = ptr[len];
+	    ptr[len] = 0;
+
+	    if ((word = CopyString(NULL, ptr)) && ret_len)
+		*ret_len = len;
+
+	    ptr[len] = tmp;
+	}
+
+	return word;
 }
 
 

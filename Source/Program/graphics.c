@@ -31,11 +31,13 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "dirlist_protos.h"
 
 // Draw a 3D box
 void do3dbox(struct RastPort *rp,struct Rectangle *rect,BOOL recessed)

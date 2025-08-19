@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -96,18 +96,8 @@ void config_env_path_add(config_env_data *data)
 		// Get path
 		if ((ptr=(char *)GetGadgetValue(data->option_list,GAD_SETTINGS_PATHLIST_PATH)) && *ptr)
 		{
-			BPTR lock;
-			char buf[256];
 			Att_Node *node;
-#if 0
-			// Get full path
-			if (lock=Lock(ptr,ACCESS_READ))
-			{
-				NameFromLock(lock,buf,256);
-				UnLock(lock);
-				ptr=buf;
-			}
-#endif
+
 			// Add to list
 			SetGadgetChoices(data->option_list,GAD_SETTINGS_PATHLIST,(APTR)~0);
 			node=Att_NewNode(data->path_list,ptr,0,0);
@@ -184,17 +174,6 @@ void config_env_path_edit(config_env_data *data)
 	// Get path
 	if ((ptr=(char *)GetGadgetValue(data->option_list,GAD_SETTINGS_PATHLIST_PATH)) && *ptr)
 	{
-		BPTR lock;
-		char buf[256];
-#if 0
-		// Get full path
-		if (lock=Lock(ptr,ACCESS_READ))
-		{
-			NameFromLock(lock,buf,256);
-			UnLock(lock);
-			ptr=buf;
-		}
-#endif
 		// Change node name
 		SetGadgetChoices(data->option_list,GAD_SETTINGS_PATHLIST,(APTR)~0);
 		Att_ChangeNodeName(node,ptr);

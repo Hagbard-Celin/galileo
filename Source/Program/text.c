@@ -31,12 +31,14 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 //#include "text.h"
 #include "galileofm.h"
+#include "text.h"
+#include "clock_task.h"
 
 void TextMultiLine(
 	struct RastPort *rp,

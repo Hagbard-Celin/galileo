@@ -28,6 +28,7 @@
 #include <proto/datatypes.h>
 #include <proto/layers.h>
 #include <proto/rexxsyslib.h>
+#include <proto/keymap.h>
 #include <proto/Picasso96.h>
 
 #ifdef _FFP
@@ -60,6 +61,9 @@
 #ifdef _DEBUG
 #include <clib/debug_protos.h>
 #endif
+
+#define D_S(type,name) char a_##name[sizeof(type)+3]; \
+		       type *name = (type *)((ULONG)(a_##name+3) & ~3UL)
 
 #endif
 

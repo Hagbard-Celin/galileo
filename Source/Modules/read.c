@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -62,7 +63,7 @@ int __asm __saveds L_Module_Entry_Internal(
 	register __d1 ULONG mod_data)
 {
 	read_data *data;
-	struct Node *node,*next;
+	Att_LockNode *node,*next;
 
 	// Allocate data and memory pool
 	if (!(data=AllocVec(sizeof(read_data),MEMF_CLEAR)) ||
@@ -198,15 +199,16 @@ int __asm __saveds L_Module_Entry_Internal(
 	if (read_open_window(data))
 	{
 		// Go through files
-		for (node=files->lh_Head;node->ln_Succ;node=node->ln_Succ)
+		for (node=(Att_LockNode *)files->lh_Head;node->node.ln_Succ;node=(Att_LockNode *)node->node.ln_Succ)
 		{
+			BPTR org_dir = 0;
 			short ret;
 
 			// Store current node
-			data->current=node;
+			data->current=(struct Node *)node;
 
 			// Store file name pointer
-			data->file=node->ln_Name;
+			data->file=node->node.ln_Name;
 
 			// Show title
 			lsprintf(data->title,GetString(locale,MSG_READING_FILE),FilePart(data->file));
@@ -216,7 +218,7 @@ int __asm __saveds L_Module_Entry_Internal(
 			SetBusyPointer(data->window);
 
 			// If no more files, disable Next item
-			if (!node->ln_Succ->ln_Succ)
+			if (!node->node.ln_Succ->ln_Succ)
 			{
 				OffMenu(data->window,FULLMENUNUM(0,0,0));
 				data->no_next=1;
@@ -230,6 +232,9 @@ int __asm __saveds L_Module_Entry_Internal(
 				data->no_next=0;
 			}
 
+			if (node->node.ln_Type == ATTNODE_LOCKNODE && node->att_lock)
+			    org_dir = CurrentDir(node->att_lock);
+
 			// Read file
 			if (ret=read_file(data,mod_data))
 			{
@@ -237,7 +242,13 @@ int __asm __saveds L_Module_Entry_Internal(
 				ret=read_view(data);
 
 				// Delete file?
-				if (node->ln_Pri) DeleteFile(node->ln_Name);
+				if (node->node.ln_Pri) DeleteFile(node->node.ln_Name);
+			}
+
+			if (org_dir)
+			{
+			    UnLock(CurrentDir(org_dir));
+			    node->att_lock = 0;
 			}
 
 			// Aborted?
@@ -245,15 +256,15 @@ int __asm __saveds L_Module_Entry_Internal(
 		}
 
 		// Go through files and free any custom entries
-		for (node=files->lh_Head;node->ln_Succ;node=next)
+		for (node=(Att_LockNode *)files->lh_Head;node->node.ln_Succ;node=next)
 		{
 			// Cache next	
-			next=node->ln_Succ;
+			next=(Att_LockNode *)node->node.ln_Succ;
 
 			// Custom?
-			if (node->ln_Type==0x7f)
+			if (node->node.ln_Type==0x7f)
 			{
-				Remove(node);
+				Remove((struct Node *)node);
 				FreeVec(node);
 			}
 		}
@@ -269,7 +280,7 @@ int __asm __saveds L_Module_Entry_Internal(
 // Free read data
 void read_free(read_data *data,struct read_startup *startup,IPCData *ipc)
 {
-    struct Message *msg;
+	struct Message *msg;
 
 	// Startup?
 	if (startup)
@@ -278,7 +289,7 @@ void read_free(read_data *data,struct read_startup *startup,IPCData *ipc)
 		if (startup->owner) IPC_Goodbye(ipc,startup->owner,0);
 
 		// Free startup data
-		Att_RemList((Att_List *)startup->files,0);
+		Att_RemList((Att_List *)startup->files,REMLIST_UNLOCK);
 		FreeVec(startup);
 	}
 
@@ -314,8 +325,8 @@ void read_free(read_data *data,struct read_startup *startup,IPCData *ipc)
 		FreeTimer(data->scroll_timer);
 
 		// Free app message port
-        while (msg=GetMsg(data->appport))
-			ReplyMsg(msg);
+		while (msg=GetMsg(data->appport))
+		    ReplyMsg(msg);
 		DeleteMsgPort(data->appport);
 
 		// Free stuff
@@ -1119,7 +1130,7 @@ BOOL read_view(read_data *data)
 
 			while (amsg=(struct AppMessage *)GetMsg(data->appport))
 			{
-				short arg;
+				WORD arg;
 				struct Node *insert=data->current;
 
 				// Galileo message?
@@ -1155,16 +1166,17 @@ BOOL read_view(read_data *data)
 					if (amsg->am_ArgList[arg].wa_Name && *amsg->am_ArgList[arg].wa_Name)
 					{
 						struct Node *node;
+						char *name;
 
 						// Build full filename
-						GetWBArgPath(&amsg->am_ArgList[arg],data->line_buffer,256);
-
-						// Allocate new node
-						if (node=AllocVec(sizeof(struct Node)+strlen(data->line_buffer)+1,MEMF_CLEAR))
+						if (name = GetWBArgPath(&amsg->am_ArgList[arg]))
 						{
+						    // Allocate new node
+						    if (node=AllocVec(sizeof(struct Node)+strlen(name)+1,MEMF_CLEAR))
+						    {
 							// Fill out node
 							node->ln_Name=(char *)(node+1);
-							strcpy(node->ln_Name,data->line_buffer);
+							strcpy(node->ln_Name,name);
 							node->ln_Type=0x7f;
 
 							// Add to list of files after current node
@@ -1173,6 +1185,9 @@ BOOL read_view(read_data *data)
 
 							// Set quit flag
 							quit_flag=1;
+						    }
+
+						    FreeMemH(name);
 						}
 					}
 				}
@@ -1532,6 +1547,7 @@ BOOL read_view(read_data *data)
 											0,
 											0,
 											Open("nil:",MODE_OLDFILE),
+											0,
 											0,
 											0);
 										break;

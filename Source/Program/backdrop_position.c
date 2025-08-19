@@ -36,7 +36,9 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
 #include "iconpos.h"
+#include "backdrop_protos.h"
 
 // Arrange backdrop objects
 long backdrop_arrange_objects(BackdropInfo *info)

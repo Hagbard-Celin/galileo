@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,44 +32,35 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofmlib.h"
 
-#define DOSBase (data->dos_base)
 
 /********************************** CreateDir **********************************/
 
-// Patched CreateDir()
-BPTR __asm L_PatchedCreateDir(register __d1 char *name)
+// Patched CreateDir()    
+BPTR __asm __saveds L_PatchedCreateDir(register __d1 char *name, register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-	struct MyLibrary *libbase;
 	struct FileInfoBlock *fib;
 	BPTR lock;
 
-	// Get library
-	if (!(libbase=GET_GALILEOFMLIB)) return 0;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// Call original function
-	lock=((BPTR __asm (*)
+	lock=((BPTR (* __asm)
 			(register __d1 char *,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_CREATEDIR])
-			(name,data->dos_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_CREATEDIR])
+			(name,DOSBase);
 
 	// Failed?
 	if (!lock) return 0;
 
 	// Get directory information
-	if (fib=dospatch_fib(lock,libbase,1))
+	if (fib=dospatch_fib(lock,1))
 	{
 		// Send notification
-		L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_CREATEDIR,0,(char *)(fib+1),fib,libbase);
+		L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_CREATEDIR,0,(char *)(fib+1),fib,GalileoFMBase);
 
 		// Free info block
 		FreeVec(fib);
@@ -80,43 +72,30 @@ BPTR __asm L_PatchedCreateDir(register __d1 char *name)
 // Calls original CreateDir directly
 BPTR __asm __saveds L_OriginalCreateDir(
 	register __d1 char *name,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// If patch wasn't installed, call DOS directly
-	if (!(data->flags&LIBDF_DOS_PATCH))
+	if (!(gfmlib_data.flags&LIBDF_DOS_PATCH))
 		return CreateDir(name);
 
 	// Create directory
 	return
-		((BPTR __asm (*)
+		((BPTR (* __asm)
 			(register __d1 char *,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_CREATEDIR])
-			(name,data->dos_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_CREATEDIR])
+			(name,DOSBase);
 }
 
 /********************************** DeleteFile **********************************/
 
 // Patched DeleteFile()
-long __asm L_PatchedDeleteFile(register __d1 char *name)
+long __asm __saveds L_PatchedDeleteFile(register __d1 char *name, register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-	struct MyLibrary *libbase;
 	char *buf=0;
 	BPTR lock;
 	long res;
 	APTR wsave=(APTR)-1;
 	struct Process *task;
-
-	// Get library
-	if (!(libbase=GET_GALILEOFMLIB)) return 0;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
 
 	// Find process
 	if (task=(struct Process *)FindTask(0))
@@ -134,12 +113,8 @@ long __asm L_PatchedDeleteFile(register __d1 char *name)
 	// Try to lock file to delete
 	if (lock=Lock(name,ACCESS_READ))
 	{
-		// Allocate buffer
-		if (buf=AllocVec(512,MEMF_CLEAR))
-		{
-			// Get full path
-			L_DevNameFromLock(lock,buf,512,libbase);
-		}
+		// Get full path
+		buf = L_PathFromLock(NULL, lock, PFLF_USE_DEVICENAME, NULL);
 
 		// Unlock file
 		UnLock(lock);
@@ -149,10 +124,10 @@ long __asm L_PatchedDeleteFile(register __d1 char *name)
 	if (task) task->pr_WindowPtr=wsave;
 
 	// Call original function
-	res=((long __asm (*)
+	res=((long (* __asm)
 			(register __d1 char *,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_DELETEFILE])
-			(name,data->dos_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_DELETEFILE])
+			(name,DOSBase);
 
 	// Failed?
 	if (!res) return 0;
@@ -161,11 +136,13 @@ long __asm L_PatchedDeleteFile(register __d1 char *name)
 	if (buf && *buf)
 	{
 		// Send notification
-		L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_DELETEFILE,0,buf,0,libbase);
+		L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_DELETEFILE,0,buf,0,GalileoFMBase);
 	}
 
 	// Free buffer
-	FreeVec(buf);
+	if (buf)
+	    FreeMemH(buf);
+
 	return res;
 }
 
@@ -173,51 +150,39 @@ long __asm L_PatchedDeleteFile(register __d1 char *name)
 // Original DeleteFile
 long __asm __saveds L_OriginalDeleteFile(
 	register __d1 char *name,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// If patch wasn't installed, call DOS directly
-	if (!(data->flags&LIBDF_DOS_PATCH))
+	if (!(gfmlib_data.flags&LIBDF_DOS_PATCH))
 		return DeleteFile(name);
 
 	// Delete file
 	return
-		((BPTR __asm (*)
+		((BPTR (* __asm)
 			(register __d1 char *,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_DELETEFILE])
-			(name,data->dos_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_DELETEFILE])
+			(name,DOSBase);
 }
 
 
 /********************************** SetFileDate **********************************/
 
 // Patched SetFileDate()
-BOOL __asm L_PatchedSetFileDate(
+BOOL __asm __saveds L_PatchedSetFileDate(
 	register __d1 char *name,
-	register __d2 struct DateStamp *date)
+	register __d2 struct DateStamp *date,
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-	struct MyLibrary *libbase;
 	BOOL res;
 	BPTR lock;
 	APTR wsave=(APTR)-1;
 	struct Process *task;
 
-	// Get library
-	if (!(libbase=GET_GALILEOFMLIB)) return 0;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// Call original function
-	res=((BOOL __asm (*)
+	res=((BOOL (* __asm)
 			(register __d1 char *,register __d2 struct DateStamp *,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_SETFILEDATE])
-			(name,date,data->dos_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_SETFILEDATE])
+			(name,date,DOSBase);
 
 	// Failed?
 	if (!res) return 0;
@@ -241,10 +206,10 @@ BOOL __asm L_PatchedSetFileDate(
 		struct FileInfoBlock *fib;
 
 		// Get directory information
-		if (fib=dospatch_fib(lock,libbase,0))
+		if (fib=dospatch_fib(lock,0))
 		{
 			// Send notification
-			L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_SETFILEDATE,0,(char *)(fib+1),fib,libbase);
+			L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_SETFILEDATE,0,(char *)(fib+1),fib,GalileoFMBase);
 
 			// Free info block
 			FreeVec(fib);
@@ -265,51 +230,39 @@ BOOL __asm L_PatchedSetFileDate(
 BOOL __asm __saveds L_OriginalSetFileDate(
 	register __d1 char *name,
 	register __d2 struct DateStamp *date,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// If patch wasn't installed, call DOS directly
-	if (!(data->flags&LIBDF_DOS_PATCH))
+	if (!(gfmlib_data.flags&LIBDF_DOS_PATCH))
 		return (BOOL)SetFileDate(name,date);
 
 	// Set date
 	return
-		((BOOL __asm (*)
+		((BOOL (* __asm)
 			(register __d1 char *,register __d2 struct DateStamp *,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_SETFILEDATE])
-			(name,date,data->dos_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_SETFILEDATE])
+			(name,date,DOSBase);
 }
 
 
 /********************************** SetComment **********************************/
 
 // Patched SetComment()
-BOOL __asm L_PatchedSetComment(
+BOOL __asm __saveds L_PatchedSetComment(
 	register __d1 char *name,
-	register __d2 char *comment)
+	register __d2 char *comment,
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-	struct MyLibrary *libbase;
 	BOOL res;
 	BPTR lock;
 	APTR wsave=(APTR)-1;
 	struct Process *task;
 
-	// Get library
-	if (!(libbase=GET_GALILEOFMLIB)) return 0;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// Call original function
-	res=((BOOL __asm (*)
+	res=((BOOL (* __asm)
 			(register __d1 char *,register __d2 char *,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_SETCOMMENT])
-			(name,comment,data->dos_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_SETCOMMENT])
+			(name,comment,DOSBase);
 
 	// Failed?
 	if (!res) return 0;
@@ -333,10 +286,10 @@ BOOL __asm L_PatchedSetComment(
 		struct FileInfoBlock *fib;
 
 		// Get directory information
-		if (fib=dospatch_fib(lock,libbase,0))
+		if (fib=dospatch_fib(lock,0))
 		{
 			// Send notification
-			L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_SETCOMMENT,0,(char *)(fib+1),fib,libbase);
+			L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_SETCOMMENT,0,(char *)(fib+1),fib,GalileoFMBase);
 
 			// Free info block
 			FreeVec(fib);
@@ -357,51 +310,39 @@ BOOL __asm L_PatchedSetComment(
 BOOL __asm __saveds L_OriginalSetComment(
 	register __d1 char *name,
 	register __d2 char *comment,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// If patch wasn't installed, call DOS directly
-	if (!(data->flags&LIBDF_DOS_PATCH))
+	if (!(gfmlib_data.flags&LIBDF_DOS_PATCH))
 		return (BOOL)SetComment(name,comment);
 
 	// Set comment
 	return
-		((BOOL __asm (*)
+		((BOOL (* __asm)
 			(register __d1 char *,register __d2 char *,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_SETCOMMENT])
-			(name,comment,data->dos_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_SETCOMMENT])
+			(name,comment,DOSBase);
 }
 
 
 /********************************** SetProtection **********************************/
 
 // Patched SetProtection()
-BOOL __asm L_PatchedSetProtection(
+BOOL __asm __saveds L_PatchedSetProtection(
 	register __d1 char *name,
-	register __d2 ULONG mask)
+	register __d2 ULONG mask,
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-	struct MyLibrary *libbase;
 	BOOL res;
 	BPTR lock;
 	APTR wsave=(APTR)-1;
 	struct Process *task;
 
-	// Get library
-	if (!(libbase=GET_GALILEOFMLIB)) return 0;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// Call original function
-	res=((BOOL __asm (*)
+	res=((BOOL (* __asm)
 			(register __d1 char *,register __d2 ULONG,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_SETPROTECTION])
-			(name,mask,data->dos_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_SETPROTECTION])
+			(name,mask,DOSBase);
 
 	// Failed?
 	if (!res) return 0;
@@ -425,10 +366,10 @@ BOOL __asm L_PatchedSetProtection(
 		struct FileInfoBlock *fib;
 
 		// Get directory information
-		if (fib=dospatch_fib(lock,libbase,0))
+		if (fib=dospatch_fib(lock,0))
 		{
 			// Send notification
-			L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_SETPROTECTION,0,(char *)(fib+1),fib,libbase);
+			L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_SETPROTECTION,0,(char *)(fib+1),fib,GalileoFMBase);
 
 			// Free info block
 			FreeVec(fib);
@@ -448,47 +389,35 @@ BOOL __asm L_PatchedSetProtection(
 BOOL __asm __saveds L_OriginalSetProtection(
 	register __d1 char *name,
 	register __d2 ULONG mask,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// If patch wasn't installed, call DOS directly
-	if (!(data->flags&LIBDF_DOS_PATCH))
+	if (!(gfmlib_data.flags&LIBDF_DOS_PATCH))
 		return (BOOL)SetProtection(name,mask);
 
 	// Set protection
 	return
-		((BOOL __asm (*)
+		((BOOL (* __asm)
 			(register __d1 char *,register __d2 ULONG,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_SETPROTECTION])
-			(name,mask,data->dos_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_SETPROTECTION])
+			(name,mask,DOSBase);
 }
 
 
 /********************************** Rename **********************************/
 
 // Patched Rename()
-BOOL __asm L_PatchedRename(
+BOOL __asm __saveds L_PatchedRename(
 	register __d1 char *oldname,
-	register __d2 char *newname)
+	register __d2 char *newname,
+	register __a6 struct Library *GalileoFMBase)
 {
 	struct FileInfoBlock *fib=0;
-	struct LibData *data;
-	struct MyLibrary *libbase;
 	BOOL res;
 	BPTR lock;
 	char old_name[108];
 	APTR wsave=(APTR)-1;
 	struct Process *task;
-
-	// Get library
-	if (!(libbase=GET_GALILEOFMLIB)) return 0;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
 
 	// Find process
 	if (task=(struct Process *)FindTask(0))
@@ -507,7 +436,7 @@ BOOL __asm L_PatchedRename(
 	if (lock=Lock(oldname,ACCESS_READ))
 	{
 		// Get file information
-		if (!(fib=dospatch_fib(lock,libbase,0)))
+		if (!(fib=dospatch_fib(lock,0)))
 		{
 			// Failed to get info
 			UnLock(lock);
@@ -519,10 +448,10 @@ BOOL __asm L_PatchedRename(
 	if (task) task->pr_WindowPtr=wsave;
 
 	// Call original function
-	res=((BOOL __asm (*)
+	res=((BOOL (* __asm)
 			(register __d1 char *,register __d2 char *,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_RENAME])
-			(oldname,newname,data->dos_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_RENAME])
+			(oldname,newname,DOSBase);
 
 	// Failure?
 	if (!res)
@@ -552,7 +481,7 @@ BOOL __asm L_PatchedRename(
 		strcpy(fib->fib_FileName,old_name);
 
 		// Send notification
-		L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_RENAME,0,(char *)(fib+1),fib,libbase);
+		L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_RENAME,0,(char *)(fib+1),fib,GalileoFMBase);
 	}
 
 	// Free info block and lock
@@ -569,49 +498,37 @@ BOOL __asm L_PatchedRename(
 BOOL __asm __saveds L_OriginalRename(
 	register __d1 char *oldname,
 	register __d2 char *newname,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// If patch wasn't installed, call DOS directly
-	if (!(data->flags&LIBDF_DOS_PATCH))
+	if (!(gfmlib_data.flags&LIBDF_DOS_PATCH))
 		return (BOOL)Rename(oldname,newname);
 
 	// Rename file
 	return
-		((BOOL __asm (*)
+		((BOOL (* __asm)
 			(register __d1 char *,register __d2 char *,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_RENAME])
-			(oldname,newname,data->dos_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_RENAME])
+			(oldname,newname,DOSBase);
 }
 
 
 /********************************** Relabel **********************************/
 
 // Patched Relabel()
-BOOL __asm L_PatchedRelabel(
+BOOL __asm __saveds L_PatchedRelabel(
 	register __d1 char *volumename,
-	register __d2 char *name)
+	register __d2 char *name,
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-	struct MyLibrary *libbase;
 	struct FileInfoBlock fib;
 	BOOL res;
 
-	// Get library
-	if (!(libbase=GET_GALILEOFMLIB)) return 0;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// Call original function
-	res=((BOOL __asm (*)
+	res=((BOOL (* __asm)
 			(register __d1 char *,register __d2 char *,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_RELABEL])
-			(volumename,name,data->dos_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_RELABEL])
+			(volumename,name,DOSBase);
 
 	// Failure?
 	if (!res) return res;
@@ -620,7 +537,7 @@ BOOL __asm L_PatchedRelabel(
 	strcpy(fib.fib_FileName,name);
 
 	// Send notification
-	L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_RELABEL,0,volumename,&fib,libbase);
+	L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_RELABEL,0,volumename,&fib,GalileoFMBase);
 	return res;
 }
 
@@ -629,43 +546,29 @@ BOOL __asm L_PatchedRelabel(
 BOOL __asm __saveds L_OriginalRelabel(
 	register __d1 char *volumename,
 	register __d2 char *name,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// Relabel disk
 	return
-		((BOOL __asm (*)
+		((BOOL (* __asm)
 			(register __d1 char *,register __d2 char *,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_RELABEL])
-			(volumename,name,data->dos_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_RELABEL])
+			(volumename,name,DOSBase);
 }
 
 
 /********************************** Open **********************************/
 
 // Patched Open()
-BPTR __asm L_PatchedOpen(
+BPTR __asm __saveds L_PatchedOpen(
 	register __d1 char *name,
-	register __d2 LONG accessMode)
+	register __d2 LONG accessMode,
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-	struct MyLibrary *libbase;
-	struct FileInfoBlock *fib;
 	BPTR file,lock;
 	BOOL create=0;
 	APTR wsave=(APTR)-1;
 	struct Process *task;
-	struct FileHandleWrapper *handle;
-
-	// Get library
-	if (!(libbase=GET_GALILEOFMLIB)) return 0;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
 
 	// Find process
 	if (task=(struct Process *)FindTask(0))
@@ -701,10 +604,10 @@ BPTR __asm L_PatchedOpen(
 	if (task) task->pr_WindowPtr=wsave;
 
 	// Call original function
-	file=((BPTR __asm (*)
+	file=((BPTR (* __asm)
 			(register __d1 char *,register __d2 LONG,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_OPEN])
-			(name,accessMode,data->dos_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_OPEN])
+			(name,accessMode,DOSBase);
 
 	// Failure?
 	if (!file) return file;
@@ -712,16 +615,18 @@ BPTR __asm L_PatchedOpen(
 	// If file is Interactive, assume it's not a filesystem
 	if (IsInteractive(file)) return file;
 
-	// Allocate FileInfoBlock and buffer
-	if (!(fib=AllocVec(sizeof(struct FileInfoBlock)+512,MEMF_CLEAR)))
-		return file;
-
 	// Disable requesters
 	if (task) task->pr_WindowPtr=(APTR)-1;
 
 	// Get lock on parent directory
+#ifdef RESOURCE_TRACKING
+	if (lock=NRT_ParentOfFH(file))
+#else
 	if (lock=ParentOfFH(file))
+#endif
 	{
+		struct FileHandleWrapper *handle;
+
 		// Allocate wrapper handle
 		if (handle=AllocVec(sizeof(struct FileHandleWrapper),0))
 		{
@@ -731,43 +636,54 @@ BPTR __asm L_PatchedOpen(
 			handle->fhw_Parent=lock;
 
 			// Lock file list
-			ObtainSemaphore(&data->file_list.lock);
+			ObtainSemaphore(&gfmlib_data.file_list.lock);
 
 			// Add to head of list
-			AddHead(&data->file_list.list,(struct Node *)handle);
+			AddHead(&gfmlib_data.file_list.list,(struct Node *)handle);
 
 			// Unlock file list
-			ReleaseSemaphore(&data->file_list.lock);
+			ReleaseSemaphore(&gfmlib_data.file_list.lock);
 		}
 
 		// If this was a create operation, we need to send a message now
 		if (create)
 		{
-			// Get buffer pointer
-			char *path=(char *)(fib+1);
+			STRPTR name;
+			ULONG len;
 
-			// Get full path of parent, and terminate it
-			L_DevNameFromLock(lock,path,512,libbase);
-			AddPart(path,"",512);
-
-			// Got path?
-			if (*path)
+			// Get full path of parent
+			if (name = L_PathFromLock(NULL, lock, PFLF_USE_DEVICENAME|PFLF_END_SLASH, NULL))
 			{
+			    struct FileInfoBlock *fib;
+
+			    len = getreg(REG_D1);
+
+			    // Get FileInfoBlock and a buffer
+			    if (fib=AllocVec(sizeof(struct FileInfoBlock) + len + 1,MEMF_CLEAR))
+			    {
+				// Get buffer pointer
+				char *path=(char *)(fib+1);
+
+			        // Copy path
+			        strcpy(path, name);
+
 				// Examine the new file
 				if (ExamineFH(file,fib))
 				{
 					// Send notification
-					L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_CREATE,0,path,fib,libbase);
+					L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_CREATE,0,path,fib,GalileoFMBase);
 				}
+
+				// Free fib
+				FreeVec(fib);
+			    }
+			    L_FreeMemH(name);
 			}
 		}
 
 		// Unlock parent, unless handle has grabbed it
 		if (!handle) UnLock(lock);
 	}
-
-	// Free fib
-	FreeVec(fib);
 
 	// Fix requesters
 	if (task) task->pr_WindowPtr=wsave;
@@ -779,43 +695,32 @@ BPTR __asm L_PatchedOpen(
 BPTR __asm __saveds L_OriginalOpen(
 	register __d1 char *name,
 	register __d2 LONG accessMode,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// If patch wasn't installed, call DOS directly
-	if (!(data->flags&LIBDF_DOS_PATCH))
+	if (!(gfmlib_data.flags&LIBDF_DOS_PATCH))
 		return Open(name,accessMode);
 
 	// Open file
 	return
-		((BPTR __asm (*)
+		((BPTR (* __asm)
 			(register __d1 char *,register __d2 LONG,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_OPEN])
-			(name,accessMode,data->dos_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_OPEN])
+			(name,accessMode,DOSBase);
 }
 
 
 /********************************** Close **********************************/
 
 // Patched Close()
-BOOL __asm L_PatchedClose(register __d1 BPTR file)
+BOOL __asm __saveds L_PatchedClose(register __d1 BPTR file, register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-	struct MyLibrary *libbase;
-
 	// Get library
-	if (!file || !(libbase=GET_GALILEOFMLIB)) return 0;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
+	if (!file) return 0;
 
 	// If this is the 'last' file, clear pointer
-	if (data->last_file==file)
-		data->last_file=0;
+	if (gfmlib_data.last_file==file)
+		gfmlib_data.last_file=0;
 
 	// Is file not interactive (ie a filesystem)?
 	if (!IsInteractive(file))
@@ -823,13 +728,13 @@ BOOL __asm L_PatchedClose(register __d1 BPTR file)
 		struct FileHandleWrapper *handle;
 
 		// See if we have a wrapper
-		if (handle=find_filehandle(file,data))
+		if (handle=find_filehandle(file))
 		{
 			// Remove it from the list
 			Remove((struct Node *)handle);
 
 			// Unlock the list
-			ReleaseSemaphore(&data->file_list.lock);
+			ReleaseSemaphore(&gfmlib_data.file_list.lock);
 
 			// Did the file get written to?
 			if (handle->fhw_Flags&FHWF_WRITTEN)
@@ -837,6 +742,8 @@ BOOL __asm L_PatchedClose(register __d1 BPTR file)
 				struct FileInfoBlock *fib;
 				APTR wsave=(APTR)-1;
 				struct Process *task;
+				STRPTR name;
+				ULONG len;
 
 				// Find process
 				if (task=(struct Process *)FindTask(0))
@@ -851,28 +758,34 @@ BOOL __asm L_PatchedClose(register __d1 BPTR file)
 					else task=0;
 				}
 
-				// Allocate FileInfoBlock and buffer
-				if (fib=AllocVec(sizeof(struct FileInfoBlock)+512,MEMF_CLEAR))
+
+
+				// Get full path of parent, and terminate it
+				if (name = L_PathFromLock(NULL, handle->fhw_Parent, PFLF_USE_DEVICENAME|PFLF_END_SLASH, NULL))
 				{
-					char *path=(char *)(fib+1);
+				    len = getreg(REG_D1);
+				    // Get FileInfoBlock and a buffer
+				    if (fib=AllocVec(sizeof(struct FileInfoBlock) + len + 1,MEMF_CLEAR))
+				    {
+					char *path;
 
-					// Get full path of parent and terminate it
-					L_DevNameFromLock(handle->fhw_Parent,path,512,libbase);
-					AddPart(path,"",512);
+				        // Get buffer pointer
+					path=(char *)(fib+1);
 
-					// Got path?
-					if (*path)
+				        // Copy path
+					strcpy(path, name);
+
+					// Examine the file
+					if (ExamineFH(file,fib))
 					{
-						// Examine the file
-						if (ExamineFH(file,fib))
-						{
-							// Send notification
-							L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_CLOSE,0,path,fib,libbase);
-						}
+						// Send notification
+						L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_CLOSE,0,path,fib,GalileoFMBase);
 					}
 
 					// Free fib
 					FreeVec(fib);
+				    }
+				    L_FreeMemH(name);
 				}
 
 				// Fix requesters
@@ -880,8 +793,11 @@ BOOL __asm L_PatchedClose(register __d1 BPTR file)
 			}
 
 			// Unlock parent lock
+#ifdef RESOURCE_TRACKING
+			NRT_UnLock(handle->fhw_Parent);
+#else
 			UnLock(handle->fhw_Parent);
-
+#endif
 			// Free wrapper handle
 			FreeVec(handle);
 		}
@@ -889,77 +805,68 @@ BOOL __asm L_PatchedClose(register __d1 BPTR file)
 
 	// Close file
 	return
-		((BOOL __asm (*)
+		((BOOL (* __asm)
 			(register __d1 BPTR,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_CLOSE])
-			(file,data->dos_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_CLOSE])
+			(file,DOSBase);
 }
 
 
 // Calls original Close directly
 BOOL __asm __saveds L_OriginalClose(
 	register __d1 BPTR file,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// If patch wasn't installed, call DOS directly
-	if (!(data->flags&LIBDF_DOS_PATCH))
+	if (!(gfmlib_data.flags&LIBDF_DOS_PATCH))
 		return (BOOL)Close(file);
 
 	// Close file
 	return
-		((BOOL __asm (*)
+		((BOOL (* __asm)
 			(register __d1 BPTR,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_CLOSE])
-			(file,data->dos_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_CLOSE])
+			(file,DOSBase);
 }
 
 
 /********************************** Write **********************************/
 
 // Patched Write()
-LONG __asm L_PatchedWrite(
+LONG __asm __saveds L_PatchedWrite(
 	register __d1 BPTR file,
 	register __d2 void *wdata,
-	register __d3 LONG length)
+	register __d3 LONG length,
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-	struct MyLibrary *libbase;
 	struct FileHandleWrapper *handle;
 
 	// Get library
-	if (!file || !(libbase=GET_GALILEOFMLIB)) return 0;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
+	if (!file) return 0;
 
 	// Different to the last file we saw?
-	if (data->last_file!=file)
+	if (gfmlib_data.last_file!=file)
 	{
 		// See if we have a wrapper
-		if (handle=find_filehandle(file,data))
+		if (handle=find_filehandle(file))
 		{
 			// Set 'written' flag
 			handle->fhw_Flags|=FHWF_WRITTEN;
 
 			// Unlock the list
-			ReleaseSemaphore(&data->file_list.lock);
+			ReleaseSemaphore(&gfmlib_data.file_list.lock);
 		}
 
 		// Remember this file
-		data->last_file=file;
+		gfmlib_data.last_file=file;
 	}
 
 	// Write data
 	return
-		((LONG __asm (*)
+		((LONG (* __asm)
 			(register __d1 BPTR,register __d2 void *,register __d3 LONG,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_WRITE])
-			(file,wdata,length,data->dos_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_WRITE])
+			(file,wdata,length,DOSBase);
 }
 
 
@@ -968,40 +875,31 @@ LONG __asm __saveds L_OriginalWrite(
 	register __d1 BPTR file,
 	register __d2 void *wdata,
 	register __d3 LONG length,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// If patch wasn't installed, call DOS directly
-	if (!(data->flags&LIBDF_DOS_PATCH))
+	if (!(gfmlib_data.flags&LIBDF_DOS_PATCH))
 		return Write(file,wdata,length);
 
 	// Write data
 	return
-		((LONG __asm (*)
+		((LONG (* __asm)
 			(register __d1 BPTR,register __d2 void *,register __d3 LONG,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_WRITE])
-			(file,wdata,length,data->dos_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_WRITE])
+			(file,wdata,length,DOSBase);
 }
 
 
 /******************************************************************************/
 
 // Get information on a filelock
-struct FileInfoBlock *dospatch_fib(BPTR lock,struct MyLibrary *libbase,BOOL req)
+struct FileInfoBlock *dospatch_fib(BPTR lock,BOOL req)
 {
 	struct FileInfoBlock *fib=0;
-	struct LibData *data;
 	BPTR parent;
 	BOOL ok=0;
 	APTR wsave=(APTR)-1;
 	struct Process *task=0;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
 
 	// Find process
 	if (req && (task=(struct Process *)FindTask(0)))
@@ -1019,24 +917,28 @@ struct FileInfoBlock *dospatch_fib(BPTR lock,struct MyLibrary *libbase,BOOL req)
 	// Get parent directory
 	if (parent=ParentDir(lock))
 	{
-		// Get FileInfoBlock and a buffer
-		if (fib=AllocVec(sizeof(struct FileInfoBlock)+512,MEMF_CLEAR))
+		STRPTR name;
+		ULONG len;
+
+		// Get full path of parent, and terminate it
+		if (name = L_PathFromLock(NULL, parent, PFLF_USE_DEVICENAME|PFLF_END_SLASH, NULL))
 		{
-			char *buf;
+		    len = getreg(REG_D1);
+		    // Get FileInfoBlock and a buffer
+		    if (fib=AllocVec(sizeof(struct FileInfoBlock) + len + 1,MEMF_CLEAR))
+		    {
+			    char *buf;
 
-			// Get buffer pointer
-			buf=(char *)(fib+1);
+			    // Get buffer pointer
+			    buf=(char *)(fib+1);
 
-			// Get full path of parent, and terminate it
-			L_DevNameFromLock(parent,buf,512,libbase);
-			AddPart(buf,"",512);
+			    // Copy path
+			    strcpy(buf, name);
 
-			// Got path?
-			if (*buf)
-			{
-				// Examine the lock
-				if (Examine(lock,fib)) ok=1;
-			}
+			    // Examine the lock
+			    if (Examine(lock,fib)) ok=1;
+		    }
+		    L_FreeMemH(name);
 		}
 
 		// Not ok?
@@ -1056,15 +958,15 @@ struct FileInfoBlock *dospatch_fib(BPTR lock,struct MyLibrary *libbase,BOOL req)
 }
 
 // Find FileHandle in tracking list
-struct FileHandleWrapper *find_filehandle(BPTR file,struct LibData *data)
+struct FileHandleWrapper *find_filehandle(BPTR file)
 {
 	struct FileHandleWrapper *handle;
 
 	// Lock list
-	ObtainSemaphore(&data->file_list.lock);
+	ObtainSemaphore(&gfmlib_data.file_list.lock);
 
 	// Go through list
-	for (handle=(struct FileHandleWrapper *)data->file_list.list.lh_Head;
+	for (handle=(struct FileHandleWrapper *)gfmlib_data.file_list.list.lh_Head;
 		handle->fhw_Node.mln_Succ;
 		handle=(struct FileHandleWrapper *)handle->fhw_Node.mln_Succ)
 	{
@@ -1072,11 +974,11 @@ struct FileHandleWrapper *find_filehandle(BPTR file,struct LibData *data)
 		if (handle->fhw_FileHandle==file)
 		{
 			// Not the top one?
-			if (handle!=(struct FileHandleWrapper *)data->file_list.list.lh_Head)
+			if (handle!=(struct FileHandleWrapper *)gfmlib_data.file_list.list.lh_Head)
 			{
 				// Shift it to the top as the most recently accessed
 				Remove((struct Node *)handle);
-				AddHead(&data->file_list.list,(struct Node *)handle);
+				AddHead(&gfmlib_data.file_list.list,(struct Node *)handle);
 			}
 
 			// Return the handle (leave the list locked)
@@ -1085,6 +987,6 @@ struct FileHandleWrapper *find_filehandle(BPTR file,struct LibData *data)
 	}
 
 	// Not found
-	ReleaseSemaphore(&data->file_list.lock);
+	ReleaseSemaphore(&gfmlib_data.file_list.lock);
 	return 0;
 }

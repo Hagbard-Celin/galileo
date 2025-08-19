@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,11 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "buttons_protos.h"
+#include "function_launch_protos.h"
+#include "misc_protos.h"
+#include "function_protos.h"
+#include "start_menu_protos.h"
 
 enum
 {
@@ -140,10 +146,15 @@ GALILEOFM_FUNC(function_loadbuttons)
 	// Go through entries
 	while (entry=function_get_entry(handle))
 	{
+		BPTR parent_lock = 0;
 		Buttons *buttons;
 
-		// Build full name
-		function_build_source(handle,entry,handle->func_work_buf);
+		// Get source-directory lock
+	        if (entry->fe_lock)
+		    parent_lock = entry->fe_lock;
+	        else
+	        if (handle->func_source_lock)
+		    parent_lock = handle->func_source_lock;
 
 		// Start menu?
 		if (start)
@@ -151,7 +162,7 @@ GALILEOFM_FUNC(function_loadbuttons)
 			IPCData *ipc;
 
 			// Open as a start menu
-			if (ipc=start_new(handle->func_work_buf,label,image,-1,-1))
+			if (ipc=start_new(entry->fe_name,parent_lock,label,image,-1,-1))
 			{
 				// Not iconified?
 				if (GUI->window && !hidden)
@@ -161,7 +172,7 @@ GALILEOFM_FUNC(function_loadbuttons)
 
 		// Open button bank
 		else
-		if (buttons=buttons_new(handle->func_work_buf,0,0,0,buttonflags))
+		if (buttons=buttons_new(entry->fe_name,0,parent_lock,0,0,0,buttonflags))
 		{
 			// Not iconified?
 			if (GUI->window && !hidden)

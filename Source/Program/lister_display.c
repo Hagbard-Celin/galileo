@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,11 +32,14 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "backdrop_protos.h"
+#include "graphics.h"
 
 #define STATUS_BUTTON_WIDTH 20
 
@@ -243,7 +247,7 @@ void lister_init_display(Lister *lister)
 		}
 
 		// Just refresh it
-		else lister_update_pathfield(lister);
+		else RefreshGList(lister->path_field,lister->window,0,1);
 	}
 
 	// Otherwise
@@ -478,7 +482,7 @@ void lister_update_pathfield(Lister *lister)
 			lister->path_field,	
 			lister->window,
 			0,
-			STRINGA_TextVal,lister->cur_buffer->buf_ExpandedPath,
+			STRINGA_TextVal,(lister->cur_buffer->buf_ExpandedPath)?lister->cur_buffer->buf_ExpandedPath:"",
 			TAG_END);
 	}
 

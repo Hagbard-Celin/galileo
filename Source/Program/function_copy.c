@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyrighr 2023 Hagbard Celine
+Copyright 2023,2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,95 +36,22 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#include "galileofm.h"
-
-
-#define COPY_INITIAL_BUFFER 8192
-#define COPY_MIN_BUFFER		2048
-#define COPY_LOW_THRESH		500000
-#define COPY_HIGH_THRESH	1000000
-
-enum
-{
-	COPY_NAME,
-	COPY_TO,
-	COPY_QUIET,
-	COPY_UPDATEC,
-	COPY_MOVESAME,
-	COPY_NEWER,
-};
-
-enum
-{
-	COPYAS_NAME,
-	COPYAS_NEWNAME,
-	COPYAS_TO,
-	COPYAS_QUIET,
-	COPYAS_MOVESAME,
-};
-
-enum
-{
-	ENCRYPT_NAME,
-	ENCRYPT_TO,
-	ENCRYPT_PASSWORD,
-	ENCRYPT_QUIET,
-};
-
-enum
-{
-	CLONE_NAME,
-	CLONE_NEWNAME,
-	CLONE_QUIET,
-};
-
-#define COPY_TOP_LEVEL		(1<<14)
-#define ENCRYPT_DECRYPT		(1<<15)
-#define COPY_UPDATE_COPY	(1<<16)
-#define COPY_NEWER_COPY		(1<<17)
-
-typedef struct
-{
-	short			valid;
-	short			confirm_each;
-
-	union
-	{
-		struct
-		{
-			char	new_name_edit[256];
-			char	old_name_edit[256];
-			BOOL	wild_copy;
-		} copy;
-
-		struct
-		{
-			char	password[24];
-			short	decrypt;
-		} encrypt;
-
-		struct
-		{
-			short	hard;
-		} makelink;
-	} func;
-} CopyData;
-
-void copy_icon_position(FunctionHandle *handle,char *name,struct DiskObject *icon);
+#include "function_copy_include.h"
 
 // COPY, etc internal function
 GALILEOFM_FUNC(function_copy)
 {
 	FunctionEntry *entry;
-	short ret=1,dest_count=0,function,count;
 	PathNode *path,*source;
-	char *source_file,*dest_file,*dest_name,*source_no_icon;
-	char *old_name=0,*old_name_edit,*new_name,*new_name_edit;
+	char *old_name=0,*old_name_edit,*new_name_edit;
 	char *password=0,*password_buf;
 	BOOL move_flag=0,rename_flag=0,link_flag=0,no_move_rename=0,source_same=0,dragdrop=0;
 	BOOL change_info=0;
 	ULONG copy_flags,rec_size=0;
 	CopyData *data;
+	BPTR org_dir = 0;
+	char dest_file[108], source_no_icon[108], new_name[108];
+	short ret=1,dest_count=0,function,count;
 
 	// Get function
 	function=command->function;
@@ -141,10 +68,7 @@ GALILEOFM_FUNC(function_copy)
 
 	// Making links
 	else
-	{
-		handle->instruction_flags=0;
 		link_flag=1;
-	}
 
 	// If moving, clear sizes
 	if (function==FUNC_MOVE || function==FUNC_MOVEAS)
@@ -163,7 +87,7 @@ GALILEOFM_FUNC(function_copy)
 		dragdrop=1;
 
 		// See if paths are the same device
-		if (function_check_same_path(handle->func_source_path,handle->func_dest_path)==LOCK_SAME_VOLUME)
+		if (SameLock(handle->func_source_lock, handle->func_dest_lock) == LOCK_SAME_VOLUME)
 		{
 			// Change operation to move
 			handle->instruction_flags|=INSTF_DIR_CLEAR_SIZES;
@@ -180,7 +104,7 @@ GALILEOFM_FUNC(function_copy)
 		(function==(FUNC_COPYAS || FUNC_MCOPYAS) && instruction->ipa_funcargs && instruction->ipa_funcargs->FA_Arguments[COPYAS_MOVESAME]))
 	{
 		// See if paths are the same device
-		if (function_check_same_path(handle->func_source_path,handle->func_dest_path)==LOCK_SAME_VOLUME)
+		if (SameLock(handle->func_source_lock, handle->func_dest_lock) == LOCK_SAME_VOLUME)
 		{
 			// Change operation to move
 			handle->instruction_flags|=INSTF_DIR_CLEAR_SIZES;
@@ -193,19 +117,32 @@ GALILEOFM_FUNC(function_copy)
 	{
 		short invalid=0,ret;
 
+		if (!path->pn_lock)
+		{
+		    if (path->pn_path && path->pn_path[0] && (path->pn_lock = LockFromPath(path->pn_path, NULL, FALSE)))
+		    {
+			path->pn_flags |= LISTNF_MADE_LOCK;
+		    }
+		    else
+		    {
+			function_error_text(handle,-1);
+			path->pn_flags |= LISTNF_INVALID;
+		    }
+		}
+
 		// See if the paths are the same
-		if ((ret=function_check_same_path(handle->func_source_path,path->pn_path))==LOCK_SAME)
+		if ((ret = SameLock(handle->func_source_lock, handle->func_dest_lock)) == LOCK_SAME)
 		{
 			// Mark as the same
 			path->pn_flags|=LISTNF_SAME;
 
 			// If not clone or *as, we can't do this
 			if (function!=FUNC_CLONE &&
-				function!=FUNC_MOVEAS &&
-				function!=FUNC_COPYAS &&
-		function!=FUNC_MCOPYAS &&
-				function!=FUNC_MAKELINKAS &&
-		function!=FUNC_MMAKELINKAS)
+			    function!=FUNC_MOVEAS &&
+			    function!=FUNC_COPYAS &&
+			    function!=FUNC_MCOPYAS &&
+			    function!=FUNC_MAKELINKAS &&
+			    function!=FUNC_MMAKELINKAS)
 			{
 				// Don't show requester for drag & drop
 				if (!dragdrop)
@@ -258,13 +195,6 @@ GALILEOFM_FUNC(function_copy)
 					((function==FUNC_CLONE)?MSG_PROGRESS_OPERATION_CLONING:MSG_PROGRESS_OPERATION_COPYING)))),
 		handle->entry_count,
 		PWF_FILENAME|PWF_FILESIZE|PWF_INFO|PWF_GRAPH);
-
-	// Allocate memory for strings
-	if (!(source_file=AllocVec(1280,MEMF_CLEAR))) return 0;
-	dest_file=source_file+256;
-	dest_name=dest_file+256;
-	new_name=dest_name+256;
-	source_no_icon=new_name+256;
 
 	// Get data pointers
 	data=(CopyData *)handle->inst_data;
@@ -331,7 +261,7 @@ GALILEOFM_FUNC(function_copy)
 		function_progress_file(handle,0,2);
 
 		// See if source is the desktop
-		if (source && HookMatchDesktop(source->pn_path_buf))
+		if (source && source->pn_lock && HookMatchLockDesktop(source->pn_lock))
 			handle->flags|=FUNCF_RESCAN_DESKTOP;
 	}
 
@@ -342,16 +272,59 @@ GALILEOFM_FUNC(function_copy)
 	while (entry=function_get_entry(handle))
 	{
 		BOOL file_ok=1;
+		BPTR source_lock = 0;
 
-		// Is source a device (in drag'n'drop operation)?
+		// Get source dir lock
+		if (entry->fe_lock)
+		    source_lock = entry->fe_lock;
+	        else
+		if (source->pn_lock)
+		    source_lock	= source->pn_lock;
+	        else
+		{
+		    ret = -1;
+		    break;
+		}
+
+		if (handle->flags&FUNCF_DRAG_DROP)
+		{
+		    char *tmp_path;
+		    BPTR tmp;
+
+		    // Examine
+		    Examine(source_lock, handle->s_info);
+
+		    if (tmp = ParentDir(source_lock))
+			UnLock(tmp);
+
+		    if (tmp_path = JoinString(handle->memory, handle->s_info->fib_FileName, (tmp)?"":":", NULL, NULL))
+		    {
+			if (handle->func_source_path)
+			    FreeMemH(handle->func_source_path);
+
+			handle->func_source_path = tmp_path;
+		    }
+		}
+
+		// Aborted?
+		if (function_check_abort(handle))
+		{
+		    ret = -1;
+		    break;
+		}
+
+		// CD to source dir
+		org_dir = CurrentDir(source_lock);
+
+///		Is source a device (in drag'n'drop operation)?
 		if (!(entry->fe_flags&FUNCENTF_EXITED) &&
-			entry->fe_name[strlen(entry->fe_name)-1]==':' && dragdrop)
+		    entry->fe_type == 0 && handle->flags&FUNCF_DRAG_DROP)
 		{
 			BPTR lock;
 
 			// See if source is the same device
 			if (move_flag &&
-				function_check_same_path(entry->fe_name,handle->func_dest_path)==LOCK_SAME_VOLUME)
+			    SameLock(source_lock,handle->func_dest_lock) == LOCK_SAME_VOLUME)
 			{
 				// Skip over this entry
 				DisplayBeep(GUI->screen_pointer);
@@ -359,21 +332,18 @@ GALILEOFM_FUNC(function_copy)
 				continue;
 			}
 
-			// Lock and examine source path
-			if (lock=Lock(entry->fe_name,ACCESS_READ))
+			// Duplicate examine source path lock
+			if (lock = DupLock(source_lock))
 			{
 				struct DiskObject *icon;
 
 				// Examine
 				Examine(lock,handle->d_info);
 
-				// Get device name
-				DevNameFromLock(lock,handle->func_work_buf+512,256);
 				UnLock(lock);
 
 				// Get disk icon
-				lsprintf(handle->func_work_buf,"%sDisk",entry->fe_name);
-				if (!(icon=GetDiskObject(handle->func_work_buf)))
+				if (!(icon=GetDiskObject("Disk")))
 				{
 					// Use default drawer icon
 					icon=GetDefDiskObject(WBDRAWER);
@@ -386,73 +356,168 @@ GALILEOFM_FUNC(function_copy)
 					icon->do_Type=WBDRAWER;
 
 					// Try and get position
-					copy_icon_position(handle,handle->func_work_buf+512,icon);
+					copy_icon_position(handle,entry->fe_name,icon);
 				}
 
 				// Get destination path
 				if (path=function_path_current(&handle->func_dest_paths))
 				{
-					// Build destination path
-					strcpy(handle->func_work_buf,path->pn_path);
-					AddPart(handle->func_work_buf,handle->d_info->fib_FileName,512);
+					char *tmp;
+
+					CurrentDir(path->pn_lock);
+
+					tmp = stpcpy(handle->func_work_buf,entry->fe_name);
+					tmp--;
+					*tmp = 0;
 
 					// Create directory
-					if (lock=OriginalCreateDir(handle->func_work_buf))
+					if (!(lock=OriginalCreateDir(handle->func_work_buf)))
+					{   LONG err;
+					    err = IoErr();
+
+					    if (err == ERROR_OBJECT_EXISTS || err == ERROR_OBJECT_IN_USE)
+						lock = Lock(handle->func_work_buf,ACCESS_READ);
+					}
+					else
+					    ChangeMode(CHANGE_LOCK,lock,ACCESS_READ);
+
+					if (lock)
 					{
 						// Examine this directory
 						Examine(lock,handle->s_info);
 
-						// Unlock directory
-						UnLock(lock);
-
 						// Write icon
 						if (icon)
 						{
-							// Write icon
-							if (PutDiskObject(handle->func_work_buf,icon))
+							BPTR dest_icon;
+							ULONG len;
+							BOOL dest_info = FALSE;
+
+							len = strlen(handle->func_work_buf);
+							strcpy(handle->func_work_buf + len,".info");
+							if (dest_icon = Lock(handle->func_work_buf,ACCESS_READ))
 							{
-								// Add to listers
-								function_filechange_loadfile(
-									handle,
-									path->pn_path,
-									handle->d_info->fib_FileName,
-									FFLF_ICON);
+							    dest_info = TRUE;
+							    UnLock(dest_icon);
+							}
+							handle->func_work_buf[len] = 0;
+							//  feil requester
+							//if (dest_info)
+							//if (!(ret=function_error(handle,FilePart(handle->func_work_buf),MSG_COPYING,ERROR_OBJECT_EXISTS)) ||
+							//		  ret==-1) break;
+
+							if (!dest_info)
+							{
+							    // Write icon
+							    if (PutDiskObject(handle->func_work_buf,icon))
+							    {
+								    // Add to listers
+								    function_filechange_loadfile(
+									    handle,
+									    path->pn_path,
+									    path->pn_lock,
+									    handle->func_work_buf,
+									    FFLF_ICON);
+							    }
 							}
 						}
 
 						// Add new directory
-						function_filechange_addfile(handle,path->pn_path,handle->s_info,0,0);
+						function_filechange_addfile(handle,path->pn_path,path->pn_lock,handle->s_info,0,0);
+						{
+						    char *tmp_path;
+
+						    if (path->pn_path_buf && path->pn_path_buf[0])
+							tmp_path = JoinString(handle->memory, path->pn_path_buf, handle->func_work_buf, NULL, JSF_FS_SLASH|JSF_E_SLASH);
+						    else
+							tmp_path = JoinString(handle->memory, handle->func_work_buf, "/", NULL, NULL);
+
+						    if (tmp_path)
+						    {
+							if (path->pn_path_buf)
+							    FreeMemH(path->pn_path_buf);
+
+							path->pn_path_buf = tmp_path;
+						    }
+						}
+
+						{
+						    char *tmp_path;
+
+						    if (tmp_path = CopyString(handle->memory,path->pn_path_buf))
+						    {
+							if (handle->func_dest_path)
+							    FreeMemH(handle->func_dest_path);
+
+							handle->func_dest_path = tmp_path;
+						    }
+						}
+
+						path->pn_lock = lock;
+						path->pn_flags|=LISTNF_CHANGED;
+						change_info = 1;
 					}
 
-					// Fix path node
-					strcpy(path->pn_path_buf,path->pn_path);
-					AddPart(path->pn_path_buf,handle->d_info->fib_FileName,512);
-					path->pn_flags|=LISTNF_CHANGED;
+					CurrentDir(source_lock);
 				}
 
 				// Free icon
 				FreeDiskObject(icon);
 			}
 		}
+///
 
 		// Update progress indicator
 		if (function_progress_update(handle,entry,count))
 		{
-			function_abort(handle);
-			ret=0;
+			ret = -1;
 			break;
 		}
 
-		// Build source name
-		function_build_source(handle,entry,source_file);
+		if (entry->fe_type == 0)
+		{
+		    char *tmp_path;
 
-		// Get destination filename
-		strcpy(dest_name,entry->fe_name);
+		    if (entry->fe_flags&FUNCENTF_MULTI_ASSIGN && !(entry->fe_flags&FUNCENTF_EXITED))
+		    {
+
+			if (tmp_path = JoinString(handle->memory, handle->d_info->fib_FileName, ":", NULL, NULL))
+		        {
+			    if (handle->func_source_path)
+				FreeMemH(handle->func_source_path);
+
+			    handle->func_source_path = tmp_path;
+		        }
+		    }
+		    // This is the new source path
+		    else
+		    if (tmp_path = CopyString(handle->memory, entry->fe_name))
+	            {
+		        if (handle->func_source_path)
+			    FreeMemH(handle->func_source_path);
+
+		        handle->func_source_path = tmp_path;
+	            }
+		}
+
+		{
+		    char *tmp;
+
+		    // Get destination filename
+		    tmp = stpcpy(dest_file,entry->fe_name);
+
+		    // Strip ':' from end of name
+		    if (entry->fe_type == ENTRY_DIRECTORY && entry->fe_flags&FUNCENTF_ASSIGN)
+		    {
+			tmp--;
+			*tmp = 0;
+		    }
+		}
 
 		// Check this isn't an exited directory
 		if (!(entry->fe_flags&FUNCENTF_EXITED))
 		{
-			// Copy as/Move as/MakeLink as/Clone?
+///			Copy as/Move as/MakeLink as/Clone?
 			if (function==FUNC_COPYAS || function==FUNC_MCOPYAS ||
 				function==FUNC_MOVEAS ||
 				function==FUNC_MAKELINKAS || function==FUNC_MMAKELINKAS ||
@@ -465,8 +530,8 @@ GALILEOFM_FUNC(function_copy)
 					if (entry->fe_flags&FUNCENTF_ICON)
 					{
 						// Get new name, tack a .info to the end
-						strcpy(dest_name,new_name);
-						strcat(dest_name,".info");
+						strcpy(dest_file,new_name);
+						strcat(dest_file,".info");
 					}
 
 					// Normal entry
@@ -505,6 +570,9 @@ GALILEOFM_FUNC(function_copy)
 									GetString(&locale,MSG_ABORT),
 									GetString(&locale,MSG_SKIP),0))==2)
 								{
+									if (org_dir)
+									    CurrentDir(org_dir);
+
 									function_abort(handle);
 									ret=0;
 									break;
@@ -543,7 +611,7 @@ GALILEOFM_FUNC(function_copy)
 								else
 								{
 									// Store new name
-									strcpy(dest_name,new_name_edit);
+									strcpy(dest_file,new_name_edit);
 								}
 							}
 						}
@@ -556,7 +624,7 @@ GALILEOFM_FUNC(function_copy)
 								old_name_edit,
 								new_name_edit,
 								entry->fe_name,
-								dest_name);
+								dest_file);
 						}
 
 						// Still ok?
@@ -564,17 +632,18 @@ GALILEOFM_FUNC(function_copy)
 						{
 							// Get old and new names
 							old_name=entry->fe_name;
-							strcpy(new_name,dest_name);
+							strcpy(new_name,dest_file);
 						}
 					}
 				}
 
 				// Otherwise, make change to first part of destination
 				else
-				if (old_name) strreplace(dest_name,old_name,new_name,0);
+				if (old_name) strreplace(dest_file,old_name,new_name,0);
 			}
+///
 
-			// Encrypt?
+///			Encrypt?
 			else
 			if (function==FUNC_ENCRYPT || function==FUNC_MENCRYPT)
 			{
@@ -600,6 +669,15 @@ GALILEOFM_FUNC(function_copy)
 						GetString(&locale,MSG_OKAY),
 						GetString(&locale,MSG_ABORT),0)) || !password_buf[0])
 					{
+						if (org_dir)
+						    CurrentDir(org_dir);
+
+						if (path->pn_recurse_lock)
+						    UnLock(path->pn_recurse_lock);
+
+						if (entry->fe_flags&FUNCENTF_RECURSE)
+						    UnLock(entry->fe_lock);
+
 						function_abort(handle);
 						ret=0;
 						break;
@@ -613,39 +691,48 @@ GALILEOFM_FUNC(function_copy)
 					else copy_flags&=~ENCRYPT_DECRYPT;
 				}
 			}
+///
 		}
 
 		// Exited directory
 		else
 		{
 			// Exited a device (in drag'n'drop operation)?
-			if (entry->fe_name[strlen(entry->fe_name)-1]==':' && dragdrop)
+			if (entry->fe_type == 0 && handle->flags&FUNCF_DRAG_DROP)
 			{
 				// Get destination path
 				if (path=function_path_current(&handle->func_dest_paths))
 				{
+					if (path->pn_flags&LISTNF_CHANGED)
+					{
+					    UnLock(path->pn_lock);
+					    path->pn_lock = 0;
+					}
+
 					// Clear path flag
 					path->pn_flags&=~LISTNF_CHANGED;
 				}
 			}
 		}
 
-		// Top-level entry?
+///		Top-level entry?
 		if (entry->fe_flags&FUNCENTF_TOP_LEVEL)
 		{
 			// Exited directory?
-			if (entry->fe_flags&FUNCENTF_EXITED)
+			if (source && entry->fe_flags&FUNCENTF_EXITED)
 			{
 				// Add size update
 				function_filechange_modify(
 					handle,
 					source->pn_path,
+					source->pn_lock,
 					entry->fe_name,
 					FM_Size,rec_size,
 					TAG_END);
 				rec_size=0;
 			}
 		}
+///
 
 		// File within a directory?
 		else
@@ -667,29 +754,40 @@ GALILEOFM_FUNC(function_copy)
 			// Go through destination paths
 			while (path)
 			{
-				// Get destination path
-				strcpy(handle->func_dest_path,path->pn_path);
-				strcpy(dest_file,handle->func_dest_path);
-				AddPart(dest_file,dest_name,256);
+				BPTR dest_lock = 0;
+				if (path->pn_recurse_lock)
+				    dest_lock = path->pn_recurse_lock;
+				else
+				if (path->pn_lock)
+				    dest_lock = path->pn_lock;
+				else
+				{
+				    ret = -1;
+				    break;
+				}
 
+				// Get destination path
+				if (path && path->pn_path && path->pn_path[0])
+				{
+				    char *tmp_path;
+
+				    if (tmp_path = CopyString(handle->memory, path->pn_path))
+				    {
+					if (handle->func_dest_path)
+					    FreeMemH(handle->func_dest_path);
+
+					handle->func_dest_path = tmp_path;
+				    }
+				}
 				// If there's multiple destinations, or flagged, change info
 				if (dest_count>1 || change_info)
 				{
-					char *file,ch=0;
+					if (entry->fe_flags&FUNCENTF_RECURSE)
+					    function_build_info(handle,handle->anchor_path,handle->func_dest_path,3);
+					else
+					    function_build_info(handle,handle->func_source_path,handle->func_dest_path,3);
 
-					// Clear filename
-					if (file=FilePart(source_file))
-					{
-						ch=*file;
-						*file=0;
-					}
-
-					// Build info string
-					function_build_info(handle,source_file,handle->func_dest_path,3);
 					change_info=0;
-
-					// Restore source filename
-					if (file) *file=ch;
 				}
 
 				// Check this isn't an exited directory
@@ -698,7 +796,7 @@ GALILEOFM_FUNC(function_copy)
 					BOOL ok=1;
 
 					// Is this a directory?
-					if (entry->fe_type>0)
+					if (entry->fe_type>=0)
 					{
 						// Set flag to change info
 						change_info=1;
@@ -706,13 +804,12 @@ GALILEOFM_FUNC(function_copy)
 						// Is this a top-level directory?
 						if (entry->fe_flags&FUNCENTF_TOP_LEVEL)
 						{
-							short len;
+						    BPTR lock;
 
+						    if (lock = Lock(entry->fe_name,ACCESS_READ))
+						    {
 							// Check we're not trying to copy it into itself
-							if (strnicmp(handle->func_dest_path,source_file,(len=strlen(source_file)))==0 &&
-								(handle->func_dest_path[len]==0 ||
-								handle->func_dest_path[len]=='/' ||
-								handle->func_dest_path[len]==':'))
+							if(SameLock(dest_lock,lock) == LOCK_SAME)
 							{
 								// Put up error requester
 								if (!(function_request(
@@ -724,6 +821,8 @@ GALILEOFM_FUNC(function_copy)
 								else ret=0;
 								ok=0;
 							}
+							UnLock(lock);
+						    }
 						}
 					}
 
@@ -742,7 +841,7 @@ GALILEOFM_FUNC(function_copy)
 								struct FileInfoBlock __aligned fib2;
 
 								// Get source info
-								if (GetFileInfo(source_file,&fib2))
+								if (GetFileInfo(entry->fe_name,&fib2))
 								{
 									// Compare file dates
 									if (CompareDates(&fib2.fib_Date,&fib.fib_Date)>=0)
@@ -766,7 +865,7 @@ GALILEOFM_FUNC(function_copy)
 
 					// Check destination is ok to write to
 					if (ok &&
-						(ret=check_file_destination(handle,entry,dest_file,&data->confirm_each))==1)
+						(ret=check_file_destination(handle,entry,dest_file,dest_lock,&data->confirm_each))==1)
 					{
 						long error=0;
 
@@ -776,21 +875,74 @@ GALILEOFM_FUNC(function_copy)
 							// Can only rename if a file, or no recursive filter set
 							if (!no_move_rename && (entry->fe_type<0 || handle->got_filter!=2))
 							{
-								// Try rename
-								if (error=OriginalRename(source_file,dest_file))
+								if (source_lock && dest_lock)
 								{
-									BPTR lock;
-									if (lock=Lock(dest_file,ACCESS_READ))
-									{
-										Examine(lock,handle->d_info);
-										UnLock(lock);
-									}
-								}
+								    BPTR assign_lock_source, assign_lock_dest;
+								    char rename_source[124], rename_dest[124];
 
-								// Different devices?
+								    sprintf(rename_source, "gars_%08p",entry);
+								    sprintf(rename_dest, "gard_%08p",entry);
+
+								    assign_lock_source = DupLock(source_lock);
+								    assign_lock_dest = DupLock(dest_lock);
+
+								    AssignLock(rename_source,assign_lock_source);
+								    AssignLock(rename_dest,assign_lock_dest);
+
+								    rename_source[12] = ':';
+								    rename_source[13] = 0;
+								    rename_dest[12] = ':';
+								    rename_dest[13] = 0;
+
+								    AddPart(rename_source,entry->fe_name,123);
+								    AddPart(rename_dest,dest_file,123);
+
+								    if (error=OriginalRename(rename_source,rename_dest))
+								    {
+									    BPTR lock;
+
+									    CurrentDir(dest_lock);
+
+									    if (lock=Lock(dest_file,ACCESS_READ))
+									    {
+										    Examine(lock,handle->d_info);
+										    UnLock(lock);
+									    }
+
+									    CurrentDir(source_lock);
+
+								    }
+
+								    // Different devices?
+								    else
+								    if (IoErr()==ERROR_RENAME_ACROSS_DEVICES)
+									    no_move_rename=1;
+
+								    rename_source[12] = 0;
+								    rename_dest[12] = 0;
+								    AssignLock(rename_source,NULL);
+								    AssignLock(rename_dest,NULL);
+
+								}
 								else
-								if (IoErr()==ERROR_RENAME_ACROSS_DEVICES)
-									no_move_rename=1;
+								{
+								    // Try rename
+								    if (error=OriginalRename(entry->fe_name,dest_file))
+								    {
+									    BPTR lock;
+
+									    if (lock=Lock(dest_file,ACCESS_READ))
+									    {
+										    Examine(lock,handle->d_info);
+										    UnLock(lock);
+									    }
+								    }
+
+								    // Different devices?
+								    else
+								    if (IoErr()==ERROR_RENAME_ACROSS_DEVICES)
+									    no_move_rename=1;
+								}
 							}
 						}
 
@@ -810,9 +962,11 @@ GALILEOFM_FUNC(function_copy)
 								if (!lock)
 								{
 									// Lock source
-									if (!(lock=Lock(source_file,ACCESS_READ)))
+									if (!(lock=Lock(entry->fe_name,ACCESS_READ)))
 										error=IoErr();
 								}
+
+								CurrentDir(dest_lock);
 
 								// Try to make link
 								if (lock &&
@@ -839,6 +993,9 @@ GALILEOFM_FUNC(function_copy)
 										strcpy(handle->d_info->fib_FileName,FilePart(dest_file));
 										ret=1;
 									}
+
+									CurrentDir(source_lock);
+
 									break;
 								}
 
@@ -850,7 +1007,13 @@ GALILEOFM_FUNC(function_copy)
 										handle,
 										entry->fe_name,
 										MSG_LINKING,
-										IoErr())) || ret==-1) break;
+										IoErr())) || ret==-1)
+									{
+									    CurrentDir(source_lock);
+									    break;
+									}
+
+									CurrentDir(source_lock);
 								}
 							}
 
@@ -876,6 +1039,11 @@ GALILEOFM_FUNC(function_copy)
 						else
 						if (!link_flag)
 						{
+							BOOL assign_icon = FALSE;
+							
+							if (entry->fe_type == ENTRY_FILE && entry->fe_flags&FUNCENTF_ASSIGN)
+							    assign_icon = TRUE;
+
 							// Top-level entry?
 							if (entry->fe_flags&FUNCENTF_TOP_LEVEL)
 								copy_flags|=COPY_TOP_LEVEL;
@@ -886,11 +1054,13 @@ GALILEOFM_FUNC(function_copy)
 								handle->s_info,
 								handle->d_info,
 								handle,
-								source_file,
+								(assign_icon)?handle->last_filename:entry->fe_name,
 								dest_file,
+								source_lock,
+								dest_lock,
 								&error,
 								password,
-								copy_flags)))
+								(assign_icon)?copy_flags|COPY_ASSIGN_ICON:copy_flags)))
 							{
 								// Not found?
 								if (error==ERROR_OBJECT_NOT_FOUND)
@@ -903,18 +1073,15 @@ GALILEOFM_FUNC(function_copy)
 									}
 
 									// Icon operation?
-									if (handle->flags&FUNCF_ICONS && !(isicon(source_file)))
+									if (handle->flags&FUNCF_ICONS && !(isicon(entry->fe_name)))
 									{
 										BPTR lock;
-										char *ptr;
 
 										// See if file has an icon on disk
-										strcat(source_file,".info");
-										if (lock=Lock(source_file,ACCESS_READ))
+										strcpy(handle->func_work_buf, entry->fe_name);
+										strcat(handle->func_work_buf, ".info");
+										if (lock=Lock(handle->func_work_buf,ACCESS_READ))
 											UnLock(lock);
-
-										// Restore file name
-										if (ptr=isicon(source_file)) *ptr=0;
 
 										// If icon exists, skip over main file
 										if (lock)
@@ -927,7 +1094,46 @@ GALILEOFM_FUNC(function_copy)
 
 								// Display error
 								if (!(ret=function_error(handle,entry->fe_name,MSG_COPYING,error)) ||
-									ret==-1) break;
+									ret==-1)
+								{
+									ret = -1;
+									break;
+								}
+							}
+							if (error == -42)
+							{
+								BPTR tmp_dest_lock;
+
+								if (entry->fe_type == ENTRY_DIRECTORY && entry->fe_flags&FUNCENTF_ASSIGN)
+								{
+								    char *tmp_name;
+
+								    if (tmp_name = JoinString(handle->memory, handle->s_info->fib_FileName, ".info", NULL, NULL))
+								    {
+									if (handle->last_filename)
+									    FreeMemH(handle->last_filename);
+
+									handle->last_filename = tmp_name;
+								    }
+								}
+
+								CurrentDir(dest_lock);
+
+								tmp_dest_lock = Lock(handle->d_info->fib_FileName, ACCESS_READ);
+
+								CurrentDir(source_lock);
+
+								if (path->pn_recurse_lock)
+								    UnLock(path->pn_recurse_lock);
+
+								path->pn_recurse_lock = tmp_dest_lock;
+							}
+							else
+							if (assign_icon)
+							{
+							    if (handle->last_filename)
+								FreeMemH(handle->last_filename);
+							    handle->last_filename = 0;
 							}
 						}
 					}
@@ -942,7 +1148,10 @@ GALILEOFM_FUNC(function_copy)
 						if (entry->fe_flags&FUNCENTF_TOP_LEVEL)
 						{
 							// Add file
-							function_filechange_addfile(handle,path->pn_path,handle->d_info,0,0);
+							function_filechange_addfile(handle,path->pn_path,dest_lock,handle->d_info,0,path->pn_lister);
+
+							// Do changes
+							function_filechange_do(handle,1);
 						}
 
 						// Update free space?
@@ -973,13 +1182,47 @@ GALILEOFM_FUNC(function_copy)
 
 					// File has failed (as far as deselecting goes)
 					else file_ok=0;
+
+					// Aborted?
+					if (function_check_abort(handle))
+					{
+					    ret = -1;
+					    break;
+					}
 				}
 
-				// Exited directory, set flag to change info
-				else change_info=1;
+				// Exited directory
+				else
+				{
+				    if (entry->fe_flags&FUNCENTF_RECURSE)
+				    {
+					BPTR tmp_lock = path->pn_recurse_lock;
+
+					path->pn_recurse_lock = ParentDir(tmp_lock);
+					UnLock(tmp_lock);
+				    }
+				    else
+				    {
+					if (path->pn_recurse_lock)
+					{
+					    UnLock(path->pn_recurse_lock);
+					    path->pn_recurse_lock = 0;
+					}
+				    }
+
+				    // Set flag to change info
+				    change_info=1;
+				}
 
 				// If clone, break out
 				if (function==FUNC_CLONE) break;
+
+				// Aborted?
+				if (function_check_abort(handle))
+				{
+				    ret = -1;
+				    break;
+				}
 
 				// Done with this path, get next
 				function_path_end(handle,&handle->func_dest_paths,0);
@@ -1003,10 +1246,10 @@ GALILEOFM_FUNC(function_copy)
 		{
 			BOOL icon=0;
 			char *ptr;
-			short suc=0;
+			short suc = 0, try = 0;
 
 			// Copy name
-			strcpy(source_no_icon,source_file);
+			strcpy(source_no_icon,entry->fe_name);
 
 			// See if file is an icon
 			if (ptr=isicon(source_no_icon))
@@ -1026,10 +1269,12 @@ GALILEOFM_FUNC(function_copy)
 
 				// Delete file (or icon)
 				if (icon) suc=DeleteDiskObject(source_no_icon);
-				else suc=DeleteFile(source_file);
+				else suc=DeleteFile(entry->fe_name);
 
 				// Successful?
 				if (suc) break;
+
+				try++;
 
 				// Get error code
 				err_code=IoErr();
@@ -1037,6 +1282,37 @@ GALILEOFM_FUNC(function_copy)
 				// If object not found, it's already deleted
 				if (err_code==ERROR_OBJECT_NOT_FOUND)
 					break;
+
+			        // Object in use, less than 3 tries?
+				else
+				if (err_code==ERROR_OBJECT_IN_USE && try<3)
+			        {
+				        if (try == 1 && entry->fe_type>0 && !(entry->fe_flags&FUNCENTF_LINK))
+				        {
+				            BPTR lock;
+				            DirBuffer *tmp_buf;
+
+				            if (lock = Lock(entry->fe_name,ACCESS_READ))
+				            {
+					        // Locked by cached lister-buffer?
+					        if (tmp_buf = lister_find_buffer(0,0,0,
+									         lock,
+									         0,0,
+									         LISTER_BFPF_ONLY_CACHE|LISTER_BFPF_DONT_MOVE|LISTER_BFPF_DONT_TEST))
+					        {
+					            // Free the buffer and try again
+					            lister_free_buffer(tmp_buf);
+					        }
+
+					        UnLock(lock);
+				            }
+				        }
+					// Wait for a tick and then try again
+				        else
+				            Delay(15);
+
+					continue;
+			        }
 
 				// Delete protected
 				else
@@ -1048,7 +1324,7 @@ GALILEOFM_FUNC(function_copy)
 						// Build requester text
 						lsprintf(handle->func_work_buf,
 							GetString(&locale,MSG_DELETE_PROTECTED),
-							FilePart(source_file));
+							FilePart(entry->fe_name));
 
 						// Display request
 						if (!(ret=function_request(
@@ -1076,7 +1352,7 @@ GALILEOFM_FUNC(function_copy)
 					}
 
 					// Try to unprotect file
-					if (!(SetProtection(source_file,0)))
+					if (!(SetProtection(entry->fe_name,0)))
 					{
 						ret=0;
 						break;
@@ -1107,11 +1383,16 @@ GALILEOFM_FUNC(function_copy)
 			else file_ok=0;
 		}
 
-		// Aborted?
-		if (ret==-1)
+		if (org_dir)
 		{
-			function_abort(handle);
-			ret=0;
+		    CurrentDir(org_dir);
+		    org_dir = 0;
+		}
+
+		// Aborted?
+		if (ret==-1 || function_check_abort(handle))
+		{
+			ret = -1;
 			break;
 		}
 
@@ -1123,20 +1404,35 @@ GALILEOFM_FUNC(function_copy)
 		rename_flag=0;
 	}
 
-	// Free data
-	FreeVec(source_file);
+	// Aborted?
+	if (ret==-1)
+	{
+		if (org_dir)
+		    CurrentDir(org_dir);
+
+		if (path && path->pn_recurse_lock)
+		{
+		    UnLock(path->pn_recurse_lock);
+		    path->pn_recurse_lock = 0;
+		}
+
+		function_abort(handle);
+		ret=0;
+	}
 
 	return ret;
 }
 
 
 // Copy a file, with optional encryption
-int function_copy_file(
+static int function_copy_file(
 	struct FileInfoBlock *s_info,
 	struct FileInfoBlock *d_info,
 	FunctionHandle *handle,
 	char *source_file,
 	char *dest_file,
+	BPTR source_path_lock,
+	BPTR dest_path_lock,
 	long *err_code,
 	char *password,
 	ULONG copy_flags)
@@ -1161,6 +1457,7 @@ int function_copy_file(
 	{
 		*err_code=IoErr();
 		UnLock(lock);
+
 		return COPY_FAILED;
 	}
 
@@ -1206,12 +1503,22 @@ int function_copy_file(
 		// Try to get icon
 		if (icon=GetDiskObject(source_file))
 		{
+			if (copy_flags&COPY_ASSIGN_ICON)
+			{
+			    char *tmp;
+
+			    tmp = stpcpy(handle->func_work_buf, dest_file);
+			    *tmp = ':';
+			    tmp++;
+			    *tmp = 0;
+			}
+
 			// Update progress
 			function_progress_file(handle,0,5);
 
 			// Adjust position for top-level files
 			if (copy_flags&COPY_TOP_LEVEL)
-				copy_icon_position(handle,FilePart(source_file),icon);
+				copy_icon_position(handle,(copy_flags&COPY_ASSIGN_ICON)?handle->func_work_buf:(char *)FilePart(source_file),icon);
 
 			// Check abort
 			if (function_check_abort(handle))
@@ -1219,15 +1526,19 @@ int function_copy_file(
 
 			// Try to write icon
 			else
-			if (PutDiskObject(dest_file,icon))
 			{
+		            CurrentDir(dest_path_lock);
+
+			    if (PutDiskObject(dest_file,icon)) //(putdiskobject(&current_dir,dest_path_lock,&org_dir,dest_file,icon))
+			    {
 				function_progress_file(handle,0,10);
 				ret_code=COPY_OK;
-			}
+			    }
 
-			// Get error
-			else
-			*err_code=IoErr();
+			    // Get error
+			    else
+				*err_code=IoErr();
+			}
 
 			// Free icon
 			FreeDiskObject(icon);
@@ -1264,6 +1575,7 @@ int function_copy_file(
 		// Is it a directory?
 		if (s_info->fib_DirEntryType>0)
 		{
+		        CurrentDir(dest_path_lock);
 			// Try to create destination directory
 			if ((lock=Lock(dest_file,ACCESS_READ)) ||
 				(lock=CreateDir(dest_file)))
@@ -1293,6 +1605,8 @@ int function_copy_file(
 					// Indicate a directory
 					*err_code=-42;
 
+					CurrentDir(source_path_lock);
+
 					// Set success code
 					return COPY_OK;
 				}
@@ -1302,15 +1616,24 @@ int function_copy_file(
 			}
 
 			// Couldn't create
-			else *err_code=IoErr();
+			else
+			{
+			    *err_code=IoErr();
+
+			    CurrentDir(source_path_lock);
+			}
+
 			return COPY_FAILED;
 		}
+
+		CurrentDir(source_path_lock);
 
 		// Check source isn't read-protected
 		if (s_info->fib_Protection&FIBF_READ)
 		{
 			// It is; fail
 			*err_code=ERROR_READ_PROTECTED;
+
 			return COPY_FAILED;
 		}
 
@@ -1319,6 +1642,7 @@ int function_copy_file(
 		{
 			// Store error code
 			*err_code=IoErr();
+
 			return COPY_FAILED;
 		}
 
@@ -1338,6 +1662,8 @@ int function_copy_file(
 		// Got buffer?
 		if (file_buffer)
 		{
+			CurrentDir(dest_path_lock);
+
 			// Open output file; if top level, use original function
 			if (copy_flags&COPY_TOP_LEVEL)
 				out_file=OriginalOpen(dest_file,MODE_NEWFILE);
@@ -1603,6 +1929,8 @@ int function_copy_file(
 				// Get new bits
 				s_info->fib_Protection|=FIBF_ARCHIVE;
 
+			        CurrentDir(source_path_lock);
+
 				// Set protection; use original function if at top-level
 				if (copy_flags&COPY_TOP_LEVEL)
 					OriginalSetProtection(source_file,s_info->fib_Protection);
@@ -1616,14 +1944,21 @@ int function_copy_file(
 
 	// Otherwise, delete failed file
 	else
-	if (out_file) DeleteFile(dest_file);
+	if (out_file)
+	{
+	    CurrentDir(dest_path_lock);
+
+	    DeleteFile(dest_file);
+	}
+
+	CurrentDir(source_path_lock);
 
 	return ret_code;
 }
 
 
 // Set position for an icon
-void copy_icon_position(FunctionHandle *handle,char *name,struct DiskObject *icon)
+static void copy_icon_position(FunctionHandle *handle,char *name,struct DiskObject *icon)
 {
 	ULONG flags;
 
@@ -1635,25 +1970,25 @@ void copy_icon_position(FunctionHandle *handle,char *name,struct DiskObject *ico
 	icon->do_CurrentY=NO_ICON_POSITION;
 	flags&=~ICONF_POSITION_OK;
 
-	if (CheckAppMessage(handle->app_msg))
+	if (handle->lister_app_msg)
 	{
 		short num;
 
 		// Find arg number
-		if ((num=FindWBArg(
-			handle->app_msg->ga_Msg.am_ArgList,
-			handle->app_msg->ga_Msg.am_NumArgs,
+		if ((num=FindGLArg(
+			handle->lister_app_msg->glam_ArgList,
+			handle->lister_app_msg->glam_NumArgs,
 			name))>-1)
 		{
 			short x,y;
 
 			// Fix icon position
-			x=handle->app_msg->ga_DragOffset.x+
-				handle->app_msg->ga_Msg.am_MouseX+
-				handle->app_msg->ga_DropPos[num].x;
-			y=handle->app_msg->ga_DragOffset.y+
-				handle->app_msg->ga_Msg.am_MouseY+
-				handle->app_msg->ga_DropPos[num].y;
+			x=handle->lister_app_msg->glam_DragOffset.x+
+				handle->lister_app_msg->glam_MouseX+
+				handle->lister_app_msg->glam_ArgData[num].glad_DropPos.x;
+			y=handle->lister_app_msg->glam_DragOffset.y+
+				handle->lister_app_msg->glam_MouseY+
+				handle->lister_app_msg->glam_ArgData[num].glad_DropPos.y;
 
 			// Store position, unless removing Galileo positions
 			if (!(environment->env->display_options&DISPOPTF_REMGALILEOPOS))

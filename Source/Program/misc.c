@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,11 +32,18 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "requesters.h"
+#include "backdrop.h"
+#include "dates.h"
+#include "scripts.h"
+#include "function_data.h"
+#include "lsprintf_protos.h"
 
 // Simple copy routine, like CopyMem
 void copy_mem(char *source,char *dest,int size)
@@ -43,17 +51,6 @@ void copy_mem(char *source,char *dest,int size)
 	while (size-->0) *dest++=*source++;
 }
 
-#if 0
-// Complement a string in place
-void compstr(char *str)
-{
-	while (*str)
-	{
-		*str=~*str;
-		++str;
-	}
-}
-#endif
 
 // Get the name of the screen we are currently on
 char *get_our_pubscreen()
@@ -155,6 +152,51 @@ void flush_port(struct MsgPort *port)
 
 	while (msg=GetMsg(port))
 		ReplyFreeMsg(msg);
+}
+
+
+// Replace the beginning of a string
+BOOL strreplace_alloch(APTR memory, STRPTR *full_string, STRPTR old, STRPTR old_part, STRPTR new_part,BOOL path)
+{
+	ULONG old_part_len, len;
+	STRPTR newstring, org = *full_string;
+
+	// Get length of old part to replace
+	old_part_len=strlen(old_part);
+
+	// See if string matches old part at the start
+	if (strnicmp(old,old_part,old_part_len)!=0) return 0;
+
+	// Check path if necessary
+	if (path &&
+		old[old_part_len]!=0 &&
+		old[old_part_len-1]!='/' &&
+		old[old_part_len-1]!=':') return 0;
+
+	len = strlen(org) - old_part_len + strlen(new_part) + 1;
+
+	if (newstring = AllocMemH(memory,len))
+	{
+	    ULONG pre_len;
+
+	    if (pre_len = (ULONG)(old - org))
+	    {
+		stccpy(newstring, org, pre_len + 1);
+		strcat(newstring, new_part);
+	    }
+	    else
+		strcpy(newstring, new_part);
+
+	    strcat(newstring, old + old_part_len);
+
+	    *full_string = newstring;
+
+	    FreeMemH(org);
+	}
+	else
+	    return 0;
+
+	return 1;
 }
 
 
@@ -313,6 +355,36 @@ void __stdargs __saveds loc_printf(char *buffer,char *string,long data,...)
 
 
 // Get disk info
+LONG GetDiskInfoLock(BPTR lock,struct InfoData *info)
+{
+	struct MsgPort *port;
+	struct DosList *dos;
+	LONG res;
+
+	port = ((struct FileLock *)BADDR(lock))->fl_Task;
+
+	// Send packet
+	res=DoPkt(port,ACTION_DISK_INFO,MKBADDR(info),0,0,0,0);
+
+	// Clear "in use" flag to indicate formatting by default
+	info->id_InUse=0;
+
+	// Get doslist pointer
+	if (dos=DeviceFromHandler(port,NULL))
+	{
+		// Invalid device?
+		if (!GetDeviceUnit(dos->dol_misc.dol_handler.dol_Startup,NULL,NULL))
+		{
+			// Disk can't be formatted
+			info->id_InUse=1;
+		}
+	}
+
+	return res;
+}
+
+
+// Get disk info
 LONG GetDiskInfo(char *device,struct InfoData *info)
 {
 	struct DevProc *proc;
@@ -354,11 +426,19 @@ BOOL VolumePresent(DirBuffer *buffer)
 	char volume[32];
 
 	// Valid path?
-	if (!buffer->buf_Path[0]) return 0;
+	if (!buffer->buf_Path || !buffer->buf_Path[0]) return 0;
 
 	// Get current disk info
-	if (!(GetDiskInfo(buffer->buf_Path,&info)) ||
-		!(dos=(struct DosList *)BADDR(info.id_VolumeNode))) return 0;
+	if (buffer->buf_Lock)
+	{
+	    if (!(GetDiskInfoLock(buffer->buf_Lock,&info)) ||
+		    !(dos=(struct DosList *)BADDR(info.id_VolumeNode))) return 0;
+	}
+	else
+	{
+	    if (!(GetDiskInfo(buffer->buf_Path,&info)) ||
+		    !(dos=(struct DosList *)BADDR(info.id_VolumeNode))) return 0;
+	}
 
 	// Valid dos list?
 	if (!dos || !dos->dol_Name) return 0;
@@ -855,6 +935,9 @@ void ChainTagItems(struct TagItem **list_ptr,struct TagItem *tags)
 // Handle a diskchange message
 void handle_diskchange(GalileoNotify *notify)
 {
+	IPCData *ipc;
+	Lister *lister;
+
 	// Bad disk?
 	if (notify->gn_Flags==(ULONG)-1)
 	{
@@ -865,6 +948,30 @@ void handle_diskchange(GalileoNotify *notify)
 	else
 	if (notify->gn_Flags==(ULONG)-2)
 		return;
+
+	// Lock lister list
+	lock_listlock(&GUI->lister_list,FALSE);
+
+	// Go through listers
+	for (ipc=(IPCData *)GUI->lister_list.list.lh_Head;
+		ipc->node.mln_Succ;
+		ipc=(IPCData *)ipc->node.mln_Succ)
+	{
+		// Get lister
+		lister=IPCDATA(ipc);
+		// Showing devicelist?
+		if (lister->flags&LISTERF_DEVICE_LIST &&
+			lister->cur_buffer &&
+			lister->cur_buffer->more_flags&DWF_DEVICE_LIST)
+		{
+				// Activate this window
+				IPC_Command(ipc,LISTER_RESCAN,0,0,0,0);
+		}
+	}
+
+	// Unlock lister list
+	unlock_listlock(&GUI->lister_list);
+
 
 	// Launch insertion script
 	RunScript((notify->gn_Flags==0)?SCRIPT_DISKREMOVE:SCRIPT_DISKINSERT,notify->gn_Name);
@@ -972,7 +1079,7 @@ BOOL GetFileInfo(char *name,struct FileInfoBlock *fib)
 {
 	BPTR lock;
 
-	if (!(lock=Lock(name,ACCESS_READ)))
+	if (!(lock = LockFromPath(name, NULL, NULL)))
 		return 0;
 	Examine(lock,fib);
 	UnLock(lock);

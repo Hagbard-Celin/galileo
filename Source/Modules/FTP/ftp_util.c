@@ -323,7 +323,7 @@ BPTR                           lock;
 __aligned struct FileInfoBlock fib;
 ULONG                          secs = 0;
 
-if	(lock = Lock( path, ACCESS_READ ))
+if	(lock = LockFromPath( path, NULL, NULL ))
 	{
 	Examine( lock, &fib );
 

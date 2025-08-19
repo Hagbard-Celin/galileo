@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,43 +37,42 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
+#include "function_protos.h"
+#include "path_routines.h"
+#include "buffers.h"
 
 // PARENT, ROOT
 GALILEOFM_FUNC(function_parent)
 {
 	PathNode *path;
-	short ret=0,a;
+	BPTR source_lock = 0;
+	short ret = 0;
 
 	// Get current source lister
 	if (!(path=function_path_current(&handle->func_source_paths)) ||
 		!path->pn_lister) return 0;
 
-	// Get current path
-	strcpy(handle->inst_data,path->pn_path);
-
-	// Try twice
-	for (a=0;a<2;a++)
+	// Get lock
+	if (path->pn_lock)
 	{
-		// Do parent/root
-		if (command->function==FUNC_PARENT) ret=path_parent(handle->inst_data);
-		else ret=path_root(handle->inst_data);
+	    // Get parent lock
+	    source_lock = ParentDir(path->pn_lock);
 
-		// Successful?
-		if (ret) break;
+	    if (command->function==FUNC_ROOT)
+	    {
+		BPTR lock;
 
-		// For second time through, expand path
-		if (a==0)
+		// Repeat until reaching root
+		while (lock = ParentDir(source_lock))
 		{
-			BPTR lock;
-
-			// Lock path
-			if (lock=Lock(handle->inst_data,ACCESS_READ))
-			{
-				// Expand path
-				DevNameFromLock(lock,handle->inst_data,512);
-				UnLock(lock);
-			}
+		    UnLock(source_lock);
+		    source_lock = lock;
 		}
+	    }
+
+	    if (source_lock)
+		ret = 1;
 	}
 
 	// Valid directory?
@@ -80,7 +80,7 @@ GALILEOFM_FUNC(function_parent)
 	{
 		// Read directory
 		handle->flags=GETDIRF_CANCHECKBUFS|GETDIRF_CANMOVEEMPTY;
-		function_read_directory(handle,path->pn_lister,handle->inst_data);
+		function_read_directory(handle, path->pn_lister, NULL, source_lock);
 	}
 
 	return 1;

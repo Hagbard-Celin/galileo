@@ -36,6 +36,8 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "backdrop_protos.h"
 
 struct line
 {
@@ -343,7 +345,7 @@ void backdrop_fix_count(BackdropInfo *info,BOOL update)
 	if (update) IPC_Command(lister->ipc,LISTER_SHOW_INFO,0,0,0,0);
 }
 
-
+#if 0  // Not used anywhere
 // Find a disk object
 BackdropObject *backdrop_find_disk(BackdropInfo *info,char *path)
 {
@@ -402,7 +404,7 @@ BackdropObject *backdrop_find_disk(BackdropInfo *info,char *path)
 
 	return object;
 }
-
+#endif
 
 // Get next object
 BackdropObject *backdrop_next_object(

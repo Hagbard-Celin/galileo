@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,19 +37,23 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "function_launch_protos.h"
+#include "clock_task.h"
+#include "lsprintf_protos.h"
+#include "function_protos.h"
 
 // RUN internal function
 GALILEOFM_FUNC(function_runprog)
 {
 	FunctionEntry *entry;
-	BPTR lock,old;
+	BPTR old;
 
-	// Lock source path
-	if (!(lock=Lock(handle->func_source_path,ACCESS_READ)))
+	if (!(handle->func_source_lock))
 		return 1;
 
 	// Change directory
-	old=CurrentDir(lock);
+	old=CurrentDir(handle->func_source_lock);
 
 	// Build list of sources
 	while (entry=function_get_entry(handle))
@@ -98,7 +103,7 @@ GALILEOFM_FUNC(function_runprog)
 				lsprintf(handle->func_work_buf,"\"%s\"",entry->fe_name);
 
 				// Launch program
-				WB_LaunchNew(handle->func_work_buf,GUI->screen_pointer,0,environment->env->default_stack,0);
+				WB_Launch(handle->func_work_buf,GUI->screen_pointer,0,environment->env->default_stack,0,0,0,0);
 			}
 
 			// Free icon
@@ -188,7 +193,7 @@ GALILEOFM_FUNC(function_runprog)
 					file=Open("nil:",MODE_OLDFILE);
 
 				// Run command
-				CLI_Launch(command,(struct Screen *)-1,0,file,0,LAUNCHF_USE_STACK,environment->env->default_stack);
+				CLI_Launch(command,(struct Screen *)-1,0,file,0,LAUNCHF_USE_STACK,environment->env->default_stack, NULL);
 			}
 		}
 
@@ -198,7 +203,6 @@ GALILEOFM_FUNC(function_runprog)
 
 	// Restore directory
 	CurrentDir(old);
-	UnLock(lock);
 
 	return 1;
 }

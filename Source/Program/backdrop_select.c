@@ -36,6 +36,9 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "misc_protos.h"
+#include "backdrop_protos.h"
 
 // Select all objects
 void backdrop_select_all(BackdropInfo *info,short state)

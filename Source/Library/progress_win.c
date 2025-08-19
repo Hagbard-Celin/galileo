@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -92,7 +92,7 @@ ProgressWindow *__asm __saveds L_OpenProgressWindow(
 		(ULONG)progress_task,
 		STACK_DEFAULT,
 		(ULONG)prog,
-		(struct Library *)DOSBase,lib);
+		lib);
 
 	// Failed?
 	if (!prog->pw_IPC)
@@ -339,6 +339,10 @@ void __saveds progress_task(void)
 
 	// Free control structure
 	FreeVec(prog);
+
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }
 
 

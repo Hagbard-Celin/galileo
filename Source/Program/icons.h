@@ -31,12 +31,15 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #ifndef _GALILEOFM_ICONS
 #define _GALILEOFM_ICONS
+
+#include "backdrop.h"
+#include "galileo_config.h"
 
 #define ICONWRITE_ABORTED	-1
 #define ICONWRITE_FAILED	0

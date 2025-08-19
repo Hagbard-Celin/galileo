@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,10 +37,15 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "backdrop_protos.h"
+#include "buttons_protos.h"
 
 // Create a new button bank
 Buttons *buttons_new(
 	char *name,
+	char *path,
+	BPTR parent_lock,
 	Cfg_ButtonBank *bank,
 	struct IBox *box,
 	short type,
@@ -47,13 +53,24 @@ Buttons *buttons_new(
 {
 	Buttons *buttons;
 	IPCData *ipc;
+	APTR memhandle;
+#ifdef _DEBUG
+	char procname[25];
+#endif
+
+	// Memory handle
+	if (!(memhandle=NewMemHandle(0,0,MEMF_CLEAR)))
+	    return 0;
 
 	// Allocate new buttons structure
-	if (!(buttons=AllocVec(sizeof(Buttons),MEMF_CLEAR)))
+	if (!(buttons=AllocMemH(memhandle,sizeof(Buttons))))
 	{
+		FreeMemHandle(memhandle);
 		if (bank) CloseButtonBank(bank);
 		return 0;
 	}
+
+	buttons->memory = memhandle;
 
 	// Initialise icon position
 	buttons->icon_pos_x=NO_ICON_POSITION;
@@ -68,13 +85,33 @@ Buttons *buttons_new(
 
 	// Filename supplied?
 	else
-	if (name) strcpy(buttons->buttons_file,name);
+	if (name)
+	{
+	    ULONG len;
+	    char *tmp;
 
+	    if (parent_lock)
+		buttons->buttons_parent_lock = DupLock(parent_lock);
+
+	    len = strlen(name) + 1;
+
+	    if (path)
+		len += strlen(path);
+
+	    buttons->buttons_file = AllocMemH(memhandle, len);
+
+	    if (path)
+		tmp = stpcpy(buttons->buttons_file, path);
+	    else
+		tmp = buttons->buttons_file;
+
+	    strcpy(tmp,name);
+	}
 	// Create new bank
 	else
 	if (!(buttons->bank=NewButtonBank(1,type)))
 	{
-		FreeVec(buttons);
+		FreeMemHandle(memhandle);
 		return 0;
 	}
 
@@ -91,20 +128,30 @@ Buttons *buttons_new(
 	// Set first-time flag
 	buttons->flags|=BUTTONF_FIRST_TIME;
 
+#ifdef _DEBUG
+	sprintf(procname, "galileo_buttons_%08lx", buttons);
+#endif
+
 	// Start buttons process
 	if (!(IPC_Launch(
 		&GUI->buttons_list,
 		&ipc,
+#ifdef _DEBUG
+		procname,
+#else
 		"galileo_buttons",
+#endif
 		(ULONG)buttons_code,
 		STACK_DEFAULT,
-		(ULONG)buttons,(struct Library *)DOSBase)))
+		(ULONG)buttons)))
 	{
 		// Free stuff if process never got off the ground
 		if (!ipc)
 		{
-            CloseButtonBank(buttons->bank);
-			FreeVec(buttons);
+		    if (buttons->buttons_parent_lock)
+			UnLock(buttons->buttons_parent_lock);
+		    CloseButtonBank(buttons->bank);
+		    FreeMemHandle(memhandle);
 		}
 		return 0;
 	}

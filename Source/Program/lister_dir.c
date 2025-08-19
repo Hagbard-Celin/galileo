@@ -31,11 +31,20 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "dirlist_protos.h"
+#include "function_launch_protos.h"
+#include "buffers_protos.h"
+#include "rexx_protos.h"
+#include "filetypes_protos.h"
+#include "handler.h"
+#include "menu_data.h"
+#include "help.h"
 #include "/Modules/modules.h"
 
 // Configure a lister
@@ -416,6 +425,13 @@ void lister_parent_popup(Lister *lister,unsigned short code)
 				else
 				if (lister->cur_buffer->buf_CustomHandler[0])
 				{
+				    if (*(ULONG *)lister->cur_buffer->buf_CustomHandler == CUSTH_TYPE_GFMMODULE)
+					galileo_handler_msg(0, "reread",
+							    0, lister,
+							    0, 0, 0, 0,
+							    0,
+							    0, 0);
+				    else
 					// Send message
 					rexx_handler_msg(
 						0,
@@ -432,7 +448,7 @@ void lister_parent_popup(Lister *lister,unsigned short code)
 				if (!(check_special_buffer(lister,1)))
 				{
 					// Re-read current dir
-					read_directory(lister,lister->cur_buffer->buf_Path,GETDIRF_RESELECT);
+					read_directory(lister,lister->cur_buffer->buf_Path,lister->cur_buffer->buf_Lock,GETDIRF_RESELECT);
 				}
 
 				// Switched from special buffer, need to refresh
@@ -451,6 +467,7 @@ void lister_parent_popup(Lister *lister,unsigned short code)
 					read_directory(
 						lister,
 						(char *)item->data,
+						NULL,
 						GETDIRF_CANCHECKBUFS|GETDIRF_CANMOVEEMPTY);
 				}
 				break;

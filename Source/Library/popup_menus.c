@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -49,7 +49,7 @@ UWORD __asm __saveds L_DoPopUpMenu(
 	register __a1 PopUpMenu *menu,
 	register __a2 PopUpItem **sel_item,
 	register __d0 UWORD code,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
 	PopUpData *data;
 	PopUpItem *item;
@@ -82,7 +82,7 @@ UWORD __asm __saveds L_DoPopUpMenu(
 		return (UWORD)-1;
 
 	// Get popup delay
-	if ((still_ticks=((struct LibData *)libbase->ml_UserData)->popup_delay)<1)
+	if ((still_ticks=gfmlib_data.popup_delay)<1)
 		still_ticks=STILL_TICKS;
 
 	// Sticky straight away?
@@ -343,7 +343,7 @@ UWORD __asm __saveds L_DoPopUpMenu(
 	// Open main list
 	if (!(popup_init_list(data,0)))
 	{
-        popup_cleanup(data);
+		popup_cleanup(data);
 		return (UWORD)-1;
 	}
 
@@ -434,7 +434,7 @@ UWORD __asm __saveds L_DoPopUpMenu(
 						{
 							ReplyMsg((struct Message *)msg);
 
-                            popup_cleanup(data);
+							popup_cleanup(data);
 							return ret;
 						}
 					}
@@ -625,7 +625,7 @@ UWORD __asm __saveds L_DoPopUpMenu(
 				// Inactive window does abort
 				case IDCMP_INACTIVEWINDOW:
 
-                    popup_cleanup(data);
+					popup_cleanup(data);
 					return (UWORD)-1;
 
 
@@ -633,7 +633,7 @@ UWORD __asm __saveds L_DoPopUpMenu(
 				case IDCMP_MOUSEBUTTONS:
 				{
 					UWORD ret=(UWORD)-1;
-                
+
 					// Is it the code we want?
 					if (msg_copy.Code==code)
 					{
@@ -713,7 +713,7 @@ UWORD __asm __saveds L_DoPopUpMenu(
 
 				// Mouse move
 				case IDCMP_MOUSEMOVE:
-           
+
 					// Still at the first movement stage?
 					if (first_move)
 					{
@@ -1808,11 +1808,7 @@ void __saveds __asm L_GetPopUpImageSize(
 }
 
 
-void __asm __saveds L_SetPopUpDelay(register __d0 short delay,register __a6 struct MyLibrary *libbase)
+void __asm __saveds L_SetPopUpDelay(register __d0 short delay,register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer, store delay value
-	data=(struct LibData *)libbase->ml_UserData;
-	data->popup_delay=delay;
+	gfmlib_data.popup_delay=delay;
 }

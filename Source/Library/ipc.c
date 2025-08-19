@@ -3,7 +3,7 @@
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
 Copyright 2012 Roman Kargin <kas1e@yandex.ru>
-Copyright 2023 Hagbard Celine
+Copyright 2023,2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -33,53 +33,49 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofmlib.h"
+#ifdef _DEBUG_STACK
+#include "stack_check.h"
+#endif
+
 
 void ipc_remove_list(IPCData *ipc);
 
 // Launch a generic process
-__asm L_IPC_Launch(
+BOOL __asm __saveds L_IPC_Launch(
 	register __a0 struct ListLock *list,
 	register __a1 IPCData **storage,
 	register __a2 char *name,
 	register __d0 ULONG entry,
 	register __d1 ULONG stack,
 	register __d2 ULONG data,
-	register __a3 struct Library *dos_base,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *libdata;
 	IPCData *ipc;
 	BOOL path=0;
 	struct TagItem *tags;
-    BPTR pathlist=0;
-#ifdef RESOURCE_TRACKING
-    struct Library *ResTrackBase=0;
-#endif
+	BPTR pathlist=0;
 
 #ifdef _DEBUG_IPCPROC
-    KPrintF("L_IPC_Launch1 Launching: %s ResTrackBase: %lx at: %lx SysBase: %lx IconBase: %lx \n", name, ResTrackBase, &ResTrackBase, SysBase, IconBase);
+	KPrintF("L_IPC_Launch1 Launching: %s ResTrackBase: %lx at: %lx SysBase: %lx IconBase: %lx \n", name, ResTrackBase, &ResTrackBase, SysBase, IconBase);
+#else
+#ifdef _DEBUG
+	KPrintF("IPC Launching: %s\n", name);
+#endif
 #endif
 
 	// Want path?
 	if (stack&IPCF_GETPATH) path=1;
 
-	// Get data pointer
-	libdata=(struct LibData *)libbase->ml_UserData;
-
 	// Clear storage
 	if (storage) *storage=0;
 
-#ifdef RESOURCE_TRACKING
-	ResTrackBase=libdata->restrack_base;
-#endif
-
 #ifdef _DEBUG_IPCPROC
-    KPrintF("L_IPC_Launch2 Launching: %s ResTrackBase: %lx at: %lx SysBase: %lx IconBase: %lx \n", name, ResTrackBase, &ResTrackBase, SysBase, IconBase);
+	KPrintF("L_IPC_Launch2 Launching: %s ResTrackBase: %lx at: %lx SysBase: %lx IconBase: %lx \n", name, ResTrackBase, &ResTrackBase, SysBase, IconBase);
 #endif
 
 	// Allocate data
@@ -91,7 +87,7 @@ __asm L_IPC_Launch(
 	}
 
 	// Store memory and list pointers
-	ipc->memory=libdata->memory;
+	ipc->memory=gfmlib_data.memory;
 	ipc->list=list;
 
 	// Fill out process tags
@@ -110,19 +106,17 @@ __asm L_IPC_Launch(
 	if (path)
 	{
 
-#define GalileoFMBase (libdata->galileofm_base)
 		// Lock path list
-		GetSemaphore(&libdata->path_lock,SEMF_SHARED,0);
+		GetSemaphore(&gfmlib_data.path_lock,SEMF_SHARED,0);
 
 		// Get path list copy
-		pathlist=GetDosPathList(libdata->path_list);
+		pathlist=GetDosPathList(gfmlib_data.path_list);
 
 		// Unlock path list
-		FreeSemaphore(&libdata->path_lock);
-#undef GalileoFMBase
+		FreeSemaphore(&gfmlib_data.path_lock);
 
 #ifdef _DEBUG_IPCPROC
-        KPrintF("L_IPC_Launch3 Launching: %s with Pathlist: %lx \n", name, pathlist);
+	KPrintF("L_IPC_Launch3 Launching: %s with Pathlist: %lx \n", name, pathlist);
 #endif
 
 		// Fill out tags
@@ -134,10 +128,8 @@ __asm L_IPC_Launch(
 	}
 	else tags[5].ti_Tag=TAG_END;
 
-#define DOSBase (dos_base)
 	// Launch process
 	ipc->proc=CreateNewProc(tags);
-#undef DOSBase
 
 	// Free tags now
 	FreeVec(tags);
@@ -145,13 +137,11 @@ __asm L_IPC_Launch(
 	// Failed to launch?
 	if (!ipc->proc)
 	{
-        // Plug memory leak
-        if (path)
-#define GalileoFMBase (libdata->galileofm_base)
-        	FreeDosPathList(pathlist);
-#undef GalileoFMBase
+	// Plug memory leak
+	if (path)
+		FreeDosPathList(pathlist);
 		
-        FreeVec(ipc);
+	FreeVec(ipc);
 		return 0;
 	}
 
@@ -164,7 +154,7 @@ __asm L_IPC_Launch(
 
 
 // Send an IPC startup
-__asm L_IPC_Startup(
+BOOL __asm L_IPC_Startup(
 	register __a0 IPCData *ipc,
 	register __a1 APTR data,
 	register __a2 struct MsgPort *reply)
@@ -196,8 +186,8 @@ __asm L_IPC_Startup(
 	if (port) DeleteMsgPort(port);
 
 	// If there's no command port, report failure
-	if (startup.command!=IPC_STARTUP) return 0;
-	return 1;
+	if (startup.command!=IPC_STARTUP) return FALSE;
+	return TRUE;
 }
 
 
@@ -223,6 +213,10 @@ IPCData *__asm L_IPC_ProcStartup(
 	// Get IPC pointer
 	ipc=(IPCData *)msg->flags;
 
+#ifdef _DEBUG_STACK
+	L_StackCheckBegin(task, &ipc->stack_debug);
+#endif
+
 	// Store IPC pointer
 	task->tc_UserData=ipc;
 
@@ -245,9 +239,9 @@ IPCData *__asm L_IPC_ProcStartup(
 		if (ipc->list)
 		{
 			// Lock and add to list
-			L_GetSemaphore(&ipc->list->lock,SEMF_EXCLUSIVE,0);
+			L_GetSemaphore(&ipc->list->lock,SEMF_EXCLUSIVE,0, getreg(REG_A6));
 			AddTail(&ipc->list->list,(struct Node *)ipc);
-			L_FreeSemaphore(&ipc->list->lock);
+			L_FreeSemaphore(&ipc->list->lock, getreg(REG_A6));
 
 			// Set flag to say we're listed
 			ipc->flags|=IPCF_LISTED;
@@ -269,6 +263,9 @@ void __asm __saveds L_IPC_Free(register __a0 IPCData *ipc)
 {
 	if (ipc)
 	{
+#ifdef _DEBUG_STACK
+		L_StackCheckEnd(FindTask(0), &ipc->stack_debug);
+#endif
 		// Mark as invalid
 		ipc->flags|=IPCF_INVALID;
 
@@ -329,13 +326,13 @@ ULONG __asm __saveds L_IPC_Command(
 	APTR memory=0;
 
 #ifdef RESOURCE_TRACKING
-    struct Library *RTlib;
-    //if (!ResTrackBase)
-        RTlib=(struct Library *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"g_restrack.library");
-    //else
-        //RTlib=ResTrackBase;
+	struct Library *RTlib;
+	//if (!ResTrackBase)
+	RTlib=(struct Library *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"g_restrack.library");
+	//else
+	//RTlib=ResTrackBase;
 #ifdef _DEBUG_IPCCOMMAND
-    KPrintF("IPC_Command: ResTrackBase: %lx RTlib: %lx \n", ResTrackBase, RTlib);
+	KPrintF("IPC_Command: ResTrackBase: %lx RTlib: %lx \n", ResTrackBase, RTlib);
 #endif
 #define ResTrackBase RTlib
 #endif
@@ -432,7 +429,7 @@ ULONG __asm __saveds L_IPC_Command(
 						if (mes->msg.mn_ReplyPort)
 						{
 KPrintF("*** deadlock message from %s (%lx) to %s (%lx)! ***\n"
-        "command : %lx\nflags   : %lx\ndata    : %lx\n",
+	"command : %lx\nflags   : %lx\ndata    : %lx\n",
 mes->sender->proc->pr_Task.tc_Node.ln_Name,mes->sender->proc,
 task->tc_Node.ln_Name,task,
 mes->command,mes->flags,mes->data);
@@ -461,7 +458,7 @@ mes->command,mes->flags,mes->data);
 		result=msg->command;
 
 		// Free message
-        if (data_free)
+		if (data_free)
 			FreeVec(data_free);
 
 		L_FreeMemH(msg);
@@ -491,7 +488,7 @@ ULONG __asm __saveds L_IPC_SafeCommand(
 	ULONG res=(ULONG)-1;
 
 	// Lock list
-	L_GetSemaphore(&list->lock,SEMF_SHARED,0);
+	L_GetSemaphore(&list->lock,SEMF_SHARED,0, getreg(REG_A6));
 
 	// See if locker is still valid
 	for (look=(IPCData *)list->list.lh_Head;
@@ -508,7 +505,7 @@ ULONG __asm __saveds L_IPC_SafeCommand(
 	}
 
 	// Unlock list
-	L_FreeSemaphore(&list->lock);
+	L_FreeSemaphore(&list->lock, getreg(REG_A6));
 	return res;
 }
 
@@ -527,7 +524,7 @@ void __asm __saveds  L_IPC_Reply(register __a0 IPCMessage *msg)
 	else
 	{
 		if (msg->data_free)
-        	FreeVec(msg->data_free);
+		    FreeVec(msg->data_free);
 		L_FreeMemH(msg);
 	}
 }
@@ -543,7 +540,7 @@ IPCData *__asm __saveds L_IPC_FindProc(
 	IPCData *ipc;
 
 	// Lock list
-	L_GetSemaphore(&list->lock,SEMF_SHARED,0);
+	L_GetSemaphore(&list->lock,SEMF_SHARED,0, getreg(REG_A6));
 
 	// Go through list
 	for (ipc=(IPCData *)list->list.lh_Head;
@@ -566,7 +563,7 @@ IPCData *__asm __saveds L_IPC_FindProc(
 	else ipc=0;
 
 	// Release semaphore
-	L_FreeSemaphore(&list->lock);
+	L_FreeSemaphore(&list->lock, getreg(REG_A6));
 
 	return ipc;
 }
@@ -581,7 +578,7 @@ void __asm __saveds L_IPC_QuitName(
 	IPCData *ipc;
 
 	// Lock list
-	L_GetSemaphore(&list->lock,SEMF_SHARED,0);
+	L_GetSemaphore(&list->lock,SEMF_SHARED,0, getreg(REG_A6));
 
 	// Go through list
 	for (ipc=(IPCData *)list->list.lh_Head;
@@ -600,7 +597,7 @@ void __asm __saveds L_IPC_QuitName(
 	}
 
 	// Release semaphore
-	L_FreeSemaphore(&list->lock);
+	L_FreeSemaphore(&list->lock, getreg(REG_A6));
 }
 
 
@@ -683,7 +680,7 @@ ULONG __asm __saveds L_IPC_ListQuit(
 	long count=0;
 
 	// Lock list
-	L_GetSemaphore(&list->lock,SEMF_SHARED,0);
+	L_GetSemaphore(&list->lock,SEMF_SHARED,0, getreg(REG_A6));
 
 	// Tell all processes to quit
 	for (ipc=(IPCData *)list->list.lh_Head;
@@ -696,7 +693,7 @@ ULONG __asm __saveds L_IPC_ListQuit(
 	}
 
 	// Unlock list
-	L_FreeSemaphore(&list->lock);
+	L_FreeSemaphore(&list->lock, getreg(REG_A6));
 
 	// Not waiting?
 	if (!wait || !owner) return (ULONG)count;
@@ -768,7 +765,7 @@ void __asm __saveds L_IPC_ListCommand(
 		port->mp_Node.ln_Pri = PORT_ASYNC_MAGIC; //original dopus5code: port->mp_Flags|=PF_ASYNC;
 
 	// Lock list
-	L_GetSemaphore(&list->lock,SEMF_SHARED,0);
+	L_GetSemaphore(&list->lock,SEMF_SHARED,0, getreg(REG_A6));
 
 	// Send command to processes in list
 	for (ipc=(IPCData *)list->list.lh_Head;
@@ -780,7 +777,7 @@ void __asm __saveds L_IPC_ListCommand(
 	}
 
 	// Unlock list
-	L_FreeSemaphore(&list->lock);
+	L_FreeSemaphore(&list->lock, getreg(REG_A6));
 
 	// Wait for replies?
 	if (port)
@@ -817,9 +814,9 @@ void ipc_remove_list(IPCData *ipc)
 	// Valid list?
 	if (ipc->list && (ipc->flags&IPCF_LISTED))
 	{
-		L_GetSemaphore(&ipc->list->lock,SEMF_EXCLUSIVE,0);
+		L_GetSemaphore(&ipc->list->lock,SEMF_EXCLUSIVE,0, getreg(REG_A6));
 		Remove((struct Node *)ipc);
-		L_FreeSemaphore(&ipc->list->lock);
+		L_FreeSemaphore(&ipc->list->lock, getreg(REG_A6));
 		ipc->flags&=~IPCF_LISTED;
 	}
 }

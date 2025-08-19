@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -48,8 +49,7 @@ int __asm __saveds L_Module_Entry(register __a0 char *argstring,
 {
 	char filename[300];
 	FuncArgs *args;
-	PathNode *source;
-
+	BPTR source_lock = 0;
 
 	// See if filename is supplied
 	filename[0]=0;
@@ -67,15 +67,30 @@ int __asm __saveds L_Module_Entry(register __a0 char *argstring,
 	{
 		FunctionEntry *entry;
 
-		gci->gc_FirstEntry( IPCDATA(ipc) );
+		gci->gc_FirstEntry( IPCDATA(ipc), NULL );
 
 		// Get first entries
 		if (entry=gci->gc_GetEntry(IPCDATA(ipc)))
 		{
+			PathNode *source;
+			BPTR lock;
+
 			// Build filename
 			source = gci->gc_GetSource(IPCDATA(ipc), filename);
-			AddPart(filename,entry->fe_name,256);
 
+			if (mod_id==CONVERTTHEME)
+			{
+			    strcpy(filename,entry->fe_name);
+			    if (entry->fe_lock)
+				lock = entry->fe_lock;
+			    else
+				lock = source->pn_lock;
+
+			    if (lock)
+				source_lock = DupLock(lock);
+			}
+			else
+			    AddPart(filename,entry->fe_name,256);
 
 			gci->gc_EndEntry(IPCDATA(ipc), entry, TRUE);
 		}
@@ -323,7 +338,7 @@ int __asm __saveds L_Module_Entry(register __a0 char *argstring,
 					if (*ptr==' ') *ptr='_';
 
 				// Convert the file
-				if (res=convert_theme(gci,filename,dest))
+				if (res=convert_theme(gci,filename,source_lock,dest))
 				{
 					// Build error
 					lsprintf(filename,GetString(locale,MSG_SAVE_ERROR),res);
@@ -342,6 +357,8 @@ int __asm __saveds L_Module_Entry(register __a0 char *argstring,
 				}
 			}
 		}
+		if (source_lock)
+		    UnLock(source_lock);
 	}
 
 	DisposeArgs(args);
@@ -872,10 +889,10 @@ Att_List *theme_build_list(char *path)
 
 
 // Convert Windows95 theme
-short convert_theme(CONST GalileoCallbackInfo *gci,char *source,char *dest)
+short convert_theme(CONST GalileoCallbackInfo *gci,char *source,BPTR source_lock,char *dest)
 {
 	APTR in,file;
-	BPTR lock,old;
+	BPTR lock = 0, old = 0;
 	char buf[500],*ptr;
 	char wallpaper[256];
 	short stretch=0,tile=0;
@@ -887,13 +904,18 @@ short convert_theme(CONST GalileoCallbackInfo *gci,char *source,char *dest)
 	wallpaper[0]=0;
 	sounds=Att_NewList(LISTF_POOL);
 
-	// Get source path
-	strcpy(buf,source);
-	if (ptr=FilePart(buf)) *ptr=0;
-	if (lock=Lock(buf,ACCESS_READ))
+	if (source_lock)
+	    old = CurrentDir(source_lock);
+	else
 	{
-		old=CurrentDir(lock);
-		source=FilePart(source);
+	    // Get source path
+	    strcpy(buf,source);
+	    if (ptr=FilePart(buf)) *ptr=0;
+	    if (lock=Lock(buf,ACCESS_READ))
+	    {
+		    old=CurrentDir(lock);
+		    source=FilePart(source);
+	    }
 	}
 
 	// Open files
@@ -1020,7 +1042,8 @@ short convert_theme(CONST GalileoCallbackInfo *gci,char *source,char *dest)
 	// Close files
 	CloseBuf(file);
 	CloseBuf(in);
-	if (lock) UnLock(CurrentDir(old));
+	if (old) CurrentDir(old);
+	if (lock) UnLock(lock);
 	return err;
 }
 

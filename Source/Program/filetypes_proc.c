@@ -31,11 +31,16 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "dirlist_protos.h"
+#include "misc_protos.h"
+#include "rexx_protos.h"
+#include "buffers_protos.h"
+#include "filetypes_protos.h"
 
 // Get the filetype sniffer
 IPCData *filetype_get_sniffer(void)
@@ -58,7 +63,7 @@ IPCData *filetype_get_sniffer(void)
 			"galileo_filetype_sniffer",
 			(ULONG)filetype_sniffer_proc,
 			STACK_DEFAULT,
-			0,(struct Library *)DOSBase))) return 0;
+			0))) return 0;
 
 		// Lock process list
 		lock_listlock(&GUI->process_list,FALSE);
@@ -299,7 +304,7 @@ void __saveds filetype_sniffer_proc(void)
 						BPTR lock,temp;
 
 						// Lock new path
-						if (lock=Lock(data->buffer->buf_Path,ACCESS_READ))
+						if (data->buffer->buf_Lock && (lock=DupLock(data->buffer->buf_Lock)))
 						{
 							// Change to this path
 							temp=CurrentDir(lock);
@@ -326,7 +331,7 @@ void __saveds filetype_sniffer_proc(void)
 					if (!(data->flags&SNIFFF_NO_FILETYPES))
 					{
 						// See if type is matched
-						type=filetype_identify(data->name,FTTYPE_WANT_NAME,data->type_name,0);
+						type=filetype_identify(data->name,NULL,FTTYPE_WANT_NAME,data->type_name,0);
 						if (data->type_name[0])
 						{
 							// Store filetype pointer
@@ -524,4 +529,8 @@ void __saveds filetype_sniffer_proc(void)
 
 	// Exit
 	IPC_Free(ipc);
+
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }

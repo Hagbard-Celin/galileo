@@ -225,13 +225,13 @@ seconds_to_datestamp( &fib.fib_Date, seconds );
 
 fib.fib_Protection = prot;
 
-if	(entry = node->fn_og->og_gci->gc_CreateFileEntry( (ULONG)node->fn_handle, &fib, NULL ))
+if	(entry = node->fn_og->og_gci->gc_CreateFileEntry( (APTR)node->fn_handle, &fib, NULL ))
 	{
-	node->fn_og->og_gci->gc_AddFileEntry( (ULONG)node->fn_handle, entry, TRUE );
+	node->fn_og->og_gci->gc_AddFileEntry( (APTR)node->fn_handle, entry, TRUE );
 
 	tags[0].ti_Data = (ULONG)name;
 
-	node->fn_og->og_gci->gc_FileSet( (ULONG)node->fn_handle, entry, tags );
+	node->fn_og->og_gci->gc_FileSet( (APTR)node->fn_handle, entry, tags );
 	}
 
 if	(node->fn_site.se_env->e_index_enable)
@@ -1394,7 +1394,7 @@ if	(fm->fm_rxmsg)
 //
 static void lister_rename( struct ftp_node *ftpnode, IPCMessage *msg )
 {
-ULONG               handle = ftpnode->fn_handle;
+APTR                handle = ftpnode->fn_handle;
 struct ftp_msg     *fm;
 char                newname[FILENAMELEN+1] = {0};
 char              **namearray = 0;
@@ -3430,11 +3430,14 @@ if	(GalileoFMBase = OpenLibrary( "galileofm.library", VERSION_GALILEOFMLIB ))
 
 	CloseLibrary( GalileoFMBase );
 	}
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }
 
 /********************************/
 
-static void lister_get_prog_stuff( struct ftp_node *node, ULONG *handle, int *type )
+static void lister_get_prog_stuff( struct ftp_node *node, APTR *handle, int *type )
 {
 if	(!node || !handle || !type)
 	{
@@ -3465,7 +3468,7 @@ else
 
 void lister_prog_bar( struct ftp_node *node, int total, int count )
 {
-ULONG handle;
+APTR  handle;
 int   type;
 
 lister_get_prog_stuff( node, &handle, &type );
@@ -3477,7 +3480,7 @@ rexx_prog_bar( node->fn_galileo, handle, type, total, count );
 
 void lister_prog_bytes( struct ftp_node *node, int total, int count )
 {
-ULONG handle;
+APTR  handle;
 int   type;
 
 lister_get_prog_stuff( node, &handle, &type );
@@ -3489,7 +3492,7 @@ rexx_prog_bytes( node->fn_galileo, handle, type, total, count );
 
 void lister_prog_clear( struct ftp_node *node )
 {
-ULONG handle;
+APTR  handle;
 int   type;
 
 //kprintf("Clear progress\n");
@@ -3508,7 +3511,7 @@ if	(type == PROGRESS_FREE)
 
 void lister_prog_info( struct ftp_node *node, char *info )
 {
-ULONG handle;
+APTR  handle;
 int   type;
 
 lister_get_prog_stuff( node, &handle, &type );
@@ -3518,7 +3521,7 @@ rexx_prog_info( node->fn_galileo, handle, type, info );
 
 void lister_prog_info2( struct ftp_node *node, char *info2 )
 {
-ULONG handle;
+APTR  handle;
 int   type;
 
 lister_get_prog_stuff( node, &handle, &type );
@@ -3529,7 +3532,7 @@ rexx_prog_info2( node->fn_galileo, handle, type, info2 );
 
 void lister_prog_info3( struct ftp_node *node, char *info3 )
 {
-ULONG handle;
+APTR  handle;
 int   type;
 
 lister_get_prog_stuff( node, &handle, &type );
@@ -3541,7 +3544,7 @@ rexx_prog_info3( node->fn_galileo, handle, type, info3 );
 
 void lister_prog_init( struct ftp_node *node, char *title, char *info, char *name, int file, int bar )
 {
-ULONG handle;
+APTR  handle;
 int   type;
 
 lister_get_prog_stuff( node, &handle, &type );
@@ -3563,7 +3566,7 @@ if	(type == PROGRESS_FREE)
 
 void lister_prog_init_multi( struct ftp_node *node, char *title, BOOL short_display, char *name, int file, int bar )
 {
-ULONG handle;
+APTR  handle;
 int   type;
 
 lister_get_prog_stuff( node, &handle, &type );
@@ -3590,7 +3593,7 @@ if	(type == PROGRESS_FREE)
 
 void lister_prog_name( struct ftp_node *node, char *name )
 {
-ULONG handle;
+APTR  handle;
 int   type;
 
 lister_get_prog_stuff( node, &handle, &type );
@@ -3627,7 +3630,7 @@ return retval;
 //	Returns 1 if lister has a custom handler
 //	Returns 0 otherwise
 //
-int handle_has_handler( const char *galileo, ULONG handle )
+int handle_has_handler( const char *galileo, APTR handle )
 {
 char *str;
 int   retval = 0;

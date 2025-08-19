@@ -31,11 +31,15 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "rexx_protos.h"
+#include "backdrop.h"
+#include "lsprintf_protos.h"
 
 #define MIN(x,y) (((x)<(y))?(x):(y))
 

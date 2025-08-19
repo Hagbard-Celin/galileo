@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -49,7 +49,7 @@ void __stdargs logprintf( char *fmt, ... );
 void             lister_add            ( struct ftp_node *, char *name, int size, int type, ULONG seconds, LONG prot, char *comment );
 void             ftplister_refresh     ( struct ftp_node *, int date );
 
-struct ftp_node *find_ftpnode          ( struct galileoftp_globals *, ULONG handle );
+struct ftp_node *find_ftpnode          ( struct galileoftp_globals *, APTR handle );
 
 int              lister_synch_path     ( struct ftp_info *, char *result );
 BOOL             entry_info_from_lister( struct ftp_node *, char *name, struct entry_info *, ULONG flags );
@@ -100,7 +100,7 @@ void            lister_prog_init       ( struct ftp_node *, char *title, char *i
 void            lister_prog_init_multi ( struct ftp_node *, char *title, BOOL short_display, char *name, int file, int bar );
 void            lister_prog_name       ( struct ftp_node *, char *name );
 int             lister_request         ( struct ftp_node *, Tag, ... );
-int             handle_has_handler     ( const char *galileo, ULONG handle );
+int             handle_has_handler     ( const char *galileo, APTR handle );
 int             lister_get_path        ( struct ftp_node *, char *buffer );
 int             lister_long_message    ( struct ftp_node *, Att_List *msg, ULONG flags );
 int             message_update         ( struct message_update_info *, int num, char *text );
@@ -135,7 +135,7 @@ struct ftp_node
 {
 struct Node		fn_node;		// For linking
 struct galileoftp_globals *fn_og;			// Points back to global info
-ULONG			fn_handle;		// Lister handle
+APTR			fn_handle;		// Lister handle
 IPCData *		fn_ipc;			// IPC of this lister process
 struct ftp_info		fn_ftp;			// Socket & site details + FTP reply code
 ULONG			fn_flags;		// See below
@@ -148,7 +148,7 @@ int			fn_systype;		// Unix, Amiga, unknown etc
 char			fn_lscmd[LSCMDLEN+1];	// The command sent to get the list of files
 int                   (*fn_ls_to_entryinfo)(struct entry_info *,const char *line,ULONG flags );
 struct Task            *fn_signaltask;		// Task to signal on abort
-ULONG                   fn_proghandle;
+APTR                    fn_proghandle;
 struct site_entry       fn_site;		// As used in Address book etc
 ULONG                   fn_read_handle;		// Handle of our Galileo text viewer
 };
@@ -247,7 +247,7 @@ struct galileoftp_globals *ui_og;
 struct SignalSemaphore	ui_sem;
 ULONG			ui_flags;			// See below...
 struct ftp_node        *ui_ftpnode;
-ULONG                   ui_handle;			// Lister
+APTR                    ui_handle;			// Lister
 char                   *ui_galileo;			// Galileo Arexx port name
 BOOL                   *ui_abort;			// TRUE when transfer is aborted - This is the only part the FTP code needs
 char                   *ui_filename;

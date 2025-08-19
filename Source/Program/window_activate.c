@@ -31,11 +31,13 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "buffers_protos.h"
 
 // Remove sizes from directories in a window
 // Called from LISTER PROCESS

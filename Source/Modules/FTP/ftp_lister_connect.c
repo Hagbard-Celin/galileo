@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -328,7 +328,7 @@ return reply;
 struct connect_log_data
 {
 struct ftp_node    *cld_node;
-ULONG               cld_handle;
+APTR		    cld_handle;
 struct connect_msg *cld_cm;
 char               *cld_errmsg;
 int                 cld_okay;
@@ -858,7 +858,7 @@ struct ftp_node *lister_new_connection( struct galileoftp_globals *ogp, struct m
 {
 struct connect_msg *cm = NULL;		// Connection message - this must be FreeVec'd
 struct ftp_node *node = NULL;		// The new node
-ULONG handle = 0;			// Lister handle
+APTR handle = 0;		       // Lister handle
 struct connect_log_data  cld = {0};
 
 if	(imsg && (cm = imsg->data_free))
@@ -989,7 +989,7 @@ return (errno == EINTR
 //
 static int galileo_lostconn( struct galileoftp_globals *og, struct ftp_node *ftpnode )
 {
-ULONG handle = ftpnode->fn_handle;
+APTR handle = ftpnode->fn_handle;
 int   msg;
 int   retval = 0;
 
@@ -1072,7 +1072,7 @@ char                galileo[PORTNAMELEN+1];
 struct ftp_node    *ftpnode = mld->mld_node;
 struct connect_msg *sm;
 struct quit_msg    *qm;
-ULONG               handle;
+APTR		    handle;
 BOOL                do_script = 0;
 
 kprintf( "lister_disconnect()\n" );

@@ -3,6 +3,7 @@
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
 Copyright 2014 Szilard Biro
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -42,6 +43,7 @@ For more information on Directory Opus for Windows please see:
 // Allocate a MatchHandle for a file
 APTR __asm __saveds L_GetMatchHandle(
 	register __a0 char *name,
+	register __d0 BPTR lock,
 	register __a6 struct MyLibrary *lib)
 {
 	MatchHandle *handle;
@@ -57,8 +59,23 @@ APTR __asm __saveds L_GetMatchHandle(
 		// Store filename pointer
 		handle->name=name;
 
+		// Got lock?
+		if (lock)
+		{
+		    BPTR org_dir;
+
+		    org_dir = CurrentDir(lock);
+		    if (!(handle->lock = Lock(name,ACCESS_READ)))
+		    {
+			FreeVec(handle);
+			CurrentDir(org_dir);
+			return 0;
+		    }
+		    CurrentDir(org_dir);
+		}
+		else
 		// Lock file
-		if (!(handle->lock=Lock(handle->name,ACCESS_READ)))
+		if (!(handle->lock=L_LockFromPathQuick(handle->name,NULL)))
 		{
 			FreeVec(handle);
 			return 0;
@@ -113,43 +130,17 @@ APTR __asm __saveds L_GetMatchHandle(
 		}
 
 		// Get full name
-#if 1
+		if (!(handle->fullname = L_PathFromLock(NULL, handle->lock, NULL, NULL)))
 		{
-			LONG error=0;
-			LONG size;
-
-			for(size=256; handle->fullname==NULL && error==0; size+=256)
-			{
-				handle->fullname=AllocVec(size,MEMF_CLEAR);
-				if (handle->fullname)
-				{
-					if (!NameFromLock(handle->lock,handle->fullname,size))
-					{
-						error=IoErr();
-						if (error==ERROR_LINE_TOO_LONG)
-						{
-							error=0;
-							FreeVec(handle->fullname);
-							handle->fullname=NULL;
-						}
-					}
-				}
-				else
-					error=IoErr();
-			}
-
-			if (!handle->fullname)
-			{
-				L_FreeMatchHandle(handle);
-				return 0;
-			}
+		    L_FreeMatchHandle(handle);
+		    return 0;
 		}
-#else
-		NameFromLock(handle->lock,handle->fullname,256);
-#endif
+
 		// Is it a file?
 		if (handle->fib.fib_DirEntryType<0)
 		{
+			BPTR org_dir = 0;
+
 			// Make sure it isn't read-protected
 			if (handle->fib.fib_Protection&FIBF_READ)
 			{
@@ -158,6 +149,9 @@ APTR __asm __saveds L_GetMatchHandle(
 				return 0;
 			}
 
+			if (lock)
+			    org_dir = CurrentDir(lock);
+
 			// Open file
 			if (!(handle->file=L_OpenBuf(handle->name,MODE_OLDFILE,512)))
 			{
@@ -165,6 +159,9 @@ APTR __asm __saveds L_GetMatchHandle(
 				L_FreeMatchHandle(handle);
 				return 0;
 			}
+
+			if (org_dir)
+			    CurrentDir(org_dir);
 
 			// Read first three longwords
 			L_ReadBuf(handle->file,(char *)longs,sizeof(ULONG)*3);
@@ -191,7 +188,7 @@ void __asm __saveds L_FreeMatchHandle(register __a0 MatchHandle *handle)
 	// Valid handle?
 	if (handle)
 	{
-	FreeVec(handle->fullname);
+		L_FreeMemH(handle->fullname);
 
 		// Close file
 		L_CloseBuf(handle->file);
@@ -212,7 +209,7 @@ void __asm __saveds L_FreeMatchHandle(register __a0 MatchHandle *handle)
 BOOL __asm __saveds L_MatchFiletype(
 	register __a0 MatchHandle *handle,
 	register __a1 Cfg_Filetype *type,
-	register __a6 struct MyLibrary *lib)
+	register __a6 struct Library *GalileoFMBase)
 {
 	unsigned long recog_pos;
 	short buffer_pos=0;
@@ -222,7 +219,7 @@ BOOL __asm __saveds L_MatchFiletype(
 	ULONG res;
 
 	// See if this is in the cache
-	if ((res=FindFiletypeCache(handle,type,(struct LibData *)lib->ml_UserData))!=(ULONG)-1)
+	if ((res=FindFiletypeCache(handle,type,&gfmlib_data))!=(ULONG)-1)
 		return (BOOL)res;
 
 	// If no valid filetype or recognition string, return
@@ -883,7 +880,7 @@ BOOL __asm __saveds L_MatchFiletype(
 	if (!handle->file && !dir_flag && !disk_flag) match_okay=0;
 
 	// Add to cache
-	AddFiletypeCache(handle,type,match_okay,(struct LibData *)lib->ml_UserData);
+	AddFiletypeCache(handle,type,match_okay,&gfmlib_data);
 	return match_okay;
 }
 
@@ -1128,7 +1125,7 @@ void AddFiletypeCache(MatchHandle *handle,Cfg_Filetype *type,ULONG result,struct
 		return;
 
 	// Lock cache list
-	L_GetSemaphore(&data->filetype_cache.lock,TRUE,0);
+	L_GetSemaphore(&data->filetype_cache.lock,TRUE,0, getreg(REG_A6));
 
 	// See if it's already in the cache
 	if (!(cache=(FileTypeCache *)L_FindNameI(&data->filetype_cache.list,handle->fullname)))
@@ -1192,7 +1189,7 @@ void AddFiletypeCache(MatchHandle *handle,Cfg_Filetype *type,ULONG result,struct
 	}
 
 	// Unlock list
-	L_FreeSemaphore(&data->filetype_cache.lock);
+	L_FreeSemaphore(&data->filetype_cache.lock, getreg(REG_A6));
 }
 
 
@@ -1207,7 +1204,7 @@ ULONG FindFiletypeCache(MatchHandle *handle,Cfg_Filetype *type,struct LibData *d
 		return result;
 
 	// Lock cache list
-	L_GetSemaphore(&data->filetype_cache.lock,FALSE,0);
+	L_GetSemaphore(&data->filetype_cache.lock,FALSE,0, getreg(REG_A6));
 
 	// See if it's in the cache
 	if (cache=(FileTypeCache *)L_FindNameI(&data->filetype_cache.list,handle->fullname))
@@ -1230,7 +1227,7 @@ ULONG FindFiletypeCache(MatchHandle *handle,Cfg_Filetype *type,struct LibData *d
 	}
 
 	// Unlock list
-	L_FreeSemaphore(&data->filetype_cache.lock);
+	L_FreeSemaphore(&data->filetype_cache.lock, getreg(REG_A6));
 
 	return result;
 }
@@ -1291,23 +1288,18 @@ void FreeFiletypeCache(struct LibData *data,FileTypeCache *one)
 
 
 // Free all cached entries
-void __asm __saveds L_ClearFiletypeCache(register __a6 struct MyLibrary *lib)
+void __asm __saveds L_ClearFiletypeCache(register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)lib->ml_UserData;
-
 	// Cache disabled?
-	if (!(data->flags&LIBDF_FT_CACHE))
+	if (!(gfmlib_data.flags&LIBDF_FT_CACHE))
 		return;
 
 	// Lock cache list
-	L_GetSemaphore(&data->filetype_cache.lock,TRUE,0);
+	L_GetSemaphore(&gfmlib_data.filetype_cache.lock,TRUE,0, GalileoFMBase);
 
 	// Clear the cache
-	FreeFiletypeCache((struct LibData *)lib->ml_UserData,0);
+	FreeFiletypeCache(&gfmlib_data,0);
 
 	// Unlock list
-	L_FreeSemaphore(&data->filetype_cache.lock);
+	L_FreeSemaphore(&gfmlib_data.filetype_cache.lock, GalileoFMBase);
 }

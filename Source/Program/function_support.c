@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,7 +37,16 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
+#include "lister_protos.h"
+#include "misc_protos.h"
+#include "requesters.h"
+#include "buffers_protos.h"
+#include "backdrop_protos.h"
+#include "lsprintf_protos.h"
 #include "replace.h"
+#include "status_text_protos.h"
+#include "file_select.h"
 
 // Check that source and destination paths are different
 short function_check_same_path(
@@ -51,8 +61,8 @@ short function_check_same_path(
 		return LOCK_SAME;
 
 	// Lock paths
-	if (!(lock1=Lock(source_path,ACCESS_READ)) ||
-		!(lock2=Lock(dest_path,ACCESS_READ)))
+	if (!(lock1 = LockFromPath(source_path, NULL, NULL)) ||
+		!(lock2 = LockFromPath(dest_path, NULL, NULL)))
 	{
 		UnLock(lock1);
 		return LOCK_DIFFERENT;
@@ -75,9 +85,10 @@ check_file_destination(
 	FunctionHandle *handle,
 	FunctionEntry *entry,
 	char *destination,
+	BPTR destination_lock,
 	short *confirm_flags)
 {
-	BPTR lock,dest_lock=0;
+	BPTR lock,dest_lock=0, org_dir = 0;
 	short confirm;
 	char name[35];
 
@@ -87,8 +98,17 @@ check_file_destination(
 	// If entry is an icon, it's ok
 	if (entry->fe_flags&FUNCENTF_ICON) return 1;
 
+	if (destination_lock)
+	    org_dir = CurrentDir(destination_lock);
+
 	// If destination doesn't exist it's ok
-	if (!(lock=Lock(destination,ACCESS_READ))) return 1;
+	if (!(lock=Lock(destination,ACCESS_READ)))
+	{
+	    if (org_dir)
+		CurrentDir(org_dir);
+
+	    return 1;
+	}
 
 	// Get destination info
 	Examine(lock,handle->d_info);
@@ -97,10 +117,22 @@ check_file_destination(
 	if (handle->d_info->fib_DirEntryType<0 &&
 		entry->fe_type<0 &&
 		!(confirm&COPYF_SKIP_ALL) &&
-		!(confirm&COPYF_DELETE_ALL)) dest_lock=ParentDir(lock);
+		!(confirm&COPYF_DELETE_ALL))
+	{
+	    if (destination_lock)
+		dest_lock = destination_lock;
+	    else
+		dest_lock = ParentDir(lock);
+	}
 
 	// Unlock lock
 	UnLock(lock);
+
+	if (org_dir)
+	{
+	    CurrentDir(org_dir);
+	    org_dir = 0;
+	}
 
 	// Get truncated filename
 	get_trunc_filename(FilePart(destination),name);
@@ -109,7 +141,7 @@ check_file_destination(
 	if (handle->d_info->fib_DirEntryType>0)
 	{
 		// If source is also a directory, that's fine, we can return
-		if (entry->fe_type>0) return 1;
+		if (entry->fe_type>=0) return 1;
 
 		// Can't copy a file over a directory
 		lsprintf(handle->func_work_buf,
@@ -161,23 +193,37 @@ check_file_destination(
 		short ret;
 		PathNode *path;
 		struct Window *win=0;
-		BPTR lock,source_lock;
+		BPTR lock = 0, source_lock;
 
-		// Build source name
-		function_build_source(handle,entry,handle->func_work_buf);
+		if (handle->func_source_lock)
+		{
+		    lock = Lock(entry->fe_name,ACCESS_READ);
+		}
+		else
+		{
+		    if (destination_lock)
+			lock = Lock(entry->fe_name,ACCESS_READ);
+		}
 
 		// Get source information
-		if (!(lock=Lock(handle->func_work_buf,ACCESS_READ)))
+		if (!lock)
 		{
+		    if (!handle->func_dest_lock)
 			UnLock(dest_lock);
-			return 0;
+
+		    return 0;
 		}
 
 		// Get information
 		Examine(lock,handle->s_info);
 
-		// Get parent dir
-		source_lock=ParentDir(lock);
+		if (handle->func_source_lock)
+		    source_lock = handle->func_source_lock;
+		else
+		{
+		    // Get parent dir
+		    source_lock=ParentDir(lock);
+		}
 		UnLock(lock);
 
 		// Get window
@@ -196,8 +242,10 @@ check_file_destination(
 			handle->replace_option);
 
 		// Unlock locks
-		UnLock(source_lock);
-		UnLock(dest_lock);
+		if (!handle->func_source_lock)
+		    UnLock(source_lock);
+		if (!destination_lock)
+		    UnLock(dest_lock);
 
 		// Abort?
 		if (ret==REPLACE_ABORT) return -1;
@@ -249,10 +297,14 @@ check_file_destination(
 			// Unprotect all?
 			if (ret==2) *confirm_flags|=COPYF_UNPROTECT_ALL;
 		}
+		if (destination_lock)
+		    org_dir = CurrentDir(destination_lock);
 
 		// Clear delete bit
 		SetProtection(destination,handle->d_info->fib_Protection&(~FIBF_DELETE));
 	}
+	if (destination_lock && !org_dir)
+	    org_dir = CurrentDir(destination_lock);
 
 	// Delete destination file
 	while (!(DeleteFile(destination)))
@@ -264,8 +316,18 @@ check_file_destination(
 			handle,
 			handle->d_info->fib_FileName,
 			MSG_DELETING,
-			IoErr()))!=1) return ret;
+			IoErr()))!=1)
+		{
+		    if (org_dir)
+		    {
+			CurrentDir(org_dir);
+		    }
+		    return ret;
+		}
 	}
+
+	if (org_dir)
+	    CurrentDir(org_dir);
 
 	// Okay to proceed
 	return 1;
@@ -456,7 +518,7 @@ void function_cleanup(FunctionHandle *handle,PathNode *node,BOOL full)
 			if (entry->fe_flags&FUNCENTF_REMOVE)
 			{
 				// Add change for remove
-				function_filechange_delfile(handle,node->pn_path,entry->fe_name,0,0);
+				function_filechange_delfile(handle,node->pn_path,node->pn_lock,entry->fe_name,0,0);
 
 				// Remove entry
 				Remove((struct Node *)entry);
@@ -467,7 +529,7 @@ void function_cleanup(FunctionHandle *handle,PathNode *node,BOOL full)
 			if (entry->fe_flags&FUNCENTF_UNSELECT)
 			{
 				// Valid buffer and entry?
-				if (buffer && entry->fe_entry)
+				if (buffer && buffer->buf_CurrentLister && entry->fe_entry)
 				{
 					// Icon?
 					if (entry->fe_flags&FUNCENTF_ICON_ACTION)
@@ -571,7 +633,7 @@ void function_perform_changes(
 			IPC_Command(path->pn_lister->ipc,LISTER_UPDATE_STAMP,0,0,0,0);
 
 		// Otherwise, do global lister update
-		else update_lister_global(path->pn_path);
+		else update_lister_global(path->pn_path, path->pn_lock);
 
 		// Clear flag
 		path->pn_flags&=~LISTNF_UPDATE_STAMP;
@@ -599,8 +661,8 @@ void function_build_info(FunctionHandle *handle,char *src,char *dst,short which)
 	if (!dst && dest) dst=dest->pn_path;
 
 	// Get paths
-	if (src) final_path(src,handle->func_work_buf+256);
-	if (dst) final_path(dst,handle->func_work_buf+384);
+	if (src) final_path(src,handle->func_work_buf+512);
+	if (dst) final_path(dst,handle->func_work_buf+768);
 
 	// Destination?
 	if (which&2)
@@ -608,8 +670,8 @@ void function_build_info(FunctionHandle *handle,char *src,char *dst,short which)
 		// Build information string
 		lsprintf(handle->func_work_buf,
 			GetString(&locale,MSG_FROM_TO),
-			handle->func_work_buf+256,
-			handle->func_work_buf+384);
+			handle->func_work_buf+512,
+			handle->func_work_buf+768);
 	}
 
 	// Only source
@@ -618,7 +680,7 @@ void function_build_info(FunctionHandle *handle,char *src,char *dst,short which)
 		// Build information string
 		lsprintf(handle->func_work_buf,
 			GetString(&locale,MSG_FROM),
-			handle->func_work_buf+256);
+			handle->func_work_buf+512);
 	}
 
 	// Set information string
@@ -633,7 +695,7 @@ void get_trunc_filename(char *source,char *dest)
 	else
 	{
 		stccpy(dest,source,31);
-		if (strlen(dest)<strlen(source))
+		if (strlen(source) > 30)
 			strcpy(dest+27,"...");
 	}
 }
@@ -644,29 +706,19 @@ void get_trunc_path(char *source,char *dest)
 		*dest=0;
 	else
 	{
-		short pos,len;
-		for (pos=0,len=0;source[pos];pos++)
+		ULONG src_len;
+
+		src_len = strlen(source);
+
+		if (src_len < 31)
 		{
-			if (source[pos]==':' || source[pos]=='/')
-			{
-				*dest++=source[pos];
-				len=0;
-			}
-			else
-			if (len==30)
-			{
-				*(dest-2)='.';
-				*(dest-1)='.';
-				*dest++='.';
-				len=31;
-			}
-			else
-			if (len<30)
-			{
-				*dest++=source[pos];
-				++len;
-			}
+		    strcpy(dest, source);
+		    return;
 		}
-		*dest=0;
+
+		stccpy(dest, source, 14);
+		strcpy(dest + 13, "...");
+		strcpy(dest + 16, source + src_len - 15);
+		dest[30] = 0;
 	}
 }

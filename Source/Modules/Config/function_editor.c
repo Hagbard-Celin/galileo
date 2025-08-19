@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -37,6 +38,7 @@ For more information on Directory Opus for Windows please see:
 
 #include "config_lib.h"
 #include "//Program/function_data.h"
+#include "//Program/main_commands.h"
 #include "config_buttons.h"
 
 #define FUNCF_PRIVATE			(1<<26) // Function is private
@@ -899,12 +901,12 @@ void FunctionEditor(void)
 
 	// Free data
 	funced_cleanup(data);
+
 	FreeVec(startup);
 }
 
 #ifdef RESOURCE_TRACKING
 #undef ResTrackBase
-//#define ResTrackBase    (startup->restrack_base)
 #endif
 
 ULONG __asm funced_init(
@@ -913,14 +915,11 @@ ULONG __asm funced_init(
 {
 	FuncEdData *data;
 
-//#ifdef RESOURCE_TRACKING
-//    ResTrackBase=startup->restrack_base;
-//#endif
 #ifdef RESOURCE_TRACKING
-    struct Library *ResTrackBase;
-    struct ExecBase *Exec=(struct ExecBase *)*((ULONG *)4);
+	struct Library *ResTrackBase;
+	struct ExecBase *Exec=(struct ExecBase *)*((ULONG *)4);
 
-    ResTrackBase=(struct Library *)FindName(&Exec->LibList,"g_restrack.library");
+	ResTrackBase=(struct Library *)FindName(&Exec->LibList,"g_restrack.library");
 #endif
 
 
@@ -937,7 +936,7 @@ ULONG __asm funced_init(
 	data->locale=startup->locale;
 
 #ifdef RESOURCE_TRACKING
-    data->startup->restrack_base=ResTrackBase;
+	data->startup->restrack_base=ResTrackBase;
 #endif
 
 	// Create timer
@@ -957,16 +956,17 @@ ULONG __asm funced_init(
 
 void funced_cleanup(FuncEdData *data)
 {
-	if (data)
-	{
-
 #ifdef RESOURCE_TRACKING
     	struct Library *ResTrackBase;
-        struct ExecBase *Exec=(struct ExecBase *)*((ULONG *)4);
+	struct ExecBase *Exec=(struct ExecBase *)*((ULONG *)4);
 
     	ResTrackBase=(struct Library *)FindName(&Exec->LibList,"g_restrack.library");
 #endif
-
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
+	if (data)
+	{
 		// Free timer
 		FreeTimer(data->drag.timer);
 
@@ -981,7 +981,6 @@ void funced_cleanup(FuncEdData *data)
 }
 
 #ifdef RESOURCE_TRACKING
-//#undef ResTrackBase
 #define ResTrackBase    (data->startup->restrack_base)
 #endif
 
@@ -1137,7 +1136,7 @@ void funced_build_entrydisplay(
 	if (!node || !node->node.ln_Succ || !entry) return;
 
 	// If node has a name, free it
-    if (node->node.ln_Name)
+	if (node->node.ln_Name)
 		FreeMemH(node->node.ln_Name);
 
 	// Get new name
@@ -1232,11 +1231,11 @@ BOOL funced_end_edit(
 				ptr=entry->buffer;
 				while (*ptr && *ptr==' ') ++ptr;
 
-                // Allow for #
-                if (*ptr && *ptr=='#') ++ptr;
+				// Allow for #
+				if (*ptr && *ptr=='#') ++ptr;
 
-                // Allow for &
-                if (*ptr && *ptr=='&') ++ptr;
+				// Allow for &
+				if (*ptr && *ptr=='&') ++ptr;
 
 				// Go through list of commands
 				list=(struct MinList *)data->startup->func_list;
@@ -1624,11 +1623,11 @@ BOOL funced_command_req(FuncEdData *data,char *buffer,short type)
 			cmd=(char *)GetGadgetValue(data->objlist,GAD_FUNCED_EDIT);
 			while (*cmd==' ') ++cmd;
 
-            // Allow for #
-            if (*cmd && *cmd=='#') ++cmd;
+		        // Allow for #
+		        if (*cmd && *cmd=='#') ++cmd;
 
-            //Allow for &
-            if (*cmd && *cmd=='&') ++cmd;
+		        //Allow for &
+		        if (*cmd && *cmd=='&') ++cmd;
 
 			// Go through list of commands
 			list=(struct MinList *)data->startup->func_list;
@@ -1808,21 +1807,32 @@ BOOL funced_command_req(FuncEdData *data,char *buffer,short type)
 // Handle app message
 void funced_appmsg(FuncEdData *data,struct AppMessage *msg)
 {
-	short num;
+	WORD num;
 
 	// Is the drop over the image gadget
 	if (data->startup->flags&FUNCEDF_IMAGE &&
 		CheckObjectArea(GetObject(data->p_objlist,GAD_FUNCED_LABEL),msg->am_MouseX,msg->am_MouseY))
 	{
-		char buf[262];
-		if (GetWBArgPath(msg->am_ArgList,buf,sizeof(buf)))
+		char *buf;
+		ULONG len;
+
+		if (buf = GetWBArgPath(msg->am_ArgList))
 		{
 			APTR iff;
+			char *tmp_buf;
+
+			len = getreg(REG_D1);
 
 			// Device?
-			if (buf[0] && buf[strlen(buf)-1]==':')
-				AddPart(buf,"Disk.info",256);
-
+			if (buf[0] && buf[len - 1]==':')
+			{
+				if (tmp_buf = JoinString(NULL, buf, "Disk.info", NULL, NULL))
+				{
+				    len = getreg(REG_D1);
+				    FreeMemH(buf);
+				    buf = tmp_buf;
+				}
+			}
 			// See if file is ILBM
 			else
 			if (iff=IFFOpen(buf,IFF_READ,ID_ILBM))
@@ -1833,15 +1843,47 @@ void funced_appmsg(FuncEdData *data,struct AppMessage *msg)
 			{
 				// See if it's an icon
 				BPTR lock;
-				strcat(buf,".info");
-				if (lock=Lock(buf,ACCESS_READ))
-					UnLock(lock);
-				else
-					buf[strlen(buf)-5]=0;
+				if (tmp_buf = JoinString(NULL, buf, ".info", NULL, NULL))
+				{
+				    len = getreg(REG_D1);
+				    if (lock=LockFromPath(buf, NULL, NULL))
+				    {
+					    FreeMemH(buf);
+					    buf = tmp_buf;
+					    UnLock(lock);
+				    }
+				    else
+					    FreeMemH(tmp_buf);
+				}
 			}
 			
-			// Fill out field
-			SetGadgetValue(data->p_objlist,GAD_FUNCED_LABEL,(ULONG)buf);
+			// Skip if too long
+			if (len < 80)
+			{
+			    // Fill out field
+			    SetGadgetValue(data->p_objlist,GAD_FUNCED_LABEL,(ULONG)buf);
+			}
+			else
+			{
+			    char *copy;
+
+			    DisplayBeep(data->window->WScreen);
+
+			    // Make error message
+			    lsprintf(data->buffer, GetString(data->locale, MSG_ERROR_LONG_PATH), 79);
+
+			    // Allocate copy of message
+			    if (copy = AllocVec(strlen(data->buffer) + 1, MEMF_PUBLIC))
+			    {
+				// Copy message
+				strcpy(copy,data->buffer);
+
+				// Set screen title
+				IPC_Command(data->startup->main_owner, MAINCMD_TITLE_ERROR, 0, 0, copy, 0);
+			    }
+			}
+
+			FreeMemH(buf);
 			return;
 		}
 	}

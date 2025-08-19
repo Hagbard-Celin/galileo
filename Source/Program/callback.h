@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2023-2024 Hagbard Celine
+Copyright 2023-2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -32,244 +32,15 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
+#ifndef GALILEOFM_CALLBACK_H
+#define GALILEOFM_CALLBACK_H
+
 #define MAINCMD_GET_CALLBACKS	0x40100
 
-DirEntry *__asm HookCreateFileEntry(
-	register __a0 Lister *lister,
-	register __a1 struct FileInfoBlock *fib,
-	register __d0 BPTR lock);
-
-DirEntry *__asm HookAddFileEntry(
-	register __a0 Lister *lister,
-	register __a1 DirEntry *entry,
-	register __d0 BOOL sort);
-
-void __asm HookFileSet(
-	register __a0 Lister *lister,
-	register __a1 DirEntry *entry,
-	register __a2 struct TagItem *tags);
-
-void __asm HookSortFileList(
-	register __a0 Lister *lister,
-	register __a1 struct List *list,
-	register __d0 long file_count,
-	register __d1 long dir_count);
-
-void __asm HookResortLister(
-	register __a0 Lister *lister,
-	register __a1 ListFormat *format);
-
-void __asm HookRefreshLister(
-	register __a0 Lister *lister,
-	register __d0 ULONG flags);
-
-void __asm HookLockFileList(
-	register __a0 Lister *lister,
-	register __d0 BOOL exclusive);
-
-void __asm HookUnlockFileList(
-	register __a0 Lister *lister);
-
-DirEntry *__asm HookFindFileEntry(
-	register __a0 Lister *lister,
-	register __a1 char *name);
-
-BOOL __asm HookSetFileComment(
-	register __a0 Lister *lister,
-	register __a1 char *name,
-	register __a2 char *comment);
-
-void __asm HookRemoveFileEntry(
-	register __a0 Lister *lister,
-	register __a1 DirEntry *entry);
-
-BOOL __asm HookFileQuery(
-	register __a0 Lister *lister,
-	register __a1 DirEntry *entry,
-	register __a2 struct TagItem *tags);
-
-void __asm HookShowHelp(
-	register __a0 char *file_name,
-	register __a1 char *node_name);
-
-
-APTR __asm HookConvertEntry(
-	register __a0 FunctionEntry *entry);
-
-Lister *__asm HookGetLister(
-	register __a0 PathNode *path);
-
-PathNode *__asm HookGetSource(
-	register __a0 FunctionHandle *handle,
-	register __a1 char *pathbuf);
-
-PathNode *__asm HookNextSource(
-	register __a0 FunctionHandle *handle,
-	register __a1 char *pathbuf);
-
-void __asm HookUnlockSource(
-	register __a0 FunctionHandle *handle);
-
-PathNode *__asm HookGetDest(
-	register __a0 FunctionHandle *handle,
-	register __a1 char *pathbuf);
-
-void __asm HookEndSource(
-	register __a0 FunctionHandle *handle,
-	register __d0 long complete);
-
-void __asm HookEndDest(
-	register __a0 FunctionHandle *handle,
-	register __d0 long complete);
-
-void __asm HookFirstEntry(
-	register __a0 FunctionHandle *handle);
-
-APTR __asm HookGetEntry(
-	register __a0 FunctionHandle *handle);
-
-ULONG __asm HookExamineEntry(
-	register __a0 FunctionEntry *entry,
-	register __d0 long type);
-
-void __asm HookEndEntry(
-	register __a0 FunctionHandle *handle,
-	register __a1 APTR entry,
-	register __d0 BOOL deselect);
-
-void __asm HookRemoveEntry(
-	register __a0 FunctionEntry *entry);
-
-long __asm HookEntryCount(
-	register __a0 FunctionHandle *handle);
-
-void __asm HookReloadEntry(
-	register __a0 FunctionHandle *handle,
-	register __a1 FunctionEntry *entry);
-
-void __asm HookAddFile(
-	register __a0 FunctionHandle *handle,
-	register __a1 char *path,
-	register __a2 struct FileInfoBlock *fib,
-	register __a3 Lister *lister);
-
-void __asm HookDelFile(
-	register __a0 FunctionHandle *handle,
-	register __a1 char *path,
-	register __a2 char *name,
-	register __a3 Lister *lister);
-
-void __asm HookLoadFile(
-	register __a0 FunctionHandle *handle,
-	register __a1 char *path,
-	register __a2 char *name,
-	register __d0 long flags,
-	register __d1 BOOL reload);
-
-void __asm HookDoChanges(
-	register __a0 FunctionHandle *handle);
-
-BOOL __asm HookCheckAbort(
-	register __a0 FunctionHandle *handle);
-
-struct Window *__asm HookGetWindow(
-	register __a0 PathNode *path);
-
-struct MsgPort *__asm HookGetPort(
-	register __a0 char *portname);
-
-struct Screen *__asm HookGetScreen(
-	register __a0 char *screenname);
-
-GalileoScreenData *__asm HookGetScreenData(void);
-
-void __asm HookFreeScreenData(register __a0 APTR data);
-
-void __asm HookOpenProgress(
-	register __a0 PathNode *path,
-	register __a1 char *operation,
-	register __d0 long total);
-
-void __asm HookUpdateProgress(
-	register __a0 PathNode *path,
-	register __a1 char *name,
-	register __d0 long count);
-
-void __asm HookCloseProgress(
-	register __a0 PathNode *path);
-
-long __asm HookReplaceReq(
-	register __a0 struct Window *window,
-	register __a1 struct Screen *screen,
-	register __a2 IPCData *ipc,
-	register __a3 struct FileInfoBlock *file1,
-	register __a4 struct FileInfoBlock *file2,
-	register __d0 long default_option);
-
-ULONG __asm HookGetPointer(
-	register __a0 struct pointer_packet *ptr);
-
-void __asm HookFreePointer(
-	register __a0 struct pointer_packet *ptr);
-
-ULONG __asm HookSendCommand(
-	register __a0 FunctionHandle *handle,
-	register __a1 char *command,
-	register __a2 char **result,
-	register __d0 ULONG flags);
-
-void __asm HookCheckDesktop(
-	register __a0 char *path);
-
-BOOL __asm HookMatchDesktop(
-	register __a0 char *path);
-
-UWORD __asm HookGetDesktop(
-	register __a0 char *path);
-
-void __asm HookGetThemes(
-	register __a0 char *path);
-
-BOOL __asm HookScript(
-	register __a0 char *name,
-	register __a1 char *data);
-
-short __asm HookDesktopPopup(
-	register __a0 ULONG flags);
-
-long __asm HookRexxCommand(
-	register __a0 char *command,
-	register __a1 char *result,
-	register __d0 long length,
-	register __a2 struct MsgPort *replyport,
-	register __d1 ULONG flags);
-
-long __asm HookFileRequest(
-	register __a0 struct Window *parent,
-	register __a1 char *title,
-	register __a2 char *initial_path,
-	register __a3 char *pathname,
-	register __d0 ULONG flags,
-	register __d1 char *pattern);
-
-void __asm __saveds HookFreePointerDirect(
-	register __a0 APTR pointer,
-    register __d0 ULONG type,
-    register __d1 ULONG flags);
-
-BOOL __asm __saveds HookIsSourceDestLock(
-    register __a0 Lister *lister);
-
-void __asm __saveds HookFakeDir(
-	 register __a0 Lister *lister,
-     register __d0 BOOL fakedir);
-
-BOOL __asm __saveds HookIsFakeDir(
-     register __a0 Lister *lister);
 
 typedef struct
 {
@@ -327,14 +98,17 @@ typedef struct
 	APTR	gc_FirstEntry;
 	APTR	gc_RexxCommand;
 	APTR	gc_FileRequest;
+	APTR	gc_ListerSet;
+	APTR    gc_ListerGet;
 	APTR	gc_GetThemes;
 	APTR    gc_FreePointerDirect;
-	APTR    gc_IsSourceDestLock;
-	APTR    gc_FakeDir;
-	APTR    gc_IsFakeDir;
+	APTR	gc_GetFileEntry;
+	APTR	gc_NewLister;
+	APTR	gc_ReadDir;
+	APTR	gc_ClearDir;
 } GalileoCallbackInfo;
 
-#define GALILEOFM_CALLBACK_COUNT    56
+#define GALILEOFM_CALLBACK_COUNT    59
 
 // Values for HookFileSet
 
@@ -352,14 +126,23 @@ typedef struct
 #define HFFS_VERSION		( TAG_USER + 0xc )	// ULONG *		- version, revision, days
 #define HFFS_MENU		( TAG_USER + 0xd )	// void *		- not implemented
 
+#define HLT_FAKEDIR		( TAG_USER + 0x1 )	// BOOL			- Not a real dir
+#define HLT_SOURCEDEST_LOCK	( TAG_USER + 0x2 )	// BOOL			- Locked as source or destination
+#define HLT_CURBUFFER_LOCK	( TAG_USER + 0x3 )	// BPTR			- Lock on current dir
 
 
 #define HOOKREFRESH_DATE	(1<<0)
 #define HOOKREFRESH_FULL	(1<<1)
 
+#define CBCDF_CLEAR_EXPANDEDPATH    (1<<0)
+#define CBCDF_CLEAR_PATH	    (1<<1)
+#define CBCDF_CLEAR_LOCK            (1<<2)
+#define CBCDF_CLEAR_HANDLER         (1<<3)
 
 enum
 {
 	EE_NAME,		// Get name pointer (READ ONLY!)
 	EE_TYPE,		// Get type (<0 = file, >0 = dir)
 };
+
+#endif

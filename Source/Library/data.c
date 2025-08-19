@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2024 Hagbard Celine
+Copyright 2024,2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -38,20 +38,21 @@ For more information on Directory Opus for Windows please see:
 
 #include "galileofmlib.h"
 
-struct DosLibrary *DOSBase;
+struct DosLibrary	*DOSBase;
 
 struct IntuitionBase *IntuitionBase;
 struct GfxBase *GfxBase;
 
-struct Library 		*GadToolsBase;
-struct Library 		*AslBase;
-struct Library 		*UtilityBase;
-struct LocaleBase 	*LocaleBase;
-struct Library 		*IFFParseBase;
-struct Library 		*LayersBase;
-struct Library 		*CxBase;
-struct Library 		*IconBase;
-struct Library 		*WorkbenchBase;
+struct Library		*GadToolsBase;
+struct Library		*AslBase;
+struct Library		*UtilityBase;
+struct LocaleBase	*LocaleBase;
+struct Library		*IFFParseBase;
+struct Library		*LayersBase;
+struct Library		*CxBase;
+struct Library		*KeymapBase;
+struct Library		*IconBase;
+struct Library		*WorkbenchBase;
 struct Library		*DataTypesBase;
 struct Library		*P96Base;
 struct NewIconBase	*NewIconBase;
@@ -59,17 +60,20 @@ struct RxsLib		*RexxSysBase;
 #ifdef RESOURCE_TRACKING
 struct Library		*ResTrackBase;
 #endif
+struct Library __far	*MyLibBase;
 
-struct TextFont 	*topaz_font;
+struct TextFont		*topaz_font;
 
-struct List				image_list;
+struct List		image_list;
 struct SignalSemaphore	image_lock;
-APTR					image_memory;
+APTR			image_memory;
 
 Class
 	*listview_class,*image_class,*button_class,*palette_class,*string_class,
-	*check_class,*view_class,*frame_class,*gauge_class,*propgadget_class;
+	*check_class,*view_class,*frame_class,*gauge_class,*propgadget_class,
+	*pathg_class,*path_class;
 
+struct LibData gfmlib_data;
 
 char	decimal_point='.';
 

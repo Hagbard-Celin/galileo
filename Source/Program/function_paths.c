@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,9 +37,10 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
 
 // Add path 
-PathNode *function_add_path(FunctionHandle *handle,PathList *list,Lister *lister,char *path)
+PathNode *function_add_path(FunctionHandle *handle,PathList *list,Lister *lister,char *path, BPTR lock)
 {
 	PathNode *node;
 
@@ -46,10 +48,18 @@ PathNode *function_add_path(FunctionHandle *handle,PathList *list,Lister *lister
 	if (node=AllocMemH(handle->memory,sizeof(PathNode)))
 	{
 		// Copy path
-		if (path) strcpy(node->pn_path_buf,path);
+		if (path)
+		    node->pn_path_buf = CopyString(handle->memory, path);
 
 		// Store lister pointer
 		node->pn_lister=lister;
+
+		//Get lock
+		if (lock)
+		    node->pn_lock = lock;
+		else
+		if (lister && lister->cur_buffer && lister->cur_buffer->buf_Lock)
+		    node->pn_lock = lister->cur_buffer->buf_Lock;
 
 		// Add to path list
 		AddHead((struct List *)list,(struct Node *)node);
@@ -67,36 +77,6 @@ PathNode *function_add_path(FunctionHandle *handle,PathList *list,Lister *lister
 }
 
 
-// Build source path
-void function_build_source(
-	FunctionHandle *handle,
-	FunctionEntry *entry,
-	char *buffer)
-{
-	// Is entry a device?
-	if (entry->fe_type>0 && entry->fe_name[strlen(entry->fe_name)-1]==':')
-	{
-		// This is the new source path
-		strcpy(handle->func_source_path,entry->fe_name);
-	}
-
-	// Build source path
-	strcpy(buffer,handle->func_source_path);
-	AddPart(buffer,entry->fe_name,256);
-}
-
-
-// Build destination path
-void function_build_dest(
-	FunctionHandle *handle,
-	FunctionEntry *entry,
-	char *buffer)
-{
-	strcpy(buffer,handle->func_dest_path);
-	AddPart(buffer,entry->fe_name,256);
-}
-
-
 // Get the current path
 PathNode *function_path_current(PathList *list)
 {
@@ -106,7 +86,10 @@ PathNode *function_path_current(PathList *list)
 	{
 		// Make sure the path is right
 		if (list->current->pn_lister && !(list->current->pn_flags&LISTNF_CHANGED))
-			list->current->pn_path=list->current->pn_lister->cur_buffer->buf_Path;
+		{
+			    list->current->pn_path=list->current->pn_lister->cur_buffer->buf_Path;
+			    list->current->pn_lock = list->current->pn_lister->cur_buffer->buf_Lock;
+		}
 		else list->current->pn_path=list->current->pn_path_buf;
 
 		// Return current path node
@@ -216,8 +199,12 @@ BOOL function_valid_path(PathNode *path)
 	// Lister pointer?
 	if (path->pn_lister)
 	{
-		// Get path from lister
-		path->pn_path=path->pn_lister->cur_buffer->buf_Path;
+		if (path->pn_lock=path->pn_lister->cur_buffer->buf_Lock)
+		    path->pn_path=path->pn_lister->cur_buffer->buf_ExpandedPath;
+		else
+		    // Get path from lister
+		    path->pn_path=path->pn_lister->cur_buffer->buf_Path;
+
 		return 1;
 	}
 

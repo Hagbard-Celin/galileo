@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,7 +37,11 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
+#include "misc_protos.h"
 #include "function_change.h"
+#include "function_protos.h"
+#include "lsprintf_protos.h"
 
 function_change_get_comment(FunctionHandle *handle,char *file,char *buffer);
 function_change_get_protect(FunctionHandle *handle,char *file,ULONG old_prot,unsigned char *masks);
@@ -44,7 +49,7 @@ function_change_get_date(FunctionHandle *handle,char *file,struct DateStamp *dat
 
 typedef union
 {
-	char				comment[80];
+	char			comment[80];
 	unsigned char		prot[2];
 	struct DateStamp	date;
 } ChangeData;
@@ -53,7 +58,6 @@ typedef union
 GALILEOFM_FUNC(function_change)
 {
 	FunctionEntry *entry;
-	char *source_file;
 	PathNode *path;
 	short ret=0;
 	int count=1,action,error_action;
@@ -218,13 +222,11 @@ GALILEOFM_FUNC(function_change)
 	// Tell this path to update it's datestamp at the end
 	path->pn_flags|=LISTNF_UPDATE_STAMP;
 
-	// Allocate memory for source path
-	if (!(source_file=AllocVec(256,0))) return 0;
-
 	// Go through entries
 	while (entry=function_get_entry(handle))
 	{
 		BOOL file_ok=1;
+		BPTR org_dir;
 
 		// Update progress indicator
 		if (function_progress_update(handle,entry,count))
@@ -234,8 +236,18 @@ GALILEOFM_FUNC(function_change)
 			break;
 		}
 
-		// Build source name
-		function_build_source(handle,entry,source_file);
+	        // CD to source-file directory
+		if (entry->fe_lock)
+		    org_dir = CurrentDir(entry->fe_lock);
+	        else
+		if (path->pn_lock)
+		    org_dir = CurrentDir(path->pn_lock);
+		else
+		{
+		    function_abort(handle);
+		    ret=0;
+		    break;
+		}
 
 		// Do we have to ask?
 		if (!(handle->inst_flags&INSTF_NO_ASK) &&
@@ -261,14 +273,14 @@ GALILEOFM_FUNC(function_change)
 
 				// Otherwise, try to read existing comment from disk
 				else
-				if (GetFileInfo(source_file,&fib))
+				if (GetFileInfo(entry->fe_name,&fib))
 				{
 					// Get existing comment
 					strcpy(data->comment,fib.fib_Comment);
 				}				
 
 				// Ask for comment
-				ret=function_change_get_comment(handle,source_file,data->comment);
+				ret=function_change_get_comment(handle,entry->fe_name,data->comment);
 			}
 
 			else
@@ -281,7 +293,7 @@ GALILEOFM_FUNC(function_change)
 					old_prot=entry->fe_entry->de_Protection;
 
 				// Ask for protection masks
-				ret=function_change_get_protect(handle,source_file,old_prot,data->prot);
+				ret=function_change_get_protect(handle,entry->fe_name,old_prot,data->prot);
 			}
 
 			else
@@ -292,13 +304,15 @@ GALILEOFM_FUNC(function_change)
 				else DateStamp(&data->date);
 
 				// Ask for date
-				ret=function_change_get_date(handle,source_file,&data->date);
+				ret=function_change_get_date(handle,entry->fe_name,&data->date);
 			}
 
 			// Check abort
 			if (ret==-1)
 			{
 				function_abort(handle);
+			        if (org_dir)
+			            CurrentDir(org_dir);
 				ret=0;
 				break;
 			}
@@ -349,11 +363,11 @@ GALILEOFM_FUNC(function_change)
 					if (entry->fe_entry)
 					{
 						// Use original function
-						ret=OriginalSetComment(source_file,data->comment);
+						ret=OriginalSetComment(entry->fe_name,data->comment);
 					}
 
 					// Otherwise, allow patched function to be used
-					else ret=SetComment(source_file,data->comment);
+					else ret=SetComment(entry->fe_name,data->comment);
 
 					// Successful?
 					if (ret)
@@ -395,11 +409,11 @@ GALILEOFM_FUNC(function_change)
 					if (entry->fe_entry)
 					{
 						// Use original function
-						ret=OriginalSetProtection(source_file,new_prot);
+						ret=OriginalSetProtection(entry->fe_name,new_prot);
 					}
 
 					// Otherwise, allow patched function to be used
-					else ret=SetProtection(source_file,new_prot);
+					else ret=SetProtection(entry->fe_name,new_prot);
 
 					// Successful?
 					if (ret)
@@ -425,11 +439,11 @@ GALILEOFM_FUNC(function_change)
 					if (entry->fe_entry)
 					{
 						// Use original function
-						ret=OriginalSetFileDate(source_file,&data->date);
+						ret=OriginalSetFileDate(entry->fe_name,&data->date);
 					}
 
 					// Otherwise, allow patched function to be used
-					else ret=SetFileDate(source_file,&data->date);
+					else ret=SetFileDate(entry->fe_name,&data->date);
 
 					// Successful?
 					if (ret)
@@ -466,6 +480,7 @@ GALILEOFM_FUNC(function_change)
 					if (function_filechange_addfile(
 							handle,
 							path->pn_path,
+							path->pn_lock,
 							&fib,
 							(NetworkInfo *)GetTagData(DE_NetworkInfo,0,entry->fe_entry->de_Tags),
 							0))
@@ -483,7 +498,12 @@ GALILEOFM_FUNC(function_change)
 					handle,
 					entry->fe_name,
 					error_action,
-					IoErr()))==-1) break;
+					IoErr()))==-1)
+				{
+				    if (org_dir)
+				        CurrentDir(org_dir);
+				    break;
+				}
 
 				// Skip?
 				if (ret==0) file_ok=0;
@@ -494,9 +514,15 @@ GALILEOFM_FUNC(function_change)
 		if (ret==-1)
 		{
 			function_abort(handle);
+			if (org_dir)
+			    CurrentDir(org_dir);
 			ret=0;
 			break;
 		}
+
+	        // Restore current directory
+		if (org_dir)
+		    CurrentDir(org_dir);
 
 		// Get next entry, increment count
 		count+=function_end_entry(handle,entry,file_ok);
@@ -504,9 +530,6 @@ GALILEOFM_FUNC(function_change)
 		// Reset result code
 		ret=1;
 	}
-
-	// Free data
-	FreeVec(source_file);
 
 	return ret;
 }

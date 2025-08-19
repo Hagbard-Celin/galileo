@@ -37,7 +37,13 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "function_launch_protos.h"
 #include "key_finder.h"
+#include "start_menu.h"
+#include "backdrop_protos.h"
+#include "cx.h"
+#include "scripts.h"
 
 void cx_right_button(register CxMsg *cxm,CxObj *co);
 BOOL cx_over_icon(BackdropInfo *info,short x,short y);
@@ -707,8 +713,8 @@ void __saveds cx_right_button(register CxMsg *cxm,CxObj *co)
 			// Check qualifiers to make sure buttons are still down (unless it's a popup menu)
 			else
 			if ((ie->ie_Class==IECLASS_POINTERPOS ||
-                 (ie->ie_Class==IECLASS_RAWMOUSE && ie->ie_Code==IECODE_NOBUTTON)) &&
-                 !(ie->ie_Qualifier&data->qual_down) && id!=WINDOW_START && id!=WINDOW_POPUP_MENU)
+			    (ie->ie_Class==IECLASS_RAWMOUSE && ie->ie_Code==IECODE_NOBUTTON)) &&
+			    !(ie->ie_Qualifier&data->qual_down) && id!=WINDOW_START && id!=WINDOW_POPUP_MENU)
 			{
 				data->right_down=0;
 				data->popup_window=0;
@@ -741,7 +747,7 @@ void __saveds cx_right_button(register CxMsg *cxm,CxObj *co)
 				msg->ExecMessage.mn_ReplyPort=GUI->rexx_app_port;
 				msg->ExecMessage.mn_Length=sizeof(struct IntuiMessage);
 				msg->Class=((ie->ie_Class==IECLASS_RAWMOUSE && ie->ie_Code==IECODE_NOBUTTON) ||
-                            ie->ie_Class==IECLASS_POINTERPOS)?IDCMP_MOUSEMOVE:IDCMP_MOUSEBUTTONS;
+				ie->ie_Class==IECLASS_POINTERPOS)?IDCMP_MOUSEMOVE:IDCMP_MOUSEBUTTONS;
 				msg->Code=ie->ie_Code;
 				msg->Qualifier=ie->ie_Qualifier;
 				msg->MouseX=x;

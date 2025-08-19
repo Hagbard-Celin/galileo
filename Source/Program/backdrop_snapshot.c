@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,12 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "misc_protos.h"
+#include "backdrop_protos.h"
+#include "groups.h"
+#include "rexx_protos.h"
+#include "position_protos.h"
 
 // Snapshot objects
 void backdrop_snapshot(BackdropInfo *info,BOOL unsnapshot,BOOL all,BackdropObject *icon)
@@ -156,50 +163,50 @@ void backdrop_snapshot(BackdropInfo *info,BOOL unsnapshot,BOOL all,BackdropObjec
 			// AppIcon?
 			if (object->bdo_type==BDO_APP_ICON)
 			{
-				leftout_record *left;
+				appicon_record *record;
 
 				// Lock position list
 				lock_listlock(&GUI->positions,TRUE);
 
 				// Look for entry for icon
-				for (left=(leftout_record *)&GUI->positions.list.lh_Head;
-					left->node.ln_Succ;
-					left=(leftout_record *)left->node.ln_Succ)
+				for (record=(appicon_record *)&GUI->positions.list.lh_Head;
+					record->node.ln_Succ;
+					record=(appicon_record *)record->node.ln_Succ)
 				{
 					// Leftout?
-					if (left->node.ln_Type==PTYPE_APPICON)
+					if (record->node.ln_Type==PTYPE_APPICON)
 					{
 						// Match this icon?
-						if (strcmp(left->icon_label,object->bdo_name)==0)
+						if (strcmp(record->icon_label,object->bdo_name)==0)
 							break;
 					}
 				}
 
 				// Didn't find one?
-				if (!(left->node.ln_Succ) && !unsnapshot)
+				if (!(record->node.ln_Succ) && !unsnapshot)
 				{
 					// Create a new entry
-					if (left=AllocMemH(GUI->position_memory,sizeof(leftout_record)))
+					if (record=AllocMemH(GUI->position_memory,sizeof(appicon_record)))
 					{
 						// Fill out entry
-						stccpy(left->icon_label,object->bdo_name,sizeof(left->icon_label));
-						left->node.ln_Name=left->name;
-						left->node.ln_Type=PTYPE_APPICON;
+						stccpy(record->icon_label,object->bdo_name,sizeof(record->icon_label));
+						record->node.ln_Name=record->name;
+						record->node.ln_Type=PTYPE_APPICON;
 
 						// Add to list
-						AddTail((struct List *)&GUI->positions,(struct Node *)left);
+						AddTail((struct List *)&GUI->positions,(struct Node *)record);
 					}
 				}
 
 				// Got one?
-				if (left->node.ln_Succ)
+				if (record->node.ln_Succ)
 				{
 					// Unsnapshot?
 					if (unsnapshot)
 					{
 						// Remove entry and free it
-						Remove((struct Node *)left);
-						FreeMemH(left);
+						Remove((struct Node *)record);
+						FreeMemH(record);
 					}
 
 					// Update entry
@@ -217,9 +224,9 @@ void backdrop_snapshot(BackdropInfo *info,BOOL unsnapshot,BOOL all,BackdropObjec
 						}
 
 						// Save position
-						left->icon_x=x;
-						left->icon_y=y;
-						left->flags&=~LEFTOUTF_NO_POSITION;
+						record->icon_x=x;
+						record->icon_y=y;
+						record->flags&=~LEFTOUTF_NO_POSITION;
 					}
 
 					// Set flag to save positions

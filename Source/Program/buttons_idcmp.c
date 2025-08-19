@@ -31,11 +31,16 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "buttons_protos.h"
+#include "misc_protos.h"
+#include "function_launch_protos.h"
+#include "menu_data.h"
+#include "help.h"
 
 #define POPUP_TIME	800000
 
@@ -704,7 +709,7 @@ buttons_process_msg(Buttons *buttons,struct IntuiMessage *msg)
 						function,
 						0,0,
 						0,0,
-						0,0,0,0,
+						0,0,0,0,0,0,
 						buttons);
 				}
 			}

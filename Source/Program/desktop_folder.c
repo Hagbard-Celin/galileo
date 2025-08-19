@@ -36,6 +36,9 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "backdrop_protos.h"
+#include "notify.h"
 
 short read_desktop_folder(BackdropInfo *info,BOOL show)
 {

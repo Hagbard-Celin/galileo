@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,12 +32,21 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
+typedef struct
+{
+    ULONG		len;
+    struct DateStamp	date;
+    Point		pos;
+    ULONG		flags;
+    TEXT		name[0];
+} group_record;
+
 void groups_new(BackdropInfo *,IPCData *);
-BOOL group_dereference(BPTR,char *,char *,Point *,ULONG *);
-BOOL group_write_data(char *,char *,short,short,ULONG);
+group_record *group_dereference(BPTR,char *);
+BOOL group_write_data(char *,char *,char *,group_record *);
 void group_snapshot_icon(BackdropInfo *,BackdropObject *,short,short);
 UWORD group_do_popup(GroupData *);

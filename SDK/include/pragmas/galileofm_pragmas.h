@@ -79,7 +79,7 @@
 #pragma libcall GalileoFMBase IPC_Flush 252 801
 #pragma libcall GalileoFMBase IPC_ListCommand 258 3210805
 #pragma libcall GalileoFMBase IPC_ProcStartup 25e 9802
-#pragma libcall GalileoFMBase IPC_Launch 264 B210A9807
+#pragma libcall GalileoFMBase IPC_Launch 264 210A9806
 #pragma libcall GalileoFMBase OpenImage 26a 9802
 #pragma libcall GalileoFMBase CloseImage 270 801
 #pragma libcall GalileoFMBase CopyImage 276 801
@@ -114,8 +114,8 @@
 #pragma libcall GalileoFMBase RemoveNotifyRequest 44a 801
 #pragma libcall GalileoFMBase StrCombine 456 0A9804
 #pragma libcall GalileoFMBase StrConcat 45c 09803
-#pragma libcall GalileoFMBase LaunchWB 462 09803
-#pragma libcall GalileoFMBase LaunchCLI 46e 432109807
+#pragma libcall GalileoFMBase LaunchWBarg 462 1BA09806
+#pragma libcall GalileoFMBase LaunchCLI 46e 5432109808
 #pragma libcall GalileoFMBase ReplyFreeMsg 474 801
 #pragma libcall GalileoFMBase TimerActive 47a 801
 #pragma libcall GalileoFMBase IFFOpen 486 10803
@@ -145,7 +145,7 @@
 #pragma libcall GalileoFMBase InitListLock 54c 9802
 #pragma libcall GalileoFMBase QualValid 558 001
 #pragma libcall GalileoFMBase FHFromBuf 55e 801
-#pragma libcall GalileoFMBase GetWBArgPath 56a 09803
+#pragma libcall GalileoFMBase GetWBArgPath 56a 801
 #pragma libcall GalileoFMBase DeviceFromLock 570 9802
 #pragma libcall GalileoFMBase DeviceFromHandler 576 9802
 #pragma libcall GalileoFMBase DevNameFromLock 57c 32103
@@ -176,7 +176,7 @@
 #pragma libcall GalileoFMBase SetAppIconMenuState 63c 10803
 #pragma libcall GalileoFMBase SearchFile 642 1A09805
 #pragma libcall GalileoFMBase ParseDateStrings 648 BA9804
-#pragma libcall GalileoFMBase DateFromStrings 64e A9803
+#pragma libcall GalileoFMBase DateFromStrings 64e 0A9804
 #pragma libcall GalileoFMBase LayoutResize 666 801
 #pragma libcall GalileoFMBase GetFileVersion 66c A910805
 #pragma libcall GalileoFMBase AsyncRequest 672 1BA90806
@@ -205,7 +205,6 @@
 #pragma libcall GalileoFMBase CalcPercent 7a4 81003
 #pragma libcall GalileoFMBase IsDiskDevice 7aa 801
 #pragma libcall GalileoFMBase ReadBufLine 7c2 09803
-#pragma libcall GalileoFMBase LaunchWBNew 7ec A109805
 #pragma libcall GalileoFMBase UpdatePathList 7f2 0
 #pragma libcall GalileoFMBase UpdateMyPaths 7f8 0
 #pragma libcall GalileoFMBase GetDeviceUnit 804 A9803
@@ -222,5 +221,11 @@
 #pragma libcall GalileoFMBase BytesToString64 894 109804
 #pragma libcall GalileoFMBase GetLocaleSettings 8b2 001
 #pragma libcall GalileoFMBase DateToStrings 8b8 0A9804
+#pragma libcall GalileoFMBase PathFromLock 8c4 910804
+#pragma libcall GalileoFMBase LockFromPath 8ca 10803
+#pragma libcall GalileoFMBase JoinString 8d0 0BA9805
+#pragma libcall GalileoFMBase CopyString 8d6 9802
+#pragma libcall GalileoFMBase LockFromVolIdPath 8dc 10A9805
+#pragma libcall GalileoFMBase VolIdFromLock 8f4 A9803
 /**/
 /* end "galileofm.library" pragmas */

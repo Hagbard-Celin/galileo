@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2023-2024 Hagbard Celine
+Copyright 2023-2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -37,7 +37,16 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "callback_protos.h"
+#include "lister_protos.h"
+#include "function_launch_protos.h"
+#include "misc_protos.h"
 #include "replace.h"
+#include "rexx_protos.h"
+#include "commands.h"
+#include "scripts.h"
+#include "menu_data.h"
+#include "callback_protos.h"
 #include "/Modules/modules.h"
 
 APTR __asm __saveds HookConvertEntry(
@@ -169,10 +178,16 @@ APTR __asm __saveds HookGetEntry(
 }
 
 void __asm __saveds HookFirstEntry(
-	register __a0 FunctionHandle *handle)
+	register __a0 FunctionHandle *handle,
+	register __d0 ULONG flags)
 {
 	// Initialise current entry pointer
 	handle->current_entry=(FunctionEntry *)handle->entry_list.lh_Head;
+
+	if (flags&ENTRYF_RECURSE_DIRS)
+	    handle->instruction_flags |= INSTF_RECURSE_DIRS;
+	else
+	    handle->instruction_flags &= ~INSTF_RECURSE_DIRS;
 }
 
 void __asm __saveds HookEndEntry(
@@ -209,6 +224,7 @@ void __asm __saveds HookReloadEntry(
 		function_filechange_reloadfile(
 			handle,
 			path->pn_path,
+			path->pn_lock,
 			entry->fe_name,0);
 	}
 }
@@ -217,39 +233,42 @@ void __asm __saveds HookAddFile(
 	register __a0 FunctionHandle *handle,
 	register __a1 char *path,
 	register __a2 struct FileInfoBlock *fib,
-	register __a3 Lister *lister)
+	register __a3 Lister *lister,
+	register __d0 BPTR lock)
 {
 	// No date given?
 	if (fib->fib_Date.ds_Days==0 && fib->fib_Date.ds_Minute==0 && fib->fib_Date.ds_Tick==0)
 		DateStamp(&fib->fib_Date);
 
 	// Add file
-	function_filechange_addfile(handle,path,fib,0,lister);
+	function_filechange_addfile(handle,path,lock,fib,0,lister);
 }
 
 void __asm __saveds HookDelFile(
 	register __a0 FunctionHandle *handle,
 	register __a1 char *path,
 	register __a2 char *name,
-	register __a3 Lister *lister)
+	register __a3 Lister *lister,
+	register __d0 BPTR lock)
 {
 	// Add file
-	function_filechange_delfile(handle,path,name,lister,1);
+	function_filechange_delfile(handle,path,lock,name,lister,1);
 }
 
 void __asm __saveds HookLoadFile(
 	register __a0 FunctionHandle *handle,
 	register __a1 char *path,
 	register __a2 char *name,
-	register __d0 long flags,
-	register __d1 BOOL reload)
+	register __d0 BPTR lock,
+	register __d1 long flags,
+	register __d2 BOOL reload)
 {
 	// Reload?
 	if (reload)
-		function_filechange_reloadfile(handle,path,name,flags);
+		function_filechange_reloadfile(handle,path,lock,name,flags);
 
 	// Load
-	else function_filechange_loadfile(handle,path,name,flags);
+	else function_filechange_loadfile(handle,path,lock,name,flags);
 }
 
 void __asm __saveds HookDoChanges(
@@ -266,11 +285,20 @@ BOOL __asm __saveds HookCheckAbort(
 }
 
 struct Window *__asm __saveds HookGetWindow(
-	register __a0 PathNode *path)
+	register __a0 Lister *lister)
 {
 	// Valid lister?
-	if (path && path->pn_lister)
-		return path->pn_lister->window;
+	if (lister)
+		return lister->window;
+	return 0;
+}
+
+IPCData *__asm __saveds HookGetIPC(
+	register __a0 Lister *lister)
+{
+	// Valid lister?
+	if (lister)
+		return lister->ipc;
 	return 0;
 }
 
@@ -349,13 +377,25 @@ void __asm __saveds HookUpdateProgress(
 {
 	// Update progress indicator
 	if (path && path->pn_lister)
+	{
+	    char *progress_name, *file;
+
+	    // Allocate memory for name
+	    if (progress_name=AllocMemH(path->pn_lister->progress_memory,
+		    strlen((file=FilePart(name)))+1))
+	    {
+		    // Copy name
+		    strcpy(progress_name,file);
+
 		lister_command(
 			path->pn_lister,
 			LISTER_PROGRESS_UPDATE,
 			count,
-			name,
+			progress_name,
 			0,
 			0);
+	    }
+	}
 }
 
 void __asm __saveds HookCloseProgress(
@@ -545,15 +585,15 @@ ULONG __asm __saveds HookGetPointer(
 void __asm __saveds HookFreePointer(
 	register __a0 struct pointer_packet *ptr)
 {
-    HookFreePointerDirect(ptr->pointer,ptr->type,ptr->flags);
+	HookFreePointerDirect(ptr->pointer,ptr->type,ptr->flags);
 }
 
 void __asm __saveds HookFreePointerDirect(
 	register __a0 APTR pointer,
-    register __d0 ULONG type,
-    register __d1 ULONG flags)
+	register __d0 ULONG type,
+	register __d1 ULONG flags)
 {
-    	// Which type?
+		// Which type?
 	switch (type)
 	{
 		// Filetypes
@@ -603,7 +643,7 @@ void __asm __saveds HookFreePointerDirect(
 		case MODPTR_COMMANDS:
 			{
 				struct List *list;
-				struct GalileoCommandList *gcl,*next=0;
+				struct GalileoCommandList *gcl,*next;
 				APTR mem_handle;
 
 				// Get list and memory handle
@@ -789,6 +829,25 @@ void __asm __saveds HookCheckDesktop(
 }
 
 
+BOOL __asm __saveds HookMatchLockDesktop(
+	register __a0 BPTR lock)
+{
+	BOOL ret=0;
+
+	// See if path matches desktop path
+	if (lock)
+	{
+	// See if they're the same
+	if (SameLock(lock,GUI->desktop_dir_lock)==LOCK_SAME)
+	{
+	    ret=1;
+	}
+	}
+
+	return ret;
+}
+
+
 BOOL __asm __saveds HookMatchDesktop(
 	register __a0 char *path)
 {
@@ -797,24 +856,20 @@ BOOL __asm __saveds HookMatchDesktop(
 	// See if path matches desktop path
 	if (path)
 	{
-		BPTR lock1,lock2;
+		BPTR lock;
 
 		// Lock both this path and the desktop
-		if ((lock1=Lock(path,ACCESS_READ)) &&
-			(lock2=Lock(environment->env->desktop_location,ACCESS_READ)))
+		if (lock=LockFromPath(path, NULL, NULL))
 		{
 			// See if they're the same
-			if (SameLock(lock1,lock2)==LOCK_SAME)
+			if (SameLock(lock,GUI->desktop_dir_lock)==LOCK_SAME)
 			{
 				ret=1;
 			}
-
-			// Unlock the second lock
-			UnLock(lock2);
 		}
 
 		// Unlock first lock
-		UnLock(lock1);
+		UnLock(lock);
 	}
 
 	return ret;
@@ -903,40 +958,4 @@ void __asm __saveds HookGetThemes(
 
 	// Add trailing slash
 	AddPart(path,"",256);
-}
-
-BOOL __asm __saveds HookIsSourceDestLock(
-     register __a0 Lister *lister)
-{
-    BOOL islocked;
-
-    if (lister->flags&LISTERF_SOURCEDEST_LOCK)
-	islocked=TRUE;
-    else
-	islocked=FALSE;
-
-    return islocked;
-}
-
-void __asm __saveds HookFakeDir(
-	register __a0 Lister *lister,
-    register __d0 BOOL fakedir)
-{
-    if (fakedir)
-	lister->more_flags|=LISTERF_FAKEDIR;
-    else
-    	lister->more_flags&=~LISTERF_FAKEDIR;
-}
-
-BOOL __asm __saveds HookIsFakeDir(
-     register __a0 Lister *lister)
-{
-    BOOL isfake;
-
-    if (lister->more_flags&LISTERF_FAKEDIR)
-	isfake=TRUE;
-    else
-	isfake=FALSE;
-
-    return isfake;
 }

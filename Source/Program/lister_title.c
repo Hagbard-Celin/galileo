@@ -31,11 +31,15 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "graphics.h"
+#include "dirlist.h"
+#include "lsprintf_protos.h"
 
 static __chip unsigned short
 	command_arrow[7]={

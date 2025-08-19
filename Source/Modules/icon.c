@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2024 Hagbard Celine
+Copyright 2024,2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -90,9 +90,25 @@ int __asm __saveds L_Module_Entry_Internal(register __a0 struct List *files,
     char buf[4];
     struct Message *msg;
 
-    // Allocate data
-    if (!(data = AllocVec( sizeof(icon_data), MEMF_CLEAR )))
-	return 0;
+    {
+	APTR handle;
+
+	if (handle = NewMemHandle(0,0,MEMF_CLEAR))
+	{
+	    // Allocate data
+	    if (data = AllocMemH(handle, sizeof(icon_data)))
+	    {
+		data->memhandle = handle;
+	    }
+	    else
+	    {
+		FreeMemHandle(handle);
+		return 0;
+	    }
+	}
+	else
+	    return 0;
+    }
 
     data->timer = AllocTimer( UNIT_VBLANK, 0 );
 
@@ -257,13 +273,28 @@ int __asm __saveds L_Module_Entry_Internal(register __a0 struct List *files,
 	    // Go through files
 	    for (node=files->lh_Head;node->ln_Succ;node=node->ln_Succ)
 	    {
+		BPTR org_dir = 0;
+
+		if (((Att_LockNode *)node)->att_lock)
+		    org_dir = CurrentDir(((Att_LockNode *)node)->att_lock);
 		// Do info on this file
 		if (!(node->ln_Type = icon_info(data,
 			                        node->ln_Name,
 			                        node->ln_Succ->ln_Succ)))
 		{
+		    if (org_dir)
+		    {
+		        UnLock(CurrentDir(org_dir));
+		        ((Att_LockNode *)node)->att_lock = 0;
+		    }
 		    break;
 		}
+
+	        if (org_dir)
+	        {
+	            UnLock(CurrentDir(org_dir));
+	            ((Att_LockNode *)node)->att_lock = 0;
+	        }
 	    }
 
 	    // Restore error pointer
@@ -304,7 +335,7 @@ int __asm __saveds L_Module_Entry_Internal(register __a0 struct List *files,
     FreeTimer( data->timer );
 
     // Free data
-    FreeVec( data );
+    FreeMemHandle( data->memhandle );
 
     return 0;
 }
@@ -568,7 +599,7 @@ static CONST_STRPTR gethandlerver(BPTR seglist)
 // open window
 int openwindow( icon_data *data, int next )
 {
-    char *ptr;
+    char *ptr, *tmp_name;
     BPTR  lock;
     short a;
     BOOL  bigfile=FALSE;
@@ -613,9 +644,36 @@ int openwindow( icon_data *data, int next )
 	    data->disktype=((struct DosList *)BADDR(data->info.id_VolumeNode))->dol_misc.dol_volume.dol_DiskType;
 
 	    // Build object name
-	    strcpy( data->object_name, data->fib.fib_FileName );
 	    if (data->icon_type == WBDISK)
-		strcat( data->object_name, ":" );
+	    {
+		if (tmp_name = JoinString(data->memhandle, data->fib.fib_FileName, ":", NULL, NULL))
+		{
+		    if (data->object_name)
+			FreeMemH(data->object_name);
+
+		    data->object_name = tmp_name;
+		}
+		else
+		{
+		    FreeVec(temp);
+		    return 0;
+		}
+	    }
+	    else
+	    {
+		if (tmp_name = CopyString(data->memhandle, data->fib.fib_FileName))
+		{
+		    if (data->object_name)
+			FreeMemH(data->object_name);
+
+		    data->object_name = tmp_name;
+		}
+		else
+		{
+		    FreeVec(temp);
+		    return 0;
+		}
+	    }
 
 	    // Get locale flags
 	    data->locale_flags = GetLocaleSettings(0);
@@ -645,7 +703,20 @@ int openwindow( icon_data *data, int next )
 		volume=(struct DosList *)BADDR(data->info.id_VolumeNode);
 
 		// Get device name
-		device=DeviceFromLock(lock,data->path);
+		device=DeviceFromLock(lock,data->buffer);
+
+		if (tmp_name = CopyString(data->memhandle, data->buffer))
+		{
+		    if (data->path)
+			FreeMemH(data->path);
+
+		    data->path = tmp_name;
+		}
+		else
+		{
+		    FreeVec(temp);
+		    return 0;
+		}
 
 		// Got device?
 		if (device)
@@ -744,7 +815,19 @@ int openwindow( icon_data *data, int next )
 	// Can't lock object
 	else
 	{
-	    strcpy( data->object_name, FilePart( data->prog_name ) );
+	    if (tmp_name = CopyString(data->memhandle, FilePart( data->prog_name )))
+	    {
+	        if (data->object_name)
+		    FreeMemH(data->object_name);
+
+		data->object_name = tmp_name;
+	    }
+	    else
+	    {
+	        FreeVec(temp);
+	        return 0;
+	    }
+
 	    strcpy( data->datebuf, "???" );
 	    data->timebuf[0] = 0;
 	}
@@ -851,7 +934,7 @@ int openwindow( icon_data *data, int next )
 	}
 
 	//build_title( data );
-	strcpy(data->title,data->path);
+	stccpy(data->title,data->path,256);
 	SetWindowTitles( data->window, data->title, (UBYTE *)-1 );
 
 	// Set error pointer
@@ -1179,26 +1262,31 @@ int openwindow( icon_data *data, int next )
 
 	    // Name
 	    {
-	        UWORD a;
+		UWORD len;
+		char buf72 = 0, buf36 = 0;
 
-	        for (a = 0; data->object_name[a]; a++)
-		    temp->buf[a] = data->object_name[a];
+		len = strlen(data->object_name);
 
-	        temp->buf[a] = 0;
-
-	        if (a > 72)
+		if (len > 72)
 	        {
-		    SetGadgetValue( data->list, GAD_ICON_NAME3, (ULONG)(temp->buf + 72));
-		    temp->buf[72] = 0;
+		    SetGadgetValue( data->list, GAD_ICON_NAME3, (ULONG)(data->object_name + 72));
+		    buf72 = data->object_name[72];
+		    data->object_name[72] = 0;
 	        }
-	        if (a > 36)
+		if (len > 36)
 	        {
-		    SetGadgetValue( data->list, GAD_ICON_NAME2, (ULONG)(temp->buf + 36));
-		    temp->buf[36] = 0;
+		    SetGadgetValue( data->list, GAD_ICON_NAME2, (ULONG)(data->object_name + 36));
+		    buf36 = data->object_name[36];
+		    data->object_name[36] = 0;
 	        }
 
-	        SetGadgetValue( data->list, GAD_ICON_NAME1, (ULONG)temp->buf );
+	        SetGadgetValue( data->list, GAD_ICON_NAME1, (ULONG)data->object_name );
 
+		if (buf72)
+		    data->object_name[72] = buf72;
+
+		if (buf36)
+		    data->object_name[36] = buf36;
 	    }
 
 	    // Type
@@ -1211,7 +1299,7 @@ int openwindow( icon_data *data, int next )
 	SetGadgetValue( data->list, GAD_ICON_LAST_CHANGED, (ULONG)temp->buf );
 
 	// Default tool
-	if (data->icon_type == WBPROJECT)
+	if ((data->icon_type == WBDISK) || (data->icon_type == WBPROJECT))
 	    SetGadgetValue( data->list, GAD_ICON_DEFAULT_TOOL, (ULONG)data->icon->do_DefaultTool );
 
 	if (data->icon_type == WBDISK)
@@ -1717,7 +1805,7 @@ static int drag_to_iconinfo( icon_data *data, IPCData *ipc, int x, int y )
 
 
 // Set the WBArg for the icon editor
-BOOL icon_set_wbarg( GalileoAppMessage *msg, char *name )
+BOOL icon_set_wbarg( struct AppMessage *msg, char *name )
 {
     BPTR  lock;
     BOOL  success = FALSE;
@@ -1805,7 +1893,7 @@ BOOL icon_send_appmsg( icon_data *data, struct Window *window, char *name )
 {
     struct AppWindow  *appwin;
     struct MsgPort    *replyport, *port;
-    GalileoAppMessage   *msg;
+    struct AppMessage *msg;
     BOOL               ok = FALSE;
 
     if (appwin = WB_FindAppWindow( window ))
@@ -1819,13 +1907,13 @@ BOOL icon_send_appmsg( icon_data *data, struct Window *window, char *name )
 		    ok = TRUE;
 
 		    port = WB_AppWindowData(appwin,
-			                    &msg->ga_Msg.am_ID,
-			                    &msg->ga_Msg.am_UserData);
+			                    &msg->am_ID,
+			                    &msg->am_UserData);
 
 		    // Fill out AppMessage info
-		    msg->ga_Msg.am_Type = MTYPE_APPWINDOW;
-		    msg->ga_Msg.am_MouseX = 30;
-		    msg->ga_Msg.am_MouseY = 30;
+		    msg->am_Type = MTYPE_APPWINDOW;
+		    msg->am_MouseX = 30;
+		    msg->am_MouseY = 30;
 
 		    PutMsg( port, (struct Message *)msg );
 
@@ -1977,6 +2065,7 @@ void icon_drop( icon_data *data, int x, int y )
     struct DiskObject   *icon;
     short                len;
     int                  failed = 0;
+    char                 *tmp_name;
 
     if (IconBase->lib_Version>=44)
     {
@@ -1987,7 +2076,13 @@ void icon_drop( icon_data *data, int x, int y )
 
     // Disk icon?
     if (data->name[strlen(data->name)-1]==':')
-	strcat(data->name,"Disk");
+    {
+	if (tmp_name = JoinString(data->memhandle, data->name, "Disk", NULL, NULL))
+	{
+	    FreeMemH(data->name);
+	    data->name = tmp_name;
+	}
+    }
 
     // Already have a .info suffix? Strip it if so
     if ((len = strlen(data->name)) > 5 &&
@@ -2175,7 +2270,17 @@ void icon_drop( icon_data *data, int x, int y )
 		    }
 
 		    // Save path
-		    strcpy( data->newicon_path, data->name );
+		    {
+			char *tmp_name;
+
+			if (tmp_name = CopyString(data->memhandle,data->name))
+			{
+			    if (data->newicon_path)
+				FreeMemH(data->newicon_path);
+
+			    data->newicon_path = tmp_name;
+			}
+		    }
 
 		    break;
 
@@ -2400,14 +2505,14 @@ BOOL icon_edit_external( icon_data *data )
     {
 	lsprintf( command, "%s %s", data->edit_command, data->tempname );
 
-	if (WB_LaunchNotify(command,
-		            data->screen,
-		            1,		    // wait,
-		            4096,	    // stack,
-		            0,		    // default_tool,
-		            0,		    // process
-		            data->ipc,	    // notify_ipc,
-		            0 ))	    // flags
+	if (WB_Launch(command,
+	              data->screen,
+	              1,	      // wait,
+	              4096,	      // stack,
+	              0,	      // default_tool,
+	              0,	      // process
+	              data->ipc,      // notify_ipc,
+	              0 ))	      // flags
 	{
 	    ok = TRUE;
 	    data->busy = TRUE;
@@ -2440,15 +2545,14 @@ BOOL icon_edit( icon_data *data )
 	ReplyFreeMsg( nmsg );
 
     // Launch IconEdit
-    if (WB_LaunchNotify(
-	    data->edit_command,
-	    data->screen,
-	    1,				    // wait,
-	    4096,			    // stack,
-	    0,				    // default_tool,
-	    &process,
-	    data->ipc,			    // notify_ipc,
-	    LAUNCHF_OPEN_UNDER_MOUSE ))	    // flags
+    if (WB_Launch(data->edit_command,
+	          data->screen,
+	          1,			          // wait,
+	          4096,			          // stack,
+	          0,			          // default_tool,
+	          &process,
+	          data->ipc,		          // notify_ipc,
+	          LAUNCHF_OPEN_UNDER_MOUSE ))     // flags
     {
 	data->busy = TRUE;
 	SetWindowBusy( data->window );
@@ -2600,11 +2704,18 @@ void get_icon_fsize(icon_data *data)
 // Icon information
 short icon_info( icon_data *data, char *name, struct Node *next )
 {
-    short a, ret = 1;
     BPTR  lock;
+    char  *tmp_name;
+    short a, ret = 1;
 
     // Copy name
-    strcpy( data->name, name );
+    if (tmp_name = CopyString(data->memhandle,name))
+    {
+	if (data->name)
+	    FreeMemH(data->name);
+
+	data->name = tmp_name;
+    }
 
     // Try to lock file
     if (lock = Lock( name, ACCESS_READ ))
@@ -2621,7 +2732,13 @@ short icon_info( icon_data *data, char *name, struct Node *next )
 		parent = lock;
 
 		// Disk, presumably
-		strcpy( data->name,"Disk" );
+		if (tmp_name = CopyString(data->memhandle, "Disk"))
+	        {
+		    if (data->name)
+			FreeMemH(data->name);
+
+		    data->name = tmp_name;
+	        }
 	    }
 
 	    // Unlock main lock
@@ -2644,10 +2761,22 @@ short icon_info( icon_data *data, char *name, struct Node *next )
 	Examine( lock, &data->fib );
 
 	// Get full path
-	DevNameFromLock( lock, data->name, 256 );
+	if (tmp_name = PathFromLock(data->memhandle, lock, PFLF_USE_DEVICENAME, NULL))
+	{
+	    if (data->name)
+		FreeMemH(data->name);
+
+	    data->name = tmp_name;
+	}
 
 	// Get path for location field
-	NameFromLock( lock, data->path, 256 );
+	if (tmp_name = PathFromLock(data->memhandle, lock, NULL, NULL))
+	{
+	    if (data->path)
+		FreeMemH(data->path);
+
+	    data->path = tmp_name;
+	}
 
 	// Unlock lock
 	UnLock( lock );
@@ -2660,35 +2789,64 @@ short icon_info( icon_data *data, char *name, struct Node *next )
 	if (lock = Lock( "", ACCESS_READ ))
 	{
 	    // Get path of current dir
-	    DevNameFromLock( lock, data->name, 256 );
-	    UnLock( lock );
+	    if (tmp_name = PathFromLock(data->memhandle, lock, PFLF_USE_DEVICENAME, "Disk"))
+	    {
+	        if (data->name)
+		    FreeMemH(data->name);
 
-	    // Add on "disk"
-	    AddPart( data->name, "Disk", 256 );
+	        data->name = tmp_name;
+	    }
+	    UnLock( lock );
 	}
     }
 
     // Otherwise, no file
     else
     {
+	char *tmp_path;
+
 	// Copy name and add .info
-	strcpy( data->path, name );
-	strcat( data->path, ".info" );
-
-	// Try to lock file
-	if (lock = Lock( data->path, ACCESS_READ ))
+	if (tmp_path = JoinString(data->memhandle, name, ".info", NULL, NULL))
 	{
-	    // Get path for location field
-	    NameFromLock( lock, data->path, 256 );
+	    // Try to lock file
+	    if (lock = Lock( tmp_path, ACCESS_READ ))
+	    {
+		FreeMemH(tmp_path);
 
-	    // Store as full name
-	    DevNameFromLock( lock, data->name, 256 );
+	        // Get path for location field
+		if (tmp_path = PathFromLock(data->memhandle, lock, NULL, NULL))
+		{
+		    if (data->path)
+			FreeMemH(data->path);
 
-	    // Unlock lock
-	    UnLock( lock );
+		    data->path = tmp_path;
+		}
+
+	        // Store as full name
+		if (tmp_path = PathFromLock(data->memhandle, lock, PFLF_USE_DEVICENAME, NULL))
+		{
+		    if (data->name)
+			FreeMemH(data->name);
+
+		    data->name = tmp_path;
+		}
+
+	        // Unlock lock
+	        UnLock( lock );
+	    }
+	    else
+	    {
+		FreeMemH(tmp_path);
+
+		if (tmp_path = CopyString(data->memhandle, "???"))
+		{
+		    if (data->path)
+			FreeMemH(data->path);
+
+		    data->path = tmp_path;
+		}
+	    }
 	}
-	else
-	    strcpy( data->path, "???" );
     }
 
     // Check if this really is a icon before stripping .info
@@ -2704,7 +2862,15 @@ short icon_info( icon_data *data, char *name, struct Node *next )
     data->icon=0;
 
     if (data->name[strlen(data->name)-1] == ':')
-	strcat( data->name, "Disk" );
+    {
+	if (tmp_name = JoinString(data->memhandle, data->name, "Disk", NULL, NULL))
+	{
+	    if (data->name)
+		FreeMemH(data->name);
+
+	    data->name = tmp_name;
+	}
+    }
 
     data->nameptr = name;
 
@@ -2712,7 +2878,13 @@ short icon_info( icon_data *data, char *name, struct Node *next )
     data->icon = (struct DiskObject *)IPC_Command( data->main_ipc, MAINCMD_GET_ICON, GCDOF_NOCACHE, data->name, 0, REPLY_NO_PORT );
 
     // Store icon name
-    strcpy( data->icon_name, data->name );
+    if (tmp_name = CopyString(data->memhandle, data->name))
+    {
+	if (data->icon_name)
+	    FreeMemH(data->icon_name);
+
+	data->icon_name = tmp_name;
+    }
 
     // Invalid icon?
     if (!data->icon)
@@ -2725,7 +2897,13 @@ short icon_info( icon_data *data, char *name, struct Node *next )
     data->icon_type = data->icon->do_Type;
 
     // Store program name
-    strcpy( data->prog_name, data->name );
+    if (tmp_name = CopyString(data->memhandle, data->name))
+    {
+	if (data->prog_name)
+	    FreeMemH(data->prog_name);
+
+	data->prog_name = tmp_name;
+    }
 
     // Default to newicon image
     data->icon_mode = 1;
@@ -2758,10 +2936,18 @@ short icon_info( icon_data *data, char *name, struct Node *next )
 		// Valid argument?
 		if (amsg->am_NumArgs > 0 && !data->busy)
 		{
-		    // Get icon name
-		    GetWBArgPath( &amsg->am_ArgList[0], data->name, 256 );
+		    char *tmp_name;
 
-		    icon_drop( data, amsg->am_MouseX, amsg->am_MouseY );
+		    // Get icon name
+		    if (tmp_name = GetWBArgPath( &amsg->am_ArgList[0]))
+		    {
+			if (data->name)
+			    FreeMemH(data->name);
+
+			data->name = tmp_name;
+
+			icon_drop( data, amsg->am_MouseX, amsg->am_MouseY );
+		    }
 		}
 
 		// Reply message
@@ -2846,7 +3032,13 @@ short icon_info( icon_data *data, char *name, struct Node *next )
 		{
 		    p = imsg->data_free;
 
-		    strcpy( data->name, imsg->data );
+		    if (tmp_name = CopyString(data->memhandle, imsg->data))
+		    {
+			if (data->name)
+			    FreeMemH(data->name);
+
+			data->name = tmp_name;
+		    }
 
 		    icon_drop( data, p->x - data->window->LeftEdge, p->y - data->window->TopEdge );
 		}
@@ -4129,12 +4321,21 @@ void icon_drop_44( icon_data *data, int x, int y )
 {
     struct IntuiMessage *msg;
     struct DiskObject *icon;
-    short   len;
     int	    failed = 0;
+    char    *tmp_name;
+    short   len;
 
     // Disk icon?
     if (data->name[strlen(data->name)-1]==':')
-	strcat(data->name,"Disk");
+    {
+	if (tmp_name = CopyString(data->memhandle, "Disk"))
+	{
+	    if (data->name)
+		FreeMemH(data->name);
+
+	    data->name = tmp_name;
+	}
+    }
 
     // Already have a .info suffix? Strip it if so
     if ((len = strlen(data->name)) > 5 &&
@@ -4318,80 +4519,19 @@ void icon_drop_44( icon_data *data, int x, int y )
 }
 
 
-// Get icon full name
-char *icon_fullname(char *name)
-{
-    char *full_name,*ptr;
-    BPTR lock;
-    short len;
-
-    // Allocate buffer for full name
-    if (!(full_name=AllocVec(300,0))) return 0;
-
-    // Copy name
-    strcpy(full_name,name);
-    ptr=full_name+strlen(full_name);
-    strcat(full_name,".info");
-
-
-    // Lock icon
-    if (!(lock=Lock(full_name,ACCESS_READ)))
-    {
-	// Strip .info
-	*ptr=0;
-	if (lock=Lock(full_name,ACCESS_READ))
-	{
-	    // Add .info back
-	    strcpy(ptr,".info");
-	}
-    }
-
-    // Got lock?
-    if (lock)
-    {
-	// Expand path
-	DevNameFromLock(lock,full_name,256);
-
-	// Disk?
-	if ((ptr=strchr(full_name,':')) && stricmp(ptr+1,"disk.info")==0)
-	{
-	    // Get real full name
-	    NameFromLock(lock,full_name,256);
-
-	    // Strip after colon
-	    if (ptr=strchr(full_name,':')) *(ptr+1)=0;
-	}
-
-	// Unlock lock
-	UnLock(lock);
-    }
-
-
-    // Strip .info from name
-    if ((len=strlen(full_name))>5 &&
-	stricmp(full_name+len-5,".info")==0)
-    {
-	// Strip it
-	*(full_name+len-5)=0;
-    }
-
-    return full_name;
-}
-
-
 // Send icon notification
 void icon_notify(char *name,ULONG flags,short delete)
 {
     char *full_name;
 
 
-    if (!(full_name=icon_fullname(name)))
+    if (!(full_name=GetIconFullname(name)))
 	return;
 
     // Send notify message
     SendNotifyMsg(GN_WRITE_ICON,0,delete,FALSE,full_name,0);
 
-    FreeVec(full_name);
+    FreeMemH(full_name);
 }
 
 

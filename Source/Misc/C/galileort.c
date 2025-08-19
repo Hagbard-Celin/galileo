@@ -85,7 +85,7 @@ void __stdargs __main(char *command)
 			exit(0);
 
 		// Launch program
-		WB_Launch(command,0,LAUNCH_WAIT);
+		WB_Launch(command,0,LAUNCH_WAIT,4000,0,0,0,0);
 
 		// Close library
 		CloseLibrary(GalileoFMBase);

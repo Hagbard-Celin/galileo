@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2023 Hagbard Celine
+Copyright 2023,2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -32,16 +32,24 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-		 http://www.gpsoft.com.au
+		http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "dirlist_protos.h"
+#include "misc_protos.h"
+#include "reselect_protos.h"
+#include "function_launch_protos.h"
+#include "function_protos.h"
+#include "rexx_protos.h"
+#include "buffers_protos.h"
+#include "icons.h"
 
 // Build entry list for a function
 int function_build_list(FunctionHandle *handle,
-	                PathNode **path,
-	                InstructionParsed *instruction)
+		        PathNode **path,
+		        InstructionParsed *instruction)
 {
     FunctionEntry *funcentry;
     DirEntry *entry;
@@ -52,7 +60,6 @@ int function_build_list(FunctionHandle *handle,
 
     // Initialise the entry list
     NewList(&handle->entry_list);
-//  ClearMemHandle(handle->entry_memory);
 
     handle->entry_count=0;
     handle->current_entry=0;
@@ -90,119 +97,138 @@ int function_build_list(FunctionHandle *handle,
 
 	    // Correct type?
 	    if (!instruction ||
-		(instruction->ipa_flags&FUNCF_NEED_FILES && external->een_type<=ENTRY_FILE) ||
-		(instruction->ipa_flags&FUNCF_NEED_DIRS && external->een_type>=ENTRY_DEVICE) ||
-		(instruction->ipa_flags&FUNCF_WANT_ENTRIES &&
-		!(instruction->ipa_flags&(FUNCF_NEED_FILES|FUNCF_NEED_DIRS))))
+	        (instruction->ipa_flags&FUNCF_NEED_FILES && external->een_type<=ENTRY_FILE) ||
+	        (instruction->ipa_flags&FUNCF_NEED_DIRS && external->een_type>=ENTRY_DEVICE) ||
+	        (instruction->ipa_flags&FUNCF_WANT_ENTRIES &&
+	        !(instruction->ipa_flags&(FUNCF_NEED_FILES|FUNCF_NEED_DIRS))))
 	    {
-		// Allocate new function entry
-		if (funcentry=function_new_entry(handle,external->een_name,0))
-		{
-		    // Fill out entry
-		    funcentry->fe_entry=external->een_entry;
-		    funcentry->fe_type=external->een_type;
-		    funcentry->fe_flags=FUNCENTF_TOP_LEVEL;
+	        // Allocate new function entry
+	        if (funcentry=function_new_entry(handle,external->een_name,0))
+	        {
+	            // Fill out entry
+	            funcentry->fe_entry=external->een_entry;
+	            funcentry->fe_type=external->een_type;
+	            funcentry->fe_lock=external->een_lock;
+	            funcentry->fe_flags=FUNCENTF_TOP_LEVEL;
 
-		    // Lister in icon mode?
-		    if (external->een_flags&FUNCENTF_ICON_ACTION)
-			    funcentry->fe_flags|=FUNCENTF_ICON_ACTION;
+	            // Lister in icon mode?
+	            if (external->een_flags&FUNCENTF_ICON_ACTION)
+		        funcentry->fe_flags|=FUNCENTF_ICON_ACTION;
 
-		    // Link?
-		    if (external->een_flags&FUNCENTF_LINK)
-			    funcentry->fe_flags|=FUNCENTF_LINK;
+	            // Link?
+	            if (external->een_flags&FUNCENTF_LINK)
+		        funcentry->fe_flags|=FUNCENTF_LINK;
 
-		    // Increment counts
-		    ++handle->entry_count;
-		    if (funcentry->fe_type>0)
-		    {
-			++handle->dir_count;
-			if (funcentry->fe_flags&FUNCENTF_LINK)
-			    ++handle->link_dir_count;
-		    }
-		    else
-		    {
-			++handle->file_count;
-			if (funcentry->fe_flags&FUNCENTF_LINK)
-			    ++handle->link_file_count;
-		    }
+	            // Assign?
+	            if (external->een_flags&FUNCENTF_ASSIGN)
+		        funcentry->fe_flags|=FUNCENTF_ASSIGN;
 
-		    // If this is a directory, check filters
-		    if (funcentry->fe_type>=ENTRY_DIRECTORY &&
-			(GUI->flags&GUIF_FILE_FILTER) &&
-			instruction &&
-			(instruction->ipa_flags&FUNCF_ASK_FILTER) &&
-			!handle->got_filter)
-		    {
-			if (!(function_check_filter(handle)))
-			    return -1;
-		    }
+	            // Multi assign?
+	            if (external->een_flags&FUNCENTF_MULTI_ASSIGN)
+		        funcentry->fe_flags|=FUNCENTF_MULTI_ASSIGN;
 
-		    // If doing icons, add an icon entry (unless this is an icon)
-		    if (do_icons && !(isicon(external->een_name)) && !(external->een_flags&FUNCENTF_FAKE_ICON))
-		    {
-			// Skip if this is a device
-			if (external->een_name[strlen(external->een_name)-1]!=':')
-			{
-			    if (funcentry=function_new_entry(handle,external->een_name,1))
-			    {
-				ExternalEntry *test;
-				BOOL removeent=FALSE;
+	            // Increment counts
+	            ++handle->entry_count;
+	            if (funcentry->fe_type>0)
+	            {
+		        ++handle->dir_count;
+		        if (funcentry->fe_flags&FUNCENTF_LINK)
+		            ++handle->link_dir_count;
+	            }
+	            else
+	            {
+		        ++handle->file_count;
+		        if (funcentry->fe_flags&FUNCENTF_LINK)
+		            ++handle->link_file_count;
+	            }
 
-				if (*path && (*path)->pn_lister && ((*path)->pn_lister->cur_buffer))
-				{
-				    if (!(find_entry(&(*path)->pn_lister->cur_buffer->entry_list,
-					funcentry->fe_name,
-					0,
-					(*path)->pn_lister->cur_buffer->more_flags&DWF_CASE|FINDENTRY_ICON)))
-				    {
-					removeent=TRUE;
-				    }
+	            // If this is a directory, check filters
+	            if (funcentry->fe_type>=ENTRY_DEVICE &&
+		        (GUI->flags&GUIF_FILE_FILTER) &&
+		        instruction &&
+		        (instruction->ipa_flags&FUNCF_ASK_FILTER) &&
+		        !handle->got_filter)
+	            {
+		        if (!(function_check_filter(handle)))
+		            return -1;
+	            }
 
-				}
+	            // If doing icons, add an icon entry (unless this is an icon)
+	            if ((do_icons || funcentry->fe_flags&FUNCENTF_ASSIGN) && !(isicon(external->een_name)) && !(external->een_flags&FUNCENTF_FAKE_ICON))
+	            {
+		        // Skip if this is a device
+		        if (external->een_type != ENTRY_DEVICE)
+		        {
+		            char *tmp;
 
-				// Check that entry didn't already exist in external list
-				for (test=(ExternalEntry *)handle->external_list.mlh_Head;
-				     test->een_node.mln_Succ;
-				     test=(ExternalEntry *)test->een_node.mln_Succ)
-				{
-				    if (strcmpi(test->een_name,funcentry->fe_name)==0)
-				    {
-					// Is in external list, so we don't need to add one ourselves
-					removeent=TRUE;
-//					Remove((struct Node *)funcentry);
-//					FreeMemH(funcentry);
-//					funcentry=0;
-					break;
-				    }
-				}
+		            // Get destination filename
+		            tmp = stpcpy(handle->func_work_buf,external->een_name);
+		            if (external->een_type == ENTRY_DIRECTORY && external->een_flags&FUNCENTF_ASSIGN)
+		            {
+			        tmp--;
+			        *tmp = 0;
+		            }
 
-				if (removeent)
-				{
-				    // Is in external list, so we don't need to add one ourselves
-				    Remove((struct Node *)funcentry);
-				    FreeMemH(funcentry);
-				    funcentry=0;
-				}
+		            if (funcentry=function_new_entry(handle,handle->func_work_buf,1))
+		            {
+			        ExternalEntry *test;
+			        BOOL removeent=FALSE;
 
-				// Still got entry?
-				if (funcentry)
-				{
-				    // Fill out entry
-				    funcentry->fe_entry=0;
-				    funcentry->fe_type=-1;
-				    funcentry->fe_flags=FUNCENTF_ICON|FUNCENTF_TOP_LEVEL;
+			        if (*path && (*path)->pn_lister && ((*path)->pn_lister->cur_buffer))
+			        {
+			            if (!(find_entry(&(*path)->pn_lister->cur_buffer->entry_list,
+					 funcentry->fe_name,
+					 0,
+					 (*path)->pn_lister->cur_buffer->more_flags&DWF_CASE|FINDENTRY_ICON)))
+			            {
+				        removeent=TRUE;
+			            }
 
-				    // Increment counts
-				    ++handle->entry_count;
-//				    ++handle->file_count;
-				}
-			    }
-			}
-		    }
-		}
+			        }
 
-		// Remove from external list
-		Remove((struct Node *)external);
+			        // Check that entry didn't already exist in external list
+			        for (test=(ExternalEntry *)handle->external_list.mlh_Head;
+			             test->een_node.mln_Succ;
+			             test=(ExternalEntry *)test->een_node.mln_Succ)
+			        {
+			            if (strcmpi(test->een_name,funcentry->fe_name)==0)
+			            {
+				        // Is in external list, so we don't need to add one ourselves
+				        removeent=TRUE;
+				        break;
+			            }
+			        }
+
+			        if (removeent)
+			        {
+			            // Is in external list, so we don't need to add one ourselves
+			            Remove((struct Node *)funcentry);
+			            FreeMemH(funcentry);
+			            funcentry=0;
+			        }
+
+			        // Still got entry?
+			        if (funcentry)
+			        {
+			            // Fill out entry
+			            funcentry->fe_entry=0;
+			            funcentry->fe_type=-1;
+			            funcentry->fe_lock=external->een_lock;
+			            funcentry->fe_flags=FUNCENTF_ICON|FUNCENTF_TOP_LEVEL;
+
+			            if (external->een_type == ENTRY_DIRECTORY && external->een_flags&FUNCENTF_ASSIGN)
+				        funcentry->fe_flags |= FUNCENTF_ASSIGN;
+
+			            // Increment counts
+			            ++handle->entry_count;
+			        }
+		            }
+		        }
+	            }
+	        }
+
+	        // Remove from external list
+	        Remove((struct Node *)external);
 	    }
 
 	    // Get next
@@ -224,9 +250,9 @@ int function_build_list(FunctionHandle *handle,
 	{
 	    // See if there's a trap for this command
 	    if (!instruction->ipa_new_arg &&
-		FindFunctionTrap(instruction->ipa_command->name,(*path)->pn_lister->cur_buffer->buf_CustomHandler,0))
+	        FindFunctionTrap(instruction->ipa_command->name,(*path)->pn_lister->cur_buffer->buf_CustomHandler,0))
 	    {
-		trapped=1;
+	        trapped=1;
 	    }
 	}
 
@@ -237,107 +263,118 @@ int function_build_list(FunctionHandle *handle,
 
 	    // Can it supply files?
 	    if ((ptr=strchr(instruction->ipa_command->template_key,FUNCKEY_FILE)) ||
-		(ptr=strchr(instruction->ipa_command->template_key,FUNCKEY_FILENO)))
+	        (ptr=strchr(instruction->ipa_command->template_key,FUNCKEY_FILENO)))
 	    {
-		short num;
+	        short num;
 
-		// Get number of name argument
-		num=atoi(ptr+1);
+	        // Get number of name argument
+	        num=atoi(ptr+1);
 
-		// Parsed arguments?
-		if (instruction->ipa_funcargs &&
-		    instruction->ipa_funcargs->FA_Arguments[num])
-		{
-		    // Skip wildcards if needed
-		    if (*ptr==FUNCKEY_FILE ||
-			!(strchr((char *)instruction->ipa_funcargs->FA_Arguments[num],'*')))
-		    {
-			// Allocate new function entry
-			if (funcentry=function_new_entry(handle,(char *)instruction->ipa_funcargs->FA_Arguments[num],0))
-			{
-			    // Got a source buffer and a filename only?
-			    if (*path && (*path)->pn_lister && !strchr(funcentry->fe_name,'/') && !strchr(funcentry->fe_name,':'))
-			    {
-				DirEntry *entry;
+	        // Parsed arguments?
+	        if (instruction->ipa_funcargs &&
+	            instruction->ipa_funcargs->FA_Arguments[num])
+	        {
+	            // Skip wildcards if needed
+	            if (*ptr==FUNCKEY_FILE ||
+		    !(strchr((char *)instruction->ipa_funcargs->FA_Arguments[num],'*')))
+	            {
+		        // Allocate new function entry
+		        if (funcentry=function_new_entry(handle,(char *)instruction->ipa_funcargs->FA_Arguments[num],0))
+		        {
+		            // Got a source buffer and a filename only?
+		            if (*path && (*path)->pn_lister && !strchr(funcentry->fe_name,'/') && !strchr(funcentry->fe_name,':'))
+		            {
+			        DirEntry *entry;
 
-				// Find entry in path
-				if (entry=find_entry(
-				    &(*path)->pn_lister->cur_buffer->entry_list,
-				    funcentry->fe_name,
-				    0,
-				    (*path)->pn_lister->cur_buffer->more_flags&DWF_CASE))
-				{
-				    // Fix as a lister entry
-				    funcentry->fe_entry=entry;
-				    funcentry->fe_type=entry->de_Node.dn_Type;
-				    funcentry->fe_flags=FUNCENTF_TOP_LEVEL;
+			        // Find entry in path
+			        if (entry=find_entry(
+			            &(*path)->pn_lister->cur_buffer->entry_list,
+			            funcentry->fe_name,
+			            0,
+			            (*path)->pn_lister->cur_buffer->more_flags&DWF_CASE))
+			        {
+			            // Fix as a lister entry
+			            funcentry->fe_entry=entry;
+			            funcentry->fe_type=entry->de_Node.dn_Type;
+			            funcentry->fe_flags=FUNCENTF_TOP_LEVEL;
+			            funcentry->fe_lock = (*path)->pn_lister->cur_buffer->buf_Lock;
 
-				    // Link?
-				    if (entry->de_Flags&ENTF_LINK)
-					funcentry->fe_flags|=FUNCENTF_LINK;
-				}
-			    }
+			            // Link?
+			            if (entry->de_Flags&ENTF_LINK)
+				        funcentry->fe_flags|=FUNCENTF_LINK;
+			        }
+		            }
 
-			    // If we haven't got a lister entry, try to lock file
-			    if (!funcentry->fe_entry && !trapped)
-			    {
-				BPTR lock,parent;
+		            // If we haven't got a lister entry, try to lock file
+		            if (!funcentry->fe_entry && !trapped)
+		            {
+			        BPTR lock,parent;
 
-				// Lock file
-				if (lock=Lock(funcentry->fe_name,ACCESS_READ))
-				{
-				    // Examine file
-				    Examine(lock,handle->s_info);
+			        // Lock file
+			        if (lock = LockFromPath(funcentry->fe_name, NULL, NULL))
+			        {
+			            // Examine file
+			            Examine(lock,handle->s_info);
 
-				    // Get lock on parent
-				    if (parent=ParentDir(lock))
-				    {
-					// Get name of parent
-					DevNameFromLock(parent,handle->temp_buffer,256);
-					AddPart(handle->temp_buffer,"",256);
-					UnLock(parent);
+			            // Get lock on parent
+			            if (parent=ParentDir(lock))
+			            {
+				        char *tmp_path;
 
-					// Make this the source path
-					function_replace_paths(handle,&handle->func_source_paths,handle->temp_buffer,1);
-					strcpy(handle->func_source_path,handle->temp_buffer);
+				        // Get name of parent
+				        if (tmp_path = PathFromLock(handle->memory, parent, PFLF_USE_DEVICENAME|PFLF_END_SLASH, NULL))
+				        {
+				            // Make this the source path
+				            function_replace_paths(handle,&handle->func_source_paths,tmp_path,1);
 
-					// Save old source lister
-					handle->saved_source_lister=handle->source_lister;
-					handle->source_lister=0;
+				            if (handle->func_source_path)
+					        FreeMemH(handle->func_source_path);
 
-					// Get new path pointer
-					*path=function_path_next(&handle->func_source_paths);
-				    }
+				            handle->func_source_path = tmp_path;
 
-				    // Unlock file lock
-				    UnLock(lock);
+				            // Get lock
+				            handle->func_source_lock = handle->func_source_paths.current->pn_lock;
 
-				    // Get type and filename
-				    funcentry->fe_type=(handle->s_info->fib_DirEntryType<0)?-1:1;
-				    strcpy(funcentry->fe_name,handle->s_info->fib_FileName);
-				}
-			    }
+				            // Save old source lister
+				            handle->saved_source_lister=handle->source_lister;
+				            handle->source_lister=0;
 
-			    // Increment counts
-			    ++handle->entry_count;
-			    if (funcentry->fe_type>0)
-			    {
-				++handle->dir_count;
-				if (funcentry->fe_flags&FUNCENTF_LINK)
-				    ++handle->link_dir_count;
-			    }
-			    else
-			    {
-				++handle->file_count;
-				if (funcentry->fe_flags&FUNCENTF_LINK)
-				    ++handle->link_file_count;
-			    }
+				            // Get new path pointer
+				            *path=function_path_next(&handle->func_source_paths);
+				        }
 
-			    // Set success flag
-			    done=1;
-			}
-		    }
-		}
+				        UnLock(parent);
+			            }
+
+			            // Unlock file lock
+			            UnLock(lock);
+
+			            // Get type and filename
+			            funcentry->fe_type=(handle->s_info->fib_DirEntryType<0)?-1:1;
+			            strcpy(funcentry->fe_name,handle->s_info->fib_FileName);
+			        }
+		            }
+
+		            // Increment counts
+		            ++handle->entry_count;
+		            if (funcentry->fe_type>0)
+		            {
+			        ++handle->dir_count;
+			        if (funcentry->fe_flags&FUNCENTF_LINK)
+			            ++handle->link_dir_count;
+		            }
+		            else
+		            {
+			        ++handle->file_count;
+			        if (funcentry->fe_flags&FUNCENTF_LINK)
+			            ++handle->link_file_count;
+		            }
+
+		            // Set success flag
+		            done=1;
+		        }
+	            }
+	        }
 	    }
 	}
     }
@@ -357,7 +394,7 @@ int function_build_list(FunctionHandle *handle,
 
 	    // Can we do icons?
 	    if (instruction && instruction->ipa_flags&FUNCF_CAN_DO_ICONS)
-		do_icons=1;
+	        do_icons=1;
 
 	    // Lock backdrop list
 	    lock_listlock(&info->objects,0);
@@ -367,95 +404,95 @@ int function_build_list(FunctionHandle *handle,
 
 	    // Go through backdrop list
 	    for (object=(BackdropObject *)info->objects.list.lh_Head;
-		 object->bdo_node.ln_Succ;
-		 object=(BackdropObject *)object->bdo_node.ln_Succ)
+	         object->bdo_node.ln_Succ;
+	         object=(BackdropObject *)object->bdo_node.ln_Succ)
 	    {
-		// Is icon selected?
-		if (object->bdo_state)
-		{
-		    short type;
-		    BOOL icon_only=0;
-		    DirEntry *entry;
+	        // Is icon selected?
+	        if (object->bdo_state)
+	        {
+	            short type;
+	            BOOL icon_only=0;
+	            DirEntry *entry;
 
-		    // See if we can find this entry
-		    if ((entry=find_entry(&buffer->entry_list,object->bdo_name,0,buffer->more_flags&DWF_CASE)) ||
-			(entry=find_entry(&buffer->reject_list,object->bdo_name,0,buffer->more_flags&DWF_CASE)))
-		    {
-			// Get type from entry
-			type=entry->de_Node.dn_Type;
-		    }
+	            // See if we can find this entry
+	            if ((entry=find_entry(&buffer->entry_list,object->bdo_name,0,buffer->more_flags&DWF_CASE)) ||
+		        (entry=find_entry(&buffer->reject_list,object->bdo_name,0,buffer->more_flags&DWF_CASE)))
+	            {
+		        // Get type from entry
+		        type=entry->de_Node.dn_Type;
+	            }
 
-		    // Get type from icon
-		    else
-		    {
-			type=(object->bdo_icon->do_Type==WBDRAWER || object->bdo_icon->do_Type==WBGARBAGE)?ENTRY_DIRECTORY:ENTRY_FILE;
-			icon_only=1;
-		    }
+	            // Get type from icon
+	            else
+	            {
+		        type=(object->bdo_icon->do_Type==WBDRAWER || object->bdo_icon->do_Type==WBGARBAGE)?ENTRY_DIRECTORY:ENTRY_FILE;
+		        icon_only=1;
+	            }
 
-		    // Correct type?
-		    if (!instruction ||
-			(instruction->ipa_flags&FUNCF_NEED_FILES && type<ENTRY_DEVICE) ||
-			(instruction->ipa_flags&FUNCF_NEED_DIRS && type>=ENTRY_DEVICE) ||
-			(instruction->ipa_flags&FUNCF_WANT_ENTRIES &&
-			!(instruction->ipa_flags&(FUNCF_NEED_FILES|FUNCF_NEED_DIRS))))
-		    {
-			// Not only an icon?
-			if (!icon_only)
-			{
-			    // Allocate new function entry
-			    if (funcentry=function_new_entry(handle,object->bdo_name,0))
-			    {
-				// Fill out entry
-				funcentry->fe_entry=(DirEntry *)object;
-				funcentry->fe_type=type;
-				funcentry->fe_flags=FUNCENTF_TOP_LEVEL|FUNCENTF_ICON_ACTION;
+	            // Correct type?
+	            if (!instruction ||
+		        (instruction->ipa_flags&FUNCF_NEED_FILES && type<ENTRY_DEVICE) ||
+		        (instruction->ipa_flags&FUNCF_NEED_DIRS && type>=ENTRY_DEVICE) ||
+		        (instruction->ipa_flags&FUNCF_WANT_ENTRIES &&
+		        !(instruction->ipa_flags&(FUNCF_NEED_FILES|FUNCF_NEED_DIRS))))
+	            {
+		        // Not only an icon?
+		        if (!icon_only)
+		        {
+		            // Allocate new function entry
+		            if (funcentry=function_new_entry(handle,object->bdo_name,0))
+		            {
+			        // Fill out entry
+			        funcentry->fe_entry=(DirEntry *)object;
+			        funcentry->fe_type=type;
+			        funcentry->fe_flags=FUNCENTF_TOP_LEVEL|FUNCENTF_ICON_ACTION;
 
-				// Link?
-				if (object->bdo_flags&BDOF_LINK_ICON)
-					funcentry->fe_flags|=FUNCENTF_LINK;
-
-				// Increment count
-				++handle->entry_count;
-				if (funcentry->fe_type>=ENTRY_DIRECTORY)
-				{
-				    ++handle->dir_count;
-				    if (funcentry->fe_flags&FUNCENTF_LINK)
-					++handle->link_dir_count;
-				}
-				else
-				{
-				    ++handle->file_count;
-				    if (funcentry->fe_flags&FUNCENTF_LINK)
-					++handle->link_file_count;
-				}
-			    }
-			}
-
-			// Not a fake icon, and we want icons?
-			if (!(object->bdo_flags&BDOF_FAKE_ICON) &&
-				(do_icons || icon_only))
-			{
-			    // Create entry for icon
-			    if (funcentry=function_new_entry(handle,object->bdo_name,1))
-			    {
-				// Fill out entry
-				funcentry->fe_entry=0;
-				funcentry->fe_type=ENTRY_FILE;
-				funcentry->fe_flags=FUNCENTF_TOP_LEVEL|FUNCENTF_ICON_ACTION;
-
-				// Not only an icon?
-				if (!icon_only) funcentry->fe_flags|=FUNCENTF_ICON;
-
-				// Link?
-				if (object->bdo_flags&BDOF_LINK_ICON)
+			        // Link?
+			        if (object->bdo_flags&BDOF_LINK_ICON)
 				    funcentry->fe_flags|=FUNCENTF_LINK;
 
-				// Increment counts
-				++handle->entry_count;
-			    }
-			}
-		    }
-		}
+			        // Increment count
+			        ++handle->entry_count;
+			        if (funcentry->fe_type>=ENTRY_DEVICE)
+			        {
+			            ++handle->dir_count;
+			            if (funcentry->fe_flags&FUNCENTF_LINK)
+				        ++handle->link_dir_count;
+			        }
+			        else
+			        {
+			            ++handle->file_count;
+			            if (funcentry->fe_flags&FUNCENTF_LINK)
+				        ++handle->link_file_count;
+			        }
+		            }
+		        }
+
+		        // Not a fake icon, and we want icons?
+		        if (!(object->bdo_flags&BDOF_FAKE_ICON) &&
+			    (do_icons || icon_only))
+		        {
+		            // Create entry for icon
+		            if (funcentry=function_new_entry(handle,object->bdo_name,1))
+		            {
+			        // Fill out entry
+			        funcentry->fe_entry=0;
+			        funcentry->fe_type=ENTRY_FILE;
+			        funcentry->fe_flags=FUNCENTF_TOP_LEVEL|FUNCENTF_ICON_ACTION;
+
+			        // Not only an icon?
+			        if (!icon_only) funcentry->fe_flags|=FUNCENTF_ICON;
+
+			        // Link?
+			        if (object->bdo_flags&BDOF_LINK_ICON)
+			            funcentry->fe_flags|=FUNCENTF_LINK;
+
+			        // Increment counts
+			        ++handle->entry_count;
+		            }
+		        }
+	            }
+	        }
 	    }
 
 	    // Unlock buffer
@@ -475,196 +512,208 @@ int function_build_list(FunctionHandle *handle,
 
 	    // Go through source buffer
 	    for (entry=(DirEntry *)buffer->entry_list.mlh_Head;
-		 entry->de_Node.dn_Succ;
-		 entry=(DirEntry *)entry->de_Node.dn_Succ)
+	         entry->de_Node.dn_Succ;
+	         entry=(DirEntry *)entry->de_Node.dn_Succ)
 	    {
-		// Is entry selected?
-		if (entry->de_Flags&ENTF_SELECTED)
-		{
-		    // Correct type?
-		    if (!instruction ||
-			(instruction->ipa_flags&FUNCF_NEED_FILES && entry->de_Node.dn_Type<=ENTRY_FILE) ||
-			(instruction->ipa_flags&FUNCF_NEED_DIRS && entry->de_Node.dn_Type>=ENTRY_DEVICE) ||
-			(instruction->ipa_flags&FUNCF_WANT_ENTRIES &&
-			!(instruction->ipa_flags&(FUNCF_NEED_FILES|FUNCF_NEED_DIRS))))
-		    {
-			// If this is a directory, check filters
-			if (entry->de_Node.dn_Type>=ENTRY_DIRECTORY &&
-			    (GUI->flags&GUIF_FILE_FILTER) &&
-			    instruction &&
-			    (instruction->ipa_flags&FUNCF_ASK_FILTER) &&
-			    !handle->got_filter)
-			{
-			    if (!(function_check_filter(handle)))
-			    {
-				buffer_unlock(buffer);
-				return -1;
-			    }
-			}
+	        // Is entry selected?
+	        if (entry->de_Flags&ENTF_SELECTED)
+	        {
+	            // Correct type?
+	            if (!instruction ||
+		        (instruction->ipa_flags&FUNCF_NEED_FILES && entry->de_Node.dn_Type<=ENTRY_FILE) ||
+		        (instruction->ipa_flags&FUNCF_NEED_DIRS && entry->de_Node.dn_Type>=ENTRY_DEVICE) ||
+		        (instruction->ipa_flags&FUNCF_WANT_ENTRIES &&
+		        !(instruction->ipa_flags&(FUNCF_NEED_FILES|FUNCF_NEED_DIRS))))
+	            {
+		        // If this is a directory, check filters
+		        if (entry->de_Node.dn_Type>=ENTRY_DEVICE &&
+		            (GUI->flags&GUIF_FILE_FILTER) &&
+		            instruction &&
+		            (instruction->ipa_flags&FUNCF_ASK_FILTER) &&
+		            !handle->got_filter)
+		        {
+		            if (!(function_check_filter(handle)))
+		            {
+			        buffer_unlock(buffer);
+			        return -1;
+		            }
+		        }
 
-			// If we're doing icons, and this is an icon, skip it temporarily
-			if (do_icons && isicon(entry->de_Node.dn_Name))
-			{
-			    entry->de_Flags|=ENTF_SKIPPED;
-			    continue;
-			}
+		        // If we're doing icons, and this is an icon, skip it temporarily
+		        if (do_icons && isicon(entry->de_Node.dn_Name))
+		        {
+		            entry->de_Flags|=ENTF_SKIPPED;
+		            continue;
+		        }
 
-			// Make reselection list if this is the first
-			if (first)
-			{
-			    MakeReselect(&(*path)->pn_lister->reselect,buffer,0);
-			    first=0;
-			}
+		        // Make reselection list if this is the first
+		        if (first)
+		        {
+		            MakeReselect(&(*path)->pn_lister->reselect,buffer,0);
+		            first=0;
+		        }
 
-			// Allocate new function entry
-			if (funcentry=function_new_entry(handle,entry->de_Node.dn_Name,0))
-			{
-			    // Fill out entry
-			    funcentry->fe_entry=entry;
-			    funcentry->fe_type=entry->de_Node.dn_Type;
-			    funcentry->fe_flags=FUNCENTF_TOP_LEVEL;
+		        // Allocate new function entry
+		        if (funcentry=function_new_entry(handle,entry->de_Node.dn_Name,0))
+		        {
+		            // Fill out entry
+		            funcentry->fe_entry=entry;
+		            funcentry->fe_type=entry->de_Node.dn_Type;
+		            funcentry->fe_flags=FUNCENTF_TOP_LEVEL;
 
-			    // Link?
-			    if (entry->de_Flags&ENTF_LINK)
-				funcentry->fe_flags|=FUNCENTF_LINK;
+		            // Link?
+		            if (entry->de_Flags&ENTF_LINK)
+			    funcentry->fe_flags|=FUNCENTF_LINK;
 
-			    // Increment count
-			    ++handle->entry_count;
-			    if (funcentry->fe_type>0)
-			    {
-				++handle->dir_count;
-				if (funcentry->fe_flags&FUNCENTF_LINK)
-				    ++handle->link_dir_count;
-			    }
-			    else
-			    {
-				++handle->file_count;
-				if (funcentry->fe_flags&FUNCENTF_LINK)
-				    ++handle->link_file_count;
-			    }
+		            // Increment count
+		            ++handle->entry_count;
+		            if (funcentry->fe_type>0)
+		            {
+			        ++handle->dir_count;
+			        if (funcentry->fe_flags&FUNCENTF_LINK)
+			            ++handle->link_dir_count;
+		            }
+		            else
+		            {
+			        ++handle->file_count;
+			        if (funcentry->fe_flags&FUNCENTF_LINK)
+			            ++handle->link_file_count;
+		            }
 
-			    // Can we handle icons?
-			    if (do_icons)
+		            // Can we handle icons?
+		            if (do_icons)
 /*
-				instruction &&
-				instruction->flags&FUNCF_CAN_DO_ICONS &&
-				environment->env->settings.icon_flags&ICONFLAG_DOUNTOICONS)
+			    instruction &&
+			    instruction->flags&FUNCF_CAN_DO_ICONS &&
+			    environment->env->settings.icon_flags&ICONFLAG_DOUNTOICONS)
 */
-			    {
-				DirEntry *icon_entry;
-				char *icon_name;
-				BPTR lock;
+		            {
+			        DirEntry *icon_entry;
+			        BPTR lock, org_dir = 0;
 
-				// Build icon name
-				strcpy(handle->func_work_buf,handle->func_source_path);
-				AddPart(handle->func_work_buf,entry->de_Node.dn_Name,280);
-				strcat(handle->func_work_buf,".info");
-				icon_name=FilePart(handle->func_work_buf);
+			        if (handle->func_source_lock)
+			            org_dir = CurrentDir(handle->func_source_lock);
+#ifdef _DEBUG
+		                else
+			            KPrintF("       LOCK ERROR in %s:%s, line: %ld\n", __FILE__, __FUNC__, __LINE__);
+#endif
 
-				// See if entry has an icon in buffer
-				if (!(icon_entry=find_entry(&buffer->entry_list,icon_name,0,buffer->more_flags&DWF_CASE)))
-				{
-				    // See if it's in the reject list
-				    if (icon_entry=find_entry(&buffer->reject_list,icon_name,0,buffer->more_flags&DWF_CASE))
-				    {
-					// Check that icon is on the disk
-					if (!(lock=Lock(handle->func_work_buf,ACCESS_READ)))
-					{
-					    // It's not there; remove from reject list
-					    remove_file_entry(buffer,icon_entry);
-					    icon_entry=0;
-					}
-					else UnLock(lock);
-				    }
-			    	    else
-				    {
-				    	icon_entry=0;
-				    }
-				}
 
-				// Did we get an icon?
-				if (icon_entry)
-				{
-				    // Allocate new entry
-				    if (funcentry=function_new_entry(handle,icon_entry->de_Node.dn_Name,0))
-				    {
-					// Fill out entry
-					funcentry->fe_entry=icon_entry;
-					funcentry->fe_type=icon_entry->de_Node.dn_Type;
-					funcentry->fe_flags=FUNCENTF_ICON|FUNCENTF_TOP_LEVEL;
+			        // Build icon name
+			        strcpy(handle->func_work_buf, entry->de_Node.dn_Name);
+			        strcat(handle->func_work_buf,".info");
 
-					// Link?
-					if (icon_entry->de_Flags&ENTF_LINK)
-					    funcentry->fe_flags|=FUNCENTF_LINK;
+			        // See if entry has an icon in buffer
+			        if (!(icon_entry=find_entry(&buffer->entry_list,handle->func_work_buf,0,buffer->more_flags&DWF_CASE)))
+			        {
+			            // See if it's in the reject list
+			            if (icon_entry=find_entry(&buffer->reject_list,handle->func_work_buf,0,buffer->more_flags&DWF_CASE))
+			            {
+#ifdef _DEBUG_FUNC_FILES
+				        KPrintF("FIXME: function_build_list()\n");
+				        KPrintF("locking: %s\n",handle->func_work_buf);
+#endif
+				        // Check that icon is on the disk
+				        if (!(lock=Lock(handle->func_work_buf,ACCESS_READ)))
+				        {
+				            // It's not there; remove from reject list
+				            remove_file_entry(buffer,icon_entry);
+				            icon_entry=0;
+				        }
+				        else UnLock(lock);
+			            }
+		                    else
+			            {
+			                icon_entry=0;
+			            }
+			        }
 
-					// Increment count
-					++handle->entry_count;
-					if (funcentry->fe_type>0)
-					{
-					    ++handle->dir_count;
-					    if (funcentry->fe_flags&FUNCENTF_LINK)
-						++handle->link_dir_count;
-					}
-					else
-					{
-					    ++handle->file_count;
-					    if (funcentry->fe_flags&FUNCENTF_LINK)
-						++handle->link_file_count;
-					}
+			        if (org_dir)
+			            CurrentDir(org_dir);
 
-					// Mark this icon to skip it later
-					icon_entry->de_Flags|=ENTF_SKIP;
-				    }
-				}
-			    }
-			}
-		    }
-		}
+			        // Did we get an icon?
+			        if (icon_entry)
+			        {
+			            // Allocate new entry
+			            if (funcentry=function_new_entry(handle,icon_entry->de_Node.dn_Name,0))
+			            {
+				        // Fill out entry
+				        funcentry->fe_entry=icon_entry;
+				        funcentry->fe_type=icon_entry->de_Node.dn_Type;
+				        funcentry->fe_flags=FUNCENTF_ICON|FUNCENTF_TOP_LEVEL;
+
+				        // Link?
+				        if (icon_entry->de_Flags&ENTF_LINK)
+				            funcentry->fe_flags|=FUNCENTF_LINK;
+
+				        // Increment count
+				        ++handle->entry_count;
+				        if (funcentry->fe_type>0)
+				        {
+				            ++handle->dir_count;
+				            if (funcentry->fe_flags&FUNCENTF_LINK)
+					        ++handle->link_dir_count;
+				        }
+				        else
+				        {
+				            ++handle->file_count;
+				            if (funcentry->fe_flags&FUNCENTF_LINK)
+					        ++handle->link_file_count;
+				        }
+
+				        // Mark this icon to skip it later
+				        icon_entry->de_Flags|=ENTF_SKIP;
+			            }
+			        }
+		            }
+		        }
+	            }
+	        }
 	    }
 
 	    // Go through source buffer again
 	    for (entry=(DirEntry *)buffer->entry_list.mlh_Head;
-		 entry->de_Node.dn_Succ;
-		 entry=(DirEntry *)entry->de_Node.dn_Succ)
+	         entry->de_Node.dn_Succ;
+	         entry=(DirEntry *)entry->de_Node.dn_Succ)
 	    {
-		// Is this an icon we skipped before?
-		if (entry->de_Flags&ENTF_SKIPPED)
-		{
-		    // Should we process it?
-		    if (!(entry->de_Flags&ENTF_SKIP))
-		    {
-			// Allocate new function entry
-			if (funcentry=function_new_entry(handle,entry->de_Node.dn_Name,0))
-			{
-			    // Fill out entry
-			    funcentry->fe_entry=entry;
-			    funcentry->fe_type=entry->de_Node.dn_Type;
-			    funcentry->fe_flags=FUNCENTF_TOP_LEVEL;
+	        // Is this an icon we skipped before?
+	        if (entry->de_Flags&ENTF_SKIPPED)
+	        {
+	            // Should we process it?
+	            if (!(entry->de_Flags&ENTF_SKIP))
+	            {
+		        // Allocate new function entry
+		        if (funcentry=function_new_entry(handle,entry->de_Node.dn_Name,0))
+		        {
+		            // Fill out entry
+		            funcentry->fe_entry=entry;
+		            funcentry->fe_type=entry->de_Node.dn_Type;
+		            funcentry->fe_flags=FUNCENTF_TOP_LEVEL;
 
-			    // Link?
-			    if (entry->de_Flags&ENTF_LINK)
-				funcentry->fe_flags|=FUNCENTF_LINK;
+		            // Link?
+		            if (entry->de_Flags&ENTF_LINK)
+			        funcentry->fe_flags|=FUNCENTF_LINK;
 
-			    // Increment count
-			    ++handle->entry_count;
-			    if (funcentry->fe_type>0)
-			    {
-				++handle->dir_count;
-				if (funcentry->fe_flags&FUNCENTF_LINK)
-				    ++handle->link_dir_count;
-			    }
-			    else
-			    {
-				++handle->file_count;
-				if (funcentry->fe_flags&FUNCENTF_LINK)
-				    ++handle->link_file_count;
-			    }
-			}
-		    }
+		            // Increment count
+		            ++handle->entry_count;
+		            if (funcentry->fe_type>0)
+		            {
+			        ++handle->dir_count;
+			        if (funcentry->fe_flags&FUNCENTF_LINK)
+			            ++handle->link_dir_count;
+		            }
+		            else
+		            {
+			        ++handle->file_count;
+			        if (funcentry->fe_flags&FUNCENTF_LINK)
+			            ++handle->link_file_count;
+		            }
+		        }
+	            }
 
-		    // Clear skip flags
-		    entry->de_Flags&=~(ENTF_SKIPPED|ENTF_SKIP);
-		}
+	            // Clear skip flags
+	            entry->de_Flags&=~(ENTF_SKIPPED|ENTF_SKIP);
+	        }
 	    }
 
 	    // Unlock buffer
@@ -724,16 +773,10 @@ FunctionEntry *function_next_entry(FunctionHandle *handle)
 
     // Valid entry?
     if (!handle->current_entry || !handle->current_entry->fe_node.mln_Succ)
-	    return 0;
-
-    // Get current entry
-//  entry=handle->current_entry;
+	return 0;
 
     // Move on to next entry
     handle->current_entry=(FunctionEntry *)handle->current_entry->fe_node.mln_Succ;
-
-    // Get next entry
-//  entry=handle->current_entry;
 
     return handle->current_entry;
 }
@@ -742,7 +785,7 @@ FunctionEntry *function_next_entry(FunctionHandle *handle)
 // Get the next entry for a function
 FunctionEntry *function_get_entry(FunctionHandle *handle)
 {
-    FunctionEntry *entry=0;
+    FunctionEntry *entry = 0;
     ULONG flags=0;
 
     // If there's a recursively-collected entry waiting, return it
@@ -767,17 +810,18 @@ FunctionEntry *function_get_entry(FunctionHandle *handle)
 	    if (handle->anchor->ap_Info.fib_DirEntryType==ST_LINKFILE ||
 		handle->anchor->ap_Info.fib_DirEntryType==ST_LINKDIR ||
 		handle->anchor->ap_Info.fib_DirEntryType==ST_SOFTLINK)
+	    {
 		handle->recurse_entry_data->fe_flags|=FUNCENTF_LINK;
+	    }
 	    else
 		handle->recurse_entry_data->fe_flags&=~FUNCENTF_LINK;
 
 	    // Is this a file or valid directory?
 	    if (handle->anchor->ap_Info.fib_DirEntryType<0 ||
-		    !(handle->anchor->ap_Flags&APF_DIDDIR))
+	        !(handle->anchor->ap_Flags&APF_DIDDIR))
 	    {
-		// Fill out path
-		strcpy(handle->recurse_path,handle->anchor_path+strlen(handle->func_source_path));
-		AddPart(handle->recurse_path,handle->anchor->ap_Info.fib_FileName,256);
+		// Copy filename
+		strcpy(handle->recurse_path,handle->anchor->ap_Info.fib_FileName);
 
 		// Do we want this entry?
 		if (handle->anchor->ap_Info.fib_DirEntryType<0 ||
@@ -786,6 +830,9 @@ FunctionEntry *function_get_entry(FunctionHandle *handle)
 		    // Point to dummy entry
 		    handle->recurse_entry=handle->recurse_entry_data;
 		    handle->recurse_entry->fe_flags|=FUNCENTF_RECURSE;
+
+		    // Get parent lock
+		    handle->recurse_entry->fe_lock=DupLock(handle->anchor->ap_Last->an_Lock);
 
 		    // File?
 		    if (handle->anchor->ap_Info.fib_DirEntryType<0)
@@ -824,7 +871,7 @@ FunctionEntry *function_get_entry(FunctionHandle *handle)
 				// Calculate block size of file
 				fileListEntries=(handle->dest_block_size>>2)-56;
 				dataBlocks=(handle->anchor->ap_Info.fib_Size+handle->dest_data_block_size-1)/
-					   handle->dest_data_block_size;
+					    handle->dest_data_block_size;
 				fileLists=(dataBlocks+fileListEntries-1)/fileListEntries;
 				totalBlocks=dataBlocks+fileLists;
 
@@ -845,16 +892,21 @@ FunctionEntry *function_get_entry(FunctionHandle *handle)
 		// Entering a new directory?
 		if (handle->anchor->ap_Info.fib_DirEntryType>0)
 		{
-		    BPTR lock;
+		    BPTR lock, current;
+		    BPTR tmp_lock;
 
-		    // Add filename to path
-		    AddPart(handle->anchor_path,handle->anchor->ap_Info.fib_FileName,256);
+		    tmp_lock = DupLock(handle->anchor->ap_Last->an_Lock);
+		    current = CurrentDir(tmp_lock);
 
 		    // Check path exists
-		    if (lock=Lock(handle->anchor_path,ACCESS_READ))
+		    if (lock=Lock((char *)handle->anchor->ap_Info.fib_FileName,ACCESS_READ))
 		    {
 			// It does
 			UnLock(lock);
+
+		        // Replace path
+		        if (current)
+			    strcpy(handle->anchor_path,handle->anchor->ap_Info.fib_FileName);
 
 			// Set bit to enter dir, increment depth count
 			handle->anchor->ap_Flags|=APF_DODIR;
@@ -865,15 +917,21 @@ FunctionEntry *function_get_entry(FunctionHandle *handle)
 		    // Doesn't exist, something went wrong, skip over it
 		    else
 		    {
-			char *ptr;
+			if (!current)
+			{
+			    char *ptr;
 
-			// Strip new filename
-			ptr=FilePart(handle->anchor_path);
-			if (ptr) *ptr=0;
-
+			    // Strip new filename
+			    ptr=FilePart(handle->anchor_path);
+			    if (ptr) *ptr=0;
+			}
 			// Don't enter
 			handle->anchor->ap_Flags&=~APF_DODIR;
 		    }
+
+		    if (current)
+			UnLock(CurrentDir(current));
+
 		}
 	    }
 
@@ -881,16 +939,23 @@ FunctionEntry *function_get_entry(FunctionHandle *handle)
 	    else
 	    if (handle->anchor->ap_Info.fib_DirEntryType>0)
 	    {
-		char *ptr;
-
 		// Clear anchor bits
 		handle->anchor->ap_Flags&=~APF_DIDDIR;
 
 		// Decrement depth count
 		--handle->recurse_depth;
 
-		// Strip last path part
-		if (ptr=PathPart(handle->anchor_path)) *ptr=0;
+		{
+		    BPTR tmp_lock;
+		    D_S(struct FileInfoBlock,tmp_fib);
+
+		    tmp_lock = DupLock(handle->anchor->ap_Last->an_Lock);
+
+		    Examine(tmp_lock,tmp_fib);
+		    strcpy(handle->anchor_path,tmp_fib->fib_FileName);
+
+		    UnLock(tmp_lock);
+		}
 
 		// Not the top-level directory?
 		if (handle->recurse_depth>0)
@@ -898,11 +963,11 @@ FunctionEntry *function_get_entry(FunctionHandle *handle)
 		    // Do we want this dir now?
 		    if (handle->instruction_flags&INSTF_WANT_DIRS_END)
 		    {
-			char *ptr;
+		        // Copy filename
+		        strcpy(handle->recurse_path,handle->anchor->ap_Info.fib_FileName);
 
-			// Fill out path
-			strcpy(handle->recurse_path,handle->anchor_path+strlen(handle->func_source_path));
-			AddPart(handle->recurse_path,handle->anchor->ap_Info.fib_FileName,256);
+		        // Get parent lock
+		        handle->recurse_entry_data->fe_lock = DupLock(handle->anchor->ap_Last->an_Lock);
 
 			// Point to dummy entry
 			handle->recurse_entry=handle->recurse_entry_data;
@@ -911,10 +976,6 @@ FunctionEntry *function_get_entry(FunctionHandle *handle)
 			handle->recurse_entry->fe_type=ENTRY_DIRECTORY;
 			handle->recurse_entry->fe_flags=flags|FUNCENTF_RECURSE|FUNCENTF_EXITED;
 			handle->recurse_entry->fe_size=0;
-
-			// Strip trailing /
-			if ((ptr=PathPart(handle->recurse_path)) && ptr[1]==0)
-			    *ptr=0;
 		    }
 		}
 
@@ -922,12 +983,21 @@ FunctionEntry *function_get_entry(FunctionHandle *handle)
 		else flags=FUNCENTF_EXITED;
 	    }
 
+#ifdef RESOURCE_TRACKING
+	    RT_DiscardLock(handle->anchor->ap_Last->an_Lock, __FILE__, __LINE__);
+#endif
+
 	    // Get the next match
 	    handle->recurse_return=MatchNext(handle->anchor);
 
+#ifdef RESOURCE_TRACKING
+	    if (!handle->recurse_return)
+		RT_InjectLock(handle->anchor->ap_Last->an_Lock, __FILE__, __LINE__);
+#endif
+
 	    // Return entry
 	    if (handle->recurse_entry)
-		    return handle->recurse_entry;
+	        return handle->recurse_entry;
 	    else continue;
 	}
 
@@ -1001,7 +1071,7 @@ FunctionEntry *function_get_entry(FunctionHandle *handle)
 
 	    // Want this directory?
 	    if (handle->instruction_flags&INSTF_WANT_DIRS_END &&
-		    !(handle->instruction_flags&INSTF_ABORT_DIR))
+	        !(handle->instruction_flags&INSTF_ABORT_DIR))
 	    {
 		// Set flags
 		if (entry) entry->fe_flags|=FUNCENTF_EXITED;
@@ -1026,10 +1096,10 @@ FunctionEntry *function_get_entry(FunctionHandle *handle)
 
 	// Get next entry as normal
 	if (!(entry=function_current_entry(handle)))
-		return 0;
+	    return 0;
 
 	// Is this a directory?
-	if (entry->fe_type>=ENTRY_DIRECTORY && !(entry->fe_flags&FUNCENTF_EXITED))
+	if (entry->fe_type>=ENTRY_DEVICE && !(entry->fe_flags&FUNCENTF_EXITED))
 	{
 	    // Recursing directories?
 	    if (handle->instruction_flags&INSTF_RECURSE_DIRS)
@@ -1071,7 +1141,6 @@ function_end_entry(FunctionHandle *handle,
 	if (entry->fe_flags&FUNCENTF_EXITED)
 	{
 	    entry->fe_flags&=~FUNCENTF_EXITED;
-//	    count=1;
 	}
 
 	// Recursive entry?
@@ -1079,6 +1148,12 @@ function_end_entry(FunctionHandle *handle,
 	{
 	    // Clear recursive entry pointer
 	    handle->recurse_entry=0;
+
+	    if (entry->fe_lock)
+	    {
+		UnLock(entry->fe_lock);
+		entry->fe_lock=0;
+	    }
 	}
 
 	// Entry we must enter
@@ -1094,44 +1169,34 @@ function_end_entry(FunctionHandle *handle,
 	    handle->anchor->ap_BreakBits=SIGBREAKF_CTRL_C;
 	    handle->anchor->ap_Flags=0;
 
-	    // Get path to go into
-	    strcpy(handle->func_work_buf,handle->func_source_path);
-	    AddPart(handle->func_work_buf,entry->fe_name,512);
-
 	    // Lock directory
-	    if (lock=Lock(handle->func_work_buf,ACCESS_READ))
-	    {
-		// Restore original CD
-		if (handle->recurse_cd)
-		{
-		    BPTR lock=CurrentDir(handle->recurse_cd);
-		    UnLock(lock);
-		}
-
-		// CD to there
-		handle->recurse_cd=CurrentDir(lock);
-
-		// Match from within
-		strcpy(handle->func_work_buf,"#?");
-	    }
-
-	    // Failed to lock, use full string
+	    if (entry->fe_flags&FUNCENTF_MULTI_ASSIGN || entry->fe_type == ENTRY_DEVICE)
+		lock = DupLock(entry->fe_lock);
 	    else
 	    {
-		// Path to go into
-		fix_literals(handle->func_work_buf,handle->func_source_path);
-		fix_literals(handle->func_work_buf+300,entry->fe_name);
-		AddPart(handle->func_work_buf,handle->func_work_buf+300,256);
-		AddPart(handle->func_work_buf,"#?",256);
+		handle->recurse_cd = CurrentDir((entry->fe_lock)?entry->fe_lock:handle->func_source_lock);
+		lock = Lock(entry->fe_name,ACCESS_READ);
 	    }
 
-	    // Recurse into it
-	    handle->recurse_return=MatchFirst(handle->func_work_buf,handle->anchor);
-	    handle->recurse_depth=1;
+	    if (lock)
+	    {
+		BPTR tmplock;
 
-	    // Initialise anchor path
-	    strcpy(handle->anchor_path,handle->func_source_path);
-	    AddPart(handle->anchor_path,entry->fe_name,256);
+		tmplock = CurrentDir(lock);
+
+		if (!handle->recurse_cd)
+		    handle->recurse_cd = tmplock;
+	    }
+
+	    handle->recurse_return = MatchFirst("#?", handle->anchor);
+
+#ifdef RESOURCE_TRACKING
+	    if (!handle->recurse_return)
+		RT_InjectLock(handle->anchor->ap_Last->an_Lock, __FILE__, __LINE__);
+#endif
+
+	    handle->recurse_depth=1;
+	    strcpy(handle->anchor_path,entry->fe_name);
 	}
 
 	// Next entry
@@ -1230,6 +1295,158 @@ function_check_filter(FunctionHandle *handle)
 }
 
 
+// Convert glargs into external filenames
+void function_files_from_glarg(FunctionHandle *handle)
+{
+    struct WBArg *arg;
+    struct GLAData *argdata;
+    ExternalEntry *entry;
+    ULONG args,currarg=0;
+
+    // No lister appmessage?
+    if (!handle->lister_app_msg || !(args = handle->lister_app_msg->glam_NumArgs)) return;
+
+    // Go through arguments
+    while (currarg < args)
+    {
+	BPTR lock;
+
+	arg = &handle->lister_app_msg->glam_ArgList[currarg];
+	argdata = &handle->lister_app_msg->glam_ArgData[currarg];
+
+	// Get lock
+	if (!(lock = arg->wa_Lock))
+	    lock = handle->lister_app_msg->glam_Lock;
+
+	// Create a new external entry
+	if (entry=new_external_entry(handle,arg->wa_Name,lock))
+	{
+	    // Directory?
+	    if (argdata->glad_Flags&AAEF_DIR)
+		entry->een_type=ENTRY_DIRECTORY;
+
+	    // Device?
+	    if (argdata->glad_Flags&AAEF_DEV)
+	    {
+		entry->een_type=ENTRY_DEVICE;
+		handle->flags|=FUNCF_COPY_NO_MOVE;
+	    }
+
+	    // Link?
+	    if (argdata->glad_Flags&AAEF_LINK)
+		entry->een_flags|=FUNCENTF_LINK;
+
+	    // Assign?
+	    if (argdata->glad_Flags&AAEF_ASSIGN)
+	    {
+		entry->een_flags|=FUNCENTF_ASSIGN;
+		handle->flags|=FUNCF_COPY_NO_MOVE;
+	    }
+
+	    // Multi directory assign?
+	    if (argdata->glad_Flags&AAEF_MULTI_ASSIGN)
+	    {
+		entry->een_flags|=FUNCENTF_MULTI_ASSIGN;
+		handle->flags|=FUNCF_COPY_NO_MOVE;
+	    }
+
+	    // Fake icon?
+	    if (argdata->glad_Flags&AAEF_FAKE_ICON)
+		entry->een_flags|=FUNCENTF_FAKE_ICON;
+
+	    // Add to external entry list
+	    AddTail((struct List *)&handle->external_list,(struct Node *)entry);
+	}
+
+	currarg++;
+    }
+
+    handle->func_flags |= FUNCF_GOT_SOURCE;
+}
+
+
+// Convert wbargs into external filenames
+void function_files_from_wbarg(FunctionHandle *handle)
+{
+    //struct ArgArrayEntry *arg;
+    struct WBArg *arg;
+    ExternalEntry *entry;
+    ULONG args,currarg=0;
+    char *name;
+
+    // No arguments?
+    if (!handle->app_msg || !(args = handle->app_msg->am_NumArgs)) return;
+
+    // Go through arguments
+    while (currarg < args)
+    {
+	struct FileInfoBlock __aligned tmp_fib;
+	BYTE isroot = FALSE;
+
+	arg = &handle->app_msg->am_ArgList[currarg];
+
+	Examine(arg->wa_Lock,&tmp_fib);
+
+	if (WBArgDir(arg))
+	{
+	    BPTR parent_lock;
+
+	    // Get directory name
+	    name = tmp_fib.fib_FileName;
+
+	    // Try to get parent dir
+	    if (parent_lock = ParentDir(arg->wa_Lock))
+	    {
+		UnLock(arg->wa_Lock);
+		arg->wa_Lock = parent_lock;
+	    }
+	    else
+	    {
+		UBYTE len;
+
+		len = strlen(name);
+		name[len] = ':';
+		name[len+1] = 0;
+		isroot = TRUE;
+	    }
+
+	}
+	else
+	    name = arg->wa_Name;
+
+	// Create a new external entry
+	if (entry=new_external_entry(handle,name,arg->wa_Lock))
+	{
+
+	    // Directory?
+	    if (WBArgDir(arg))
+	    entry->een_type=1;
+
+	    // Device?
+	    if (isroot)
+	    {
+		entry->een_type=ENTRY_DEVICE;
+		handle->flags|=FUNCF_COPY_NO_MOVE;
+	    }
+	    // Link?
+	    //else
+	    //if ((entrytype == ST_SOFTLINK) || (entrytype == ST_LINKDIR) || (entrytype == ST_LINKFILE))
+	    //	  entry->een_flags|=FUNCENTF_LINK;
+
+	    // Fake icon?
+	    //if (arg->aae_Flags&AAEF_FAKE_ICON)
+	    //	  entry->een_flags|=FUNCENTF_FAKE_ICON;
+
+	    // Add to external entry list
+	    AddTail((struct List *)&handle->external_list,(struct Node *)entry);
+	}
+	currarg++;
+    }
+
+    handle->func_flags |= FUNCF_GOT_SOURCE;
+}
+
+
 // Convert arguments into external filenames
 void function_files_from_args(FunctionHandle *handle)
 {
@@ -1245,7 +1462,7 @@ void function_files_from_args(FunctionHandle *handle)
 	 arg=(struct ArgArrayEntry *)arg->aae_Node.mln_Succ)
     {
 	// Create a new external entry
-	if (entry=new_external_entry(handle,arg->aae_String))
+	if (entry=new_external_entry(handle,arg->aae_String,arg->aae_Lock))
 	{
 	    // Directory?
 	    if (arg->aae_Flags&AAEF_DIR)
@@ -1263,6 +1480,10 @@ void function_files_from_args(FunctionHandle *handle)
 	    AddTail((struct List *)&handle->external_list,(struct Node *)entry);
 	}
     }
+
+    if (arg->aae_Lock)
+    handle->func_flags |= FUNCF_GOT_SOURCE;
+
 }
 
 
@@ -1321,7 +1542,7 @@ char *function_build_file_string(FunctionHandle *handle,short quotes)
 
 
 // Create a new external entry
-ExternalEntry *new_external_entry(FunctionHandle *handle,char *path)
+ExternalEntry *new_external_entry(FunctionHandle *handle,char *path, BPTR lock)
 {
     ExternalEntry *entry;
     char *ptr;
@@ -1330,6 +1551,9 @@ ExternalEntry *new_external_entry(FunctionHandle *handle,char *path)
     // Allocate new entry
     if (!(entry=AllocMemH(handle->memory,sizeof(ExternalEntry)+(len=strlen(path)))))
 	return 0;
+
+    // Get lock
+    entry->een_lock = lock;
 
     // Copy path
     strcpy(entry->een_path,path);

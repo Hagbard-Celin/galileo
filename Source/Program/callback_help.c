@@ -31,11 +31,12 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "help.h"
 
 void __asm __saveds HookShowHelp(
 	register __a0 char *file_name,

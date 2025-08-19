@@ -31,12 +31,14 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #define SCRIPTF_NO_LOCK		(1<<0)
 #define SCRIPTF_NO_SOUND	(1<<1)
+
+#include "//Program/main_commands.h"
 
 enum
 {
@@ -188,44 +190,6 @@ void _env_select_icon_font(
 	UBYTE *mode,
 	short bufsize);
 
-
-enum
-{
-	MAINCMD_BASE=0x40000,
-	MAINCMD_RESET,			// Reset display
-	MAINCMD_CLOSE_DISPLAY,		// Close display
-	MAINCMD_OPEN_DISPLAY,		// Open display
-	MAINCMD_GET_SCREEN_DATA,	// Get screen data
-	MAINCMD_RESET_TOOLMENU,		// Reset Tools menu
-	MAINCMD_ADD_APPWINDOW,
-	MAINCMD_REM_APPWINDOW,
-
-	GROUP_NEW_FONT,			// New font for Groups
-	GROUP_NEW_NAME,			// Group's name changed
-	GROUP_ADD_ICON,			// Show icon in group
-	GROUP_NEW_BACKFILL,		// Backfill pattern changed
-
-	REXXCMD_INCREMENT_MSG,		// Increment message count
-
-	GROUP_DELETE,			// Delete from group
-
-	MAINCMD_COMMAND,		// Command
-
-	MAINCMD_GET_LIST,		// Get command list
-
-	MAINCMD_SAVE_POSITIONS,		// Save position list
-	MAINCMD_LOAD_POSITIONS,		// Load position list
-
-	REXXCMD_SEND_MSG,		// Send a REXX command
-	REXXCMD_SEND_RXMSG,		// Send a REXX message
-
-	MAINCMD_GET_PEN,		// Get custom pen
-	MAINCMD_RELEASE_PEN,		// Free custom pen
-
-	MAINCMD_GET_ICON,		// Get an icon
-
-	MAINCMD_SAVE_ENV,		// Save environment
-};
 
 extern MenuData button_toolbar_menu[];
 

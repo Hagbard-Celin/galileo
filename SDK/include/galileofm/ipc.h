@@ -1,6 +1,10 @@
 #ifndef _GALILEOFM_IPC
 #define _GALILEOFM_IPC
 
+#ifdef _DEBUG_STACK
+#include "/Library/stack_check.h"
+#endif
+
 /*****************************************************************************
 
  Inter-process communication
@@ -31,6 +35,9 @@ typedef struct _IPC {
 	APTR			memory;		// Memory
 	struct MsgPort		*reply_port;	// Port for replies
 	ULONG			flags;		// Flags
+#ifdef _DEBUG_STACK
+	StackData			stack_debug;
+#endif
 } IPCData;
 
 #define IPCDATA(ipc)		((APTR)ipc->userdata)
@@ -70,7 +77,7 @@ ULONG IPC_Command(IPCData *,ULONG,ULONG,APTR,APTR,struct MsgPort *);
 IPCData *IPC_FindProc(struct ListLock *,char *,BOOL,ULONG);
 void IPC_Flush(IPCData *);
 void IPC_Free(IPCData *);
-long IPC_Launch(struct ListLock *,IPCData **,char *,ULONG,ULONG,ULONG,struct Library *);
+BOOL IPC_Launch(struct ListLock *,IPCData **,char *,ULONG,ULONG,ULONG);
 void IPC_ListCommand(struct ListLock *,ULONG,ULONG,ULONG,BOOL);
 IPCData *IPC_ProcStartup(ULONG *,ULONG (*__asm)(register __a0 IPCData *,register __a1 APTR));
 void IPC_Reply(IPCMessage *);

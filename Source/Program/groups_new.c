@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,12 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lsprintf_protos.h"
+#include "misc_protos.h"
+#include "requesters.h"
+#include "backdrop_protos.h"
+#include "groups.h"
+#include "icons.h"
 
 void groups_new(BackdropInfo *info,IPCData *ipc)
 {
@@ -150,124 +157,220 @@ BOOL backdrop_new_group_object(
 
 
 // Dereference a group object
-BOOL group_dereference(
+group_record *group_dereference(
 	BPTR lock,
-	char *name,
-	char *path,
-	Point *position,
-	ULONG *flags)
+	char *name)
 {
 	BPTR old=0;
-	APTR file;
-	ULONG data;
+	BPTR file;
+	ULONG data[2] = {0};
+	group_record *record = 0;
 	BOOL ok=0;
-	char *buffer;
-
-	// Allocate buffer
-	if (!(buffer=AllocVec(512,MEMF_CLEAR))) return 0;
 
 	// Change directory?
-	if (lock) old=CurrentDir(lock);
+	if (lock) old = CurrentDir(lock);
 
 	// Open file
-	if (file=OpenBuf(name,MODE_OLDFILE,512))
+	if (file = Open(name,MODE_OLDFILE))
 	{
 		// Read header
-		data=0;
-		ReadBuf(file,(char *)&data,sizeof(data));
+		Read(file,&data,sizeof(data));
 
 		// Valid group object?
-		if (data==MAKE_ID('G','R','P','\0'))
+		if (data[0] == MAKE_ID('G','R','P','\1'))
 		{
-			short len,pos;
+			ULONG len;
 
-			// Clear stuff
-			if (path) *path=0;
-			if (position)
+			data[1]	+= sizeof(group_record);
+
+			if (record = AllocVec(data[1] + 1,MEMF_ANY))
 			{
-				position->x=-1;
-				position->y=-1;
-			}
-			if (flags) *flags=0;
+			    // Read data
+			    len = Read(file, (char *)record, data[1]);
 
-			// Read data
-			len=ReadBuf(file,buffer,400);
+			    if (len == data[1])
+			    {
+				char *tmp = (char *)record;
 
-			// Look for newline
-			for (pos=0;pos<len;pos++)
-				if (buffer[pos]=='\n') break;
-
-			// Got newline?
-			if (buffer[pos]=='\n')
-			{
+				tmp += len;
 				// Null-terminate
-				if (pos>255) buffer[255]=0;
-				else buffer[pos]=0;
+				*tmp = 0;
+				//*(((char *)record) + len) = 0;
 
-				// Copy path
-				if (path) strcpy(path,buffer);
-
-				// Get position
-				if (position && len>pos+4)
-					CopyMem((char *)buffer+pos+1,(char *)position,sizeof(Point));
-
-				// Get flags
-				if (flags && len>pos+8)
-					CopyMem((char *)buffer+pos+5,(char *)flags,sizeof(ULONG));
-
-				// Set ok flag
-				ok=1;
+			        // Set ok flag
+			        ok=1;
+			    }
 			}
+		}
+		// Upgrade old group object?
+		else
+		if (data[0] == MAKE_ID('G','R','P','\0'))
+		{
+		    char *buffer;
+		    short len,pos;
+		    APTR bfile;
+
+		    Close(file);
+		    file = 0;
+
+		    // Allocate buffer
+		    if (buffer = AllocVec(640 , MEMF_CLEAR))
+		    {
+			// Open file
+			if (bfile = OpenBuf(name, MODE_OLDFILE, 320))
+			{
+			    // Skip header
+			    SeekBuf(bfile, sizeof(ULONG), OFFSET_BEGINNING);
+
+			    // Read data
+			    len = ReadBuf(bfile, buffer, 300);
+
+			    // Look for newline
+			    for (pos=0;pos<len;pos++)
+				    if (buffer[pos]=='\n') break;
+
+			    // Got newline?
+			    if (buffer[pos]=='\n')
+			    {
+				BPTR lock;
+				char *fullname;
+				ULONG length;
+
+				// Null-terminate
+				if (pos>255)
+				{
+				    buffer[255]=0;
+				    length = 255;
+				}
+				else
+				{
+				    buffer[pos]=0;
+				    length = pos;
+				}
+
+				if (lock = LockFromPath(buffer, length, LFPF_TRY_ICON))
+				{
+				    char *infotst;
+				    fullname = buffer + 320;
+
+				    NameFromLock(lock, fullname, 300);
+
+				    infotst = fullname + strlen(fullname) - 5;
+
+				    if (!(stricmp(infotst, ".info")))
+					infotst[0] = 0;
+
+
+				    if (record = AllocVec(sizeof(group_record) + strlen(fullname) + 1,MEMF_ANY))
+				    {
+				        struct FileLock *fl;
+				        struct DosList *volume;
+
+					// Get filelock pointer
+					fl = (struct FileLock *)BADDR(lock);
+
+				        // Get volume entry
+					if (volume = (struct DosList *)BADDR(fl->fl_Volume))
+				        {
+					    // Get volume id
+					    record->date = volume->dol_misc.dol_volume.dol_VolumeDate;
+					    record->len = *(UBYTE *)BADDR(volume->dol_Name);
+
+					    // Copy path
+					    strcpy(record->name, fullname);
+
+					    // Get position
+					    if (len>pos+4)
+						    CopyMem((char *)buffer+pos+1, (char *)&record->pos, sizeof(Point));
+
+					    // Get flags
+					    if (len>pos+8)
+						    CopyMem((char *)buffer+pos+5, (char *)&record->flags, sizeof(ULONG));
+
+					    // Set ok flag
+					    ok=1;
+
+					    // Close file
+					    CloseBuf(bfile);
+
+					    // Write upgraded file
+					    group_write_data(name, record->name, NULL, record);
+				        }
+
+				    }
+
+				    UnLock(lock);
+				}
+			    }
+			}
+
+			FreeVec(buffer);
+		    }
 		}
 
 		// Close file
-		CloseBuf(file);
+		if (file)
+		    Close(file);
 	}
 
-	// Free buffer
-	FreeVec(buffer);
+	if (!ok)
+	{
+	    if (record)
+		FreeVec(record);
+	    record = 0;
+	}
 
 	// Restore directory
 	if (lock) CurrentDir(old);
-	return ok;
+	return record;
 }
 
 
 // Write group data file
-BOOL group_write_data(char *name,char *path,short x,short y,ULONG flags)
+BOOL group_write_data(char *name,char *path,char *filename, group_record *record)
 {
 	APTR file;
-	ULONG data[2];
+	ULONG len, pathlen, namelen = 0;
 
 	// Create file
 	if (!(file=OpenBuf(name,MODE_NEWFILE,384)))
+	{
 		return 0;
+	}
 
-	// Write pointer info
-	WriteBuf(file,"GRP\0",4);
-	WriteBuf(file,path,-1);
-	WriteBuf(file,"\n",1);
+	pathlen = strlen(path);
 
-	// Store position and flags
-	data[0]=(x<<16)|y;
-	data[1]=flags;
+	if (filename)
+	    namelen = strlen(filename);
+
+	len = pathlen + namelen;
+
+	// Write id
+	WriteBuf(file, "GRP\1", 4);
+
+	// Write total string length
+	WriteBuf(file, (char *)&len, sizeof(ULONG));
 
 	// Write data
-	WriteBuf(file,(char *)data,sizeof(ULONG)*2);
+	WriteBuf(file, (char *)record, sizeof(group_record));
+
+	// Write full path
+	WriteBuf(file, path, pathlen);
+	if (namelen)
+	    WriteBuf(file, filename, namelen);
 
 	// Close file
 	CloseBuf(file);
 	return 1;
 }
 
-
 // Snapshot position in group
 void group_snapshot_icon(BackdropInfo *info,BackdropObject *icon,short x,short y)
 {
 	GroupData *group;
-	char buffer[256];
+	char buffer[123];
 	BPTR lock,old;
-	ULONG flags;
+	group_record *record;
 
 	// Get group pointer
 	group=(GroupData *)IPCDATA(info->ipc);
@@ -280,10 +383,14 @@ void group_snapshot_icon(BackdropInfo *info,BackdropObject *icon,short x,short y
 	old=CurrentDir(lock);
 
 	// Dereference object
-	if (group_dereference(0,icon->bdo_device_name,buffer,0,&flags))
+	if (record = group_dereference(0,icon->bdo_device_name))
 	{
+		record->pos.x = x;
+		record->pos.y = y;
 		// Write new data file
-		group_write_data(icon->bdo_device_name,buffer,x,y,flags);
+		group_write_data(icon->bdo_device_name, record->name, NULL, record);
+
+		FreeVec(record);
 	}
 
 	// Restore directory

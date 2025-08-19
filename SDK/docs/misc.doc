@@ -148,6 +148,35 @@ galileofm.library/Atoh                                       galileofm.library/A
     SEE ALSO
         console.device/RawKeyConvert()
 
+galileofm.library/CopyString                           galileofm.library/CopyString
+
+    NAME
+        CopyString - convert a key from the raw key code
+
+    SYNOPSIS
+        result:length CopyString(memhandle, string)
+            D0:D1                   A0        A1
+
+        STRPTR:ULONG CopyString(APTR, STRPTR);
+
+    FUNCTION
+        This routine takes the supplied string and copies it calculating
+        the required buffer size and allocating the buffer.
+
+    INPUTS
+        memhandle - as supplied by NewMemHandle(), the function will use this
+                    handle to allocate the string if supplied, optional
+        string - string to copy
+
+    RESULT
+        The result of this function is a pointer to a buffer of size
+        'strlen(result) + 1' containing the result string, this buffer MUST
+        be freed with FreeMemH() after use. It will also return the actual
+        length of the result string as a ULONG in 'D1'.
+
+    SEE ALSO
+        JoinString(), FreeMemH(), NewMemHandle()
+
 galileofm.library/DivideToString                   galileofm.library/DivideToString
 
     NAME
@@ -288,6 +317,49 @@ galileofm.library/Atoh                                       galileofm.library/A
 
     SEE ALSO
         Itoa()
+
+galileofm.library/JoinString                           galileofm.library/JoinString
+
+    NAME
+        JoinString - converts unsigned integer to a string
+
+    SYNOPSIS
+        result:length JoinString(memhandle, first, second, third, flags)
+            D0:D1                   A0        A1     A2      A3     D0
+
+        STRPTR:ULONG JoinString(APTR, STRPTR, STRPTR, STRPTR, ULONG);
+
+    FUNCTION
+        This routine takes the supplied strings and joins them calculating
+        the required buffer size and allocating the buffer.
+
+
+    INPUTS
+        memhandle - as supplied by NewMemHandle(), the function will use this
+                    handle to allocate the string if supplied, optional
+        first - first string
+        second - second string
+        third - third string
+        flags - supported flags:
+
+                   JSF_FS_SLASH   - Add a "/" between first and second string
+                   JSF_ST_SLASH   - Add a "/" between second and third string
+                   JSF_E_SLASH    - Add a "/" at the end of result string
+                   JSF_FS_ADDPART - Add a "/" between first and second string
+                                    unless the first string ends with ":" or "/"
+                   JSF_ST_ADDPART - Add a "/" between second and third string
+                                    unless the second string ends with ":" or "/"
+                   JSF_E_ADDPART  - Add a "/" at the end of result string
+                                    unless it already ends with "/"
+
+    RESULT
+        The result of this function is a pointer to a buffer of size
+        'strlen(result) + 1' containing the result string, this buffer MUST
+        be freed with FreeMemH() after use. It will also return the actual
+        length of the result string as a ULONG in 'D1'.
+
+    SEE ALSO
+        CopyStirng(), FreeMemH(), NewMemHandle()
 
 galileofm.library/QtoaU                                     galileofm.library/QtoaU
 

@@ -36,6 +36,10 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "misc_protos.h"
+#include "backdrop_protos.h"
+#include "text.h"
 
 // Scroll the icons
 void backdrop_scroll_objects(BackdropInfo *info,short off_x,short off_y)

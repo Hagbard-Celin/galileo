@@ -2,7 +2,7 @@
   XADbrowser.gfmmodule 1.22 - Galileo plugin to browse through XAD archives
   Copyright (C) 1999,2000 Mladen Milinkovic <mladen.milinkovic@ri.tel.hr>
   Copyright 2013 Roman Kargin <kas1e@yandex.ru>
-  Copyright 2023 Hagbard Celine
+  Copyright 2023,2025 Hagbard Celine
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -20,14 +20,29 @@
 */
 
 #define CATCOMP_NUMBERS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <exec/memory.h>
+#include <dos/filehandler.h>
+
+#include <proto/exec.h>
+#include <proto/dos.h>
+
+#include <clib/alib_protos.h>
+#define __NOLIBBASE__
+#include <proto/xadmaster.h>
+#undef __NOLIBBASE__
+
 #include "XADbrowser.strings"
-//#define _GALILEOFM_MODULE_DEF
-//#include <galileofm/modules.h>
 #include "modules_lib.h"
+#include "//Program/lister_ipc.h"
 #include "module.h"
 
 #define XADOPEN_ARGS  "ARCHIVE,NEWLISTER/S"
 #define XADEXTRACT_ARGS "ARCHIVE/M,TO/K"
+
+#define IPC_CMD_PORT(lister) ((*(IPCData **)lister)->command_port)
 
 extern struct DosLibrary *DOSBase;
 extern struct Library *GalileoFMBase;
@@ -43,40 +58,43 @@ extern struct Library *AslBase;
 extern struct Library *DiskfontBase;
 extern struct Device *TimerBase;
 extern struct RxsLib *RexxSysBase;
-extern struct xadMasterBase *xadMasterBase;
 
 extern struct GalileoLocale *locale;
 void init_locale_data(struct GalileoLocale *);
-//extern ModuleInfo module_info;
-//extern ModuleFunction module_func;
 
 #ifdef RESOURCE_TRACKING
 extern ULONG callerid;
 #endif
 
+#define XBF_SKIP_ALL	    (1<<1)
+#define XBF_OVERWRITE_ALL   (1<<2)
 
-struct DirDate
+struct SmallFileInfoBlock
 {
-    struct MinNode      node;
-    struct DateStamp    date;
-    char                name[1];
+   LONG	  sfib_DiskKey;
+   LONG	  sfib_DirEntryType;
+
+   TEXT	  sfib_FileName[108];
+   LONG	  sfib_Protection;
+   LONG	  sfib_EntryType;
+   LONG	  sfib_Size;
+   LONG	  sfib_NumBlocks;
+   struct DateStamp sfib_Date;
+   TEXT	  sfib_Comment[80];
+   UWORD  sfib_OwnerUID;      
+   UWORD  sfib_OwnerGID;      
 };
 
-struct FList
-{
-	struct List list;
-	APTR entry;
-   UWORD dirs, files;
-	struct FList *Parent,*Next;
-};
 
 struct Tree
 {
-	struct FileInfoBlock fib;
+	struct SmallFileInfoBlock fib;
 	struct xadFileInfo *xfi;
 	APTR entry;
-	struct Tree *Next, *Child;
+	ULONG FileCount;
+	struct Tree *Next, *Child, *Parent;
 };
+
 
 // Structures used with callback commands
 struct function_entry
@@ -88,34 +106,43 @@ struct function_entry
 	short			flags;	// File flags
 };
 
-struct ModuleData
+struct XADbrowserData
 {
-	ULONG	ArcMode, listh, listh2, desth;
-	char lists[20], listpath[512], rootpath[108], orgpath[512];
-	struct xadArchiveInfo *ArcInf;
-	struct MsgPort *mp;
-	char mp_name[20];
-	IPCData *ipc;
-	struct Screen *screen;
-	struct Tree *root, *cur;
-	APTR memhandle;
-	char *arcname, *buf;
-	struct Window *listw;
-	struct GalileoLocale *locale;
-	struct Library *GalileoFMBase;
-	struct DosLibrary *DOSBase;
-	struct Library *UtilityBase;
-	struct xadMasterBase *xadMasterBase;
-	PathNode *listp2, *destp;
-	APTR ptr;
-	CONST GalileoCallbackInfo *gci;
-	struct MinList Temp, DirDates;
-	PathNode *listp;
-	BOOL All, over, newlister;
-	FuncArgs	    *args;
-	//struct _dirdate *dirdatep;
-	char *password;
-//    char password[512];
+    IPCData 			    *ipc;
+    ULONG			    mod_id;
+    APTR			    memhandle;
+    APTR			    treehandle;
+    struct Tree 		    *root;
+    struct Tree 		    *cur;
+    BOOL			    newlister;		
+    BOOL			    All;		
+    ULONG 			    count;		
+    BOOL			    over;		
+    BOOL			    retry;
+    struct xadArchiveInfo 	    *ArcInf;
+    ULONG			    ArcMode;		
+    STRPTR			    arc_filename;
+    STRPTR			    root_path;		
+    STRPTR			    path;		
+    PathNode 			    *source_node;	
+    PathNode 			    *dest_node;		
+    BPTR			    sourcedir_lock;
+    BPTR			    destdir_lock;	
+    APTR			    source_lister;	
+    APTR			    dest_lister;	
+    IPCData			    *source_ipc;
+    IPCData			    *dest_ipc;
+    struct Window		    *source_window;	
+    struct Screen 		    *screen;
+    APTR 			    progress;		
+    struct xadMasterBase	    *xadMasterBase;
+    CONST GalileoCallbackInfo	    *gci;
+    TEXT			    password[512];
+    struct MsgPort		    *mp;
+    struct MinList 		    Temp;
+    TEXT			    cpy_filename[108];
+    TEXT			    buf[160];		
+    char			    mp_name[24];
 };
 
 struct TempFile
@@ -123,11 +150,3 @@ struct TempFile
 	struct MinNode node;
 	char FileName[110];
 };
-
-struct MyPacket
-{
-	struct Message sp_Msg;
-	struct DosPacket sp_Pkt;
-	char *a7, *a8;
-};
-

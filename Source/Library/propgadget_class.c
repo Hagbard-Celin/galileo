@@ -36,7 +36,6 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofmlib.h"
-#define BOOPSI_LIBS
 #include "boopsi.h"
 
 /// PropGadget dispatcher

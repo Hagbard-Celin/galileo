@@ -1,5 +1,5 @@
 
-									Galileo
+                                                                        Galileo
 
                           External Module Definition
 
@@ -198,19 +198,17 @@ All fields of the ModuleFunction structure must be initialised, as follows:
         FUNCF_PRIVATE        - the function is private, it won't show up in
                                the popup command list
 
-        FUNCF_SYNC           - set if you want the old behviour when the user
+        FUNCF_SYNC           - set if you want the old behavior when the user
                                selects "Run Asynchronously" in the Function
                                Editor (see Documentation/Module-Changes.txt)
 
 
 6. It is highly recommended that you link with the standard module startup
-code (modinit.o¹) when creating modules. This code contains the
+code (modinit.o) when creating modules. This code contains the
 Module_Identify() function, and automatically initialises several library bases
 which you may need. See the <galileofm/modules.h> file for more information on
 this file.
 
-¹There is also modinitmffp.o for gfmmodules compiled with MATH=FFP. It will
-open mathffp.library and mathtrans.library for you.
 
 7. The "gci" parameter to the Module_Entry() function provides the
 address of the GalileoCallbackInfo structure within Galileo. This structure
@@ -462,7 +460,7 @@ Present but undocumented in Maggelan II:
 
     void gc_GetThemes(    char *buffer)
 
-	This function places the themes path into 'buffer'.
+        This function places the themes path into 'buffer'.
 
 
 Added in Galileo:
@@ -479,10 +477,74 @@ Added in Galileo:
     'flags'.
 
 
-    BOOL gc_IsSourceDestLock(    ULONG lister)
+    void gc_ListerSet(   ULONG lister,
+                         struct TagItem *tags)
 
-    This function take a lister handle and returns TRUE if the lister is locked
-    as source or destination or FLASE otherwise.
+    This command allows you to modify the lister. Pass an array of tags with the
+    item ID in ti_Tag and the new value in ti_Data.
+    Only one tag is supported so far:
+
+        HLT_FAKEDIR     - Indicates if this is a real disk-backed dir (BOOL)
+
+
+    BOOL gc_ListerGet(   ULONG lister,
+                         struct TagItem *tags)
+
+    Lets you query info about a lister. Pass an array of tags with the item ID in
+    ti_Tag and a pointer to the appropriate memory area to store the result.
+    The supported tags are:
+
+        HLT_FAKEDIR          - Real dir or not                     (BOOL)
+        HLT_SOURCEDEST_LOCK  - Is the lister locked as source/dest (BOOL)
+        HLT_CURBUFFER_LOCK   - Return a lock on the current dir    (BPTR)
+
+            The lock from HLT_CURBUFFER_LOCK is yours to use as you please,
+            and you are responsible for unlocking it after use.
+
+
+    APTR gc_GetFileEntry(   APTR lister,
+                            APTR from_entry,
+                            BOOL selected);
+
+    Gets the first file-entry from a lister, from the top or continuing the
+    search from from_entry. If selected is TRUE, only selected entries are
+    considered.
+
+
+    APTR gc_NewLister(   STRPTR path,
+                         APTR parent,
+                         STRPTR toolbar_path,
+                         BPTR path_lock,
+                         ULONG flags,
+                         WORD Left,
+                         WORD Top,
+                         WORD Width,
+                         WORD Height)
+
+    Open a new lister. A path to read into the lister can be supplied either
+    as a string in the "path" argument or a lock on the directory to read in
+    the "path_lock" argument. A custom toolbar can be selected with the
+    "toolbar_path" argument. The position and size can be specified with the
+    "Left", "Top", "Width" and "Height" arguments. Flags MUST be NULL.
+
+
+    void gc_ReadDir(   APTR lister,
+                       STRPTR path,
+                       ULONG flags,
+                       BPTR path_lock)
+
+    Open a directory in the lister. Either by supplying a path in "path" or a
+    lock on the directory to read in "path_lock". Flags MUST be NULL.
+
+
+    void gc_ClearDir(   APTR lister,
+                        ULONG flags)
+
+    Clears all the file entries in the lister. Supported flags:
+
+        CBCDF_CLEAR_PATH     - Also clear/free the lister path strings
+        CBCDF_CLEAR_LOCK     - UnLock() the current buffer directory lock
+        CBCDF_CLEAR_HANDLER  - Clear the current buffer CustomHandler
 
 
 *****************************************************************************
@@ -501,11 +563,12 @@ Added in Galileo:
     pointer is still valid too).
 
 
-    ULONG gc_GetLister(   APTR path)
+    APTR gc_GetLister(   APTR path)
 
     Takes a path as returned by the gc_GetSource(), etc functions, and converts
     it to a lister handle that you can use with the gc_AddFileEntry() and similar
     functions.
+    NOTE: The return type of this function was previously ULONG.
 
 
     APTR gc_GetSource(    APTR handle,
@@ -523,7 +586,7 @@ Added in Galileo:
     If your module is handling multiple source paths, you should call this
     hook if you are aborting early and do not wish to process further source
     paths. Set the 'unused' parameter to 0.
-    If you module is handling only one destnation path, it shuld not be
+    If you module is handling only one destination path, it should not be
     called.
     This hook is the same as the old EXTCMD_END_SOURCE callback function.
 
@@ -560,10 +623,10 @@ Added in Galileo:
     void gc_EndDest(    APTR handle,
                         long continue)
 
-    If your module is handling multiple destination paths, you must call this
-    command when you have finished with one destination path, prior to
+    If your module is handling multiple destination paths, you must call
+    this command when you have finished with one destination path, prior to
     calling gc_GetDest().
-    If you do not handle multiple destination paths you sould not call this.
+    If you do not handle multiple destination paths you should not call this.
     This hook is the same as the old EXTCMD_END_DEST callback function.
 
 
@@ -626,24 +689,32 @@ Added in Galileo:
     long gc_AddFile(    APTR handle,
                         char *path,
                         struct FileInfoBlock *fib,
-                        APTR lister)
+                        APTR lister,
+                        BPTR lock)
 
     Allows you to add a file or directory to a lister. The 'path' field
-    points to the full path of the file to add. 'fib' is an initialised
-    FileInfoBlock which is used to create the file entry. The 'lister'
-    pointer is obtained via a call to the gc_GetLister() function.
-    The display is not updated until you call gc_DoChanges(), or your
-    function returns.
+    points to the absolute path of the parent directory of the file to add.
+    If a lock on the parent directory is supplied in 'lock' this will be
+    used in place of 'path'. Using 'lock' is the preferred method.
+    'fib' is an initialised FileInfoBlock which is used to create the file
+    entry. The 'lister' pointer is obtained via a call to the gc_GetLister()
+    function. The display is not updated until you call gc_DoChanges(), or
+    your function returns.
     This hook is the same as the old EXTCMD_ADD_FILE callback function.
 
 
     void gc_DelFile(    APTR handle,
                         char *path,
                         char *name,
-                        APTR lister)
+                        APTR lister,
+                        BPTR lock)
 
     This removes the specified file from any listers it is currently
-    shown in. The file itself is not deleted, only the display of it in
+    shown in. 'path' is the full path of the parent directory of the file
+    and 'name' is the file name. If a lock on the parent directory is
+    supplied in 'lock' this will be used in place of 'path'. Using 'lock'
+    is the preferred method.
+    The file itself is not deleted, only the display of it in
     the lister. The display is not updated until you call gc_DoChanges(),
     or your function returns.
     This hook is the same as the old EXTCMD_DEL_FILE callback function.
@@ -652,13 +723,17 @@ Added in Galileo:
     void gc_LoadFile(    APTR handle,
                          char *path,
                          char *name,
+                         BPTR lock,
                          long flags,
                          BOOL reload)
 
     This function is similar to gc_AddFile() except that it takes a
     filename and path and supplies the FileInfoBlock structure itself.
-    'path' is the full path of the file and 'name' is the file name. If
-    'flags' is set to LFF_ICON, the icon of the supplied file will be
+    'path' is the full path of the parent directory of the file and 'name'
+    is the file name. If a lock on the parent directory is supplied in
+    'lock' this will be used in place of 'path'. Using 'lock' is the
+    preferred method.
+    If 'flags' is set to LFF_ICON, the icon of the supplied file will be
     loaded instead of the file itself. If 'reload' is set to TRUE, an
     existing file will be reloaded (ie the old entry in the lister
     will be removed).
@@ -683,12 +758,13 @@ Added in Galileo:
     This hook is the same as the old EXTCMD_CHECK_ABORT callback function.
 
 
-    struct Window *gc_GetWindow(    APTR path)
+    struct Window *gc_GetWindow(    APTR lister)
 
     This function returns a pointer to the Window for the lister specified
-    by the supplied path handle (as returned by gc_GetSource(), etc). This
+    by the supplied lister pointer (as returned by gc_GetLister()). This
     is useful if you want to open a requester over a lister window.
-    This hook is the same as the old EXTCMD_GET_WINDOW callback function.
+    WARNING: This function previously took a path handle as returned by
+    gc_GetSource.
 
 
     struct MsgPort *gc_GetPort(    char *name)

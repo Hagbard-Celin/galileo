@@ -36,7 +36,14 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "callback_protos.h"
+#include "function_launch_protos.h"
 #include "scripts.h"
+#include "filetypes_protos.h"
+#include "menu_data.h"
+#include "rexx_protos.h"
+#include "lsprintf_protos.h"
 
 void theme_expand_path(char *buf);
 
@@ -134,7 +141,7 @@ BOOL rexx_galileo_cmd(struct RexxMsg *msg,short command,char *args)
 				id=rexx_match_keyword(&args,getfiletype_keys,0);
 
 				// Try to match filetype
-				if (type=filetype_identify(name,FTTYPE_WANT_NAME,typename,0))
+				if (type=filetype_identify(name,NULL,FTTYPE_WANT_NAME,typename,0))
 				{
 					// Want ID?
 					if (id==0 && type->type.id[0]) strcpy(typename,type->type.id);

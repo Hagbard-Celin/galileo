@@ -1,4 +1,4 @@
-* "galileofm.library"                                             
+* "galileofm.library"
 ##base _GalileoFMBase
 ##bias 30
 *                                                             
@@ -127,7 +127,7 @@ IPC_ListQuit(list,owner,flags,wait)(a0/a1,d0/d1)
 IPC_Flush(port)(a0)
 IPC_ListCommand(list,command,flags,data,wait)(a0,d0/d1/d2/d3)
 IPC_ProcStartup(data,code)(a0/a1)
-IPC_Launch(list,ipc,name,entry,stack,data,dos)(a0/a1/a2,d0/d1/d2,a3)
+IPC_Launch(list,ipc,name,entry,stack,data)(a0/a1/a2,d0/d1/d2)
 *
 OpenImage(name,info)(a0/a1)
 CloseImage(image)(a0)
@@ -152,11 +152,12 @@ NewFunction(memory,type)(a0,d0)
 NewInstruction(memory,type,string)(a0,d0,a1)
 ReadSettings(env,name)(a0/a1)
 ReadListerDef(iff,id)(a0,d0)
-OpenButtonBank(name)(a0)
+OpenButtonBank(name,parent_lock)(a0,a1)
 DefaultSettings(settings)(a0)
 DefaultEnvironment(env)(a0)
 DefaultButtonBank()()
-SaveSettings(env,name)(a0/a1)
+*SaveSettings(env,name)(a0/a1)
+GetIconFullname(name)(a0)
 SaveListerDef(iff,lister)(a0/a1)
 SaveButtonBank(bank,name)(a0/a1)
 CloseButtonBank(bank)(a0)
@@ -226,11 +227,11 @@ SendNotifyMsg(type,data,flags,wait,name,fib)(d0/d1/d2/d3,a0/a1)
 StrCombine(s1,s2,s3,len)(a0/a1/a2,d0)
 StrConcat(s1,s2,len)(a0/a1,d0)
 *
-WB_Launch(name,screen,wait)(a0/a1,d0)
+WB_LaunchArg(wbarg,screen,wait,proc,notify,flags)(a0/a1,d0,a2/a3,d1)
 *
 CopyLocalEnv(a0)(a0)
 *
-CLI_Launch(name,screen,cd,in,out,wait,stack)(a0/a1,d0/d1/d2/d3/d4)
+CLI_Launch(name,screen,cd,in,out,wait,stack,command_dir)(a0/a1,d0/d1/d2/d3/d4/d5)
 *
 ReplyFreeMsg(msg)(a0)
 *
@@ -293,7 +294,7 @@ FHFromBuf(file)(a0)
 *
 WB_AppIconFlags(icon)(a0)
 *
-GetWBArgPath(arg,buf,size)(a0/a1,d0)
+GetWBArgPath(arg)(a0)
 *
 DeviceFromLock(lock,name)(a0/a1)
 DeviceFromHandler(port,name)(a0/a1)
@@ -352,7 +353,7 @@ SearchFile(file,text,flags,buffer,size)(a0/a1,d0,a2,d1)
 ParseDateStrings(string,date,time,range)(a0/a1/a2/a3)
 DateFromStrings(date,time,ds,method)(a0/a1/a2,d0)
 *
-GetMatchHandle(name)(a0)
+GetMatchHandle(name,lock)(a0,d0)
 FreeMatchHandle(handle)(a0)
 MatchFiletype(handle,type)(a0/a1)
 *
@@ -455,7 +456,7 @@ UnlockReqBackFill()()
 *
 DragCustomOk(bm)(a0)
 *
-WB_LaunchNew(name,scr,wait,stack,tool)(a0/a1,d0/d1,a2)
+FreeLaunchWBArgs(args,numargs)(a0,d0)
 *
 UpdatePathList()()
 UpdateMyPaths()()
@@ -481,7 +482,7 @@ GetStatistics(id)(d0)
 *
 SetPopUpDelay(delay)(d0)
 *
-WB_LaunchNotify(name,scr,wait,stack,tool,proc,notify,flags)(a0/a1,d0/d1,a2/a3/a4,d2)
+WB_Launch(name,scr,wait,stack,tool,proc,notify,flags)(a0/a1,d0/d1,a2/a3/a4,d2)
 *
 *
 WB_AppWindowWindow(appwindow)(a0)
@@ -513,7 +514,24 @@ SetLocaleFlags(flags,dateformat)(d0/d1)
 GetLocaleSettings(type)(d0)
 DateToStrings(date,date_buf,time_buf,flags)(a0/a1/a2,d0)
 *
+LockFromPathQuick(path,length)(a0,d0)
+PathFromLock(memory,lock,flags,append)(a0,d0/d1,a1)
+*PathFromLock(memory,lock,flags,strlen)(a0,d0/d1,a1)
+LockFromPath(path,length,flags)(a0,d0/d1)
 *
+JoinString(memory,first,second,third,flags)(a0/a1/a2/a3,d0)
+CopyString(memory,original)(a0/a1)
+LockFromVolIdPath(volumename,path,volumedatenamelen,flags)(a0/a1/a2,d0/d1)
+GetLastPathComponent(dest,path)(a0/a1)
+*
+FreeHandlerMessage(msg)(a0)
+ReplyHandlerMessage(msg)(a0)
+*
+VolIdFromLock(lock,date,name)(a0/a1/a2)
+*
+*
+*WB_AddAppWindowTr(id,data,window,port,tags)(d0/d1,a0/a1/a2)
+*WB_RemoveAppWindowTr(window)(a0)
 *
 * end "galileofm.library" pragmas 
 ##end

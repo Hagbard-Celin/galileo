@@ -31,11 +31,15 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "buttons_protos.h"
+#include "menu_data.h"
+#include "help.h"
+#include "lsprintf_protos.h"
 
 // Do popup
 void buttons_do_popup(Buttons *buttons,UWORD code)

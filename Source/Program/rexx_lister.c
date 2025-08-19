@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2023 Hagbard Celine
+Copyright 2023,2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -32,11 +32,21 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "dirlist_protos.h"
+#include "misc_protos.h"
+#include "function_launch_protos.h"
+#include "rexx_protos.h"
+#include "buffers_protos.h"
+#include "dates.h"
+#include "position_protos.h"
+#include "menu_data.h"
+#include "lsprintf_protos.h"
 
 #define RETURN_RESULT	0
 #define RETURN_VAR		1
@@ -180,39 +190,43 @@ void rexx_lister_new(struct RexxMsg *msg,char *args)
 		// Position from icon?
 		if (fromicon && path)
 		{
-			char fullpath[512];
 			BPTR lock;
 
 			// Get full path
-			if (lock=Lock(path,ACCESS_READ))
+			if (lock = LockFromPath(path, NULL, NULL))
 			{
-				struct DiskObject *icon;
-				short mode=0;
+			    char *fullpath;
+			    struct DiskObject *icon;
+			    short mode=0;
 
-				NameFromLock(lock,fullpath,512);
-				UnLock(lock);
-
+			    if (fullpath = PathFromLock(NULL, lock, NULL, NULL))
+			    {
 				// Try and load icon
-				icon=GetDiskObject(fullpath);
-
-				// Get position
-				pos=GetListerPosition(
-						fullpath,
-						0,
-						icon,
-						&cfg->lister.pos[0],
-						(nomode)?0:&mode,
-						&cfg->lister.format,
-						(parent)?parent->window:0,
-						parent,
-						0);
-
-				// Free icon
-				FreeDiskObject(icon);
-
-				// Mode set?
-				if (!nomode && mode)
+				if (icon=GetDiskObject(fullpath))
 				{
+				    struct DateStamp date = {0};
+
+				    VolIdFromLock(lock, &date, NULL);
+
+				    // Get position
+				    pos=GetListerPosition(
+						    fullpath,
+						    &date,
+						    0,
+						    icon,
+						    &cfg->lister.pos[0],
+						    (nomode)?0:&mode,
+						    &cfg->lister.format,
+						    (parent)?parent->window:0,
+						    parent,
+						    0);
+
+				    // Free icon
+				    FreeDiskObject(icon);
+
+				    // Mode set?
+				    if (!nomode && mode)
+				    {
 					if (mode&LISTERMODE_ICON)
 						flags|=GLSTF_ICON;
 					if (mode&LISTERMODE_ICON_ACTION)
@@ -222,7 +236,13 @@ void rexx_lister_new(struct RexxMsg *msg,char *args)
 
 					// Store additional flags
 					cfg->lister.flags|=flags;
+				    }
 				}
+
+				FreeMemH(fullpath);
+			    }
+
+			    UnLock(lock);
 			}
 		}
 
@@ -407,29 +427,35 @@ BOOL rexx_lister_cmd(struct RexxMsg *msg,short command,char *args)
 			case RXCMD_READ:
 				{
 					long flags;
-					char path[256];
+					char *path;
 
-					// Get path to read
-					rexx_parse_word(&args,path,256);
+					if (path = rexx_parse_word_alloch(&args, NULL))
+					{
+					    // Force re-read?
+					    rexx_skip_space(&args);
+					    if ((rexx_match_keyword(&args,force_string,0))==0)
+						    flags=0;
+					    else flags=GETDIRF_CANMOVEEMPTY|GETDIRF_CANCHECKBUFS;
 
-					// Force re-read?
-					rexx_skip_space(&args);
-					if ((rexx_match_keyword(&args,force_string,0))==0)
-						flags=0;
-					else flags=GETDIRF_CANMOVEEMPTY|GETDIRF_CANCHECKBUFS;
+					    rexx_set_return(msg, rc, lister->cur_buffer->buf_Path);
 
-					// Return old path
-					strcpy(result,lister->cur_buffer->buf_Path);
+					    // Read this path
+					    function_launch(
+						    FUNCTION_READ_DIRECTORY,
+						    0,0,
+						    flags,
+						    lister,
+						    0,
+						    path,0,
+						    0,0,
+						    0,0,0);
 
-					// Read this path
-					function_launch(
-						FUNCTION_READ_DIRECTORY,
-						0,0,
-						flags,
-						lister,
-						0,
-						path,0,
-						0,0,0);
+					    rc = -1;
+					}
+					else
+					{
+					    rc = RXERR_NO_MEMORY;
+					}
 				}
 				break;
 
@@ -499,6 +525,66 @@ BOOL rexx_lister_cmd(struct RexxMsg *msg,short command,char *args)
 				break;
 
 
+			// Buffer assign
+			case RXCMD_ASSIGN:
+
+				// Lock current buffer
+				buffer_lock(lister->cur_buffer,FALSE);
+
+				// Get query item
+				id=rexx_get_command(&args);
+				switch (id)
+				{
+					// Make assign
+					case RXCMD_GET:
+						if (lister->cur_buffer->buf_Lock)
+						{
+						    BPTR lock;
+
+						    if (lock = DupLock(lister->cur_buffer->buf_Lock))
+						    {
+							lsprintf(result,"garx_%08.lx", lister->cur_buffer);
+							if (AssignLock(result, lock))
+							{
+							    strcat(result, ":");
+							}
+						        else
+							{
+							    UnLock(lock);
+							    *result = 0;
+							    rc = RXERR_NO_MEMORY;
+							}
+						    }
+						    else
+							rc = RXERR_NO_MEMORY;
+						}
+						else
+						    rc = RXERR_INVALID_PATH;
+						break;
+
+					// Remove assign
+					case RXCMD_FREE:
+						if (lister->cur_buffer->buf_Lock)
+						{
+						    lsprintf(lister->work_buffer,"garx_%08.lx", lister->cur_buffer);
+						    AssignLock(lister->work_buffer, NULL);
+						}
+						else
+						    rc = RXERR_INVALID_PATH;
+
+						break;
+
+					// Unknown
+					default:
+						rc=RXERR_INVALID_QUERY;
+						break;
+				}
+
+				// Unlock buffer
+				buffer_unlock(lister->cur_buffer);
+				break;
+
+
 			// Query lister
 			case RXCMD_QUERY:
 
@@ -511,7 +597,11 @@ BOOL rexx_lister_cmd(struct RexxMsg *msg,short command,char *args)
 				{
 					// Path
 					case RXCMD_PATH:
-						strcpy(result,lister->cur_buffer->buf_Path);
+						if (lister->cur_buffer->buf_Path)
+						{
+						    rexx_set_return(msg, 0, lister->cur_buffer->buf_Path);
+						    rc = -1;
+						}
 						break;
 
 					// Label
@@ -546,10 +636,10 @@ BOOL rexx_lister_cmd(struct RexxMsg *msg,short command,char *args)
 						lsprintf(result,"%ld",(lister->flags&LISTERF_BUSY)?1:0);
 						break;
 
-                    // Source/Destination status locked?
-                    case RXCMD_SOURCEDESTLOCK:
-                        lsprintf(result,"%ld",(lister->flags&LISTERF_SOURCEDEST_LOCK)?1:0);
-                        break;
+				        // Source/Destination status locked?
+				        case RXCMD_SOURCEDESTLOCK:
+					    lsprintf(result,"%ld",(lister->flags&LISTERF_SOURCEDEST_LOCK)?1:0);
+					    break;
 
 					// Handler
 					case RXCMD_HANDLER:
@@ -808,7 +898,7 @@ BOOL rexx_lister_cmd(struct RexxMsg *msg,short command,char *args)
 						buffer_lock(lister->cur_buffer,TRUE);
 
 						// Free contents of buffer
-						buffer_freedir(lister->cur_buffer,0);
+						buffer_freedir(lister->cur_buffer,FREEDIRF_FREE_LOCK|FREEDIRF_FREE_PATH|FREEDIRF_FREE_EXPANDEDPATH);
 
 						// Unlock buffer
 						buffer_unlock(lister->cur_buffer);
@@ -836,6 +926,12 @@ BOOL rexx_lister_cmd(struct RexxMsg *msg,short command,char *args)
 						rexx_skip_space(&args);
 						if (!(rc=rexx_set_format(command,id,&lister->format,args)))
 							lister->cur_buffer->flags&=~DWF_SPECIAL_SORT;
+						break;
+
+
+					case RXCMD_HANDLER:
+						lister->cur_buffer->buf_CustomHandler[0] = 0;
+						lister->cur_buffer->cust_flags = 0;
 						break;
 
 
@@ -886,22 +982,41 @@ BOOL rexx_lister_cmd(struct RexxMsg *msg,short command,char *args)
 					// Path
 					case RXCMD_PATH:
 
-						// Get pointer to path
-						rexx_skip_space(&args);
+						{
+						    STRPTR newpath;
 
-						// Lock current buffer
-						buffer_lock(lister->cur_buffer,TRUE);
+						    // Get pointer to path
+						    rexx_skip_space(&args);
 
-						// Copy path string
-						strcpy(lister->cur_buffer->buf_Path,args);
-						strcpy(lister->cur_buffer->buf_ExpandedPath,args);
-						strcpy(lister->cur_buffer->buf_ObjectName,FilePart(args));
+						    // Lock current buffer
+						    buffer_lock(lister->cur_buffer,TRUE);
 
-						// Update path field
-						lister_update_pathfield(lister);
+						    // Copy path strings
+						    if (newpath = CopyString(0,args))
+						    {
+							STRPTR oldpath = lister->cur_buffer->buf_Path;
 
-						// Unlock buffer
-						buffer_unlock(lister->cur_buffer);
+							lister->cur_buffer->buf_Path = newpath;
+							if (oldpath)
+							    FreeMemH(oldpath);
+						    }
+
+						    if (newpath = CopyString(0,args))
+						    {
+							STRPTR oldpath = lister->cur_buffer->buf_ExpandedPath;
+
+							lister->cur_buffer->buf_ExpandedPath = newpath;
+							if (oldpath)
+							    FreeMemH(oldpath);
+						    }
+						    strcpy(lister->cur_buffer->buf_ObjectName,FilePart(args));
+
+						    // Update path field
+						    lister_update_pathfield(lister);
+
+						    // Unlock buffer
+						    buffer_unlock(lister->cur_buffer);
+						}
 						break;
 
 
@@ -1433,7 +1548,7 @@ BOOL rexx_lister_cmd(struct RexxMsg *msg,short command,char *args)
 							}
 
 							// Allocate new value tag
-							if (node=AllocMemH(lister->memory,sizeof(struct Node)+strlen(args)+1+strlen(name)+1))
+							if (node=AllocMemH(lister->lister_memory,sizeof(struct Node)+strlen(args)+1+strlen(name)+1))
 							{
 								strcpy((char *)(node+1),args);
 								node->ln_Name=((char *)(node+1))+strlen(args)+1;

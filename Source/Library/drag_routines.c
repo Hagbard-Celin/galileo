@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -1118,17 +1118,12 @@ void __asm __saveds L_RemoveDragImage(register __a0 DragInfo *drag)
 // See if custom dragging is OK
 BOOL __asm __saveds L_DragCustomOk(
 	register __a0 struct BitMap *bm,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
 	BOOL ok=0;
 
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// Ok to custom drag?
-	if (!(data->flags&LIBDF_NO_CUSTOM_DRAG) &&
+	if (!(gfmlib_data.flags&LIBDF_NO_CUSTOM_DRAG) &&
 			GfxBase->LibNode.lib_Version>=39 &&
 			P96Base &&
 			p96GetBitMapAttr(bm,P96BMA_ISP96)) ok=1;

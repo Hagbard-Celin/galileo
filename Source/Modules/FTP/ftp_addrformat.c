@@ -222,6 +222,9 @@ if	(GalileoFMBase = OpenLibrary( "galileofm.library", VERSION_GALILEOFMLIB ))
 		}
 	CloseLibrary(GalileoFMBase);
 	}
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }
 
 
@@ -256,8 +259,7 @@ if	(data = AllocVec( sizeof(struct format_data), MEMF_CLEAR ))
 		"galileo_ftp_format",		// Name
 		(ULONG)format_code,		// Code
 		4096,				// Stack size
-		(ULONG)data,			// Data passed to task
-		(struct Library *)DOSBase );	// Needs pointer to dos.library
+		(ULONG)data);			// Data passed to task
 	
 	// failed? then dump 	
 	if	(!result)

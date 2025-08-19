@@ -36,6 +36,16 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lsprintf_protos.h"
+#include "misc_protos.h"
+#include "popup_protos.h"
+#include "rexx_protos.h"
+#include "backdrop_protos.h"
+#include "requesters.h"
+#include "commands.h"
+#include "function_data.h"
+#include "menu_data.h"
+#include "callback.h"
 #include "/Modules/modules.h"
 #include "/Modules/modules_protos.h"
 
@@ -741,11 +751,21 @@ void command_new(BackdropInfo *info,IPCData *ipc,char *filename)
 		// Only add as a leftout if not editing an existing function
 		if (!edit_func)
 		{
-			// Leave the new function out
-			if (backdrop_leave_out(info,buffer,BLOF_PERMANENT|BLOF_REFRESH,-1,-1))
+			BPTR lock, parent_lock;
+
+			if (lock = LockFromPath(buffer, NULL, FALSE))
 			{
-				// Save leftout list
-				backdrop_save_leftouts(info);
+			    if (parent_lock = ParentDir(lock))
+			    {
+				// Leave the new function out
+				if (backdrop_leave_out(info,FilePart(buffer),parent_lock,BLOF_PERMANENT|BLOF_REFRESH,-1,-1))
+				{
+					// Save leftout list
+					backdrop_save_leftouts(info);
+				}
+				UnLock(parent_lock);
+			    }
+			    UnLock(lock);
 			}
 		}
 	}

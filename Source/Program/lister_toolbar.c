@@ -31,11 +31,18 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "misc_protos.h"
+#include "function_launch_protos.h"
+#include "popup_protos.h"
+#include "buttons_protos.h"
+#include "graphics.h"
+#include "lsprintf_protos.h"
 
 // Valid toolbar?
 BOOL lister_valid_toolbar(Lister *lister)
@@ -848,10 +855,10 @@ void lister_toolbar_edit(short which)
 		if (GUI->toolbar) bank=CopyButtonBank(GUI->toolbar->buttons);
 
 		// Open toolbar as a button bank
-		if (!(buttons=buttons_new(environment->toolbar_path,bank,0,0,BUTTONF_FAIL|BUTTONF_TOOLBAR)))
+		if (!(buttons=buttons_new(environment->toolbar_path,0,0,bank,0,0,BUTTONF_FAIL|BUTTONF_TOOLBAR)))
 		{
 			// Create new bank
-			if (!(buttons=buttons_new(0,0,0,1,0)))
+			if (!(buttons=buttons_new(0,0,0,0,0,1,0)))
 			{
 				DisplayBeep(GUI->screen_pointer);
 				return;

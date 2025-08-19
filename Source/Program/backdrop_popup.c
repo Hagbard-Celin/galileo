@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,17 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
+#include "popup_protos.h"
+#include "misc_protos.h"
+#include "app_msg_protos.h"
+#include "backdrop_protos.h"
+#include "cx.h"
+#include "popup_protos.h"
+#include "desktop.h"
+#include "rexx_protos.h"
+#include "menu_data.h"
+#include "lsprintf_protos.h"
 
 #define BPF_SNAPSHOT	(1<<0)
 #define BPF_CLOSE		(1<<1)
@@ -440,26 +452,26 @@ BOOL backdrop_popup(
 					if (object->bdo_type==BDO_DISK ||
 						object->bdo_type==BDO_BAD_DISK) devptr=object->bdo_device_name;
 
-					// Else get a lock on the object's parent
-					else lock=backdrop_icon_lock(object);
+					// Get parent lock
+					if (object->bdo_parent_lock)
+					    lock = object->bdo_parent_lock;
+					else
+					if (object->bdo_flags&BDOF_DESKTOP_FOLDER)
+					    lock = GUI->desktop_dir_lock;
+					else
+					if (info->lister && info->lister->cur_buffer && info->lister->cur_buffer->buf_Lock)
+					    lock = info->lister->cur_buffer->buf_Lock;
 				}
 				else
 				if (filename)
 				{
-					BPTR temp;
-
-					if (temp=Lock(filename,ACCESS_READ))
-						lock=ParentDir(temp);
-					UnLock(temp);
+					lock = info->lister->cur_buffer->buf_Lock;
 				}
 
 				// Got lock?
 				if (lock || devptr)
 				{
 					struct ArgArray *array;
-
-					// Get pathname
-					if (lock) DevNameFromLock(lock,info->buffer,256);
 
 					// Build argument array
 					if (array=NewArgArray())
@@ -483,12 +495,10 @@ BOOL backdrop_popup(
 						0,
 						0,
 						info->lister,0,
-						info->buffer,0,
+						0,0,
+						lock,0,
 						array,0,
 						0);
-
-					// Free lock
-					if (lock) UnLock(lock);
 				}
 			}
 
@@ -690,10 +700,10 @@ BOOL backdrop_popup(
 					// Run a rexx command?
 					if (type)
 					{
-						char rexxcmd[512],ipath[256];
+						char rexxcmd[512], *ipath;
 
 						// Get icon path
-						if (desktop_icon_path(object,ipath,256,0))
+						if (ipath = desktop_icon_path(object,0))
 						{
 							// Get rexx function to run
 							lsprintf(rexxcmd,
@@ -705,6 +715,8 @@ BOOL backdrop_popup(
 
 							// Run rexx thing
 							rexx_send_command(rexxcmd,FALSE);
+
+							FreeMemH(ipath);
 						}
 					}
 
@@ -762,6 +774,7 @@ BOOL backdrop_popup(
 						def_function_diskcopy,
 						0,
 						0,
+						0,0,
 						0,0,
 						0,0,
 						BuildArgArray(object->bdo_device_name,0),0,0);
@@ -988,7 +1001,7 @@ BOOL popup_get_filetype(
 
 	// Get match handle for file
 	if (handle ||
-		(handle=GetMatchHandle(name)))
+		(handle=GetMatchHandle(name,NULL)))
 	{
 		short num=0;
 
@@ -1387,7 +1400,7 @@ void popup_default_menu(BackdropInfo *info,PopUpHandle *menu,short *extnum)
 	PopUpNewItem(menu,MSG_LISTER_ICONIFY,MENU_LISTER_ICONIFY,0);
 
 	// Snapshot disabled?
-	if ((!info->lister->cur_buffer->buf_ExpandedPath[0] ||
+	if ((!info->lister->cur_buffer->buf_ExpandedPath || !info->lister->cur_buffer->buf_ExpandedPath[0] ||
 		!(info->lister->cur_buffer->flags&DWF_VALID)) &&
 		!info->lister->cur_buffer->buf_CustomHandler[0]) flags=POPUPF_DISABLED;
 
@@ -1643,7 +1656,7 @@ MatchHandle *popup_build_icon_menu(BackdropInfo *info,char *filename,BackdropObj
 
 		// Otherwise, get handle
 		else
-		if (handle=GetMatchHandle(filename))
+		if (handle=GetMatchHandle(filename,NULL))
 		{
 			// Directory?
 			if (handle->fib.fib_DirEntryType>0)
@@ -1755,7 +1768,7 @@ MatchHandle *popup_build_icon_menu(BackdropInfo *info,char *filename,BackdropObj
 				PopUpNewItem(menu,MSG_ICON_LEAVE_OUT_MENU,MENU_ICON_LEAVE_OUT,0);
 
 				// Short cut
-				if (GUI->flags2&GUIF2_ENABLE_SHORTCUTS && (filename || !templeft))
+				if (GUI->flags2&GUIF2_ENABLE_SHORTCUTS && ((filename && (strlen(filename) < 255)) || !templeft))
 				{
 					PopUpNewItem(menu,MSG_ICONS_SHORTCUT_MENU,MENU_ICON_SHORTCUT,0);
 					PopUpSeparator(menu);

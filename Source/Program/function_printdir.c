@@ -36,6 +36,13 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "function_launch_protos.h"
+#include "misc_protos.h"
+#include "function_protos.h"
+#include "buffers_protos.h"
+#include "dates.h"
+#include "lsprintf_protos.h"
 #include "/Modules/modules_internal_protos.h"
 
 // PRINTDIR internal function
@@ -99,7 +106,7 @@ GALILEOFM_FUNC(function_printdir)
 	}
 
 	// Otherwise, lock directory
-	else if (lock=Lock(path->pn_path,ACCESS_READ))
+	else if ((path->pn_lock && (lock = DupLock(path->pn_lock))) || (lock=Lock(path->pn_path,ACCESS_READ)))
 	{
 		// Examine directory
 		Examine(lock,handle->s_info);

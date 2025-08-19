@@ -9,3 +9,18 @@ The command "lister query" has a new argument:
 "lister query <handle> sourcedestlock"
 This returns "1" if the lister is locked as either a source or a destination
 lister, or "0" otherwise.
+
+The command "lister clear" has a new argument:
+"lister clear <handle> handler"
+It clears a Custom Handler previously set with "lister set <handle> handler".
+
+There is no longer a global 255 character path-length limit, if you ask for the
+path of a lister it can be of any length.
+For this reason the "lister" command has has a new argument:
+"lister assign <handle> <option>"
+Where option can be one of "get" and "free".
+"get" will make a temporary assign to the lister current-directory in the
+format "garx_00000000:", where '0' represents a hex digit.
+And "free" will un-assign it. These assigns are filtered out when viewing the
+DeviceList in Lister-windows.
+

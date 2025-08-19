@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,11 +32,19 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "callback_protos.h"
+#include "lister_protos.h"
+#include "dirlist_protos.h"
+#include "misc_protos.h"
+#include "callback_protos.h"
+#include "buffers_protos.h"
+#include "function_launch_protos.h"
+#include "dates.h"
 
 DirEntry *__asm __saveds HookCreateFileEntry(
 	register __a0 Lister *lister,
@@ -78,6 +87,17 @@ DirEntry *__asm __saveds HookFindFileEntry(
 	if (entry=find_entry(&lister->cur_buffer->entry_list,name,0,lister->cur_buffer->more_flags&DWF_CASE))
 		return entry;
 	return find_entry(&lister->cur_buffer->reject_list,name,0,lister->cur_buffer->more_flags&DWF_CASE);
+}
+
+DirEntry *__asm __saveds HookGetFileEntry(
+	register __a0 Lister *lister,
+	register __a1 DirEntry *from_entry,
+	register __d0 BOOL selected)
+{
+	DirEntry *entry;
+
+	entry=get_entry(from_entry?(struct MinList *)from_entry:&lister->cur_buffer->entry_list,selected,ENTRY_ANYTHING);
+	return entry;
 }
 
 void __asm __saveds HookFileSet(
@@ -474,7 +494,8 @@ void __asm __saveds HookResortLister(
 
 void __asm __saveds HookRefreshLister(
 	register __a0 Lister *lister,
-	register __d0 ULONG flags)
+	register __d0 ULONG flags,
+	register __d1 BOOL wait)
 {
 	ULONG refresh;
 
@@ -489,7 +510,7 @@ void __asm __saveds HookRefreshLister(
 	if (flags&HOOKREFRESH_DATE) refresh=REFRESHF_DATESTAMP;
 
 	// Refresh the lister
-	IPC_Command(lister->ipc,LISTER_REFRESH_WINDOW,refresh,0,0,0);
+	IPC_Command(lister->ipc,LISTER_REFRESH_WINDOW,refresh,0,0,(wait)?REPLY_NO_PORT:0);
 }
 
 void __asm __saveds HookRemoveFileEntry(
@@ -497,4 +518,129 @@ void __asm __saveds HookRemoveFileEntry(
 	register __a1 DirEntry *entry)
 {
 	removefile(lister->cur_buffer,entry);
+}
+
+void __asm __saveds HookListerSet(
+	register __a0 Lister *lister,
+	register __a1 struct TagItem *tags)
+{
+    struct TagItem *tag,*tstate;
+
+    // Go through tags
+    tstate=tags;
+    while (tag=NextTagItem(&tstate))
+    {
+	// Look at tag
+	switch (tag->ti_Tag)
+	{
+		// Fake directory
+		case HLT_FAKEDIR:
+			if (tag->ti_Data)
+			    lister->more_flags|=LISTERF_FAKEDIR;
+	        else
+	            lister->more_flags&=~LISTERF_FAKEDIR;
+			break;
+	}
+    }
+}
+
+BOOL __asm __saveds HookListerGet(
+	register __a0 Lister *lister,
+	register __a1 struct TagItem *tags)
+{
+    struct TagItem *tag,*tstate;
+    BOOL ret=1;
+
+    // Go through tags
+    tstate=tags;
+    while (tag=NextTagItem(&tstate))
+    {
+	// Look at tag
+	switch (tag->ti_Tag)
+	{
+		// Fake dir
+		case HLT_FAKEDIR:
+			if (tag->ti_Data)
+			    if (lister->more_flags&LISTERF_FAKEDIR)
+				*((BOOL *)tag->ti_Data) = TRUE;
+			    else
+				*((BOOL *)tag->ti_Data) = FALSE;
+			break;
+
+		// Source/Destination lock
+		case HLT_SOURCEDEST_LOCK:
+			if (tag->ti_Data)
+			    if (lister->flags&LISTERF_SOURCEDEST_LOCK)
+				*((BOOL *)tag->ti_Data) = TRUE;
+			    else
+				*((BOOL *)tag->ti_Data) = FALSE;
+			break;
+
+		// CurrentDir lock
+		case HLT_CURBUFFER_LOCK:
+			if (tag->ti_Data)
+			    if (lister->cur_buffer)
+				*((BPTR *)tag->ti_Data) = DupLock(lister->cur_buffer->buf_Lock);
+			    else
+				*((BPTR *)tag->ti_Data) = 0;
+			break;
+
+		// Something else
+		default:
+			ret=0;
+			break;
+	}
+    }
+
+    return ret;
+}
+
+void __asm __saveds HookReadDir(
+	register __a0 Lister *lister,
+	register __a1 STRPTR path,
+	register __d0 ULONG flags,
+	register __d1 BPTR path_lock)
+{
+    // Read this path
+    function_launch(FUNCTION_READ_DIRECTORY,
+	            0,0,
+		    flags|GETDIRF_CANMOVEEMPTY|GETDIRF_CANCHECKBUFS,
+	            lister,
+	            0,
+	            path,0,
+		    path_lock,0,
+	            0,0,0);
+
+}
+
+void __asm __saveds HookClearDir(
+	register __a0 Lister *lister,
+	register __d0 ULONG flags)
+{
+    ULONG fdflags = 0;
+
+    // Set flags
+    if (flags&CBCDF_CLEAR_PATH)
+    {
+	fdflags |= FREEDIRF_FREE_PATH;
+	fdflags |= FREEDIRF_FREE_EXPANDEDPATH;
+    }
+
+    if (flags&CBCDF_CLEAR_LOCK)
+	fdflags |= FREEDIRF_FREE_LOCK;
+
+    if (flags&CBCDF_CLEAR_HANDLER)
+	fdflags |= FREEDIRF_CLEAR_HANDLER;
+
+    // Check we're not showing a special buffer
+    check_special_buffer(lister,1);
+
+    // Lock current buffer
+    buffer_lock(lister->cur_buffer,TRUE);
+
+    // Free contents of buffer
+    buffer_freedir(lister->cur_buffer,fdflags);
+
+    // Unlock buffer
+    buffer_unlock(lister->cur_buffer);
 }

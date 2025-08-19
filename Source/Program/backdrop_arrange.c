@@ -36,6 +36,10 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "dirlist_protos.h"
+#include "misc_protos.h"
+#include "backdrop_protos.h"
+#include "text.h"
 
 // Position an icon
 void backdrop_icon_position(BackdropInfo *info,BackdropObject *icon,short x,short y)
@@ -838,19 +842,16 @@ Cfg_Filetype *backdrop_get_filetype(BackdropInfo *info,BackdropObject *object)
 	// Don't have a filetype yet?
 	if (!filetype)
 	{
-		BPTR lock,old;
+		BPTR lock;
 
 		// Get icon lock
 		if (lock=backdrop_icon_lock(object))
 		{
-			// Change current directory
-			old=CurrentDir(lock);
-
 			// Match filetype
-			filetype=filetype_identify(object->bdo_name,FTTYPE_ANY,0,0);
+			filetype=filetype_identify(object->bdo_name, lock, FTTYPE_ANY, 0, 0);
 
-			// Restore directory, free lock
-			UnLock(CurrentDir(old));
+			// Free lock
+			UnLock(lock);
 		}
 	}
 

@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -58,13 +58,12 @@ typedef struct SemaphoreNode
 long __asm __saveds L_GetSemaphore(
 	register __a0 struct SignalSemaphore *sem,
 	register __d0 long exclusive,
-	register __a1 char *name)
+	register __a1 char *name,
+	register __a6 struct Library *GalileoFMBase)
 {
 #ifdef TRAP_SEMAPHORE
 	SemaphoreNode *node;
 	SemaphoreOwner *owner=0;
-	struct MyLibrary *libbase;
-	struct LibData *data;
 #endif
 
 	// Attempt only?
@@ -94,15 +93,11 @@ long __asm __saveds L_GetSemaphore(
 	}
 
 #ifdef TRAP_SEMAPHORE
-	// Get our library data
-	libbase=(struct MyLibrary *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"galileofm.library");
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// Lock semaphore list
-	ObtainSemaphore(&data->semaphores.lock);
+	ObtainSemaphore(&gfmlib_data.semaphores.lock);
 
 	// Look for semaphore in list
-	for (node=(SemaphoreNode *)data->semaphores.list.lh_Head;
+	for (node=(SemaphoreNode *)gfmlib_data.semaphores.list.lh_Head;
 		node->node.mln_Succ;
 		node=(SemaphoreNode *)node->node.mln_Succ)
 	{
@@ -117,7 +112,7 @@ long __asm __saveds L_GetSemaphore(
 		if (node=AllocVec(sizeof(SemaphoreNode),MEMF_CLEAR))
 		{
 			// Add to semaphore list
-			AddTail(&data->semaphores.list,(struct Node *)node);
+			AddTail(&gfmlib_data.semaphores.list,(struct Node *)node);
 
 			// Set semaphore pointer
 			node->sem=sem;
@@ -145,7 +140,7 @@ long __asm __saveds L_GetSemaphore(
 	}
 
 	// Unlock semaphore list
-	ReleaseSemaphore(&data->semaphores.lock);
+	ReleaseSemaphore(&gfmlib_data.semaphores.lock);
 
 #endif
 
@@ -178,7 +173,7 @@ long __asm __saveds L_GetSemaphore(
 	if (owner)
 	{
 		// Lock semaphore list
-		ObtainSemaphore(&data->semaphores.lock);
+		ObtainSemaphore(&gfmlib_data.semaphores.lock);
 
 		// Remove us from the waiter queue
 		Remove((struct Node *)owner);
@@ -187,36 +182,32 @@ long __asm __saveds L_GetSemaphore(
 		AddTail((struct List *)&node->owners,(struct Node *)owner);
 
 		// Unlock semaphore list
-		ReleaseSemaphore(&data->semaphores.lock);
+		ReleaseSemaphore(&gfmlib_data.semaphores.lock);
 	}
 
 #endif
+
 
 	return TRUE;
 }
 
 void __asm __saveds L_FreeSemaphore(
-	register __a0 struct SignalSemaphore *sem)
+	register __a0 struct SignalSemaphore *sem,
+	register __a6 struct Library *GalileoFMBase)
 {
 #ifdef TRAP_SEMAPHORE
 	SemaphoreNode *node;
 	SemaphoreOwner *owner;
 	struct Task *task;
-	struct MyLibrary *libbase;
-	struct LibData *data;
-
-	// Get our library data
-	libbase=(struct MyLibrary *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"galileofm.library");
-	data=(struct LibData *)libbase->ml_UserData;
 
 	// Find this task
 	task=FindTask(0);
 
 	// Lock semaphore list
-	ObtainSemaphore(&data->semaphores.lock);
+	ObtainSemaphore(&gfmlib_data.semaphores.lock);
 
 	// Go through Semaphore list 
-	for (node=(SemaphoreNode *)data->semaphores.list.lh_Head;
+	for (node=(SemaphoreNode *)gfmlib_data.semaphores.list.lh_Head;
 		node->node.mln_Succ;
 		node=(SemaphoreNode *)node->node.mln_Succ)
 	{
@@ -253,7 +244,7 @@ void __asm __saveds L_FreeSemaphore(
 	}
 
 	// Unlock semaphore list
-	ReleaseSemaphore(&data->semaphores.lock);
+	ReleaseSemaphore(&gfmlib_data.semaphores.lock);
 
 #endif
 
@@ -262,23 +253,18 @@ void __asm __saveds L_FreeSemaphore(
 }
 
 void __asm __saveds L_ShowSemaphore(
-	register __a0 struct SignalSemaphore *sem)
+	register __a0 struct SignalSemaphore *sem,
+	register __a6 struct Library *GalileoFMBase)
 {
 #ifdef TRAP_SEMAPHORE
 	SemaphoreNode *node;
 	SemaphoreOwner *owner;
-	struct MyLibrary *libbase;
-	struct LibData *data;
-
-	// Get our library data
-	libbase=(struct MyLibrary *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"galileofm.library");
-	data=(struct LibData *)libbase->ml_UserData;
 
 	// Lock semaphore list
-	ObtainSemaphore(&data->semaphores.lock);
+	ObtainSemaphore(&gfmlib_data.semaphores.lock);
 
 	// Go through Semaphore list 
-	for (node=(SemaphoreNode *)data->semaphores.list.lh_Head;
+	for (node=(SemaphoreNode *)gfmlib_data.semaphores.list.lh_Head;
 		node->node.mln_Succ;
 		node=(SemaphoreNode *)node->node.mln_Succ)
 	{
@@ -307,7 +293,7 @@ void __asm __saveds L_ShowSemaphore(
 	}
 
 	// Unlock semaphore list
-	ReleaseSemaphore(&data->semaphores.lock);
+	ReleaseSemaphore(&gfmlib_data.semaphores.lock);
 #endif
 }
 

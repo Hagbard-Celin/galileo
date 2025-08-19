@@ -151,7 +151,7 @@ galileofm.library/IPC_Command                         galileofm.library/IPC_Comm
         IPC_Launch(list, ipcptr, name, entry, stack, data, doslib)
                     A0     A1     A2     D0    D1     D2     A3
 
-        long IPC_Launch(struct ListLock *, IPCData **, char *,
+        BOOL IPC_Launch(struct ListLock *, IPCData **, char *,
                         ULONG, ULONG, ULONG, struct Library *);
 
     FUNCTION

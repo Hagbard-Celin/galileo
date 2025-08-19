@@ -36,6 +36,9 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "function_protos.h"
+#include "menu_data.h"
 
 // Quit, Hide, Reveal
 GALILEOFM_FUNC(function_special)

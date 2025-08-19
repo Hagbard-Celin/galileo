@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-				 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -39,7 +40,7 @@ For more information on Directory Opus for Windows please see:
 
 #define LIB_VER	0
 
-int __asm __saveds __UserLibInit(void);
+int __asm __saveds __UserLibInit(register __a6 struct Library *libbase);
 void __asm __saveds __UserLibCleanup(void);
 
 struct DosLibrary *DOSBase;
@@ -58,6 +59,9 @@ struct Library *DiskfontBase;
 struct Device  *TimerBase;
 struct RxsLib  *RexxSysBase;
 struct GalileoLocale *locale;
+#ifdef _TRAMPOLINE
+struct Library __far	*MyLibBase;
+#endif
 
 #ifdef RESOURCE_TRACKING
 struct Library *ResTrackBase;
@@ -68,7 +72,7 @@ ULONG callerid;
 //extern struct ModuleData data;
 
 // Initialise libraries we need
-__asm __saveds __UserLibInit()
+__asm __saveds __UserLibInit(register __a6 struct Library *libbase)
 {
 
 #ifdef RESOURCE_TRACKING
@@ -117,6 +121,10 @@ __asm __saveds __UserLibInit()
 	// Unnecessary libraries
 	WorkbenchBase=OpenLibrary("workbench.library",0);
 	RexxSysBase=(struct RxsLib *)OpenLibrary("rexxsyslib.library",0);
+
+#ifdef _TRAMPOLINE
+	MyLibBase = libbase;
+#endif
   
 	// Allocate and open locale data
 	if (!(locale=AllocVec(sizeof(struct GalileoLocale),MEMF_CLEAR)))

@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,21 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "dirlist_protos.h"
+#include "misc_protos.h"
+#include "function_launch_protos.h"
+#include "app_msg_protos.h"
+#include "rexx_protos.h"
+#include "buffers_protos.h"
+#include "backdrop_protos.h"
+#include "path_routines.h"
+#include "desktop.h"
+#include "file_openwith.h"
+#include "handler.h"
+#include "file_select.h"
+#include "menu_data.h"
+#include "lsprintf_protos.h"
 
 #define EDIT_TIMEOUT	750000
 
@@ -584,20 +600,29 @@ short select_select_files(Lister *lister,UWORD qual,short mouse_x,short mouse_y)
 					{
 						char *ptr;
 
-						// Get comment pointer
-						ptr=(char *)GetTagData(DE_Comment,0,first_entry->de_Tags);
-
-						// Buffer list entry?
-						if (first_entry->de_SubType==SUBENTRY_BUFFER)
+						// Multi assign entry?
+						if (first_entry->de_SubType==SUBENTRY_MULTI_ASSIGN)
 						{
-							if (!(name_ptr=ptr))
-								name_ptr=(char *)GetTagData(DE_DisplayString,0,first_entry->de_Tags);
+							// Use assign name
+							name_ptr=(char *)GetTagData(DE_AssignName,0,first_entry->de_Tags);
 						}
-
-						// Device?
 						else
-						if (first_entry->de_Size==DLT_DEVICE && ptr)
-							name_ptr=ptr;
+						{
+						    // Get comment pointer
+						    ptr=(char *)GetTagData(DE_Comment,0,first_entry->de_Tags);
+
+						    // Buffer list entry?
+						    if (first_entry->de_SubType==SUBENTRY_BUFFER)
+						    {
+							    if (!(name_ptr=ptr))
+								    name_ptr=(char *)GetTagData(DE_DisplayString,0,first_entry->de_Tags);
+						    }
+
+						    // Device?
+						    else
+						    if (first_entry->de_Size==DLT_DEVICE && ptr)
+							    name_ptr=ptr;
+						}
 					}
 
 					// Get type of entry
@@ -995,7 +1020,6 @@ short select_select_files(Lister *lister,UWORD qual,short mouse_x,short mouse_y)
 		{
 			struct Window *window=0;
 			struct Layer *layer;
-			GalileoAppMessage *msg;
 			struct AppWindow *app_window=0;
 			BOOL ok=1,refresh=0;
 			unsigned long over_parent=0;
@@ -1027,8 +1051,26 @@ short select_select_files(Lister *lister,UWORD qual,short mouse_x,short mouse_y)
 					// Check it's not ours, unless we dropped onto a directory
 					if (window!=lister->window || over_entry || over_parent)
 					{
+						// Is it the main window?
+						if (window == GUI->window)
+						{
+						    BackdropObject *drop_obj;
+
+						    lock_listlock(&GUI->backdrop->objects, 0);
+
+						    // Is it over a AppIcon?
+						    if ((drop_obj = backdrop_get_object(GUI->backdrop, mouse_x - window->LeftEdge, mouse_y - window->TopEdge, 0)) &&
+							drop_obj->bdo_type == BDO_APP_ICON && !(drop_obj->bdo_flags&BDOF_BUSY))
+						    {
+								app_window = (struct AppWindow *)drop_obj->bdo_misc_data;
+								ok = 2;
+						    }
+						    unlock_listlock(&GUI->backdrop->objects);
+
+						}
+
 						// See if window is in list of AppWindows
-						if (!(app_window=WB_FindAppWindow(window))) ok=0;
+						if (!app_window && !(app_window=WB_FindAppWindow(window))) ok=0;
 					}
 				}
 				else ok=0;
@@ -1042,132 +1084,213 @@ short select_select_files(Lister *lister,UWORD qual,short mouse_x,short mouse_y)
 			else
 			if (app_window)
 			{
-				struct MsgPort *port;
+				struct MsgPort *port = 0;
+				struct AppMessage *msg = 0;
+				WORD winmousex, winmousey;
 
-				// Allocate AppMessage
-				if (msg=alloc_appmsg_files(
-					entry,
-					lister->cur_buffer,
-					multi_drag))
+				winmousex = mouse_x-window->LeftEdge;
+				winmousey = mouse_y-window->TopEdge;
+
+			        if (lister->cur_buffer->buf_CustomHandler[0])
+			        {
+			            ULONG id;
+				    char *dest_path=0,*pathname = 0;
+		                    Lister *dest=0;
+				    BackdropInfo *info=0;
+
+			            // Is window a lister?
+			            if ((id=GetWindowID(window))==WINDOW_LISTER)
+			            {
+			                // Get destination lister's handle
+			                if (dest=(Lister *)IPCDATA(((IPCData *)GetWindowAppPort(window))))
+			                {
+				            // Lister in text mode
+				            if (!(dest->flags&LISTERF_VIEW_ICONS))
+				            {
+				                if (over_entry)
+					        {
+						    if (*(ULONG *)lister->cur_buffer->buf_CustomHandler != CUSTH_TYPE_GFMMODULE)
+						    {
+				                        // Use this path
+					                if (pathname = JoinString(lister->lister_memory, dest->cur_buffer->buf_Path, over_entry->de_Node.dn_Name, NULL, JSF_E_SLASH))
+						            dest_path = pathname;
+						    }
+					        }
+				            }
+				            // Lister in icon mode
+				            else
+				            {
+				                // Get backdrop info
+				                info=dest->backdrop_info;
+				            }
+			                }
+			            }
+
+				    if (*(ULONG *)lister->cur_buffer->buf_CustomHandler == CUSTH_TYPE_GFMMODULE)
+				    {
+					BPTR dest_lock = 0;
+					GalileoHandlerAppMessage *hamsg;
+
+					if (dest && dest->cur_buffer)
+					    dest_lock = dest->cur_buffer->buf_Lock;
+					else
+					if (id==WINDOW_BACKDROP)
+					    dest_lock = GUI->desktop_dir_lock;
+
+			                if (over_entry || over_parent) qual|=IEQUALIFIER_SUBDROP;
+
+					if (hamsg = alloc_handler_appmsg_files(entry, lister->cur_buffer, multi_drag,
+									   "dropfrom", dest, dest_lock,	qual))
+					{
+					    Forbid();
+					    if (port = FindPort(lister->cur_buffer->buf_CustomHandler))
+					    {
+						// Send the message
+						PutMsg(port,(struct Message *)hamsg);
+						Permit();
+						port = 0;
+
+					    }
+					    else
+					    {
+						Permit();
+						FreeHandlerMessage((GalileoHandlerMessage *)hamsg);
+					    }
+
+					    refresh = 1;
+					}
+				    }
+				    else
+				    {
+
+			                // Or the desktop?
+			                if (id==WINDOW_BACKDROP)
+			                {
+			                    // Get info pointer
+			                    info=GUI->backdrop;
+			                }
+
+			                if (info)
+			                {
+			                    BackdropObject *icon;
+
+			                    // Lock backdrop list
+			                    lock_listlock(&info->objects,0);
+
+			                    // See if we dropped on an object
+					    if (icon=backdrop_get_object(info, winmousex, winmousey, 0))
+			                    {
+				                // Get path of icon
+						if (pathname = desktop_icon_path(icon,0))
+				                {
+				                    // Use this path
+					            dest_path = pathname;
+				                }
+			                    }
+				            else
+			                    if (id==WINDOW_BACKDROP)
+			                    {
+			                        // Set destination path
+			                        dest_path="desktop";
+				            }
+
+			                    // Unlock backdrop list
+			                    unlock_listlock(&info->objects);
+			                }
+
+			                if (!dest_path)
+			                {
+				            if (pathname = CopyString(lister->lister_memory, dest->cur_buffer->buf_Path))
+				            {
+				                if (over_parent)
+				                    path_parent(pathname);
+
+			                        // Use this path
+				                dest_path = pathname;
+				            }
+			                }
+
+			                // Send to rexx handler
+			                // FIXME: Wrong msg
+			                if (over_entry || over_parent) qual|=IEQUALIFIER_SUBDROP;
+				        //rexx_custom_app_msg(msg,lister->cur_buffer,"dropfrom",dest,dest_path,qual);
+				        rexx_app_msg_files(entry, lister->cur_buffer, multi_drag, "dropfrom", dest, dest_path, qual);
+
+
+			                // Free path
+			                if (pathname)
+				            FreeMemH(pathname);
+				    }
+			        }
+				else
+				if (((AppEntry *)app_window)->ae_port->mp_Node.ln_Type == GNT_LISTER_APPMSG_PORT ||
+				    ((AppEntry *)app_window)->ae_port->mp_Node.ln_Type == GNT_MAIN_APPMSG_PORT)
 				{
-					// Get window information
-					port=WB_AppWindowData(
-						app_window,
-						&msg->ga_Msg.am_ID,
-						&msg->ga_Msg.am_UserData);
+				    GalileoListerAppMessage *lmsg;
+
+				    if (lmsg = alloc_lister_appmsg_files(entry, lister->cur_buffer, multi_drag))
+				    {
+					msg = (struct AppMessage *)lmsg;
 
 					// Fill out AppMessage info
-					msg->ga_Msg.am_Type=MTYPE_APPWINDOW;
-					msg->ga_Msg.am_MouseX=mouse_x-((window)?window->LeftEdge:0);
-					msg->ga_Msg.am_MouseY=mouse_y-((window)?window->TopEdge:0);
+					lmsg->glam_Type = MTYPE_LISTER_APPWINDOW;
+					lmsg->glam_MouseX = winmousex;
+					lmsg->glam_MouseY = winmousey;
+					lmsg->glam_Lister = lister;
+					lmsg->glam_OverEntry = over_entry;
+					lmsg->glam_Flags |= over_parent;
+				    }
+				}
+				else
+				{
+				    if (msg=alloc_appmsg_files(entry, lister->cur_buffer, multi_drag))
+				    {
+					msg->am_MouseX = winmousex;
+					msg->am_MouseY = winmousey;
 
-					// Set source lister pointer
-					set_appmsg_data(msg,(ULONG)lister,over_parent,(ULONG)over_entry);
-
-					// Custom handler assigned?
-					if (lister->cur_buffer->buf_CustomHandler[0])
+					// Fill out AppMessage info
+					if (ok == 2)
 					{
-						BOOL put=0;
-						Lister *dest=0;
-						char *dest_path=0,*pathname;
-						BackdropInfo *info=0;
-						ULONG id;
+					    msg->am_Type=MTYPE_APPICON;
 
-						// Allocate path name
-						if (pathname=AllocVec(512,MEMF_CLEAR))
-						{
-							// Is window a lister?
-							if ((id=GetWindowID(window))==WINDOW_LISTER)
-							{
-								// Get destination lister's handle
-								if (dest=(Lister *)IPCDATA(((IPCData *)GetWindowAppPort(window))))
-								{
-									// If destination lister also has a custom handler
-									if (dest->cur_buffer->buf_CustomHandler[0])
-									{
-										// Send message to destination
-										put=1;
-									}
-
-									// Get path
-									strcpy(pathname,dest->cur_buffer->buf_Path);
-									dest_path=pathname;
-
-									// Add on sub-directory, or do parent
-									if (over_entry)
-										AddPart(pathname,over_entry->de_Node.dn_Name,512);
-									else
-									if (over_parent)
-										path_parent(pathname);
-
-									// Is lister in icon mode?
-									if (dest->flags&LISTERF_VIEW_ICONS)
-									{
-										// Get backdrop info
-										info=dest->backdrop_info;
-									}
-								}
-							}
-
-							// Or the desktop?
-							else
-							if (id==WINDOW_BACKDROP)
-							{
-								// Set destination path
-								dest_path="desktop";
-
-								// Get info pointer
-								info=GUI->backdrop;
-							}
-
-							// Got icon backdrop?
-							if (info)
-							{
-								BackdropObject *icon;
-
-								// Lock backdrop list
-								lock_listlock(&info->objects,0);
-
-								// See if we dropped on an object
-								if (icon=backdrop_get_object(info,msg->ga_Msg.am_MouseX,msg->ga_Msg.am_MouseY,0))
-								{
-									// Get path of icon
-									if (desktop_icon_path(icon,pathname,512,0))
-									{
-										// Use this path
-										dest_path=pathname;
-									}
-								}
-
-								// Unlock backdrop list
-								unlock_listlock(&info->objects);
-							}
-
-							// Send to rexx handler
-							if (over_entry || over_parent) qual|=IEQUALIFIER_SUBDROP;
-							rexx_custom_app_msg(msg,lister->cur_buffer,"dropfrom",dest,dest_path,qual);
-
-							// Free message if not sending it
-							if (!put)
-							{
-								ReplyAppMessage(msg);
-								msg=0;
-							}
-
-							// Free path
-							FreeVec(pathname);
-						}
+					    if (port->mp_Node.ln_Type == GNT_APPMSG_PORT)
+					    {
+						if (environment->env->settings.icon_flags&ICONFLAG_DOUNTOICONS)
+						    msg->am_Class = GLAMCLASS_LISTER_ICON;
+						else
+						    msg->am_Class = GLAMCLASS_LISTER;
+					    }
 					}
+					else
+					    msg->am_Type=MTYPE_APPWINDOW;
+				    }
+				}
 
-					// Send message
-					if (msg) PutMsg(port,(struct Message *)msg);
+				if (msg)
+			        {
 
-					// Refresh the lister
-					refresh=1;
+				    // Get window information
+				    port=WB_AppWindowData(
+					    app_window,
+					    &msg->am_ID,
+					    &msg->am_UserData);
+
+				    // Custom handler assigned?
+				    // FIXME: Assign for lock?
+			        }
+				// Do we have a  message
+				if (msg)
+				{
+				    // Send it
+				    PutMsg(port,(struct Message *)msg);
+
+				    // Refresh the lister
+				    refresh=1;
 				}
 
 				// FindAppWindow left us in (nested) Forbid()
-				Permit();
+				if (ok != 2)
+				    Permit();
 			}
 
 			// Unbusy
@@ -1347,20 +1470,8 @@ void select_rmb_scroll(Lister *lister,short x,short y)
 					// Otherwise
 					else
 					{
-						// Device?
-						if (entry->de_Node.dn_Type==ENTRY_DEVICE)
-						{
-							// Get pathname
-							strcpy(lister->work_buffer,entry->de_Node.dn_Name);
-						}
-
-						// File
-						else
-						{
-							// Build full filename
-							strcpy(lister->work_buffer,lister->cur_buffer->buf_Path);
-							AddPart(lister->work_buffer,entry->de_Node.dn_Name,512);
-						}
+						// Get object name
+						strcpy(lister->work_buffer,entry->de_Node.dn_Name);
 					}
 
 					// Do the popup
@@ -1387,6 +1498,13 @@ void select_rmb_scroll(Lister *lister,short x,short y)
 								// Custom handler assigned?
 								if (lister->cur_buffer->buf_CustomHandler[0])
 								{
+								    if (*(ULONG *)lister->cur_buffer->buf_CustomHandler == CUSTH_TYPE_GFMMODULE)
+									galileo_handler_msg(0, app_commands[REXXAPPCMD_MENU],
+											    entry, lister,
+											    0, 0, 0, 0,
+											    id,
+											    0, 0);
+								    else
 									// Send message
 									rexx_handler_msg(
 										0,
@@ -1408,24 +1526,23 @@ void select_rmb_scroll(Lister *lister,short x,short y)
 						if (id>=MENU_OPEN_WITH_BASE &&
 							id<=MENU_OPEN_WITH_MAX)
 						{
-							char *name;
+						    struct open_arg *oarg;
 
-							// Allocate name
-							if (name=AllocVec(512,0))
-							{
-								char task_name[30];
+						    if (oarg = AllocVec(sizeof(struct open_arg) + strlen(entry->de_Node.dn_Name), MEMF_CLEAR|MEMF_PUBLIC))
+						    {
+							char task_name[30];
 
-								// Build name
-								strcpy(name,lister->cur_buffer->buf_Path);
-								AddPart(name,entry->de_Node.dn_Name,512);
+							oarg->parent_dir = lister->cur_buffer->buf_Lock;
+							strcpy(oarg->name, entry->de_Node.dn_Name);
 
 								// Build task name (kludgy!)
 								lsprintf(task_name,"galileo_%ld_open_with",id-MENU_OPEN_WITH_BASE);
 
-								// Do 'open with' on this entry
-								if (!(misc_startup(task_name,MENU_FILE_OPEN_WITH,lister->window,name,0)))
-									FreeVec(name);
-							}
+							// Do 'open with' on this entry
+							if (!(misc_startup(task_name,MENU_FILE_OPEN_WITH,lister->window,oarg,0)))
+								FreeVec(oarg);
+
+						    }
 						}
 
 						// Look at ID
@@ -1446,19 +1563,19 @@ void select_rmb_scroll(Lister *lister,short x,short y)
 							// Open with
 							case MENU_OPEN_WITH:
 								{
-									char *name;
+								    struct open_arg *oarg;
 
-									// Allocate name
-									if (name=AllocVec(512,0))
-									{
-										// Build name
-										strcpy(name,lister->cur_buffer->buf_Path);
-										AddPart(name,entry->de_Node.dn_Name,512);
+								    if (oarg = AllocVec(sizeof(struct open_arg) + strlen(entry->de_Node.dn_Name), MEMF_CLEAR|MEMF_PUBLIC))
+								    {
 
-										// Do 'open with' on this entry
-										if (!(misc_startup("galileo_open_with",MENU_FILE_OPEN_WITH,lister->window,name,0)))
-											FreeVec(name);
-									}
+									oarg->parent_dir = lister->cur_buffer->buf_Lock;
+									strcpy(oarg->name, entry->de_Node.dn_Name);
+
+									// Do 'open with' on this entry
+									if (!(misc_startup("galileo_open_with",MENU_FILE_OPEN_WITH,lister->window,oarg,0)))
+										FreeVec(oarg);
+
+								    }
 								}
 								break;
 
@@ -1472,8 +1589,8 @@ void select_rmb_scroll(Lister *lister,short x,short y)
 
 							// Rename
 							case MENU_ICON_RENAME:
-#ifdef _DEBUG
-								KPrintF("Renaming \n");
+#ifdef _DEBUG_FILE_SELECT
+								KPrintF("\n	!!** file_select.c: Renaming \n");
 #endif
 								// Do rename
 								file_run_function(lister,entry,def_function_rename,0,0);
@@ -1537,6 +1654,7 @@ void select_rmb_scroll(Lister *lister,short x,short y)
 									def_function_diskcopy,
 									0,
 									0,
+									0,0,
 									0,0,
 									0,0,
 									BuildArgArray(entry->de_Node.dn_Name,0),0,0);
@@ -1706,6 +1824,13 @@ void file_doubleclick(Lister *lister,DirEntry *entry,UWORD qual)
 			// Custom handler assigned?
 			if (lister->cur_buffer->buf_CustomHandler[0])
 			{
+			    if (*(ULONG *)lister->cur_buffer->buf_CustomHandler == CUSTH_TYPE_GFMMODULE)
+				galileo_handler_msg(0, "doubleclick",
+						    entry, lister,
+						    0, 0, 0, 0,
+						    0,
+						    qual, 0);
+			    else
 				// Send double-click message
 				rexx_handler_msg(
 					0,
@@ -1723,28 +1848,23 @@ void file_doubleclick(Lister *lister,DirEntry *entry,UWORD qual)
 			else
 			{
 				Cfg_Filetype *type;
-				char *dir;
-				char *pathname;
+				char *pathname = 0;
 				Lister *new_lister=0;
 				short action;
-
-				if (!(pathname=AllocVec(512,0)))
-					break;
-
-				// Get current directory
-				dir=lister->cur_buffer->buf_Path;
+				BPTR lock = 0;
 
 				// If this is a device, replace pathname
 				if (entry->de_Node.dn_Type==ENTRY_DEVICE)
 				{
-					if (entry->de_SubType==SUBENTRY_BUFFER)
+					if (entry->de_SubType==SUBENTRY_MULTI_ASSIGN || entry->de_SubType==SUBENTRY_BUFFER)
 					{
 						char *ptr;
 
 						if (!(ptr=(char *)GetTagData(DE_Comment,0,entry->de_Tags)))
 							ptr=(char *)GetTagData(DE_DisplayString,0,entry->de_Tags);
-						if (ptr) strcpy(pathname,ptr);
-						else *pathname=0;
+
+						if (ptr)
+						    pathname = ptr;
 
 						// Check for custom buffer
 						if (lister_select_cache(lister,(DirBuffer *)entry->de_UserData))
@@ -1753,21 +1873,33 @@ void file_doubleclick(Lister *lister,DirEntry *entry,UWORD qual)
 							*pathname=0;
 						}
 					}
-					else strcpy(pathname,entry->de_Node.dn_Name);
+					else
+					{
+					    pathname = entry->de_Node.dn_Name;
+					}
+
+					if (entry->de_SubType&(SUBENTRY_MULTI_ASSIGN|SUBENTRY_ASSIGN))
+					{
+					    lock = DupLock((BPTR)entry->de_UserData);
+					}
+					else
+					{
+					    // Lock the directory
+					    lock = LockFromPath(pathname,NULL,FALSE);
+					}
 				}
 
-				// Otherwise, tack directory name onto pathname
+				// Otherwise, dir name
 				else
 				{
-					strcpy(pathname,dir);
-					AddPart(pathname,entry->de_Node.dn_Name,512);
-					AddPart(pathname,"",512);
+					// Need only the directory name if we got a lock
+					if (lister->cur_buffer->buf_Lock)
+					    pathname = entry->de_Node.dn_Name;
 				}
 
 				// Break if no path
-				if (!*pathname)
+				if (!pathname)
 				{
-					FreeVec(pathname);
 					break;
 				}
 
@@ -1779,28 +1911,37 @@ void file_doubleclick(Lister *lister,DirEntry *entry,UWORD qual)
 				action=FTTYPE_DOUBLE_CLICK;
 				
 				// Try to match filetype
-				if (entry->de_Node.dn_Type!=ENTRY_DEVICE &&
-					(type=filetype_identify(pathname,action,0,0)) &&
-					type!=default_filetype)
+				if (entry->de_Node.dn_Type!=ENTRY_DEVICE)
 				{
-					// Do filetype action on directory
-					function_launch(
-						FUNCTION_FILETYPE,
-						0,
-						action,
-						0,
-						lister,0,
-						lister->cur_buffer->buf_Path,0,
-						BuildArgArray(pathname,0),0,0);
-					FreeVec(pathname);
-					break;
+				    if ((type=filetype_identify(pathname,lister->cur_buffer->buf_Lock,action,0,0)) &&
+					type!=default_filetype)
+				    {
+					    // Do filetype action on directory
+					    function_launch(
+						    FUNCTION_FILETYPE,
+						    0,
+						    action,
+						    0,
+						    lister,0,
+						    lister->cur_buffer->buf_Path,0,
+						    lister->cur_buffer->buf_Lock,0,
+						    BuildArgArray(pathname,0),0,0);
+					    FreeVec(pathname);
+					    if (lock)
+						UnLock(lock);
+					    break;
+				    }
+
+				    // Lock the directory
+				    if (lister->cur_buffer->buf_Lock && !lock)
+					lock = Lock(entry->de_Node.dn_Name,ACCESS_READ);
 				}
 
 				// Open a new window?
 				if (qual&IEQUAL_ANYSHIFT)
 				{
 					// Read into new lister
-					new_lister=read_new_lister(pathname,lister,qual);
+					new_lister=read_new_lister(pathname,lock,lister,qual);
 				}
 
 				// Need to read in current window?
@@ -1818,10 +1959,9 @@ void file_doubleclick(Lister *lister,DirEntry *entry,UWORD qual)
 					read_directory(
 						lister,
 						pathname,
+						lock,
 						GETDIRF_CANMOVEEMPTY|GETDIRF_CANCHECKBUFS);
 				}
-
-				FreeVec(pathname);
 			}
 			break;
 
@@ -1833,6 +1973,13 @@ void file_doubleclick(Lister *lister,DirEntry *entry,UWORD qual)
 			if (lister->cur_buffer->buf_CustomHandler[0])
 			{
 				// Send double-click message
+			    if (*(ULONG *)lister->cur_buffer->buf_CustomHandler == CUSTH_TYPE_GFMMODULE)
+				galileo_handler_msg(0, "doubleclick",
+						    entry, lister,
+						    0, 0, 0, 0,
+						    0,
+						    qual, 0);
+			    else
 				rexx_handler_msg(
 					0,
 					lister->cur_buffer,
@@ -1846,16 +1993,8 @@ void file_doubleclick(Lister *lister,DirEntry *entry,UWORD qual)
 			}
 			else
 			{
-				char *pathname;
 				ULONG flags=0;
 				short action;
-
-				if (!(pathname=AllocVec(512,0)))
-					break;
-
-				// Build full pathname
-				strcpy(pathname,lister->cur_buffer->buf_Path);
-				AddPart(pathname,entry->de_Node.dn_Name,512);
 
 				// Is the lister in name mode?
 				if (!(lister->flags&LISTERF_VIEW_ICONS))
@@ -1878,9 +2017,9 @@ void file_doubleclick(Lister *lister,DirEntry *entry,UWORD qual)
 					(qual<<16)|action,
 					flags,
 					lister,0,
-					lister->cur_buffer->buf_Path,0,
-					BuildArgArray(pathname,0),0,0);
-				FreeVec(pathname);
+					entry->de_Node.dn_Name,0,
+					lister->cur_buffer->buf_Lock,0,
+					0,0,0);
 			}
 			break;
 	}
@@ -2646,16 +2785,6 @@ short select_key_select(Lister *lister,BOOL doubleclick)
 // Run a function on a single file
 void file_run_function(Lister *lister,DirEntry *entry,Cfg_Function *func,char *dest,ULONG flags)
 {
-	// Build filename
-	strcpy(lister->work_buffer,lister->cur_buffer->buf_Path);
-	AddPart(lister->work_buffer,entry->de_Node.dn_Name,512);
-
-	// Add a / if a directory
-	if (entry->de_Node.dn_Type>=0) AddPart(lister->work_buffer,"",512);
-
-#ifdef _DEBUG
-    KPrintF("Work Buffer: %s \n",lister->work_buffer);
-#endif
 	// Launch function
 	function_launch(
 		FUNCTION_RUN_FUNCTION_EXTERNAL,
@@ -2664,6 +2793,7 @@ void file_run_function(Lister *lister,DirEntry *entry,Cfg_Function *func,char *d
 		flags,
 		lister,0,
 		0,dest,
-		BuildArgArray(lister->work_buffer,0),0,
+		lister->cur_buffer->buf_Lock,0,
+		BuildArgArray(entry->de_Node.dn_Name,0),0,
 		0);
 }

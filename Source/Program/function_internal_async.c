@@ -1,7 +1,7 @@
 /*
 
 Galileo Amiga File-Manager and Workbench Replacement
-Copyright 2023 Hagbard Celine
+Copyright 2023,2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +36,9 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
+#include "commands.h"
+#include "callback.h"
 #include "/Modules/modules.h"
 #include "/Modules/modules_protos.h"
 
@@ -53,8 +56,7 @@ function_internal_async(AsyncData *adata)
 		   adata->command->name,
 		   (ULONG)async_command,
 		   STACK_DEFAULT,
-		   (ULONG)adata,
-		   (struct Library *)DOSBase);
+		   (ULONG)adata);
 
     if (!async_proc)
 	 ret = 0;
@@ -123,4 +125,8 @@ void __saveds async_command(void)
 
     // Put opencount back
     ModuleBase->lib_OpenCnt--;
+
+#ifdef RESOURCE_TRACKING
+    ResourceTrackingEndOfTask();
+#endif
 }

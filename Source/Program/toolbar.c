@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -51,9 +51,9 @@ ToolBarInfo *OpenToolBar(Cfg_ButtonBank *buttons,char *pathname)
 		// Load disk file
 		else
 		if (pathname && pathname[0])
-        {
-        	toolbar->buttons=OpenButtonBank(pathname);
-        }
+		{
+			toolbar->buttons=OpenButtonBank(pathname, NULL);
+		}
 		// Invalid?
 		if (!toolbar->buttons ||
 			!(GetToolBarCache(toolbar,FALSE)))
@@ -84,7 +84,6 @@ void FreeToolBar(ToolBarInfo *toolbar)
 		// Free buttons
 		CloseButtonBank(toolbar->buttons);
 
-        
 		// Free position array
 		FreeVec(toolbar->button_array);
 
@@ -108,9 +107,10 @@ BOOL GetToolBarCache(ToolBarInfo *toolbar,BOOL real)
 
 	// Free existing cache
 	FreeToolBarCache(toolbar);
-    // Plug memory leak
-    if (toolbar->button_array)
-        FreeVec(toolbar->button_array);
+
+	// Plug memory leak
+	if (toolbar->button_array)
+	    FreeVec(toolbar->button_array);
 
 	// Remap toolbar if this is for real
 	if (real && !toolbar->done_remap)

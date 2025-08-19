@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,28 +32,58 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "function_launch_protos.h"
+#include "popup_protos.h"
+#include "requesters.h"
+#include "start_menu_protos.h"
+#include "menu_data.h"
+#include "help.h"
+#include "lsprintf_protos.h"
 
 // Open a new start menu
-IPCData *start_new(char *buttons,char *label,char *image,short x,short y)
+IPCData *start_new(char *buttons, BPTR parent_lock, char *label,char *image,short x,short y)
 {
 	StartMenu *menu;
 	IPCData *ipc;
+	APTR memhandle;
+
+	// Memory handle
+	if (!(memhandle = NewMemHandle(0,0,MEMF_CLEAR)))
+	    return 0;
 
 	// Allocate data
-	if (!(menu=AllocVec(sizeof(StartMenu),MEMF_CLEAR)) ||
-		!(menu->memory=NewMemHandle(1024,512,MEMF_CLEAR)))
+	if (!(menu = AllocMemH(memhandle,sizeof(StartMenu))))
 	{
-		FreeVec(menu);
+		FreeMemHandle(memhandle);
 		return 0;
 	}
 
+	menu->memory = memhandle;
+
 	// Fill it out
-	if (buttons) strcpy(menu->buttons,buttons);
+	if (buttons)
+	{
+	    ULONG len;
+
+	    len = strlen(buttons) + 1;
+
+	    if (!(menu->buttons = AllocMemH(memhandle,len)))
+	    {
+		FreeMemHandle(memhandle);
+		return 0;
+	    }
+
+	    if (parent_lock)
+		menu->buttons_parent_lock = DupLock(parent_lock);
+
+	    strcpy(menu->buttons,buttons);
+	}
 	if (label) strcpy(menu->data.label,label);
 	if (image) strcpy(menu->data.image,image);
 
@@ -67,11 +98,13 @@ IPCData *start_new(char *buttons,char *label,char *image,short x,short y)
 		"galileo_start_menu",
 		(ULONG)start_proc,
 		STACK_DEFAULT,
-		(ULONG)menu,(struct Library *)DOSBase)) && ipc) return ipc;
+		(ULONG)menu)) && ipc) return ipc;
 
 	// Failed
 	if (!ipc)
 	{
+		if (menu->buttons_parent_lock)
+		    UnLock(menu->buttons_parent_lock);
 		FreeMemHandle(menu->memory);
 		FreeVec(menu);
 	}
@@ -94,7 +127,7 @@ void __saveds start_proc(void)
 	}
 
 	// If path is empty, go straight into edit mode
-	if (!menu->buttons[0])
+	if (!menu->bank->path || !menu->bank->path[0])
 	{
 		// If edit is cancelled, don't open
 		if (!(start_edit(menu)))
@@ -152,7 +185,7 @@ void __saveds start_proc(void)
 		if (menu->app_window)
 		{
 			struct AppMessage *msg;
-			short arg;
+			WORD arg;
 
 			// Get messages
 			while (msg=(struct AppMessage *)GetMsg(menu->app_port))
@@ -160,13 +193,16 @@ void __saveds start_proc(void)
 				// Go through arguments
 				for (arg=0;arg<msg->am_NumArgs;arg++)
 				{
-					char path[256];
+					char *path;
 
 					// Get pathname
-					if (GetWBArgPath(&msg->am_ArgList[arg],path,256))
+					if (path = GetWBArgPath(&msg->am_ArgList[arg]))
 					{
 						// Add to start menu
+						// FIXME: Lock for path ?
 						start_add_item(menu,path);
+
+						FreeMemH(path);
 					}
 				}
 
@@ -359,22 +395,22 @@ ULONG __asm __saveds start_init(
 	SET_IPCDATA(menu->ipc,menu);
 
 	// Create a new bank?
-	if (!menu->buttons[0])
-    {
-		menu->bank=NewButtonBank(0,0);
-    }
-
-	// Load button bank information
+	if (menu->buttons && menu->buttons[0])
+	{
+	    menu->bank = OpenButtonBank(menu->buttons, &menu->buttons_parent_lock);
+	}
 	else
-    {
-		menu->bank=OpenButtonBank(menu->buttons);
-    }
+	{
+	    menu->bank = NewButtonBank(0,0);
+	}
+
+	// Finished with this
+	if (menu->buttons)
+	    FreeMemH(menu->buttons);
+
 	// No bank?
 	if (!menu->bank)
 		return 0;
-
-	// Get current path
-	stccpy(menu->buttons,menu->bank->path,sizeof(menu->buttons));
 
 	// If bank doesn't have start menu information, allocate it
 	if (!menu->bank->startmenu)
@@ -438,14 +474,13 @@ void start_cleanup(StartMenu *menu)
 	CloseButtonBank(menu->bank);
 
 	// Free message port
-    while (msg=GetMsg(menu->app_port))
-		ReplyMsg(msg);
+	while (msg=GetMsg(menu->app_port))
+	    ReplyMsg(msg);
 	DeleteMsgPort(menu->app_port);
 
 	// Free data
 	PopUpFreeHandle(menu->menu);
 	FreeMemHandle(menu->memory);
-	FreeVec(menu);
 
 	// Forbid so we don't get unloaded too soon
 	Forbid();
@@ -458,6 +493,10 @@ void start_cleanup(StartMenu *menu)
 
 	// Free IPC
 	IPC_Free(ipc);
+
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }
 
 
@@ -811,8 +850,8 @@ void start_hide(StartMenu *menu)
 		menu->x=menu->window->LeftEdge;
 		menu->y=menu->window->TopEdge;
 
-        // Free DrawInfo
-        FreeScreenDrawInfo(menu->window->WScreen, menu->drawinfo);
+		// Free DrawInfo
+		FreeScreenDrawInfo(menu->window->WScreen, menu->drawinfo);
 
 		// Remove AppWindow
 		if (menu->app_window)
@@ -1244,7 +1283,7 @@ BOOL start_edit(StartMenu *menu)
 				menu->bank,
 				(ULONG)&GUI->command_list.list,
 				3,
-				menu->buttons))
+				menu->bank->path))
 	{
 		// Lock bank lock
 		GetSemaphore(&menu->lock,SEMF_EXCLUSIVE,0);
@@ -1265,9 +1304,6 @@ BOOL start_edit(StartMenu *menu)
 		// If changed, set flag
 		if (menu->bank->window.flags&BTNWF_CHANGED)
 			menu->changed=1;
-
-		// Get current path
-		stccpy(menu->buttons,menu->bank->path,sizeof(menu->buttons));
 
 		// Set result
 		ret=1;
@@ -1298,7 +1334,7 @@ BOOL start_save(StartMenu *menu)
 		CopyMem((char *)&menu->data,(char *)menu->bank->startmenu,sizeof(CFG_STRT));
 
 	// Save the button bank				
-	if (!SaveButtonBank(menu->bank,menu->buttons))
+	if (!SaveButtonBank(menu->bank,menu->bank->path))
 	{
 		menu->changed=0;
 		ret=1;
@@ -1406,7 +1442,7 @@ void start_create_new(BOOL load)
 	}
 
 	// Create a start menu
-	if (ipc=start_new(path,"Start!",0,-1,-1))
+	if (ipc=start_new(path,0,"Start!",0,-1,-1))
 	{
 		// Show new start menu
 		if (load && GUI->window)
@@ -1431,7 +1467,7 @@ void start_add_item(StartMenu *menu,char *pathname)
 	if (!menu->bank || !pathname || !*pathname) return;
 
 	// Lock file
-	if (!(lock=Lock(pathname,ACCESS_READ)))
+	if (!(lock = LockFromPath(pathname, NULL, NULL)))
 	{
 		DisplayBeep(menu->window->WScreen);
 		return;
@@ -1442,7 +1478,7 @@ void start_add_item(StartMenu *menu,char *pathname)
 		label=pathname;
 
 	// Allocate buffer, button
-	if (!(string=AllocVec(512,MEMF_CLEAR)) ||
+	if (!(string=AllocVec(strlen(pathname) + 20,MEMF_CLEAR)) ||
 		!(button=NewButtonWithFunc(
 					menu->bank->memory,
 					label,
@@ -1481,7 +1517,7 @@ void start_add_item(StartMenu *menu,char *pathname)
 		if (!sufcmp(string,".info")) strcat(string,".info");
 
 		// See if icon is present
-		if (lock=Lock(string,ACCESS_READ))
+		if (lock = LockFromPath(string, NULL, NULL))
 		{
 			// It'll be a Workbench function
 			type=INST_WORKBENCH;

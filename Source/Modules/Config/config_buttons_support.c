@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -209,8 +209,7 @@ void _config_buttons_edit_button(
 				"galileo_button_editor",
 				(ULONG)ButtonEditor,
 				STACK_DEFAULT,
-				(ULONG)startup,
-				(struct Library *)DOSBase)) && ipc)
+				(ULONG)startup)) && ipc)
 			{
 				success=1;
 

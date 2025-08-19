@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -120,8 +120,7 @@ Cfg_Filetype *__asm __saveds L_EditFiletype(
 		"galileo_filetype_editor",
 		(ULONG)FiletypeEditor,
 		STACK_DEFAULT,
-		(ULONG)data,
-		(struct Library *)DOSBase)) || !editor)
+		(ULONG)data)) || !editor)
 	{
 		// Failed; free data
 		FreeFiletype(data->type);

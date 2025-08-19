@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,13 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "misc_protos.h"
+#include "backdrop_protos.h"
+#include "scripts.h"
+#include "iconpos_protos.h"
+#include "graphics.h"
+#include "menu_data.h"
 
 BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned short flags)
 {
@@ -433,12 +441,11 @@ BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned
 					if ((window=layer->Window))
 					{
 						BOOL ok=0;
+						BackdropObject *drop_obj;
 
 						// Is it our window?
 						if (window==info->window)
 						{
-							BackdropObject *drop_obj;
-
 							// Lock backdrop list
 							lock_listlock(&info->objects,0);
 
@@ -450,7 +457,7 @@ BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned
 								if ((msg->Qualifier&(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))==(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))
 								{
 									// Replace the image
-									backdrop_replace_icon_image(info,0,drop_obj);
+									backdrop_replace_icon_image(info,0,0,drop_obj);
 									fail=2;
 								}
 
@@ -460,7 +467,11 @@ BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned
 								if (drop_obj->bdo_type==BDO_APP_ICON)
 								{
 									// If the icon isn't busy
-									if (!(drop_obj->bdo_flags&BDOF_BUSY)) ok=1;
+									if (!(drop_obj->bdo_flags&BDOF_BUSY))
+									{
+									    appwindow = (struct AppWindow *)drop_obj->bdo_misc_data;
+									    ok = 1;
+									}
 								}
 
 								// On groups...
@@ -487,25 +498,94 @@ BOOL backdrop_handle_button(BackdropInfo *info,struct IntuiMessage *msg,unsigned
 							// Unlock backdrop list
 							unlock_listlock(&info->objects);
 						}
+						else
+						if (window == GUI->window)
+						{
+						    //short x, y;
 
+						    //x = msg->MouseX + info->window->LeftEdge - window->LeftEdge;
+						    //y = msg->MouseY + info->window->TopEdge - window->TopEdge;
+						    // Lock backdrop list
+						    lock_listlock(&GUI->backdrop->objects, 0);
+						    if ((drop_obj = backdrop_get_object(GUI->backdrop, x - window->LeftEdge, y - window->TopEdge, 0)) &&
+							drop_obj->bdo_type == BDO_APP_ICON && !(drop_obj->bdo_flags&BDOF_BUSY))
+						    {
+								//fail=1;
+								appwindow = (struct AppWindow *)drop_obj->bdo_misc_data;
+								ok = 1;
+
+						    }
+						    else
+							ok = 1;
+						    unlock_listlock(&GUI->backdrop->objects);
+						}
 						// Not our window, ok to do drop
 						else ok=1;
 
 						// Ok to drop?
 						if (ok)
 						{
+							AppEntry *entry;
+
 							// Forbid
 							Forbid();
 
+
+							// AppIcon?
+							if (appwindow)
+							{
+							    backdrop_drop_appwindow(info,
+								                    appwindow,
+								                    x-window->LeftEdge,
+								                    y-window->TopEdge,
+								                    MTYPE_APPICON);
+
+							}
 							// AppWindow?
+							else
 							if (appwindow=WB_FindAppWindow(window))
 							{
 								// Do app stuff
-								backdrop_drop_appwindow(
+								entry = (AppEntry *)appwindow;
+
+								// Valid entry?
+								if (entry->ae_port->mp_Node.ln_Type == GNT_LISTER_APPMSG_PORT ||
+								    entry->ae_port->mp_Node.ln_Type == GNT_MAIN_APPMSG_PORT)
+								{
+								    Lister *entry_lister = 0;
+								    BOOL dropok = TRUE;
+
+								    if (entry->ae_port->mp_Node.ln_Type == GNT_LISTER_APPMSG_PORT &&
+									(entry_lister = (Lister *)entry->ae_userdata) &&
+									entry_lister->cur_buffer->buf_CustomHandler[0] &&
+									entry_lister->cur_buffer->cust_flags&CUSTF_NO_EXT_APPMSG)
+								    {
+									if (!info->lister)
+									{
+									    if (!(info->flags&BDIF_MAIN_DESKTOP))
+									    {
+										dropok = FALSE;
+										DisplayBeep(window->WScreen);
+									    }
+									}
+
+								    }
+
+								    if (dropok)
+									backdrop_drop_lister_appwindow(
 									info,
 									appwindow,
 									x-window->LeftEdge,
 									y-window->TopEdge);
+								}
+								else
+								    // Do app stuff
+								    backdrop_drop_appwindow(
+									    info,
+									    appwindow,
+									    x-window->LeftEdge,
+									    y-window->TopEdge,
+									    MTYPE_APPWINDOW);
 
 								// FindAppWindow left us in (nested) Forbid()
 								Permit();

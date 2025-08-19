@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -155,12 +155,12 @@ char  fname[FNAMESIZE];
 char  comment[COMMENTLEN];
 char  buf[256];
 BPTR  cf;
-ULONG lister;
+APTR lister;
 
 lister = ftpnode->fn_handle;
 
 // lock list.  lister is still busy from previous fn call
-ftpnode->fn_og->og_gci->gc_LockFileList( (ULONG)lister, TRUE );
+ftpnode->fn_og->og_gci->gc_LockFileList( lister, TRUE );
 
 // open file
 if	(cf = Open( indexname, MODE_OLDFILE ))
@@ -193,13 +193,13 @@ if	(cf = Open( indexname, MODE_OLDFILE ))
 
 		// update the lister
 		if	(*fname && *comment)
-			ftpnode->fn_og->og_gci->gc_SetFileComment( (ULONG)lister, fname, comment );
+			ftpnode->fn_og->og_gci->gc_SetFileComment( lister, fname, comment );
 		}
 	Close( cf );
 	}
 
 // unlock list
-ftpnode->fn_og->og_gci->gc_UnlockFileList( (ULONG)lister );
+ftpnode->fn_og->og_gci->gc_UnlockFileList( lister );
 
 // refresh lister
 ftplister_refresh( ftpnode, REFRESH_NODATE );
@@ -261,9 +261,10 @@ int retval = 0, buffered = 0;
 int lsresult;
 BOOL abort = FALSE;
 struct update_info *ui;
-ULONG handle;
+APTR handle;
 struct Library *TimerBase = GetTimerBase();
 int progress = ftpnode->fn_site.se_env->e_progress_window;
+struct TagItem tags[] = {HLT_FAKEDIR, TRUE , TAG_END};
 
 kprintf( "lister_list()\n" );
 
@@ -273,7 +274,7 @@ ftpnode->fn_ftp.fi_found_index_size = 0;
 ftpnode->fn_ftp.fi_found_fbbs_size = 0;
 
 // To avoid usless snapshot attempt when quitting
-ftpnode->fn_og->og_gci->gc_FakeDir(ftpnode->fn_handle,TRUE);
+ftpnode->fn_og->og_gci->gc_ListerSet(ftpnode->fn_handle, tags);
 
 // Passive mode required?
 ftpnode->fn_ftp.fi_flags &= ~FTP_PASSIVE;

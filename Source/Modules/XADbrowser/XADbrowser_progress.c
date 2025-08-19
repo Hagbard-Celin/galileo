@@ -1,7 +1,7 @@
 /*
   XADBrowser.gfmmodule 1.22 - Galileo plugin to browse through XAD archives
   Copyright (C) 1999,2000 Mladen Milinkovic <mladen.milinkovic@ri.tel.hr>
-  Copyright 2023 Hagbard Celine
+  Copyright 2023,2025 Hagbard Celine
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,92 +19,103 @@
 */
 
 #include "XADbrowser.h"
-//#include "compiler.h"
-#include <stdio.h>
 
-#include <libraries/xadmaster.h>
-
-#include <proto/exec.h>
-#include <proto/dos.h>
-#include <proto/xadmaster.h>
-
-ULONG __saveds __asm ProgressHook(register __a0 struct Hook *hook, register __a1 struct xadProgressInfo *xpi)
+ULONG __asm __saveds ProgressHook(register __a0 struct Hook *hook, register __a1 struct xadProgressInfo *xpi)
 {
-	struct ModuleData *data = hook->h_Data;
-	struct Library *GalileoFMBase;
-	struct DosLibrary *DOSBase;
-	struct Library *UtilityBase;
-    struct xadMasterBase *xadMasterBase;
+	struct XADbrowserData *data = hook->h_Data;
+	struct xadMasterBase *xadMasterBase;
 	struct TagItem tags[] = {PW_FileDone, 0, TAG_DONE};
-/*	struct TagItem reqtags[]={AR_Window,0,AR_Message,0, AR_Button,0,
-					AR_Button,0, AR_Button,0, AR_Button,0,
-					AR_Button,0, AR_Button,0, TAG_DONE};*/
 	ULONG ret = XADPIF_OK;
 	LONG rc;
-	char mess[200];
 
 	tags[0].ti_Data = xpi->xpi_CurrentSize;
 
-	if(!(GalileoFMBase=data->GalileoFMBase)) return(NULL);
-	if(!(DOSBase=data->DOSBase)) return(NULL);
-	if(!(UtilityBase=data->UtilityBase)) return(NULL);
-	if(!(xadMasterBase=data->xadMasterBase)) return(NULL);
+	if (!(xadMasterBase=data->xadMasterBase)) return(NULL);
 
-	SetProgressWindow(data->ptr, tags);
+	SetProgressWindow(data->progress, tags);
 
 	switch(xpi->xpi_Mode)
 	{
 		case XADPMODE_ERROR:
 		{
-			sprintf(data->buf,"lister request %s \"%s\" %s|%s",
-				data->lists, xadGetErrorText(xpi->xpi_Error),
-				GetString(data->locale, MSG_OK),
-				GetString(data->locale, MSG_ABORT));
-
-		        if (!(data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL)))
-		        {
-			    data->over=TRUE;
-			    ret &= ~XADPIF_OK;
-		        }
-
+			if (!data->over && xpi->xpi_Error != XADERR_SKIP)
+			{
+			    if (!(AsyncRequestTags(data->ipc, REQTYPE_SIMPLE, NULL, NULL, NULL,
+						   AR_Window, data->source_window,
+					           AR_Message, xadGetErrorText(xpi->xpi_Error),
+						   AR_Button, GetString(locale, MSG_RETRY),
+					           AR_Button, GetString(locale, MSG_ABORT),
+						   TAG_END)))
+		            {
+				data->over=TRUE;
+		            }
+			    else
+				data->retry = TRUE;
+			}
 			break;
 		}
 		
 		case XADPMODE_ASK:
 		{
-			if(xpi->xpi_Status & XADPIF_OVERWRITE)
+			if (xpi->xpi_Status & XADPIF_OVERWRITE)
 			{
-				if(data->All == TRUE)
+				if (data->All == TRUE)
 				{
-					ret |= XADPIF_OVERWRITE;
-					break;
+				    ret |= XADPIF_OVERWRITE;
+				    break;
 				}
-				else if(data->All == FALSE) break;
+				else if (data->All == FALSE)
+				{
+				    ret |= XADPIF_SKIP;
+				    break;
+				}
 
-				sprintf(mess, GetString(data->locale, MSG_EXISTS_FORM), FilePart(xpi->xpi_FileName));
-/*				reqtags[0].ti_Data = (ULONG) data->listw;
-				reqtags[1].ti_Data = (ULONG) mess;
-				reqtags[2].ti_Data = (ULONG) GalileoGetString(data->locale,MSG_REPLACE);
-				reqtags[3].ti_Data = (ULONG) GalileoGetString(data->locale,MSG_REPLACE_ALL);
-				reqtags[4].ti_Data = (ULONG) GalileoGetString(data->locale,MSG_SKIP);
-				reqtags[5].ti_Data = (ULONG) GalileoGetString(data->locale,MSG_SKIP_ALL);
-				reqtags[6].ti_Data = (ULONG) GalileoGetString(data->locale,MSG_ABORT);
-				AsyncRequest(IPCDATA(data->ipc),REQTYPE_SIMPLE,NULL,NULL,NULL,reqtags);
-*/
-				sprintf(data->buf, "lister request %s \"%s\" %s|%s|%s|%s|%s",
-					data->lists, mess, GetString(data->locale, MSG_REPLACE),
-					GetString(data->locale, MSG_REPLACE_ALL), GetString(data->locale, MSG_SKIP),
-					GetString(data->locale, MSG_SKIP_ALL), GetString(data->locale, MSG_ABORT));
-				
-				rc = data->gci->gc_RexxCommand(data->buf, NULL, NULL, NULL, NULL);
+				sprintf(data->buf, GetString(locale, MSG_EXISTS_FORM), FilePart(xpi->xpi_FileName));
 
-				if(!rc) ret = NULL;
+
+				if (!(rc = AsyncRequestTags(data->ipc, REQTYPE_SIMPLE, NULL, NULL, NULL,
+							    AR_Window, data->source_window,
+							    AR_Message, data->buf,
+							    AR_Button, GetString(locale, MSG_REPLACE),
+							    AR_Button, GetString(locale, MSG_REPLACE_ALL),
+							    AR_Button, GetString(locale, MSG_SKIP),
+							    AR_Button, GetString(locale, MSG_SKIP_ALL),
+							    AR_Button, GetString(locale, MSG_ABORT),
+							    TAG_END)))
+				{
+				    data->over = TRUE;
+				}
 				else
 				{
-					if(rc <= 2) ret |= XADPIF_OVERWRITE;
-					if(rc == 2) data->All = TRUE;
-					else if(rc == 4) data->All = FALSE;
+					if (rc <= 2)
+					{
+					    ret |= XADPIF_OVERWRITE;
+					    if (rc == 2) data->All = TRUE;
+					}
+					else
+					if (rc >= 3)
+					{
+					    ret |= XADPIF_SKIP;
+					    if (rc == 4) data->All = FALSE;
+					}
 				}
+			}
+			if (xpi->xpi_Status & XADPIF_ISDIRECTORY)
+			{
+				sprintf(data->buf, GetString(locale, MSG_ERROR_DEST_IS_DIRECTORY), FilePart(xpi->xpi_FileName));
+
+				if (!(AsyncRequestTags(data->ipc, REQTYPE_SIMPLE, NULL, NULL, NULL,
+						       AR_Window, data->source_window,
+						       AR_Message, data->buf,
+						       AR_Button, GetString(locale, MSG_ERROR_DEST_IS_DIRECTORY),
+						       AR_Button, GetString(locale, MSG_SKIP),
+						       AR_Button, GetString(locale, MSG_ABORT),
+						       TAG_END)))
+				{
+				    data->over = TRUE;
+				}
+				else
+				    ret |= XADPIF_SKIP;
 			}
 			break;
 		}

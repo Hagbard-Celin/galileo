@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,10 +37,120 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "dirlist_protos.h"
+#include "misc_protos.h"
+#include "buffers_protos.h"
+#include "file_select.h"
+#include "app_msg.h"
+#include "rexx_protos.h"
+#include "lsprintf_protos.h"
+
+char *rexx_filestring_files(DirEntry *entry, DirBuffer *buffer, ULONG numargs, ULONG flags)
+{
+    long len=0,num;
+    char *string = 0;
+
+
+    // Any arguments?
+    if (numargs>0)
+    {
+	// If multi-drag, get first selected file
+	if (numargs>1) entry=get_entry(&buffer->entry_list,1,ENTRY_ANYTHING);
+
+	// Fill out arguments
+	for (num=0;num<numargs && entry;num++)
+	{
+	    len+=strlen(entry->de_Node.dn_Name)+((flags&CUSTF_WANT_QUOTES)?3:1);
+
+	    // Get next entry (for multidrag)
+	    if (numargs>1) entry=get_entry((struct MinList *)entry,1,ENTRY_ANYTHING);
+	    else break;
+	}
+
+	// Allocate string
+	if (!len || !(string=AllocVec(len,MEMF_CLEAR)))
+		return 0;
+
+	if (numargs>1) entry=get_entry(&buffer->entry_list,1,ENTRY_ANYTHING);
+
+	// Go through arguments
+	for (num=0;num<numargs && entry;num++)
+	{
+	    // Quote name
+	    if (flags&CUSTF_WANT_QUOTES) strcat(string,"\"");
+
+	    strcat(string, entry->de_Node.dn_Name);
+
+	    // End quote
+	    if (flags&CUSTF_WANT_QUOTES) strcat(string,"\"");
+
+	    // Space
+	    if (num<numargs-1) strcat(string," ");
+
+	    // Deselect entry
+	    deselect_entry(buffer,entry);
+
+	    // Get next entry (for multidrag)
+	    if (numargs>1) entry=get_entry((struct MinList *)entry,1,ENTRY_ANYTHING);
+	    else break;
+	}
+    }
+
+    return string;
+
+}
+
+
+// Handle an AppMessage
+void rexx_app_msg_files(DirEntry *entry,
+	DirBuffer *buffer,
+	BOOL multifiles,
+	char *action,
+	Lister *dest,
+	char *dest_path,
+	unsigned short qual)
+{
+	char *string;
+
+	// Build string
+	if (string=rexx_filestring_files(entry, buffer, (multifiles)?(buffer->buf_SelectedFiles[0]+buffer->buf_SelectedDirs[0]):1, buffer->cust_flags))
+	{
+		// Send message
+		rexx_handler_msg(
+			0,
+			buffer,
+			RXMF_WARN,
+			HA_String,0,action,
+			HA_Value,1,buffer->buf_CurrentLister,
+			HA_String,2,string,
+			HA_Value,3,dest,
+			HA_String,5,dest_path,
+			HA_Qualifier,6,qual,
+			TAG_END);
+
+		if (!strcmp(action, "dropfrom") && dest && dest->cur_buffer && dest->cur_buffer->buf_CustomHandler[0])
+		    rexx_handler_msg(
+			    0,
+			    dest->cur_buffer,
+			    RXMF_WARN,
+			    HA_String,0,"drop",
+			    HA_Value,1,dest,
+			    HA_String,2,string,
+			    HA_Value,3,buffer->buf_CurrentLister,
+			    HA_String,5,dest_path,
+			    HA_Qualifier,6,qual,
+			    TAG_END);
+
+
+		// Free string
+		FreeVec(string);
+	}
+}
+
 
 // Handle an AppMessage
 void rexx_custom_app_msg(
-	GalileoAppMessage *msg,
+	struct AppMessage *msg,
 	DirBuffer *buffer,
 	char *action,
 	Lister *dest,
@@ -72,28 +183,45 @@ void rexx_custom_app_msg(
 
 // Build a string of filenames
 char *rexx_build_filestring(
-	GalileoAppMessage *msg,
+	struct AppMessage *msg,
 	ULONG *lister_ptr,
 	ULONG flags)
 {
 	long len=0,num;
-	char buf[256],*string;
+	char *buf,*string;
 	ULONG lister=0;
+	BOOL addslash = FALSE;
+	struct WBArg *arglist;
+	GalileoListerAppMessage *lmsg;
+	WORD numargs;
 
 	// Do files come from a lister?
-	get_appmsg_data(msg,&lister,0,0);
 	if (lister_ptr) *lister_ptr=lister;
 
-	// Go through arguments
-	for (num=0;num<msg->ga_Msg.am_NumArgs;num++)
+	if (msg->am_Type == MTYPE_LISTER_APPWINDOW && msg->am_Class == GLAMCLASS_LISTER)
 	{
-		// Get path name
-		GetWBArgPath(&msg->ga_Msg.am_ArgList[num],buf,256);
+	    lmsg = (GalileoListerAppMessage *)msg;
+	    numargs = lmsg->glam_NumArgs;
+	    arglist = lmsg->glam_ArgList;
 
+	}
+	else
+	{
+	    numargs = msg->am_NumArgs;
+	    arglist = msg->am_ArgList;
+	}
+
+
+	// Go through arguments
+	for (num=0;num<numargs;num++)
+	{
+	    // Get path name
+	    if (buf = GetWBArgPath(&arglist[num]))
+	    {
 		// If a directory and not from a lister, add trailing /
-		if ((!msg->ga_Msg.am_ArgList[num].wa_Name || !*msg->ga_Msg.am_ArgList[num].wa_Name) && !lister)
+		if ((!arglist[num].wa_Name || !*arglist[num].wa_Name) && !lister)
 		{
-			AddPart(buf,"",256);
+			addslash = TRUE;
 		}
 
 		// Do files come from a lister, and don't want full paths?
@@ -105,22 +233,30 @@ char *rexx_build_filestring(
 
 		// Otherwise store full length
 		else len+=strlen(buf)+((flags&CUSTF_WANT_QUOTES)?3:1);
+
+		FreeMemH(buf);
+	    }
 	}
 
+	if (addslash)
+	    len++;
+
 	// Allocate string
-	if (!(string=AllocVec(len,MEMF_CLEAR)))
+	if (!len || !(string=AllocVec(len,MEMF_CLEAR)))
 		return 0;
 
 	// Go through arguments
-	for (num=0;num<msg->ga_Msg.am_NumArgs;num++)
+	for (num=0;num<numargs;num++)
 	{
-		// Get path name
-		GetWBArgPath(&msg->ga_Msg.am_ArgList[num],buf,256);
+	    addslash = FALSE;
 
+	    // Get path name
+	    if (buf = GetWBArgPath(&arglist[num]))
+	    {
 		// If a directory and not from a lister, add trailing /
-		if ((!msg->ga_Msg.am_ArgList[num].wa_Name || !*msg->ga_Msg.am_ArgList[num].wa_Name) && !lister)
+		if ((!arglist[num].wa_Name || !*arglist[num].wa_Name) && !lister)
 		{
-			AddPart(buf,"",256);
+			addslash = TRUE;
 		}
 
 		// Quote name
@@ -136,11 +272,17 @@ char *rexx_build_filestring(
 		// Otherwise store full name length
 		else strcat(string,buf);
 
+		if (addslash)
+		    strcat(string,"/");
+
 		// End quote
 		if (flags&CUSTF_WANT_QUOTES) strcat(string,"\"");
 
 		// Space
-		if (num<msg->ga_Msg.am_NumArgs-1) strcat(string," ");
+		if (num<numargs-1) strcat(string," ");
+
+		FreeMemH(buf);
+	    }
 	}
 
 	return string;
@@ -649,18 +791,17 @@ short rexx_lister_reload_file(Lister *lister,char *args)
 	if (rexx_match_keyword(&args,update_key,0)==0)
 		update=1;
 
-	// Lock lister path
-	if (!(lock=Lock(buf->buf_Path,ACCESS_READ)))
-		return RXERR_INVALID_PATH;
+	if (!buf->buf_Lock)
+	    return RXERR_INVALID_PATH;
 
 	// Change to this directory
-	cd=CurrentDir(lock);
+	cd = CurrentDir(buf->buf_Lock);
 
 	// Lock file
 	if (!(lock=Lock(name,ACCESS_READ)))
 	{
 		// Failed
-		UnLock(CurrentDir(cd));
+		CurrentDir(cd);
 		return RXERR_INVALID_FILE;
 	}
 
@@ -669,7 +810,7 @@ short rexx_lister_reload_file(Lister *lister,char *args)
 	UnLock(lock);
 
 	// Restore CD
-	UnLock(CurrentDir(cd));
+	CurrentDir(cd);
 
 	// Lock current buffer
 	buffer_lock(buf,TRUE);

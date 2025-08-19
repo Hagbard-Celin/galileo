@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-CopyRight 2024 Hagbard Celine
+CopyRight 2024,2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -116,6 +116,7 @@ typedef struct
 
 typedef struct
 {
+	APTR			memhandle;
 	struct Screen		*screen;
 	struct Window		*window;
 	IPCData			*ipc;
@@ -126,11 +127,11 @@ typedef struct
 	NewConfigWindow		new_win;
 	ObjectList		*list;
 
-	char			icon_name[256];
-	char			prog_name[256];
-	char			name[256];
+	char			*icon_name;
+	char			*prog_name;
+	char			*name;
 	char			title[256];
-	char			object_name[256];
+	char			*object_name;
 
 	struct DiskObject	*icon;
 	struct DiskObject	icon_copy;
@@ -186,8 +187,8 @@ typedef struct
 	BOOL			strip_newicon;
 	BOOL			strip_oldicon;
 
-	char			path[256];
-	char			newicon_path[256];
+	char			*path;
+	char			*newicon_path;
 
 	short			icon_mode;
 

@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,59 +37,113 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "app_msg_protos.h"
+#include "function_launch_protos.h"
+#include "misc_protos.h"
+#include "backdrop_protos.h"
+#include "desktop.h"
+#include "menu_data.h"
+#include "icons.h"
 
-void desktop_drop(BackdropInfo *info,GalileoAppMessage *msg,UWORD qual)
+ULONG desktop_drop(BackdropInfo *info,struct AppMessage *msg,UWORD qual)
 {
 	BackdropObject *drop_obj;
 	short ok=0,x,y;
-	char *name,*source_path;
-	short arg,action=DESKTOP_POPUP_LEFTOUT;
-	struct ArgArray *array=0;
-	struct ArgArrayEntry *aae;
-	BOOL check;
+	BPTR source_lock = 0;
+	short action=DESKTOP_POPUP_LEFTOUT;
+	Lister *source=0;
+	GalileoListerAppMessage *lamsg = 0;
+	WORD arg,numargs;
+	struct WBArg *arglist;
+	struct GLAData *argdata = 0;
+	ULONG reply;
+	char disk[5] = "Disk";
 
 	// Lock backdrop list
 	lock_listlock(&info->objects,0);
 
-	// See if we dropped stuff on an object
-	if ((drop_obj=backdrop_get_object(info,msg->ga_Msg.am_MouseX,msg->ga_Msg.am_MouseY,0)))
+	if (msg->am_Type == MTYPE_LISTER_APPWINDOW && msg->am_Class == GLAMCLASS_LISTER)
 	{
-		// Is shift/alt down?
+	    lamsg = (GalileoListerAppMessage *)msg;
+	    source = lamsg->glam_Lister;
+	    //flags = lamsg->glam_Flags;
+	    //over_entry = lamsg->glam_OverEntry;
+	    numargs = lamsg->glam_NumArgs;
+	    arglist = lamsg->glam_ArgList;
+	    argdata = lamsg->glam_ArgData;
+	    reply = 2;
+
+	}
+	else
+	{
+	    //amsg = (struct AppMessage *)msg;
+	    numargs = msg->am_NumArgs;
+	    arglist = msg->am_ArgList;
+	    reply = 1;
+	}
+
+	// See if we dropped stuff on an object
+	if ((drop_obj=backdrop_get_object(info,msg->am_MouseX,msg->am_MouseY,0)))
+	{
+		short drop_ok;
+
+	        // Is shift/alt down?
 		if ((qual&(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))==(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))
-		{
-			char pathname[256];
+	        {
+			if (arglist[0].wa_Lock)
+			    source_lock = arglist[0].wa_Lock;
+			else
+			if (lamsg)
+			    source_lock = lamsg->glam_Lock;
 
-			// Get path of first file
-			GetWBArgPath(&msg->ga_Msg.am_ArgList[0],pathname,256);
+			if (!argdata && WBArgDir(&arglist[0]))
+		        {
+			    BPTR parent_lock;
 
-			// Replace the image
-			backdrop_replace_icon_image(info,pathname,drop_obj);
+			    // Try to get parent dir
+			    if (parent_lock = ParentDir(source_lock))
+			    {
+			        D_S(struct FileInfoBlock,tmp_fib);
 
-			// Reply the message
-			ReplyAppMessage(msg);
-		}
+			        // Get directory name
+				Examine(source_lock,tmp_fib);
+			        backdrop_replace_icon_image(info,tmp_fib->fib_FileName,parent_lock,drop_obj);
+			        UnLock(parent_lock);
+			    }
+			    else
+			        backdrop_replace_icon_image(info,disk,source_lock,drop_obj);
+		        }
+			else
 
-		// Handle drop on an object
-		else
-		if (desktop_drop_on_object(info,&msg,drop_obj,qual))
-		{
-			// Reply the message
-			ReplyAppMessage(msg);
-		}
+			if (argdata && argdata[0].glad_Flags == AAEF_DEV)
+		        {
+			    backdrop_replace_icon_image(info,disk,source_lock,drop_obj);
+		        }
+		        else
+			    backdrop_replace_icon_image(info,arglist[0].wa_Name,source_lock,drop_obj);
+	        }
 
-		// Not dropped
-		else drop_obj=0;
+	        // Handle drop on an object
+	        else
+		if (drop_ok = desktop_drop_on_object(info,lamsg,(lamsg)?0:msg,drop_obj,qual))
+	        {
+		    if (drop_ok == 1 && lamsg)
+		    {
+		        // Reply the message
+			reply_lister_appmsg(lamsg);
+			reply = 0;
+		    }
+	        }
+
+	        // Not dropped
+	        else drop_obj=0;
 	}
 
 	// Unlock backdrop list
 	unlock_listlock(&info->objects);
 
 	// Dropped on an object?
-	if (drop_obj) return;
-
-	// Get buffer
-	if (!(name=AllocVec(1024,MEMF_CLEAR))) return;
-	source_path=name+512;
+	if (drop_obj) return reply;
 
 	// Popup menu?
 	if (environment->env->env_flags&ENVF_DESKTOP_FOLDER)
@@ -110,9 +165,7 @@ void desktop_drop(BackdropInfo *info,GalileoAppMessage *msg,UWORD qual)
 		else
 		if ((res=DoPopUpMenu(info->window,&GUI->desktop_menu->ph_Menu,0,SELECTDOWN))==(UWORD)-1 || res==MENU_DESKTOP_CANCEL)
 		{
-			// Cancelled	
-			FreeVec(name);
-			return;
+			return reply;
 		}
 
 		// Help?
@@ -122,9 +175,7 @@ void desktop_drop(BackdropInfo *info,GalileoAppMessage *msg,UWORD qual)
 			// Do help
 			help_menu_help(res&~POPUP_HELPFLAG,0);
 
-			// Cancelled	
-			FreeVec(name);
-			return;
+			return reply;
 		}
 
 		// Get action
@@ -133,199 +184,183 @@ void desktop_drop(BackdropInfo *info,GalileoAppMessage *msg,UWORD qual)
 		else
 		if (res==MENU_DESKTOP_MOVE) action=DESKTOP_POPUP_MOVE;
 	}
-		
+
 	// Set busy pointer
 	SetBusyPointer(info->window);
 
-	// Galileo message?
-	check=CheckAppMessage(msg);
-
 	// Go through arguments
-	for (arg=0;arg<msg->ga_Msg.am_NumArgs;arg++)
+	for (arg=0;arg<numargs;arg++)
 	{
-		// What operation?
-		switch (action)
+	    BOOL rootdir = FALSE;
+
+	    if (!argdata)
+	    {
+		if (WBArgDir(&arglist[0]))
 		{
-			// Leave out?
-			case DESKTOP_POPUP_LEFTOUT:
+		    BPTR parentlock;
 
-				// Get path name
-				GetWBArgPath(&msg->ga_Msg.am_ArgList[arg],name,512);
-
-				// Ignore if it's an icon or a disk
-				if (!(isicon(name)) && name[strlen(name)-1]!=':')
-				{
-					short len,perm=0;
-					BackdropObject *icon;
-
-					// Permanent?
-					if (GUI->flags2&GUIF2_BENIFY)
-						perm=1;
-
-					// Get position
-					x=msg->ga_Msg.am_MouseX;
-					y=msg->ga_Msg.am_MouseY;
-
-					// Drop from Galileo?
-					if (check)
-					{
-						// Adjust position for icon offset
-						x+=msg->ga_DragOffset.x+msg->ga_DropPos[arg].x;
-						y+=msg->ga_DragOffset.y+msg->ga_DropPos[arg].y;
-					}
-
-					// Strip trailing /
-					len=strlen(name)-1;
-					if (name[len]=='/') name[len]=0;
-
-					// Leave this out
-					if (icon=backdrop_leave_out(info,name,(perm)?BLOF_PERMANENT:0,x,y))
-					{
-						// Position it
-						backdrop_place_object(info,icon);
-
-						// Save for permanent leftout
-						if (perm) backdrop_save_leftouts(info);
-						ok=1;
-					}
-				}
-				break;
-
-			// Copy/Move
-			case DESKTOP_POPUP_COPY:
-			case DESKTOP_POPUP_MOVE:
-				{	
-					BOOL dir=0;
-
-					// Create ArgArray if needed
-					if (!array &&
-						!(array=NewArgArray())) break;
-
-					// Get path name
-					GetWBArgPath(&msg->ga_Msg.am_ArgList[arg],name,512);
-
-					// Set flag if a directory
-					if (!msg->ga_Msg.am_ArgList[arg].wa_Name ||
-						!*msg->ga_Msg.am_ArgList[arg].wa_Name) dir=1;
-
-					// Get source path
-					if (!*source_path)
-					{
-						char *ptr;
-	
-						// Copy from name
-						strcpy(source_path,name);
-
-						// Strip last part
-						if (ptr=FilePart(source_path)) *ptr=0;
-					}
-
-					// Create argument
-					if (aae=NewArgArrayEntry(array,FilePart(name)))
-					{
-						// Set directory flag
-						if (dir) aae->aae_Flags|=AAEF_DIR;
-
-						// Set OK flag
-						ok=1;
-					}
-				}
-				break;
+		    if (parentlock = ParentDir(arglist[arg].wa_Lock))
+		        UnLock(parentlock);
+		    else
+		        rootdir = TRUE;
 		}
+	    }
+	    else
+	    if (argdata && argdata[arg].glad_Flags&AAEF_DEV)
+		rootdir = TRUE;
+
+	    if (!rootdir)
+	    {
+	        // What operation?
+	        switch (action)
+	        {
+
+		        // Leave out?
+		        case DESKTOP_POPUP_LEFTOUT:
+
+			        // Ignore if it's an icon or a disk
+				if (!(isicon(arglist[arg].wa_Name)))
+			        {
+					short perm=0;
+				        BackdropObject *icon;
+
+				        // Permanent?
+				        if (GUI->flags2&GUIF2_BENIFY)
+					        perm=1;
+
+				        if (!argdata)
+				        {
+				            // Get position
+				            x=msg->am_MouseX;
+				            y=msg->am_MouseY;
+				        }
+				        else
+				        {
+				            // Get position
+				            x=lamsg->glam_MouseX;
+				            y=lamsg->glam_MouseY;
+
+				            // Adjust position for icon offset
+				            x+=lamsg->glam_DragOffset.x+argdata[arg].glad_DropPos.x;
+				            y+=lamsg->glam_DragOffset.y+argdata[arg].glad_DropPos.y;
+				        }
+
+				        if (arglist[arg].wa_Lock)
+					    source_lock = arglist[arg].wa_Lock;
+				        else
+				        if (lamsg)
+					    source_lock = lamsg->glam_Lock;
+
+				        // Leave this out
+				        if (icon=backdrop_leave_out(info,arglist[arg].wa_Name,source_lock,(perm)?BLOF_PERMANENT:0,x,y))
+				        {
+					        // Position it
+					        backdrop_place_object(info,icon);
+
+					        // Save for permanent leftout
+					        if (perm) backdrop_save_leftouts(info);
+					        ok=1;
+				        }
+			        }
+			        break;
+
+		        // Copy/Move
+		        case DESKTOP_POPUP_COPY:
+		        case DESKTOP_POPUP_MOVE:
+
+				ok = 1;
+
+			        break;
+	        }
+	    }
 	}
 
 	// Successful?
 	if (ok)
 	{
-		// Left-outs?
-		if (action==DESKTOP_POPUP_LEFTOUT)
-		{
-			// Refresh
-			backdrop_show_objects(info,BDSF_RECALC);
-		}
+	        // Left-outs?
+	        if (action==DESKTOP_POPUP_LEFTOUT)
+	        {
+		        // Refresh
+		        backdrop_show_objects(info,BDSF_RECALC);
+	        }
 
-		// Otherwise, launch function
-		else
-		{
-			// Launch the function
-			function_launch(
-				FUNCTION_RUN_FUNCTION_EXTERNAL,
-				(action==DESKTOP_POPUP_COPY)?def_function_copy:def_function_move,
-				0,
-				FUNCF_ICONS|FUNCF_RESCAN_DESKTOP|FUNCF_DRAG_DROP|FUNCF_COPY_NO_MOVE,
-				0,0,
-				source_path,environment->env->desktop_location,
-				array,
-				0,
-				(Buttons *)CopyAppMessage(msg,global_memory_pool));
-		}
+	        // Otherwise, launch function
+	        else
+	        {
+		        // Launch the function
+		        function_launch(
+			        FUNCTION_RUN_FUNCTION_EXTERNAL,
+			        (action==DESKTOP_POPUP_COPY)?def_function_copy:def_function_move,
+			        0,
+			        FUNCF_ICONS|FUNCF_RESCAN_DESKTOP|FUNCF_DRAG_DROP|FUNCF_COPY_NO_MOVE,
+			        source,0,
+			        0,environment->env->desktop_location,
+			        0,GUI->desktop_dir_lock,
+			        0,
+			        0,
+			        (lamsg)?(Buttons *)lamsg:(Buttons *)CopyAppMessage(msg,global_memory_pool));
+
+		        if (!lamsg)
+			    ReplyAppMessage(msg);
+
+			reply = 0;
+	        }
 	}
-
-	// Otherwise, free array
-	else FreeArgArray(array);
-
-	// Free buffer
-	FreeVec(name);
 
 	// Clear busy pointer
 	ClearPointer(info->window);
 
-	// Reply the message
-	ReplyAppMessage(msg);
+	return reply;
 }
 
 
 // Handle drop on an object
-BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropObject *drop_obj,UWORD qual)
+BOOL desktop_drop_on_object(BackdropInfo *info,GalileoListerAppMessage *lamsg,struct AppMessage *amsg,BackdropObject *drop_obj,UWORD qual)
 {
+	Lister *source = 0;
+	struct WBArg *arglist;
+	struct GLAData *argdata = 0;
 	char *name;
+	WORD numargs;
 	short ret=1;
 
 	// Allocate buffer
 	if (!(name=AllocVec(1024,0))) return 1;
 
+	if (lamsg)
+	{
+	    source = lamsg->glam_Lister;
+	    numargs = lamsg->glam_NumArgs;
+	    arglist = lamsg->glam_ArgList;
+	    argdata = lamsg->glam_ArgData;
+	}
+	else
+	if (amsg)
+	{
+	    numargs = amsg->am_NumArgs;
+	    arglist = amsg->am_ArgList;
+	}
+	else
+	    return 1;
+
 	// Was it an AppIcon?
 	if (drop_obj->bdo_type==BDO_APP_ICON)
 	{
-		// Is the icon busy?
-		if (drop_obj->bdo_flags&BDOF_BUSY)
-		{
-			// Flash error
-			DisplayBeep(info->window->WScreen);
-		}
+	    // Flash error
+	    DisplayBeep(info->window->WScreen);
 
-		// Otherwise, pass message on
-		else
-		{
-			struct MsgPort *port;
-
-			// Turn message into an AppIcon one
-			(*msg)->ga_Msg.am_Type=MTYPE_APPICON;
-
-			// Get port and info
-			port=WB_AppWindowData(
-				(struct AppWindow *)drop_obj->bdo_misc_data,
-				&(*msg)->ga_Msg.am_ID,
-				&(*msg)->ga_Msg.am_UserData);
-
-			// Fix reply port
-			(*msg)->ga_Msg.am_Message.mn_ReplyPort=GUI->appmsg_port;
-
-			// Send the message on
-			PutMsg(port,(struct Message *)*msg);
-
-			// Zero message pointer
-			*msg=0;
-		}
+	    return 1;
 	}
 
 	// Was it a group?
 	else
 	if (drop_obj->bdo_type==BDO_GROUP)
 	{
-		short arg;
+		WORD arg;
 		GroupData *group;
 		BOOL ok=0;
+		BPTR parent_lock = 0;
 
 		// Find group if it's open
 		lock_listlock(&GUI->group_list,0);
@@ -333,14 +368,17 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 			unlock_listlock(&GUI->group_list);
 
 		// Go through arguments
-		for (arg=0;arg<(*msg)->ga_Msg.am_NumArgs;arg++)
+		for (arg=0;arg<numargs;arg++)
 		{
 			// Valid file?
-			if ((*msg)->ga_Msg.am_ArgList[arg].wa_Name &&
-				*(*msg)->ga_Msg.am_ArgList[arg].wa_Name)
+			if ((!argdata && arglist[arg].wa_Name && *arglist[arg].wa_Name) ||
+			    (argdata && !(argdata[arg].glad_Flags&(AAEF_DIR|AAEF_DEV))))
 			{
-				// Get filename
-				GetWBArgPath(&(*msg)->ga_Msg.am_ArgList[arg],name,512);
+			        if (arglist[arg].wa_Lock)
+				    parent_lock = arglist[arg].wa_Lock;
+			        else
+				if (lamsg)
+				    parent_lock = lamsg->glam_Lock;
 
 				// Send add message to group if it's open
 				if (group)
@@ -348,10 +386,10 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 					char *copy;
 
 					// Copy name
-					if (copy=AllocVec(strlen(name)+1,0))
+					if (copy=AllocVec(strlen(arglist[arg].wa_Name)+1,0))
 					{
-						strcpy(copy,name);
-						IPC_Command(group->ipc,GROUP_ADD_ICON,0,0,copy,0);
+						strcpy(copy,arglist[arg].wa_Name);
+						IPC_Command(group->ipc,GROUP_ADD_ICON,0,(APTR)DupLock(parent_lock),copy,0);
 						ok=1;
 					}
 				}
@@ -359,7 +397,7 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 				// Otherwise add object to group
 				else
 				{
-					backdrop_group_add_object(drop_obj->bdo_name,0,name,-1,-1);
+					backdrop_group_add_object(drop_obj->bdo_name,0,arglist[arg].wa_Name,parent_lock,-1,-1);
 					ok=1;
 				}
 			}
@@ -379,7 +417,7 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 		// Is it an Galileo command?
 		if (command_filetype)
 		{
-			BPTR lock,old;
+			BPTR lock;
 
 			// Set failure initially
 			ret=0;
@@ -387,11 +425,8 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 			// Get lock on directory
 			if (lock=backdrop_icon_lock(drop_obj))
 			{
-				// Go there
-				old=CurrentDir(lock);
-
 				// See if it's a command
-				if (filetype_match_type(drop_obj->bdo_name,command_filetype))
+				if (filetype_match_type(drop_obj->bdo_name, lock, command_filetype))
 				{
 					// Run command with args
 					backdrop_object_open(
@@ -399,13 +434,13 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 						drop_obj,
 						0,
 						0,
-						(*msg)->ga_Msg.am_NumArgs,
-						(*msg)->ga_Msg.am_ArgList);
-					ret=1;
+						lamsg,
+						amsg);
+					ret=2;
 				}
 
-				// Restore CD
-				UnLock(CurrentDir(old));
+				// Unlock
+				UnLock(lock);
 			}
 		}
 
@@ -423,8 +458,8 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 			drop_obj,
 			0,
 			0,
-			(*msg)->ga_Msg.am_NumArgs,
-			(*msg)->ga_Msg.am_ArgList);
+			lamsg,
+			amsg);
 	}
 
 
@@ -434,64 +469,69 @@ BOOL desktop_drop_on_object(BackdropInfo *info,GalileoAppMessage **msg,BackdropO
 		drop_obj->bdo_icon->do_Type==WBDRAWER ||
 		drop_obj->bdo_icon->do_Type==WBGARBAGE)
 	{
-		struct ArgArray *arg_array;
+	    BPTR dest_lock;
 
-		// Get arg array
-		if (arg_array=AppArgArray(*msg,AAF_ALLOW_DIRS))
-		{
-			BPTR lock;
+	    // Get destination path
+	    if (dest_lock=backdrop_icon_lock(drop_obj))
+	    {
+		    short action;
 
-			// Get pathname of first file
-			DevNameFromLock((*msg)->ga_Msg.am_ArgList[0].wa_Lock,name,512);
+		    // Is object a left-out?
+		    if (drop_obj->bdo_type==BDO_LEFT_OUT)
+		    {
+			BPTR org_dir, tmp_lock;
 
-			// Need source directory; if no name, get parent
-			if ((!(*msg)->ga_Msg.am_ArgList[0].wa_Name ||
-				!*(*msg)->ga_Msg.am_ArgList[0].wa_Name) &&
-				(lock=ParentDir((*msg)->ga_Msg.am_ArgList[0].wa_Lock)))
+			org_dir = CurrentDir(dest_lock);
+			if (tmp_lock = Lock(drop_obj->bdo_name,ACCESS_READ))
 			{
-				// Get pathname of parent
-				DevNameFromLock(lock,name,512);
-				UnLock(lock);
+			    dest_lock = tmp_lock;
+			    strcpy(info->buffer,drop_obj->bdo_name);
+			    UnLock(CurrentDir(org_dir));
 			}
-
-			// Get destination path
-			if (lock=backdrop_icon_lock(drop_obj))
+			else
 			{
-				short action;
-
-				// Get path
-				DevNameFromLock(lock,name+512,512);
-				UnLock(lock);
-
-				// Is object a left-out?
-				if (drop_obj->bdo_type==BDO_LEFT_OUT)
-				{
-					// Add left-out name
-					AddPart(name+512,drop_obj->bdo_name,512);
-				}
-
-				// Get filetype action
-				if (qual&IEQUALIFIER_CONTROL) action=FTTYPE_CTRL_DRAGDROP;
-				else
-				if (qual&(IEQUALIFIER_LALT|IEQUALIFIER_RALT)) action=FTTYPE_ALT_DRAGDROP;
-				else
-				action=FTTYPE_DRAG_DROP;
-
-				// Do filetype action on files
-				function_launch(
-					FUNCTION_FILETYPE,
-					0,
-					action,
-					FUNCF_DRAG_DROP|FUNCF_ICONS,
-					0,0,
-					name,name+512,
-					arg_array,
-					0,
-					(Buttons *)CopyAppMessage(*msg,global_memory_pool));
+			    CurrentDir(org_dir);
+			    FreeVec(name);
+			    DisplayBeep(GUI->screen_pointer);
+			    return 1;
 			}
-		}
+		    }
+		    else
+		    if (drop_obj->bdo_type==BDO_DISK)
+		    {
+			char *tmp;
+			tmp = stpcpy(info->buffer,drop_obj->bdo_name);
+			*tmp++ = ':';
+			*tmp = 0;
+		    }
+
+		    // Get filetype action
+		    if (qual&IEQUALIFIER_CONTROL) action=FTTYPE_CTRL_DRAGDROP;
+		    else
+		    if (qual&(IEQUALIFIER_LALT|IEQUALIFIER_RALT)) action=FTTYPE_ALT_DRAGDROP;
+		    else
+		    action=FTTYPE_DRAG_DROP;
+
+		    // Do filetype action on files
+		    function_launch(
+			    FUNCTION_FILETYPE,
+			    0,
+			    action,
+			    FUNCF_DRAG_DROP|FUNCF_ICONS|FUNCF_DROPON_LOCK,
+			    source,0,
+			    0,info->buffer,
+			    0,dest_lock,
+			    0, //arg_array,
+			    0,
+			    (lamsg)?(Buttons *)lamsg:(Buttons *)CopyAppMessage(amsg,global_memory_pool));
+		    ret = 2;
+	    }
 	}
 	else ret=0;
+
+	if (amsg)
+	    ReplyAppMessage(amsg);
+
 
 	FreeVec(name);
 	return ret;

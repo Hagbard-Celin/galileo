@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,13 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
+#include "misc_protos.h"
+#include "function_protos.h"
+#include "filetypes_protos.h"
+#include "menu_data.h"
+#include "lsprintf_protos.h"
+#include "callback_protos.h"
 #include "/Modules/modules.h"
 #include "/Modules/modules_protos.h"
 #include "/Modules/modules_internal_protos.h"
@@ -47,8 +55,8 @@ GALILEOFM_FUNC(function_show)
 {
 	FunctionEntry *entry;
 	Att_List *list;
-	short ret=0,count=0,funcid;
 	BOOL sync_flag=0;
+	short ret=0,count=0,funcid;
 
 	// Got arguments? See if 'wait' flag is set
 	if (instruction->ipa_funcargs &&
@@ -70,11 +78,8 @@ GALILEOFM_FUNC(function_show)
 			// Get first entry
 			entry=function_get_entry(handle);
 
-			// Build full name
-			function_build_source(handle,entry,handle->func_work_buf);
-
 			// See if file really can't be identified
-			if (!(type=filetype_identify(handle->func_work_buf,FTTYPE_ANY,0,0)) ||
+			if (!(type=filetype_identify(entry->fe_name,handle->func_source_lock,FTTYPE_ANY,0,0)) ||
 				is_default_filetype(type))
 			{
 				// Build requester text
@@ -132,11 +137,23 @@ GALILEOFM_FUNC(function_show)
 	// Build list of sources
 	while (entry=function_get_entry(handle))
 	{
-		// Build full name
-		function_build_source(handle,entry,handle->func_work_buf);
+		Att_LockNode *node;
+		BPTR entry_lock = 0;
+
+		if (entry->fe_lock)
+		    entry_lock = DupLock(entry->fe_lock);
+		else
+		if (handle->func_source_lock)
+		{
+		    entry_lock = DupLock(handle->func_source_lock);
+		}
 
 		// Add entry to list
-		Att_NewNode(list,handle->func_work_buf,(ULONG)entry,0);
+		if (node = (Att_LockNode *)Att_NewNode(list,entry->fe_name,(ULONG)entry,ADDNODE_LOCKNODE))
+		    node->att_lock = entry_lock;
+		else
+		if (entry_lock)
+		    UnLock(entry_lock);
 
 		// Get next entry
 		function_end_entry(handle,entry,1);
@@ -353,7 +370,7 @@ GALILEOFM_FUNC(function_show)
 						ExternalEntry *entry;
 
 						// Create entry
-						if (entry=new_external_entry(handle,node->node.ln_Name))
+						if (entry=new_external_entry(handle,node->node.ln_Name,handle->func_source_lock))
 						{
 							// Add to external entry list
 							AddTail((struct List *)&handle->external_list,(struct Node *)entry);
@@ -372,7 +389,7 @@ GALILEOFM_FUNC(function_show)
 	}
 
 	// Free file list
-	if (list) Att_RemList(list,0);
+	if (list) Att_RemList(list,REMLIST_UNLOCK);
 	return ret;
 }
 
@@ -400,8 +417,8 @@ void function_iconinfo_update(FunctionHandle *handle,Att_List *list)
 				entry=(FunctionEntry *)node->att_data;
 
 				// Reload file and icon
-				function_filechange_reloadfile(handle,handle->func_source_path,entry->fe_name,0);
-				function_filechange_reloadfile(handle,handle->func_source_path,entry->fe_name,FFLF_ICON);
+				function_filechange_reloadfile(handle,handle->func_source_path,handle->func_source_lock,entry->fe_name,0);
+				function_filechange_reloadfile(handle,handle->func_source_path,handle->func_source_lock,entry->fe_name,FFLF_ICON);
 			}
 		}
 	}

@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -38,37 +39,52 @@ For more information on Directory Opus for Windows please see:
 #ifndef _GALILEOFM_APPMSG
 #define _GALILEOFM_APPMSG
 
-GalileoAppMessage *alloc_appmsg_files(DirEntry *,DirBuffer *,BOOL);
-struct ArgArray *AppArgArray(GalileoAppMessage *,short);
-void FreeArgArray(struct ArgArray *);
-void set_appmsg_data(GalileoAppMessage *,ULONG,ULONG,ULONG);
-BOOL get_appmsg_data(GalileoAppMessage *,ULONG *,ULONG *,ULONG *);
-short FindWBArg(struct WBArg *args,short count,char *name);
-void UnlockWBArg(struct WBArg *args,short count);
-struct ArgArray *WBArgArray(struct WBArg *,short,short);
+#include "dirlist.h"
+
+typedef struct _GalileoListerAppMessage {
+    struct Message  glam_Message;	/* standard message structure */
+    UWORD	    glam_Type;		/* message type */
+    ULONG	    glam_UserData;	/* application specific */
+    ULONG	    glam_ID;		/* application definable ID */
+    LONG	    glam_NumArgs;	/* # of elements in arglist */
+    ULONG	    glam_Flags;
+    UWORD	    glam_Version;	/* will be >= GLAM_VERSION */
+    UWORD	    glam_Class;		/* message class */
+    WORD	    glam_MouseX;	/* mouse x position of event */
+    WORD	    glam_MouseY;	/* mouse y position of event */
+    Point	    glam_DragOffset;
+    Lister	    *glam_Lister;
+    BPTR	    glam_Lock;		/* a lock descriptor */
+    DirEntry 	    *glam_OverEntry;
+    struct GLAData  *glam_ArgData;
+    struct WBArg    glam_ArgList[0];	/* the arguments themselves */
+} GalileoListerAppMessage;
+
 
 struct ArgArray
 {
 	struct MinList	aa_List;
 	APTR		aa_Memory;
 	ULONG		aa_Flags;
-	ULONG		aa_Count;
+	LONG		aa_Count;
 };
 
 struct ArgArrayEntry
 {
 	struct MinNode	aae_Node;
 	UWORD		aae_Flags;
+	BPTR		aae_Lock;
 	char		aae_String[1];
 };
 
 #define AAF_ALLOW_DIRS	(1<<0)
 
-#define AAEF_DIR	(1<<0)
-#define AAEF_LINK	(1<<1)
-#define AAEF_FAKE_ICON	(1<<2)
+#define AAEF_DIR	    (1<<0)
+#define AAEF_LINK	    (1<<1)
+#define AAEF_FAKE_ICON	    (1<<2)
+#define AAEF_DEV	    (1<<3)
+#define AAEF_ASSIGN	    (1<<4)
+#define AAEF_MULTI_ASSIGN   (1<<5)
 
-struct ArgArray *BuildArgArray(char *,...);
-struct ArgArray *BuildArgArrayA(char **);
-struct ArgArray *NewArgArray(void);
-struct ArgArrayEntry *NewArgArrayEntry(struct ArgArray *,char *);
+#endif
+

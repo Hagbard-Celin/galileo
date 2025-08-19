@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,17 +37,24 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "dirlist_protos.h"
+#include "misc_protos.h"
+#include "function_launch_protos.h"
+#include "buffers_protos.h"
+#include "backdrop_protos.h"
+#include "icons.h"
 
 void lister_get_device_icons(Lister *,BOOL);
 
-// Get icons for display in a lister
+/// Get icons for display in a lister
 void lister_get_icons(FunctionHandle *handle,Lister *lister,char *add_name,short flags)
 {
 	BackdropObject *object;
 	DirBuffer *buffer;
 	DirEntry *entry=0;
-	char name[256];
-	BPTR dir,lock;
+	char name[108];
+	BPTR dir;
 	short iter=0;
 	long count=0;
 	Att_List *icon_list;
@@ -68,9 +76,7 @@ void lister_get_icons(FunctionHandle *handle,Lister *lister,char *add_name,short
 	}
 
 	// CD to directory
-	if (!(lock=Lock(lister->cur_buffer->buf_Path,ACCESS_READ)))
-		return;
-	dir=CurrentDir(lock);
+	dir=CurrentDir(lister->cur_buffer->buf_Lock);
 
 	// Make sure only one process at a time runs this
 	ObtainSemaphore(&info->icon_lock);
@@ -173,7 +179,7 @@ void lister_get_icons(FunctionHandle *handle,Lister *lister,char *add_name,short
 				lock_listlock(&info->objects,1);
 
 				// Create icon
-				if (object=backdrop_leftout_new(info,name,lister->cur_buffer->buf_Path,0))
+				if (object=backdrop_leftout_new(info,name,0,0))
 				{
 					BPTR file;
 					struct FileInfoBlock __aligned fib;
@@ -340,8 +346,9 @@ void lister_get_icons(FunctionHandle *handle,Lister *lister,char *add_name,short
 	ReleaseSemaphore(&info->icon_lock);
 
 	// Restore current dir
-	UnLock(CurrentDir(dir));
+	CurrentDir(dir);
 }
+///
 
 
 // Get icons for device/cache list
@@ -352,7 +359,7 @@ void lister_get_device_icons(Lister *lister,BOOL clean)
 	struct List *search;
 	BackdropObject *object;
 	BackdropInfo *info=lister->backdrop_info;
-	BOOL new=1;
+	BOOL new = FALSE;
 
 	// Make sure only one process at a time runs this
 	ObtainSemaphore(&info->icon_lock);
@@ -389,7 +396,7 @@ void lister_get_device_icons(Lister *lister,BOOL clean)
 					strcmp(object->bdo_device_name,ptr)==0)
 				{
 					object->bdo_flags|=BDOF_OK;
-					new=0;
+
 					break;
 				}
 
@@ -413,6 +420,8 @@ void lister_get_device_icons(Lister *lister,BOOL clean)
 				ptr,
 				BDO_DISK))
 			{
+				new = TRUE;
+
 				// Mark object as ok
 				object->bdo_flags=BDOF_OK|BDOF_CACHE|BDOF_NO_POSITION;
 
@@ -448,7 +457,6 @@ void lister_get_device_icons(Lister *lister,BOOL clean)
 				{
 					// Mark as ok
 					object->bdo_flags|=BDOF_OK;
-					new=0;
 					break;
 				}
 
@@ -472,6 +480,8 @@ void lister_get_device_icons(Lister *lister,BOOL clean)
 				entry->de_Node.dn_Name,
 				BDO_DISK))
 			{
+				new = TRUE;
+
 				// Get object date
 				object->bdo_date=entry->de_Date;
 
@@ -483,6 +493,7 @@ void lister_get_device_icons(Lister *lister,BOOL clean)
 
 				// Get icon
 				backdrop_get_icon(info,object,GETICON_CD|GETICON_SAVE_POS);
+				if (clean) object->bdo_flags |= BDOF_NO_POSITION;
 			}
 
 			// Unlock icon list
@@ -491,7 +502,7 @@ void lister_get_device_icons(Lister *lister,BOOL clean)
 
 		// Assign
 		else
-		if (entry->de_SubType!=SUBENTRY_BUFFER)
+		if (entry->de_SubType==SUBENTRY_ASSIGN)
 		{
 			// Lock icon list
 			lock_listlock(&lister->backdrop_info->objects,0);
@@ -500,7 +511,6 @@ void lister_get_device_icons(Lister *lister,BOOL clean)
 			if (object=(BackdropObject *)FindName(&info->objects.list,entry->de_Node.dn_Name))
 			{
 				object->bdo_flags|=BDOF_OK;
-				new=0;
 			}
 
 			// Unlock icon list
@@ -519,11 +529,32 @@ void lister_get_device_icons(Lister *lister,BOOL clean)
 				entry->de_Node.dn_Name,
 				BDO_DISK))
 			{
+				BPTR lock_entry;
+
+				new = TRUE;
+
 				// Get object date
 				object->bdo_date=entry->de_Date;
 
 				// Mark object as ok
 				object->bdo_flags=BDOF_OK|BDOF_ASSIGN|BDOF_NO_POSITION;
+
+				// Get lock
+				if (lock_entry = DupLock((BPTR)entry->de_UserData))
+				{
+			            BPTR lock_parent;
+
+				    if (lock_parent = ParentDir(lock_entry))
+				    {
+				        UnLock(lock_entry);
+				        lock_entry = lock_parent;
+				    }
+				    else
+					object->bdo_flags|=BDOF_ASSIGN_VOL;
+
+				    object->bdo_parent_lock = lock_entry;
+				}
+
 
 				// Add to backdrop list
 				AddTail(&info->objects.list,&object->bdo_node);

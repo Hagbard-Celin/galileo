@@ -120,9 +120,9 @@ CONFIGVER   = 0
 CONFIGREV   = 2
 
 
-XADMYOBJS   = $(OBJ)$(XADDIR)XADbrowser_progress.o
+XADMYOBJS   = $(OBJ)$(XADDIR)XADbrowser_progress.o $(OBJ)$(XADDIR)trampoline.o
 
-XADOBJS     = $(OBJ)$(XADDIR)XADbrowser.o $(OBJ)$(XADDIR)XADbrowser_data.o $(OBJ)$(XADDIR)XADbrowser_strings.o $(XADMYOBJS)
+XADOBJS     = $(OBJ)$(XADDIR)libinit.o $(OBJ)lsprintf.o $(OBJ)$(XADDIR)XADbrowser.o $(OBJ)$(XADDIR)XADbrowser_data.o $(OBJ)$(XADDIR)XADbrowser_strings.o $(XADMYOBJS)
 XADVER      = 0
 XADREV      = 2
 
@@ -208,6 +208,8 @@ modules_internal_pragmas.h: modules_internal.fd
     fd2pragma modules_internal.fd modules_internal_pragmas.h
 
 $(OBJ)lsprintf.o: lsprintf.asm
+$(OBJ)$(XADDIR)trampoline.o: $(XADDIR)trampoline.asm
+    sc:c/asm -o$(OBJ)$(XADDIR) -iASMINC: $*.asm
 $(OBJ)$(FTPDIR)ftp_ver.o: $(FTPDIR)ftp_ver.c
 
 
@@ -229,7 +231,7 @@ lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(SHOWVER)
 librevision $(SHOWREV)
 $(STRIPDEBUG) noicons
-sc sd 
+sc sd
 <
 
 #########################################################################
@@ -546,19 +548,21 @@ sc sd
 <
 
 #########################################################################
+$(OBJ)$(XADDIR)libinit.o: libinit.c
+    sc $*.c $(SCFLAGS) DEF=_TRAMPOLINE  objname $@
 
-$(BIN)XADbrowser.gfmmodule: $(STDOBJS) $(XADOBJS) 
+$(BIN)XADbrowser.gfmmodule: $(XADOBJS) 
 	slink with lib:utillib.with with <<
 define __ctype=___ctype
 libprefix _L_
 libfd modules.fd
-$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(XADOBJS) 
+$(ADDSYM) from lib:libent.o lib:libinit.o $(XADOBJS) 
 to $(BIN)XADbrowser.gfmmodule
 lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(XADVER)
 librevision $(XADREV)
 $(STRIPDEBUG) noicons
-sc sd
+sc
 <
 
 #########################################################################
@@ -815,7 +819,7 @@ $(OBJ)update.o: modules.h module.h /Program/position.h
 $(OBJ)update_data.o: update_data.c update.h update.strings modules_lib.h
 $(OBJ)update_data.o: /Library/galileofmbase.h /Include/galileo/os.h
 $(OBJ)update_data.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)update_data.o: modules.h module.h
+$(OBJ)update_data.o: modules.h module.h /Program/position.h
 $(OBJ)update_strings.o: update_strings.c update.strings
 $(OBJ)update_strings.o: /Library/galileofmbase.h /Include/galileo/os.h
 $(OBJ)update_strings.o: /Program/galileo_config.h /Library/galileofmpragmas.h
@@ -858,15 +862,16 @@ $(OBJ)ftp/ftp_module.o: ftp/ftp_ad_internet.h ftp/ftp_arexx.h
 $(OBJ)ftp/ftp_module.o: ftp/ftp_module.h ftp/ftp_ipc.h ftp/ftp_galileoftp.h
 $(OBJ)ftp/ftp_module.o: /Program/reselect.h /Program/pattern.h
 $(OBJ)ftp/ftp_module.o: /Program/toolbar.h /Program/lister.h /Program/popup.h
-$(OBJ)ftp/ftp_module.o: /Program/dirlist.h ftp/ftp_util.h
-$(OBJ)ftp/ftp_module.o: ftp/ftp_addrsupp_protos.h
+$(OBJ)ftp/ftp_module.o: /Program/lister_ipc.h /Program/dirlist.h
+$(OBJ)ftp/ftp_module.o: ftp/ftp_util.h ftp/ftp_addrsupp_protos.h
 $(OBJ)ftp/ftp_data.o: ftp/ftp_data.c ftp/ftp.h ftp/ftp.strings modules_lib.h
 $(OBJ)ftp/ftp_data.o: /Library/galileofmbase.h /Include/galileo/os.h
 $(OBJ)ftp/ftp_data.o: /Program/galileo_config.h /Library/galileofmpragmas.h
 $(OBJ)ftp/ftp_data.o: modules.h module.h ftp/ftp_ad_internet.h
 $(OBJ)ftp/ftp_data.o: ftp/ftp_galileoftp.h /Program/reselect.h
 $(OBJ)ftp/ftp_data.o: /Program/pattern.h /Program/toolbar.h /Program/lister.h
-$(OBJ)ftp/ftp_data.o: /Program/popup.h /Program/dirlist.h
+$(OBJ)ftp/ftp_data.o: /Program/popup.h /Program/lister_ipc.h
+$(OBJ)ftp/ftp_data.o: /Program/dirlist.h
 $(OBJ)ftp/ftp_strings.o: ftp/ftp_strings.c ftp/ftp.strings
 $(OBJ)ftp/ftp_strings.o: /Library/galileofmbase.h /Include/galileo/os.h
 $(OBJ)ftp/ftp_strings.o: /Program/galileo_config.h
@@ -879,8 +884,9 @@ $(OBJ)ftp/ftp_main.o: ftp/ftp_ad_sockproto2.h ftp/ftp_extern_pragmas.h
 $(OBJ)ftp/ftp_main.o: ftp/ftp_arexx.h ftp/ftp_module.h ftp/ftp_ipc.h
 $(OBJ)ftp/ftp_main.o: ftp/ftp_galileoftp.h /Program/reselect.h
 $(OBJ)ftp/ftp_main.o: /Program/pattern.h /Program/toolbar.h /Program/lister.h
-$(OBJ)ftp/ftp_main.o: /Program/popup.h /Program/dirlist.h ftp/ftp_lister.h
-$(OBJ)ftp/ftp_main.o: ftp/ftp_util.h ftp/ftp_addrsupp_protos.h
+$(OBJ)ftp/ftp_main.o: /Program/popup.h /Program/lister_ipc.h
+$(OBJ)ftp/ftp_main.o: /Program/dirlist.h ftp/ftp_lister.h ftp/ftp_util.h
+$(OBJ)ftp/ftp_main.o: ftp/ftp_addrsupp_protos.h
 $(OBJ)ftp/ftp_lister.o: ftp/ftp_lister.c ftp/ftp.h ftp/ftp.strings
 $(OBJ)ftp/ftp_lister.o: modules_lib.h /Library/galileofmbase.h
 $(OBJ)ftp/ftp_lister.o: /Include/galileo/os.h /Program/galileo_config.h
@@ -890,9 +896,9 @@ $(OBJ)ftp/ftp_lister.o: ftp/ftp_extern_pragmas.h ftp/ftp_ad_errno.h
 $(OBJ)ftp/ftp_lister.o: ftp/ftp_arexx.h ftp/ftp_ipc.h ftp/ftp_galileoftp.h
 $(OBJ)ftp/ftp_lister.o: /Program/reselect.h /Program/pattern.h
 $(OBJ)ftp/ftp_lister.o: /Program/toolbar.h /Program/lister.h /Program/popup.h
-$(OBJ)ftp/ftp_lister.o: /Program/dirlist.h ftp/ftp_lister.h ftp/ftp_util.h
-$(OBJ)ftp/ftp_lister.o: ftp/ftp_recursive.h ftp/ftp_addrsupp_protos.h
-$(OBJ)ftp/ftp_lister.o: ftp/ftp_protect.h
+$(OBJ)ftp/ftp_lister.o: /Program/lister_ipc.h /Program/dirlist.h
+$(OBJ)ftp/ftp_lister.o: ftp/ftp_lister.h ftp/ftp_util.h ftp/ftp_recursive.h
+$(OBJ)ftp/ftp_lister.o: ftp/ftp_addrsupp_protos.h ftp/ftp_protect.h
 $(OBJ)ftp/ftp_lister_list.o: ftp/ftp_lister_list.c ftp/ftp.h ftp/ftp.strings
 $(OBJ)ftp/ftp_lister_list.o: modules_lib.h /Library/galileofmbase.h
 $(OBJ)ftp/ftp_lister_list.o: /Include/galileo/os.h /Program/galileo_config.h
@@ -902,9 +908,9 @@ $(OBJ)ftp/ftp_lister_list.o: ftp/ftp_extern_pragmas.h ftp/ftp_ad_errno.h
 $(OBJ)ftp/ftp_lister_list.o: ftp/ftp_lister.h ftp/ftp_galileoftp.h
 $(OBJ)ftp/ftp_lister_list.o: /Program/reselect.h /Program/pattern.h
 $(OBJ)ftp/ftp_lister_list.o: /Program/toolbar.h /Program/lister.h
-$(OBJ)ftp/ftp_lister_list.o: /Program/popup.h /Program/dirlist.h
-$(OBJ)ftp/ftp_lister_list.o: ftp/ftp_arexx.h ftp/ftp_ipc.h ftp/ftp_util.h
-$(OBJ)ftp/ftp_lister_list.o: ftp/ftp_list.h
+$(OBJ)ftp/ftp_lister_list.o: /Program/popup.h /Program/lister_ipc.h
+$(OBJ)ftp/ftp_lister_list.o: /Program/dirlist.h ftp/ftp_arexx.h ftp/ftp_ipc.h
+$(OBJ)ftp/ftp_lister_list.o: ftp/ftp_util.h ftp/ftp_list.h
 $(OBJ)ftp/ftp_lister_xfer.o: ftp/ftp_lister_xfer.c ftp/ftp.h ftp/ftp.strings
 $(OBJ)ftp/ftp_lister_xfer.o: modules_lib.h /Library/galileofmbase.h
 $(OBJ)ftp/ftp_lister_xfer.o: /Include/galileo/os.h /Program/galileo_config.h
@@ -915,9 +921,10 @@ $(OBJ)ftp/ftp_lister_xfer.o: ftp/ftp_arexx.h ftp/ftp_ipc.h
 $(OBJ)ftp/ftp_lister_xfer.o: ftp/ftp_galileoftp.h /Program/reselect.h
 $(OBJ)ftp/ftp_lister_xfer.o: /Program/pattern.h /Program/toolbar.h
 $(OBJ)ftp/ftp_lister_xfer.o: /Program/lister.h /Program/popup.h
-$(OBJ)ftp/ftp_lister_xfer.o: /Program/dirlist.h ftp/ftp_lister.h
-$(OBJ)ftp/ftp_lister_xfer.o: ftp/ftp_util.h ftp/ftp_recursive.h
-$(OBJ)ftp/ftp_lister_xfer.o: ftp/ftp_lister_xfer.h ftp/ftp_addrsupp_protos.h
+$(OBJ)ftp/ftp_lister_xfer.o: /Program/lister_ipc.h /Program/dirlist.h
+$(OBJ)ftp/ftp_lister_xfer.o: ftp/ftp_lister.h ftp/ftp_util.h
+$(OBJ)ftp/ftp_lister_xfer.o: ftp/ftp_recursive.h ftp/ftp_lister_xfer.h
+$(OBJ)ftp/ftp_lister_xfer.o: ftp/ftp_addrsupp_protos.h
 $(OBJ)ftp/ftp_lister_connect.o: ftp/ftp_lister_connect.c ftp/ftp.h
 $(OBJ)ftp/ftp_lister_connect.o: ftp/ftp.strings modules_lib.h
 $(OBJ)ftp/ftp_lister_connect.o: /Library/galileofmbase.h
@@ -931,9 +938,9 @@ $(OBJ)ftp/ftp_lister_connect.o: ftp/ftp_arexx.h ftp/ftp_ipc.h
 $(OBJ)ftp/ftp_lister_connect.o: ftp/ftp_galileoftp.h /Program/reselect.h
 $(OBJ)ftp/ftp_lister_connect.o: /Program/pattern.h /Program/toolbar.h
 $(OBJ)ftp/ftp_lister_connect.o: /Program/lister.h /Program/popup.h
-$(OBJ)ftp/ftp_lister_connect.o: /Program/dirlist.h ftp/ftp_lister.h
-$(OBJ)ftp/ftp_lister_connect.o: ftp/ftp_util.h ftp/ftp_module.h
-$(OBJ)ftp/ftp_lister_connect.o: ftp/ftp_addrsupp_protos.h
+$(OBJ)ftp/ftp_lister_connect.o: /Program/lister_ipc.h /Program/dirlist.h
+$(OBJ)ftp/ftp_lister_connect.o: ftp/ftp_lister.h ftp/ftp_util.h
+$(OBJ)ftp/ftp_lister_connect.o: ftp/ftp_module.h ftp/ftp_addrsupp_protos.h
 $(OBJ)ftp/ftp.o: ftp/ftp.c ftp/ftp_ad_sockproto2.h ftp/ftp_ad_internet.h
 $(OBJ)ftp/ftp.o: ftp/ftp_extern_pragmas.h ftp/ftp_ad_errno.h ftp/ftp.h
 $(OBJ)ftp/ftp.o: ftp/ftp.strings modules_lib.h /Library/galileofmbase.h
@@ -941,14 +948,15 @@ $(OBJ)ftp/ftp.o: /Include/galileo/os.h /Program/galileo_config.h
 $(OBJ)ftp/ftp.o: /Library/galileofmpragmas.h modules.h module.h
 $(OBJ)ftp/ftp.o: ftp/ftp_galileoftp.h /Program/reselect.h /Program/pattern.h
 $(OBJ)ftp/ftp.o: /Program/toolbar.h /Program/lister.h /Program/popup.h
-$(OBJ)ftp/ftp.o: /Program/dirlist.h ftp/ftp_ipc.h ftp/ftp_lister.h
-$(OBJ)ftp/ftp.o: ftp/ftp_arexx.h ftp/ftp_util.h
+$(OBJ)ftp/ftp.o: /Program/lister_ipc.h /Program/dirlist.h ftp/ftp_ipc.h
+$(OBJ)ftp/ftp.o: ftp/ftp_lister.h ftp/ftp_arexx.h ftp/ftp_util.h
 $(OBJ)ftp/ftp_arexx.o: ftp/ftp_arexx.c modules_lib.h /Library/galileofmbase.h
 $(OBJ)ftp/ftp_arexx.o: /Include/galileo/os.h /Program/galileo_config.h
 $(OBJ)ftp/ftp_arexx.o: /Library/galileofmpragmas.h modules.h ftp/ftp_arexx.h
 $(OBJ)ftp/ftp_arexx.o: ftp/ftp_galileoftp.h module.h /Program/reselect.h
 $(OBJ)ftp/ftp_arexx.o: /Program/pattern.h /Program/toolbar.h
-$(OBJ)ftp/ftp_arexx.o: /Program/lister.h /Program/popup.h /Program/dirlist.h
+$(OBJ)ftp/ftp_arexx.o: /Program/lister.h /Program/popup.h
+$(OBJ)ftp/ftp_arexx.o: /Program/lister_ipc.h /Program/dirlist.h
 $(OBJ)ftp/ftp_util.o: ftp/ftp_util.c ftp/ftp.h ftp/ftp.strings modules_lib.h
 $(OBJ)ftp/ftp_util.o: /Library/galileofmbase.h /Include/galileo/os.h
 $(OBJ)ftp/ftp_util.o: /Program/galileo_config.h /Library/galileofmpragmas.h
@@ -956,8 +964,9 @@ $(OBJ)ftp/ftp_util.o: modules.h module.h ftp/ftp_ad_internet.h
 $(OBJ)ftp/ftp_util.o: ftp/ftp_ad_sockproto.h ftp/ftp_extern_pragmas.h
 $(OBJ)ftp/ftp_util.o: ftp/ftp_galileoftp.h /Program/reselect.h
 $(OBJ)ftp/ftp_util.o: /Program/pattern.h /Program/toolbar.h /Program/lister.h
-$(OBJ)ftp/ftp_util.o: /Program/popup.h /Program/dirlist.h ftp/ftp_list.h
-$(OBJ)ftp/ftp_util.o: ftp/ftp_lister.h ftp/ftp_util.h ftp/ftp_recursive.h
+$(OBJ)ftp/ftp_util.o: /Program/popup.h /Program/lister_ipc.h
+$(OBJ)ftp/ftp_util.o: /Program/dirlist.h ftp/ftp_list.h ftp/ftp_lister.h
+$(OBJ)ftp/ftp_util.o: ftp/ftp_util.h ftp/ftp_recursive.h
 $(OBJ)ftp/ftp_recursive.o: ftp/ftp_recursive.c ftp/ftp_recursive.h
 $(OBJ)ftp/ftp_recursive.o: modules_lib.h /Library/galileofmbase.h
 $(OBJ)ftp/ftp_recursive.o: /Include/galileo/os.h /Program/galileo_config.h
@@ -965,12 +974,12 @@ $(OBJ)ftp/ftp_recursive.o: /Library/galileofmpragmas.h modules.h
 $(OBJ)ftp/ftp_recursive.o: ftp/ftp_lister.h ftp/ftp_galileoftp.h module.h
 $(OBJ)ftp/ftp_recursive.o: /Program/reselect.h /Program/pattern.h
 $(OBJ)ftp/ftp_recursive.o: /Program/toolbar.h /Program/lister.h
-$(OBJ)ftp/ftp_recursive.o: /Program/popup.h /Program/dirlist.h ftp/ftp.h
-$(OBJ)ftp/ftp_recursive.o: ftp/ftp.strings ftp/ftp_ad_internet.h
-$(OBJ)ftp/ftp_recursive.o: ftp/ftp_util.h ftp/ftp_list.h ftp/ftp_ipc.h
-$(OBJ)ftp/ftp_recursive.o: ftp/ftp_arexx.h ftp/ftp_lister_xfer.h
-$(OBJ)ftp/ftp_recursive.o: ftp/ftp_ad_sockproto2.h ftp/ftp_extern_pragmas.h
-$(OBJ)ftp/ftp_recursive.o: ftp/ftp_addrsupp_protos.h
+$(OBJ)ftp/ftp_recursive.o: /Program/popup.h /Program/lister_ipc.h
+$(OBJ)ftp/ftp_recursive.o: /Program/dirlist.h ftp/ftp.h ftp/ftp.strings
+$(OBJ)ftp/ftp_recursive.o: ftp/ftp_ad_internet.h ftp/ftp_util.h
+$(OBJ)ftp/ftp_recursive.o: ftp/ftp_list.h ftp/ftp_ipc.h ftp/ftp_arexx.h
+$(OBJ)ftp/ftp_recursive.o: ftp/ftp_lister_xfer.h ftp/ftp_ad_sockproto2.h
+$(OBJ)ftp/ftp_recursive.o: ftp/ftp_extern_pragmas.h ftp/ftp_addrsupp_protos.h
 $(OBJ)ftp/ftp_addressbook.o: ftp/ftp_addressbook.c ftp/ftp.h ftp/ftp.strings
 $(OBJ)ftp/ftp_addressbook.o: modules_lib.h /Library/galileofmbase.h
 $(OBJ)ftp/ftp_addressbook.o: /Include/galileo/os.h /Program/galileo_config.h
@@ -980,10 +989,11 @@ $(OBJ)ftp/ftp_addressbook.o: ftp/ftp_extern_pragmas.h ftp/ftp_addressbook.h
 $(OBJ)ftp/ftp_addressbook.o: ftp/ftp_galileoftp.h /Program/reselect.h
 $(OBJ)ftp/ftp_addressbook.o: /Program/pattern.h /Program/toolbar.h
 $(OBJ)ftp/ftp_addressbook.o: /Program/lister.h /Program/popup.h
-$(OBJ)ftp/ftp_addressbook.o: /Program/dirlist.h ftp/ftp_addressbook_protos.h
-$(OBJ)ftp/ftp_addressbook.o: ftp/ftp_addrsupp.h ftp/ftp_addrsupp_protos.h
-$(OBJ)ftp/ftp_addressbook.o: ftp/ftp_addrformat.h ftp/ftp_ipc.h
-$(OBJ)ftp/ftp_addressbook.o: ftp/ftp_util.h config/galileoconfig.h
+$(OBJ)ftp/ftp_addressbook.o: /Program/lister_ipc.h /Program/dirlist.h
+$(OBJ)ftp/ftp_addressbook.o: ftp/ftp_addressbook_protos.h ftp/ftp_addrsupp.h
+$(OBJ)ftp/ftp_addressbook.o: ftp/ftp_addrsupp_protos.h ftp/ftp_addrformat.h
+$(OBJ)ftp/ftp_addressbook.o: ftp/ftp_ipc.h ftp/ftp_util.h
+$(OBJ)ftp/ftp_addressbook.o: config/galileoconfig.h
 $(OBJ)ftp/ftp_addressbook.o: config/galileoconfig_pragmas.h
 $(OBJ)ftp/ftp_addrsupp.o: ftp/ftp_addrsupp.c ftp/ftp.h ftp/ftp.strings
 $(OBJ)ftp/ftp_addrsupp.o: modules_lib.h /Library/galileofmbase.h
@@ -993,10 +1003,10 @@ $(OBJ)ftp/ftp_addrsupp.o: ftp/ftp_ad_internet.h ftp/ftp_ipc.h
 $(OBJ)ftp/ftp_addrsupp.o: ftp/ftp_galileoftp.h /Program/reselect.h
 $(OBJ)ftp/ftp_addrsupp.o: /Program/pattern.h /Program/toolbar.h
 $(OBJ)ftp/ftp_addrsupp.o: /Program/lister.h /Program/popup.h
-$(OBJ)ftp/ftp_addrsupp.o: /Program/dirlist.h ftp/ftp_addressbook.h
-$(OBJ)ftp/ftp_addrsupp.o: ftp/ftp_addressbook_protos.h ftp/ftp_addrsupp.h
-$(OBJ)ftp/ftp_addrsupp.o: ftp/ftp_addrsupp_protos.h ftp/ftp_addrformat.h
-$(OBJ)ftp/ftp_addrsupp.o: ftp/ftp_util.h
+$(OBJ)ftp/ftp_addrsupp.o: /Program/lister_ipc.h /Program/dirlist.h
+$(OBJ)ftp/ftp_addrsupp.o: ftp/ftp_addressbook.h ftp/ftp_addressbook_protos.h
+$(OBJ)ftp/ftp_addrsupp.o: ftp/ftp_addrsupp.h ftp/ftp_addrsupp_protos.h
+$(OBJ)ftp/ftp_addrsupp.o: ftp/ftp_addrformat.h ftp/ftp_util.h
 $(OBJ)ftp/ftp_addrformat.o: ftp/ftp_addrformat.c ftp/ftp.h ftp/ftp.strings
 $(OBJ)ftp/ftp_addrformat.o: modules_lib.h /Library/galileofmbase.h
 $(OBJ)ftp/ftp_addrformat.o: /Include/galileo/os.h /Program/galileo_config.h
@@ -1005,7 +1015,8 @@ $(OBJ)ftp/ftp_addrformat.o: ftp/ftp_ad_internet.h ftp/ftp_ipc.h
 $(OBJ)ftp/ftp_addrformat.o: ftp/ftp_galileoftp.h /Program/reselect.h
 $(OBJ)ftp/ftp_addrformat.o: /Program/pattern.h /Program/toolbar.h
 $(OBJ)ftp/ftp_addrformat.o: /Program/lister.h /Program/popup.h
-$(OBJ)ftp/ftp_addrformat.o: /Program/dirlist.h ftp/ftp_addressbook.h
+$(OBJ)ftp/ftp_addrformat.o: /Program/lister_ipc.h /Program/dirlist.h
+$(OBJ)ftp/ftp_addrformat.o: ftp/ftp_addressbook.h
 $(OBJ)ftp/ftp_addrformat.o: ftp/ftp_addressbook_protos.h ftp/ftp_addrformat.h
 $(OBJ)ftp/ftp_addrformat.o: /Modules/modules_internal_protos.h
 $(OBJ)ftp/ftp_addrformat.o: /Modules/modules_internal_pragmas.h
@@ -1016,22 +1027,23 @@ $(OBJ)ftp/ftp_protect.o: /Library/galileofmpragmas.h modules.h module.h
 $(OBJ)ftp/ftp_protect.o: ftp/ftp_ad_internet.h ftp/ftp_galileoftp.h
 $(OBJ)ftp/ftp_protect.o: /Program/reselect.h /Program/pattern.h
 $(OBJ)ftp/ftp_protect.o: /Program/toolbar.h /Program/lister.h
-$(OBJ)ftp/ftp_protect.o: /Program/popup.h /Program/dirlist.h ftp/ftp_ipc.h
-$(OBJ)ftp/ftp_protect.o: ftp/ftp_util.h ftp/ftp_protect.h
-$(OBJ)ftp/ftp_protect.o: config/galileoconfig.h
+$(OBJ)ftp/ftp_protect.o: /Program/popup.h /Program/lister_ipc.h
+$(OBJ)ftp/ftp_protect.o: /Program/dirlist.h ftp/ftp_ipc.h ftp/ftp_util.h
+$(OBJ)ftp/ftp_protect.o: ftp/ftp_protect.h config/galileoconfig.h
 $(OBJ)ftp/ftp_protect.o: config/galileoconfig_pragmas.h
 $(OBJ)xadbrowser/XADbrowser.o: xadbrowser/XADbrowser.c xadbrowser/XADbrowser.h
 $(OBJ)xadbrowser/XADbrowser.o: xadbrowser/XADbrowser.strings modules_lib.h
 $(OBJ)xadbrowser/XADbrowser.o: /Library/galileofmbase.h /Include/galileo/os.h
 $(OBJ)xadbrowser/XADbrowser.o: /Program/galileo_config.h
-$(OBJ)xadbrowser/XADbrowser.o: /Library/galileofmpragmas.h modules.h module.h
+$(OBJ)xadbrowser/XADbrowser.o: /Library/galileofmpragmas.h modules.h
+$(OBJ)xadbrowser/XADbrowser.o: /Program/lister_ipc.h module.h
 $(OBJ)xadbrowser/XADbrowser_data.o: xadbrowser/XADbrowser_data.c xadbrowser/XADbrowser.h
 $(OBJ)xadbrowser/XADbrowser_data.o: xadbrowser/XADbrowser.strings
 $(OBJ)xadbrowser/XADbrowser_data.o: modules_lib.h /Library/galileofmbase.h
 $(OBJ)xadbrowser/XADbrowser_data.o: /Include/galileo/os.h
 $(OBJ)xadbrowser/XADbrowser_data.o: /Program/galileo_config.h
 $(OBJ)xadbrowser/XADbrowser_data.o: /Library/galileofmpragmas.h modules.h
-$(OBJ)xadbrowser/XADbrowser_data.o: module.h
+$(OBJ)xadbrowser/XADbrowser_data.o: /Program/lister_ipc.h module.h
 $(OBJ)xadbrowser/XADbrowser_strings.o: xadbrowser/XADbrowser_strings.c xadbrowser/XADbrowser.strings
 $(OBJ)xadbrowser/XADbrowser_strings.o: /Library/galileofmbase.h
 $(OBJ)xadbrowser/XADbrowser_strings.o: /Include/galileo/os.h
@@ -1044,7 +1056,7 @@ $(OBJ)xadbrowser/XADbrowser_progress.o: /Library/galileofmbase.h
 $(OBJ)xadbrowser/XADbrowser_progress.o: /Include/galileo/os.h
 $(OBJ)xadbrowser/XADbrowser_progress.o: /Program/galileo_config.h
 $(OBJ)xadbrowser/XADbrowser_progress.o: /Library/galileofmpragmas.h modules.h
-$(OBJ)xadbrowser/XADbrowser_progress.o: module.h
+$(OBJ)xadbrowser/XADbrowser_progress.o: /Program/lister_ipc.h module.h
 
 $(OBJ)config/libinit.o: config/libinit.c config/config_lib.h
 $(OBJ)config/libinit.o: /Library/galileofmbase.h /Include/galileo/os.h
@@ -1090,6 +1102,7 @@ $(OBJ)config/config_environment.o: config/function_editor.h
 $(OBJ)config/config_environment.o: config/select_colours.h
 $(OBJ)config/config_environment.o: config/button_editor.h
 $(OBJ)config/config_environment.o: config/config_environment.h
+$(OBJ)config/config_environment.o: /Program/main_commands.h
 $(OBJ)config/config_environment.o: /Modules/modules_internal_protos.h
 $(OBJ)config/config_environment.o: /Modules/modules_internal_pragmas.h
 $(OBJ)config/config_environment_data.o: config/config_environment_data.c config/config_lib.h
@@ -1107,6 +1120,7 @@ $(OBJ)config/config_environment_data.o: config/function_editor.h
 $(OBJ)config/config_environment_data.o: config/select_colours.h
 $(OBJ)config/config_environment_data.o: config/button_editor.h
 $(OBJ)config/config_environment_data.o: config/config_environment.h
+$(OBJ)config/config_environment_data.o: /Program/main_commands.h
 $(OBJ)config/config_environment_lister.o: config/config_environment_lister.c config/config_lib.h
 $(OBJ)config/config_environment_lister.o: /Library/galileofmbase.h
 $(OBJ)config/config_environment_lister.o: /Include/galileo/os.h
@@ -1122,6 +1136,7 @@ $(OBJ)config/config_environment_lister.o: config/function_editor.h
 $(OBJ)config/config_environment_lister.o: config/select_colours.h
 $(OBJ)config/config_environment_lister.o: config/button_editor.h
 $(OBJ)config/config_environment_lister.o: config/config_environment.h
+$(OBJ)config/config_environment_lister.o: /Program/main_commands.h
 $(OBJ)config/config_environment_desktop.o: config/config_environment_desktop.c config/config_lib.h
 $(OBJ)config/config_environment_desktop.o: /Library/galileofmbase.h
 $(OBJ)config/config_environment_desktop.o: /Include/galileo/os.h
@@ -1138,6 +1153,7 @@ $(OBJ)config/config_environment_desktop.o: config/function_editor.h
 $(OBJ)config/config_environment_desktop.o: config/select_colours.h
 $(OBJ)config/config_environment_desktop.o: config/button_editor.h
 $(OBJ)config/config_environment_desktop.o: config/config_environment.h
+$(OBJ)config/config_environment_desktop.o: /Program/main_commands.h
 $(OBJ)config/config_environment_palette.o: config/config_environment_palette.c config/config_lib.h
 $(OBJ)config/config_environment_palette.o: /Library/galileofmbase.h
 $(OBJ)config/config_environment_palette.o: /Include/galileo/os.h
@@ -1154,6 +1170,7 @@ $(OBJ)config/config_environment_palette.o: config/function_editor.h
 $(OBJ)config/config_environment_palette.o: config/select_colours.h
 $(OBJ)config/config_environment_palette.o: config/button_editor.h
 $(OBJ)config/config_environment_palette.o: config/config_environment.h
+$(OBJ)config/config_environment_palette.o: /Program/main_commands.h
 $(OBJ)config/config_environment_output.o: config/config_environment_output.c config/config_lib.h
 $(OBJ)config/config_environment_output.o: /Library/galileofmbase.h
 $(OBJ)config/config_environment_output.o: /Include/galileo/os.h
@@ -1169,6 +1186,7 @@ $(OBJ)config/config_environment_output.o: config/function_editor.h
 $(OBJ)config/config_environment_output.o: config/select_colours.h
 $(OBJ)config/config_environment_output.o: config/button_editor.h
 $(OBJ)config/config_environment_output.o: config/config_environment.h
+$(OBJ)config/config_environment_output.o: /Program/main_commands.h
 $(OBJ)config/config_environment_sounds.o: config/config_environment_sounds.c config/config_lib.h
 $(OBJ)config/config_environment_sounds.o: /Library/galileofmbase.h
 $(OBJ)config/config_environment_sounds.o: /Include/galileo/os.h
@@ -1184,6 +1202,7 @@ $(OBJ)config/config_environment_sounds.o: config/function_editor.h
 $(OBJ)config/config_environment_sounds.o: config/select_colours.h
 $(OBJ)config/config_environment_sounds.o: config/button_editor.h
 $(OBJ)config/config_environment_sounds.o: config/config_environment.h
+$(OBJ)config/config_environment_sounds.o: /Program/main_commands.h
 $(OBJ)config/config_environment_sounds.o: /Modules/modules_internal_protos.h
 $(OBJ)config/config_environment_sounds.o: /Modules/modules_internal_pragmas.h
 $(OBJ)config/config_environment_display.o: config/config_environment_display.c config/config_lib.h
@@ -1202,6 +1221,7 @@ $(OBJ)config/config_environment_display.o: config/function_editor.h
 $(OBJ)config/config_environment_display.o: config/select_colours.h
 $(OBJ)config/config_environment_display.o: config/button_editor.h
 $(OBJ)config/config_environment_display.o: config/config_environment.h
+$(OBJ)config/config_environment_display.o: /Program/main_commands.h
 $(OBJ)config/config_environment_icons.o: config/config_environment_icons.c config/config_lib.h
 $(OBJ)config/config_environment_icons.o: /Library/galileofmbase.h
 $(OBJ)config/config_environment_icons.o: /Include/galileo/os.h
@@ -1217,6 +1237,7 @@ $(OBJ)config/config_environment_icons.o: config/function_editor.h
 $(OBJ)config/config_environment_icons.o: config/select_colours.h
 $(OBJ)config/config_environment_icons.o: config/button_editor.h
 $(OBJ)config/config_environment_icons.o: config/config_environment.h
+$(OBJ)config/config_environment_icons.o: /Program/main_commands.h
 $(OBJ)config/config_environment_picture.o: config/config_environment_picture.c config/config_lib.h
 $(OBJ)config/config_environment_picture.o: /Library/galileofmbase.h
 $(OBJ)config/config_environment_picture.o: /Include/galileo/os.h
@@ -1233,6 +1254,7 @@ $(OBJ)config/config_environment_picture.o: config/function_editor.h
 $(OBJ)config/config_environment_picture.o: config/select_colours.h
 $(OBJ)config/config_environment_picture.o: config/button_editor.h
 $(OBJ)config/config_environment_picture.o: config/config_environment.h
+$(OBJ)config/config_environment_picture.o: /Program/main_commands.h
 $(OBJ)config/config_environment_paths.o: config/config_environment_paths.c config/config_lib.h
 $(OBJ)config/config_environment_paths.o: /Library/galileofmbase.h
 $(OBJ)config/config_environment_paths.o: /Include/galileo/os.h
@@ -1248,6 +1270,7 @@ $(OBJ)config/config_environment_paths.o: config/function_editor.h
 $(OBJ)config/config_environment_paths.o: config/select_colours.h
 $(OBJ)config/config_environment_paths.o: config/button_editor.h
 $(OBJ)config/config_environment_paths.o: config/config_environment.h
+$(OBJ)config/config_environment_paths.o: /Program/main_commands.h
 $(OBJ)config/config_buttons.o: config/config_buttons.c config/config_lib.h
 $(OBJ)config/config_buttons.o: /Library/galileofmbase.h /Include/galileo/os.h
 $(OBJ)config/config_buttons.o: /Program/galileo_config.h
@@ -1342,6 +1365,7 @@ $(OBJ)config/function_editor.o: config/function_editor.h
 $(OBJ)config/function_editor.o: config/select_colours.h
 $(OBJ)config/function_editor.o: config/button_editor.h
 $(OBJ)config/function_editor.o: /Program/function_data.h
+$(OBJ)config/function_editor.o: /Program/main_commands.h
 $(OBJ)config/function_editor.o: config/config_buttons.h
 $(OBJ)config/function_editor_data.o: config/function_editor_data.c config/config_lib.h
 $(OBJ)config/function_editor_data.o: /Library/galileofmbase.h

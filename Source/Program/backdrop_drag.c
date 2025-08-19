@@ -36,6 +36,10 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
+#include "misc_protos.h"
+#include "app_msg_protos.h"
+#include "backdrop_protos.h"
 
 // Start dragging
 BOOL backdrop_start_drag(BackdropInfo *info,short x,short y)
@@ -387,7 +391,7 @@ void backdrop_drop_object(BackdropInfo *info,BackdropObject *on_object)
 	// Drop on an AppIcon
 	if (on_object->bdo_type==BDO_APP_ICON)
 	{
-		GalileoAppMessage *msg;
+		struct AppMessage *msg;
 		struct MsgPort *port;
 
 		// Is the icon busy?
@@ -406,13 +410,24 @@ void backdrop_drop_object(BackdropInfo *info,BackdropObject *on_object)
 		}
 
 		// Set message type
-		msg->ga_Msg.am_Type=MTYPE_APPICON;
+		msg->am_Type=MTYPE_APPICON;
 
 		// Get AppInfo
 		port=WB_AppWindowData(
 			(struct AppWindow *)on_object->bdo_misc_data,
-			&msg->ga_Msg.am_ID,
-			&msg->ga_Msg.am_UserData);
+			&msg->am_ID,
+			&msg->am_UserData);
+
+		if (port->mp_Node.ln_Type == GNT_APPMSG_PORT)
+		{
+		    if (info->flags == BDIF_MAIN_DESKTOP)
+			msg->am_Class = GLAMCLASS_DESKTOP_ICON;
+		    else
+		    if (info->flags == BDIF_GROUP)
+			msg->am_Class = GLAMCLASS_GROUP_ICON;
+		    else
+			msg->am_Class = GLAMCLASS_LISTER_ICON;
+		}
 
 		// Send the message
 		PutMsg(port,(struct Message *)msg);
@@ -494,6 +509,7 @@ void backdrop_drop_object(BackdropInfo *info,BackdropObject *on_object)
 		def_function_diskcopy,
 		0,
 		0,
+		0,0,
 		0,0,
 		0,0,
 		BuildArgArray(buf,dbuf,0),

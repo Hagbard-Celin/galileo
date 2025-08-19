@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -62,7 +63,7 @@ BOOL theme_copy_file(char *,char *);
 Att_List *theme_build_list(char *path);
 void write_theme_intro(APTR,char *);
 void write_theme_outro(APTR);
-short convert_theme(CONST GalileoCallbackInfo *,char *,char *);
+short convert_theme(CONST GalileoCallbackInfo *,char *,BPTR,char *);
 void convert_theme_file(char *);
 
 extern char *pen_settings[];

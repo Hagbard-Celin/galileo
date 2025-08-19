@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2023 Hagbard Celine
+Copyright 2023,2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,10 +36,7 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#include "galileofm.h"
-#include "scripts.h"
-
-extern struct Library		   *ConsoleDevice;
+#include "cleanup_include.h"
 
 // Quit the program
 void quit(BOOL script)
@@ -103,9 +100,9 @@ void quit(BOOL script)
 		// Free application port
 		if (GUI->appmsg_port)
 		{
-			GalileoAppMessage *amsg;
+			struct AppMessage *amsg;
 			RemPort(GUI->appmsg_port);
-			while (amsg=(GalileoAppMessage *)GetMsg(GUI->appmsg_port))
+			while (amsg=(struct AppMessage *)GetMsg(GUI->appmsg_port))
 				ReplyAppMessage(amsg);
 			DeleteMsgPort(GUI->appmsg_port);
 			GUI->appmsg_port=0;
@@ -144,8 +141,8 @@ void quit(BOOL script)
 		CloseButtonBank(GUI->lister_menu);
 		CloseButtonBank(GUI->hotkeys);
 
-        // Plug memory leak
-        CloseButtonBank(GUI->scripts);
+		// Plug memory leak
+		CloseButtonBank(GUI->scripts);
 
 		// Free user menus
 		CloseButtonBank(GUI->user_menu);
@@ -166,11 +163,11 @@ void quit(BOOL script)
 
 		// Delete notify port
 		if (GUI->notify_port)
-        {
-            while (msg=GetMsg(GUI->notify_port))
+		{
+		    while (msg=GetMsg(GUI->notify_port))
 			ReplyFreeMsg(msg);
-        	DeleteMsgPort(GUI->notify_port);
-        }
+		    DeleteMsgPort(GUI->notify_port);
+		}
 
 		// Free position memory
 		FreeMemHandle(GUI->position_memory);
@@ -179,7 +176,7 @@ void quit(BOOL script)
 		Att_RemList(GUI->command_history,0);
 
 		// Delete icon positioning port
-        while (msg=GetMsg(GUI->iconpos_port))
+		while (msg=GetMsg(GUI->iconpos_port))
 			ReplyFreeMsg(msg);
 		DeleteMsgPort(GUI->iconpos_port);
 
@@ -255,17 +252,21 @@ void quit(BOOL script)
 	CloseLibrary(GalileoFMBase);
 
 #ifdef _DEBUG
-    {
-        unsigned char clock[8];
+	{
+	    unsigned char clock[8];
 
-        getclk(clock);
-        KPrintF("Main program finished at: %02.ld/%02.ld %02.ld:%02.ld:%02.ld,%02.ld\n", clock[3], clock[2], clock[4], clock[5], clock[6], clock[7]);
-    }
+	    getclk(clock);
+	    KPrintF("Main program finished at: %02.ld/%02.ld %02.ld:%02.ld:%02.ld,%02.ld\n", clock[3], clock[2], clock[4], clock[5], clock[6], clock[7]);
+	}
 #ifdef RESOURCE_TRACKING
-    PrintTrackedResources();
-    //EndResourceTracking(); /* Generate a memory usage report */
-    REALL_CloseLibrary(ResTrackBase);
+	ResourceTrackingEndOfTask();
+	PrintTrackedResources();
+	//EndResourceTracking(); /* Generate a memory usage report */
+	REALL_CloseLibrary(ResTrackBase);
 #endif
+#endif
+#ifdef _DEBUG_STACK
+	stack_check_end((struct Task *)main_proc, &stack_check_data);
 #endif
 	// Outahere!
 	exit(0);
@@ -331,6 +332,14 @@ BOOL quit_notify(void)
 	// Look for quit traps
 	while (trap=FindTrapEntry(trap,"quit",port))
 	{
+	    if (!strncmp(port, "gfm_", 4))
+			galileo_handler_msg(port, "quit",
+					    0, 0,
+					    0, 0, 0, 0,
+					    0,
+					    0, 0);
+
+	    else
 		// Send abort message
 		rexx_handler_msg(port,0,0,HA_String,0,"quit",TAG_END);
 	}

@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,12 +37,21 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "dirlist_protos.h"
+#include "misc_protos.h"
+#include "function_launch_protos.h"
+#include "dirlist_protos.h"
+#include "backdrop_protos.h"
+#include "buffers_protos.h"
+#include "dates.h"
+#include "icons.h"
 
 // Find a list of file changes for a path
 FileChangeList *function_find_filechanges(
 	FunctionHandle *handle,
 	FileChangeList *start,
 	char *path,
+	BPTR path_lock,
 	Lister *lister,
 	short *substr)
 {
@@ -59,11 +69,23 @@ FileChangeList *function_find_filechanges(
 		list->node.ln_Succ;
 		list=(FileChangeList *)list->node.ln_Succ)
 	{
+		// Lock to match?
+		if (path_lock)
+		{
+		    if (path_lock == list->lock || (SameLock(path_lock,list->lock) == LOCK_SAME))
+		    {
+		        return list;
+		    }
+		}
+
 		// Path to match?
 		if (path && *path && *list->path)
 		{
 			// Match on path
-			if (stricmp(path,list->path)==0) return list;
+			if (stricmp(path,list->path)==0)
+			{
+			    return list;
+			}
 
 			// Accept a sub-string?
 			if (substr)
@@ -79,7 +101,10 @@ FileChangeList *function_find_filechanges(
 
 		// Match lister pointer
 		else
-		if (list->lister==lister) return list;
+		if (list->lister && list->lister==lister)
+		{
+		    return list;
+		}
 	}
 
 	return 0;
@@ -90,18 +115,22 @@ FileChangeList *function_find_filechanges(
 FileChangeList *function_add_filechanges(
 	FunctionHandle *handle,
 	char *path,
+	BPTR path_lock,
 	Lister *lister)
 {
 	FileChangeList *list;
 
 	// Allocate new list
-	if (!(list=AllocMemH(handle->memory,sizeof(FileChangeList)+strlen(path))))
+	if (!(list=AllocMemH(handle->memory,sizeof(FileChangeList) + (path?strlen(path):0))))
 		return 0;
 
 	// Initialise
 	list->node.ln_Name=list->path;
 	NewList((struct List *)&list->files);
 
+	// Lock supplied?
+	if (path_lock) list->lock = DupLock(path_lock);
+	else
 	// Path supplied?
 	if (path) strcpy(list->path,path);
 
@@ -119,6 +148,7 @@ FileChangeList *function_add_filechanges(
 FileChange *function_filechange_addfile(
 	FunctionHandle *handle,
 	char *path,
+	BPTR path_lock,
 	struct FileInfoBlock *info,
 	NetworkInfo *network,
 	Lister *lister)
@@ -127,8 +157,8 @@ FileChange *function_filechange_addfile(
 	FileChange *change;
 
 	// Find list for this path, add if not found
-	if (!(list=function_find_filechanges(handle,0,path,lister,0)) &&
-		!(list=function_add_filechanges(handle,path,lister))) return 0;
+	if (!(list=function_find_filechanges(handle,0,path,path_lock,lister,0)) &&
+		!(list=function_add_filechanges(handle,path,path_lock,lister))) return 0;
 
 	// Get new change entry
 	if (!(change=AllocMemH(handle->memory,
@@ -175,23 +205,38 @@ FileChange *function_filechange_addfile(
 FileChange *function_filechange_loadfile(
 	FunctionHandle *handle,
 	char *path,
+	BPTR path_lock,
 	char *name,
 	short flags)
 {
 	char *buffer;
-	BPTR lock;
+	BPTR lock = 0;
 	struct FileInfoBlock __aligned fib;
 	FileChange *change=0;
 	short len;
+	BPTR org_dir;
 
 	// Allocate buffer
 	len=strlen(path)+strlen(name)+((flags&FFLF_ICON)?7:2);
 	if (!(buffer=AllocVec(len+1,0))) return 0;
 
-	// Build path name
-	strcpy(buffer,path);
-	AddPart(buffer,name,len);
-	if (flags&FFLF_ICON && !isicon(name)) strcat(buffer,".info");
+	if (path_lock)
+	{
+	    strcpy(buffer,name);
+	    if (flags&FFLF_ICON && !isicon(name)) strcat(buffer,".info");
+	    org_dir = CurrentDir(path_lock);
+	    lock=Lock(buffer,ACCESS_READ);
+	    CurrentDir(org_dir);
+
+	}
+	else
+	{
+	    // Build path name
+	    strcpy(buffer,path);
+	    AddPart(buffer,name,len);
+	    if (flags&FFLF_ICON && !isicon(name)) strcat(buffer,".info");
+	    lock=Lock(buffer,ACCESS_READ);
+	}
 
 	// Deferred?
 	if (flags&FFLF_DEFERRED)
@@ -203,23 +248,23 @@ FileChange *function_filechange_loadfile(
 		fib.fib_Comment[0]=0;
 
 		// Add change
-		if (change=function_filechange_addfile(handle,path,&fib,0,0))
+		if (change=function_filechange_addfile(handle,path,path_lock,&fib,0,0))
 		{
 			// Set type
 			change->node.ln_Type=FCTYPE_LOAD;
 		}
 	}
 
-	// Lock file
+	// Examine file
 	else
-	if (lock=Lock(buffer,ACCESS_READ))
+	if (lock)
 	{
 		// Examine file
 		Examine(lock,&fib);
 		UnLock(lock);
 
 		// Add to lister
-		change=function_filechange_addfile(handle,path,&fib,0,0);
+		change=function_filechange_addfile(handle,path,path_lock,&fib,0,0);
 	}
 
 	// Allowed to fail?
@@ -227,7 +272,7 @@ FileChange *function_filechange_loadfile(
 	if (flags&FFLF_RELOAD)
 	{
 		// Add a delete command
-		change=function_filechange_delfile(handle,path,FilePart(buffer),0,0);
+		change=function_filechange_delfile(handle,path,path_lock,FilePart(buffer),0,0);
 	}
 
 	// Free buffer
@@ -241,13 +286,14 @@ FileChange *function_filechange_loadfile(
 void function_filechange_reloadfile(
 	FunctionHandle *handle,
 	char *path,
+	BPTR path_lock,
 	char *name,
 	short flags)
 {
 	FileChange *change;
 
 	// Add change to load the file
-	if (!(change=function_filechange_loadfile(handle,path,name,FFLF_RELOAD|flags)))
+	if (!(change=function_filechange_loadfile(handle,path,path_lock,name,FFLF_RELOAD|flags)))
 		return;
 
 	// Change type
@@ -260,6 +306,7 @@ void function_filechange_reloadfile(
 FileChange *function_filechange_delfile(
 	FunctionHandle *handle,
 	char *path,
+	BPTR path_lock,
 	char *name,
 	Lister *lister,
 	BOOL tail)
@@ -268,8 +315,8 @@ FileChange *function_filechange_delfile(
 	FileChange *change;
 
 	// Find list for this path, add if not found
-	if (!(list=function_find_filechanges(handle,0,path,lister,0)) &&
-		!(list=function_add_filechanges(handle,path,lister))) return 0;
+	if (!(list=function_find_filechanges(handle,0,path,path_lock,lister,0)) &&
+		!(list=function_add_filechanges(handle,path,path_lock,lister))) return 0;
 
 	// Get new change entry
 	if (!(change=AllocMemH(handle->memory,
@@ -297,6 +344,7 @@ FileChange *function_filechange_delfile(
 FileChange *function_filechange_modify(
 	FunctionHandle *handle,
 	char *path,
+	BPTR path_lock,
 	char *name,
 	Tag tag1,...)
 {
@@ -308,8 +356,8 @@ FileChange *function_filechange_modify(
 	tags=(struct TagItem *)&tag1;
 
 	// Find list for this path, add if not found
-	if (!(list=function_find_filechanges(handle,0,path,0,0)) &&
-		!(list=function_add_filechanges(handle,path,0))) return 0;
+	if (!(list=function_find_filechanges(handle,0,path,path_lock,0,0)) &&
+		!(list=function_add_filechanges(handle,path,path_lock,0))) return 0;
 
 	// Get new change entry
 	if (!(change=AllocMemH(handle->memory,
@@ -388,14 +436,15 @@ FileChange *function_filechange_modify(
 FileChange *function_filechange_rename(
 	FunctionHandle *handle,
 	char *path,
+	BPTR path_lock,
 	char *name)
 {
 	FileChangeList *list;
 	FileChange *change;
 
 	// Find list for this path, add if not found
-	if (!(list=function_find_filechanges(handle,0,path,0,0)) &&
-		!(list=function_add_filechanges(handle,path,0))) return 0;
+	if (!(list=function_find_filechanges(handle,0,path,path_lock,0,0)) &&
+		!(list=function_add_filechanges(handle,path,path_lock,0))) return 0;
 
 	// Get new change entry
 	if (!(change=AllocMemH(handle->memory,sizeof(FileChange)+strlen(name))))
@@ -430,7 +479,7 @@ void function_filechange_do(FunctionHandle *handle,BOOL strip)
 		BackdropInfo *info;
 		short substr;
 		BOOL show=0;
-		ULONG ref_flags=REFRESHF_SLIDERS|REFRESHF_ICONS|REFRESHF_STATUS;
+		ULONG ref_flags=REFRESHF_SLIDERS|REFRESHF_ICONS|REFRESHF_STATUS|REFRESHF_RESORT;
 		FileChangeList *list=0;
 		DirEntry *show_file=0;
 
@@ -445,7 +494,7 @@ void function_filechange_do(FunctionHandle *handle,BOOL strip)
 		info=lister->backdrop_info;
 
 		// Any changes for this path?
-		while (list=function_find_filechanges(handle,list,lister->cur_buffer->buf_Path,lister,&substr))
+		while (list=function_find_filechanges(handle,list,lister->cur_buffer->buf_Path,lister->cur_buffer->buf_Lock,lister,&substr))
 		{
 			FileChange *change;
 			DirBuffer *buffer;
@@ -481,7 +530,7 @@ void function_filechange_do(FunctionHandle *handle,BOOL strip)
 					if (change->node.ln_Type==FCTYPE_RENAME)
 					{
 						// Try to rename buffer
-						if (strreplace(buffer->buf_Path,list->path,change->fib_FileName,1))
+						if (strreplace_alloch(0, &buffer->buf_Path, buffer->buf_Path, list->path, change->fib_FileName, 1))
 						{
 							char *old_path_path,*new_path_path;
 							short len=0;
@@ -491,10 +540,11 @@ void function_filechange_do(FunctionHandle *handle,BOOL strip)
 							new_path_path=strchr(change->fib_FileName,':')+1;
 
 							// Replace part in expanded path
-							strreplace(
-								strchr(buffer->buf_ExpandedPath,':')+1,
-								old_path_path,
-								new_path_path,1);
+							strreplace_alloch(0,
+									  &buffer->buf_ExpandedPath,
+									  strchr(buffer->buf_ExpandedPath,':')+1,
+									  old_path_path,
+									  new_path_path,1);
 
 							// Is buffer actually showing the path that changed?
 							if (stricmp(buffer->buf_Path,change->fib_FileName)==0)
@@ -533,16 +583,18 @@ void function_filechange_do(FunctionHandle *handle,BOOL strip)
 					// Load a new file?
 					if (change->node.ln_Type==FCTYPE_LOAD)
 					{
-						char buf[512];
-						BPTR lock;
+						BPTR lock = 0, org_dir;
 						struct FileInfoBlock __aligned fib;
 
-						// Build path
-						strcpy(buf,buffer->buf_Path);
-						AddPart(buf,change->fib_FileName,512);
+						if (list->lock && buffer->buf_Lock)
+						{
+						    org_dir = CurrentDir(buffer->buf_Lock);
+						    lock = Lock(change->fib_FileName,ACCESS_READ);
+						    CurrentDir(org_dir);
+						}
 
-						// Try to lock file
-						if (lock=Lock(buf,ACCESS_READ))
+
+						if (lock)
 						{
 							// Get info
 							Examine(lock,&fib);
@@ -830,6 +882,8 @@ void function_filechange_do(FunctionHandle *handle,BOOL strip)
 			{
 				// Remove and free this list
 				Remove((struct Node *)list);
+				if (list->lock)
+				    UnLock(list->lock);
 				FreeMemH(list);
 			}
 

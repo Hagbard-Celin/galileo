@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,7 +37,6 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofmlib.h"
-#define BOOPSI_LIBS
 #include "boopsi.h"
 
 // Button dispatcher
@@ -160,6 +160,26 @@ ULONG __asm __saveds button_dispatch(
 						strlen(((struct StringInfo *)gadget->SpecialInfo)->Buffer);
 				}
 
+				// Path gadget?
+				else
+				if (cl->cl_UserData==CLASS_PATHGAD)
+				{
+					// Set flag
+					data->flags|=BUTTONF_PATH;
+
+					// Store border dimensions
+					((PathData *)data)->border=*((struct IBox *)&gadget->LeftEdge);
+
+					// Get font if supplied
+					((PathData *)data)->string_font=
+						(struct TextFont *)GetTagData(STRINGA_Font,0,tags);
+
+					// Get change task and bit
+					((PathData *)data)->change_task=
+						(struct Task *)GetTagData(GTCustom_ChangeSigTask,0,tags);
+					((PathData *)data)->change_bit=GetTagData(GTCustom_ChangeSigBit,0,tags);
+				}
+
 				// Check gadget?
 				else
 				if (cl->cl_UserData==CLASS_CHECKGAD)
@@ -250,6 +270,10 @@ ULONG __asm __saveds button_dispatch(
 				else
 				if (data->flags&BUTTONF_STRING) data->place=PLACETEXT_LEFT;
 
+				// Path?
+				else
+				if (data->flags&BUTTONF_PATH) data->place=PLACETEXT_LEFT;
+
 				// View?
 				else
 				if (data->flags&BUTTONF_VIEW) data->place=PLACETEXT_LEFT;
@@ -293,8 +317,8 @@ ULONG __asm __saveds button_dispatch(
 		// Look at tags
 		case OM_SET:
 
-			// String gadget?
-			if (data && data->flags&(BUTTONF_STRING|BUTTONF_VIEW))
+			// String path of view gadget?
+			if (data && data->flags&(BUTTONF_STRING|BUTTONF_PATH|BUTTONF_VIEW))
 			{
 				struct TagItem *tag;
 				BOOL redraw=0,handle=1;
@@ -323,11 +347,12 @@ ULONG __asm __saveds button_dispatch(
 				}
 
 				// Set string?
-				if ((tag=FindTagItem(STRINGA_TextVal,((struct opSet *)msg)->ops_AttrList)) ||
-					(tag=FindTagItem(GTST_String,((struct opSet *)msg)->ops_AttrList)) ||
-					(tag=FindTagItem(GTTX_Text,((struct opSet *)msg)->ops_AttrList)) ||
-					(tag=FindTagItem(GTIN_Number,((struct opSet *)msg)->ops_AttrList)) ||
-					(tag=FindTagItem(GTNM_Number,((struct opSet *)msg)->ops_AttrList)))
+				if (!(data->flags&BUTTONF_PATH) &&
+				    ((tag=FindTagItem(STRINGA_TextVal,((struct opSet *)msg)->ops_AttrList)) ||
+				    (tag=FindTagItem(GTST_String,((struct opSet *)msg)->ops_AttrList)) ||
+				    (tag=FindTagItem(GTTX_Text,((struct opSet *)msg)->ops_AttrList)) ||
+				    (tag=FindTagItem(GTIN_Number,((struct opSet *)msg)->ops_AttrList)) ||
+				    (tag=FindTagItem(GTNM_Number,((struct opSet *)msg)->ops_AttrList))))
 				{
 					// Number?
 					if (tag->ti_Tag==GTIN_Number)
@@ -531,7 +556,7 @@ ULONG __asm __saveds button_dispatch(
 		case GM_RENDER:
 
 			// String gadget?
-			if (data->flags&BUTTONF_STRING)
+			if (data->flags&BUTTONF_STRING || data->flags&BUTTONF_PATH)
 			{
 				// First render?
 				if (!(data->flags&BUTTONF_SHRUNK))
@@ -549,8 +574,8 @@ ULONG __asm __saveds button_dispatch(
 			// Render border (and button for button gadgets)
 			button_render(cl,gadget,data,(struct gpRender *)msg);
 
-			// Let string gadget handle itself
-			if (data->flags&BUTTONF_STRING)
+			// Let string and path gadget handle itself
+			if (data->flags&BUTTONF_STRING || data->flags&BUTTONF_PATH)
 			{
 				unsigned short flags;
 
@@ -582,8 +607,8 @@ ULONG __asm __saveds button_dispatch(
 
 		case GM_HANDLEINPUT:
 
-			// Let string gadget handle itself
-			if (data->flags&BUTTONF_STRING)
+			// Let string and path gadget handle itself
+			if (data->flags&BUTTONF_STRING || data->flags&BUTTONF_PATH)
 				retval=DoSuperMethodA(cl,obj,msg);
 
 			// Button
@@ -693,8 +718,8 @@ ULONG __asm __saveds button_dispatch(
 			// Pass it to super class
 			retval=DoSuperMethodA(cl,obj,msg);
 
-			// String gadget?
-			if (data->flags&BUTTONF_STRING)
+			// String or path gadget?
+			if (data->flags&BUTTONF_STRING|BUTTONF_PATH)
 			{
 				// Did Intuition abort this?
 				if (((struct gpGoInactive *)msg)->gpgi_Abort)
@@ -715,6 +740,8 @@ ULONG __asm __saveds button_dispatch(
 
 			// Handle the resize
 			button_resize(cl,gadget,data,(struct gpResize *)msg);
+			if (data->flags&BUTTONF_PATH)
+			    DoSuperMethodA(cl,obj,msg);
 			break;
 
 
@@ -773,6 +800,7 @@ void button_render(
 
 	// Get gadget position
 	if (data->flags&BUTTONF_STRING) box=((StringData *)data)->border;
+	else if (data->flags&BUTTONF_PATH) box=((PathData *)data)->border;
 	else box=*((struct IBox *)&gadget->LeftEdge);
 
 	// Get real gadget position
@@ -880,8 +908,8 @@ void button_render(
 	// Get pen array
 	pens=render->gpr_GInfo->gi_DrInfo->dri_Pens;
 
-	// String gadgets have the border around them
-	if (data->flags&BUTTONF_STRING)
+	// String and path gadgets have the border around them
+	if (data->flags&BUTTONF_STRING || data->flags&BUTTONF_PATH)
 	{
 		struct Rectangle rect;
 		struct Rectangle interior;
@@ -946,10 +974,15 @@ void button_render(
 		}
 
 		// Set pen to fill background
-		SetAPen(rp,
-			(gadget->Flags&GFLG_SELECTED)?
+		if (data->flags&BUTTONF_STRING)
+		{
+		    SetAPen(rp,
+			    (gadget->Flags&GFLG_SELECTED)?
 				((struct StringInfo *)gadget->SpecialInfo)->Extension->ActivePens[1]:
 				((struct StringInfo *)gadget->SpecialInfo)->Extension->Pens[1]);
+		}
+		else
+		    SetAPen(rp,pens[BACKGROUNDPEN]);
 
 		// Fill left-side?
 		if (interior.MinX<gadget_box.Left)
@@ -1319,7 +1352,7 @@ void button_render(
 	}
 
 	// Stuff for buttons only
-	if (!(data->flags&BUTTONF_STRING))
+	if (!(data->flags&BUTTONF_STRING) && !(data->flags&BUTTONF_PATH))
 	{
 		// Get button image if there is one
 		if (gadget->Flags&GFLG_SELECTED &&
@@ -1375,7 +1408,7 @@ void button_resize(
 	*((struct IBox *)&gadget->LeftEdge)=size->gpr_Size;
 
 	// String?
-	if (data->flags&BUTTONF_STRING)
+	if (data->flags&BUTTONF_STRING || data->flags&BUTTONF_PATH)
 	{
 		// Save border position
 		((StringData *)data)->border=size->gpr_Size;
@@ -1402,10 +1435,18 @@ void button_field_shrink(
 	// Not got font yet?
 	if (!sdata->string_font)
 	{
+	    // String gadget?
+	    if (sdata->data.flags&BUTTONF_STRING)
+	    {
 		// Get string font
 		if (!(sdata->string_font=((struct StringInfo *)gadget->SpecialInfo)->Extension->Font) &&
 			window)
 			sdata->string_font=window->RPort->Font;
+	    }
+	    // Path gadget
+	    else
+	    if (window)
+		sdata->string_font=window->RPort->Font;
 	}
 
 	// Get amount of horizontal space

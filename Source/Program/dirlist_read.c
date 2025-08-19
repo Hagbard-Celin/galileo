@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,26 +32,37 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "dirlist_protos.h"
+#include "lister_protos.h"
+#include "misc_protos.h"
+#include "function_launch_protos.h"
+#include "position_protos.h"
 
 // Launches read directory function for a lister
-void read_directory(Lister *lister,char *path,int flags)
+void read_directory(Lister *lister, char *path, BPTR lock, int flags)
 {
+	if (lock)
+	{
+		// Launch read function
+		function_launch(FUNCTION_READ_DIRECTORY,0,0,flags,lister,0,0,0,lock,0,0,0,0);
+	}
+	else
 	// Check path for FTP
 	if (!(lister_check_ftp(lister,path)))
 	{
 		// Launch read function
-		function_launch(FUNCTION_READ_DIRECTORY,0,0,flags,lister,0,path,0,0,0,0);
+		function_launch(FUNCTION_READ_DIRECTORY,0,0,flags,lister,0,path,0,0,0,0,0,0);
 	}
 }
 
 
 // Create a new lister and read a directory into it
-Lister *read_new_lister(char *path,Lister *parent,UWORD qual)
+Lister *read_new_lister(char *path, BPTR lock, Lister *parent, UWORD qual)
 {
 	Cfg_Lister *cfg;
 	Lister *new_lister=0;
@@ -71,9 +83,20 @@ Lister *read_new_lister(char *path,Lister *parent,UWORD qual)
 		{
 			// Get lister
 			lister=IPCDATA(ipc);
-
 			// Is this lister what we're after?
-			if (stricmp(lister->cur_buffer->buf_Path,path)==0 &&
+			if (lock && lister->cur_buffer->buf_Lock &&
+			    !(lister->flags&LISTERF_BUSY))
+			{
+			    if (SameLock(lock,lister->cur_buffer->buf_Lock) == LOCK_SAME)
+			    {
+					// Activate this window
+					IPC_Command(ipc,IPC_ACTIVATE,0,(APTR)1,0,0);
+					break;
+			    }
+
+			}
+			else
+			if ((path && lister->cur_buffer->buf_Path && stricmp(lister->cur_buffer->buf_Path,path)==0) &&
 				!(lister->flags&LISTERF_BUSY))
 			{
 				// Activate this window
@@ -92,23 +115,30 @@ Lister *read_new_lister(char *path,Lister *parent,UWORD qual)
 	// Get a new lister definition
 	if (cfg=NewLister(path))
 	{
-		char fullpath[512];
-		BPTR lock;
-		short mode;
+		char *fullpath = 0;
+		struct DateStamp date = {0};
 		position_rec *pos;
+		//BPTR lock;
+		short mode;
+
+		if (!lock)
+		    lock=LockFromPath(path, NULL, FALSE);
 
 		// Expand path just in case
-		if (lock=Lock(path,ACCESS_READ))
+		if (lock)
 		{
-			NameFromLock(lock,fullpath,512);
-			AddPart(fullpath,"",512);
-			UnLock(lock);
+			fullpath = PathFromLock(NULL, lock, PFLF_END_SLASH, NULL);
+
+			//UnLock(lock);
+			cfg->lock = lock;
+
+			VolIdFromLock(lock, &date, NULL);
 		}
-		else strcpy(fullpath,path);
-		
+
 		// Get position
 		pos=GetListerPosition(
-			fullpath,
+			fullpath?fullpath:path,
+			&date,
 			0,
 			0,
 			&cfg->lister.pos[0],
@@ -117,6 +147,9 @@ Lister *read_new_lister(char *path,Lister *parent,UWORD qual)
 			(parent)?parent->window:0,
 			parent,
 			0);
+
+		if (fullpath)
+		    FreeMemH(fullpath);
 
 		// Split display?
 		if (qual&(IEQUALIFIER_LALT|IEQUALIFIER_RALT))

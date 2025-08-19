@@ -97,3 +97,9 @@ Run asynchronously needs to be enabled for this command to work.
 MSG_XAD_OPEN_ERR (//)
 Unable to open xadmaster.library V13 or higher.
 ;
+MSG_ERROR_DEST_IS_DIRECTORY (//)
+Destination '%s' is a directory.
+;
+MSG_RETRY (//)
+_Retry
+;

@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,11 +32,16 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "reselect_protos.h"
+#include "lister_protos.h"
+#include "buffers_protos.h"
+#include "filetypes.h"
 
 // Copies the contents of one window to another
 // Called from the LISTER PROCESS
@@ -76,7 +82,7 @@ void buffer_copy(DirBuffer *source,DirBuffer *dest,Lister *dest_lister)
 		MakeReselect(&reselect,dest,RESELF_SAVE_FILETYPES);
 
 		// Free contents of destination window
-		buffer_freedir(dest,1);
+		buffer_freedir(dest,FREEDIRF_CLEAR_HANDLER|FREEDIRF_FREE_LOCK|FREEDIRF_FREE_PATH|FREEDIRF_FREE_EXPANDEDPATH);
 
 		// Initialise file list
 		NewList((struct List *)&file_list);
@@ -132,8 +138,10 @@ void buffer_copy(DirBuffer *source,DirBuffer *dest,Lister *dest_lister)
 		FreeReselect(&reselect);
 
 		// Copy directory, device and disk name
-		strcpy(dest->buf_Path,source->buf_Path);
-		strcpy(dest->buf_ExpandedPath,source->buf_ExpandedPath);
+		if (source->buf_Path)
+		    dest->buf_Path = CopyString(0,source->buf_Path);
+		if (source->buf_ExpandedPath)
+		    dest->buf_ExpandedPath = CopyString(0,source->buf_ExpandedPath);
 		strcpy(dest->buf_VolumeLabel,source->buf_VolumeLabel);
 
 		// Copy flags
@@ -143,6 +151,10 @@ void buffer_copy(DirBuffer *source,DirBuffer *dest,Lister *dest_lister)
 		dest->buf_DirectoryDate=source->buf_DirectoryDate;
 		dest->buf_VolumeDate=source->buf_VolumeDate;
 		dest->buf_DiskType=source->buf_DiskType;
+
+		// Copy lock
+		if (source->buf_Lock)
+		    dest->buf_Lock = DupLock(source->buf_Lock);
 
 		// Unlock buffers
 		buffer_unlock(source);
@@ -275,7 +287,7 @@ void buffer_show_special(Lister *lister,char *title)
 	check_call("buffer_show_special",lister);
 #endif
 	// Free special dir contents
-	buffer_freedir(lister->special_buffer,1);
+	buffer_freedir(lister->special_buffer,FREEDIRF_CLEAR_HANDLER|FREEDIRF_FREE_LOCK|FREEDIRF_FREE_PATH|FREEDIRF_FREE_EXPANDEDPATH);
 	lister->special_buffer->buf_FreeDiskSpace=0;
 	lister->special_buffer->buf_TotalDiskSpace=0;
 
@@ -309,10 +321,18 @@ void buffer_show_special(Lister *lister,char *title)
 				lister->list_area.rect.MaxX,
 				lister->list_area.rect.MaxY);
 		}
+
+		// Fix current directory
+		if (lister->lister_orgdir != ((struct Process *)((struct ExecBase *)*((ULONG *)4))->ThisTask)->pr_CurrentDir)
+		    UnLock(CurrentDir(lister->lister_orgdir));
 	}
 
 	// Store title
 	strcpy(lister->special_buffer->buf_VolumeLabel,title);
+
+	// Fix current directory
+	if (lister->lister_orgdir != ((struct Process *)((struct ExecBase *)*((ULONG *)4))->ThisTask)->pr_CurrentDir)
+	    UnLock(CurrentDir(lister->lister_orgdir));
 
 	// Clear path field
 	lister_update_pathfield(lister);

@@ -31,11 +31,17 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "icons.h"
+#include "menu_data.h"
+#include "clock_task.h"
+#include "wb.h"
+#include "lsprintf_protos.h"
 #include "/Modules/modules.h"
 
 // Run Workbench startup programs
@@ -210,12 +216,11 @@ void wb_launch_list(IPCData *ipc,Att_List *launch_list)
 		}
 
 		// Launch program
-		if (WB_LaunchNew(
-				launch->node.ln_Name,
-				(struct Screen *)-1,
-				(launch->node.ln_Type&LAUNCH_DONOTWAIT)?LAUNCH_REPLY:LAUNCH_WAIT_TIMEOUT,
-				environment->env->default_stack,
-				0))
+		if (WB_Launch(launch->node.ln_Name,
+			      (struct Screen *)-1,
+			      (launch->node.ln_Type&LAUNCH_DONOTWAIT)?LAUNCH_REPLY:LAUNCH_WAIT_TIMEOUT,
+			      environment->env->default_stack,
+			      0,0,0,0))
 		{
 			// Delay?
 			if (LAUNCH_GETWAIT(launch->node.ln_Type))

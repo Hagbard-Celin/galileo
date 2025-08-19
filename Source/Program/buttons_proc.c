@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,11 +32,15 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "buttons_protos.h"
+#include "misc_protos.h"
+#include "requesters.h"
+#include "menu_data.h"
 
 #define BUTTONS_FLASH_RATE	500000
 
@@ -45,7 +50,7 @@ void __saveds buttons_code(void)
 	Buttons *buttons;
 	IPCMessage *lmsg;
 	struct IntuiMessage *imsg;
-	GalileoAppMessage *msg;
+	struct AppMessage *msg;
 	IPCData *ipc;
 
 	// Do startup
@@ -134,10 +139,10 @@ void __saveds buttons_code(void)
 
 
 		// AppMessages?
-		while (msg=(GalileoAppMessage *)GetMsg(buttons->app_port))
+		while (msg=(struct AppMessage *)GetMsg(buttons->app_port))
 		{
 			// Menu operation?
-			if (msg->ga_Msg.am_Type==MTYPE_APPSNAPSHOT)
+			if (msg->am_Type==MTYPE_APPSNAPSHOT)
 			{
 				struct AppSnapshotMsg *asm;
 
@@ -165,10 +170,10 @@ void __saveds buttons_code(void)
 
 			// AppIcon?
 			else
-			if (msg->ga_Msg.am_Type==MTYPE_APPICON)
+			if (msg->am_Type==MTYPE_APPICON)
 			{
 				// De-iconify?
-				if (msg->ga_Msg.am_NumArgs==0)
+				if (msg->am_NumArgs==0)
 				{
 					// Update icon position
 					buttons_update_icon(buttons);
@@ -736,10 +741,6 @@ ULONG __asm __saveds buttons_init(
 	// Initialise boopsi list
 	NewList(&buttons->boopsi_list);
 
-	// Memory handle
-	if (!(buttons->memory=NewMemHandle(1024,256,MEMF_CLEAR)))
-		return 0;
-
 	// Get a file requester
 	if (!(buttons->filereq=alloc_filereq()))
 		return 0;
@@ -747,6 +748,8 @@ ULONG __asm __saveds buttons_init(
 	// Create app message port
 	if (!(buttons->app_port=CreateMsgPort()))
 		return 0;
+
+	buttons->app_port->mp_Node.ln_Type = GNT_LISTER_APPMSG_PORT;
 
 	// Open timer
 	if (!(buttons->timer=AllocTimer(UNIT_VBLANK,0)))
@@ -756,16 +759,20 @@ ULONG __asm __saveds buttons_init(
 	StartTimer(buttons->timer,5,0);
 
 	// Load button bank information
-	if (buttons->buttons_file[0] && !buttons->bank)
+	if (buttons->buttons_file && buttons->buttons_file[0] && !buttons->bank)
 	{
 		// Open bank
-		if (!(buttons->bank=OpenButtonBank(buttons->buttons_file)))
+		if (!(buttons->bank=OpenButtonBank(buttons->buttons_file, &buttons->buttons_parent_lock)))
 		{
 			// Failed, try to create a new one if we're allowed to
 			if (buttons->flags&BUTTONF_FAIL ||
 				!(buttons->bank=NewButtonBank(1,0))) return 0;
 		}
 	}
+
+	// Finished with this
+	if (buttons->buttons_file)
+	    FreeMemH(buttons->buttons_file);
 
 	// Valid bank?
 	if (buttons->bank)
@@ -810,16 +817,19 @@ void buttons_cleanup(Buttons *buttons,BOOL bye)
 	// Free file requester
 	FreeAslRequest(buttons->filereq);
 
-	// Free memory
-	FreeMemHandle(buttons->memory);
-
 	// Free bank information
 	CloseButtonBank(buttons->bank);
 	CloseButtonBank(buttons->backup);
-	FreeVec(buttons);
+
+	// Free memory
+	FreeMemHandle(buttons->memory);
 
 	// Free IPC data
 	IPC_Free(ipc);
+
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }
 
 

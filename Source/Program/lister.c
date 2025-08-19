@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,18 +37,28 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "misc_protos.h"
+#include "backdrop_protos.h"
+#include "tile.h"
+#include "graphics.h"
+#include "position_protos.h"
+#include "menu_data.h"
 
 // Create a new lister
 Lister *lister_new(Cfg_Lister *cfg_lister)
 {
 	Lister *lister;
 	IPCData *ipc;
+#ifdef _DEBUG
+	char procname[24];
+#endif
 
 	// Allocate new lister structure
 	if (!(lister=AllocVec(sizeof(Lister),MEMF_CLEAR)) ||
-		!(lister->memory=NewMemHandle(1500,400,MEMF_CLEAR)) ||
+		!(lister->lister_memory=NewMemHandle(1500,400,MEMF_CLEAR)) ||
 		!(lister->backdrop_info=backdrop_new(0,0)) ||
-		!(lister->title=AllocMemH(lister->memory,300)) ||
+		!(lister->title=AllocMemH(lister->lister_memory,300)) ||
 		!(lister->fib=AllocDosObject(DOS_FIB,0)))
 	{
 		if (lister)
@@ -113,14 +124,22 @@ Lister *lister_new(Cfg_Lister *cfg_lister)
 	// Set refresh callback
 	lister->backdrop_info->callback=lister_refresh_callback;
 
+#ifdef _DEBUG
+	sprintf(procname, "galileo_lister_%08lx", lister);
+#endif
+
 	// Start lister process
 	if (!(IPC_Launch(
 		&GUI->lister_list,
 		&ipc,
+#ifdef _DEBUG
+		procname,
+#else
 		"galileo_lister",
+#endif
 		(ULONG)lister_code,
 		STACK_DEFAULT,
-		(ULONG)lister,(struct Library *)DOSBase)))
+		(ULONG)lister)))
 	{
 		if (!ipc) lister_free(lister);
 		return 0;
@@ -139,9 +158,38 @@ void lister_free(Lister *lister)
 		backdrop_free(lister->backdrop_info);
 		FreeDosObject(DOS_FIB,lister->fib);
 		FreeListerDef(lister->lister);
-		FreeMemHandle(lister->memory);
+		FreeMemHandle(lister->lister_memory);
 		FreeVec(lister);
 	}
+}
+
+
+// Find a lister showing a path
+Lister *find_lister_lock(BPTR lock)
+{
+	Lister *lister=0;
+	IPCData *ipc;
+
+	// Get list lock
+	lock_listlock(&GUI->lister_list,FALSE);
+
+	// Go through listers
+	for (ipc=(IPCData *)GUI->lister_list.list.lh_Head;
+		ipc->node.mln_Succ;
+		ipc=(IPCData *)ipc->node.mln_Succ)
+	{
+		// Get lister
+		lister=IPCDATA(ipc);
+
+		// Compare path
+		if (SameLock(lister->cur_buffer->buf_Lock,lock)==LOCK_SAME)
+			break;
+	}
+
+	// Free list lock
+	unlock_listlock(&GUI->lister_list);
+
+	return (lister && ipc->node.mln_Succ)?lister:0;
 }
 
 
@@ -259,10 +307,6 @@ void lister_update(Lister *lister)
 		if (path[0] &&
 			(lister->lister->path=AllocMemH(0,strlen(path)+1)))
 			strcpy(lister->lister->path,path);
-
-#ifdef _DEBUG_ALLOCMEMH
-		KPrintF("lister.c:260 AllocMem: %lx \n", ((ULONG *)lister->lister->path)-2 );
-#endif
 
 		// Is lister iconified?
 		if (lister->flags&LISTERF_ICONIFIED)
@@ -743,46 +787,38 @@ BOOL lister_check_valid(Lister *lister)
 	return FALSE;
 }
 
-
 // Open a new lister for a path
-Lister *lister_open_new(char *path,BackdropObject *object,struct Window *parent,Lister *lister)
+Lister *lister_open_new(char *path,
+			struct DateStamp *voldate,
+			BPTR lock,
+			BackdropObject *object,
+			struct Window *parent,
+			Lister *lister)
 {
-	Cfg_Lister *cfg;
-	short mode;
 	position_rec *pos;
-	BPTR lock;
-	char *full_path,device[40],*ptr;
-
-	// Allocate buffer for full path
-	if (!(full_path=AllocVec(512,0)))
-		return 0;
+	Cfg_Lister *cfg;
+	char *full_path = 0;
+	short mode;
+	//BPTR lock;
+	char device[40];
 
 	// Get a new lister definition
 	if (!(cfg=NewLister(path)))
-	{
-		FreeVec(full_path);
-		return 0;
-	}
+	    return 0;
 
 	// Lock path
-	if (lock=Lock(path,ACCESS_READ))
+	if (lock)
 	{
 		// Get full path for position
-		NameFromLock(lock,full_path,512);
-		UnLock(lock);
+		full_path = PathFromLock(NULL, lock, PFLF_END_SLASH, NULL);
+		DeviceFromLock(lock,device);
+		cfg->lock = lock;
 	}
-	else strcpy(full_path,path);
-
-	// Get device name
-	strncpy(device,path,39);
-	if (ptr=strchr(device,':')) *(ptr+1)=0;
-
-	// Check path is terminated
-	AddPart(full_path,"",512);
 
 	// Get position
 	pos=GetListerPosition(
 		full_path,
+		voldate,
 		device,
 		(object)?object->bdo_icon:0,
 		&cfg->lister.pos[0],
@@ -793,7 +829,8 @@ Lister *lister_open_new(char *path,BackdropObject *object,struct Window *parent,
 		0);
 
 	// Free buffer
-	FreeVec(full_path);
+	if (full_path)
+	    FreeMemH(full_path);
 
 	// Create new lister
 	if (!(lister=lister_new(cfg)))

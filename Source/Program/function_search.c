@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,13 +37,19 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "dirlist_protos.h"
+#include "function_launch_protos.h"
+#include "misc_protos.h"
+#include "function_protos.h"
+#include "buffers.h"
+#include "lsprintf_protos.h"
 #include "search.h"
 
 typedef struct
 {
-	char			search_text[80];
+	char		search_text[80];
 	unsigned long	search_flags;
-	long			search_result;
+	long		search_result;
 } SearchData;
 
 search_get_data(FunctionHandle *handle,SearchData *data);
@@ -143,6 +150,7 @@ GALILEOFM_FUNC(function_search)
 		if (entry->fe_type<0)
 		{
 			APTR file;
+			BPTR cur_dir = 0, org_dir = 0;
 
 			// Ask for search text?
 			if (!data->search_text[0])
@@ -169,14 +177,20 @@ GALILEOFM_FUNC(function_search)
 				}
 			}
 
-			// Build source name
-			function_build_source(handle,entry,handle->func_work_buf);
+	        // CD to source-file directory
+	        if (entry->fe_lock)
+				cur_dir = entry->fe_lock;
+	        else
+	        if (path->pn_lock)
+				cur_dir = path->pn_lock;
 
+			if (cur_dir)
+				org_dir = CurrentDir(cur_dir);
 			// By default no match
 			ret=-1;
 
 			// Open file
-			if (file=OpenBuf(handle->func_work_buf,MODE_OLDFILE,0))
+			if (file=OpenBuf(entry->fe_name,MODE_OLDFILE,0))
 			{
 				ret=SearchFile(file,data->search_text,data->search_flags,0,0);
 				CloseBuf(file);
@@ -185,6 +199,15 @@ GALILEOFM_FUNC(function_search)
 			// Match?
 			if (ret!=-1)
 			{
+				BPTR foundfile;
+				char *fullpath = 0;
+
+				if (foundfile = Lock(entry->fe_name,ACCESS_READ))
+				{
+				    fullpath = PathFromLock(NULL, foundfile, NULL, NULL);
+				    UnLock(foundfile);
+				}
+
 				// Got a match; what do we do with it?
 				switch (data->search_result)
 				{
@@ -209,7 +232,9 @@ GALILEOFM_FUNC(function_search)
 						char buf[256];
 
 						// Build requester text
-						get_trunc_path(handle->func_work_buf,buf);
+						if (fullpath)
+						    get_trunc_path(fullpath,buf);
+
 						lsprintf(handle->func_work_buf+512,
 							GetString(&locale,MSG_FOUND_A_MATCH),
 							buf);
@@ -230,7 +255,6 @@ GALILEOFM_FUNC(function_search)
 							// Is file in a directory?
 							if (entry->fe_flags&FUNCENTF_RECURSE)
 							{
-								char *ptr;
 								PathNode *path;
 								char *filename;
 
@@ -239,19 +263,17 @@ GALILEOFM_FUNC(function_search)
 									(path=function_path_current(&handle->func_source_paths)) &&
 									path->pn_lister)
 								{
-									// Copy filename
-									if (ptr=FilePart(handle->func_work_buf))
-									{
-										strcpy(filename,ptr);
-										*ptr=0;
-									}
-									
+									BPTR read_dir;
+
+									read_dir = DupLock(cur_dir);
+									strcpy(filename,entry->fe_name);
 									// Read directory
 									handle->flags=GETDIRF_CANCHECKBUFS|GETDIRF_CANMOVEEMPTY;
 									function_read_directory(
 										handle,
 										path->pn_lister,
-										handle->func_work_buf);
+										0,
+										read_dir);
 
 									// Select file
 									function_select_file(handle,path->pn_lister,filename);
@@ -283,24 +305,32 @@ GALILEOFM_FUNC(function_search)
 						// Create list for filename to read file
 						if (list=Att_NewList(0))
 						{
+							Att_LockNode *node;
 							struct read_startup *startup;
 
 							// Add filename node
-							Att_NewNode(list,handle->func_work_buf,0,0);
-
-							// Allocate startup
-							if (startup=AllocVec(sizeof(struct read_startup),MEMF_CLEAR))
+							if (node = (Att_LockNode *)Att_NewNode(list,entry->fe_name,0,ADDNODE_LOCKNODE))
 							{
-								// Copy search string
-								strcpy(startup->initial_search,data->search_text);
-								startup->files=(struct List *)list;
+								node->att_lock = DupLock(cur_dir);
 
-								// Read file
-								if (misc_startup("galileo_read",FUNC_READ,0,startup,0))
-									break;
-								FreeVec(startup);
+								// Allocate startup
+								if (startup=AllocVec(sizeof(struct read_startup),MEMF_CLEAR))
+								{
+									// Copy search string
+									strcpy(startup->initial_search,data->search_text);
+									startup->files=(struct List *)list;
+
+									// Read file
+									if (misc_startup("galileo_read",FUNC_READ,0,startup,0))
+									{
+										break;
+									}
+
+									FreeVec(startup);
+								}
 							}
-							Att_RemList(list,0);
+
+							Att_RemList(list,REMLIST_UNLOCK);
 						}
 						break;
 					}
@@ -310,12 +340,18 @@ GALILEOFM_FUNC(function_search)
 
 						if (output)
 						{
-							WriteBuf(output,handle->func_work_buf,-1);
+							WriteBuf(output,fullpath,-1);
 							WriteBuf(output,"\n",1);
 						}
 						break;
 				}
+				if (fullpath)
+				    FreeMemH(fullpath);
 			}
+
+	        // Restore current directory
+	        if (org_dir)
+		    CurrentDir(org_dir);
 		}
 
 		// Break flag?
@@ -343,9 +379,11 @@ GALILEOFM_FUNC(function_search)
 			Att_Node *node;
 
 			// Add node with filename
-			if (node=Att_NewNode(list,"T:Galileo-SearchResults",0,0))
+			if (node=Att_NewNode(list,"T:Galileo-SearchResults",0,ADDNODE_LOCKNODE))
 			{
 				struct read_startup *startup;
+
+				((Att_LockNode *)node)->att_lock = Lock("T:",ACCESS_READ);
 
 				// Allocate startup
 				if (startup=AllocVec(sizeof(struct read_startup),MEMF_CLEAR))
@@ -360,7 +398,7 @@ GALILEOFM_FUNC(function_search)
 					FreeVec(startup);
 				}
 			}
-			Att_RemList(list,0);
+			Att_RemList(list,REMLIST_UNLOCK);
 		}
 	}
 	

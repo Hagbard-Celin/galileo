@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,12 +32,16 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #ifndef _GALILEOFM_DISPLAY
 #define _GALILEOFM_DISPLAY
+
+#include "function_select.h"
+#include "pattern.h"
+#include "toolbar.h"
 
 #define NAME_CLOCK		"galileo_clock"
 #define NAME_HIDDEN_CLOCK	"galileo_hidden_clock"
@@ -207,7 +212,9 @@ typedef struct
 	struct NotifyRequest	*env_notify;			// ENV: notify
 	struct NotifyRequest	*commands_notify;		// Commands  notify
 
-	char			pad[76];
+	char			pad[72];
+
+	BPTR			desktop_dir_lock;		// lock on desktop directory
 
 	ULONG			orig_flags;			// original flags
 

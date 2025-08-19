@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,8 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
+#include "desktop.h"
 
 // Handle notification of DOS events
 void handle_dos_notify(GalileoNotify *notify,FunctionHandle *handle)
@@ -54,6 +57,7 @@ void handle_dos_notify(GalileoNotify *notify,FunctionHandle *handle)
 			function_filechange_addfile(
 				handle,
 				notify->gn_Name,
+				NULL,
 				notify->gn_Fib,
 				0,0);
 		}
@@ -63,16 +67,14 @@ void handle_dos_notify(GalileoNotify *notify,FunctionHandle *handle)
 	else
 	if (notify->gn_Flags&GNF_DOS_DELETEFILE)
 	{
-		char *ptr;
-
-		// Copy path to buffer
-		strcpy(handle->func_work_buf,notify->gn_Name);
+		char *ptr, tmp = 0;
 
 		// Get pointer to filename
-		if (ptr=FilePart(handle->func_work_buf))
+		if (ptr = FilePart(notify->gn_Name))
 		{
 			// Copy to separate buffer and break connection
-			strcpy(handle->recurse_path,ptr);
+			strcpy(handle->func_work_buf, ptr);
+			tmp = ptr[0];
 			*ptr=0;
 		}
 
@@ -80,12 +82,13 @@ void handle_dos_notify(GalileoNotify *notify,FunctionHandle *handle)
 		if (ptr)
 		{
 			// Add change to remove file
-			function_filechange_delfile(
-				handle,
-				handle->func_work_buf,
-				handle->recurse_path,
-				0,
-				1);
+			function_filechange_delfile(handle,
+				                    notify->gn_Name,
+				                    NULL,
+				                    handle->func_work_buf,
+						    0, 1);
+
+			ptr[0] = tmp;
 		}
 	}
 
@@ -114,6 +117,7 @@ void handle_dos_notify(GalileoNotify *notify,FunctionHandle *handle)
 				function_filechange_addfile(
 					handle,
 					notify->gn_Name,
+					NULL,
 					notify->gn_Fib,
 					0,0);
 			}
@@ -156,21 +160,31 @@ void handle_dos_notify(GalileoNotify *notify,FunctionHandle *handle)
 				// Is this a directory?
 				if (notify->gn_Fib->fib_DirEntryType>0)
 				{
-					// Build full pathname for old...
-					strcpy(handle->func_work_buf,notify->gn_Name);
-					AddPart(handle->func_work_buf,notify->gn_Fib->fib_FileName,512);
-					AddPart(handle->func_work_buf,"",512);
+					char *oldpath, *newpath;
 
-					// And for new...
-					strcpy(handle->func_work_buf+512,notify->gn_Name);
-					AddPart(handle->func_work_buf+512,notify->gn_Fib->fib_Comment,512);
-					AddPart(handle->func_work_buf+512,"",512);
+					if (oldpath = JoinString(handle->memory,
+								 notify->gn_Name,
+								 notify->gn_Fib->fib_FileName,
+								 NULL,
+								 JSF_FS_SLASH|JSF_E_SLASH))
+					{
+					    if (newpath = JoinString(handle->memory,
+								     notify->gn_Name,
+								     notify->gn_Fib->fib_Comment,
+								     NULL,
+								     JSF_FS_SLASH|JSF_E_SLASH))
+					    {
+						// Add directory rename
+						function_filechange_rename(handle,
+							                   oldpath,
+							                   NULL,
+							                   newpath);
 
-					// Add directory rename
-					function_filechange_rename(
-						handle,
-						handle->func_work_buf,
-						handle->func_work_buf+512);
+						FreeMemH(newpath);
+					    }
+
+					    FreeMemH(oldpath);
+					}
 				}
 			}
 
@@ -190,6 +204,7 @@ void handle_dos_notify(GalileoNotify *notify,FunctionHandle *handle)
 				function_filechange_modify(
 					handle,
 					notify->gn_Name,
+					NULL,
 					notify->gn_Fib->fib_FileName,
 					tag.ti_Tag,tag.ti_Data,
 					TAG_END);

@@ -31,11 +31,14 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "buttons_protos.h"
+#include "misc_protos.h"
+#include "lsprintf_protos.h"
 
 // Save a button bank
 buttons_save(Buttons *buttons,char *name)
@@ -157,7 +160,7 @@ buttons_load(Buttons *buttons,struct Screen *screen,char *name)
 			WINDOW_NO_CLOSE);
 
 		// Load bank
-		if (bank=OpenButtonBank(path))
+		if (bank=OpenButtonBank(path, NULL))
 		{
 			// Store path
 			strcpy(bank->path,path);

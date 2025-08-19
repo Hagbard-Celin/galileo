@@ -31,13 +31,12 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
-#ifndef GALILEOFM_ENVIRONMENT
-#define GALILEOFM_ENVIRONMENT
-
+#ifndef GALILEOFM_ENVIRONMENT_H
+#define GALILEOFM_ENVIRONMENT_H
 
 Cfg_Environment *environment_new(void);
 void environment_free(Cfg_Environment *env);

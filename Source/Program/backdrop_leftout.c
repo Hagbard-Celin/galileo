@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,11 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lsprintf_protos.h"
+#include "misc_protos.h"
+#include "backdrop_protos.h"
+#include "icons.h"
+#include "position_protos.h"
 
 #define is_digit(c) ((c)>='0' && (c)<='9')
 
@@ -45,81 +51,142 @@ BackdropObject *backdrop_leftout_new(
 	BackdropInfo *info,
 	char *name,
 	char *parent_dir,
-	ULONG flags)
+	char *custom_label)
 {
 	BackdropObject *newob;
-	short size;
-	char path[262];
+	BOOL validlister = FALSE;
 
-	// Not given a path?
-	if (!parent_dir)
+	if (info->lister && info->lister->cur_buffer && info->lister->cur_buffer->buf_Lock)
+	    validlister = TRUE;
+
+
+	if (!validlister && (!parent_dir || !parent_dir[0]))
 	{
-		BPTR lock,parent;
+	    BPTR lock;
 
-		// Lock object
-		if (!(lock=Lock(name,ACCESS_READ)))
-		{
-			// Couldn't lock object.. see if it's "Disk"
-			if (stricmp(FilePart(name),"disk")==0)
-				return 0;
+	    if (!(lock = LockFromPath(name, NULL, FALSE)))
+	    {
+		// Couldn't lock object.. see if it's "Disk"
+		if (stricmp(FilePart(name),"disk")==0)
+		    return 0;
 
-			// Not a disk.info, try for .info file
-			StrCombine(path,name,".info",sizeof(path));
-			if (!(lock=Lock(path,ACCESS_READ)))
-				return 0;
-		}
-
-		// Get parent dir
-		if (parent=ParentDir(lock))
-		{
-			// Get path
-			DevNameFromLock(parent,path,260);
-			parent_dir=path;
-		}
-
-		// Unlock locks
+		// Not a disk.info, try for .info file
+		if (!(lock = LockFromPath(name, NULL, TRUE)))
+		    return 0;
+	        else
+		    UnLock(lock);
+	    }
+	    else
 		UnLock(lock);
-		UnLock(parent);
 	}
 
-	// Get size
-	size=sizeof(BackdropObject)+(parent_dir?strlen(parent_dir)+1:0)+GUI->def_filename_length+1;
-	if (flags&BLNF_CUSTOM_LABEL) size+=GUI->def_filename_length+1;
-
 	// Allocate a new object
-	if (newob=AllocMemH(info->memory,size))
+	if (newob=AllocMemH(info->memory,sizeof(BackdropObject)))
 	{
+		char filelen;
+		ULONG len;
+
 		// Fill out object
 		newob->bdo_type=BDO_LEFT_OUT;
 		newob->bdo_flags=BDOF_NO_POSITION;
 
-		// Get object name
-		newob->bdo_name=(char *)(newob+1);
-		newob->bdo_node.ln_Name=newob->bdo_name;
-		strcpy(newob->bdo_name,FilePart(name));
+		if (validlister)
+		    newob->bdo_parent_lock = info->lister->cur_buffer->buf_Lock;
 
-		// Get path pointer
-		if (parent_dir) newob->bdo_path=newob->bdo_name+GUI->def_filename_length+1;
-
-		// Custom label?
-		if (flags&BLNF_CUSTOM_LABEL)
+		if (name && (len = strlen(name)))
 		{
-			// Get label pointer
-			newob->bdo_device_name=newob->bdo_name+GUI->def_filename_length+1;
-			newob->bdo_flags|=BDOF_CUSTOM_LABEL;
+		    char filename[108];
 
-			// Bump path pointer
-			if (parent_dir) newob->bdo_path+=GUI->def_filename_length+1;
+		    // Copy filename and get length including terminating zero
+		    filelen = stccpy(filename, FilePart(name), 108);
+
+		    // Allocate name
+		    if (!(newob->bdo_name = AllocMemH(info->memory, filelen)))
+		    {
+			FreeMemH(newob);
+			return 0;
+		    }
+
+		    // Copy name
+		    newob->bdo_node.ln_Name = newob->bdo_name;
+		    strcpy(newob->bdo_name, filename);
+
+		    if(!validlister)
+		    {
+			ULONG pathlen;
+
+		        if (!parent_dir || !parent_dir[0])
+		        {
+		            // Get path length including terminating zero
+			    pathlen = len - filelen + 2;
+
+		            // Allocate parent dir
+			    if (!pathlen || !(newob->bdo_path = AllocMemH(info->memory, pathlen)))
+			        goto leftout_fail;
+
+		            // Copy parent dir part of filename
+		            stccpy(newob->bdo_path, name, pathlen);
+
+			    pathlen--;
+		        }
+		        else
+		        {
+		            len = strlen(parent_dir);
+
+		            // Allocate parent dir
+		            if (!(newob->bdo_path = AllocMemH(info->memory, len + 1)))
+			        goto leftout_fail;
+
+		            // Copy parent dir
+	                    strcpy(newob->bdo_path, parent_dir);
+
+			    pathlen = len;
+		        }
+
+		        if (custom_label && (len = strlen(custom_label)))
+		        {
+			    char *path_ptr;
+
+			    if ((path_ptr = strchr(newob->bdo_path, ':') + 1) == newob->bdo_path + pathlen)
+				path_ptr = newob->bdo_path;
+
+		            // Get lock on parent dir
+			    if (!path_ptr || !(newob->bdo_parent_lock = LockFromPath(path_ptr, NULL, FALSE)))
+		                goto leftout_fail;
+
+		            // Allocate custom label
+		            if (!(newob->bdo_device_name = AllocMemH(info->memory, len + 1)))
+			        goto leftout_fail;
+
+		            // Copy custom label
+		            strcpy(newob->bdo_device_name, custom_label);
+
+		            // Set flag
+		            newob->bdo_flags|=BDOF_CUSTOM_LABEL;
+		        }
+		    }
+
+		    // Add to backdrop list
+		    AddTail(&info->objects.list,&newob->bdo_node);
 		}
-
-		// Copy path
-		if (parent_dir) strcpy(newob->bdo_path,parent_dir);
-
-		// Add to backdrop list
-		AddTail(&info->objects.list,&newob->bdo_node);
+		else
+		    FreeMemH(newob);
 	}
 
 	return newob;
+
+leftout_fail:
+	if (newob->bdo_name)
+	    FreeMemH(newob->bdo_name);
+
+	if (newob->bdo_path)
+	    FreeMemH(newob->bdo_path);
+
+	if (!validlister &&  newob->bdo_parent_lock)
+	    UnLock(newob->bdo_parent_lock);
+
+	FreeMemH(newob);
+	return 0;
 }
 
 
@@ -175,19 +242,15 @@ void backdrop_leave_icons_out(BackdropInfo *info,BackdropObject *only_one,BOOL s
 			if (info!=GUI->backdrop)
 			{
 				BPTR dir;
-				char path[256];
 
 				// Get icon lock
 				if (dir=backdrop_icon_lock(object))
 				{
-					// Get icon path name
-					DevNameFromLock(dir,path,256);
-					AddPart(path,object->bdo_name,256);
-
 					// New left-out
 					if (backdrop_leave_out(
 						GUI->backdrop,
-						path,
+						object->bdo_name,
+						dir,
 						BLOF_PERMANENT|BLOF_REFRESH,-1,-1)) save=1;
 
 					// Unlock lock
@@ -209,14 +272,20 @@ void backdrop_leave_icons_out(BackdropInfo *info,BackdropObject *only_one,BOOL s
 BackdropObject *backdrop_leave_out(
 	BackdropInfo *info,
 	char *name,
+	BPTR parent_lock,
 	ULONG flags,
 	short x,short y)
 {
-	BPTR lock,parent;
+	BPTR lock, org_dir;
 	struct FileInfoBlock __aligned fib;
 	BackdropObject *object;
 	struct List *search;
-	char path[262];
+	char *path = 0;
+
+	if (!parent_lock)
+	    return 0;
+
+	org_dir = CurrentDir(parent_lock);
 
 	// Lock object
 	if (!(lock=Lock(name,ACCESS_READ)))
@@ -233,14 +302,14 @@ BackdropObject *backdrop_leave_out(
 	// Locked object, get some info
 	else Examine(lock,&fib);
 
-	// Get parent lock
-	if (parent=ParentDir(lock))
+	if ((SameLock(parent_lock, GUI->desktop_dir_lock)) == LOCK_SAME)
+	    path = CopyString(NULL, environment->env->desktop_location);
+
+	if (!path)
 	{
 		// Get parent path
-		DevNameFromLock(parent,path,260);
-		UnLock(parent);
+		path = PathFromLock(NULL, parent_lock, PFLF_END_SLASH, NULL);
 	}
-	else path[0]=0;
 
 	// Lock backdrop list
 	lock_listlock(&info->objects,1);
@@ -263,14 +332,27 @@ BackdropObject *backdrop_leave_out(
 	// Was object not already in list?
 	if (!object)
 	{
-		// Get new left out
-		if (object=backdrop_leftout_new(info,name,path,BLNF_CUSTOM_LABEL))
+	    if (lock = Lock(":", ACCESS_READ))
+	    {
+		CurrentDir(lock);
+
+		if (object=backdrop_leftout_new(info,name,path,fib.fib_FileName))
 		{
-			// Set name
-			stccpy(object->bdo_device_name,FilePart(name),GUI->def_filename_length);
+			struct FileLock *fl;
+			struct DosList *volume;
 
 			// Set temporary flag if not permanent
 			if (!(flags&BLOF_PERMANENT)) object->bdo_flags|=BDOF_TEMP_LEFTOUT;
+
+			// Get filelock pointer
+			fl=(struct FileLock *)BADDR(lock);
+
+			// Get volume entry
+			if (volume=(struct DosList *)BADDR(fl->fl_Volume))
+			{
+			    object->bdo_date = volume->dol_misc.dol_volume.dol_VolumeDate;
+			    object->bdo_vol_name_len = *(UBYTE *)BADDR(volume->dol_Name);
+			}
 
 			// Position supplied?
 			if (x>-1 && y>-1)
@@ -282,7 +364,8 @@ BackdropObject *backdrop_leave_out(
 			}
 
 			// Get icon
-			backdrop_get_icon(info,object,GETICON_CD);
+			CurrentDir(parent_lock);
+			backdrop_get_icon(info,object, NULL);
 
 			// Refresh?
 			if (flags&BLOF_REFRESH)
@@ -294,11 +377,23 @@ BackdropObject *backdrop_leave_out(
 				backdrop_show_objects(info,BDSF_RECALC);
 			}
 		}
+		else
+		    CurrentDir(parent_lock);
+
+		UnLock(lock);
+	    }
 	}
 	else object=0;
 
 	// Unlock backdrop list
 	unlock_listlock(&info->objects);
+
+	// Restore current-dir
+	CurrentDir(org_dir);
+
+	// Free path string
+	if (path)
+	    FreeMemH(path);
 
 	return object;
 }
@@ -325,16 +420,17 @@ void backdrop_save_leftouts(BackdropInfo *info)
 		if (object->bdo_type==BDO_LEFT_OUT &&
 			!(object->bdo_flags&(BDOF_TEMP_LEFTOUT|BDOF_DESKTOP_FOLDER)))
 		{
-			struct Node *entry;
-			struct List *search;
+		    struct Node *entry;
+		    struct List *search;
 
-			// Get full path of object
-			stccpy(info->buffer,object->bdo_path,sizeof(info->buffer));
-			AddPart(info->buffer,object->bdo_name,256);
+		    char *fullpath;
 
+		    // Get full path of object
+		    if (fullpath = JoinString(info->memory, object->bdo_path, object->bdo_name, NULL, NULL))
+		    {
 			// See if it's already in the list
 			search=(struct List *)&GUI->positions;
-			while (entry=FindNameI(search,info->buffer))
+			while (entry=FindNameI(search,fullpath))
 			{
 				// Left-out?
 				if (entry->ln_Type==PTYPE_LEFTOUT) break;
@@ -347,7 +443,7 @@ void backdrop_save_leftouts(BackdropInfo *info)
 				leftout_record *left;
 
 				// Create new entry
-				if (left=AllocMemH(GUI->position_memory,sizeof(leftout_record)+strlen(info->buffer)))
+				if (left=AllocMemH(GUI->position_memory,sizeof(leftout_record)+strlen(fullpath)))
 				{
 					// Valid icon position?
 					if (!(object->bdo_flags&BDOF_NO_POSITION))
@@ -377,10 +473,15 @@ void backdrop_save_leftouts(BackdropInfo *info)
 					else left->flags=LEFTOUTF_NO_POSITION;
 
 					// Fill out name and type
-					stccpy(left->icon_label,FilePart(info->buffer),sizeof(left->icon_label));
-					strcpy(left->name,info->buffer);
+					stccpy(left->icon_label,FilePart(fullpath),sizeof(left->icon_label));
+					strcpy(left->name,fullpath);
 					left->node.ln_Name=left->name;
 					left->node.ln_Type=PTYPE_LEFTOUT;
+					left->node.ln_Pri=1;
+
+					// Get volume unique-id.
+					left->vol_date = object->bdo_date;
+					left->vol_name_len = object->bdo_vol_name_len;
 
 					// Set pointer in object
 					object->bdo_misc_data=(ULONG)left;
@@ -390,6 +491,9 @@ void backdrop_save_leftouts(BackdropInfo *info)
 					save=1;
 				}
 			}
+
+			FreeMemH(fullpath);
+		    }
 		}
 	}
 
@@ -433,7 +537,7 @@ void backdrop_putaway(BackdropInfo *info,BackdropObject *only_one)
 			// If left-out wasn't temporary, delete from list
 			if (!(object->bdo_flags&BDOF_TEMP_LEFTOUT))
 			{
-				if (backdrop_remove_leftout(object))
+				if (backdrop_remove_leftout(info, object))
 				{
 					save=1;
 				}
@@ -462,20 +566,18 @@ void backdrop_putaway(BackdropInfo *info,BackdropObject *only_one)
 
 
 // Remove a left-out from the list
-BOOL backdrop_remove_leftout(BackdropObject *object)
+BOOL backdrop_remove_leftout(BackdropInfo *info, BackdropObject *object)
 {
-	char buf[256];
+	char *buf;
 	struct Node *node;
 	struct List *search;
 
-	// Get full path of object
-	stccpy(buf,object->bdo_path,256);
-	AddPart(buf,object->bdo_name,256);
-
-	// Look for object in list
-	search=(struct List *)&GUI->positions;
-	while (node=FindNameI(search,buf))
+	if (buf = JoinString(info->memory, object->bdo_path, object->bdo_name, NULL, NULL))
 	{
+	    // Look for object in list
+	    search=(struct List *)&GUI->positions;
+	    while (node=FindNameI(search,buf))
+	    {
 		// Left-out?
 		if (node->ln_Type==PTYPE_LEFTOUT)
 		{
@@ -483,16 +585,220 @@ BOOL backdrop_remove_leftout(BackdropObject *object)
 			Remove(node);
 			FreeMemH(node);
 
+			// Free string
+			FreeMemH(buf);
+
 			// Return success
 			return 1;
 		}
 
 		// Keep looking
 		search=(struct List *)node;
+	    }
+
+	    // Free string
+	    FreeMemH(buf);
 	}
 
 	// Failed
 	return 0;
+}
+
+
+BackdropObject *backdrop_make_volume_leftout(BackdropInfo *info, leftout_record *left,  BPTR volume_lock)
+{
+    BPTR parent_lock, tmp_lock, org_dir = 0;
+    STRPTR path_ptr;
+    BackdropObject *object = 0;
+
+    if (left->node.ln_Pri == 1)
+    {
+	path_ptr = left->node.ln_Name + left->vol_name_len + 1;
+	org_dir = CurrentDir(volume_lock);
+    }
+    else
+	path_ptr = left->node.ln_Name;
+
+    if (path_ptr && (tmp_lock = LockFromPath(path_ptr, NULL, FALSE)))
+    {
+	parent_lock = ParentDir(tmp_lock);
+	UnLock(tmp_lock);
+
+	// Get new left-out object
+	if (object=backdrop_leftout_new(info,left->node.ln_Name,0,left->icon_label))
+	{
+	    // Valid position?
+	    if (!(left->flags&LEFTOUTF_NO_POSITION))
+	    {
+		    // Store position
+		    object->bdo_flags|=BDOF_LEFTOUT_POS;
+		    object->bdo_custom_pos=(left->icon_x<<16)|left->icon_y;
+	    }
+
+	    object->bdo_date = left->vol_date;
+	    object->bdo_vol_name_len = left->vol_name_len;
+
+	    // Copy label, store entry pointer
+	    //stccpy(object->bdo_device_name,left->icon_label,GUI->def_filename_length+1);
+	    object->bdo_misc_data=(ULONG)left;
+
+	    // Get icon
+	    CurrentDir(parent_lock);
+
+	    backdrop_get_icon(info,object,NULL);
+
+	    CurrentDir(volume_lock);
+	}
+	UnLock(parent_lock);
+    }
+    if (org_dir)
+	CurrentDir(org_dir);
+    UnLock(volume_lock);
+
+    return object;
+}
+
+
+leftout_record *backdrop_leftouts_upgrade(leftout_record *left, BPTR *volume_lock)
+{
+    struct DosList *volume = 0;
+    leftout_record *record = 0;
+    BPTR lock;
+    STRPTR tmp_src = 0;
+    ULONG dest_len = 0;
+
+    if (lock = LockFromPath(left->node.ln_Name, NULL, FALSE))
+    {
+	BPTR org_dir;
+	struct FileLock *fl;
+
+	org_dir = CurrentDir(lock);
+	if (*volume_lock = Lock(":", ACCESS_READ))
+	{
+	    // Get filelock pointer
+	    fl=(struct FileLock *)BADDR(*volume_lock);
+
+	    // Get volume entry
+	    if (volume=(struct DosList *)BADDR(fl->fl_Volume))
+	    {
+	        tmp_src = strchr(left->node.ln_Name, ':');
+	        dest_len = *(char *)BADDR(volume->dol_Name) + strlen(tmp_src);
+	    }
+	}
+	UnLock(CurrentDir(org_dir));
+    }
+
+    // Create new entry
+    if (volume && (record = AllocMemH(GUI->position_memory, sizeof(leftout_record) + dest_len)))
+    {
+	STRPTR tmp_dst, vol_name;
+
+	vol_name = ((char *)BADDR(volume->dol_Name) + 1);
+
+	// Copy name
+	tmp_dst = stpcpy(record->name, vol_name);
+	strcpy(tmp_dst, tmp_src);
+
+	// Copy label
+	strcpy(record->icon_label, ((leftout_record_old *)left)->icon_label);
+
+
+	// Fill out name pointer and type
+	record->node.ln_Name = record->name;
+	record->node.ln_Type = PTYPE_LEFTOUT;
+	record->node.ln_Pri = 1;
+
+	// Get volume unique-id.
+	record->vol_date = volume->dol_misc.dol_volume.dol_VolumeDate;
+	record->vol_name_len = *(UBYTE *)BADDR(volume->dol_Name);
+
+	// Store flags
+	record->flags = ((leftout_record_old *)left)->flags;
+
+	// Store position
+	record->icon_x = ((leftout_record_old *)left)->icon_x;
+	record->icon_y = ((leftout_record_old *)left)->icon_y;
+
+	// Replace old record
+	Insert((struct List *)&GUI->positions, (struct Node *)record, (struct Node *)left);
+	Remove((struct Node *)left);
+	FreeMemH(left);
+    }
+
+    return record;
+}
+
+// Add leftouts belonging to disk
+void backdrop_add_volume_leftouts(BackdropInfo *info, char *device, char *volume, struct DateStamp *date, UBYTE len)
+{
+    leftout_record *left;
+    BackdropObject *object;
+    BYTE devlen;
+    struct List *search;
+
+    devlen = strlen(device) - 1;
+
+    // Lock position list
+    lock_listlock(&GUI->positions,FALSE);
+
+    // Go through leftouts
+    for (left=(leftout_record *)GUI->positions.list.lh_Head;
+	 left->node.ln_Succ;
+	 left=(leftout_record *)left->node.ln_Succ)
+    {
+	// Left-out?
+	if (left->node.ln_Type==PTYPE_LEFTOUT)
+	{
+	    char *name;
+	    BPTR volume_lock = 0;
+
+	    search=&info->objects.list;
+
+	    // Get filename
+	    name=FilePart(left->node.ln_Name);
+
+	    if ((left->node.ln_Pri == 1 && left->vol_name_len == len &&
+		!memcmp(&left->vol_date, date, sizeof(struct DateStamp)) &&
+		!memcmp(left->node.ln_Name, volume, len)) ||
+		(left->node.ln_Name[devlen] == ':' && !memcmp(left->node.ln_Name, device, devlen)))
+	    {
+		while (object=(BackdropObject *)FindNameI(search,name))
+		{
+		    // Is this a left-out?
+		    if (object->bdo_type==BDO_LEFT_OUT)
+		    {
+			// Match entry pointer
+			if (object->bdo_misc_data==(ULONG)left) break;
+		    }
+
+		    // Continue search
+		    search=(struct List *)object;
+		}
+
+		if (!object)
+		{
+		    if (left->node.ln_Pri == 1)
+			volume_lock = LockFromVolIdPath(left->node.ln_Name, NULL, &left->vol_date, left->vol_name_len, NULL);
+		    else
+		    {
+			leftout_record *new_left;
+
+			if (new_left = backdrop_leftouts_upgrade(left, &volume_lock))
+			    left = new_left;
+		    }
+		}
+
+	        if (volume_lock)
+	        {
+		    if (object = backdrop_make_volume_leftout(info, left, volume_lock))
+			    backdrop_place_object(info,object);
+		}
+	    }
+	}
+    }
+
+    // Lock position list
+    unlock_listlock(&GUI->positions);
 }
 
 
@@ -537,10 +843,83 @@ void backdrop_add_leftouts(BackdropInfo *info)
 			// Not there?
 			if (!object)
 			{
-				// Get new left-out object
-				if (object=backdrop_leftout_new(info,left->node.ln_Name,0,BLNF_CUSTOM_LABEL))
+			    BPTR volume_lock;
+
+			    // Need to upgrade leftout_record?
+			    if (left->node.ln_Pri != 1)
+			    {
+				struct DosList *volume = 0;
+				leftout_record *record;
+				STRPTR tmp_src = 0;
+				ULONG dest_len = 0;
+
+				if (volume_lock = LockFromPath(left->node.ln_Name, NULL, LFPF_TRY_ICON))
 				{
-					// Valid position?
+				    struct FileLock *fl;
+
+				    // Get filelock pointer
+				    fl=(struct FileLock *)BADDR(volume_lock);
+
+				    // Get volume entry
+				    if (volume=(struct DosList *)BADDR(fl->fl_Volume))
+				    {
+				        tmp_src = strchr(left->node.ln_Name, ':');
+				        dest_len = *(char *)BADDR(volume->dol_Name) + strlen(tmp_src);
+				    }
+				}
+
+				// Create new entry
+				if (volume && (record = AllocMemH(GUI->position_memory, sizeof(leftout_record) + dest_len)))
+				{
+				    STRPTR tmp_dst, vol_name;
+
+				    vol_name = ((char *)BADDR(volume->dol_Name) + 1);
+
+				    // Copy name
+				    tmp_dst = stpcpy(record->name, vol_name);
+				    strcpy(tmp_dst, tmp_src);
+
+				    // Copy label
+				    strcpy(record->icon_label, ((leftout_record_old *)left)->icon_label);
+
+
+				    // Fill out name pointer and type
+				    record->node.ln_Name = record->name;
+				    record->node.ln_Type = PTYPE_LEFTOUT;
+				    record->node.ln_Pri = 1;
+
+				    // Get volume unique-id.
+				    record->vol_date = volume->dol_misc.dol_volume.dol_VolumeDate;
+				    record->vol_name_len = *(UBYTE *)BADDR(volume->dol_Name);
+
+				    // Store flags
+				    record->flags = ((leftout_record_old *)left)->flags;
+
+				    // Store position
+				    record->icon_x = ((leftout_record_old *)left)->icon_x;
+				    record->icon_y = ((leftout_record_old *)left)->icon_y;
+
+				    // Replace old record
+				    Insert((struct List *)&GUI->positions, (struct Node *)record, (struct Node *)left);
+				    Remove((struct Node *)left);
+				    FreeMemH(left);
+				    left = record;
+				}
+			    }
+			    // Get volume lock
+			    else
+				volume_lock = LockFromVolIdPath(left->node.ln_Name, NULL, &left->vol_date, left->vol_name_len, LFPF_TRY_ICON);
+
+			    if (volume_lock)
+			    {
+				BPTR parent_lock, org_dir;
+
+				if (parent_lock = ParentDir(volume_lock))
+				{
+				    // Get new left-out object
+				    if (object=backdrop_leftout_new(info,left->node.ln_Name,0,left->icon_label))
+				    {
+					    // Valid position?
 					if (!(left->flags&LEFTOUTF_NO_POSITION))
 					{
 						// Store position
@@ -548,13 +927,25 @@ void backdrop_add_leftouts(BackdropInfo *info)
 						object->bdo_custom_pos=(left->icon_x<<16)|left->icon_y;
 					}
 
-					// Copy label, store entry pointer
-					stccpy(object->bdo_device_name,left->icon_label,GUI->def_filename_length+1);
+					object->bdo_date = left->vol_date;
+					object->bdo_vol_name_len = left->vol_name_len;
+
+					// Store entry pointer
 					object->bdo_misc_data=(ULONG)left;
 
-					// Fix size and position
-					backdrop_get_icon(info,object,GETICON_CD);
+					// Get icon
+					org_dir = CurrentDir(parent_lock);
+
+					backdrop_get_icon(info,object,NULL);
+
+					CurrentDir(org_dir);
+				    }
+
+				    UnLock(parent_lock);
 				}
+
+				UnLock(volume_lock);
+			    }
 			}
 		}
 	}

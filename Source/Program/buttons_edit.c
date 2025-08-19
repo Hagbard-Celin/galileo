@@ -31,11 +31,15 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "buttons_protos.h"
+#include "misc_protos.h"
+#include "menu_data.h"
+#include "graphics.h"
 
 // Handles key press in edit mode
 void buttons_edit_key(Buttons *buttons,UWORD code,UWORD qual)
@@ -495,7 +499,7 @@ void buttons_edit(
 	if (send_button) FreeButton(send_button);
 
 	// Free message if we have one
-	if (send_msg) ReplyAppMessage((GalileoAppMessage *)send_msg);
+	if (send_msg) ReplyAppMessage((struct AppMessage *)send_msg);
 
 	// If editor was already running, or we can't start it if not, return
 	if (ipc || !can_start) return;

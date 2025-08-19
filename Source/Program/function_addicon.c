@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,7 +37,10 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
-
+#include "function_launch_protos.h"
+#include "function_protos.h"
+#include "icons.h"
+#include "lsprintf_protos.h"
 
 typedef struct
 {
@@ -154,6 +158,7 @@ GALILEOFM_FUNC(function_addicon)
 	while (entry=function_get_entry(handle))
 	{
 		BOOL file_ok=0,replace_image=0;
+		BPTR org_dir = 0, tmplock = 0;
 
 		// Update progress indicator
 		if (function_progress_update(handle,entry,count))
@@ -163,13 +168,19 @@ GALILEOFM_FUNC(function_addicon)
 			break;
 		}
 
+	        // CD to source-file directory
+		if (entry->fe_lock)
+		    org_dir = CurrentDir(entry->fe_lock);
+	        else
+	        if (path->pn_lock)
+		    org_dir = CurrentDir(path->pn_lock);
+
 		// Ignore icons
 		if (!(isicon(entry->fe_name)))
 		{
-			// Build source and icon name
-			function_build_source(handle,entry,handle->func_work_buf);
-			strcpy(handle->func_work_buf+384,handle->func_work_buf);
-			strcat(handle->func_work_buf+384,".info");
+			// Build icon name
+			strcpy(handle->func_work_buf,entry->fe_name);
+			strcat(handle->func_work_buf,".info");
 
 			// Need confirmation?
 			if (data->confirm_each)
@@ -177,19 +188,19 @@ GALILEOFM_FUNC(function_addicon)
 				BPTR lock;
 
 				// Does icon exist?
-				if (lock=Lock(handle->func_work_buf+384,ACCESS_READ))
+				if (lock=Lock(handle->func_work_buf,ACCESS_READ))
 				{
 					UnLock(lock);
 
 					// Build message
-					lsprintf(handle->func_work_buf+800,
+					lsprintf(handle->func_work_buf+200,
 						GetString(&locale,MSG_ICON_ALREADY_EXISTS),
 						entry->fe_name);
 
 					// Display requester
 					if (!(ret=function_request(
 						handle,
-						handle->func_work_buf+800,
+						handle->func_work_buf+200,
 						0,
 						GetString(&locale,MSG_REPLACE),
 						GetString(&locale,MSG_ALL),
@@ -198,6 +209,12 @@ GALILEOFM_FUNC(function_addicon)
 						GetString(&locale,MSG_CANCEL),0)))
 					{
 						// Aborted?
+					        if (org_dir)
+						    CurrentDir(org_dir);
+
+					        if (tmplock)
+						    UnLock(tmplock);
+
 						function_abort(handle);
 						break;
 					}
@@ -229,13 +246,13 @@ GALILEOFM_FUNC(function_addicon)
 					// gjp V44 icn stuff
 					if (IconBase->lib_Version>=44)
 					{
-					        icon=GetIconTags(handle->func_work_buf,
+					        icon=GetIconTags(entry->fe_name,
 							         ICONGETA_FailIfUnavailable,TRUE,
 							         ICONGETA_RemapIcon,FALSE,
 							         TAG_DONE);
 					}
 					else
-						icon=GetDiskObject(handle->func_work_buf);
+						icon=GetDiskObject(entry->fe_name);
 
 					if (icon)
 					{
@@ -254,11 +271,10 @@ GALILEOFM_FUNC(function_addicon)
 						SetIconFlags(icon,flags);
 
 						// Write icon
-
-						if	(PutDiskObject(handle->func_work_buf,icon))
+						if	(PutDiskObject(entry->fe_name,icon))
 						{
 							// Load icon file into listers
-							function_filechange_loadfile(handle,path->pn_path,entry->fe_name,FFLF_ICON);
+							function_filechange_loadfile(handle,path->pn_path,path->pn_lock,entry->fe_name,FFLF_ICON);
 							file_ok=1;
 						}
 
@@ -274,7 +290,7 @@ GALILEOFM_FUNC(function_addicon)
 					ret=1;
 					while (!(ok=icon_write(
 								(entry->fe_type>0)?ICONTYPE_DRAWER:ICONTYPE_PROJECT,
-								handle->func_work_buf,
+								entry->fe_name,
 								replace_image,
 								data->flags,
 								data->mask,
@@ -286,21 +302,31 @@ GALILEOFM_FUNC(function_addicon)
 							entry->fe_name,
 							MSG_ADDICONING,
 							err))==-1 || ret==0) break;
-						function_build_source(handle,entry,handle->func_work_buf);
 					}
 
 					// Success?
 					if (ok)
 					{
 						// Load icon file into listers
-						function_filechange_loadfile(handle,path->pn_path,entry->fe_name,FFLF_ICON);
+						function_filechange_loadfile(handle,path->pn_path,path->pn_lock,entry->fe_name,FFLF_ICON);
 						file_ok=1;
 					}
 					else
-					if (ret==-1) break;
+					if (ret==-1)
+					{
+					    UnLock(CurrentDir(org_dir));
+					    break;
+					}
 				}
 			}
 		}
+
+	        // Restore current directory
+	        if (org_dir)
+		    CurrentDir(org_dir);
+
+	        if (tmplock)
+		    UnLock(tmplock);
 
 		// Get next entry, increment count
 		count+=function_end_entry(handle,entry,file_ok);

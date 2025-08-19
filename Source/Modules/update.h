@@ -40,6 +40,7 @@ For more information on Directory Opus for Windows please see:
 #include "update.strings"
 #include "modules_lib.h"
 #include "module.h"
+#include "/Program/position.h"
 
 #define UPDATEF_DONE_PATHS	(1<<0)
 #define UPDATEF_DONE_LEFTOUTS	(1<<1)
@@ -53,16 +54,20 @@ For more information on Directory Opus for Windows please see:
 #define UPDATEF_DONE_THEMES 	(1<<9)
 #define UPDATEF_DONE_IFFCHUNK	(1<<10)
 #define UPDATEF_DONE_PATHFORMAT	(1<<11)
-#define UPDATEF_DONE_FIXGROUPS	(1<<13)
+#define UPDATEF_DONE_FIXGROUPS	(1<<12)
+#define UPDATEF_DONE_POSITOPOSR	(1<<13)
 
 struct Window *open_status(struct Screen *);
 BOOL update_do_leftouts(struct List *,APTR);
 BOOL update_groups(void);
+BOOL update_groups1(void);
 BOOL update_iffchunk(void);
 short update_convert_leftouts(APTR file,APTR memory,struct List *list);
 BOOL update_storage(void);
 void update_filetypes(void);
 void update_envarc(void);
 void update_envarc_do(char *path);
+BOOL update_position_info(struct List *list);
+BOOL write_position_info(struct List *list);
 APTR read_position_info(struct List *list);
 void update_do_pathkeys(struct List *list);

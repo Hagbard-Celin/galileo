@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,9 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "menu_data.h"
+#include "backdrop_protos.h"
 
 // Got a notify message from PutDiskObject()
 BOOL backdrop_check_notify(
@@ -44,12 +48,15 @@ BOOL backdrop_check_notify(
 	Lister *lister)
 {
 	char *name_buf;
-	BOOL disk=0,ret=0;
+	BOOL disk=0,ret=0, validlister = FALSE;
 	struct List *search;
 	BackdropObject *object;
 
 	if (!(name_buf=AllocVec(256,0)))
 		return 0;
+
+	if (lister && lister->cur_buffer && lister->cur_buffer->buf_Lock)
+	    validlister = TRUE;
 
 	// Disk icon?
 	if (notify->gn_Name[strlen(notify->gn_Name)-1]==':')
@@ -81,22 +88,15 @@ BOOL backdrop_check_notify(
 	// Is this a lister?
 	if (lister)
 	{
-		short len;
+		BPTR lock;
 		BOOL ok=0;
 
-		// Match length
-		len=strlen(notify->gn_Name);
-
-		// See if strings match
-		if (strnicmp(lister->cur_buffer->buf_Path,notify->gn_Name,len)==0)
+		if (validlister && (lock = LockFromPath(notify->gn_Name, NULL, FALSE)))
 		{
-			// Check termination
-			if (lister->cur_buffer->buf_Path[len]=='\0') ok=1;
+		    if (SameLock(lock, lister->cur_buffer->buf_Lock) == LOCK_SAME)
+			ok = 1;
 
-			// / can terminate too
-			else
-			if (lister->cur_buffer->buf_Path[len]=='/' &&
-				lister->cur_buffer->buf_Path[len+1]=='\0') ok=1;
+		    UnLock(lock);
 		}
 
 		// Didn't match?
@@ -123,42 +123,37 @@ BOOL backdrop_check_notify(
 			break;
 		}
 
+		// Lister?
+		else
+		if (validlister)
+		    break;
+
 		// Valid object?
 		else
 		if (object->bdo_type!=BDO_APP_ICON &&
 			object->bdo_type!=BDO_BAD_DISK &&
 			object->bdo_path)
 		{
-			char *path=0;
-			BPTR lock;
+			BPTR lock1, lock2;
 
-			// If no lister, get full path of object
-			if (!lister && (path=AllocVec(512,0)))
+			if (lock1 = LockFromPath(notify->gn_Name, NULL, FALSE))
 			{
-				// Lock path
-				if (lock=Lock(object->bdo_path,ACCESS_READ))
-				{
-					// Get full path
-					DevNameFromLock(lock,path,512);
-					UnLock(lock);
-				}
+			    if (lock2 = LockFromPath(object->bdo_path, NULL, FALSE))
+			    {
+				BOOL br = FALSE;
 
-				// Failed
-				else strcpy(path,object->bdo_path);
+				if (SameLock(lock1, lock2) == LOCK_SAME)
+				    br = TRUE;
+
+				UnLock(lock1);
+				UnLock(lock2);
+
+				if (br)
+				    break;
+			    }
+			    else
+				UnLock(lock1);
 			}
-					
-			// Objects in same directory?
-			if (lister || stricmp(notify->gn_Name,(path)?path:object->bdo_path)==0)
-			{
-				// Free path
-				if (path) FreeVec(path);
-
-				// Matched
-				break;
-			}
-
-			// Free path
-			if (path) FreeVec(path);
 		}
 
 		// If this is a lister, there could only be one
@@ -277,25 +272,21 @@ BOOL backdrop_check_notify(
 	else
 	if (info->flags&BDIF_MAIN_DESKTOP)
 	{
-		BPTR lock1,lock2;
+		BPTR lock;
 
-		// Lock the desktop folder and the changed directory
-		if ((lock1=Lock(environment->env->desktop_location,ACCESS_READ)) &&
-			(lock2=Lock(notify->gn_Name,ACCESS_READ)))
+		// Lock the changed directory
+		if (lock=Lock(notify->gn_Name,ACCESS_READ))
 		{
 			// Same directory?
-			if (SameLock(lock1,lock2)==LOCK_SAME)
+			if (SameLock(lock,GUI->desktop_dir_lock)==LOCK_SAME)
 			{
 				// Update the desktop folder
 				misc_startup("galileo_desktop_update",MENU_UPDATE_DESKTOP,GUI->window,0,TRUE);
 			}
 
-			// Unlock second lock
-			UnLock(lock2);
+			// Unlock lock
+			UnLock(lock);
 		}
-
-		// Unlock first lock
-		UnLock(lock1);
 	}
 
 	// Unlock list

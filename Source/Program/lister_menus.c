@@ -36,6 +36,13 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "misc_protos.h"
+#include "popup_protos.h"
+#include "rexx_protos.h"
+#include "backdrop.h"
+#include "handler.h"
+#include "menu_data.h"
 
 #define set_item(item,true) if(true){item->Flags|=CHECKED;}else{item->Flags&=~CHECKED;}
 #define off_item(item,true) if(true){item->Flags&=~ITEMENABLED;}else{item->Flags|=ITEMENABLED;}
@@ -152,8 +159,8 @@ void lister_fix_menus(Lister *lister,BOOL sel_only)
 		{
 			BOOL dis=0;
 
-			// Does path end in a colon?
-			if (lister->cur_buffer->buf_Path[strlen(lister->cur_buffer->buf_Path)-1]==':')
+			// Root directory?
+			if (lister->cur_buffer->flags&DWF_ROOT)
 				dis=1;
 
 			// Do disable
@@ -270,6 +277,13 @@ UWORD lister_listerpopup(Lister *lister,UWORD code)
 			// Custom handler in lister?
 			if (strcmp(lister->cur_buffer->buf_CustomHandler,ext->pe_Command)==0)
 			{
+			    if (*(ULONG *)lister->cur_buffer->buf_CustomHandler == CUSTH_TYPE_GFMMODULE)
+				galileo_handler_msg(0, ext->pe_Menu,
+						    0, lister,
+						    0, 0, 0, 0,
+						    0,
+						    0, 0);
+			    else
 				// Send message
 				rexx_handler_msg(
 					0,

@@ -31,11 +31,12 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "tile.h"
 
 // Tile windows
 void tile_windows(TileInfo *ti)

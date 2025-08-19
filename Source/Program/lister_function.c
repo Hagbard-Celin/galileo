@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,17 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "dirlist_protos.h"
+#include "misc_protos.h"
+#include "function_launch_protos.h"
+#include "backdrop_protos.h"
+#include "rexx_protos.h"
+#include "path_routines.h"
+#include "menu_data.h"
+#include "position_protos.h"
+#include "handler.h"
+#include "icons.h"
 
 // Do a lister-specific function
 int lister_do_function(Lister *lister,ULONG func)
@@ -137,69 +149,63 @@ int lister_do_function(Lister *lister,ULONG func)
 			// Check lister isn't locked
 			if (!(lister->flags&LISTERF_LOCK))
 			{
-				char buffer[256];
-				short ret=0,a;
 				BOOL shift=0;
+				BPTR source_lock = 0;
+				short ret=0;
 
 				// Custom handler?
 				if (lister->cur_buffer->buf_CustomHandler[0])
 				{
-					UWORD qual=0;
+				    UWORD qual=0;
 
-					// Build command
-					if (func==MENU_LISTER_PARENT || func==MENU_LISTER_PARENT_NEW)
-						strcpy(buffer,"parent");
-					else
-						strcpy(buffer,"root");
+				    // New window means shift is down (for this anyway)
+				    if (func==MENU_LISTER_PARENT_NEW || func==MENU_LISTER_ROOT_NEW)
+					    qual=IEQUALIFIER_LSHIFT;
 
-					// New window means shift is down (for this anyway)
-					if (func==MENU_LISTER_PARENT_NEW || func==MENU_LISTER_ROOT_NEW)
-						qual=IEQUALIFIER_LSHIFT;
-
+				    if (*(ULONG *)lister->cur_buffer->buf_CustomHandler == CUSTH_TYPE_GFMMODULE)
+					galileo_handler_msg(0, (func==MENU_LISTER_PARENT || func==MENU_LISTER_PARENT_NEW)?"parent":"root",
+							    0, lister,
+							    0, 0, 0, 0,
+							    0,
+							    qual, 0);
+				    else
 					// Send message
 					rexx_handler_msg(
 						0,
 						lister->cur_buffer,
 						RXMF_WARN,
-						HA_String,0,buffer,
+						HA_String,0,(func==MENU_LISTER_PARENT || func==MENU_LISTER_PARENT_NEW)?"parent":"root",
 						HA_Value,1,lister,
 						HA_String,2,lister->cur_buffer->buf_Path,
 						HA_Qualifier,6,qual,
 						TAG_END);
-					break;
+				    break;
 				}
 
 				// Open in new window?
 				if (func==MENU_LISTER_PARENT_NEW ||
 					func==MENU_LISTER_ROOT_NEW) shift=1;
 
-				// Copy current path
-				strcpy(buffer,lister->cur_buffer->buf_Path);
-
-				// Try twice
-				for (a=0;a<2;a++)
+				// Get lock
+				if (lister->cur_buffer->buf_Lock)
 				{
-					// Do parent/root
-					if (func==MENU_LISTER_PARENT || func==MENU_LISTER_PARENT_NEW)
-						ret=path_parent(buffer);
-					else ret=path_root(buffer);
+				    // Get parent lock
+				    source_lock = ParentDir(lister->cur_buffer->buf_Lock);
 
-					// Successful?
-					if (ret) break;
+				    if (func == MENU_LISTER_ROOT || func == MENU_LISTER_ROOT_NEW)
+				    {
+					BPTR lock;
 
-					// For second time through, expand path
-					if (a==0)
+					// Repeat until reaching root
+					while (lock = ParentDir(source_lock))
 					{
-						BPTR lock;
-
-						// Lock path
-						if (lock=Lock(buffer,ACCESS_READ))
-						{
-							// Expand path
-							DevNameFromLock(lock,buffer,256);
-							UnLock(lock);
-						}
+					    UnLock(source_lock);
+					    source_lock = lock;
 					}
+				    }
+
+				    if (source_lock)
+					ret = 1;
 				}
 
 				// Ok to change?
@@ -209,12 +215,12 @@ int lister_do_function(Lister *lister,ULONG func)
 					if (shift)
 					{
 						// Read into new lister
-						if (read_new_lister(buffer,lister,0))
+						if (read_new_lister(NULL, source_lock, lister, 0))
 							break;
 					}
 
 					// Read into same window
-					do_parent_root(lister,buffer);
+					do_parent_root(lister, NULL, source_lock);
 				}
 			}
 			break;
@@ -266,8 +272,8 @@ int lister_do_function(Lister *lister,ULONG func)
 			lister_close(lister,0);
 			lister_open(lister,GUI->screen_pointer);
 
-            // Activate the window
-            ActivateWindow(lister->window);
+		        // Activate the window
+		        ActivateWindow(lister->window);
 			break;
 
 
@@ -318,8 +324,9 @@ int lister_do_function(Lister *lister,ULONG func)
 				// Changing from text to icon mode?
 				if (!(lister->flags&LISTERF_VIEW_ICONS))
 				{
-					// Get other dimensions
-					dims=lister->other_dims;
+					// Get other dimensions, if any
+					if (lister->other_dims.Width && lister->other_dims.Height)
+					    dims=lister->other_dims;
 
 					// Store new dimensions
 					lister->other_dims=current;
@@ -524,13 +531,13 @@ int lister_do_function(Lister *lister,ULONG func)
 			// Try to iconify
 			if (lister_iconify(lister))
 			{
-                // Must do this, or some commands will make MuForce hit if run before
-                // opening/activating new lister
-            	// Clear pointer to current lister
-            	Forbid();
-            	if (GUI->current_lister==lister)
-            		GUI->current_lister=0;
-            	Permit();
+		// Must do this, or some commands will make MuForce hit if run before
+		// opening/activating new lister
+	    	// Clear pointer to current lister
+	    	Forbid();
+	    	if (GUI->current_lister==lister)
+	    		GUI->current_lister=0;
+	    	Permit();
 
 				// Close window
 				lister_close(lister,0);
@@ -750,6 +757,7 @@ int lister_do_function(Lister *lister,ULONG func)
 				(lister->flags&LISTERF_VIEW_ICONS)?FUNCF_ICONS:0,
 				lister,0,
 				lister->cur_buffer->buf_Path,0,
+				lister->cur_buffer->buf_Lock,0,
 				0,0,
 				0);
 			break;
@@ -757,16 +765,36 @@ int lister_do_function(Lister *lister,ULONG func)
 
 		// Open parent
 		case MENU_OPEN_PARENT:
-
-			// Copy path
-			strcpy(lister->work_buffer,lister->cur_buffer->buf_Path);
-
-			// Get parent and read into new lister
-			if (!(path_parent(lister->work_buffer)) ||
-				!(read_new_lister(lister->work_buffer,lister,0)))
 			{
-				// Error
-				DisplayBeep(lister->window->WScreen);
+			    BPTR parent_lock = 0;
+			    UBYTE ok = 1;
+			    STRPTR temp_path = 0;
+
+			    // Get parent lock
+			    if (lister->cur_buffer->buf_Lock)
+			    {
+				if (!(parent_lock = ParentDir(lister->cur_buffer->buf_Lock)))
+				    ok = 0;
+			    }
+			    else
+			    {
+				if (!(temp_path = path_parent_alloch(0, lister->cur_buffer->buf_Path)))
+				    ok = 0;
+			    }
+
+			    // Read into new lister
+			    if (ok && !(read_new_lister(temp_path,parent_lock,lister,0)))
+				ok = 0;
+
+			    if (temp_path)
+				FreeMemH(temp_path);
+
+			    // Failed?
+			    if (!ok)
+			    {
+				    // Error
+				    DisplayBeep(lister->window->WScreen);
+			    }
 			}
 			break;
 

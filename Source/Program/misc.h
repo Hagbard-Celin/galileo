@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -45,7 +45,7 @@ enum
 	TYPE_SCRIPTS,
 };
 
-#define READFILE_OK			0
+#define READFILE_OK		 0
 #define READFILE_NOT_FOUND	-1
 #define READFILE_NO_MEMORY	-2
 
@@ -57,53 +57,6 @@ typedef struct
 	IPCData		*ipc;
 } MiscStartup;
 
-IPCData *misc_startup(char *,ULONG,struct Window *,APTR,BOOL);
-void __saveds misc_proc(void);
-long misc_check_quit(struct Screen *screen,IPCData *ipc);
-
-/*
-// Simple copy routine, like CopyMem but inline. Should be faster on small copies
-void __inline copy_mem(char *source,char *dest,int size)
-{
-	while (size-->0) *dest++=*source++;
-}
-*/
-
-// Prototypes
-void copy_mem(char *,char *,int);
-read_file(char *,char **,ULONG *);
-void getsizestring(char *,ULONG);
-void getfloatstr(double,char *);
-BOOL copy_string(char *,char **,struct GalileoRemember **);
-void do_title_string(char *,char *,char *);
-char *get_our_pubscreen(void);
-char *strstri(char *,char *);
-get_disk_change(void);
-make_uscore_string(char *,char *,int *);
-struct Node *next_node(struct List *,struct Node *,int);
-struct IntuiMessage *get_imsg(struct Window *);
-void lock_listlock(struct ListLock *list,BOOL exclusive);
-void unlock_listlock(struct ListLock *list);
-request_file(struct Window *parent,char *title,char *buffer,char *def,ULONG flags,char *pattern);
-void flush_port(struct MsgPort *port);
-BOOL strreplace(char *,char *,char *,BOOL);
-void get_screen_data(GalileoScreenData *data);
-char *arg_get_word(char *args,char *buffer,int buflen);
-BOOL arg_match_keyword(char *args,char *word);
-void protect_get_string(ULONG protect,char *buffer);
-long prot_from_string(char *buf);
-long netprot_from_string(char *buf);
-void abort_io(struct IORequest *ioreq);
-LONG GetDiskInfo(char *device,struct InfoData *info);
-BOOL VolumePresent(DirBuffer *buffer);
-char *find_public_screen(struct Screen *screen,BOOL lock);
-Cfg_Function *match_function_key(UWORD,UWORD,Cfg_ButtonBank *,Lister *,ULONG,ULONG *);
-Cfg_Function *match_function_key_list(UWORD,UWORD,Cfg_ButtonBank *,BOOL);
-void fix_literals(char *dest,char *srce);
-struct Node *FindNameI(struct List *list,char *name);
-short error_saving(short err,struct Window *window,long txt,long buttons);
-BOOL check_closescreen(struct Screen *screen);
-BOOL check_qualifier(UWORD,UWORD,UWORD,UWORD);
 
 struct read_startup
 {
@@ -123,38 +76,10 @@ typedef struct
 	char			data[1];
 } iconopen_packet;
 
-iconopen_packet *get_icon_packet(struct _BackdropInfo *,struct _BackdropObject *,char *,UWORD);
-
-struct IntuiMessage *check_refresh_msg(struct Window *window,ULONG mask);
-
-struct Window *WhichWindow(
-	struct Screen *screen,
-	short x,
-	short y,
-	unsigned short flags);
 
 #define WWF_LEAVE_LOCKED	(1<<0)
 #define WWF_NO_LOCK		(1<<1)
 
-BOOL isdevice(char *path);
-void final_path(char *path,char *buf);
-
-char *function_label(Cfg_ButtonFunction *func);
-void build_version_string(char *buf,short ver,short rev,long days,short format);
-
-BOOL file_trap_more(char *name,char *tool);
-
-char *sufcmp(char *name,char *suffix);
-
-short misc_check_change(struct Screen *screen,IPCData *ipc,Cfg_ButtonBank *bank,long string);
-
-struct Library *OpenModule(char *);
-
-void ChainTagItems(struct TagItem **list,struct TagItem *tags);
-
-void handle_diskchange(GalileoNotify *);
-
-void send_main_reset_cmd(ULONG,ULONG,APTR);
 
 enum
 {
@@ -169,8 +94,4 @@ enum
 	KEYMATCH_SCRIPTS,
 };
 
-void key_finder(IPCData *ipc);
-
-BOOL GetFileInfo(char *name,struct FileInfoBlock *fib);
-	
 #endif

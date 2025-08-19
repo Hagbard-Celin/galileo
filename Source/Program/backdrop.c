@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,11 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "backdrop_protos.h"
+#include "desktop.h"
+#include "icons.h"
+#include "lsprintf_protos.h"
 
 // Create a new backdrop handle
 BackdropInfo *backdrop_new(IPCData *ipc,ULONG flags)
@@ -247,37 +253,44 @@ BackdropObject *backdrop_new_object(
 	short type)
 {
 	BackdropObject *object;
-	short len=0;
-
-	// Extra space?
-	if (extra)
-	{
-		if (!*extra) extra=0;
-		else len=strlen(extra)+1;
-	}
+	ULONG len;
 
 	// Allocate object
-	if (!(object=AllocMemH(info->memory,sizeof(BackdropObject)+GUI->def_filename_length+1+len)))
+	if (!(object=AllocMemH(info->memory, sizeof(BackdropObject))))
 		return 0;
 
-	// Get name pointer
-	object->bdo_name=(char *)(object+1);
+	if (name && (len = strlen(name)))
+	{
+	    // Allocate name
+	    if (!(object->bdo_name = AllocMemH(info->memory, len + 1)))
+	    {
+			FreeMemH(object);
+			return 0;
+	    }
 
-	// Set name
-	object->bdo_node.ln_Name=object->bdo_name;
-	if (name) stccpy(object->bdo_name,name,GUI->def_filename_length);
+	    // Copy extra
+	    strcpy(object->bdo_name, name);
+		object->bdo_node.ln_Name = object->bdo_name;
+	}
+
+	if (extra && (len = strlen(extra)))
+	{
+	    // Allocate extra
+	    if (!(object->bdo_device_name = AllocMemH(info->memory, len + 1)))
+	    {
+		if (object->bdo_name)
+		    FreeMemH(object->bdo_name);
+
+		FreeMemH(object);
+		return 0;
+	    }
+
+	    // Copy extra
+	    strcpy(object->bdo_device_name, extra);
+	}
 
 	// Set type
 	object->bdo_type=type;
-
-	// Any extra?
-	if (extra)
-	{
-		// Copy extra
-		object->bdo_device_name=object->bdo_name+GUI->def_filename_length+1;
-		strcpy(object->bdo_device_name,extra);
-	}
-
 	return object;
 }
 
@@ -336,6 +349,22 @@ void backdrop_remove_object(BackdropInfo *info,BackdropObject *object)
 	for (a=0;a<2;a++)
 	if (object->bdo_image_mask[a])
 			FreeVec(object->bdo_image_mask[a]);
+
+	// Free name
+	if (object->bdo_name)
+	    FreeMemH(object->bdo_name);
+
+	// Free path
+	if (object->bdo_path)
+	    FreeMemH(object->bdo_path);
+
+	// Free custom/device name
+	if (object->bdo_device_name)
+	    FreeMemH(object->bdo_device_name);
+
+	// Unlock parent lock
+	if (!(object->bdo_flags&BDOF_ICON_VIEW) && object->bdo_parent_lock)
+	    UnLock(object->bdo_parent_lock);
 
 	// Free object
 	FreeMemH(object);
@@ -405,7 +434,7 @@ void backdrop_get_icon(BackdropInfo *info,BackdropObject *object,short flags)
 
 					// Find a filetype-defined icon
 					if (object->bdo_device_name &&
-						(type=filetype_identify(object->bdo_device_name,FTTYPE_ICON,0,0)))
+						(type=filetype_identify(object->bdo_device_name,NULL,FTTYPE_ICON,0,0)))
 					{
 						// Copy icon path, strip .info
 						strcpy(name,type->icon_path);
@@ -443,12 +472,12 @@ void backdrop_get_icon(BackdropInfo *info,BackdropObject *object,short flags)
 					if (object->bdo_icon)
 					{
 #ifdef _DEBUG_ICONS
-			KPrintF("backdrop_get_icon  path: %s name: %s \n", object->bdo_path, object->bdo_name);
-			KPrintF("backdrop_get_icon  do_Gadget.Width: %ld do_Gadget.Height %ld  \n", object->bdo_icon->do_Gadget.Width, object->bdo_icon->do_Gadget.Height );
-			if (object->bdo_icon->do_Gadget.GadgetRender)
-			    KPrintF("backdrop_get_icon  do_Gadget.GadgetRender->Width: %ld do_Gadget.GadgetRender->Height %ld \n", ((struct Image *)object->bdo_icon->do_Gadget.GadgetRender)->Width, ((struct Image *)object->bdo_icon->do_Gadget.GadgetRender)->Height );
+						KPrintF("backdrop_get_icon  path: %s name: %s \n", object->bdo_path, object->bdo_name);
+						KPrintF("backdrop_get_icon  do_Gadget.Width: %ld do_Gadget.Height %ld  \n", object->bdo_icon->do_Gadget.Width, object->bdo_icon->do_Gadget.Height );
+						if (object->bdo_icon->do_Gadget.GadgetRender)
+						    KPrintF("backdrop_get_icon  do_Gadget.GadgetRender->Width: %ld do_Gadget.GadgetRender->Height %ld \n", ((struct Image *)object->bdo_icon->do_Gadget.GadgetRender)->Width, ((struct Image *)object->bdo_icon->do_Gadget.GadgetRender)->Height );
 #endif
-			// If it's a drawer icon, turn it into a disk
+						// If it's a drawer icon, turn it into a disk
 						if (object->bdo_icon->do_Type==WBDRAWER)
 							object->bdo_icon->do_Type=WBDISK;
 
@@ -528,10 +557,10 @@ void backdrop_get_icon(BackdropInfo *info,BackdropObject *object,short flags)
 					if (info->flags&BDIF_MAIN_DESKTOP &&
 						environment->env->desktop_flags&DESKTOPF_DISTINCT)
 					{
-						char path[256];
+						char *path;
 
 						// Get icon path
-						if (desktop_icon_path(object,path,256,lock))
+						if (path = desktop_icon_path(object,lock))
 						{
 							// See if position is available
 							if (desktop_find_icon(path,&object->bdo_custom_pos))
@@ -539,6 +568,8 @@ void backdrop_get_icon(BackdropInfo *info,BackdropObject *object,short flags)
 								// Set "custom position" flag
 								object->bdo_flags|=BDOF_CUSTOM_POS;
 							}
+
+							FreeMemH(path);
 						}
 					}
 #endif
@@ -1017,6 +1048,9 @@ BPTR backdrop_icon_lock(BackdropObject *object)
 
 	// Is object a disk?
 	else
+	if (object->bdo_parent_lock)
+	    lock = DupLock(object->bdo_parent_lock);
+	else
 	if (object->bdo_type==BDO_DISK &&
 		object->bdo_device_name)
 	{
@@ -1041,7 +1075,10 @@ BPTR backdrop_icon_lock(BackdropObject *object)
 
 	// Otherwise, lock parent directory
 	else
-	if (object->bdo_path) lock=Lock(object->bdo_path,ACCESS_READ);
+	if (object->bdo_path)
+	{
+	    lock=LockFromPathQuick(object->bdo_path,NULL);
+	}
 
 	// And if no parent directory, lock volume name if it's a disk
 	else

@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,11 +32,17 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofmlib.h"
+
+// When one insists on perusing a scheme that is in no way supported
+// by neither language or compiler....
+// Tried using setreg(), but the global optimizer would not have it
+// Stubbornness won, and this was created
+void __asm set_d1(register __d1 ULONG value);
 
 __asm __saveds L_StrCombine(register __a0 char *buf,
 	register __a1 char *one,
@@ -66,6 +73,130 @@ __asm __saveds L_StrConcat(register __a0 char *buf,
 	buf[lim]=0;
 	return 0;
 }
+
+
+STRPTR __asm __saveds L_JoinString(register __a0 APTR memory, register __a1 STRPTR first, register __a2 STRPTR second, register __a3 STRPTR third, register __d0 ULONG flags)
+{
+    STRPTR joined;
+    ULONG size, len[3] = {0};
+
+    if (!first || !first[0])
+	return 0;
+    else
+    {
+	if ((len[0] = strlen(first)) && flags&JSF_FS_ADDPART)
+	{
+	    if (first[len[0] - 1] != '/' && first[len[0] - 1] != ':')
+		flags |= JSF_FS_SLASH;
+	}
+    }
+    if (second)
+    {
+	if ((len[1] = strlen(second)) && flags&JSF_ST_ADDPART)
+	{
+	    if (second[len[1] - 1] != '/')
+		flags |= JSF_ST_SLASH;
+	}
+    }
+    if (third)
+    {
+	if ((len[2] = strlen(third)) && flags&JSF_E_ADDPART)
+	{
+	    if (third[len[2] - 1] != '/')
+		flags |= JSF_E_SLASH;
+	}
+    }
+
+    if ((size = len[0] + len[1] + len[2] + 1) == 1)
+	return 0;
+
+    if (flags&JSF_FS_SLASH)
+    size++;
+    if (flags&JSF_ST_SLASH)
+    size++;
+    if (flags&JSF_E_SLASH)
+    size++;
+
+    if (joined = L_AllocMemH(memory, size))
+    {
+	strcpy(joined, first);
+	if (flags&JSF_FS_SLASH)
+	    strcat(joined, "/");
+	if (len[1])
+	{
+	    strcat(joined, second);
+	    if (flags&JSF_ST_SLASH)
+		strcat(joined, "/");
+	}
+	if (len[2])
+	{
+	    strcat(joined, third);
+	}
+	if (flags&JSF_E_SLASH)
+	    strcat(joined, "/");
+
+	size--;
+	set_d1(size);
+	return joined;
+    }
+
+    return 0;
+}
+
+// Copy a string
+STRPTR __asm __saveds L_CopyString(register __a0 APTR memory, register __a1 STRPTR original)
+{
+    char *copy = 0;
+    ULONG len = 0;
+
+    if (original && (copy = L_AllocMemH(memory, (len = strlen(original))+1)))
+	strcpy(copy,original);
+
+    set_d1(len);
+    return copy;
+}
+
+
+BOOL __asm __saveds L_GetLastPathComponent(register __a0 STRPTR dest, register __a1 STRPTR path)
+{
+    STRPTR tmp = 0;
+    ULONG len, pos;
+
+    if (!dest || !path || !(len = strlen(path)))
+	return FALSE;
+
+    if (path[len - 1] == ':')
+    {
+	tmp = path;
+    }
+    else
+    {
+	pos = len;
+	if (path[len - 1] != '/')
+	pos++;
+
+
+	for (len = 0; --pos; len++)
+	{
+	    if (path[pos - 1] == ':' || path[pos - 1] == '/')
+	    {
+		tmp = path + pos;
+		break;
+	    }
+
+	}
+    }
+
+    if (tmp)
+    {
+	len++;
+	stccpy(dest, tmp, len);
+	return TRUE;
+    }
+
+    return FALSE;
+}
+
 
 ULONG __asm __saveds L_Atoh(
 	register __a0 unsigned char *buf,

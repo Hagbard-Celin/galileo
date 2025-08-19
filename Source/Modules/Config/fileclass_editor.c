@@ -394,8 +394,8 @@ void __saveds FileclassEditor(void)
 
 	// Close REXX library
 	CloseLibrary(data->rexx_base);
-    while (msg=GetMsg(data->reply_port))
-			FreeVec(msg);
+	while (msg=GetMsg(data->reply_port))
+		FreeVec(msg);
 	DeleteMsgPort(data->reply_port);
 
 	// Free data
@@ -403,6 +403,10 @@ void __saveds FileclassEditor(void)
 	Att_RemList(data->match_list,REMLIST_FREEDATA);
 	FreeFiletype(data->type);
 	FreeVec(data);
+
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }
 
 
@@ -567,7 +571,7 @@ void _fileclassed_build_recognition(fileclass_ed_data *data)
 		return;
 
 #ifdef _DEBUG_ALLOCMEMH
-    KPrintF("fileclass_editor.c:529 AllocMem: %lx \n", (data->type->recognition)-2 );
+	KPrintF("fileclass_editor.c:529 AllocMem: %lx \n", (data->type->recognition)-2 );
 #endif
 
 	// Go through nodes to build recognition string
@@ -910,13 +914,13 @@ void classed_send_rexx(fileclass_ed_data *data,char *command,short open)
 			}
 		}
 
-    // Free the result
-    if( msg->rm_Result1 == 0 && msg->rm_Result2 != NULL )
-	    DeleteArgstring( (char *) msg->rm_Result2 );
+	    // Free the result
+	    if( msg->rm_Result1 == 0 && msg->rm_Result2 != NULL )
+		    DeleteArgstring( (char *) msg->rm_Result2 );
 	}
 
-    // Clear message
-    ClearRexxMsg(msg,1);
+	// Clear message
+	ClearRexxMsg(msg,1);
 
 	// Free message
 	DeleteRexxMsg(msg);

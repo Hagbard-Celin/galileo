@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,13 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "misc_protos.h"
+#include "rexx_protos.h"
+#include "dates.h"
+#include "backdrop.h"
+#include "handler.h"
+#include "position_protos.h"
 
 
 // Load position list
@@ -58,24 +66,28 @@ void GetPositions(struct ListLock *list,APTR memory,char *name)
 	while (id=IFFNextChunk(iff,0))
 	{
 		struct Node *entry;
+		ULONG size;
 
 		// Valid chunk?
-		if (id!=ID_POSI && id!=ID_LOUT && id!=ID_ICON && id!=ID_STRT) continue;
+		if (id!=ID_POSI && id!=ID_POSR && id!=ID_LOUT && id!=ID_LFTO && id!=ID_ICON && id!=ID_STRT) continue;
+
+		size = IFFChunkSize(iff) + sizeof(struct Node);
 
 		// Allocate record
-		if (!(entry=AllocMemH(memory,IFFChunkSize(iff)+sizeof(struct Node))))
+		if (!(entry=AllocMemH(memory, size)))
 			continue;
 
 		// Read chunk data
 		IFFReadChunkBytes(iff,(APTR)(entry+1),-1);
 
 		// Set type and name pointer
-		if (id==ID_POSI)
+		if (id==ID_POSR)
 		{
 			position_rec *rec=(position_rec *)entry;
 
 			// Set type and name
 			entry->ln_Type=PTYPE_POSITION;
+			entry->ln_Pri=1;
 			entry->ln_Name=rec->name;
 
 			// Check flags
@@ -84,16 +96,37 @@ void GetPositions(struct ListLock *list,APTR memory,char *name)
 
 		}
 		else
+		if (id==ID_POSI)
+		{
+			position_rec_old *rec=(position_rec_old *)entry;
+
+			// Set type and name
+			entry->ln_Type=PTYPE_POSITION;
+			entry->ln_Name=rec->name;
+
+			// Check flags
+			if (!(rec->flags&POSITIONF_NEW_FLAG))
+				rec->flags|=POSITIONF_POSITION|POSITIONF_NEW_FLAG;
+
+		}
+		else
+		if (id==ID_LFTO)
+		{
+			entry->ln_Type=PTYPE_LEFTOUT;
+			entry->ln_Pri=1;
+			entry->ln_Name=((leftout_record *)entry)->name;
+		}
+		else
 		if (id==ID_LOUT)
 		{
 			entry->ln_Type=PTYPE_LEFTOUT;
-			entry->ln_Name=((leftout_record *)entry)->name;
+			entry->ln_Name=((leftout_record_old *)entry)->name;
 		}
 		else
 		if (id==ID_ICON)
 		{
 			entry->ln_Type=PTYPE_APPICON;
-			entry->ln_Name=((leftout_record *)entry)->name;
+			entry->ln_Name=((appicon_record *)entry)->name;
 		}
 
 		// Add to list
@@ -126,27 +159,49 @@ void SavePositions(struct List *list,char *name)
 			node->ln_Type==PTYPE_APPICON)
 		{
 			ULONG id=0;
-			short size=0;
+			ULONG size=0;
 
 			// Position?
 			if (node->ln_Type==PTYPE_POSITION)
 			{
+			    if (node->ln_Pri == 1)
+			    {
 				// Skip temporaries
 				if (((position_rec *)node)->flags&POSITIONF_TEMP)
 					continue;
 
 				// Get id and chunk size
-				id=ID_POSI;
+				id=ID_POSR;
 				size=sizeof(position_rec)-sizeof(struct Node);
+			    }
+			    else
+			    {
+				// Skip temporaries
+				if (((position_rec_old *)node)->flags&POSITIONF_TEMP)
+					continue;
+
+				// Get id and chunk size
+				id=ID_POSI;
+				size=sizeof(position_rec_old)-sizeof(struct Node);
+			    }
 			}
 
 			// Left-out?
 			else
 			if (node->ln_Type==PTYPE_LEFTOUT)
 			{
+			    if (node->ln_Pri == 1)
+			    {
+				// Get id and chunk size
+				id=ID_LFTO;
+				size=sizeof(leftout_record)-sizeof(struct Node);
+			    }
+			    else
+			    {
 				// Get id and chunk size
 				id=ID_LOUT;
-				size=sizeof(leftout_record)-sizeof(struct Node);
+				size=sizeof(leftout_record_old)-sizeof(struct Node);
+			    }
 			}
 
 			// AppIcon?
@@ -155,7 +210,7 @@ void SavePositions(struct List *list,char *name)
 			{
 				// Get id and chunk size
 				id=ID_ICON;
-				size=sizeof(leftout_record)-sizeof(struct Node);
+				size=sizeof(appicon_record)-sizeof(struct Node);
 			}
 
 			// Write chunk
@@ -175,6 +230,7 @@ void SavePositions(struct List *list,char *name)
 // Get the position for a lister
 position_rec *GetListerPosition(
 	char *path,
+	struct DateStamp *volumedate,
 	char *device,
 	struct DiskObject *icon,
 	struct IBox *position,
@@ -236,7 +292,30 @@ position_rec *GetListerPosition(
 	while (entry=FindNameI(search,path))
 	{
 		// Position info?
-		if (entry->ln_Type==PTYPE_POSITION) break;
+		if (entry->ln_Type==PTYPE_POSITION)
+		{
+		    if ((((position_rec *)entry)->type == PPTYPE_NODISKID) ||
+			(((position_rec *)entry)->type == PPTYPE_DISKID &&
+			!memcmp(&((position_rec *)entry)->vol_date, volumedate, sizeof(struct DateStamp))))
+		    {
+			break;
+		    }
+
+		    if (((position_rec *)entry)->type == PPTYPE_NEEDDATE)
+		    {
+			if (volumedate && (volumedate->ds_Days || volumedate->ds_Minute || volumedate->ds_Tick))
+			{
+			    ((position_rec *)entry)->vol_date = *volumedate;
+			    ((position_rec *)entry)->type = PPTYPE_DISKID;
+			}
+			else
+			    ((position_rec *)entry)->type = PPTYPE_NODISKID;
+
+			// Save list
+			SavePositions(&GUI->positions.list,GUI->position_name);
+			break;
+		    }
+		}
 		search=(struct List *)entry;
 	}
 
@@ -247,9 +326,21 @@ position_rec *GetListerPosition(
 		search=(struct List *)&GUI->positions;
 		while (entry=FindNameI(search,device))
 		{
-			// Position info?
-			if (entry->ln_Type==PTYPE_POSITION) break;
-			search=(struct List *)entry;
+		    // Position info?
+		    if (entry->ln_Type==PTYPE_POSITION)
+		    {
+		        if (((position_rec *)entry)->type == PPTYPE_NEEDDATE)
+			{
+			    ((position_rec *)entry)->type = PPTYPE_DEVICE;
+
+			    // Save list
+			    SavePositions(&GUI->positions.list,GUI->position_name);
+			}
+
+		        if (((position_rec *)entry)->type == PPTYPE_DEVICE)
+			    break;
+		    }
+		    search=(struct List *)entry;
 		}
 	}
 
@@ -399,12 +490,13 @@ position_rec *PositionUpdate(Lister *lister,short flags)
 	struct List *search;
 	struct Node *entry;
 	struct DiskObject *icon=0;
-	char icon_path[512];
+	char *icon_name = 0;
 	BOOL new=0,disk_flag=0;
+	BPTR icon_parent = 0;
 
     // Fake dirs can not make use of this
     if (lister->more_flags&LISTERF_FAKEDIR)
-        return 0;
+	return 0;
 
 	// Just update position, in workbench icon mode?
 	if (flags==0 && environment->env->display_options&DISPOPTF_ICON_POS && lister && lister->backdrop)
@@ -521,6 +613,13 @@ position_rec *PositionUpdate(Lister *lister,short flags)
 		// Custom handler?
 		if (lister->cur_buffer->buf_CustomHandler[0])
 		{
+		    if (*(ULONG *)lister->cur_buffer->buf_CustomHandler == CUSTH_TYPE_GFMMODULE)
+			galileo_handler_msg(0, "snapshot",
+					    0, lister,
+					    0, 0, 0, 0,
+					    0,
+					    0, 0);
+		    else
 			// Send SnapShot message
 			rexx_handler_msg(
 				0,
@@ -534,7 +633,7 @@ position_rec *PositionUpdate(Lister *lister,short flags)
 	}
 
 	// Invalid path?
-	if (!lister->cur_buffer->buf_ExpandedPath[0] ||
+	if (!lister->cur_buffer->buf_ExpandedPath || !lister->cur_buffer->buf_ExpandedPath[0] ||
 		!(lister->cur_buffer->flags&DWF_VALID)) return 0;
 
 	// Lock list
@@ -543,30 +642,38 @@ position_rec *PositionUpdate(Lister *lister,short flags)
 	// Use Workbench icon positions? 
 	if (environment->env->display_options&DISPOPTF_ICON_POS && !(flags&POSUPF_FORMAT))
 	{
-		char *ptr;
+	    BPTR old;
 
-		// Get lister path, strip trailing '/' character
-		strcpy(icon_path,lister->cur_buffer->buf_Path);
-		if (*(ptr=icon_path+strlen(icon_path)-1)=='/') *ptr=0;
+	    if (lister->cur_buffer->flags&DWF_ROOT)
+	    {
+		icon_name = "Disk";
+		icon_parent = DupLock(lister->cur_buffer->buf_Lock);
+		disk_flag = 1;
+	    }
+	    else
+	    {
+		icon_name = lister->cur_buffer->buf_ObjectName;
+		icon_parent = ParentDir(lister->cur_buffer->buf_Lock);
+	    }
 
-		// Disk?
-		if (*ptr==':')
-		{
-			strcat(ptr,"Disk");
-			disk_flag=1;
-		}
+	    old = CurrentDir(icon_parent);
 
-		// Try to get icon
-		if (icon=GetDiskObject(icon_path))
-		{
-			// No drawer info?
-			if (!icon->do_DrawerData)
-			{
-				// Can't use icon
-				FreeDiskObject(icon);
-				icon=0;
-			}
-		}
+	    // Try to get icon
+	    if (icon=GetDiskObject(icon_name))
+	    {
+		    // No drawer info?
+		    if (!icon->do_DrawerData)
+		    {
+			    // Can't use icon
+			    FreeDiskObject(icon);
+			    icon=0;
+		    }
+	    }
+
+	    CurrentDir(old);
+
+	    if (!icon)
+		UnLock(icon_parent);
 	}
 
 	// Store in position-info if no icon
@@ -577,7 +684,23 @@ position_rec *PositionUpdate(Lister *lister,short flags)
 		while (entry=FindNameI(search,lister->cur_buffer->buf_ExpandedPath))
 		{
 			// Is this a position record?	
-			if (entry->ln_Type==PTYPE_POSITION) break;
+			if (entry->ln_Type==PTYPE_POSITION)
+			{
+			    struct DateStamp *volumedate;
+
+			    volumedate = &lister->cur_buffer->buf_VolumeDate;
+			    if (volumedate->ds_Days || volumedate->ds_Minute || volumedate->ds_Tick)
+			    {
+				if (((position_rec *)entry)->type == PPTYPE_DISKID &&
+				    !memcmp(&((position_rec *)entry)->vol_date, volumedate, sizeof(struct DateStamp)))
+				{
+				    break;
+				}
+			    }
+			    else
+			    if (((position_rec *)entry)->type == PPTYPE_NODISKID)
+				break;
+			}
 			search=(struct List *)entry;
 		}
 
@@ -698,6 +821,7 @@ position_rec *PositionUpdate(Lister *lister,short flags)
 		if (icon)
 		{
 			struct IBox *dims;
+			BPTR old;
 
 			// Get position
 			if (pos)
@@ -740,8 +864,12 @@ position_rec *PositionUpdate(Lister *lister,short flags)
 			icon->do_DrawerData->dd_CurrentX=lister->backdrop_info->offset_x-lister->backdrop_info->area.MinX;
 			icon->do_DrawerData->dd_CurrentY=lister->backdrop_info->offset_y-lister->backdrop_info->area.MinY;
 
+			old = CurrentDir(icon_parent);
+
 			// Save icon
-			PutDiskObject(icon_path,icon);
+			PutDiskObject(icon_name,icon);
+
+			UnLock(CurrentDir(old));
 
 			// If it was a disk, signal to update datestamp so we don't reread
 			if (disk_flag) IPC_Command(lister->ipc,LISTER_UPDATE_STAMP,0,0,0,0);
@@ -778,6 +906,13 @@ void PositionRemove(Lister *lister,BOOL save)
 		// Custom handler?
 		if (lister->cur_buffer->buf_CustomHandler[0])
 		{
+		    if (*(ULONG *)lister->cur_buffer->buf_CustomHandler == CUSTH_TYPE_GFMMODULE)
+			galileo_handler_msg(0, "unsnapshot",
+					    0, lister,
+					    0, 0, 0, 0,
+					    0,
+					    0, 0);
+		    else
 			// Send SnapShot message
 			rexx_handler_msg(
 				0,
@@ -786,7 +921,8 @@ void PositionRemove(Lister *lister,BOOL save)
 				HA_String,0,"unsnapshot",
 				HA_Value,1,lister,
 				TAG_END);
-			return;
+		    
+		    return;
 		}
 	}
 
@@ -802,7 +938,23 @@ void PositionRemove(Lister *lister,BOOL save)
 	while (entry=(position_rec *)FindNameI(search,lister->cur_buffer->buf_ExpandedPath))
 	{
 		// Is this a position record?	
-		if (entry->node.ln_Type==PTYPE_POSITION) break;
+		if (entry->node.ln_Type==PTYPE_POSITION)
+		{
+		    struct DateStamp *volumedate;
+
+		    volumedate = &lister->cur_buffer->buf_VolumeDate;
+		    if (volumedate->ds_Days || volumedate->ds_Minute || volumedate->ds_Tick)
+		    {
+			if (((position_rec *)entry)->type == PPTYPE_DISKID &&
+			    !memcmp(&((position_rec *)entry)->vol_date, volumedate, sizeof(struct DateStamp)))
+			{
+			    break;
+			}
+		    }
+		    else
+		    if (((position_rec *)entry)->type == PPTYPE_NODISKID)
+			break;
+		}
 		search=(struct List *)entry;
 	}
 
@@ -836,7 +988,6 @@ void PositionRemove(Lister *lister,BOOL save)
 void CopyPositions(struct ListLock *source,struct List *dest,APTR memory)
 {
 	struct Node *node,*new;
-	short size;
 
 	// Lock list
 	lock_listlock(source,FALSE);
@@ -847,21 +998,61 @@ void CopyPositions(struct ListLock *source,struct List *dest,APTR memory)
 	// Go through position list
 	for (node=source->list.lh_Head;node->ln_Succ;node=node->ln_Succ)
 	{
-		// Position?
-		if (node->ln_Type==PTYPE_POSITION) size=sizeof(position_rec);
+		ULONG size = 0;
 
-		// Leftout
-		else size=sizeof(leftout_record);
+		// Position?
+		if (node->ln_Type==PTYPE_POSITION)
+		{
+		    if (node->ln_Pri == 1)
+			size=sizeof(position_rec);
+		    else
+			size=sizeof(position_rec_old);
+		}
+		// Left-out?
+		else
+		if (node->ln_Type==PTYPE_LEFTOUT)
+		{
+		    if (node->ln_Pri == 1)
+			size=sizeof(leftout_record);
+		    else
+			size=sizeof(leftout_record_old);
+		}
+
+		// AppIcon?
+		else
+		if (node->ln_Type==PTYPE_APPICON)
+		    size=sizeof(appicon_record);
+		
+		if (!size)
+		    continue;
+
+		size += strlen(node->ln_Name);
 
 		// Allocate copy
-		if (new=AllocMemH(memory,size+256))
+		if (new=AllocMemH(memory,size))
 		{
 			// Copy data across
 			CopyMem((char *)node,(char *)new,size);
 
 			// Set name pointer
-			if (node->ln_Type==PTYPE_POSITION) new->ln_Name=((position_rec *)new)->name;
-			else new->ln_Name=((leftout_record *)new)->name;
+			if (node->ln_Type==PTYPE_POSITION)
+			{
+			    if (node->ln_Pri == 1)
+				new->ln_Name=((position_rec *)new)->name;
+			    else
+				new->ln_Name=((position_rec_old *)new)->name;
+			}
+			else
+			if (node->ln_Type==PTYPE_LEFTOUT)
+			{
+			    if (node->ln_Pri == 1)
+				new->ln_Name=((leftout_record *)new)->name;
+			    else
+				new->ln_Name=((leftout_record_old *)new)->name;
+			}
+			else
+			if (node->ln_Type==PTYPE_APPICON)
+			    new->ln_Name=((appicon_record *)new)->name;
 
 			// Copy name
 			strcpy(new->ln_Name,node->ln_Name);

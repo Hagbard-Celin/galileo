@@ -43,13 +43,14 @@ Class *init_class(
 	struct LibData *data,
 	char *name,
 	char *super,
+	struct IClass *super_pointer,
 	unsigned long (*dispatcher)(),
 	long data_size)
 {
 	Class *cl;
 
 	// Create class
-	if (cl=MakeClass(name,super,0,data_size,0))
+	if (cl=MakeClass(name,super,super_pointer,data_size,0))
 	{
 		// Initialise
 		cl->cl_Dispatcher.h_Entry=dispatcher;

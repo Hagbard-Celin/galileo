@@ -36,6 +36,18 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "dirlist_protos.h"
+#include "misc_protos.h"
+#include "buffers_protos.h"
+#include "dates.h"
+#include "rexx_protos.h"
+#include "graphics.h"
+#include "file_select.h"
+#include "clock_task.h"
+#include "envoy.h"
+#include "handler.h"
+#include "lsprintf_protos.h"
 #include <libraries/multiuser.h>
 #include <proto/multiuser.h>
 
@@ -71,6 +83,7 @@ void lister_end_edit(Lister *lister,short flags)
 		long line;
 		BOOL change=0;
 		char *command=0;
+		ULONG gfm_command = 0;
 
 		// Has entry not changed?
 		if (strcmp(lister->edit_ptr,lister->edit_old_ptr)==0)
@@ -109,6 +122,7 @@ void lister_end_edit(Lister *lister,short flags)
 						{
 							// Get command
 							command="name";
+							gfm_command = GHMEDITCMD_NAME;
 							strcpy(UNDO,lister->edit_ptr);
 						}
 
@@ -147,6 +161,7 @@ void lister_end_edit(Lister *lister,short flags)
 					{
 						// Get command
 						command=(lister->edit_type==DISPLAY_OWNER)?"owner":"group";
+						gfm_command = (lister->edit_type==DISPLAY_OWNER)?GHMEDITCMD_OWNER:GHMEDITCMD_GROUP;
 						strcpy(UNDO,lister->edit_ptr);
 					}
 
@@ -394,6 +409,7 @@ void lister_end_edit(Lister *lister,short flags)
 					{
 						// Get command
 						command=(lister->edit_type==DISPLAY_NETPROT)?"netprot":"protect";
+						gfm_command = (lister->edit_type==DISPLAY_NETPROT)?GHMEDITCMD_NETPROT:GHMEDITCMD_PROTECT;
 						strcpy(UNDO,lister->edit_ptr);
 					}
 
@@ -455,6 +471,7 @@ void lister_end_edit(Lister *lister,short flags)
 					{
 						// Get command
 						command="date";
+						gfm_command = GHMEDITCMD_DATE;
 						strcpy(UNDO,lister->edit_ptr);
 					}
 
@@ -503,6 +520,7 @@ void lister_end_edit(Lister *lister,short flags)
 					{
 						// Get command
 						command="comment";
+						gfm_command = GHMEDITCMD_COMMENT;
 						strcpy(UNDO,lister->edit_ptr);
 					}
 
@@ -566,6 +584,13 @@ void lister_end_edit(Lister *lister,short flags)
 			// Got a command to send to a custom handler
 			if (command)
 			{
+			    if (*(ULONG *)lister->cur_buffer->buf_CustomHandler == CUSTH_TYPE_GFMMODULE)
+				galileo_handler_msg(0, "edit",
+						    lister->edit_entry, lister,
+						    0, 0, UNDO, 0,
+						    gfm_command,
+						    0, 0);
+			    else
 				// Send the message
 				rexx_handler_msg(
 					0,

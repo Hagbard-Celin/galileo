@@ -1,47 +1,64 @@
 Module changes:
 
-   C module filename extention is changed from ".module" to ".gfmmodule"
+ - C module filename extention is changed from ".module" to ".gfmmodule"
 
 
-   The prefix for callbacks is changed to from dc_ to gc_ for GaileoCallback.
+ - The prefix for callbacks is changed to from dc_ to gc_ for GaileoCallback.
 
 
-   Some previously undocumented callbacks are now documented, and some new
-ones added. See "SDK/docs/hooks.doc".
+ - Some previously undocumented callbacks are now documented, and some new
+   ones added. See "SDK/docs/hooks.doc".
 
 
-   Commands from gfmmodules now detach if the user selects "Run
-Asynchronously" in the Function Editor.
+ - Commands from gfmmodules now detach if the user selects "Run
+   Asynchronously" in the Function Editor.
 
-The following macro will return TRUE if the module was started asynchronously:
+   The following macro will return TRUE if the module was started
+   asynchronously:
 
-FUNCASYNC(ipc);
+   FUNCASYNC(ipc);
 
-This was mainly implemented to support modules that need source entries, but
-might outlive the closing of the source lister, or want to take it over completely.
-To make this work you have to take care of one more thing. As soon as you are
-finished with collecting entries from the source lister you must deallocate the
-FunctionHandle in you got with you "IPCData *ipc" (the one you reference with
-"IPCDATA(ipc)"). This is done like this:
+   This was mainly implemented to support modules that need source entries,
+   but might outlive the closing of the source lister, or want to take it
+   over completely.
+   To make this work you have to take care of one more thing. As soon as you
+   are finished with collecting entries from the source lister you must
+   deallocate the FunctionHandle in you got with you "IPCData *ipc" (the one
+   you reference with "IPCDATA(ipc)"). This is done like this:
 
-gc_FreePointerDirect(IPCDATA(ipc),GETPTR_HANDLE,GETPTRF_DELPORT);
+   gc_FreePointerDirect(IPCDATA(ipc),GETPTR_HANDLE,GETPTRF_DELPORT);
 
-Hooks, callbacks or AREXX commands that require the FunctionHandle CAN NOT be used
-after this call. And dc_RexxCommand MUST be used in place of gc_SendCommand even if
-it appears before this call.
+   Hooks, callbacks or AREXX commands that require the FunctionHandle CAN NOT
+   be used after this call. And dc_RexxCommand MUST be used in place of
+   gc_SendCommand even if it appears before this call.
 
-If you don't want to support running asynchronously. Or are porting a .module to
-.gfmmodule and just want it to work as before. You will have to add FUNCF_SYNC
-to your command flags in in you function definition(s). The effect of the
-"Run Asynchronously" setting will then be as before this change.
-
+   If you don't want to support running asynchronously. Or are porting a
+   .module to .gfmmodule and just want it to work as before. You will have to
+   add FUNCF_SYNC to your command flags in in you function definition(s). The
+   effect of the "Run Asynchronously" setting will then be as before this
+   change.
 
    
-   The original packet-based callbacks (from now "legacy callbacks") has been
-removed and replaced with the direct hook callbacks (from now "callbacks").
+ - The original packet-based callbacks (from now "legacy callbacks") has been
+   removed and replaced with the direct hook callbacks (from now "callbacks").
 
-Module_Entry() now gets a pointer to the GalileoCallbackInfo structure in
-place of the func_callback() pointer.
+   Module_Entry() now gets a pointer to the GalileoCallbackInfo structure in
+   place of the func_callback() pointer.
 
-HOOKCMD_GET_CALLBACKS is changed to fill in a pointer to GalileoCallbackInfo
-as opposed to the structure itself.
+   HOOKCMD_GET_CALLBACKS is changed to fill in a pointer to
+   GalileoCallbackInfo as opposed to the structure itself.
+
+
+ - The argument of the gc_GetWindow() callback is changed from a path handle as
+   returned by gc_GetSource() to a lister pointer as returned from
+   gc_GetLister().
+
+
+ - The callbacks gc_AddFile(), gc_DelFile(), and gc_LoadFile() got an
+   additional 'lock' argument. And some callbacks have changed return-type.
+   See docs/module.doc in the SDK.
+
+
+ - The type of the "lister" argument in callbacks is changed from ULONG to
+   APTR.
+

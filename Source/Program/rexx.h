@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2023 Hagbard Celine
+Copyright 2023,2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -32,12 +32,14 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #ifndef _GALILEOFM_REXX
 #define _GALILEOFM_REXX
+
+#include "function_launch.h"
 
 #define RXERRORIMGONE	100	// Error to indicate shutting down
 #define RXERRORNOCMD	30	// Error to indicate invalid command
@@ -229,7 +231,10 @@ enum
 	RXCMD_MATCHDESKTOP,
 	RXCMD_VALUE,
 	RXCMD_COMMENTLENGTH,
-    RXCMD_SOURCEDESTLOCK,
+	RXCMD_SOURCEDESTLOCK,
+	RXCMD_ASSIGN,
+	RXCMD_GET,
+	RXCMD_FREE
 };
 
 enum
@@ -355,58 +360,6 @@ enum
 	READCOM_READ,
 };
 
-void __saveds rexx_proc(void);
-ULONG __asm __saveds rexx_init(register __a0 IPCData *ipc,register __a1 ULONG *foo);
-BOOL rexx_process_msg(struct RexxMsg *,struct MsgPort *,long *);
-void rexx_set_return(struct RexxMsg *msg,long rc,char *result);
-RexxReader *rexx_read_file(short,char *,struct RexxMsg *);
-void rexx_goodbye_reader(IPCData *ipc);
-void rexx_reply_msg(struct RexxMsg *rmsg);
-
-void rexx_lister_new(struct RexxMsg *msg,char *args);
-BOOL rexx_lister_cmd(struct RexxMsg *msg,short command,char *args);
-void rexx_lister_file_return(struct RexxMsg *msg,DirBuffer *,short id,char,short,char *);
-void rexx_lister_entry_info(struct RexxMsg *msg,DirBuffer *buffer,char *args,short,char *);
-void rexx_lister_get_current(struct RexxMsg *,short,short,char *);
-void rexx_query_format(short id,ListFormat *format,char *result);
-long rexx_set_format(short command,short id,ListFormat *format,char *args);
-
-BOOL rexx_galileo_cmd(struct RexxMsg *,short,char *);
-
-void rexx_custom_app_msg(struct _GalileoAppMessage *msg,DirBuffer *buffer,char *action,Lister *,char *,unsigned short);
-char *rexx_build_filestring(struct _GalileoAppMessage *,ULONG *,ULONG);
-short rexx_lister_add_file(Lister *lister,char *args,struct RexxMsg *);
-DirEntry *rexx_lister_get_file(DirBuffer *buffer,char **args);
-short rexx_lister_remove_file(Lister *lister,char *args);
-short rexx_lister_select_file(Lister *lister,char *args,char *result);
-
-short rexx_get_command(char **commandptr);
-void rexx_skip_space(char **command);
-void rexx_skip_space_reverse(char **command,char *);
-long rexx_parse_number(char **ptr,BOOL,long);
-BOOL rexx_parse_number_byte(char **,UBYTE *);
-short rexx_parse_word(char **ptr,char *buffer,short bufferlen);
-short rexx_match_keyword(char **ptr,char **keys,long *);
-BOOL rexx_lister_valid(Lister *lister);
-void rexx_set_var(struct RexxMsg *,char *,char *,ULONG,short);
-BOOL rexx_get_var(struct RexxMsg *,char *,char *,char *,short);
-
-short AddFunctionTrap(char *,char *,char *);
-short RemFunctionTrap(char *,char *);
-BOOL FindFunctionTrap(char *,char *,char *);
-APTR LockTrapList(void);
-void UnlockTrapList(void);
-APTR FindTrapEntry(APTR,char  *,char *);
-
-long rexx_add_appicon(char *,struct RexxMsg *);
-void rexx_rem_appthing(char *,short);
-void rexx_handle_appmsg(struct AppMessage *msg);
-BOOL rexx_send_appmsg(RexxAppThing *,short,struct AppMessage *);
-
-long rexx_lister_newprogress(Lister *lister,char *args,long *);
-
-void rexx_set_lister_mode(Lister *lister,char *args);
-void rexx_send_command(char *command,BOOL);
 
 #define HA_String	0x01
 #define HA_Value	0x02
@@ -419,18 +372,7 @@ typedef struct
 	ULONG	ha_Data;
 } HandlerArg;
 
-short rexx_handler_msg(
-	char *handler,
-	DirBuffer *buffer,
-	short flags,
-	ULONG args,...);
-short __stdargs rexx_handler_msg_args(
-	char *handler,
-	DirBuffer *buffer,
-	short flags,
-	HandlerArg *args);
 
-long rexx_set_appicon(char *str,struct RexxMsg *msg);
 
 typedef struct
 {
@@ -439,7 +381,6 @@ typedef struct
 	IPCMessage	*ipc_msg;
 } RexxMsgTracker;
 
-BOOL rexx_send_msg(struct MinList *list,IPCMessage **imsg,struct MsgPort *port);
 
 typedef struct
 {
@@ -447,20 +388,6 @@ typedef struct
 	struct RexxMsg	*rx_msg;
 } RexxDespatch;
 
-BOOL rexx_send_rxmsg(IPCMessage *imsg,struct MsgPort *rxport);
-BOOL rexx_send_rxmsg_args(RexxDespatch *desp,ULONG flags,struct MsgPort *rxport);
-
-short rexx_lister_reload_file(Lister *,char *);
-
-// dos notify
-void handle_dos_notify(GalileoNotify *,FunctionHandle *);
-
-void rexx_add_cmd(char *args);
-BOOL rexx_lister_movement(Lister *lister,char *args);
-void rexx_add_cmd_type(Att_List *list,char *type);
-
-
-void rexx_remap_icons(BOOL);
 
 enum
 {
@@ -476,9 +403,5 @@ enum
 };
 
 #define IEQUALIFIER_SUBDROP	0x400
-
-void rexx_galileo_get_pen(char **,UBYTE *);
-short rexx_galileo_map_pen(short);
-void rexx_send_reset(ULONG,ULONG);
 
 #endif

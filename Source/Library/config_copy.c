@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -39,7 +39,6 @@ For more information on Directory Opus for Windows please see:
 #include "config.h"
 #include "/Program/galileo_config.h"
 
-char *copy_string(APTR,char *);
 
 // Copy a button bank
 Cfg_ButtonBank *__asm __saveds L_CopyButtonBank(register __a0 Cfg_ButtonBank *orig)
@@ -174,13 +173,13 @@ Cfg_Filetype *__asm __saveds L_CopyFiletype(
 		type->type=orig->type;
 
 		// Copy recognition string and icon path
-		type->recognition=copy_string(memory,orig->recognition);
-		type->icon_path=copy_string(memory,orig->icon_path);
+		type->recognition=L_CopyString(memory,orig->recognition);
+		type->icon_path=L_CopyString(memory,orig->icon_path);
 
 		// Copy action strings
 		if (orig->actions && type->actions)
 			for (a=0;a<16;a++)
-				type->actions[a]=copy_string(memory,orig->actions[a]);
+				type->actions[a]=L_CopyString(memory,orig->actions[a]);
 
 		// Copy function list
 		for (function=(Cfg_Function *)orig->function_list.lh_Head;
@@ -230,13 +229,6 @@ Cfg_Function *__asm __saveds L_CopyFunction(
 	// Allocate a new function
 	else
     {
-#ifdef _DEBUG_ALLOCMEMH
-        if (!memory)
-        {
-            volatile char *a = 0;
-        	*a = 0;
-        }
-#endif
 		if (!(function=L_NewFunction(memory,0)))
 			return 0;
     }
@@ -251,15 +243,8 @@ Cfg_Function *__asm __saveds L_CopyFunction(
 		Cfg_Instruction *copy;
 
 		// Allocate a new instruction
-#ifdef _DEBUG_ALLOCMEMH
-        if (!memory)
-        {
-            volatile char *a = 0;
-        	*a = 0;
-        }
-#endif
 		if (!(copy=L_AllocMemH(memory,sizeof(Cfg_Instruction))) ||
-			!(copy->string=copy_string(memory,instruction->string)))
+			!(copy->string=L_CopyString(memory,instruction->string)))
 		{
 			L_FreeMemH(copy);
 			break;
@@ -291,10 +276,10 @@ Cfg_ButtonFunction *__asm __saveds L_CopyButtonFunction(
 	register __a2 Cfg_ButtonFunction *newfunc)
 {
 	// Copy name
-	newfunc->node.ln_Name=copy_string(memory,func->node.ln_Name);
+	newfunc->node.ln_Name=L_CopyString(memory,func->node.ln_Name);
 
 	// Copy label
-	newfunc->label=copy_string(memory,func->label);
+	newfunc->label=L_CopyString(memory,func->label);
 
 	// Does original function have an image?
 	if (func->image)

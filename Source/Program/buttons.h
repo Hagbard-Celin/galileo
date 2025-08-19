@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -96,7 +97,8 @@ typedef struct ButtonWindow
 
 	struct Requester	busy_req;		// Busy requester
 
-	char			buttons_file[256];	// File to open from
+	char			*buttons_file;		// File to open from
+	BPTR			buttons_parent_lock;	// Dir to open from
 
 	IPCData			*editor;		// Editor pointer
 	short			editor_sel_row;		// Selected row
@@ -200,85 +202,12 @@ typedef struct
 
 extern MenuData button_toolbar_menu[];
 
-// protos
-Buttons *buttons_new(char *,Cfg_ButtonBank *,struct IBox *,short,ULONG);
-ULONG buttons_command(Buttons *,ULONG,ULONG,APTR,APTR,struct MsgPort *);
-void buttons_update(Buttons *buttons);
-void buttons_get_font(Buttons *buttons);
-BOOL buttons_iconify(Buttons *buttons);
-
-void __saveds buttons_code(void);
-ULONG __asm __saveds buttons_init(register __a0 IPCData *,register __a1 Buttons *);
-void buttons_cleanup(Buttons *,BOOL);
-BOOL buttons_open(Buttons *,struct Screen *,short);
-void buttons_close(Buttons *,short);
-void buttons_refresh(Buttons *,ULONG);
-buttons_process_msg(Buttons *,struct IntuiMessage *);
-void buttons_busy(Buttons *);
-void buttons_unbusy(Buttons *);
-
-short buttons_draw_border(Buttons *,Cfg_Button *,short,short,short,short,struct RastPort *);
-void buttons_get_rect(Buttons *buttons,int x,int y,struct Rectangle *rect);
-void buttons_redraw_button(Buttons *buttons,Cfg_Button *button);
-short buttons_draw_button(Buttons *,Cfg_Button *,short,short,short,short,struct RastPort *);
-Cfg_Button *button_from_point(Buttons *,WORD *,WORD *);
-Cfg_Button *button_from_pos(Buttons *buttons,short col,short row);
-BOOL buttons_pos(Buttons *buttons,Cfg_Button *button,short *col,short *row);
-Cfg_Function *button_valid(Cfg_Button *button,short which);
-void buttons_show_highlight(Buttons *buttons);
-void buttons_stop_highlight(Buttons *buttons);
-
-Cfg_ButtonFunction *button_find_function(Cfg_Button *button,short which,APTR *);
-void buttons_run_button(Buttons *,Cfg_Button *,short);
-BOOL buttons_app_message(Buttons *,struct _GalileoAppMessage *msg);
-
-buttons_save(Buttons *buttons,char *name);
-void buttons_saveas(Buttons *buttons);
-buttons_load(Buttons *buttons,struct Screen *screen,char *);
-int buttons_check_change(Buttons *buttons,BOOL);
-
-void buttons_edit_key(Buttons *buttons,UWORD code,UWORD qual);
-BOOL buttons_visible_select(Buttons *buttons);
-void buttons_start_drag(Buttons *,short,short,short,short);
-void buttons_show_drag(Buttons *,short,short);
-void buttons_stop_drag(Buttons *,short,short);
-void buttons_edit(IPCData *my_ipc,buttons_edit_packet *);
-BOOL buttons_edit_bank(Buttons *buttons,short col,short row,Cfg_Button *,struct AppMessage *,short);
-
-
-short buttons_get_max_size(Buttons *,unsigned short *,unsigned short *);
-void buttons_highlight_button(Buttons *buttons,short state,short);
-void buttons_show_button(Buttons *,Cfg_Button *,short,short,short,struct RastPort *);
-
-void buttons_do_popup(Buttons *,UWORD);
-BOOL buttons_button_popup(Buttons *,UWORD);
-
-int buttons_do_function(Buttons *buttons,ULONG func);
-void buttons_new_bank(Buttons *buttons,short func,Cfg_ButtonBank *);
-
-buttons_request_file(Buttons *,char *,char *,char *,ULONG);
-
-void __asm buttons_refresh_callback(
-	register __d0 ULONG type,
-	register __a0 struct Window *window,
-	register __a1 Buttons *buttons);
-
-void buttons_edit_save(ULONG id);
-void buttons_edit_defaults(ULONG id);
-
-BOOL buttons_fix_drag(Buttons *buttons);
-void buttons_fix_internal(Buttons *buttons);
-
-void buttons_remap(Buttons *buttons,short remap);
 
 #define BUTCLOSEF_SCRIPT	(1<<0)
 #define BUTCLOSEF_NO_REMAP	(1<<1)
 
 #define BUTOPENF_REMAP		(1<<0)
 
-void buttons_update_icon(Buttons *buttons);
-
-UWORD button_border_popup(Buttons *buttons);
 
 #define DRAG_WIDTH	8
 #define DRAG_HI_HEIGHT	8

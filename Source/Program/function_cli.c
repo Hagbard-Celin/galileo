@@ -36,6 +36,12 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
+#include "misc_protos.h"
+#include "function_protos.h"
+#include "rexx_protos.h"
+#include "commands.h"
+#include "lsprintf_protos.h"
 #include "eliza.h"
 
 typedef struct
@@ -415,6 +421,7 @@ GALILEOFM_FUNC(function_cli)
 								0,0,
 								0,0,
 								0,0,
+								0,0,
 								0,
 								(wait_reply)?&reply_msg:0,0);
 
@@ -438,10 +445,14 @@ GALILEOFM_FUNC(function_cli)
 							handle->func_work_buf,
 							(struct Screen *)-1,
 							0,
+#ifdef RESOURCE_TRACKING
+							NRT_Open("console:",MODE_OLDFILE),
+#else
 							Open("console:",MODE_OLDFILE),
+#endif
 							0,
 							wait_reply|LAUNCHF_USE_STACK,
-							environment->env->default_stack);
+							environment->env->default_stack, NULL);
 					}
 				}
 

@@ -194,7 +194,7 @@ __asm __saveds L_DoSimpleRequest(
 						else
 						if (gadgetid==GAD_POPUP_ID)
 						{
-							char buf[400],file[40],*ptr;
+							char buf[400],file[108],*ptr;
 							struct TagItem tags[4];
 
 							// Get initial path and file

@@ -3,7 +3,7 @@
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
 Copyright 2012 Roman Kargin <kas1e@yandex.ru>
-Copyright 2023 Hagbard Celine
+Copyright 2023,2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -38,13 +38,19 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
+#include "misc_protos.h"
+#include "lister_protos.h"
+#include "app_msg_protos.h"
+#include "menu_data.h"
+#include "filetypes.h"
 
 BOOL function_launch_quick(
 	ULONG command,
 	Cfg_Function *function,
 	Lister *source_list)
 {
-	return function_launch(command,function,0,0,source_list,0,0,0,0,0,0);
+	return function_launch(command,function,0,0,source_list,0,0,0,0,0,0,0,0);
 }
 
 // Launches a function process
@@ -57,12 +63,17 @@ BOOL function_launch(
 	Lister *dest_list,
 	char *source_path,
 	char *dest_path,
+	BPTR source_lock,
+	BPTR dest_lock,
 	struct ArgArray *args,
 	struct Message *done_msg,
 	Buttons *buttons)
 {
 	FunctionHandle *handle;
 	IPCData *ipc;
+#ifdef _DEBUG
+	char procname[26];
+#endif
 
 	// Allocate handle
 	if (!(handle=function_new_handle(0,0)))
@@ -70,6 +81,11 @@ BOOL function_launch(
 		// Free function?
 		if (function && function->function.flags2&FUNCF2_FREE_FUNCTION)
 			FreeFunction(handle->function);
+
+		// Free destination lock?
+		if (flags&FUNCF_DRAG_DROP && flags&FUNCF_DROPON_LOCK)
+		    UnLock(dest_lock);
+
 		return 0;
 	}
 
@@ -91,17 +107,52 @@ BOOL function_launch(
 	handle->function=function;
 	handle->command=command;
 	handle->data=data;
+
+	if (flags&FUNCF_DRAG_DROP && flags&FUNCF_DROPON_LOCK)
+	{
+	    handle->func_drop_on_lock = dest_lock;
+	    flags &= ~FUNCF_DROPON_LOCK;
+	}
+
 	handle->flags=flags;
 
 	// AppMessage?
-	if (flags&FUNCF_DRAG_DROP)
+	if (buttons && handle->command != FUNCTION_RUN_FUNCTION  && !(flags&FUNCF_WBARG_PASSTRUGH))
 	{
-		// Get AppMessage
-		if ((handle->app_msg=(GalileoAppMessage *)buttons))
+	    if (((GalileoListerAppMessage *)buttons)->glam_Type == MTYPE_LISTER_APPWINDOW &&
+		((GalileoListerAppMessage *)buttons)->glam_Class == GLAMCLASS_LISTER)
+	    {
+		ULONG arg = 0;
+
+		handle->lister_app_msg = (GalileoListerAppMessage *)buttons;
+
+		// Get lock
+		while (!(source_lock))
 		{
-			// Free the locks in the message
-			UnlockWBArg(handle->app_msg->ga_Msg.am_ArgList,handle->app_msg->ga_Msg.am_NumArgs);
+		    if (!(source_lock = handle->lister_app_msg->glam_ArgList[arg].wa_Lock))
+		        source_lock = handle->lister_app_msg->glam_Lock;
+
+		    arg++;
+
+		    if (arg >= handle->lister_app_msg->glam_NumArgs) break;
 		}
+	    }
+	    else
+	    {
+		ULONG arg = 0;
+
+		handle->app_msg = (struct AppMessage *)buttons;
+
+		// Get lock
+		while (!(source_lock))
+		{
+		    source_lock = handle->app_msg->am_ArgList[arg].wa_Lock;
+
+		    arg++;
+
+		    if (arg >= handle->app_msg->am_NumArgs) break;
+		}
+	    }
 	}
 
 	// Filetypes?
@@ -112,11 +163,26 @@ BOOL function_launch(
 	// Buttons
 	else handle->func_buttons=buttons;
 
+	// Source lock
+	if (source_lock)
+	    handle->func_source_lock = source_lock;
+
+	// Dest lock
+	if (dest_lock)
+	    handle->func_dest_lock = dest_lock;
+
 	// Source path
 	if (source_path)
 	{
-		strcpy(handle->func_source_path,source_path);
-		if (source_path[0]) AddPart(handle->func_source_path,"",512);
+		char *tmp_path;
+
+		if (tmp_path = JoinString(handle->memory, source_path, (!source_lock && source_path[0] && (source_path[strlen(source_path) - 1] != ':'))?"/":"", NULL, NULL))
+	        {
+		    if (handle->func_source_path)
+			FreeMemH(handle->func_source_path);
+
+		    handle->func_source_path = tmp_path;
+	        }
 	}
 
 	// Destination path
@@ -133,9 +199,15 @@ BOOL function_launch(
 		// Copy path
 		else
 		{
-			strcpy(handle->func_dest_path,dest_path);
-			if (dest_path[0]) AddPart(handle->func_dest_path,"",512);
-			else dest_path=0;
+			char *tmp_path;
+
+			if (tmp_path = JoinString(handle->memory, dest_path, (!dest_lock && dest_path[0] && (dest_path[strlen(dest_path) - 1] != ':'))?"/":"", NULL, NULL))
+		        {
+			    if (handle->func_dest_path)
+				FreeMemH(handle->func_dest_path);
+
+			    handle->func_dest_path = tmp_path;
+		        }
 		}
 	}
 
@@ -144,18 +216,18 @@ BOOL function_launch(
 	handle->dest_lister=dest_list;
 
 	// Add initial source and destination listers to the lists
-	if (handle->source_lister || source_path)
+	if (handle->source_lister || source_path || source_lock)
 	{
 		// Add source path
-		function_add_path(handle,&handle->func_source_paths,handle->source_lister,handle->func_source_path);
+		function_add_path(handle,&handle->func_source_paths,handle->source_lister,handle->func_source_path, source_lock);
 	}
 
-	if (handle->dest_lister || dest_path)
+	if (handle->dest_lister || dest_path || dest_lock)
 	{
 		PathNode *path;
 
 		// Add destination path
-		if (path=function_add_path(handle,&handle->func_dest_paths,handle->dest_lister,handle->func_dest_path))
+		if (path=function_add_path(handle,&handle->func_dest_paths,handle->dest_lister,handle->func_dest_path, dest_lock))
 		{
 			// Is this a drag'n'drop to a lister?
 			if (handle->dest_lister &&
@@ -170,8 +242,9 @@ BOOL function_launch(
 				len=strlen(handle->dest_lister->cur_buffer->buf_Path);
 
 				// To a directory inside the lister?
-				if (strncmp(handle->dest_lister->cur_buffer->buf_Path,handle->func_dest_path,len)==0 &&
-					handle->func_dest_path[len])
+				if ((handle->dest_lister->cur_buffer->buf_Lock && dest_lock && (handle->dest_lister->cur_buffer->buf_Lock != dest_lock)) ||
+				    handle->func_dest_path && (strncmp(handle->dest_lister->cur_buffer->buf_Path,handle->func_dest_path,len)==0 &&
+				    handle->func_dest_path && handle->func_dest_path[len]))
 				{
 					// Mark node as having a changed path
 					path->pn_flags|=LISTNF_CHANGED;
@@ -186,14 +259,22 @@ BOOL function_launch(
 	// Done message
 	handle->done_msg=done_msg;
 
+#ifdef _DEBUG
+	sprintf(procname, "galileo_function_%08lx", handle);
+#endif
+
 	// Launch process
 	if (!(IPC_Launch(
 		&GUI->function_list,
 		&ipc,
+#ifdef _DEBUG
+		procname,
+#else
 		"galileo_function",
+#endif
 		(ULONG)function_launch_code,
 		STACK_DEFAULT,
-		(ULONG)handle,(struct Library *)DOSBase)))
+		(ULONG)handle)))
 	{
 		if (!ipc) function_free(handle);
 		return 0;
@@ -270,7 +351,37 @@ FunctionHandle *function_new_handle(struct MsgPort *port,BOOL small)
 void function_handle_init(FunctionHandle *handle,BOOL clear)
 {
 	// Clear memory handles
-	if (clear) ClearMemHandle(handle->entry_memory);
+	if (clear)
+	{
+	    PathNode *node;
+
+	    // Go through source paths and unlock any temporary locks
+	    if (!(IsListEmpty((struct List *)&handle->func_source_paths)))
+	    {
+		for (node=(PathNode *)handle->func_source_paths.list.mlh_Head;
+			node->pn_node.mln_Succ;
+			node=(PathNode *)node->pn_node.mln_Succ)
+		{
+			// Valid lister?
+			if (node->pn_lock && (node->pn_flags&LISTNF_MADE_LOCK))
+				UnLock(node->pn_lock);
+		}
+	    }
+
+	    // Go through destination paths and unlock any temporary locks
+	    if (!(IsListEmpty((struct List *)&handle->func_dest_paths)))
+	    {
+		for (node=(PathNode *)handle->func_dest_paths.list.mlh_Head;
+			node->pn_node.mln_Succ;
+			node=(PathNode *)node->pn_node.mln_Succ)
+		{
+			// Valid lister?
+			if (node->pn_lock && (node->pn_flags&LISTNF_MADE_LOCK))
+				UnLock(node->pn_lock);
+		}
+	    }
+	    ClearMemHandle(handle->entry_memory);
+	}
 
 	// Initialise function
 	handle->func_flags=0;
@@ -314,6 +425,10 @@ void function_free(FunctionHandle *handle)
 		FreeDosObject(DOS_FIB,handle->s_info);
 		FreeDosObject(DOS_FIB,handle->d_info);
 
+		// Free dropon lock
+		if (handle->func_drop_on_lock)
+		    UnLock(handle->func_drop_on_lock);
+
 		// Free function?
 		if (handle->function && handle->function->function.flags2&FUNCF2_FREE_FUNCTION)
 			FreeFunction(handle->function);
@@ -322,7 +437,12 @@ void function_free(FunctionHandle *handle)
 		FreeAslRequest(handle->filereq);
 
 		// AppMessage
-		FreeAppMessage(handle->app_msg);
+		if (handle->app_msg)
+		    FreeAppMessage(handle->app_msg);
+
+		// ListerAppMessage
+		if (handle->app_msg)
+		    free_lister_appmsg(handle->lister_app_msg);
 
 		// Arguments
 		if (handle->args)
@@ -330,10 +450,63 @@ void function_free(FunctionHandle *handle)
 		if (handle->arg_passthru)
 			FreeArgArray(handle->arg_passthru);
 
+		if (!(IsListEmpty(&handle->filechange)))
+		{
+		    FileChangeList *list,*nextlist;
+
+		    // Go through lists
+		    for (list=(FileChangeList *)handle->filechange.lh_Head;
+			    list->node.ln_Succ;
+			    list=nextlist)
+		    {
+			// Cache next list
+			nextlist=(FileChangeList *)list->node.ln_Succ;
+
+			if (list->lock)
+			    UnLock(list->lock);
+		    }
+		}
+
+		// Go through source paths and unlock any temporary locks
+		if (!(IsListEmpty((struct List *)&handle->func_source_paths)))
+		{
+		    PathNode *node;
+
+		    for (node=(PathNode *)handle->func_source_paths.list.mlh_Head;
+			 node->pn_node.mln_Succ;
+			 node=(PathNode *)node->pn_node.mln_Succ)
+		    {
+			    // Valid lister?
+			    if (node->pn_lock && (node->pn_flags&LISTNF_MADE_LOCK))
+				    UnLock(node->pn_lock);
+
+			    if (node->pn_recurse_lock)
+			        UnLock(node->pn_recurse_lock);
+		    }
+		}
+
+		// Go through destination paths and unlock any temporary locks
+		if (!(IsListEmpty((struct List *)&handle->func_dest_paths)))
+		{
+		    PathNode *node;
+
+		    for (node=(PathNode *)handle->func_dest_paths.list.mlh_Head;
+			 node->pn_node.mln_Succ;
+			 node=(PathNode *)node->pn_node.mln_Succ)
+		    {
+			    // Valid lister?
+			    if (node->pn_lock && (node->pn_flags&LISTNF_MADE_LOCK))
+				    UnLock(node->pn_lock);
+
+			    if (node->pn_recurse_lock)
+			        UnLock(node->pn_recurse_lock);
+		    }
+		}
+
 		// Free handle memory
 		FreeMemHandle(handle->memory);
 		if (handle->entry_memory)
-        	FreeMemHandle(handle->entry_memory);
+		FreeMemHandle(handle->entry_memory);
 		FreeVec(handle);
 	}
 }
@@ -344,7 +517,7 @@ void __saveds function_launch_code(void)
 {
 	FunctionHandle *handle;
 	IPCData *ipc;
-    struct Message *msg;
+	struct Message *msg;
 
 	// Get startup message
 	if (!(ipc=IPC_ProcStartup((ULONG *)&handle,function_init)))
@@ -366,7 +539,7 @@ void __saveds function_launch_code(void)
 				if (source_list=function_lister_current(&handle->func_source_paths))
 				{
 					// Read directory	
-					function_read_directory(handle,source_list,handle->func_source_path);
+					function_read_directory(handle,source_list,handle->func_source_path,handle->func_source_lock);
 
 					// If the lister is in icon mode, we don't refresh it
 					if (source_list->flags&(LISTERF_VIEW_ICONS|LISTERF_ICON_ACTION))
@@ -403,9 +576,15 @@ void __saveds function_launch_code(void)
 
 		// Run a function with external arguments
 		case FUNCTION_RUN_FUNCTION_EXTERNAL:
-
+			if (handle->lister_app_msg)
+			    function_files_from_glarg(handle);
+			else
+			if (handle->app_msg)
+			    function_files_from_wbarg(handle);
 			// Convert arguments to external file list
-			function_files_from_args(handle);
+			else
+			    function_files_from_args(handle);
+
 
 		// Run a function
 		case FUNCTION_RUN_FUNCTION:
@@ -421,9 +600,9 @@ void __saveds function_launch_code(void)
 			break;
 	}
 
-    // If running async, leave cleanup to module
-    if (!(ipc->flags&IPCF_DETACHEDCHILD))
-    {
+	// If running async, leave cleanup to module
+	if (!(ipc->flags&IPCF_DETACHEDCHILD))
+	{
 		// Do any file changes
 		function_filechange_do(handle,0);
 
@@ -438,13 +617,13 @@ void __saveds function_launch_code(void)
 			// Update the desktop folder
 			misc_startup("galileo_desktop_update",MENU_UPDATE_DESKTOP,GUI->window,0,TRUE);
 		}
-    }
+	}
 	// Send goodbye message
 	IPC_Goodbye(ipc,&main_ipc,WINDOW_FUNCTION);
 
-    // Only free data if not running asynchronous
-    if (!(ipc->flags&IPCF_DETACHEDCHILD))
-    {
+	// Only free data if not running asynchronous
+	if (!(ipc->flags&IPCF_DETACHEDCHILD))
+	{
 		// Done message?
 		if (handle->done_msg)
 		{
@@ -453,14 +632,18 @@ void __saveds function_launch_code(void)
 		}
 
 		// Free reply port
-    	while (msg=GetMsg(handle->reply_port))
+		while (msg=GetMsg(handle->reply_port))
 				ReplyFreeMsg(msg);
 		DeleteMsgPort(handle->reply_port);
 
 		function_free(handle);
-    }
+	}
 	// Cleanup process
 	IPC_Free(ipc);
+
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }
 
 // Initialise a function
@@ -475,7 +658,7 @@ ULONG __asm __saveds function_init(
 	// Create message port
 	if (!(handle->reply_port=CreateMsgPort()))
 		return 0;
-  handle->reply_port->mp_Node.ln_Pri = PORT_ASYNC_MAGIC; //original dopus5code:	handle->reply_port->mp_Flags|=PF_ASYNC;
+	handle->reply_port->mp_Node.ln_Pri = PORT_ASYNC_MAGIC; //original dopus5code: handle->reply_port->mp_Flags|=PF_ASYNC;
 
 	return 1;
 }
@@ -654,7 +837,7 @@ BOOL function_lock_paths(FunctionHandle *handle,PathList *list,int locker)
 			else
 			if (handle->flags&FUNCF_NO_SOURCE)
 			{
-                // Clear lister
+				// Clear lister
 				node->pn_lister=0;
 			}
 
@@ -664,7 +847,7 @@ BOOL function_lock_paths(FunctionHandle *handle,PathList *list,int locker)
 			{
 				IPCMessage *msg;
 
-                // Make lister busy
+				// Make lister busy
 				IPC_Command(
 					node->pn_lister->ipc,
 					LISTER_BUSY,
@@ -925,7 +1108,17 @@ Lister *function_get_paths(
 			{
 				node->pn_lister=first;
 				node->pn_flags=0;
+
+				if (first->cur_buffer && first->cur_buffer->buf_Lock)
+				    node->pn_lock = first->cur_buffer->buf_Lock;
+
 				AddHead((struct List *)list,(struct Node *)node);
+
+				// Set appropriate lock
+				if (list==&handle->func_source_paths)
+					handle->func_source_lock = node->pn_lock;
+				else handle->func_dest_lock = node->pn_lock;
+
 			}
 		}
 	}
@@ -957,7 +1150,7 @@ Lister *function_get_paths(
 				if (lister!=first)
 				{
 					// Valid path or custom handler?
-					if (lister->cur_buffer->buf_Path[0] ||
+					if ((lister->cur_buffer->buf_Path && lister->cur_buffer->buf_Path[0]) ||
 						lister->cur_buffer->buf_CustomHandler[0])
 					{
 						// Allocate lister node
@@ -966,6 +1159,10 @@ Lister *function_get_paths(
 							// Add to list
 							node->pn_lister=lister;
 							node->pn_flags=0;
+
+							if (lister->cur_buffer->buf_Lock)
+							    node->pn_lock = lister->cur_buffer->buf_Lock;
+
 							AddTail((struct List *)list,(struct Node *)node);
 						}
 					}

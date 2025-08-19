@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2024 Hagbard Celine
+Copyright 2024,2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -100,12 +100,11 @@ void free_libdata(struct MyLibrary *libbase)
 
 	    // Close timer
 	    if (data->TimerBase) CloseDevice(&data->timer_io);
-
-	    // Free library data
-	    FreeVec(data);
     }
 
     if (listview_class) FreeClass(listview_class);
+    if (path_class) FreeClass(path_class);
+    if (pathg_class) FreeClass(pathg_class);
     if (propgadget_class) FreeClass(propgadget_class);
     if (button_class) FreeClass(button_class);
     if (string_class) FreeClass(string_class);
@@ -121,6 +120,7 @@ void free_libdata(struct MyLibrary *libbase)
     if (P96Base) CloseLibrary(P96Base);
     if (DataTypesBase) CloseLibrary(DataTypesBase);
     if (IconBase) CloseLibrary(IconBase);
+    if (KeymapBase) CloseLibrary(KeymapBase);
     if (CxBase) CloseLibrary(CxBase);
     if (LayersBase) CloseLibrary(LayersBase);
     if (UtilityBase) CloseLibrary(UtilityBase);
@@ -132,16 +132,16 @@ void free_libdata(struct MyLibrary *libbase)
     if (DOSBase) CloseLibrary((struct Library *)DOSBase);
 
 #ifdef _DEBUG
-    KPrintF("Main Library\n");
 #ifdef RESOURCE_TRACKING
+    KPrintF("Main Library\n");
     //PrintTrackedResources();
     if (ResTrackBase->lib_OpenCnt==2)
 	EndResourceTracking(); /* Generate a memory usage report */
 
     REALL_CloseLibrary(ResTrackBase);
-#endif
 
     KPrintF("Quitting......\n");
+#endif
 #endif
 
 }
@@ -150,22 +150,23 @@ void free_libdata(struct MyLibrary *libbase)
 // Initialise libraries we need
 __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 {
-	struct LibData *data;
 	char buf[16];
 
 #ifdef RESOURCE_TRACKING
 
-    callerid=(ULONG)&__UserLibInit;
+	callerid=(ULONG)&__UserLibInit;
 
-    if (ResTrackBase=REALL_OpenLibrary("g_restrack.library",0))
-    {
-	StartResourceTracking (RTL_ALL);
-	SetMyLibBase ((struct Library *)libbase);
-    }
+	if (ResTrackBase=REALL_OpenLibrary("g_restrack.library",0))
+	{
+		StartResourceTracking (RTL_ALL);
+		SetMyLibBase ((struct Library *)libbase);
+	}
 #endif
-
+#ifdef _DEBUG_USERLIBINIT
+	KPrintF("Library GalileoFMBase: 0x%08.lx  &gfmlib_data.notify_lock: 0x%08.lx\n", libbase, &gfmlib_data.notify_lock);
+#endif
 #ifdef _DEBUG_IPCPROC
-    KPrintF("Library ResTrackBase: %lx at: %lx SysBase: %lx \n",ResTrackBase, &ResTrackBase, SysBase);
+	KPrintF("Library ResTrackBase: 0x%08.lx at: 0x%08.lx SysBase: 0x%08.lx  GalileoFMBase: 0x%08.lx\n",ResTrackBase, &ResTrackBase, SysBase, libbase);
 #endif
 
 	// Initialise
@@ -177,6 +178,7 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 	LocaleBase=0;
 	IconBase=0;
 	CxBase=0;
+	KeymapBase=0;
 	WorkbenchBase=0;
 	topaz_font=0;
 	NewList(&image_list);
@@ -204,6 +206,7 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 		!(UtilityBase=OpenLibrary("utility.library",37)) ||
 		!(LayersBase=OpenLibrary("layers.library",37)) ||
 		!(CxBase=OpenLibrary("commodities.library",37)) ||
+		!(KeymapBase=OpenLibrary("keymap.library",37)) ||
 		!(IconBase=OpenLibrary("icon.library",37)) ||
 		!(WorkbenchBase=OpenLibrary("workbench.library",37)))
 	{
@@ -217,29 +220,25 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 	RexxSysBase=(struct RxsLib *)OpenLibrary("rexxsyslib.library",0);
 	P96Base=OpenLibrary("Picasso96API.library",0);
 
-	// Get library data
-	if (!(data=AllocVec(sizeof(struct LibData),MEMF_CLEAR)))
-	{
-		free_libdata(NULL);
-		return 1;
-	}
+	// Save our library base with in far-data to make it always available.
+	MyLibBase = (struct Library *)libbase;
 
-	libbase->ml_UserData=(ULONG)data;
-
+	// Need this for now, as not all functions have been rewritten
+	// after LibData was moved to the near-data section
+	libbase->ml_UserData = (ULONG)&gfmlib_data;
 
 	// Check for OS 3.5 icon library
 	// if <44 then try for NewIcons. Don't open NewIcons under V44
-
 	if	(IconBase->lib_Version>=44)
-		data->flags|=LIBDF_USING_OS35;
+		gfmlib_data.flags|=LIBDF_USING_OS35;
 	else
 		NewIconBase=(struct NewIconBase *)OpenLibrary("newicon.library",0);
 
 
 	// Open timer device
-	if (OpenDevice("timer.device",UNIT_VBLANK,&data->timer_io,0))
+	if (OpenDevice("timer.device",UNIT_VBLANK,&gfmlib_data.timer_io,0))
 		return 1;
-	data->TimerBase=(struct Library *)data->timer_io.io_Device;
+	gfmlib_data.TimerBase=(struct Library *)gfmlib_data.timer_io.io_Device;
 
 	// Get topaz font
 	if (!(topaz_font=OpenFont(&topaz_attr)))
@@ -249,174 +248,198 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 	}
 
 	// Initialise stuff
-	data->low_mem_signal=-1;
-	data->wb_data.first_app_entry=TRUE;
-	data->wb_data.wb_base=WorkbenchBase;
-	data->wb_data.int_base=(struct Library *)IntuitionBase;
-	data->wb_data.galileofm_base=libbase;
-	data->wb_data.utility_base=UtilityBase;
-	data->dos_base=(struct Library *)DOSBase;
-	data->icon_base=IconBase;
-	data->new_icon_base=(struct Library *)NewIconBase;
-	data->int_base=(struct Library *)IntuitionBase;
-	data->galileofm_base=libbase;
-	data->gfx_base=GfxBase;
-	data->LayersBase = LayersBase;
-	data->CxBase = CxBase;
+	gfmlib_data.low_mem_signal=-1;
+	gfmlib_data.wb_data.first_app_entry=TRUE;
+	gfmlib_data.dos_base=(struct Library *)DOSBase;
+	gfmlib_data.icon_base=IconBase;
+	gfmlib_data.new_icon_base=(struct Library *)NewIconBase;
+	gfmlib_data.int_base=(struct Library *)IntuitionBase;
+	gfmlib_data.galileofm_base=libbase;
+	gfmlib_data.gfx_base=GfxBase;
+	gfmlib_data.LayersBase = LayersBase;
+	gfmlib_data.CxBase = CxBase;
+	gfmlib_data.KeymapBase = KeymapBase;
 
 #ifdef RESOURCE_TRACKING
-	data->wb_data.restrack_base=ResTrackBase;
-	data->restrack_base=ResTrackBase;
+	gfmlib_data.restrack_base=ResTrackBase;
 #endif
 
-	NewList((struct List *)&data->wb_data.app_list);
-	NewList((struct List *)&data->wb_data.rem_app_list);
-	NewList((struct List *)&data->notify_list);
-	NewList((struct List *)&data->launch_list);
-	NewList((struct List *)&data->error_list);
-	NewList(&data->semaphores.list);
-	NewList(&data->device_list.list);
-	NewList(&data->file_list.list);
-	NewList(&data->filetype_cache.list);
-	NewList(&data->allocbitmap_patch.list);
-	NewList((struct List *)&data->dos_list);
-	InitSemaphore(&data->dos_lock);
-	InitSemaphore(&data->wb_data.patch_lock);
-	InitSemaphore(&data->notify_lock);
-	InitSemaphore(&data->launch_lock);
-	InitSemaphore(&data->path_lock);
-	InitSemaphore(&data->semaphores.lock);
-	InitSemaphore(&data->device_list.lock);
-	InitSemaphore(&data->file_list.lock);
-	InitSemaphore(&data->filetype_cache.lock);
-	InitSemaphore(&data->allocbitmap_patch.lock);
-	InitSemaphore(&data->backfill_lock);
-	data->popup_delay=10;
+	NewList((struct List *)&gfmlib_data.wb_data.app_list);
+	NewList((struct List *)&gfmlib_data.wb_data.rem_app_list);
+	NewList((struct List *)&gfmlib_data.notify_list);
+	NewList((struct List *)&gfmlib_data.launch_list);
+	NewList((struct List *)&gfmlib_data.error_list);
+	NewList(&gfmlib_data.semaphores.list);
+	NewList(&gfmlib_data.device_list.list);
+	NewList(&gfmlib_data.file_list.list);
+	NewList(&gfmlib_data.filetype_cache.list);
+	NewList(&gfmlib_data.allocbitmap_patch.list);
+	NewList((struct List *)&gfmlib_data.dos_list);
+	InitSemaphore(&gfmlib_data.dos_lock);
+	InitSemaphore(&gfmlib_data.wb_data.patch_lock);
+	InitSemaphore(&gfmlib_data.notify_lock);
+	InitSemaphore(&gfmlib_data.launch_lock);
+	InitSemaphore(&gfmlib_data.path_lock);
+	InitSemaphore(&gfmlib_data.semaphores.lock);
+	InitSemaphore(&gfmlib_data.device_list.lock);
+	InitSemaphore(&gfmlib_data.file_list.lock);
+	InitSemaphore(&gfmlib_data.filetype_cache.lock);
+	InitSemaphore(&gfmlib_data.allocbitmap_patch.lock);
+	InitSemaphore(&gfmlib_data.backfill_lock);
+	gfmlib_data.popup_delay=10;
 
 	// Initialise NewIcons settings
-	data->NewIconsFlags=ENVNIF_ENABLE;
-	data->NewIconsPrecision=16;
+	gfmlib_data.NewIconsFlags=ENVNIF_ENABLE;
+	gfmlib_data.NewIconsPrecision=16;
 
 	// See if SysIHack is running
 	Forbid();
-	if (FindTask("« sysihack »")) data->flags|=LIBDF_3DLOOK;
+	if (FindTask("« sysihack »")) gfmlib_data.flags|=LIBDF_3DLOOK;
 
 	// Or variable is set for 3d gadgets
 	else
 	if (GetVar("Galileo/3DLook",buf,2,GVF_GLOBAL_ONLY)>-1)
-		data->flags|=LIBDF_3DLOOK;
+		gfmlib_data.flags|=LIBDF_3DLOOK;
 	Permit();
 
 	// Variable set for no stippling of requesters
 	if (GetVar("Galileo/OuEstLeMinibar",buf,2,GVF_GLOBAL_ONLY)>-1)
-		data->flags|=LIBDF_NOSTIPPLE;
+		gfmlib_data.flags|=LIBDF_NOSTIPPLE;
 
 	// Variable set to install DOS patches
 	if (GetVar("Galileo/DOSPatch",buf,2,GVF_GLOBAL_ONLY)>-1)
-		data->flags|=LIBDF_DOS_PATCH;
+		gfmlib_data.flags|=LIBDF_DOS_PATCH;
 
 	// Variable set to install filetype cache
 	if (GetVar("Galileo/FiletypeCache",buf,14,GVF_GLOBAL_ONLY)>-1)
 	{
 		// Get cache size
-		data->ft_cache_max=atoi(buf);
-		if (data->ft_cache_max<10)
-			data->ft_cache_max=10;
+		gfmlib_data.ft_cache_max=atoi(buf);
+		if (gfmlib_data.ft_cache_max<10)
+			gfmlib_data.ft_cache_max=10;
 
 		// Set cache flag
-		data->flags|=LIBDF_FT_CACHE;
+		gfmlib_data.flags|=LIBDF_FT_CACHE;
 	}
 
 	// Save a4
-	data->a4=getreg(REG_A4);
+	gfmlib_data.a4=getreg(REG_A4);
 
 	// Create some memory handles
-	data->memory=L_NewMemHandle(sizeof(IPCMessage)<<5,sizeof(IPCMessage)<<4,MEMF_CLEAR|MEMF_PUBLIC);
-	data->dos_list_memory=L_NewMemHandle(1024,512,MEMF_CLEAR);
+	gfmlib_data.memory=L_NewMemHandle(sizeof(IPCMessage)<<5,sizeof(IPCMessage)<<4,MEMF_CLEAR|MEMF_PUBLIC);
+	gfmlib_data.dos_list_memory=L_NewMemHandle(1024,512,MEMF_CLEAR);
 
 	// Initialise boopsi classes
 	if (!(image_class=
 			init_class(
-				data,
+				&gfmlib_data,
 				"galileoiclass",
 				"imageclass",
-				(unsigned long (*)())image_dispatch,
+				NULL,
+				(unsigned long (*)())image_dispatchTr,
 				sizeof(BoopsiImageData))) ||
 
 		!(button_class=
 			init_class(
-				data,
+				&gfmlib_data,
 				"galileobuttongclass",
 				"gadgetclass",
-				(unsigned long (*)())button_dispatch,
+				NULL,
+				(unsigned long (*)())button_dispatchTr,
 				sizeof(ButtonData))) ||
 
 		!(string_class=
 			init_class(
-				data,
+				&gfmlib_data,
 				"galileostrgclass",
 				"strgclass",
-				(unsigned long (*)())button_dispatch,
+				NULL,
+				(unsigned long (*)())button_dispatchTr,
 				sizeof(StringData))) ||
 
 		!(check_class=
 			init_class(
-				data,
+				&gfmlib_data,
 				"galileocheckgclass",
 				"gadgetclass",
-				(unsigned long (*)())button_dispatch,
+				NULL,
+				(unsigned long (*)())button_dispatchTr,
 				sizeof(CheckData))) ||
 
 		!(view_class=
 			init_class(
-				data,
+				&gfmlib_data,
 				"galileoviewgclass",
 				"gadgetclass",
-				(unsigned long (*)())button_dispatch,
+				NULL,
+				(unsigned long (*)())button_dispatchTr,
 				sizeof(ButtonData))) ||
 
 		!(palette_class=
 			init_class(
-				data,
+				&gfmlib_data,
 				"galileopalettegclass",
 				"gadgetclass",
-				(unsigned long (*)())palette_dispatch,
+				NULL,
+				(unsigned long (*)())palette_dispatchTr,
 				sizeof(PaletteData))) ||
 
 		!(frame_class=
 			init_class(
-				data,
+				&gfmlib_data,
 				"galileoframeclass",
 				"gadgetclass",
-				(unsigned long (*)())button_dispatch,
+				NULL,
+				(unsigned long (*)())button_dispatchTr,
 				sizeof(ButtonData))) ||
 
 		!(gauge_class=
 			init_class(
-				data,
+				&gfmlib_data,
 				"galileogaugeclass",
 				"gadgetclass",
-				(unsigned long (*)())button_dispatch,
+				NULL,
+				(unsigned long (*)())button_dispatchTr,
 				sizeof(GaugeData))) ||
 
 		!(propgadget_class=
 			init_class(
-				data,
+				&gfmlib_data,
 				"galileopropgclass",
 				"gadgetclass",
-				(unsigned long (*)())propgadget_dispatch,
+				NULL,
+				(unsigned long (*)())propgadget_dispatchTr,
 				sizeof(PropGadgetData))) ||
+
+		!(pathg_class=
+			init_class(
+				&gfmlib_data,
+				NULL,
+				"gadgetclass",
+				NULL,
+				(unsigned long (*)())pathgadget_dispatchTr,
+				sizeof(PathGadgetData))) ||
+
+		!(path_class=
+			init_class(
+				&gfmlib_data,
+				"galileopathgclass",
+				NULL,
+				pathg_class,
+				(unsigned long (*)())button_dispatchTr,
+				sizeof(PathData))) ||
 
 		!(listview_class=
 			init_class(
-				data,
+				&gfmlib_data,
 				"galileolistviewgclass",
 				"gadgetclass",
-				(unsigned long (*)())listview_dispatch,
+				NULL,
+				(unsigned long (*)())listview_dispatchTr,
 				sizeof(ListViewData))))
 	{
 		free_libdata(libbase);
-		return 1;
+	        return 1;
 	}
 
 	// Set flag to identify some classes
@@ -425,46 +448,47 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 	if (view_class) view_class->cl_UserData=CLASS_VIEW;
 	if (frame_class) frame_class->cl_UserData=CLASS_FRAME;
 	if (gauge_class) gauge_class->cl_UserData=CLASS_GAUGE;
+	if (path_class) path_class->cl_UserData=CLASS_PATHGAD;
 
 	// Initialise locale
-	init_locale_data(&data->locale);
+	init_locale_data(&gfmlib_data.locale);
 
 	// Did we get locale library?
-	if (LocaleBase=data->locale.li_LocaleBase)
+	if (LocaleBase=gfmlib_data.locale.li_LocaleBase)
 	{
 		// Get decimal point
-		if (data->locale.li_Locale && data->locale.li_Locale->loc_DecimalPoint)
-				decimal_point=data->locale.li_Locale->loc_DecimalPoint[0];
+		if (gfmlib_data.locale.li_Locale && gfmlib_data.locale.li_Locale->loc_DecimalPoint)
+				decimal_point=gfmlib_data.locale.li_Locale->loc_DecimalPoint[0];
 	}
 
 	// Get a path list
-	data->path_list=L_GetDosPathList(0);
+	gfmlib_data.path_list=L_GetDosPathList(0);
 
 	// Create launcher process
 	if (!(L_IPC_Launch(
 		0,&launcher_ipc,
 		"GALILEO_LAUNCHER",
-		(ULONG)launcher_proc,
+		(ULONG)launcher_procTr,
 		STACK_LARGE|IPCF_GETPATH,
-		(ULONG)data,(struct Library *)DOSBase,libbase)) || !launcher_ipc)
+		(ULONG)&gfmlib_data,libbase)) || !launcher_ipc)
 	{
 	    free_libdata(libbase);
 	    return 1;
 	}
-	data->launcher=launcher_ipc;
+	gfmlib_data.launcher=launcher_ipc;
 
 	// Initialise low-memory handler
 	if (ExecLib->LibNode.lib_Version>=39)
 	{
 		// Initialise interrupt
-		data->low_mem_handler.is_Node.ln_Pri=50;
-		data->low_mem_handler.is_Node.ln_Type=NT_INTERRUPT;
-		data->low_mem_handler.is_Node.ln_Name="galileo memhandler";
-		data->low_mem_handler.is_Data=data;
-		data->low_mem_handler.is_Code=(void (*)())low_mem_handler;
+		gfmlib_data.low_mem_handler.is_Node.ln_Pri=50;
+		gfmlib_data.low_mem_handler.is_Node.ln_Type=NT_INTERRUPT;
+		gfmlib_data.low_mem_handler.is_Node.ln_Name="galileo memhandler";
+		gfmlib_data.low_mem_handler.is_Data=&gfmlib_data;
+		gfmlib_data.low_mem_handler.is_Code=(void (*)())low_mem_handler;
 
 		// Add the handler
-		AddMemHandler(&data->low_mem_handler);
+		AddMemHandler(&gfmlib_data.low_mem_handler);
 	}
 
 	// Succeeded

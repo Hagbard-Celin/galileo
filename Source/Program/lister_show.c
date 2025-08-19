@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,12 +32,18 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
-#include "misc.h"
+#include "lister_protos.h"
+#include "dirlist_protos.h"
+#include "misc_protos.h"
+#include "buffers_protos.h"
+#include "backdrop_protos.h"
+#include "graphics.h"
+#include "text.h"
 
 #define PEXTRA	8
 
@@ -354,6 +361,7 @@ void lister_draw_entry(
 	BYTE vert_space = environment->env->lister_vert_space;
 	BYTE vert_space_over = (vert_space >> 1) + (vert_space&1);
 	BYTE vert_space_under = vert_space - vert_space_over;
+
 	// Set pen colours
 	setdispcol(entry,lister);
 
@@ -1021,7 +1029,7 @@ void lister_update_name(Lister *lister)
 		struct InfoData __aligned info;
 
 		// If no path, return immediately
-		if (!buffer->buf_Path[0])
+		if (!buffer->buf_Path || !buffer->buf_Path[0])
 		{
 			lister_show_name(lister);
 			buffer_unlock(buffer);
@@ -1199,9 +1207,22 @@ void lister_refresh_display(Lister *lister,ULONG flags)
 	// Refresh files
 	else
 	{
-		buffer->buf_OldVertOffset=-1;
-		buffer->buf_OldHorizOffset=-1;
+	    buffer->buf_OldVertOffset=-1;
+	    buffer->buf_OldHorizOffset=-1;
+
+	    if (flags&REFRESHF_NO_DIRLIST)
+	    {
+		// Clear file area
+		EraseRect(&lister->list_area.rast,
+			lister->list_area.rect.MinX,
+			lister->list_area.rect.MinY,
+			lister->list_area.rect.MaxX,
+			lister->list_area.rect.MaxY);
+	    }
+	    else
+	    {
 		lister_display_dir(lister);
+	    }
 	}
 }
 
@@ -1215,7 +1236,8 @@ void lister_refresh_name(Lister *lister)
 #endif
 
 	// Is volume available?
-	if (VolumePresent(lister->cur_buffer))
+	if (lister->cur_buffer->buf_Lock &&
+	    VolumePresent(lister->cur_buffer))
 	{
 		// Update size information
 		lister_update_name(lister);

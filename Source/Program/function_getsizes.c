@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,10 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "dirlist_protos.h"
+#include "function_launch_protos.h"
+#include "function_protos.h"
+#include "lsprintf_protos.h"
 
 // GETSIZES, CHECKFIT, CLEARSIZES
 GALILEOFM_FUNC(function_getsizes)
@@ -48,10 +53,17 @@ GALILEOFM_FUNC(function_getsizes)
 	short clear=0;
 	Lister *lister;
 	DirBuffer *buffer=0;
+	BPTR org_dir = 0;
 
 	// Get current lister
 	if (lister=function_lister_current(&handle->func_source_paths))
 		buffer=lister->cur_buffer;
+
+	if (buffer && buffer->buf_Lock)
+	    org_dir = CurrentDir(buffer->buf_Lock);
+	else
+	if (handle->func_source_lock)
+	    org_dir = CurrentDir(handle->func_source_lock);
 
 	// Clear sizes?
 	if (command->function==FUNC_UNBYTE)
@@ -95,35 +107,34 @@ GALILEOFM_FUNC(function_getsizes)
 		// Got a destination path (for checkfit)?
 		if (path && command->function==FUNC_CHECKFIT)
 		{
-			BPTR lock;
 			struct InfoData __aligned info;
 
-			// RAM?
-			if (strncmp(path->pn_path,"RAM:",4)==0)
+			if (strncmp(path->pn_path,"RAM:",4)!=0)
 			{
-				// Kludge for RAM
-				dest_blocks=(AvailMem(MEMF_ANY)>>10)-2;
-				info.id_BytesPerBlock=1024;
-				info.id_DiskType=ID_FFS_DISK;
-			}
-
-			// Get disk information
-			else
-			if (lock=Lock(path->pn_path,ACCESS_READ))
-			{
-				// Get info
-				Info(lock,&info);
-				UnLock(lock);
+			    if (path->pn_lock)
+			    {
+				Info(path->pn_lock,&info);
 
 				// Number of blocks free
 				dest_blocks=info.id_NumBlocks-info.id_NumBlocksUsed;
-			}
+			    }
 
-			// Couldn't lock; assume FFS
-			else
-			{
+			    // Couldn't lock; assume FFS
+			    else
+			    {
 				info.id_BytesPerBlock=512;
 				info.id_DiskType=ID_FFS_DISK;
+			    }
+
+
+
+			}
+			else
+			{
+			    // Kludge for RAM
+			    dest_blocks=(AvailMem(MEMF_ANY)>>10)-2;
+			    info.id_BytesPerBlock=1024;
+			    info.id_DiskType=ID_FFS_DISK;
 			}
 
 			// Get block size
@@ -132,9 +143,9 @@ GALILEOFM_FUNC(function_getsizes)
 
 			// Old file system?
 			if (info.id_DiskType==ID_DOS_DISK ||
-				info.id_DiskType==ID_INTER_DOS_DISK ||
-				info.id_DiskType==ID_FASTDIR_DOS_DISK ||
-                info.id_DiskType==ID_LONG_DOS_DISK) handle->dest_data_block_size-=24;
+			    info.id_DiskType==ID_INTER_DOS_DISK ||
+			    info.id_DiskType==ID_FASTDIR_DOS_DISK ||
+			    info.id_DiskType==ID_LONG_DOS_DISK) handle->dest_data_block_size-=24;
 		}
 
 		// Otherwise, assume FFS for fun
@@ -147,8 +158,8 @@ GALILEOFM_FUNC(function_getsizes)
 		// Go through files
 		while (entry=function_get_entry(handle))
 		{
-			short file_ok=0;
 			DirEntry *dirent=0;
+			short file_ok=0;
 
 			// Check abort
 			if (function_check_abort(handle))
@@ -266,7 +277,7 @@ GALILEOFM_FUNC(function_getsizes)
 			if (dest_blocks>-1)
 			{
 				short percent;
-				//double pct;
+				char trunc_path[32];
 
 				// Fit completely?
 				if (dest_blocks>=total_blocks) percent=100;
@@ -276,13 +287,15 @@ GALILEOFM_FUNC(function_getsizes)
 					// Get percent that will fit
 					//pct=dest_blocks*100;
 					//percent=(short)(pct/(double)total_blocks);
-                    percent=(short)((dest_blocks*100)/total_blocks);
+					percent=(short)((dest_blocks*100)/total_blocks);
 				}
+
+				get_trunc_path(path->pn_path, trunc_path);
 
 				// Build string
 				lsprintf(handle->func_work_buf,
 					"\n%s %s %ld%%",
-					path->pn_path,
+					trunc_path,
 					GetString(&locale,MSG_FIT),
 					percent);
 			}
@@ -323,5 +336,9 @@ GALILEOFM_FUNC(function_getsizes)
 		}
 		FreeVec(req_text);
 	}
+
+	if (org_dir)
+	    CurrentDir(org_dir);
+
 	return ret;
 }

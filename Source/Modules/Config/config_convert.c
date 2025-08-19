@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -63,7 +63,6 @@ enum
 	CONVERT_HOTKEYS
 };
 
-char *copy_string(APTR,char *);
 void convert_function(APTR,struct List *,old_NewFunction *,short type,BOOL);
 BOOL convert_instructions(APTR,struct MinList *list,char *string);
 void convert_function_data(APTR,struct MinList *,ULONG,char,char);
@@ -530,7 +529,7 @@ short convert_config(
 							AddTail((struct List *)&button->function_list,&func->node);
 
 							// Fill out name
-							func->label=copy_string(bank->memory,oldconfig->drive[a].name);
+							func->label=CopyString(bank->memory,oldconfig->drive[a].name);
 
 							// Initialise function
 							if (oldconfig->drive[a].key!=0)
@@ -587,7 +586,7 @@ short convert_config(
 						// Create a new button bank
 						if (bank=NewButtonBank(0,0))
 						{
-                            // Initialise bank
+							// Initialise bank
 							strcpy(bank->window.name,oldconfig->menutit[menu]);
 
 							// Get bank font
@@ -680,7 +679,7 @@ short convert_config(
 									FindFunctionType((struct List *)&button->function_list,FTYPE_LEFT_BUTTON))
 								{
 									// Copy name
-									func->label=copy_string(bank->memory,name);
+									func->label=CopyString(bank->memory,name);
 								}
 							}
 						}
@@ -763,15 +762,15 @@ short convert_config(
 						type->type.priority=-126;
 
 					// Copy recognition string
-					type->recognition=copy_string(0,oldtype->recognition);
+					type->recognition=CopyString(0,oldtype->recognition);
 
 					// Copy icon path
-					type->icon_path=copy_string(0,oldtype->iconpath);
+					type->icon_path=CopyString(0,oldtype->iconpath);
 
 					// Copy actions
 					for (a=0;a<FILETYPE_FUNCNUM;a++)
 						if (oldtype->function[a] && oldtype->function[a][0])
-							type->actions[a]=copy_string(0,oldtype->actionstring[a]);
+							type->actions[a]=CopyString(0,oldtype->actionstring[a]);
 
 					// Copy functions
 					for (a=0;a<FILETYPE_FUNCNUM;a++)
@@ -829,7 +828,7 @@ short convert_config(
 		// Create button bank
 		if (bank=NewButtonBank(0,0))
 		{
-            // Initialise bank
+			// Initialise bank
 			strcpy(bank->window.name,"Hotkeys");
 			strcpy(bank->window.font_name,((struct GfxBase *)GfxBase)->DefaultFont->tf_Message.mn_Node.ln_Name);
 			bank->window.font_size=((struct GfxBase *)GfxBase)->DefaultFont->tf_YSize;
@@ -979,7 +978,7 @@ Cfg_ButtonBank *convert_button_bank(
 							FindFunctionType((struct List *)&button->function_list,FTYPE_LEFT_BUTTON))
 						{
 							// Copy name
-							func->label=copy_string(bank->memory,oldbank->gadgets[gad].name);
+							func->label=CopyString(bank->memory,oldbank->gadgets[gad].name);
 						}
 							
 						// Right button function?
@@ -1001,7 +1000,7 @@ Cfg_ButtonBank *convert_button_bank(
 								FindFunctionType((struct List *)&button->function_list,FTYPE_RIGHT_BUTTON))
 							{
 								// Copy name
-								func->label=copy_string(bank->memory,oldbank->gadgets[gad+42].name);
+								func->label=CopyString(bank->memory,oldbank->gadgets[gad+42].name);
 							}
 						}
 					}
@@ -1018,19 +1017,6 @@ Cfg_ButtonBank *convert_button_bank(
 
 	return bank;
 }
-
-// Copy a string
-char *copy_string(APTR memory,char *original)
-{
-	char *copy=0;
-
-	if (original &&
-		(copy=AllocMemH(memory,strlen(original)+1)))
-		strcpy(copy,original);
-
-	return copy;
-}
-
 
 // Convert a function
 void convert_function(APTR memory,struct List *list,old_NewFunction *oldfunc,short type,BOOL label)
@@ -1051,7 +1037,7 @@ void convert_function(APTR memory,struct List *list,old_NewFunction *oldfunc,sho
 
 	// Label?
 	if (label && oldfunc->name)
-		func->label=copy_string(memory,oldfunc->name);
+		func->label=CopyString(memory,oldfunc->name);
 
 	// Initialise function
 	func->function.flags=oldfunc->which;
@@ -1144,7 +1130,7 @@ BOOL convert_instructions(APTR memory,struct MinList *list,char *string)
 				}
 
 				// Copy string
-				ins->string=copy_string(memory,ptr);
+				ins->string=CopyString(memory,ptr);
 
 				// Link instruction in
 				AddTail((struct List *)list,(struct Node *)ins);

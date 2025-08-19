@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -38,6 +39,8 @@ For more information on Directory Opus for Windows please see:
 #ifndef GALILEOFM_DATA
 #define GALILEOFM_DATA
 
+#include "display.h"
+
 // Library bases
 extern struct ExecBase			*SysBase;
 extern struct Library			*GalileoFMBase;
@@ -57,33 +60,33 @@ extern struct Library			*DataTypesBase;
 extern struct Device			*InputBase;
 extern struct Device			*TimerBase;
 extern struct Library			*AmigaGuideBase;
-//extern struct Library			  *CyberGfxBase;
 extern struct Library 			*P96Base;
 extern struct NewIconBase		*NewIconBase;
 extern struct muBase			*muBase;
 #ifdef RESOURCE_TRACKING
-extern struct Library           *ResTrackBase;
+extern struct Library           	*ResTrackBase;
 #endif
 
 extern struct Process			*main_proc;			// Main process pointer
 extern struct MsgPort			*arexx_port;			// ARexx port
-extern IPCData					main_ipc;			// Main IPC data
-extern APTR						global_memory_pool;		// Global memory pool for anything to use
-extern char						*str_space_string;		// A string of spaces
+extern IPCData				main_ipc;			// Main IPC data
+extern APTR				global_memory_pool;		// Global memory pool for anything to use
+extern char				*str_space_string;		// A string of spaces
 extern struct GalileoLocale		locale;				// Locale data
-extern APTR						main_status;			// Main status window
+extern APTR				main_status;			// Main status window
 extern Cfg_Environment			*environment;			// Environment data
-extern GUI_Glue					*GUI;				// GUI data
-extern BPTR						old_current_dir;		// Old current directory
-extern BOOL                     rem_galileo_assign;     // Remove assigns...
-extern BOOL                     rem_g_themes_assign;    // ...if we made them.
+extern GUI_Glue				*GUI;				// GUI data
 extern struct IOStdReq			input_req;
 extern struct IOStdReq			timer_req;
 extern struct IOStdReq			console_req;
 
-extern struct GalileoSemaphore	pub_semaphore;
+extern struct GalileoSemaphore		pub_semaphore;
 
-extern long						main_lister_count;
+extern long				main_lister_count;
+
+#ifdef _DEBUG_STACK
+extern StackData			stack_check_data;
+#endif
 
 // Internal function definitions
 extern Cfg_Function	*def_function_leaveout;

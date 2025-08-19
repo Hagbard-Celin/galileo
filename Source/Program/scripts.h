@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -56,6 +56,7 @@ enum
 	SCRIPT_PRESTARTUP,
 };
 
+BOOL RunScript(short,char *);
 void InitScripts(void);
 void FreeScripts(void);
 BOOL RunScript_Node(Att_Node *,char *);

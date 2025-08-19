@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -318,7 +319,7 @@ unsigned long __asm __saveds L_Config_Environment(
 			// Get messages
 			while (appmsg=(struct AppMessage *)GetMsg(data->app_port))	
 			{
-				short num;
+				WORD num;
 
 				gotmsg=1;
 
@@ -332,18 +333,22 @@ unsigned long __asm __saveds L_Config_Environment(
 						if (appmsg->am_ArgList[num].wa_Name &&
 							*appmsg->am_ArgList[num].wa_Name)
 						{
-							char name[256];
+							char *name;
 
 							// Get full name
-							GetWBArgPath(&appmsg->am_ArgList[num],name,256);
-
-							// Try and get palette
-							if (get_palette_file(data,name))
+							if (name = GetWBArgPath(&appmsg->am_ArgList[num]))
 							{
-								// Update sliders
-								_config_env_palette_update_sliders(data);
-								ok=1;
-								break;
+							    // Try and get palette
+							    if (get_palette_file(data,name))
+							    {
+								    // Update sliders
+								    _config_env_palette_update_sliders(data);
+								    ok=1;
+								    FreeMemH(name);
+								    break;
+							    }
+							    else
+								FreeMemH(name);
 							}
 						}
 					}
@@ -361,12 +366,18 @@ unsigned long __asm __saveds L_Config_Environment(
 						((obj=GetObject(data->option_list,GAD_ENVIRONMENT_PICTURE_REQ_FIELD)) &&
 						 CheckObjectArea(obj,appmsg->am_MouseX,appmsg->am_MouseY)))
 					{
-						char name[256];
+						char *name;
 
 						// Get full name and store in field
-						GetWBArgPath(appmsg->am_ArgList,name,256);
-						SetGadgetValue(data->option_list,obj->id,(ULONG)name);
-						ok=1;
+						if (name = GetWBArgPath(appmsg->am_ArgList))
+						{
+						    if (getreg(REG_D1) < 256)
+						    {
+							SetGadgetValue(data->option_list,obj->id,(ULONG)name);
+							ok=1;
+						    }
+						    FreeMemH(name);
+						}
 					}
 				}
 
@@ -376,12 +387,18 @@ unsigned long __asm __saveds L_Config_Environment(
 				{
 					if (GetGadgetValue(data->option_list,GAD_SETTINGS_SOUNDLIST)>-1)
 					{
-						char name[256];
+						char *name;
 
 						// Get full name and store in field
-						GetWBArgPath(appmsg->am_ArgList,name,256);
-						SetGadgetValue(data->option_list,GAD_SETTINGS_SOUNDLIST_PATH,(ULONG)name);
-						ok=1;
+						if (name = GetWBArgPath(appmsg->am_ArgList))
+						{
+						    if (getreg(REG_D1) < 256)
+						    {
+						        SetGadgetValue(data->option_list,GAD_SETTINGS_SOUNDLIST_PATH,(ULONG)name);
+						        ok=1;
+						    }
+						    FreeMemH(name);
+						}
 					}
 				}
 
@@ -401,7 +418,7 @@ unsigned long __asm __saveds L_Config_Environment(
 			while (msg=GetWindowMsg(data->window->UserPort))
 			{
 				struct IntuiMessage msg_copy;
-				struct Gadget *gadget;
+				struct Gadget *gadget = 0;
 				UWORD gadgetid=0;
 
 				// Copy message and reply
@@ -907,7 +924,7 @@ unsigned long __asm __saveds L_Config_Environment(
 									}
 
 									// Launch function
-									CLI_Launch(func,data->window->WScreen,0,0,0,0,0);
+									CLI_Launch(func,data->window->WScreen,0,0,0,0,0,0);
 								}
 								break;
 
@@ -965,6 +982,12 @@ unsigned long __asm __saveds L_Config_Environment(
 							// Max. filename
 							case GAD_SETTINGS_MAX_FILENAME:
 								BoundsCheckGadget(data->option_list,GAD_SETTINGS_MAX_FILENAME,30,107);
+								break;
+
+
+							// Lister line spacing
+							case GAD_ENVIRONMENT_LISTER_VERTSPACE:
+								BoundsCheckGadget(data->option_list,GAD_ENVIRONMENT_LISTER_VERTSPACE,0,20);
 								break;
 
 

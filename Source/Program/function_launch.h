@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2023 Hagbard Celine
+Copyright 2023,2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -39,6 +39,10 @@ For more information on Directory Opus for Windows please see:
 #ifndef _GALILEOFM_FUNCTION_LAUNCH
 #define _GALILEOFM_FUNCTION_LAUNCH
 
+#include "buttons.h"
+#include "dirlist.h"
+#include "app_msg.h"
+
 #define COMMAND_LINE_LEN	512
 
 enum
@@ -60,6 +64,7 @@ typedef struct _FunctionEntry
 	DirEntry		*fe_entry;
 	short			fe_type;
 	short			fe_flags;
+	BPTR			fe_lock;
 	long			fe_size;
 } FunctionEntry;
 
@@ -70,6 +75,7 @@ typedef struct
 	short			een_flags;
 	DirEntry		*een_entry;
 	char			*een_name;
+	BPTR			een_lock;
 	char			een_path[1];
 } ExternalEntry;
 
@@ -80,7 +86,7 @@ typedef struct _InstructionParsed
 	short			ipa_type;
 	unsigned char		*ipa_string;
 	ULONG			ipa_flags;
-	char			ipa_inst_data[680];
+	char			ipa_inst_data[256];
 	ULONG			ipa_inst_flags;
 	FuncArgs		*ipa_funcargs;
 	short			ipa_new_arg;
@@ -112,14 +118,20 @@ typedef struct _AsyncData
 #define FUNCENTF_ICON_ONLY		(1<<10)
 #define FUNCENTF_LINK			(1<<11)	// Link
 #define FUNCENTF_FAKE_ICON		(1<<12)
+#define FUNCENTF_ASSIGN			(1<<13) // Assign to directory
+#define FUNCENTF_MULTI_ASSIGN		(1<<14) // Assign to directory
 
 typedef struct _PathNode
 {
 	struct MinNode		pn_node;
-	char			pn_path_buf[512];
+	char			*pn_path_buf;
 	char			*pn_path;
 	Lister			*pn_lister;
 	ULONG			pn_flags;
+	BPTR			pn_lock;
+	BPTR			pn_recurse_lock;
+	STRPTR			pn_alt_path;
+	BPTR			pn_alt_lock;
 } PathNode;
 
 #define LISTNF_INVALID		(1<<0)	// List is invalid
@@ -128,8 +140,9 @@ typedef struct _PathNode
 #define LISTNF_SAME		(1<<3)	// Same as the source
 #define LISTNF_CHANGED		(1<<4)	// Use internal buffer
 #define LISTNF_UPDATE_STAMP	(1<<5)	// Update datestamp
-#define LISTNF_RESCAN		(1<<6)	// Rescan this list
+#define LISTNF_RESCAN		(1<<6)	// Rescan this lister
 #define LISTNF_NO_REFRESH	(1<<7)	// Don't refresh this lister
+#define LISTNF_MADE_LOCK	(1<<8)	// Temp lock made for PathNode
 
 typedef struct
 {
@@ -142,6 +155,7 @@ typedef struct
 	struct Node		node;
 	struct MinList		files;
 	Lister			*lister;
+	BPTR			lock;
 	short			count;
 	char			path[1];
 } FileChangeList;
@@ -180,8 +194,8 @@ typedef struct _FunctionHandle
     ULONG			data;			// Function data
     ULONG			flags;			// Function flags
 
-    char			func_source_path[512];	// Source path
-    char			func_dest_path[512];	// Destination path
+    char			*func_source_path;	// Source path
+    char			*func_dest_path;	// Destination path
 
     int				entry_count;		// Total number of entries
     struct List			entry_list;		// Entries to work on
@@ -205,7 +219,7 @@ typedef struct _FunctionHandle
     struct List			recurse_list;		// List of files collected recursively
     FunctionEntry		*current_recurse;	// Current recursively-collected file
 
-    struct AnchorPath	       *anchor;		       // Anchor for recursing directories
+    struct AnchorPath		*anchor;	        // Anchor for recursing directories
     char			*anchor_path;		// Full pathname for anchor
     int				recurse_return;		// Result code from last return
     FunctionEntry		*recurse_entry;		// Recursively collected entry
@@ -226,8 +240,8 @@ typedef struct _FunctionHandle
 
     char			func_work_buf[1024];	// A buffer to do things in
 
-    PathList			func_source_paths;	     // List of source paths
-    PathList			func_dest_paths;	     // List of destination paths
+    PathList			func_source_paths;	// List of source paths
+    PathList			func_dest_paths;	// List of destination paths
 
     struct FileInfoBlock				// Some FileInfoBlocks to play with
 				*s_info,
@@ -242,7 +256,7 @@ typedef struct _FunctionHandle
 
     struct FileInfoBlock	recurse_info;		// Info on last recursed entry
 
-    char			last_filename[512];	// Last filename used
+    char			*last_filename;		// Last filename used
 
     APTR			script_file;		// External script file
     char			script_name[80];	// Script file name
@@ -292,7 +306,8 @@ typedef struct _FunctionHandle
     struct FileRequester	*filereq;		// File requester
     struct IBox			coords;			// Coordinates
 
-    struct _GalileoAppMessage	*app_msg;		// AppMessage from drag&drop
+    struct AppMessage		*app_msg;		// AppMessage from drag&drop
+    GalileoListerAppMessage     *lister_app_msg;	// Internal drag&drop
 
     struct List			filechange;		// File changes
 
@@ -308,6 +323,10 @@ typedef struct _FunctionHandle
     short			ret_code;
 
     ULONG			func_additional_flags;
+
+    BPTR			func_source_lock;	// Source path
+    BPTR			func_dest_lock;		// Destination path
+    BPTR			func_drop_on_lock;	// Drag'n'drop destination, must unlock
 } FunctionHandle;
 
 
@@ -328,7 +347,7 @@ typedef struct _FunctionReturn {
 #define FUNCF_CAN_DO_ICONS		(1<<6)	// Function can do icons
 #define FUNCF_SINGLE_SOURCE		(1<<8)	// Only a single source needed
 #define FUNCF_SINGLE_DEST		(1<<9)	// Only a single destination needed
-
+#define FUNCF_WBARG_PASSTRUGH           (1<<10)
 #define FUNCF_WANT_DEST			(1<<11)	// Want destinations, don't need them
 #define FUNCF_WANT_SOURCE		(1<<12)	// Want source, don't need it
 #define FUNCF_CREATE_SOURCE		(1<<13)	// Can create our own source
@@ -352,6 +371,7 @@ typedef struct _FunctionReturn {
 #define FUNCF_RUN_NO_ICONS		(1<<28)	// Don't run using icons (double-click kludge)
 #define FUNCF_COPY_NO_MOVE		(1<<28)	// Don't move even if on same volume (drag'n'drop kludge)
 
+#define FUNCF_DROPON_LOCK		(1<<29) // Drag'n'drop on entry, must unlock supplied destination lock
 #define FUNCF_LAST_FILE_FLAG		(1<<29)	// Still using last file
 #define FUNCF_GOT_SOURCE		(1<<30)	// Got a source
 #define FUNCF_GOT_DEST			(1<<31)	// Got a destination
@@ -392,123 +412,6 @@ typedef struct _FunctionReturn {
 #define PARSE_ABORT			-1
 #define PARSE_INVALID			-2
 
-// protos
-BOOL function_launch_quick(ULONG,Cfg_Function *,Lister *);
-BOOL function_launch(ULONG,Cfg_Function *,ULONG,ULONG,Lister *,Lister *,char *,char *,struct ArgArray *,struct Message *,Buttons *);
-FunctionHandle *function_new_handle(struct MsgPort *,BOOL);
-void function_handle_init(FunctionHandle *,BOOL);
-ULONG __asm function_init(register __a0 IPCData *ipc,register __a1 FunctionHandle *handle);
-void function_free(FunctionHandle *);
-void __saveds function_launch_code(void);
-BOOL function_check_abort(FunctionHandle *);
-Lister *function_valid_lister(FunctionHandle *handle,Lister *lister);
-BOOL function_lock_paths(FunctionHandle *handle,PathList *,int);
-void function_unlock_paths(FunctionHandle *handle,PathList *,int);
-
-int function_build_list(FunctionHandle *function,PathNode **,InstructionParsed *);
-FunctionEntry *function_new_entry(FunctionHandle *,char *,BOOL);
-FunctionEntry *function_current_entry(FunctionHandle *handle);
-FunctionEntry *function_next_entry(FunctionHandle *handle);
-void function_files_from_args(FunctionHandle *handle);
-char *function_build_file_string(FunctionHandle *handle,short);
-
-void function_progress_on(FunctionHandle *handle,char *operation,ULONG total,ULONG flags);
-BOOL function_progress_update(FunctionHandle *handle,FunctionEntry *entry,ULONG count);
-Lister *function_get_paths(FunctionHandle *,PathList *,ULONG,short);
-BOOL function_valid_path(PathNode *path);
-PathNode *function_add_path(FunctionHandle *,PathList *,Lister *,char *);
-
-void function_read_directory(FunctionHandle *handle,Lister *lister,char *);
-void buffer_list_buffers(Lister *dest_lister);
-void build_device_list(Lister *lister);
-
-void function_run_function(FunctionHandle *);
-function_parse_function(FunctionHandle *);
-void function_parse_arguments(FunctionHandle *,InstructionParsed *);
-void function_parse_instruction(FunctionHandle *,char *,unsigned char *,ULONG *);
-short function_run(FunctionHandle *);
-function_run_instruction(FunctionHandle *,InstructionParsed *);
-function_build_instruction(FunctionHandle *,InstructionParsed *,unsigned char *,char *);
-function_add_filename(char *,char *,char *,int,short);
-void function_build_default(FunctionHandle *handle,char *def_string,char *buffer);
-BOOL function_check_paths(FunctionHandle *handle);
-short function_check_single(FunctionHandle *,long,long,short);
-
-function_internal_command(struct _CommandList *,char *,FunctionHandle *,InstructionParsed *);
-function_internal_async(AsyncData *);
-ULONG __asm __saveds async_command_startup(register __a0 IPCData *ipc, register __a1 AsyncData *adata);
-void __saveds async_command(void);
-struct _CommandList *function_find_internal(char **,short);
-ULONG parse_internal_function(char *str,char *template,ULONG orig_flags);
-char *parse_find_path(char *str);
-
-function_external_command(FunctionHandle *,InstructionParsed *);
-function_open_script(FunctionHandle *);
-function_write_script(FunctionHandle *,char *,short);
-void function_close_script(FunctionHandle *,int);
-
-short function_check_same_path(char *,char *);
-check_file_destination(FunctionHandle *handle,FunctionEntry *entry,char *destination,short *confirm_each);
-function_error(FunctionHandle *handle,char *name,int action_msg,int error_code);
-BOOL function_check_dirs(FunctionHandle *);
-FunctionEntry *function_get_entry(FunctionHandle *);
-function_end_entry(FunctionHandle *,FunctionEntry *,int);
-function_check_filter(FunctionHandle *handle);
-
-void function_abort(FunctionHandle *handle);
-void function_error_text(FunctionHandle *handle,int);
-void function_text(FunctionHandle *handle,char *text);
-function_request(FunctionHandle *,char *,ULONG,...);
-void function_build_source(FunctionHandle *handle,FunctionEntry *entry,char *buffer);
-void function_build_dest(FunctionHandle *handle,FunctionEntry *entry,char *buffer);
-PathNode *function_path_current(PathList *);
-Lister *function_lister_current(PathList *);
-PathNode *function_path_next(PathList *);
-void function_path_end(FunctionHandle *,PathList *,int);
-void function_cleanup(FunctionHandle *,PathNode *,BOOL);
-void function_do_lister_changes(FunctionHandle *,PathList *);
-void function_perform_changes(FunctionHandle *,PathNode *);
-
-void function_filetype(FunctionHandle *handle);
-
-void function_check_ins_path(
-	FunctionHandle *handle,
-	InstructionParsed *instruction,
-	PathList *path_list,
-	char path_type,
-	short locker);
-
-void function_replace_paths(
-	FunctionHandle *handle,
-	PathList *path_list,
-	char *new_path,
-	short locker);
-
-void function_progress_file(
-	FunctionHandle *handle,
-	long size,
-	long count);
-
-void function_progress_info(FunctionHandle *handle,char *info);
-
-short func_requester(
-	FunctionHandle *handle,
-	unsigned char *instruction,
-	char *buf,
-	short max_len,
-	short func_len,
-	short *position);
-
-FileChangeList *function_find_filechanges(FunctionHandle *,FileChangeList *,char *,Lister *,short *);
-FileChangeList *function_add_filechanges(FunctionHandle *,char *,Lister *);
-FileChange *function_filechange_addfile(FunctionHandle *,char *,struct FileInfoBlock *,NetworkInfo *,Lister *);
-FileChange *function_filechange_loadfile(FunctionHandle *,char *,char *,short);
-void function_filechange_reloadfile(FunctionHandle *,char *,char *,short);
-FileChange *function_filechange_delfile(FunctionHandle *,char *,char *,Lister *,BOOL);
-void function_filechange_do(FunctionHandle *,BOOL);
-
-FileChange *function_filechange_modify(FunctionHandle *,char *,char *,Tag tag,...);
-FileChange *function_filechange_rename(FunctionHandle *,char *,char *);
 
 #define FM_Size		( TAG_USER + 0x1 )
 #define FM_Date		( TAG_USER + 0x2 )
@@ -522,16 +425,9 @@ FileChange *function_filechange_rename(FunctionHandle *,char *,char *);
 #define FMF_COMMENT	(1<<3)
 #define FMF_NAME	(1<<4)
 
-void function_build_info(FunctionHandle *handle,char *,char *,short);
 
 #define FFLF_ICON	(1<<0)
 #define FFLF_RELOAD	(1<<1)
 #define FFLF_DEFERRED	(1<<2)
-
-
-void function_iconinfo_update(FunctionHandle *handle,Att_List *list);
-
-void get_trunc_filename(char *source,char *dest);
-void get_trunc_path(char *source,char *dest);
 
 #endif

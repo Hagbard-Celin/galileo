@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,25 +37,34 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "function_launch_protos.h"
+#include "reselect_protos.h"
+#include "function_protos.h"
+#include "buffers_protos.h"
+#include "status_text_protos.h"
+#include "position_protos.h"
+#include "filetypes_protos.h"
+#include "envoy.h"
+#include "lsprintf_protos.h"
 #include <libraries/multiuser.h>
 #include <proto/multiuser.h>
 
-read_dir(DirBuffer *,Lister *,FunctionHandle *,BPTR,struct InfoData *,ReselectionData *);
-void readdir_check_format(Lister *lister,char *path,ListFormat *,BOOL);
+static short read_dir(DirBuffer *,Lister *,FunctionHandle *,BPTR,ReselectionData *);
+static void readdir_check_format(Lister *lister, char *path, BPTR lock, ListFormat *, BOOL);
 
-#define PATH_FULL_DEVICE	handle->func_work_buf
-#define PATH_FULL_NAME		handle->func_work_buf+768
 
 // Sets up and reads a new directory
 // Called from FUNCTION PROCESS
 void function_read_directory(
 	FunctionHandle *handle,
 	Lister *lister,
-	char *source_path)
+	char *source_path,
+	BPTR source_lock)
 {
 	ReselectionData reselect;
 	BPTR lock;
-	short ret;
+	short ret, volnamelen = 0;
 	BOOL same=0,noread=0;
 	struct DateStamp stamp,*stamp_ptr=0;
 	struct InfoData __aligned info;
@@ -62,6 +72,7 @@ void function_read_directory(
 	char *ptr;
 	DirBuffer *buffer;
 	ULONG disktype=0;
+	STRPTR path_full_name, path_full_device;
 
 	// If we're currently displaying a special buffer, return to a normal one
 	IPC_Command(
@@ -70,18 +81,27 @@ void function_read_directory(
 		0,0,0,
 		REPLY_NO_PORT);
 
-	// Get last character of path, strip if it's a /
-	ptr=source_path+strlen(source_path)-1;
-	if (*ptr=='/') *ptr=0;
+	if (!source_lock)
+	{
+	    if (!source_path || !source_path[0])
+		return;
+
+	    // Get last character of path, strip if it's a /
+	    ptr=source_path+strlen(source_path)-1;
+	    if (*ptr=='/') *ptr=0;
+
+	    lock = LockFromPath(source_path, NULL, NULL);
+	}
+	else
+	    lock = source_lock;
 
 	// Lock path to read
-	if (lock=Lock(source_path,ACCESS_READ))
+	if (lock)
 	{
 		struct DosList *doslist;
 
-		// Get full paths
-		NameFromLock(lock,PATH_FULL_NAME,256);
-		DevNameFromLock(lock,PATH_FULL_DEVICE,256);
+		path_full_name = PathFromLock(NULL, lock, PFLF_END_SLASH, NULL);
+		path_full_device = PathFromLock(NULL, lock, PFLF_USE_DEVICENAME|PFLF_END_SLASH, NULL);
 
 		// Get disk information
 		Info(lock,&info);
@@ -92,6 +112,8 @@ void function_read_directory(
 			// Get date stamp
 			stamp=doslist->dol_misc.dol_volume.dol_VolumeDate;
 			stamp_ptr=&stamp;
+
+			volnamelen = *(UBYTE *)BADDR(doslist->dol_Name);
 
 			// Get disk type
 			disktype=doslist->dol_misc.dol_volume.dol_DiskType;
@@ -104,13 +126,17 @@ void function_read_directory(
 	// Couldn't lock
 	else
 	{
-		strcpy(PATH_FULL_NAME,source_path);
-		strcpy(PATH_FULL_DEVICE,source_path);
+	    if (!(strchr(source_path,':')))
+	    {
+			path_full_name = JoinString(0, lister->cur_buffer->buf_Path, source_path, NULL, JSF_E_SLASH);
+			path_full_device = CopyString(0, path_full_name);
+	    }
+	    else
+	    {
+			path_full_name = CopyString(0, source_path);
+			path_full_device = CopyString(0, path_full_name);
+	    }
 	}
-
-	// Make sure paths are terminated
-	AddPart(PATH_FULL_DEVICE,"",256);
-	AddPart(PATH_FULL_NAME,"",256);
 
 	// Store current list format
 	oldformat=lister->cur_buffer->buf_ListFormat;
@@ -145,20 +171,36 @@ void function_read_directory(
 		}
 */
 
+		if (source_lock)
+		{
+		    buffer=(DirBuffer *)IPC_Command(
+			lister->ipc,
+			LISTER_BUFFER_FIND_LOCK,
+			(ULONG)stamp_ptr,
+			(APTR)lock,
+			0,
+			REPLY_NO_PORT);
+		}
 		// Look for path
-		if (buffer=(DirBuffer *)IPC_Command(
+		else
+		{
+		    buffer=(DirBuffer *)IPC_Command(
 			lister->ipc,
 			LISTER_BUFFER_FIND,
 			(ULONG)stamp_ptr,
-			(APTR)PATH_FULL_DEVICE,
+			(APTR)path_full_device,
 			0,
-			REPLY_NO_PORT))
+			REPLY_NO_PORT);
+		}
+
+		if (buffer)
 		{
 			// Found it
-			UnLock(lock);
+			if (lock != buffer->buf_Lock)
+			    UnLock(lock);
 
 			// Check for special sort format
-			readdir_check_format(lister,PATH_FULL_NAME,&oldformat,same);
+			readdir_check_format(lister, path_full_name, buffer->buf_Lock, &oldformat, same);
 
 			// Store format
 			lister->format=oldformat;
@@ -175,28 +217,83 @@ void function_read_directory(
 	// Still reading?
 	if (!noread)
 	{
+		ULONG flags = FREEDIRF_FREE_LOCK;
+
 		// Empty buffer?
 		if (handle->flags&GETDIRF_CANMOVEEMPTY)
 		{
+		    if (source_lock)
+		    {
+			IPC_Command(
+				lister->ipc,
+				LISTER_BUFFER_FIND_EMPTY_LOCK,
+				(ULONG)stamp_ptr,
+				(APTR)lock,
+				0,
+				REPLY_NO_PORT);
+		    }
+		    else
+		    {
 			IPC_Command(
 				lister->ipc,
 				LISTER_BUFFER_FIND_EMPTY,
 				(ULONG)stamp_ptr,
-				(APTR)PATH_FULL_DEVICE,
+				(APTR)path_full_device,
 				0,
 				REPLY_NO_PORT);
+		    }
 		}
 
 		// Get buffer
 		buffer=lister->cur_buffer;
 
-		// Same path?
-		if (stricmp(buffer->buf_Path,PATH_FULL_DEVICE)==0)
-			same=1;
 
-		// Store paths
-		strcpy(buffer->buf_Path,PATH_FULL_DEVICE);
-		strcpy(buffer->buf_ExpandedPath,PATH_FULL_NAME);
+		if (source_lock)
+		{
+		    // Same lock?
+		    if (source_lock == buffer->buf_Lock)
+		    {
+				flags &= ~(FREEDIRF_FREE_LOCK);
+				same=1;
+		    }
+		    else
+		    if (SameLock(source_lock,buffer->buf_Lock) == LOCK_SAME)
+		    {
+		        UnLock(source_lock);
+		        lock = buffer->buf_Lock;
+			flags &= ~(FREEDIRF_FREE_LOCK);
+			same=1;
+		    }
+		}
+		// Same path?
+		else
+		if (buffer->buf_Path && (source_path == buffer->buf_Path || stricmp(buffer->buf_Path,path_full_device)==0))
+		{
+			//flags &= ~(FREEDIRF_FREE_PATH|FREEDIRF_FREE_EXPANDEDPATH);
+			same=1;
+		}
+
+		if (!same)
+		{
+		    Forbid();
+		    // Store paths
+		    if (path_full_device)
+		    {
+			STRPTR oldpath = buffer->buf_Path;
+			buffer->buf_Path = path_full_device;
+			if (oldpath)
+			    FreeMemH(oldpath);
+		    }
+
+		    if (path_full_name)
+		    {
+			STRPTR oldpath = buffer->buf_ExpandedPath;
+			buffer->buf_ExpandedPath = path_full_name;
+			if (oldpath)
+			    FreeMemH(oldpath);
+		    }
+		    Permit();
+		}
 
 		// Refresh path field
 		IPC_Command(lister->ipc,LISTER_REFRESH_PATH,0,0,0,0);
@@ -221,10 +318,14 @@ void function_read_directory(
 		}
 
 		// Free buffer
-		buffer_freedir(buffer,0); /******* was 1 ******/
+		buffer_freedir(buffer,flags); /******* was 1 ******/
 
 		// Default to previous format
 		lister->cur_buffer->buf_ListFormat=oldformat;
+
+		// Store lock
+		if (lock && flags&FREEDIRF_FREE_LOCK)
+		    buffer->buf_Lock = lock;
 
 		// Unlock buffer
 		buffer_unlock(buffer);
@@ -233,10 +334,16 @@ void function_read_directory(
 		IPC_Command(
 			lister->ipc,
 			LISTER_REFRESH_WINDOW,
-			REFRESHF_UPDATE_NAME|REFRESHF_STATUS|REFRESHF_SLIDERS|REFRESHF_CLEAR_ICONS,
+			REFRESHF_UPDATE_NAME|REFRESHF_STATUS|REFRESHF_SLIDERS|REFRESHF_CLEAR_ICONS|REFRESHF_NO_DIRLIST,
 			0,
 			0,
 			REPLY_NO_PORT);
+			// Clear file area
+			EraseRect(&lister->list_area.rast,
+				lister->list_area.rect.MinX,
+				lister->list_area.rect.MinY,
+				lister->list_area.rect.MaxX,
+				lister->list_area.rect.MaxY);
 
 		// Invalid directory?
 		if (!lock)
@@ -253,20 +360,22 @@ void function_read_directory(
 			buffer_lock(buffer,TRUE);
 
 			// Check format
-			readdir_check_format(lister,PATH_FULL_NAME,&oldformat,same);
+			readdir_check_format(lister, path_full_name, lock, &oldformat, same);
 
 			// Store format
 			buffer->buf_ListFormat=oldformat;
 
-	/**************/
+			/**************/
 			lister->format=oldformat;
-	/**************/
+			/**************/
 
 			// Save disk type
 			buffer->buf_DiskType=disktype;
 
+			buffer->buf_VolNameLength = volnamelen;
+
 			// Get volume name
-			stccpy(buffer->buf_VolumeLabel,buffer->buf_ExpandedPath,32);
+			stccpy(buffer->buf_VolumeLabel,path_full_name,32);
 			if (ptr=strchr(buffer->buf_VolumeLabel,':')) *ptr=0;
 
 			// Unlock buffer
@@ -278,12 +387,12 @@ void function_read_directory(
 				lister,
 				handle,
 				lock,
-				&info,
+				/*&info,*/
 				(handle->flags&GETDIRF_RESELECT)?&reselect:0);
 		}
 
 		// Unlock directory
-		UnLock(lock);
+		//UnLock(lock);
 
 		// Store disk stamp
 		if (stamp_ptr) buffer->buf_VolumeDate=*stamp_ptr;
@@ -312,6 +421,7 @@ void function_read_directory(
 	if (lock)
 	{
 		short mode;
+	        struct DateStamp date = {0};
 
 		// Refresh
 		IPC_Command(
@@ -326,29 +436,47 @@ void function_read_directory(
 
 		// Get icons if necessary
 		if (lister->flags&(LISTERF_VIEW_ICONS|LISTERF_ICON_ACTION))
+		{
 			lister_get_icons(handle,lister,0,GETICONSF_SHOW);
-
+		}
 		// Initial mode
 		mode=(lister->flags&LISTERF_VIEW_ICONS)?0:LISTERMODE_ICON;
 
+		VolIdFromLock(lock, &date, NULL);
+
 		// Get position entry
-		if (!(GetListerPosition(PATH_FULL_NAME,0,0,&lister->other_dims,&mode,0,0,0,GLPF_USE_MODE)))
+		if (!(GetListerPosition(path_full_name, &date, 0, 0, &lister->other_dims, &mode, 0, 0, 0, GLPF_USE_MODE)))
 		{
 			// No entry; use same dimensions as current
 			if (lister_valid_window(lister)) lister->other_dims=*((struct IBox *)&lister->window->LeftEdge);
 		}
+	}
+
+	if (noread)
+	{
+	    if (path_full_device)
+		FreeMemH(path_full_device);
+	    if (path_full_name)
+		FreeMemH(path_full_name);
+	}
+
+	if (same)
+	{
+	    if (path_full_device)
+		FreeMemH(path_full_device);
+	    if (path_full_name)
+		FreeMemH(path_full_name);
 	}
 }
 
 
 // Read a directory into a buffer
 // Called from FUNCTION PROCESS
-read_dir(
+static short read_dir(
 	DirBuffer *buffer,
 	Lister *lister,
 	FunctionHandle *handle,
 	BPTR lock,
-	struct InfoData *info,
 	ReselectionData *reselect)
 {
 	long file_count=0,dir_count=0;
@@ -356,7 +484,6 @@ read_dir(
 	BPTR parent;
 	DirEntry *entry;
 	struct MinList file_list;
-	struct DevProc *proc;
 	NetworkInfo network,*network_ptr=0;
 	short sniff=SNIFFF_NO_FILETYPES;
 	short item;
@@ -398,9 +525,6 @@ read_dir(
 		FreeDosObject(DOS_FIB,fileinfo);
 		return 0;
 	}
-
-	// Get device process
-	proc=GetDeviceProc(buffer->buf_Path,0);
 
 	// Store directory datestamp
 	buffer->buf_DirectoryDate=fileinfo->fib_Date;
@@ -451,7 +575,7 @@ read_dir(
 				network_get_info(
 					network_ptr,
 					buffer,
-					proc,
+					buffer->buf_Lock,
 					fileinfo->fib_OwnerUID,
 					fileinfo->fib_OwnerGID,
 					fileinfo->fib_Protection);
@@ -494,9 +618,6 @@ read_dir(
 		}
 	}
 
-	// Free device process
-	FreeDeviceProc(proc);
-
 	// Reselection list?
 	if (reselect && reselect->flags&RESELF_SAVE_FILETYPES)
 		GetReselectFiletypes(reselect,&file_list);
@@ -517,8 +638,8 @@ read_dir(
 	buffer->flags&=~DWF_READING;
 	buffer->flags|=DWF_VALID;
 
-    // Clear fake-dir flag
-    lister->more_flags&=~LISTERF_FAKEDIR;
+	// Clear fake-dir flag
+	lister->more_flags&=~LISTERF_FAKEDIR;
 
 	// Free up
 	FreeDosObject(DOS_FIB,fileinfo);
@@ -530,13 +651,17 @@ read_dir(
 void network_get_info(
 	NetworkInfo *network,
 	DirBuffer *buffer,
-	struct DevProc *proc,
+	BPTR lock,
 	UWORD owner,
 	UWORD group,
 	ULONG protection)
 {
 	char *ptr;
+	struct MsgPort *port;
 	short a,b;
+
+	// Get device process message port
+	port = ((struct FileLock *)BADDR(buffer->buf_Lock))->fl_Task;
 
 	// Initialise network info
 	network->owner_id=owner;
@@ -553,7 +678,7 @@ void network_get_info(
 
 		// Try sending packet
 		else
-		if (buffer->user_info && (DoPkt(proc->dvp_Port,ACTION_UID_TO_USERINFO,owner,(ULONG)buffer->user_info,0,0,0)))
+		if (buffer->user_info && (DoPkt(port,ACTION_UID_TO_USERINFO,owner,(ULONG)buffer->user_info,0,0,0)))
 		{
 			// Store owner for next time
 			buffer->last_owner=owner;
@@ -601,7 +726,7 @@ void network_get_info(
 
 		// Try sending packet
 		else
-		if (buffer->group_info && (DoPkt(proc->dvp_Port,ACTION_GID_TO_GROUPINFO,group,(ULONG)buffer->group_info,0,0,0)))
+		if (buffer->group_info && (DoPkt(port,ACTION_GID_TO_GROUPINFO,group,(ULONG)buffer->group_info,0,0,0)))
 		{
 			// Store owner for next time
 			buffer->last_group=group;
@@ -659,9 +784,12 @@ void network_get_info(
 
 
 // Check sort format
-void readdir_check_format(Lister *lister,char *path,ListFormat *format,BOOL same)
+static void readdir_check_format(Lister *lister, char *path, BPTR lock, ListFormat *format, BOOL same)
 {
 	position_rec *pos;
+	struct DateStamp date = {0};
+
+	VolIdFromLock(lock, &date, NULL);
 
 	// Is format locked, or this is a rescan?
 	if (lister->more_flags&LISTERF_LOCK_FORMAT || same)
@@ -672,7 +800,7 @@ void readdir_check_format(Lister *lister,char *path,ListFormat *format,BOOL same
 
 	// See if position is supplied
 	else
-	if (!(pos=GetListerPosition(path,0,0,0,0,format,0,0,0)) ||
+	if (!(pos=GetListerPosition(path, &date, 0, 0, 0, 0, format, 0, 0, 0)) ||
 		!(pos->flags&POSITIONF_FORMAT))
 	{
 		// Use current format from lister

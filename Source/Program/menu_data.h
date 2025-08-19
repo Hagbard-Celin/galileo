@@ -35,6 +35,11 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#ifndef GALILEOFM_MENU_DATA_H
+#define GALILEOFM_MENU_DATA_H
+
+#include "help.h"
+
 extern MenuData galileo_menus[];
 extern MenuHelp menu_help_data[];
 
@@ -276,3 +281,5 @@ enum
 
 	MENU_EXTENSION=10000,
 };
+
+#endif

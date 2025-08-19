@@ -36,6 +36,8 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "backdrop_protos.h"
 
 // Handle backdrop icon idcmp stuff
 BOOL backdrop_idcmp(BackdropInfo *info,struct IntuiMessage *msg,unsigned short flags)

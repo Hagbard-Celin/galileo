@@ -31,11 +31,17 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "function_launch_protos.h"
+#include "requesters.h"
+#include "rexx_protos.h"
+#include "commands.h"
+#include "lsprintf_protos.h"
 
 //#define RX_DEBUG
 
@@ -170,7 +176,7 @@ void __saveds rexx_proc(void)
 				rexx_handle_appmsg(amsg);
 
 				// Reply to it
-				ReplyAppMessage((GalileoAppMessage *)amsg);
+				ReplyAppMessage((struct AppMessage *)amsg);
 			}
 		}
 
@@ -342,6 +348,10 @@ void __saveds rexx_proc(void)
 
 	// Exit
 	IPC_Free(ipc);
+
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }
 
 
@@ -421,7 +431,6 @@ BOOL rexx_process_msg(struct RexxMsg *msg,struct MsgPort *reply,long *count)
 		Lister *source=0,*dest=0;
 		BOOL sync=0,orig=0;
 		short opt;
-        char sourcepath[512]="\0", destpath[512]="\0";
 
 		// Skip spaces
 		rexx_skip_space(&commandptr);
@@ -446,14 +455,14 @@ BOOL rexx_process_msg(struct RexxMsg *msg,struct MsgPort *reply,long *count)
 					{
 						// Source?
 						if (opt==RXCOM_SOURCE)
-                        {
-                            source=lister;
-                        }
+						{
+						    source=lister;
+						}
 						// Dest
 						else
-                        {
-                            dest=lister;
-                        }
+						{
+						    dest=lister;
+						}
 					}
 
 					// Fail with an error
@@ -518,8 +527,8 @@ BOOL rexx_process_msg(struct RexxMsg *msg,struct MsgPort *reply,long *count)
 				0,
 				(reply_msg)?FUNCF_SYNC:0,
 				source,dest,
-				(sourcepath[0])?sourcepath:0,
-                (destpath[0])?destpath:0,
+				0,0,
+				0,0,
 				0,reply_msg,0);
 		}
 #endif
@@ -689,7 +698,7 @@ RexxReader *rexx_read_file(short command,char *args,struct RexxMsg *msg)
 		if ((reader=AllocVec(sizeof(RexxReader),MEMF_CLEAR)) &&
 			(startup=AllocVec(sizeof(struct read_startup),MEMF_CLEAR)) &&
 			(startup->files=(struct List *)Att_NewList(0)) &&
-			(node=Att_NewNode((Att_List *)startup->files,args,0,0)))
+			(node=Att_NewNode((Att_List *)startup->files,args,0,ADDNODE_LOCKNODE)))
 		{
 			// Set delete flag
 			if (delete) node->node.ln_Pri=1;

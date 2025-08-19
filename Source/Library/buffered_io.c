@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -46,7 +46,6 @@ typedef struct
 	long		buffer_fill;	// Amount of data in buffer
 	long		file_pos;		// Position in file
 	long		write_total;	// Amount of write data
-	void		*dos;			// DOS library pointer
 } BufFile;
 
 // Open a buffered file
@@ -68,9 +67,6 @@ APTR __asm __saveds L_OpenBuf(
 		return 0;
 	}
 
-	// Store DOS pointer
-	file->dos=DOSBase;
-
 	// Allocate buffer
 	if (buffer_size>0)
 	{
@@ -81,8 +77,6 @@ APTR __asm __saveds L_OpenBuf(
 	return file;
 }
 
-
-#define DOSBase	(((BufFile *)file)->dos)
 
 // Close a buffered file
 long __asm __saveds L_CloseBuf(register __a0 APTR file)
@@ -95,7 +89,8 @@ long __asm __saveds L_CloseBuf(register __a0 APTR file)
 		total=L_FlushBuf(file);
 
 		// Free buffer
-		FreeVec(((BufFile *)file)->buffer);
+		if (((BufFile *)file)->buffer)
+		    FreeVec(((BufFile *)file)->buffer);
 
 		// Close file
 		Close(((BufFile *)file)->file);

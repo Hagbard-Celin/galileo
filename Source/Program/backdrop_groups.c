@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,16 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "app_msg_protos.h"
+#include "backdrop_protos.h"
+#include "groups.h"
+#include "menu_data.h"
+#include "help.h"
+#include "scripts.h"
+#include "icons.h"
+#include "graphics.h"
+#include "lsprintf_protos.h"
 
 // Read program groups (icon list must be locked)
 void backdrop_read_groups(BackdropInfo *info)
@@ -166,7 +177,7 @@ void backdrop_open_group(BackdropInfo *info,BackdropObject *object,BOOL activate
 		"galileo_group",
 		(ULONG)backdrop_group_handler,
 		STACK_DEFAULT,
-		(ULONG)group,(struct Library *)DOSBase);
+		(ULONG)group);
 
 	// Failed?
 	if (!ipc) FreeVec(group);
@@ -230,96 +241,149 @@ void __saveds backdrop_group_handler(void)
 			// Got an AppWindow?
 			if (group->appwindow)
 			{
-				GalileoAppMessage *amsg;
+				struct AppMessage *amsg;
 				BOOL beep=0;
+				char disk[5] = "Disk";
 
 				// AppMessages?
-				while (amsg=(GalileoAppMessage *)GetMsg(group->appport))
+				while (amsg=(struct AppMessage *)GetMsg(group->appport))
 				{
-					short arg;
-					char path[256];
 					BackdropObject *drop_obj;
+					GalileoListerAppMessage *lamsg = 0;
+					//LONG numargs;
+					struct WBArg *arglist;
+					struct GLAData *argdata = 0;
+					WORD mousex, mousey;
+					WORD arg, numargs;
 
-					// Lock backdrop list
-					lock_listlock(&group->info->objects,1);
-
-					// Set busy pointer
-					if (group->window) SetBusyPointer(group->window);
-
-					// Dropped on an object?
-					if (drop_obj=backdrop_get_object(group->info,amsg->ga_Msg.am_MouseX,amsg->ga_Msg.am_MouseY,0))
+					if (amsg->am_Type == MTYPE_LISTER_APPWINDOW && amsg->am_Class == GLAMCLASS_LISTER)
 					{
-						UWORD qual;
-
-						// Get qualifiers
-						qual=(InputBase)?PeekQualifier():0;
-	
-						// Is shift/alt down?
-						if ((qual&(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))==(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))
-						{
-							// Get path of first file
-							GetWBArgPath(&amsg->ga_Msg.am_ArgList[0],path,256);
-
-							// Replace the image
-							backdrop_replace_icon_image(group->info,path,drop_obj);
-						}
-
-						// Run program with args
-						else
-						backdrop_object_open(
-							group->info,
-							drop_obj,
-							0,
-							0,
-							amsg->ga_Msg.am_NumArgs,
-							amsg->ga_Msg.am_ArgList);
+					    lamsg = (GalileoListerAppMessage *)amsg;
+					    numargs = lamsg->glam_NumArgs;
+					    arglist = lamsg->glam_ArgList;
+					    argdata = lamsg->glam_ArgData;
+					    mousex = lamsg->glam_MouseX;
+					    mousey = lamsg->glam_MouseY;
 					}
-
-					// Otherwise, adding objects to the group
 					else
-					for (arg=0;arg<amsg->ga_Msg.am_NumArgs;arg++)
 					{
-						// Valid name?
-						if (*amsg->ga_Msg.am_ArgList[arg].wa_Name)
-						{
-							short x,y;
-
-							// Get full path name
-							GetWBArgPath(&amsg->ga_Msg.am_ArgList[arg],path,256);
-
-							// Default to no position
-							x=-1;
-							y=-1;
-
-							// Galileo app message?
-							if (CheckAppMessage(amsg))
-							{
-								// Get icon position
-								x=amsg->ga_DragOffset.x+amsg->ga_Msg.am_MouseX+amsg->ga_DropPos[arg].x;
-								y=amsg->ga_DragOffset.y+amsg->ga_Msg.am_MouseY+amsg->ga_DropPos[arg].y;
-							}
-
-							// Add group object
-							backdrop_group_add_object(group->name,group->info,path,x,y);
-						}
-
-						// Otherwise, set beep flag for error
-						else
-						if (!beep)
-						{
-							beep=1;
-							DisplayBeep(group->window->WScreen);
-						}
+					    numargs = amsg->am_NumArgs;
+					    arglist = amsg->am_ArgList;
+					    mousex = amsg->am_MouseX;
+					    mousey = amsg->am_MouseY;
 					}
+					    // Lock backdrop list
+					    lock_listlock(&group->info->objects,1);
 
-					// Clear busy pointer
-					if (group->window) ClearPointer(group->window);
+					    // Set busy pointer
+					    if (group->window) SetBusyPointer(group->window);
 
-					// Unlock backdrop list
-					unlock_listlock(&group->info->objects);
+					    // Dropped on an object?
+					    if (drop_obj=backdrop_get_object(group->info,mousex,mousey,0))
+					    {
+						    UWORD qual;
 
-					// Reply to message
-					ReplyMsg((struct Message *)amsg);
+						    // Get qualifiers
+						    qual=(InputBase)?PeekQualifier():0;
+
+						    // Is shift/alt down?
+						    if ((qual&(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))==(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))
+						    {
+							    BPTR source_lock = 0;
+
+							    if (arglist[0].wa_Lock)
+							        source_lock = arglist[0].wa_Lock;
+							    else
+							    if (lamsg)
+							        source_lock = lamsg->glam_Lock;
+
+							    if (!argdata && WBArgDir(&arglist[0]))
+						            {
+							        BPTR parent_lock;
+
+							        // Try to get parent dir
+							        if (parent_lock = ParentDir(arglist[0].wa_Lock))
+							        {
+							            D_S(struct FileInfoBlock,tmp_fib);
+
+							            // Get directory name
+								    Examine(arglist[0].wa_Lock,tmp_fib);
+							            backdrop_replace_icon_image(group->info,tmp_fib->fib_FileName,parent_lock,drop_obj);
+							            UnLock(parent_lock);
+							        }
+							        else
+							            backdrop_replace_icon_image(group->info,disk,arglist[0].wa_Lock,drop_obj);
+						            }
+							    else
+							    {
+								if (argdata && argdata[0].glad_Flags == AAEF_DEV)
+								    backdrop_replace_icon_image(group->info,disk,source_lock,drop_obj);
+							        else
+								    backdrop_replace_icon_image(group->info,arglist[0].wa_Name,source_lock,drop_obj);
+							    }
+						    }
+
+						    // Run program with args
+						    else
+						    backdrop_object_open(
+							    group->info,
+							    drop_obj,
+							    0,
+							    0,
+							    lamsg,
+							    (lamsg)?0:amsg);
+					    }
+
+					    // Otherwise, adding objects to the group
+					    else
+					    for (arg=0;arg<numargs;arg++)
+					    {
+						    // Valid name?
+						    if (*arglist[arg].wa_Name)
+						    {
+							    short x,y;
+							    BPTR lock = 0;
+
+							    if (arglist[arg].wa_Lock)
+								lock = arglist[arg].wa_Lock;
+							    else
+							    if (lamsg)
+								lock = lamsg->glam_Lock;
+
+							    // Default to no position
+							    x=-1;
+							    y=-1;
+
+							    if (argdata)
+							    {
+							        // Get icon position
+							        x=lamsg->glam_DragOffset.x+lamsg->glam_MouseX+argdata[arg].glad_DropPos.x;
+							        y=lamsg->glam_DragOffset.y+lamsg->glam_MouseY+argdata[arg].glad_DropPos.y;
+							    }
+
+							    // Add group object
+							    backdrop_group_add_object(group->name,group->info,arglist[arg].wa_Name,lock,x,y);
+						    }
+
+						    // Otherwise, set beep flag for error
+						    else
+						    if (!beep)
+						    {
+							    beep=1;
+							    DisplayBeep(group->window->WScreen);
+						    }
+					    }
+
+					    // Clear busy pointer
+					    if (group->window) ClearPointer(group->window);
+
+					    // Unlock backdrop list
+					    unlock_listlock(&group->info->objects);
+
+					    if (lamsg)
+						free_lister_appmsg(lamsg);
+					    else
+						ReplyMsg((struct Message *)amsg);
 				}
 			}
 
@@ -419,10 +483,13 @@ void __saveds backdrop_group_handler(void)
 						if (group->window) SetBusyPointer(group->window);
 
 						// Add object
-						backdrop_group_add_object(group->name,group->info,msg->data_free,-1,-1);
+						backdrop_group_add_object(group->name,group->info,msg->data_free,(BPTR)msg->data,-1,-1);
 
 						// Clear busy pointer
 						if (group->window) ClearPointer(group->window);
+
+						if (msg->data)
+						    UnLock((BPTR)msg->data);
 
 						// Unlock backdrop list
 						unlock_listlock(&group->info->objects);
@@ -697,6 +764,10 @@ void __saveds backdrop_group_handler(void)
 
 	// Exit
 	IPC_Free(ipc);
+
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }
 
 
@@ -710,7 +781,10 @@ ULONG __asm __saveds backdrop_group_init(
 	SET_IPCDATA(ipc,group);
 
 	// Create message port
-	group->appport=CreateMsgPort();
+	if (!(group->appport=CreateMsgPort()))
+	    return 0;
+
+	group->appport->mp_Node.ln_Type = GNT_LISTER_APPMSG_PORT;
 
 	// Create backdrop info and timer
 	if (!(group->info=backdrop_new(ipc,BDIF_GROUP)) ||
@@ -912,60 +986,77 @@ void backdrop_read_group_objects(GroupData *group)
 {
 	short ok;
 	BPTR lock,old;
-	struct FileInfoBlock *fib;
-	char *buffer;
+	struct FileInfoBlock __aligned fib;
 
-	// Allocate data
-	if (!(fib=AllocVec(sizeof(struct FileInfoBlock)+256,MEMF_CLEAR)))
-		return;
-	buffer=(char *)(fib+1);
+	if (!(lock =Lock("PROGDIR:groups",ACCESS_READ)))
+	    return;
 
-	// Get path to search
-	lsprintf(buffer,"PROGDIR:groups/%s",group->name);
+	old = CurrentDir(lock);
 
 	// Lock path
-	if (lock=Lock(buffer,ACCESS_READ))
+	if (lock=Lock(group->name,ACCESS_READ))
 	{
 		// Change to this directory
-		old=CurrentDir(lock);
+		UnLock(CurrentDir(lock));
 
 		// Search directory
-		ok=Examine(lock,fib);
-		while (ok && ExNext(lock,fib))
+		ok=Examine(lock,&fib);
+		while (ok && ExNext(lock,&fib))
 		{
 			BackdropObject *object;
-			Point pos;
-			ULONG flags;
+			group_record *record;
 
 			// Dereference object
-			if (group_dereference(0,fib->fib_FileName,buffer,&pos,&flags))
+			if (record = group_dereference(0,fib.fib_FileName))
 			{
-				// Lock backdrop list
-				lock_listlock(&group->info->objects,1);
+			    BPTR volume_lock, tmp;
+
+			    // Lock backdrop list
+			    lock_listlock(&group->info->objects,1);
+
+			    if (volume_lock = LockFromVolIdPath(record->name, NULL, &record->date, record->len, LFPF_TRY_ICON))
+			    {
+				tmp = CurrentDir(volume_lock);
 
 				// Create a new icon for this
-				if (object=backdrop_leftout_new(group->info,buffer,0,BLNF_CUSTOM_LABEL))
+				if (object=backdrop_leftout_new(group->info,record->name,0,fib.fib_FileName))
 				{
-					// Set label
-					strcpy(object->bdo_device_name,fib->fib_FileName);
+					BPTR parent_lock, tmp_lock;
 
 					// Got a position?
-					if (pos.x!=-1 && pos.y!=-1)
+					if (record->pos.x!=-1 && record->pos.y!=-1)
 					{
 						// Set position
 						object->bdo_flags|=BDOF_LEFTOUT_POS;
-						object->bdo_custom_pos=(pos.x<<16)|pos.y;
+						object->bdo_custom_pos=(record->pos.x<<16)|record->pos.y;
 					}
 
 					// No initial position
 					else object->bdo_flags|=BDOF_AUTO_POSITION;
-					
-					// Add object
-					backdrop_new_group_object(group->info,object,BDNF_CD);
-				}
 
-				// Unlock backdrop list
-				unlock_listlock(&group->info->objects);
+					object->bdo_date = record->date;
+					object->bdo_vol_name_len = record->len;
+
+					if (tmp_lock = LockFromPath(record->name + record->len + 1, NULL, FALSE))
+					{
+					    parent_lock = ParentDir(tmp_lock);
+					    UnLock(tmp_lock);
+					    UnLock(CurrentDir(parent_lock));
+					    // Add object
+					    backdrop_new_group_object(group->info,object,NULL);
+					    UnLock(CurrentDir(tmp));
+					}
+					else
+					    UnLock(CurrentDir(tmp));
+				}
+			        else
+				    UnLock(CurrentDir(tmp));
+			    }
+
+			    FreeVec(record);
+
+			    // Unlock backdrop list
+			    unlock_listlock(&group->info->objects);
 			}
 
 			// Window open?
@@ -994,9 +1085,6 @@ void backdrop_read_group_objects(GroupData *group)
 		// Restore directory
 		UnLock(CurrentDir(old));
 	}
-
-	// Clean up
-	FreeVec(fib);
 
 	// Lock backdrop list
 	lock_listlock(&group->info->objects,1);
@@ -1042,17 +1130,24 @@ void backdrop_check_groups(BackdropInfo *info)
 void backdrop_group_add_object(
 	char *groupname,
 	BackdropInfo *info,
-	char *path,
+	char *name,
+	BPTR parent_dir,
 	short x,
 	short y)
 {
 	struct DiskObject *icon;
-	char *filename,buffer[256];
-	BPTR lock;
+	char *path = 0;
+	BPTR lock, org_dir;
 	BOOL fail=0;
 
+	if (!parent_dir || !name)
+	    return;
+
+	org_dir = CurrentDir(parent_dir);
+
+
 	// Get object icon, must be tool or project
-	if (!(icon=GetProperIcon(path,0,0)) ||
+	if (!(icon=GetProperIcon(name,0,0)) ||
 		(icon->do_Type!=WBTOOL && icon->do_Type!=WBPROJECT))
 	{
 		// Failure
@@ -1061,21 +1156,65 @@ void backdrop_group_add_object(
 		return;
 	}
 
-	// Get filename
-	filename=FilePart(path);
-
-	// Check an object of this name isn't already in the group
-	lsprintf(buffer,"PROGDIR:groups/%s/%s",groupname,filename);
-	if (lock=Lock(buffer,ACCESS_READ))
+	if (lock=Lock("PROGDIR:groups",ACCESS_READ))
 	{
-		// Already exists
-		UnLock(lock);
-		fail=1;
-	}
+	    BPTR group_dir, tmp;
 
-	// Create pointer file
-	if (!fail && !(group_write_data(buffer,path,x,y,GetIconFlags(icon))))
-		fail=1;
+	    CurrentDir(lock);
+
+	    // Change to group directory
+	    if (group_dir = Lock(groupname, ACCESS_READ))
+	    {
+		UnLock(CurrentDir(group_dir));
+
+		// Check an object of this name isn't already in the group
+	        if (tmp = Lock(name, ACCESS_READ))
+	        {
+		    // Already exists
+		    UnLock(tmp);
+		    fail=1;
+		}
+	    }
+	    else
+	    {
+		UnLock(CurrentDir(org_dir));
+		fail = 1;
+	    }
+	}
+	else
+	    fail = 1;
+
+	if (!fail)
+	{
+	    if (path = PathFromLock(NULL, parent_dir, PFLF_END_SLASH, NULL))
+	    {
+	        struct FileLock *fl;
+	        struct DosList *volume;
+		group_record object;
+
+	        // Get filelock pointer
+		fl=(struct FileLock *)BADDR(parent_dir);
+
+	        // Get volume entry
+	        if (volume=(struct DosList *)BADDR(fl->fl_Volume))
+	        {
+		    object.date	= volume->dol_misc.dol_volume.dol_VolumeDate;
+		    object.len = *(UBYTE *)BADDR(volume->dol_Name);
+
+		    object.pos.x =x;
+		    object.pos.y =y;
+		    object.flags = GetIconFlags(icon);
+
+	            // Create pointer file
+		    if (!(group_write_data(name, path, name, &object)))
+		        fail = 1;
+	        }
+		else
+		    fail = 1;
+	    }
+	    else
+		fail = 1;
+	}
 
 	// Free icon
 	FreeCachedDiskObject(icon);
@@ -1083,14 +1222,16 @@ void backdrop_group_add_object(
 	// Written successfully?
 	if (!fail && info)
 	{
-		BackdropObject *object;
+	    BPTR volume_dir;
+	    BackdropObject *object;
 
+	    UnLock(CurrentDir(parent_dir));
+	    if (volume_dir = Lock(":", ACCESS_READ))
+	    {
+		CurrentDir(volume_dir);
 		// Create backdrop entry
-		if (object=backdrop_leftout_new(info,path,0,BLNF_CUSTOM_LABEL))
+		if (object=backdrop_leftout_new(info,name,path,name))
 		{
-			// Set label
-			strcpy(object->bdo_device_name,object->bdo_name);
-
 			// Got a position?
 			if (x!=-1 && y!=-1)
 			{
@@ -1102,11 +1243,28 @@ void backdrop_group_add_object(
 			// No initial position
 			else object->bdo_flags|=BDOF_AUTO_POSITION;
 
+			CurrentDir(parent_dir);
 			// Add object
-			backdrop_new_group_object(info,object,BDNF_CD|BDNF_RECALC);
+			backdrop_new_group_object(info,object,BDNF_RECALC);
+
 		}
-		else fail=1;
+		else
+		{
+		    CurrentDir(parent_dir);
+		    fail=1;
+		}
+
+		UnLock(volume_dir);
+	    }
 	}
+
+	if (path)
+	    FreeMemH(path);
+
+	CurrentDir(org_dir);
+
+	if (lock)
+	    UnLock(lock);
 
 	// Did we fail?
 	if (fail)

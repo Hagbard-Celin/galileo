@@ -37,9 +37,10 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "update.h"
-#include "/Program/position.h"
 
 char *version="$VER: update.gfmmodule 0.2 "__AMIGADATE__" ";
+
+BOOL alloc_fail = FALSE;
 
 int __asm __saveds L_Module_Entry(
 	register __a0 char *args,
@@ -143,8 +144,18 @@ int __asm __saveds L_Module_Entry(
 		flags|=UPDATEF_DONE_POSITION;
 	}
 
+	// Haven't done iffchunk?
+	if (!(flags&UPDATEF_DONE_IFFCHUNK))
+	{
+		// Open status window
+		if (!window) window=open_status(screen);
+
+		if (update_iffchunk())
+		    flags|=UPDATEF_DONE_IFFCHUNK;
+	}
+
 	// Haven't done leftouts?
-	if (!(flags&UPDATEF_DONE_LEFTOUTS))
+	if (!alloc_fail && !(flags&UPDATEF_DONE_LEFTOUTS))
 	{
 		struct List list;
 		APTR memory;
@@ -165,7 +176,7 @@ int __asm __saveds L_Module_Entry(
 	}
 
 	// Haven't done groups?
-	if (!(flags&UPDATEF_DONE_GROUPS) || !(flags&UPDATEF_DONE_FIXGROUPS))
+	if (!alloc_fail && !(flags&UPDATEF_DONE_GROUPS) || !(flags&UPDATEF_DONE_FIXGROUPS))
 	{
 		// Open status window
 		if (!window) window=open_status(screen);
@@ -175,7 +186,7 @@ int __asm __saveds L_Module_Entry(
 	}
 
 	// Haven't done storage?
-	if (!(flags&UPDATEF_DONE_STORAGE))
+	if (!alloc_fail && !(flags&UPDATEF_DONE_STORAGE))
 	{
 		// Open status window
 		if (!window) window=open_status(screen);
@@ -185,7 +196,7 @@ int __asm __saveds L_Module_Entry(
 	}
 
 	// Haven't done filetypes?
-	if (!(flags&UPDATEF_DONE_FILETYPES))
+	if (!alloc_fail && !(flags&UPDATEF_DONE_FILETYPES))
 	{
 		// Open status window
 		if (!window) window=open_status(screen);
@@ -200,18 +211,8 @@ int __asm __saveds L_Module_Entry(
 		flags|=UPDATEF_DONE_FILETYPES;
 	}
 
-	// Haven't done iffchunk?
-	if (!(flags&UPDATEF_DONE_IFFCHUNK))
-	{
-		// Open status window
-		if (!window) window=open_status(screen);
-
-		if (update_iffchunk())
-		    flags|=UPDATEF_DONE_IFFCHUNK;
-	}
-
 	// Haven't done path keys
-	if (!(flags&UPDATEF_DONE_PATH_KEYS))
+	if (!alloc_fail && !(flags&UPDATEF_DONE_PATH_KEYS))
 	{
 		struct List list;
 		APTR memory;
@@ -236,7 +237,7 @@ int __asm __saveds L_Module_Entry(
 		flags|=UPDATEF_DONE_PATH_KEYS;
 	}
 	else
-	if (!(flags&UPDATEF_DONE_PATHFORMAT))
+	if (!alloc_fail && !(flags&UPDATEF_DONE_PATHFORMAT))
 	{
 	    // Delete pathformat module
 	    DeleteFile("PROGDIR:modules/pathformat.gfmmodule");
@@ -247,7 +248,7 @@ int __asm __saveds L_Module_Entry(
 	}
 
 	// Haven't done theme stuff
-	if (!(flags&UPDATEF_DONE_THEMES))
+	if (!alloc_fail && !(flags&UPDATEF_DONE_THEMES))
 	{
 		// Create sounds directory
 		if (file=CreateDir("PROGDIR:Sounds"))
@@ -267,8 +268,23 @@ int __asm __saveds L_Module_Entry(
 		flags|=UPDATEF_DONE_THEMES;
 	}
 
+	// Haven't done disk-id positions?
+	if (!alloc_fail && !(flags&UPDATEF_DONE_POSITOPOSR))
+	{
+		struct List list;
+
+		// Open status window
+		if (!window) window=open_status(screen);
+
+		// Read position-info file
+		if (update_position_info(&list))
+		{
+		    flags|=UPDATEF_DONE_POSITOPOSR;
+		}
+	}
+
 	// Have flags changed?
-	if (oldflags!=flags)
+	if (!alloc_fail && oldflags!=flags)
 	{
 		// Set bits to 'rwed'
 		SetProtection("PROGDIR:system/update-history",0);
@@ -303,12 +319,91 @@ struct Window *open_status(struct Screen *screen)
 }
 
 
+BOOL write_position_info(struct List *list)
+{
+    APTR iff;
+    struct Node *node;
+    BOOL succ = TRUE;
+
+    // Open file
+    if (!(iff=IFFOpen("PROGDIR:System/position-info",IFF_WRITE,ID_GILO)))
+	    return 0;
+
+    // Go through entries
+    for (node=list->lh_Head;node->ln_Succ;node=node->ln_Succ)
+    {
+	    // Valid path, or AppIcon?
+	    if ((node->ln_Name && *node->ln_Name) ||
+		    node->ln_Type==PTYPE_APPICON)
+	    {
+		    ULONG id=0;
+		    short size=0;
+
+		    // Position?
+		    if (node->ln_Type==PTYPE_POSITION)
+		    {
+		        if (node->ln_Pri == 1)
+		        {
+			    // Get id and chunk size
+			    id=ID_POSR;
+			    size=sizeof(position_rec)-sizeof(struct Node);
+		        }
+		        else
+		        {
+			    // Get id and chunk size
+			    id=ID_POSI;
+			    size=sizeof(position_rec_old)-sizeof(struct Node);
+		        }
+		    }
+
+		    // Left-out?
+		    else
+		    if (node->ln_Type==PTYPE_LEFTOUT)
+		    {
+		        if (node->ln_Pri == 1)
+		        {
+			    // Get id and chunk size
+			    id=ID_LFTO;
+			    size=sizeof(leftout_record)-sizeof(struct Node);
+		        }
+		        else
+		        {
+			    // Get id and chunk size
+			    id=ID_LOUT;
+			    size=sizeof(leftout_record_old)-sizeof(struct Node);
+		        }
+		    }
+
+		    // AppIcon?
+		    else
+		    if (node->ln_Type==PTYPE_APPICON)
+		    {
+			    // Get id and chunk size
+			    id=ID_ICON;
+			    size=sizeof(appicon_record)-sizeof(struct Node);
+		    }
+
+		    // Write chunk
+		    if (!(IFFWriteChunk(iff,(APTR)(node+1),id,size+((node->ln_Name)?strlen(node->ln_Name):0))))
+		    {
+			succ = FALSE;
+			break;
+		    }
+	    }
+    }
+
+    // Close file
+    IFFClose(iff);
+
+    return succ;
+}
+
 // Convert leftouts
 BOOL update_do_leftouts(struct List *list,APTR memory)
 {
 	struct DosList *dos;
 	short count=0;
-	BOOL asked=0,dowb=1;
+	BOOL asked=0,dowb=1, succ = FALSE;
 
 	// Lock dos list
 	dos=LockDosList(LDF_VOLUMES|LDF_READ);
@@ -385,60 +480,11 @@ BOOL update_do_leftouts(struct List *list,APTR memory)
 	// Added anything?
 	if (count)
 	{
-		APTR iff;
-		struct Node *node;
-
-		// Open file
-		if (!(iff=IFFOpen("PROGDIR:System/position-info",IFF_WRITE,ID_GILO)))
-			return 0;
-
-		// Go through entries
-		for (node=list->lh_Head;node->ln_Succ;node=node->ln_Succ)
-		{
-			// Valid path, or AppIcon?
-			if ((node->ln_Name && *node->ln_Name) ||
-				node->ln_Type==PTYPE_APPICON)
-			{
-				ULONG id=0;
-				short size=0;
-
-				// Position?
-				if (node->ln_Type==PTYPE_POSITION)
-				{
-					// Get id and chunk size
-					id=ID_POSI;
-					size=sizeof(position_rec)-sizeof(struct Node);
-				}
-
-				// Left-out?
-				else
-				if (node->ln_Type==PTYPE_LEFTOUT)
-				{
-					// Get id and chunk size
-					id=ID_LOUT;
-					size=sizeof(leftout_record)-sizeof(struct Node);
-				}
-
-				// AppIcon?
-				else
-				if (node->ln_Type==PTYPE_APPICON)
-				{
-					// Get id and chunk size
-					id=ID_ICON;
-					size=sizeof(leftout_record)-sizeof(struct Node);
-				}
-
-				// Write chunk
-				if (!(IFFWriteChunk(iff,(APTR)(node+1),id,size+((node->ln_Name)?strlen(node->ln_Name):0))))
-					break;
-			}
-		}
-
-		// Close file
-		IFFClose(iff);
+	    if (write_position_info(list))
+		succ = TRUE;
 	}
 
-	return 1;
+	return succ;
 }
 
 
@@ -455,7 +501,7 @@ BOOL update_iffchunk(void)
 	anchor->ap_Strlen=256;
 
 	// Start match
-	error=MatchFirst("PROGDIR:(Buttons|Commands|Environment|Settings|Filetypes|Storage)/#?",anchor);
+	error=MatchFirst("PROGDIR:(Buttons|Commands|Environment|Settings|Filetypes|Storage|System)/#?",anchor);
 	while (!error)
 	{
 		// Directory?
@@ -918,6 +964,138 @@ void update_envarc_do(char *path)
 }
 
 
+// Upgrade position-info file
+BOOL update_position_info(struct List *list)
+{
+    APTR memory;
+    APTR iff;
+    BOOL succ = FALSE;
+
+    // Allocate memory handle
+    if (!(memory=NewMemHandle(4096,1024,MEMF_CLEAR)))
+    {
+	alloc_fail = TRUE;
+	return 0;
+    }
+
+    // Initialise list
+    NewList(list);
+
+    // Open position info file
+    if (iff=IFFOpen("PROGDIR:System/position-info",IFF_READ,ID_GILO))
+    {
+	ULONG id;
+
+	// Read file
+	while (id=IFFNextChunk(iff,0))
+	{
+	    struct Node *entry;
+	    ULONG size;
+
+	    // Valid chunk?
+	    if (id!=ID_POSI && id!=ID_POSR && id!=ID_LOUT && id!=ID_LFTO && id!=ID_ICON && id!=ID_STRT)
+		    continue;
+
+	    // Allocate record
+	    if (!(entry=AllocMemH(memory, size = IFFChunkSize(iff) + sizeof(struct Node))))
+		goto posupg_fail;
+
+	    // Read chunk data
+	    IFFReadChunkBytes(iff,(APTR)(entry+1),-1);
+
+	    // Set type and name pointer
+	    if (id==ID_POSR)
+	    {
+		entry->ln_Type=PTYPE_POSITION;
+		entry->ln_Name=((position_rec *)entry)->name;
+	    }
+	    else
+	    if (id==ID_POSI)
+	    {
+		//UBYTE pos = 0;
+
+		position_rec *upgrade_entry;
+		position_rec_old *org_entry = (position_rec_old *)entry;
+
+		size += sizeof(position_rec) - sizeof(position_rec_old);
+
+		if (!(upgrade_entry = AllocMemH(memory, size)))
+		    goto posupg_fail;
+
+		upgrade_entry->node.ln_Type = PTYPE_POSITION;
+		upgrade_entry->node.ln_Pri  = 1;
+		upgrade_entry->node.ln_Name = upgrade_entry->name;
+		upgrade_entry->type         = PPTYPE_NEEDDATE;
+		upgrade_entry->format       = org_entry->format;
+		upgrade_entry->icon_x       = org_entry->icon_x;
+		upgrade_entry->icon_y       = org_entry->icon_y;
+		upgrade_entry->text_dims    = org_entry->text_dims;
+		upgrade_entry->icon_dims    = org_entry->icon_dims;
+		upgrade_entry->code         = org_entry->code;
+		upgrade_entry->qual         = org_entry->qual;
+		upgrade_entry->qual_mask    = org_entry->qual_mask;
+		upgrade_entry->qual_same    = org_entry->qual_same;
+		upgrade_entry->flags        = org_entry->flags;
+		strcpy(upgrade_entry->name, org_entry->name);
+#if 0
+		do
+		{
+		    pos++;
+		} while (pos < 32 && upgrade_entry->name[pos] && upgrade_entry->name[pos] != ':');
+
+		if (upgrade_entry->name[pos] != ':')
+		    upgrade_entry->vol_name_len = pos;
+#endif
+		FreeMemH(entry);
+		entry = (struct Node *)upgrade_entry;
+		entry->ln_Name=((position_rec *)entry)->name;
+	    }
+	    else
+	    if (id==ID_LFTO)
+	    {
+		entry->ln_Type=PTYPE_LEFTOUT;
+		entry->ln_Pri=1;
+		entry->ln_Name=((leftout_record *)entry)->name;
+	    }
+	    else
+	    if (id==ID_LOUT)
+	    {
+		entry->ln_Type=PTYPE_LEFTOUT;
+		entry->ln_Name=((leftout_record_old *)entry)->name;
+	    }
+	    else
+	    if (id==ID_ICON)
+	    {
+		entry->ln_Type=PTYPE_APPICON;
+		entry->ln_Name=((leftout_record *)entry)->name;
+	    }
+	    // Add to list
+	    AddTail(list,entry);
+	}
+
+	// Close file
+	IFFClose(iff);
+    }
+
+    if (!(IsListEmpty(list)))
+    {
+	if (write_position_info(list))
+	    succ = TRUE;
+    }
+
+    FreeMemHandle(memory);
+
+    return succ;
+
+posupg_fail:
+    FreeMemHandle(memory);
+
+    alloc_fail = TRUE;
+
+    return 0;
+}
+
+
 // Read position-info file
 APTR read_position_info(struct List *list)
 {
@@ -942,7 +1120,7 @@ APTR read_position_info(struct List *list)
 			struct Node *entry;
 
 			// Valid chunk?
-			if (id!=ID_POSI && id!=ID_LOUT && id!=ID_ICON && id!=ID_STRT)
+			if (id!=ID_POSI && id!=ID_POSR && id!=ID_LOUT && id!=ID_LFTO && id!=ID_ICON && id!=ID_STRT)
 				continue;
 
 			// Allocate record
@@ -953,16 +1131,30 @@ APTR read_position_info(struct List *list)
 			IFFReadChunkBytes(iff,(APTR)(entry+1),-1);
 
 			// Set type and name pointer
+			if (id==ID_POSR)
+			{
+				entry->ln_Type=PTYPE_POSITION;
+				entry->ln_Pri=1;
+				entry->ln_Name=((position_rec *)entry)->name;
+			}
+			else
 			if (id==ID_POSI)
 			{
 				entry->ln_Type=PTYPE_POSITION;
-				entry->ln_Name=((position_rec *)entry)->name;
+				entry->ln_Name=((position_rec_old *)entry)->name;
+			}
+			else
+			if (id==ID_LFTO)
+			{
+				entry->ln_Type=PTYPE_LEFTOUT;
+				entry->ln_Pri=1;
+				entry->ln_Name=((leftout_record *)entry)->name;
 			}
 			else
 			if (id==ID_LOUT)
 			{
 				entry->ln_Type=PTYPE_LEFTOUT;
-				entry->ln_Name=((leftout_record *)entry)->name;
+				entry->ln_Name=((leftout_record_old *)entry)->name;
 			}
 			else
 			if (id==ID_ICON)
@@ -993,7 +1185,7 @@ void update_do_pathkeys(struct List *list)
 	if (IsListEmpty(list)) return;
 
 	// Try to open hotkeys bank
-	if (!(bank=OpenButtonBank("PROGDIR:buttons/hotkeys")))
+	if (!(bank=OpenButtonBank("PROGDIR:buttons/hotkeys", NULL)))
 	{
 		// Create a new bank
 		if (!(bank=NewButtonBank(0,0))) return;

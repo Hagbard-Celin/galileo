@@ -31,16 +31,17 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofmlib.h"
 
+
 struct DosList *__saveds __asm L_DeviceFromLock(
 	register __a0 BPTR lock,
 	register __a1 char *name,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
 	struct FileLock *fl;
 
@@ -51,21 +52,16 @@ struct DosList *__saveds __asm L_DeviceFromLock(
 	if (!(fl=(struct FileLock *)BADDR(lock))) return 0;
 
 	// Pass to DeviceFromHandler
-	return L_DeviceFromHandler(fl->fl_Task,name,libbase);
+	return L_DeviceFromHandler(fl->fl_Task,name,GalileoFMBase);
 }
 
 struct DosList *__saveds __asm L_DeviceFromHandler(
 	register __a0 struct MsgPort *port,
 	register __a1 char *name,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
 	struct DosList *dos,*dos_list=0;
 	DeviceNode *node,*match_node=0;
-	struct LibData *data=(struct LibData *)libbase->ml_UserData;
-
-#ifdef RESOURCE_TRACKING
-#define GalileoFMBase		(data->galileofm_base)
-#endif
 
 	// No port?
 	if (!port) return 0;
@@ -74,10 +70,10 @@ struct DosList *__saveds __asm L_DeviceFromHandler(
 	if (name) *name=0;
 
 	// Lock device list
-	ObtainSemaphore(&data->device_list.lock);
+	ObtainSemaphore(&gfmlib_data.device_list.lock);
 
 	// Go through device list
-	for (node=(DeviceNode *)data->device_list.list.lh_Head;
+	for (node=(DeviceNode *)gfmlib_data.device_list.list.lh_Head;
 		node->node.ln_Succ;
 		node=(DeviceNode *)node->node.ln_Succ)
 	{
@@ -107,10 +103,10 @@ struct DosList *__saveds __asm L_DeviceFromHandler(
 			strcat(namebuf,":");
 
 			// Not already in device list?
-			if (!(node=(DeviceNode *)FindName(&data->device_list.list,namebuf)))
+			if (!(node=(DeviceNode *)FindName(&gfmlib_data.device_list.list,namebuf)))
 			{
 				// Allocate new device node
-				if (node=L_AllocMemH(data->memory,sizeof(DeviceNode)))
+				if (node=L_AllocMemH(gfmlib_data.memory,sizeof(DeviceNode)))
 				{
 					// Fill out node
 					node->node.ln_Name=node->dol_Name;
@@ -119,7 +115,7 @@ struct DosList *__saveds __asm L_DeviceFromHandler(
 					strcpy(node->dol_Name,namebuf);
 
 					// Add to list
-					AddTail(&data->device_list.list,(struct Node *)node);
+					AddTail(&gfmlib_data.device_list.list,(struct Node *)node);
 
 					// Is this actually the one we're looking for?
 					if (node->dol_Task==port) match_node=node;
@@ -134,7 +130,7 @@ struct DosList *__saveds __asm L_DeviceFromHandler(
 		UnLockDosList(LDF_DEVICES|LDF_READ);
 
 		// Go through device list again
-		for (node=(DeviceNode *)data->device_list.list.lh_Head;
+		for (node=(DeviceNode *)gfmlib_data.device_list.list.lh_Head;
 			node->node.ln_Succ;)
 		{
 			DeviceNode *next=(DeviceNode *)node->node.ln_Succ;
@@ -153,9 +149,7 @@ struct DosList *__saveds __asm L_DeviceFromHandler(
 			node=next;
 		}
 	}
-#ifdef RESOURCE_TRACKING
-#undef GalileoFMBase
-#endif
+
 	// Got a match?
 	if (match_node)
 	{
@@ -171,7 +165,7 @@ struct DosList *__saveds __asm L_DeviceFromHandler(
 	}
 
 	// Unlock device list
-	ReleaseSemaphore(&data->device_list.lock);
+	ReleaseSemaphore(&gfmlib_data.device_list.lock);
 
 	// Return DosList pointer
 	return dos_list;
@@ -181,7 +175,7 @@ BOOL __saveds __asm L_DevNameFromLock(
 	register __d1 BPTR lock,
 	register __d2 char *buffer,
 	register __d3 long len,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
 	char devicename[34],*temp,*ptr;
 
@@ -195,7 +189,7 @@ BOOL __saveds __asm L_DevNameFromLock(
 	if (!(NameFromLock(lock,buffer,len))) return 0;
 
 	// Get device name
-	if (!(L_DeviceFromLock(lock,devicename,libbase))) return 1;
+	if (!(L_DeviceFromLock(lock,devicename,GalileoFMBase))) return 1;
 
 	// Allocate temporary buffer
 	if (!(temp=AllocVec(len+strlen(devicename)+1,MEMF_CLEAR))) return 1;

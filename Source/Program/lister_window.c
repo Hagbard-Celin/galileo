@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2024 Hagbard Celine
+Copyright 2024,2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -37,6 +37,12 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "backdrop_protos.h"
+#include "graphics.h"
+#include "scripts.h"
+#include "palette_routines.h"
+#include "lsprintf_protos.h"
 
 struct Window *lister_open_window(Lister *,struct Screen *);
 void lister_close_window(Lister *,BOOL);
@@ -140,7 +146,7 @@ struct Window *lister_open_window(Lister *lister,struct Screen *screen)
 	// Create placeholder for size gadget to keep window borders consistent
 	if (lister->flags&LISTERF_LOCK_POS)
 	{
-		struct Image *image=0;
+		struct Image *image;
 
 		lister->drawinfo=GetScreenDrawInfo(screen);
 
@@ -380,17 +386,9 @@ struct Window *lister_open_window(Lister *lister,struct Screen *screen)
 
 	}
 
-	// Create edit hook
-	lister->path_edit_hook=
-		GetEditHookTags(
-			0,
-			OBJECTF_NO_SELECT_NEXT,
-			GTCustom_History,lister->path_history,
-			TAG_END);
-
 	// Create path field
 	if (!(lister->path_field=
-		NewObject(0,"galileostrgclass",
+		NewObject(0,"galileopathgclass",
 			GA_ID,GAD_PATH,
 			GA_Left,lister->window->BorderLeft,
 			GA_RelBottom,-(lister->window->BorderBottom+FIELD_FONT->tf_YSize+4),
@@ -400,13 +398,10 @@ struct Window *lister_open_window(Lister *lister,struct Screen *screen)
 			GA_Immediate,TRUE,
 			GTCustom_ThinBorders,TRUE,
 			GTCustom_NoGhost,TRUE,
-			STRINGA_TextVal,(lister->cur_buffer)?lister->cur_buffer->buf_Path:"",
-			STRINGA_MaxChars,511,
-			STRINGA_Buffer,lister->path_buffer,
-			STRINGA_UndoBuffer,GUI->global_undo_buffer,
-			STRINGA_WorkBuffer,GUI->global_undo_buffer+512,
+			GTCustom_History,lister->path_history,
+			STRINGA_TextVal,(lister->cur_buffer)?lister->cur_buffer->buf_Path:NULL,
+			PATHGA_StringPointer,&lister->path_buffer,
 			STRINGA_Font,FIELD_FONT,
-			STRINGA_EditHook,lister->path_edit_hook,
 			TAG_END)))
 	{
 		lister_close(lister,0);
@@ -518,7 +513,8 @@ void lister_close_window(Lister *lister,BOOL run_script)
 		HideProgressWindow(lister->progress_window);
 
 	// Fix current directory
-	UnLock(CurrentDir(0));
+	if (lister->lister_orgdir != ((struct Process *)((struct ExecBase *)*((ULONG *)4))->ThisTask)->pr_CurrentDir)
+	    UnLock(CurrentDir(lister->lister_orgdir));
 
 	// Free icon remapping
 	backdrop_free_remap(lister->backdrop_info,lister->window);
@@ -839,23 +835,9 @@ void lister_build_icon_name(Lister *lister)
 		else name_ptr=lister->icon_name;
 
 		// Valid path?
-		if (lister->cur_buffer->buf_ExpandedPath[0])
+		if (lister->cur_buffer->buf_ExpandedPath && lister->cur_buffer->buf_ExpandedPath[0])
 		{
-			char *ptr;
-
-			// Copy name
-			strcpy(lister->work_buffer,lister->cur_buffer->buf_ExpandedPath);
-
-			// Strip trailing '/'
-			if (*(ptr=lister->work_buffer+strlen(lister->work_buffer)-1)=='/')
-				*ptr=0;
-
-			// Get pointer to name
-			if (!(ptr=FilePart(lister->work_buffer)) || !*ptr)
-				ptr=lister->work_buffer;
-
-			// Copy file part to icon name
-			stccpy(name_ptr,ptr,32);
+			GetLastPathComponent(name_ptr, lister->cur_buffer->buf_ExpandedPath);
 		}
 
 		// Otherwise copy object name

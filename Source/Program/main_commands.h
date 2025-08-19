@@ -31,9 +31,12 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
+
+#ifndef GALILEOFM_MAIN_COMMANDS_H
+#define GALILEOFM_MAIN_COMMANDS_H
 
 enum
 {
@@ -70,4 +73,7 @@ enum
 	MAINCMD_GET_ICON,		// Get an icon
 
 	MAINCMD_SAVE_ENV,		// Save environment
+	MAINCMD_TITLE_ERROR     	// Set screen title error message
 };
+
+#endif

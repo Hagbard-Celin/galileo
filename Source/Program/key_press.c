@@ -31,12 +31,15 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
 #include "key_finder.h"
+#include "start_menu.h"
+#include "buttons.h"
 #include "/Modules/Config/galileoconfig.h"
 
 // Match a key press against a function

@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -66,7 +67,8 @@ short config_menus_which_list(config_menus_data *data,short x,short y)
 // Handle an AppMessage
 void config_menus_appmsg(config_menus_data *data,struct AppMessage *msg)
 {
-	short type,num,ret=0;
+	WORD num;
+	short type,ret=0;
 
 	// No files?
 	if (msg->am_NumArgs<1) return;
@@ -88,14 +90,14 @@ void config_menus_appmsg(config_menus_data *data,struct AppMessage *msg)
 	// Go through files
 	for (num=0;num<msg->am_NumArgs;num++)
 	{
-		char path[256];
+		char *path;
 
 		// Get path
-		GetWBArgPath(&msg->am_ArgList[num],path,256);
-
-		// Handle import
-		if (!(config_menus_import_bank(data,type,path,0)))
+		if (path = GetWBArgPath(&msg->am_ArgList[num]))
 		{
+		    // Handle import
+		    if ((getreg(REG_D1) < 256) && !(config_menus_import_bank(data,type,path,0)))
+		    {
 			// Dropped in item or sub-item list?
 			if (type==MENU_ITEM || type==MENU_SUB)
 			{
@@ -112,10 +114,15 @@ void config_menus_appmsg(config_menus_data *data,struct AppMessage *msg)
 					GetString(locale,MSG_OK),
 					GetString(locale,MSG_INVALID_BUTTON_FILE),
 					FilePart(path));
+
+				FreeMemH(path);
 				break;
 			}
+		    }
+		    else ret=1;
+
+		    FreeMemH(path);
 		}
-		else ret=1;
 	}
 
 	// Attach menu list
@@ -147,7 +154,7 @@ BOOL config_menus_import_bank(
 	Cfg_Button *button,*new_button,*add_pos=0;
 
 	// Load button bank
-	if (!import_button && !(import=OpenButtonBank(path))) return 0;
+	if (!import_button && !(import=OpenButtonBank(path, NULL))) return 0;
     
 	// Check bank isn't empty
 	if (!import_button && IsListEmpty(&import->buttons))
@@ -208,7 +215,7 @@ BOOL config_menus_import_bank(
 					data->menu_list[MENU_MENU],
 					GetGadgetValue(data->objlist,GAD_MENUS_MENU))))
 			{
-                // Error
+				// Error
 				CloseButtonBank(import);
 				return 1;
 			}
@@ -232,7 +239,7 @@ BOOL config_menus_import_bank(
 				data->menu_list[MENU_ITEM],
 				GetGadgetValue(data->objlist,GAD_MENUS_ITEM))))
 		{
-            // Error
+			// Error
 			CloseButtonBank(import);
 			return 1;
 		}

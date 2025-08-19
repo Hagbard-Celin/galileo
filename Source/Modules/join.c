@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -51,7 +52,7 @@ int __asm __saveds L_Module_Entry(
 {
 	join_data *data;
 	FunctionEntry *entry;
-	Att_Node *current=0;
+	Att_LockNode *current=0;
 	short ret=1,start=0;
 	BOOL quit_flag=0;
 
@@ -84,7 +85,7 @@ int __asm __saveds L_Module_Entry(
 	}
 
 	// Get source path
-	gci->gc_GetSource(IPCDATA(ipc), data->source);
+	data->source_path = gci->gc_GetSource(IPCDATA(ipc), data->source);
 
 	// Get destination path
 	data->dest_path = gci->gc_GetDest(IPCDATA(ipc), data->dest);
@@ -96,7 +97,7 @@ int __asm __saveds L_Module_Entry(
 		if (data->function==JOIN)
 		{
 			char **names;
-			short a;
+			WORD a;
 
 			// Get array pointer
 			names=(char **)data->args->FA_Arguments[JOINARG_FROM];
@@ -104,24 +105,62 @@ int __asm __saveds L_Module_Entry(
 			// Go through names
 			for (a=0;names[a];a++)
 			{
-				char buf[256];
+				char *pos, *filename;
+				BPTR parent_lock;
 
 				// Any path characters in name?
-				if (strchr(names[a],':') || strchr(names[a],'/'))
+				if (pos = strchr(names[a],':'))
 				{
-					// Use name by itself
-					stccpy(buf,names[a],255);
+				    char *tmp;
+
+				    if ((tmp = PathPart(names[a])) && tmp[0] == '/')
+				    {
+					filename = tmp + 1;
+					*tmp = 0;
+					if (!(parent_lock = LockFromPath(names[a],NULL,FALSE)))
+					    continue;
+				    }
+				    else
+				    {
+					char tmp_char;
+
+					tmp_char = pos[1];
+					pos[1]= 0;
+
+					if (!(parent_lock = Lock(names[a],ACCESS_READ)))
+					    continue;
+
+					pos[1] = tmp_char;
+
+					filename = pos + 1;
+
+				    }
 				}
 
 				// Treat as filename in current path
 				else
 				{
-					strcpy(buf,data->source);
-					AddPart(buf,names[a],256);
+				    char *tmp;
+
+				    if ((tmp = PathPart(names[a])) && tmp[0] == '/')
+				    {
+					BPTR org_dir;
+
+					filename = tmp + 1;
+					*tmp = 0;
+					org_dir = CurrentDir(data->source_path->pn_lock);
+					parent_lock = Lock(names[a],ACCESS_READ);
+					CurrentDir(org_dir);
+				    }
+				    else
+				    {
+					parent_lock = DupLock(data->source_path->pn_lock);
+					filename = names[a];
+				    }
 				}
 
 				// Add entry to list
-				join_add_file(data,buf,1);
+				join_add_file(data,filename,parent_lock,1);
 			}
 
 			// Set destination
@@ -142,8 +181,7 @@ int __asm __saveds L_Module_Entry(
 			char buf[256];
 
 			// Any path characters in name?
-			if (strchr((char *)data->args->FA_Arguments[SPLITARG_FROM],'/') ||
-				strchr((char *)data->args->FA_Arguments[SPLITARG_FROM],':'))
+			if (strchr((char *)data->args->FA_Arguments[SPLITARG_FROM],':'))
 			{
 				// Use name by itself
 				stccpy(buf,(char *)data->args->FA_Arguments[SPLITARG_FROM],255);
@@ -157,7 +195,7 @@ int __asm __saveds L_Module_Entry(
 			}
 
 			// Add entry to list
-			join_add_file(data,buf,1);
+			join_add_file(data,buf,NULL,1);
 
 			// Set destination
 			SetGadgetValue(
@@ -172,19 +210,17 @@ int __asm __saveds L_Module_Entry(
 	// Otherwise
 	else
 	{
-		gci->gc_FirstEntry(IPCDATA(ipc));
+		gci->gc_FirstEntry(IPCDATA(ipc), NULL);
 
 		// Get entries
 		while (entry = gci->gc_GetEntry(IPCDATA(ipc)))
 		{
-			char buf[256];
+			BPTR parent_lock;
 
-			// Build path
-			strcpy(buf,data->source);
-			AddPart(buf,entry->fe_name,256);
+			parent_lock = DupLock(data->source_path->pn_lock);
 
 			// Add entry to list
-			join_add_file(data,buf,1);
+			join_add_file(data,entry->fe_name,parent_lock,1);
 
 			// End entry
 			gci->gc_EndEntry(IPCDATA(ipc), entry, TRUE);
@@ -198,7 +234,7 @@ int __asm __saveds L_Module_Entry(
 	if (data->function==SPLIT)
 	{
 		// Get first node
-		current=(Att_Node *)data->join_list->list.lh_Head;
+		current=(Att_LockNode *)data->join_list->list.lh_Head;
 
 		// Fill out gadgets
 		split_do_gadgets(data,current);
@@ -225,7 +261,7 @@ int __asm __saveds L_Module_Entry(
 	else
 	{
 		// Display list
-		join_add_file(data,0,-1);
+		join_add_file(data,0,0,-1);
 
 		// Disable gadgets
 		join_do_gadgets(data,1);
@@ -278,8 +314,7 @@ int __asm __saveds L_Module_Entry(
 			// Get messages
 			while (amsg=(struct AppMessage *)GetMsg(data->app_port))
 			{
-				char name[256];
-				short arg;
+				WORD arg;
 
 				// Go through arguments
 				for (arg=0;arg<amsg->am_NumArgs;arg++)
@@ -288,16 +323,17 @@ int __asm __saveds L_Module_Entry(
 					if (amsg->am_ArgList[arg].wa_Name &&
 						*amsg->am_ArgList[arg].wa_Name)
 					{
-						// Get name
-						GetWBArgPath(&amsg->am_ArgList[arg],name,256);
+						BPTR parent_lock;
+
+						parent_lock = DupLock(amsg->am_ArgList[arg].wa_Lock);
 
 						// Add to list
-						join_add_file(data,name,arg);
+						join_add_file(data,amsg->am_ArgList[arg].wa_Name,parent_lock,arg);
 					}
 				}
 
 				// Finish add
-				join_add_file(data,0,-1);
+				join_add_file(data,0,0,-1);
 
 				// Reply to message
 				ReplyMsg((struct Message *)amsg);
@@ -460,7 +496,7 @@ int __asm __saveds L_Module_Entry(
 							case GAD_SPLIT_SKIP:
 
 								// Get next
-								if (current) current=(Att_Node *)current->node.ln_Succ;
+								if (current) current=(Att_LockNode *)current->node.ln_Succ;
 
 								// Valid file?
 								if (current && current->node.ln_Succ)
@@ -576,12 +612,12 @@ void join_free(join_data *data)
 		join_close(data);
 
 		// Free message port
-        while (msg=GetMsg(data->app_port))
+		while (msg=GetMsg(data->app_port))
 			ReplyMsg(msg);
 		DeleteMsgPort(data->app_port);
 
 		// Free list
-		Att_RemList(data->join_list,0);
+		Att_RemList(data->join_list,REMLIST_UNLOCK);
 
 		// Close timer device
 		if (data->TimerBase) CloseDevice((struct IORequest *)&data->timer_req);
@@ -596,7 +632,7 @@ void join_free(join_data *data)
 
 
 // Add file to join list
-void join_add_file(join_data *data,char *file,short arg)
+void join_add_file(join_data *data,char *file, BPTR parent_lock,WORD arg)
 {
 	// Detach list?
 	if (arg==0) SetGadgetChoices(data->list,GAD_JOIN_LISTER,(APTR)~0);
@@ -604,8 +640,14 @@ void join_add_file(join_data *data,char *file,short arg)
 	// Valid file?
 	if (file)
 	{
+		Att_LockNode *node;
+
 		// Add to list
-		Att_NewNode(data->join_list,file,0,0);
+		if (node = (Att_LockNode *)Att_NewNode(data->join_list,file,0,ADDNODE_LOCKNODE))
+		    node->att_lock = parent_lock;
+		else
+		if (parent_lock)
+		    UnLock(parent_lock);
 	}
 
 	// Re-attach list?
@@ -626,7 +668,7 @@ void join_do_gadgets(join_data *data,short state)
 // Remove entry
 void join_remove(join_data *data)
 {
-	short item;
+	WORD item;
 	Att_Node *node;
 
 	// Get selection
@@ -635,7 +677,7 @@ void join_remove(join_data *data)
 		return;
 
 	// Remove list
-	join_add_file(data,0,0);
+	join_add_file(data,0,0,0);
 
 	// Remove node
 	Att_RemNode(node);
@@ -644,7 +686,7 @@ void join_remove(join_data *data)
 	SetGadgetValue(data->list,GAD_JOIN_LISTER,(ULONG)-1);
 
 	// Attach list
-	join_add_file(data,0,-1);
+	join_add_file(data,0,0,-1);
 
 	// Disable gadgets
 	join_do_gadgets(data,1);
@@ -655,23 +697,23 @@ void join_remove(join_data *data)
 void join_clear(join_data *data)
 {
 	// Remove list
-	join_add_file(data,0,0);
+	join_add_file(data,0,0,0);
 
 	// Clear list
-	Att_RemList(data->join_list,REMLIST_SAVELIST);
+	Att_RemList(data->join_list,REMLIST_SAVELIST|REMLIST_UNLOCK);
 
 	// No selection
 	SetGadgetValue(data->list,GAD_JOIN_LISTER,(ULONG)-1);
 
 	// Attach list
-	join_add_file(data,0,-1);
+	join_add_file(data,0,0,-1);
 }
 
 
 // Move item
-void join_move(join_data *data,short id)
+void join_move(join_data *data,WORD id)
 {
-	short item;
+	WORD item;
 	Att_Node *node,*swap;
 
 	// Get selection
@@ -696,7 +738,7 @@ void join_move(join_data *data,short id)
 		return;
 
 	// Remove list
-	join_add_file(data,0,0);
+	join_add_file(data,0,0,0);
 
 	// Swap nodes
 	SwapListNodes((struct List *)data->join_list,(struct Node *)node,(struct Node *)swap);
@@ -705,14 +747,13 @@ void join_move(join_data *data,short id)
 	SetGadgetValue(data->list,GAD_JOIN_LISTER,item);
 
 	// Attach list
-	join_add_file(data,0,-1);
+	join_add_file(data,0,0,-1);
 }
 
 
 // Add to list
 void join_add(join_data *data)
 {
-	char buf[256];
 	struct FileRequester *req;
 
 	// Make window busy
@@ -728,13 +769,13 @@ void join_add(join_data *data)
 		ASLFR_InitialDrawer,data->source,
 		TAG_END))
 	{
-		// Get path
-		strcpy(buf,req->fr_Drawer);
-		AddPart(buf,req->fr_File,256);
+		BPTR parent_lock;
+
+		parent_lock = LockFromPath(req->fr_Drawer,NULL,FALSE);
 
 		// Add file
-		join_add_file(data,buf,0);
-		join_add_file(data,0,-1);
+		join_add_file(data,req->fr_File,parent_lock,0);
+		join_add_file(data,0,0,-1);
 
 		// Save path
 		strcpy(data->source,req->fr_Drawer);
@@ -850,8 +891,9 @@ BOOL join_join_files(join_data *data)
 {
 	BPTR in,out;
 	APTR progress;
-	short count,retcode=0;
-	Att_Node *node;
+	WORD count;
+	short retcode=0;
+	Att_LockNode *node;
 	char *initial_buffer,*ptr;
 	struct Library *TimerBase;
 
@@ -895,11 +937,12 @@ BOOL join_join_files(join_data *data)
 	    data->dest_path->pn_flags |= LISTNF_RESCAN;
 
 	// Go through files
-	for (node=(Att_Node *)data->join_list->list.lh_Head,count=1;
+	for (node=(Att_LockNode *)data->join_list->list.lh_Head,count=1;
 		node->node.ln_Succ;
-		node=(Att_Node *)node->node.ln_Succ,count++)
+		node=(Att_LockNode *)node->node.ln_Succ,count++)
 	{
 		struct FileInfoBlock __aligned fib;
+		BPTR org_dir;
 		long buffer_size,total_size=0;
 		char *file_buffer;
 		ULONG copytime;
@@ -907,6 +950,8 @@ BOOL join_join_files(join_data *data)
 		short ret;
 		BOOL remove=0;
 		long remove_pos;
+
+		org_dir = CurrentDir(node->att_lock);
 
 		// Open file
 		while (!(in=Open(node->node.ln_Name,MODE_OLDFILE)))
@@ -920,6 +965,8 @@ BOOL join_join_files(join_data *data)
 					TRUE))!=1)
 				break;
 		}
+
+		CurrentDir(org_dir);
 
 		// Failed?
 		if (!in) continue;
@@ -1152,7 +1199,7 @@ short join_show_error(join_data *data,short msg,char *name,BOOL remove)
 
 
 // Fill out gadgets for split
-void split_do_gadgets(join_data *data,Att_Node *node)
+void split_do_gadgets(join_data *data,Att_LockNode *node)
 {
 	// Got a filename?
 	if (node && node->node.ln_Name)
@@ -1205,7 +1252,7 @@ short split_split_file(join_data *data)
 	char *path,*name,*stem,*buffer=0;
 	long filesize,chunksize,buffersize,count=0,num,progtotal=0;
 	struct FileInfoBlock __aligned fib;
-	BPTR file,out,old,lock;
+	BPTR file,out,old = 0,lock;
 	char outname[60],device[40];
 	APTR progress;
 	BOOL abort=0,floppy=0,ram=0;
@@ -1232,9 +1279,6 @@ short split_split_file(join_data *data)
 	// RAM?
 	if (strcmp(device,"RAM:")==0) ram=1;
 
-	// Cd to path
-	old=CurrentDir(lock);
-
 	// Get DOS list entry
 	if (dos=DeviceFromLock(lock,0))
 	{
@@ -1254,6 +1298,9 @@ short split_split_file(join_data *data)
 		}
 	}
 
+	if (data->source_path && data->source_path->pn_lock)
+	    old = CurrentDir(data->source_path->pn_lock);
+
 	// Try to open file
 	while (!(file=Open(name,MODE_OLDFILE)))
 	{
@@ -1265,6 +1312,9 @@ short split_split_file(join_data *data)
 			return -1;
 		}
 	}
+
+	if (old)
+	    CurrentDir(old);
 
 	// Examine file
 	ExamineFH(file,&fib);
@@ -1329,6 +1379,9 @@ short split_split_file(join_data *data)
 		PW_FileName,fib.fib_FileName,
 		PW_FileSize,filesize<<1,
 		TAG_END);
+
+	// Cd to path
+	old=CurrentDir(lock);
 
 	// Loop until file is fully split
 	while (filesize>0)

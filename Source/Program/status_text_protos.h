@@ -31,17 +31,19 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
-#ifndef _GALILEOFM_CLEANUP
-#define _GALILEOFM_CLEANUP
+#ifndef _GALILEOFM_STATUS_TEXT_PROTOS
+#define _GALILEOFM_STATUS_TEXT_PROTOS
 
-// Prototypes
-void quit(BOOL);
-checkwindowquit(void);
-void delete_temp_files(struct DateStamp *);
-BOOL quit_notify(void);
+#include "lister.h"
+#include "function_launch.h"
+
+status_display_error(Lister *lister,int errcode);
+void status_text(Lister *lister,char *text);
+void status_okay(Lister *lister);
+void status_abort(Lister *lister);
 
 #endif

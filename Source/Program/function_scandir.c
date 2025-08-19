@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,12 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "function_launch_protos.h"
+#include "function_protos.h"
+#include "buffers.h"
+#include "rexx.h"
+#include "position_protos.h"
 
 enum
 {
@@ -55,13 +62,12 @@ GALILEOFM_FUNC(function_scandir)
 	FunctionEntry *entry;
 	unsigned long mode_flags=0;
 	char *sel_file;
+	BPTR org_dir, read_dir = 0;
 
 	// Get current lister
 	lister=function_lister_current(&handle->func_source_paths);
 
-	// Clear buffer
-	if (!(sel_file=AllocVec(256,MEMF_CLEAR)))
-		return 0;
+	sel_file = handle->inst_data;
 
 	// Parsed arguments?
 	if (instruction->ipa_funcargs)
@@ -70,8 +76,10 @@ GALILEOFM_FUNC(function_scandir)
 		new_flag=instruction->ipa_funcargs->FA_Arguments[SCANDIR_NEW];
 		if (instruction->ipa_funcargs->FA_Arguments[SCANDIR_PATH])
 		{
-			path_flag=1;
-			strcpy(handle->func_source_path,(char *)instruction->ipa_funcargs->FA_Arguments[SCANDIR_PATH]);
+			if (read_dir = LockFromPath((char *)instruction->ipa_funcargs->FA_Arguments[SCANDIR_PATH],NULL,FALSE))
+			{
+			    path_flag=1;
+			}
 		}
 
 		// Mode?
@@ -105,12 +113,15 @@ GALILEOFM_FUNC(function_scandir)
 			// Directory?
 			if (entry->fe_type>0)
 			{
-				// Build path name
-				AddPart(handle->func_source_path,entry->fe_name,512);
+				org_dir = CurrentDir(handle->func_source_lock);
+				if (read_dir = Lock(entry->fe_name,ACCESS_READ))
+				    path_flag=1;
+
+				if (org_dir)
+				    CurrentDir(org_dir);
 
 				// Finish with entry
 				function_end_entry(handle,entry,FALSE);
-				path_flag=1;
 				if (!new_flag) dest_flag=1;
 				break;
 			}
@@ -121,38 +132,31 @@ GALILEOFM_FUNC(function_scandir)
 	}
 
 	// Container?
-	if (cont_flag && *handle->func_source_path)
+	if (cont_flag && handle->func_source_lock && handle->func_source_path)
 	{
 		char *ptr;
-		BPTR lock;
 
-		// Try to lock path
-		if (lock=Lock(handle->func_source_path,ACCESS_READ))
+		if (read_dir = ParentDir(handle->func_source_lock))
 		{
-			// Get full name
-			DevNameFromLock(lock,handle->func_source_path,512);
-			UnLock(lock);
+
+		    // Get pointer to file name	    
+		    ptr=FilePart(handle->func_source_path);
+
+		    // Directory?
+		    if (!ptr || !*ptr || ptr==handle->func_source_path)
+		    {
+			    short len;
+
+			    // Strip last /
+			    if (handle->func_source_path[(len=strlen(handle->func_source_path)-1)]=='/')
+				    handle->func_source_path[len]=0;
+
+			    // Try again
+			    ptr=FilePart(handle->func_source_path);
+		    }
+
+		    strcpy(sel_file,ptr);
 		}
-
-		// Get pointer to file name	
-		ptr=FilePart(handle->func_source_path);
-
-		// Directory?
-		if (!ptr || !*ptr || ptr==handle->func_source_path)
-		{
-			short len;
-
-			// Strip last /
-			if (handle->func_source_path[(len=strlen(handle->func_source_path)-1)]=='/')
-				handle->func_source_path[len]=0;
-
-			// Try again
-			ptr=FilePart(handle->func_source_path);
-		}
-
-		// Copy name and clear from path
-		stccpy(sel_file,ptr,39);
-		*ptr=0;
 	}
 
 	// Read into destination lister?
@@ -170,6 +174,9 @@ GALILEOFM_FUNC(function_scandir)
 		function_unlock_paths(handle,&handle->func_dest_paths,0);
 	}
 
+	if (!read_dir)
+	    read_dir = handle->func_source_lock;
+
 	// Read into current lister?
 	if (!new_flag && lister)
 	{
@@ -178,15 +185,18 @@ GALILEOFM_FUNC(function_scandir)
 		else handle->flags=0;
 
 		// Read directory
-		function_read_directory(handle,lister,handle->func_source_path);
+		function_read_directory(handle,lister,NULL,read_dir);
 	}
 
 	// Create a new lister
 	else
-	if (cfg=NewLister((path_flag)?handle->func_source_path:0))
+	if (cfg=NewLister(0))
 	{
 		// Initialise lister
 		lister_init_new(cfg,(new_flag)?0:lister);
+
+		// Set lock
+		cfg->lock = read_dir;
 
 		// Set flags
 		cfg->lister.flags|=mode_flags;
@@ -194,37 +204,37 @@ GALILEOFM_FUNC(function_scandir)
 		// Open lister
 		if (lister=lister_new(cfg))
 		{
-			BPTR lock;
-
-			// Got a path and can lock it?
-			if (path_flag && handle->func_source_path[0] &&
-				(lock=Lock(handle->func_source_path,ACCESS_READ)))
+			// Got a path and a lock?
+			if (path_flag && read_dir)
 			{
 				short mode=0;
-
-				// Get full path
-				NameFromLock(lock,lister->work_buffer,512);
-				UnLock(lock);
-
-				// Check path is terminated
-				AddPart(lister->work_buffer,"",512);
+				char *fullpath;
 
 				// Get mode flags
 				if (mode_flags&GLSTF_ICON) mode|=LISTERMODE_ICON;
 				if (mode_flags&GLSTF_ICON_ACTION) mode|=LISTERMODE_ICON_ACTION;
 
-				// Get position
-				lister->pos_rec=
-					GetListerPosition(
-						lister->work_buffer,
-						0,
-						0,
-						&cfg->lister.pos[0],
-						&mode,
-						&lister->format,
-						0,
-						0,
-						GLPF_USE_MODE);
+				if (fullpath = PathFromLock(handle->memory, read_dir, PFLF_END_SLASH, NULL))
+				{
+				    struct DateStamp date = {0};
+
+				    VolIdFromLock(read_dir, &date, NULL);
+
+				    // Get position
+				    lister->pos_rec=
+					    GetListerPosition(
+						    fullpath,
+						    &date,
+						    0,
+						    0,
+						    &cfg->lister.pos[0],
+						    &mode,
+						    &lister->format,
+						    0,
+						    0,
+						    GLPF_USE_MODE);
+				    FreeMemH(fullpath);
+				}
 			}
 
 			// Send initialise command
@@ -248,6 +258,5 @@ GALILEOFM_FUNC(function_scandir)
 		}
 	}
 
-	FreeVec(sel_file);
 	return 1;
 }

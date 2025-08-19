@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2023 Hagbard Celine
+Copyright 2023,2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,32 +36,11 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#include "galileofm.h"
-#include "/Modules/modules.h"
-#include "/Modules/modules_protos.h"
-#include "eliza.h"
-#include "scripts.h"
+#include "main_include.h"
 
-#define LIB_VER 0	// Minimum library version we need
-
-#define INIT_STEPS	14
-
-#define ExecLib		((struct ExecBase *)*((ULONG *)4))
-
-struct Library *main_open_library(char *lib,short ver);
-
-#pragma libcall ModuleBase LibExpunge 12 0
-void LibExpunge(void);
-
-#define PROG(x) main_bump_progress(main_status,(x),TRUE)
-
-extern struct Library		   *ConsoleDevice;
-
-#ifdef RESOURCE_TRACKING
-
-ULONG callerid;
-
-#endif
+BPTR old_current_dir = 0;      // Old current directory
+BOOL rem_galileo_assign = 0;   // Remove assigns...
+BOOL rem_g_themes_assign = 0;  // ...if we made them.
 
 // Main entry point
 
@@ -71,14 +50,14 @@ void main(int argc,char **argv)
 
 
 #ifdef RESOURCE_TRACKING
-    if (ResTrackBase=REALL_OpenLibrary("g_restrack.library",0))
-         StartResourceTracking (RTL_ALL);
+	if (ResTrackBase=REALL_OpenLibrary("g_restrack.library",0))
+	     StartResourceTracking (RTL_ALL);
 
-    callerid=(ULONG)&main;
+	callerid=(ULONG)&main;
 #endif
 
 #ifdef _DEBUG_IPCPROC
-    KPrintF("Main ResTrackBase: %lx at: %lx SysBase %lx GalileoFMBase: %lx\n", ResTrackBase, &ResTrackBase, SysBase, GalileoFMBase);
+	KPrintF("Main ResTrackBase: %lx at: %lx SysBase %lx GalileoFMBase: %lx\n", ResTrackBase, &ResTrackBase, SysBase, GalileoFMBase);
 #endif
 
 	/******** Startup Stuff that happens before the progress bar is displayed ********/
@@ -212,6 +191,9 @@ void startup_misc_init()
 	// Get pointer to our Process structure, and hide requesters
 	main_proc=(struct Process *)FindTask(0);
 	main_proc->pr_WindowPtr=(APTR)-1;
+#ifdef _DEBUG_STACK
+	stack_check_begin((struct Task *)main_proc, &stack_check_data);
+#endif
 }
 
 
@@ -222,28 +204,28 @@ void startup_check_assign()
 
 	// See if we have a Galileo: lock
 	if (lock=Lock("Galileo:",ACCESS_READ))
-		UnLock(lock);
+	    UnLock(lock);
 
 	// We don't; assign it to PROGDIR:
 	else
 	if (lock=DupLock(GetProgramDir()))
 	{
-		if (!(AssignLock("Galileo",lock)))
-            UnLock(lock);
-        rem_galileo_assign=1;
+	    if (!(AssignLock("Galileo",lock)))
+		UnLock(lock);
+	    rem_galileo_assign=1;
 	}
 
 	// See if we have a G_THEMES: lock
 	if (lock=Lock("G_THEMES:",ACCESS_READ))
-		UnLock(lock);
+	    UnLock(lock);
 
 	// We don't; assign it to PROGDIR:Themes
 	else
 	if (lock=Lock("PROGDIR:Themes",ACCESS_READ))
 	{
-		if (!(AssignLock("G_THEMES",lock)))
-			UnLock(lock);
-		rem_g_themes_assign=1;
+	    if (!(AssignLock("G_THEMES",lock)))
+		    UnLock(lock);
+	    rem_g_themes_assign=1;
 	}
 }
 
@@ -789,7 +771,7 @@ void startup_show_startup_picture(IPCData **startup_pic)
 					"galileo_show",
 					(ULONG)misc_proc,
 					STACK_DEFAULT,
-					(ULONG)startup,(struct Library *)DOSBase)))
+					(ULONG)startup)))
 				{
 					// Failed
 					if (!ipc) FreeVec(startup);
@@ -906,6 +888,7 @@ void startup_init_ports()
 	GUI->appmsg_port->mp_Node.ln_Pri=1;
 	GUI->appmsg_port->mp_Node.ln_Name=galileo_name;
 	AddPort(GUI->appmsg_port);
+	GUI->appmsg_port->mp_Node.ln_Type = GNT_MAIN_APPMSG_PORT;
 
 	// Initialise public semaphore
 	pub_semaphore.sem.ss_Link.ln_Name="Galileo Public Semaphore";
@@ -1042,7 +1025,7 @@ KPrintF("Main before rexx_proc ResTrackBase: %lx at: %lx SysBase: %lx IconBase: 
 		&GUI->rexx_proc,
 		"galileo_rexx",
 		(ULONG)rexx_proc,
-		STACK_DEFAULT,0,(struct Library *)DOSBase);
+		STACK_DEFAULT,0);
 
 #ifdef _DEBUG_IPCPROC
     KPrintF("Main after rexx_proc ResTrackBase: %lx \n",ResTrackBase);

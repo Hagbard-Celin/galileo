@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,11 +32,15 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "buttons_protos.h"
+#include "misc_protos.h"
+#include "function_launch_protos.h"
+#include "app_msg_protos.h"
 
 // Find button function
 Cfg_ButtonFunction *button_find_function(Cfg_Button *button,short which,APTR *image)
@@ -123,17 +128,19 @@ void buttons_run_button(Buttons *buttons,Cfg_Button *button,short which)
 		0,0,
 		0,0,
 		0,0,
+		0,0,
 		buttons);
 }
 
 
 // Handle some appstuff
-BOOL buttons_app_message(Buttons *buttons,GalileoAppMessage *msg)
+BOOL buttons_app_message(Buttons *buttons,struct AppMessage *msg)
 {
 	short col,row;
 	Cfg_Button *button;
 	Cfg_Function *function;
-	struct ArgArray *arg_array;
+	GalileoListerAppMessage *lamsg = 0;
+	BOOL ret = FALSE;
 	IPCData *ipc;
 
 	// Lock process list
@@ -159,9 +166,23 @@ BOOL buttons_app_message(Buttons *buttons,GalileoAppMessage *msg)
 	// Lock bank
 	GetSemaphore(&buttons->bank->lock,SEMF_SHARED,0);
 
+	if (msg->am_Type == MTYPE_LISTER_APPWINDOW && msg->am_Class == GLAMCLASS_LISTER)
+	{
+	    lamsg = (GalileoListerAppMessage *)msg;
+	    ret = TRUE;
+	    col	= lamsg->glam_MouseX;
+	    row	= lamsg->glam_MouseY;
+	}
+	else
+	{
+	    col	= msg->am_MouseX;
+	    row	= msg->am_MouseY;
+	}
+
 	// Get button and function we dropped on
-	col=msg->ga_Msg.am_MouseX;
-	row=msg->ga_Msg.am_MouseY;
+	col = msg->am_MouseX;
+	row = msg->am_MouseY;
+
 	if (!(button=button_from_point(buttons,&col,&row)) ||
 		!(function=button_valid(button,button->current)))
 	{
@@ -169,39 +190,20 @@ BOOL buttons_app_message(Buttons *buttons,GalileoAppMessage *msg)
 		return 0;
 	}
 
-	// Get arg array
-	if (arg_array=AppArgArray(msg,AAF_ALLOW_DIRS))
-	{
-		BPTR lock;
-		char pathname[256];
-
-		// Get pathname of first file
-		DevNameFromLock(msg->ga_Msg.am_ArgList[0].wa_Lock,pathname,256);
-
-		// Need source directory; if no name, get parent
-		if ((!msg->ga_Msg.am_ArgList[0].wa_Name ||
-			!*msg->ga_Msg.am_ArgList[0].wa_Name) &&
-			(lock=ParentDir(msg->ga_Msg.am_ArgList[0].wa_Lock)))
-		{
-			// Get pathname of parent
-			DevNameFromLock(lock,pathname,256);
-			UnLock(lock);
-		}
-
-		// Launch function
-		function_launch(
-			FUNCTION_RUN_FUNCTION_EXTERNAL,
-			function,
-			0,
-			0,
-			0,0,
-			pathname,0,
-			arg_array,0,
-			buttons);
-	}
+	// Launch function
+	function_launch(
+	        FUNCTION_RUN_FUNCTION_EXTERNAL,
+	        function,
+	        0,
+	        0,
+	        0,0,
+	        0,0,
+	        0,0,
+	        0,0,
+	        (lamsg)?(Buttons *)lamsg:(Buttons *)CopyAppMessage(msg, NULL));
 
 	// Unlock button lock
 	FreeSemaphore(&buttons->bank->lock);
 
-	return 0;
+	return ret;
 }

@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -65,11 +66,14 @@ struct locals
     int			    put, set;
     int			    isicon;
     BPTR		    lock;
-    char		    newpath[256];
+    char		    newpath[108];
     int			    newxoff, newyoff;
     ULONG		    flags;
-    char		    path[256];
+    char		    *path;
     int			    xoff, yoff;
     int			    more_files;
     ULONG		    return_to;
+    BPTR		    parent_lock;
+    BPTR		    newparent_lock;
+    BPTR		    org_dir;
 };

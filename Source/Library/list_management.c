@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -38,7 +39,7 @@ For more information on Directory Opus for Windows please see:
 #include "galileofmlib.h"
 
 /****************************************************************************
-                         Returns a new list structure
+			 Returns a new list structure
  ****************************************************************************/
 
 Att_List *__asm __saveds L_Att_NewList(register __d0 ULONG flags)
@@ -66,7 +67,7 @@ Att_List *__asm __saveds L_Att_NewList(register __d0 ULONG flags)
 
 
 /****************************************************************************
-                          Add a node to an Att_List
+			  Add a node to an Att_List
  ****************************************************************************/
 
 Att_Node *__asm __saveds L_Att_NewNode(
@@ -77,6 +78,7 @@ Att_Node *__asm __saveds L_Att_NewNode(
 {
 	Att_Node *node;
 	BOOL added=0;
+	ULONG size;
 
 	// Valid list?
 	if (!list) return 0;
@@ -84,17 +86,29 @@ Att_Node *__asm __saveds L_Att_NewNode(
 	// Lock list
 	L_LockAttList(list,TRUE);
 
+	if (flags&ADDNODE_LOCKNODE)
+	    size = sizeof(Att_LockNode);
+	else
+	    size = sizeof(Att_Node);
+
 	// Allocate node
-	if (!(node=L_AllocMemH(list->memory,sizeof(Att_Node))))
+	if (!(node=L_AllocMemH(list->memory,size)))
 	{
 		L_UnlockAttList(list);
 		return 0;
 	}
 
+	if (flags&ADDNODE_LOCKNODE)
+	    node->node.ln_Type = ATTNODE_LOCKNODE;
+	else
+	if (flags&ADDNODE_DISKCHANGENODE)
+	    node->node.ln_Type = ATTNODE_DISKCHANGENODE;
+
+
 	// If name supplied, create a copy of it
 	if (name)
 	{
-		if (!(node->node.ln_Name=L_AllocMemH(list->memory,strlen(name)+1)))
+		if (!(node->node.ln_Name=L_AllocMemH(list->memory,(flags&ADDNODE_DISKCHANGENODE)?sizeof(diskchange_data):strlen(name)+1)))
 		{
 			L_FreeMemH(node);
 			L_UnlockAttList(list);
@@ -214,7 +228,7 @@ Att_Node *__asm __saveds L_Att_NewNode(
 
 
 /****************************************************************************
-                          Remove a node from an Att_List
+			  Remove a node from an Att_List
  ****************************************************************************/
 
 void __asm __saveds L_Att_RemNode(register __a0 Att_Node *node)
@@ -233,6 +247,12 @@ void __asm __saveds L_Att_RemNode(register __a0 Att_Node *node)
 		// Remove the node
 		Remove((struct Node *)node);
 
+		if (ISATTLOCKNODE(node->node.ln_Type) &&
+		    ((Att_LockNode *)node)->att_lock)
+		{
+		    UnLock(((Att_LockNode *)node)->att_lock);
+		}
+
 		// Free memory allocated for name
 		L_FreeMemH(node->node.ln_Name);
 
@@ -246,7 +266,7 @@ void __asm __saveds L_Att_RemNode(register __a0 Att_Node *node)
 
 
 /****************************************************************************
-                       Reposition a node in an Att_List
+		       Reposition a node in an Att_List
  ****************************************************************************/
 
 void __asm __saveds L_Att_PosNode(
@@ -269,7 +289,7 @@ void __asm __saveds L_Att_PosNode(
 
 
 /****************************************************************************
-                          Free an entire Att_List
+			  Free an entire Att_List
  ****************************************************************************/
 
 void __asm __saveds L_Att_RemList(
@@ -282,7 +302,7 @@ void __asm __saveds L_Att_RemList(
 	if (!list) return;
 
 	// Only need to go through list if freeing data, or not using pools
-	if (flags&REMLIST_FREEDATA || !list->memory)
+	if (flags&REMLIST_FREEDATA || flags&REMLIST_UNLOCK || !list->memory)
 	{
 		// Go through list
 		for (node=(Att_Node *)list->list.lh_Head;
@@ -299,11 +319,18 @@ void __asm __saveds L_Att_RemList(
 				else FreeVec((APTR)node->att_data);
 			}
 
+			if (flags&REMLIST_UNLOCK &&
+			    ISATTLOCKNODE(node->node.ln_Type) &&
+			    ((Att_LockNode *)node)->att_lock)
+			{
+			    UnLock(((Att_LockNode *)node)->att_lock);
+			}
+
 			// If not pooling, remove node
 			if (!list->memory)
 			{
 				// Free memory allocated for name
-                if (node->node.ln_Name)
+				if (node->node.ln_Name)
 					L_FreeMemH(node->node.ln_Name);
 
 				// Free node
@@ -316,7 +343,7 @@ void __asm __saveds L_Att_RemList(
 	if (!(flags&REMLIST_SAVELIST))
 	{
 		// Free list memory
-        if (list->memory)
+		if (list->memory)
 			L_FreeMemHandle(list->memory);
 
 		// Free list itself
@@ -327,7 +354,7 @@ void __asm __saveds L_Att_RemList(
 	else
 	{
 		// Clear list memory
-        if (list->memory)
+		if (list->memory)
 			L_ClearMemHandle(list->memory);
 
 		// Reinitialise list
@@ -337,7 +364,7 @@ void __asm __saveds L_Att_RemList(
 
 
 /****************************************************************************
-                        Find a node by ordinal number
+			Find a node by ordinal number
  ****************************************************************************/
 
 Att_Node *__asm __saveds L_Att_FindNode(
@@ -360,7 +387,7 @@ Att_Node *__asm __saveds L_Att_FindNode(
 
 
 /****************************************************************************
-                  Find the ordinal number of a node by name
+		  Find the ordinal number of a node by name
  ****************************************************************************/
 
 __asm __saveds L_Att_NodeNumber(
@@ -385,7 +412,7 @@ __asm __saveds L_Att_NodeNumber(
 
 
 /****************************************************************************
-                           Find a node by its data
+			   Find a node by its data
  ****************************************************************************/
 
 Att_Node *__asm __saveds L_Att_FindNodeData(
@@ -407,7 +434,7 @@ Att_Node *__asm __saveds L_Att_FindNodeData(
 
 
 /****************************************************************************
-                   Find a node's ordinal number by its data
+		   Find a node's ordinal number by its data
  ****************************************************************************/
 
 __asm __saveds L_Att_NodeDataNumber(
@@ -430,7 +457,7 @@ __asm __saveds L_Att_NodeDataNumber(
 
 
 /****************************************************************************
-                      Find a node name by ordinal number
+		      Find a node name by ordinal number
  ****************************************************************************/
 
 char *__asm __saveds L_Att_NodeName(
@@ -449,7 +476,7 @@ char *__asm __saveds L_Att_NodeName(
 
 
 /****************************************************************************
-                      Count the nodes in a list
+		      Count the nodes in a list
  ****************************************************************************/
 
 __asm __saveds L_Att_NodeCount(register __a0 Att_List *list)
@@ -470,7 +497,7 @@ __asm __saveds L_Att_NodeCount(register __a0 Att_List *list)
 
 
 /****************************************************************************
-                             Change a node's name
+			     Change a node's name
  ****************************************************************************/
 
 void __asm __saveds L_Att_ChangeNodeName(
@@ -497,7 +524,7 @@ void __asm __saveds L_Att_ChangeNodeName(
 
 
 /****************************************************************************
-                      Find the ordinal number of a node
+		      Find the ordinal number of a node
  ****************************************************************************/
 
 __asm __saveds L_Att_FindNodeNumber(
@@ -522,7 +549,7 @@ __asm __saveds L_Att_FindNodeNumber(
 
 
 /****************************************************************************
-                Add a node to a list with alphabetical sorting
+		Add a node to a list with alphabetical sorting
  ****************************************************************************/
 
 void __asm __saveds L_AddSorted(
@@ -594,7 +621,7 @@ void __saveds __asm L_LockAttList(
 {
 	// List requires locking?
 	if (list && list->flags&LISTF_LOCK)
-		L_GetSemaphore(&list->lock,(exclusive)?SEMF_EXCLUSIVE:SEMF_SHARED,0);
+		L_GetSemaphore(&list->lock,(exclusive)?SEMF_EXCLUSIVE:SEMF_SHARED,0, getreg(REG_A6));
 }
 
 
@@ -603,7 +630,7 @@ void __saveds __asm L_UnlockAttList(register __a0 Att_List *list)
 {
 	// List required locking?
 	if (list && list->flags&LISTF_LOCK)
-		L_FreeSemaphore(&list->lock);
+		L_FreeSemaphore(&list->lock, getreg(REG_A6));
 }
 
 
@@ -655,12 +682,12 @@ BOOL __asm __saveds L_IsListLockEmpty(register __a0 struct ListLock *list)
 	BOOL empty;
 
 	// Lock list
-	L_GetSemaphore(&list->lock,SEMF_SHARED,0);
+	L_GetSemaphore(&list->lock,SEMF_SHARED,0, getreg(REG_A6));
 
 	// See if it's empty
 	empty=IsListEmpty(&list->list)?TRUE:FALSE;
 
 	// Unlock list
-	L_FreeSemaphore(&list->lock);
+	L_FreeSemaphore(&list->lock, getreg(REG_A6));
 	return empty;
 }

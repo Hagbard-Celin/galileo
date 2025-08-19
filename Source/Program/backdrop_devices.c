@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,11 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "misc_protos.h"
+#include "backdrop_protos.h"
+#include "desktop.h"
+#include "lsprintf_protos.h"
 
 // Get devices for backdrop (list must be locked)
 short backdrop_get_devices(BackdropInfo *info)
@@ -68,14 +74,14 @@ short backdrop_get_devices(BackdropInfo *info)
 			environment->env->display_options&DISPOPTF_HIDE_BAD)
 			continue;
 
-		// Invalid task (means it's PAR, SER, etc)?
-		if (!dos_entry->dle_DosList.dol_Task) continue;
-
 		// Is this a device?
 		if (dos_entry->dle_Node.ln_Type==DLT_DEVICE)
 		{
 			DosListEntry *entry;
 			struct DosList *dos;
+
+			// Invalid task (means it's PAR, SER, etc)
+			if (!dos_entry->dle_DosList.dol_Task) continue;
 
 			// Go through dos list
 			for (entry=(DosListEntry *)dos_list.lh_Head;
@@ -276,14 +282,110 @@ short backdrop_get_devices(BackdropInfo *info)
 	return change;
 }
 
+// Free backdrop objects and lister cache entries for ejected volumes
+void backdrop_check_ejected(BackdropInfo *info)
+{
+    struct DosList *doslist, *nextdoslist;
+
+    // Lock buffer list
+    lock_listlock(&GUI->buffer_list,TRUE);
+
+    // Lock doslist
+    doslist = LockDosList(LDF_VOLUMES|LDF_READ);
+
+    doslist = NextDosEntry(doslist,LDF_VOLUMES);
+
+    // Go through DOS list
+    do
+    {
+	nextdoslist = NextDosEntry(doslist,LDF_VOLUMES);
+
+	// Ejected and got locks?
+	if (!doslist->dol_Task && doslist->dol_misc.dol_volume.dol_LockList)
+	{
+	    BPTR lock, nextlock;
+	    struct FileLock *fl;
+	    DirBuffer *tmp_buf;
+
+	    lock = doslist->dol_misc.dol_volume.dol_LockList;
+
+	    do
+	    {
+		// Get pointer
+		fl = BADDR(lock);
+
+		// Get next lock
+		nextlock = fl->fl_Link;
+
+	        // Locked by chached lister-buffer?
+	        if (tmp_buf = lister_find_buffer(0,0,0,
+					         lock,
+					         0,0,
+						 LISTER_BFPF_DONT_LOCK|LISTER_BFPF_ONLY_CACHE|LISTER_BFPF_DONT_MOVE|LISTER_BFPF_DONT_TEST|LISTER_BFPF_COMPARE_LOCKADDRESS))
+	        {
+		    // Free the buffer
+	            lister_free_buffer(tmp_buf);
+
+	        }
+		// Go through backdrop list
+		else
+		{
+		    BackdropObject *object;
+
+		    for (object=(BackdropObject *)GUI->backdrop->objects.list.lh_Head;
+			 object->bdo_node.ln_Succ;)
+		    {
+			BackdropObject *next=(BackdropObject *)object->bdo_node.ln_Succ;
+
+			// Is this the lock we are looking for?
+			if (object->bdo_parent_lock == lock)
+			{
+			    // Erase object
+			    backdrop_erase_icon(info,object,0);
+
+			    // Remove object
+			    backdrop_remove_object(info,object);
+
+			    break;
+			}
+
+			// Get next
+			object=next;
+		    }
+		}
+	    } while (lock = nextlock);
+	}
+    } while (doslist = nextdoslist);
+
+    // Unlock doslist
+    UnLockDosList(LDF_VOLUMES|LDF_READ);
+
+    // Unlock buffer list
+    unlock_listlock(&GUI->buffer_list);
+}
 
 // Refresh drives
-void backdrop_refresh_drives(BackdropInfo *info,short flags)
+void backdrop_refresh_drives(BackdropInfo *info, GalileoNotify *notify, short flags)
 {
 	short change;
 
 	// Lock backdrop list
 	lock_listlock(&info->objects,1);
+
+	if (notify)
+	{
+	    if (notify->gn_Flags == 0)
+	    // Free ejected
+		backdrop_check_ejected(info);
+	    else
+	    if (notify->gn_Flags == 1)
+	    {
+		diskchange_data *diskchange;
+
+		diskchange = (diskchange_data *)notify->gn_Name;
+		backdrop_add_volume_leftouts(info, diskchange->devname, diskchange->volname, &diskchange->date, diskchange->volnamelen);
+	    }
+	}
 
 	// Refresh the device list
 	change=backdrop_get_devices(info);

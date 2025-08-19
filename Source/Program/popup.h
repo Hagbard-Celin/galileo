@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -54,11 +54,5 @@ typedef struct _PopUpExt
 #define POPUP_LISTER2	9
 
 #define POPUPEXTF_HANDLER	(1<<0)
-
-void add_popup_ext(char *,Att_List *,char *,ULONG);
-void remove_popup_ext(char *);
-BOOL popup_ext_check(char *);
-void popup_run_func(PopUpExt *,struct _BackdropObject *,char *,struct ListerWindow *);
-PopUpHandle *popup_from_bank(Cfg_ButtonBank *bank,short *);
 
 #endif

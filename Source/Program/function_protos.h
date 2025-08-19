@@ -31,12 +31,15 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #ifndef _GALILEOFM_FUNCTION_PROTOS
 #define _GALILEOFM_FUNCTION_PROTOS
+
+#include "function_launch.h"
+#include "function_data.h"
 
 #define GALILEOFM_FUNC(name) \
 	int name(struct _CommandList *command,\
@@ -93,9 +96,9 @@ GALILEOFM_FUNC(function_loadfonts);
 GALILEOFM_FUNC(function_stopsniffer);
 
 BOOL rename_get_wild(char *,char *,char *,char *);
-ExternalEntry *new_external_entry(FunctionHandle *handle,char *path);
+ExternalEntry *new_external_entry(FunctionHandle *handle,char *path, BPTR lock);
 
-void network_get_info(NetworkInfo *,DirBuffer *,struct DevProc *,UWORD,UWORD,ULONG);
+void network_get_info(NetworkInfo *,DirBuffer *,BPTR,UWORD,UWORD,ULONG);
 
 void function_user_run(FunctionHandle *handle,Cfg_Function *function);
 

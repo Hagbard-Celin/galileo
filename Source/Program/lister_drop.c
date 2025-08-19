@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,26 +37,54 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "dirlist_protos.h"
+#include "misc_protos.h"
+#include "app_msg_protos.h"
+#include "function_launch_protos.h"
+#include "rexx_protos.h"
+#include "buffers_protos.h"
+#include "path_routines.h"
+#include "backdrop_protos.h"
+#include "lsprintf_protos.h"
 
 // Handle some dropped files
-void lister_receive_drop(Lister *dest,GalileoAppMessage *msg)
+void lister_receive_drop(Lister *dest, GalileoListerAppMessage *msg)
 {
 	Lister *source=0;
-	ULONG flags=0;
-	char pathname[256];
-	struct ArgArray *arg_array;
+	ULONG flags=0, launch_flags;
 	long func_type;
 	Cfg_Function *function;
 	BackdropInfo *info;
 	DirEntry *over_entry=0;
 	UWORD qual;
-	BOOL ok=1;
+	WORD ok = -1;
+	BOOL read=0;
+	BPTR dest_lock=0, source_lock;
+	struct WBArg *arglist;
+	struct GLAData *argdata = 0;
+	struct AppMessage *amsg = 0;
 
 	// Cache backdrop pointer
 	info=dest->backdrop_info;
 
-	// Get internal app message data
-	get_appmsg_data(msg,(ULONG *)&source,&flags,(ULONG *)&over_entry);
+	if (msg->glam_Type == MTYPE_LISTER_APPWINDOW && msg->glam_Class == GLAMCLASS_LISTER)
+	{
+	    source = msg->glam_Lister;
+	    flags = msg->glam_Flags;
+	    over_entry = msg->glam_OverEntry;
+	    arglist = msg->glam_ArgList;
+	    argdata = msg->glam_ArgData;
+
+	}
+	else
+	{
+	    amsg = (struct AppMessage *)msg;
+	    arglist = amsg->am_ArgList;
+	}
+
+	// Set launch flag
+	launch_flags = FUNCF_DRAG_DROP;
 
 	// Get qualifiers
 	qual=(InputBase)?PeekQualifier():0;
@@ -63,78 +92,150 @@ void lister_receive_drop(Lister *dest,GalileoAppMessage *msg)
 	// Does current buffer have a custom handler?
 	if (dest->cur_buffer->buf_CustomHandler[0])
 	{
+		char *tmp_path = 0;
+
+		if (amsg && dest->cur_buffer->cust_flags&CUSTF_NO_EXT_APPMSG)
+		{
+		    DisplayBeep(dest->window->WScreen);
+		    return;
+		}
+
 		// Does message have lister in it?
 		if (source==dest)
 		{
 			// Clear lister pointer
-			set_appmsg_data(msg,0,flags,0);
+			msg->glam_Lister = 0;
 		}
 
-		// Build destination path
-		strcpy(info->buffer,dest->cur_buffer->buf_Path);
 		if (over_entry)
-			AddPart(info->buffer,over_entry->de_Node.dn_Name,512);
+		    tmp_path = JoinString(NULL, dest->cur_buffer->buf_Path, over_entry->de_Node.dn_Name, NULL, NULL);
 		else
 		if (flags&DROPF_PARENT)
-			path_parent(info->buffer);
+		{
+		    if (tmp_path = CopyString(NULL, dest->cur_buffer->buf_Path))
+			path_parent(tmp_path);
+		}
 
 		// Send to rexx handler
 		if (over_entry || flags&DROPF_PARENT) qual|=IEQUALIFIER_SUBDROP;
-		rexx_custom_app_msg(msg,dest->cur_buffer,"drop",source,info->buffer,qual);
+		rexx_custom_app_msg((struct AppMessage *)msg,dest->cur_buffer,"drop",source,(tmp_path)?tmp_path:dest->cur_buffer->buf_Path,qual);
+
+		if (tmp_path)
+		    FreeMemH(tmp_path);
+
+		if (!amsg)
+		    reply_lister_appmsg(msg);
+
 		return;
 	}
 
+	// Get first entry lock
+	if (!(source_lock = arglist[0].wa_Lock))
+	    source_lock = msg->glam_Lock;
+
 	// Is first entry a directory?
-	if (WBArgDir(&msg->ga_Msg.am_ArgList[0]))
+	if ((argdata && argdata[0].glad_Flags&(AAEF_DIR|AAEF_DEV)) || (!argdata && (WBArgDir(&arglist[0]))))
 	{
-		// Get first path name
-		if (DevNameFromLock(msg->ga_Msg.am_ArgList[0].wa_Lock,pathname,256))
+	    // In icon mode?
+	    if (dest->flags&LISTERF_VIEW_ICONS)
+	    {
+		// Showing device list?
+	        if (dest->cur_buffer->more_flags&DWF_DEVICE_LIST)
+	        {
+			BPTR new_lock, org_dir = 0;
+
+			if (argdata && argdata[0].glad_Flags&AAEF_DIR)
+		        {
+			    org_dir = CurrentDir(source_lock);
+			    new_lock = Lock(arglist[0].wa_Name, ACCESS_READ);
+		        }
+		        else
+			    new_lock = DupLock(source_lock);
+
+		        // Do assign
+		        // FIXME: Lock!!!!
+		        function_launch(
+			        FUNCTION_RUN_FUNCTION,
+			        def_function_assign,
+			        0,
+			        launch_flags,
+			        0,dest,
+				0,0,
+				new_lock,0,
+			        0,
+			        0,
+				0);
+
+		        if (org_dir)
+			    CurrentDir(org_dir);
+
+			if (!amsg)
+			    reply_lister_appmsg(msg);
+		        return;
+	        }
+	    }
+	    // Can only read if lister is open, and not in icon mode
+	    else
+	    if (dest->window)
+	    {
+	        // If shift is down, we read it, no questions asked
+	        if (qual&IEQUAL_ANYSHIFT)
+		    read=1;
+	        else
+	        // Is it a device?
+		if (argdata)
 		{
-			BOOL read=0;
+		    if (argdata[0].glad_Flags&AAEF_DEV)
+		        read=1;
+		}
+		else
+		{
+		    BPTR parentlock;
 
-			// If shift is down, we read it, no questions asked
-			if (qual&IEQUAL_ANYSHIFT) read=1;
-
-			// Is it a device?
-			else
-			if (pathname[strlen(pathname)-1]==':') read=1;
-
-			// Can only read if lister is open, and not in icon mode
-			if (!dest->window || dest->flags&LISTERF_VIEW_ICONS) read=0;
-
-			// Want to read directory?
-			if (read)
-			{
-				// Load directory
-				read_directory(
-					dest,
-					pathname,
-					GETDIRF_CANCHECKBUFS|GETDIRF_CANMOVEEMPTY);
-				return;
-			}
-
-			// In icon mode, showing device list?
-			if (dest->flags&LISTERF_VIEW_ICONS &&
-				dest->cur_buffer->more_flags&DWF_DEVICE_LIST)
-			{
-				// Do assign
-				function_launch(
-					FUNCTION_RUN_FUNCTION,
-					def_function_assign,
-					0,
-					FUNCF_DRAG_DROP,
-					0,dest,
-					pathname,0,
-					0,
-					0,
-					0);
-				return;
-			}
+		    if (parentlock = ParentDir(arglist[0].wa_Lock))
+			UnLock(parentlock);
+		    else
+			read = 1;
 		}
 
-		// Error
-		else return;
+	        // Want to read directory?
+	        if (read)
+	        {
+			BPTR new_lock, org_dir = 0;
+
+			if (argdata && argdata[0].glad_Flags&AAEF_DIR)
+		        {
+			    org_dir = CurrentDir(source_lock);
+			    new_lock = Lock(arglist[0].wa_Name, ACCESS_READ);
+		        }
+		        else
+			    new_lock = DupLock(source_lock);
+
+		        if (new_lock)
+		        {
+		            // Load directory
+		            read_directory(
+			            dest,
+			            arglist[0].wa_Name,
+				    new_lock,
+			            GETDIRF_CANCHECKBUFS|GETDIRF_CANMOVEEMPTY);
+		        }
+		        else
+			    DisplayBeep(dest->window->WScreen);
+
+		        if (org_dir)
+			    CurrentDir(org_dir);
+
+			if (!amsg)
+			    reply_lister_appmsg(msg);
+
+		        return;
+	        }
+	    }
 	}
+
+	if (amsg || flags&DROPF_ICON_MODE)
+	    launch_flags |= FUNCF_ICONS;
 
 	// Lister must have a valid buffer
 	if (!(dest->cur_buffer->flags&DWF_VALID)) return;
@@ -142,7 +243,6 @@ void lister_receive_drop(Lister *dest,GalileoAppMessage *msg)
 	// Normal filetype action to start with
 	func_type=FUNCTION_FILETYPE;
 	function=0;
-	strcpy(info->buffer,dest->cur_buffer->buf_Path);
 
 	// Is destination lister in icon mode?
 	if (dest->flags&LISTERF_VIEW_ICONS)
@@ -153,16 +253,39 @@ void lister_receive_drop(Lister *dest,GalileoAppMessage *msg)
 		lock_listlock(&info->objects,0);
 
 		// See if it's dropped on anything
-		if (drop_on=backdrop_get_object(info,msg->ga_Msg.am_MouseX,msg->ga_Msg.am_MouseY,0))
+		if (drop_on=backdrop_get_object(info,msg->glam_MouseX,msg->glam_MouseY,0))
 		{
 			// Is shift/alt down?
 			if ((qual&(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))==(IEQUALIFIER_LSHIFT|IEQUALIFIER_LALT))
 			{
-				// Get path of first file
-				GetWBArgPath(&msg->ga_Msg.am_ArgList[0],pathname,256);
+				char disk[5] = "Disk";
 
-				// Replace the image
-				backdrop_replace_icon_image(info,pathname,drop_on);
+				if (!argdata && WBArgDir(&arglist[0]))
+			        {
+				    BPTR parent_lock;
+
+
+				    // Try to get parent dir
+				    if (parent_lock = ParentDir(source_lock))
+				    {
+				        D_S(struct FileInfoBlock,tmp_fib);
+
+				        // Get directory name
+					Examine(source_lock,tmp_fib);
+				        backdrop_replace_icon_image(info,tmp_fib->fib_FileName,parent_lock,drop_on);
+				        UnLock(parent_lock);
+				    }
+				    else
+					backdrop_replace_icon_image(info,disk,source_lock,drop_on);
+			        }
+				else
+				{
+				    if (argdata && argdata[0].glad_Flags == AAEF_DEV)
+					backdrop_replace_icon_image(info,disk,source_lock,drop_on);
+				    else
+					backdrop_replace_icon_image(info,arglist[0].wa_Name,source_lock,drop_on);
+				}
+
 				ok=0;
 			}
 
@@ -170,10 +293,21 @@ void lister_receive_drop(Lister *dest,GalileoAppMessage *msg)
 			else
 			if (drop_on->bdo_icon->do_Type==WBDRAWER || drop_on->bdo_icon->do_Type==WBGARBAGE)
 			{
-				// Move into this drawer
-				func_type=FUNCTION_RUN_FUNCTION_EXTERNAL;
-				function=def_function_copy;
-				AddPart(info->buffer,drop_on->bdo_name,512);
+				BPTR new_lock;
+
+				if (new_lock = Lock(drop_on->bdo_name, ACCESS_READ))
+				{
+				    dest_lock = new_lock;
+
+				    launch_flags |= FUNCF_DROPON_LOCK;
+
+				    // Move into this drawer
+				    func_type=FUNCTION_RUN_FUNCTION_EXTERNAL;
+				    function=def_function_copy;
+				    ok = 1;
+				}
+				else
+				    ok = -2;
 			}
 
 			// Dropped on a tool?
@@ -186,9 +320,9 @@ void lister_receive_drop(Lister *dest,GalileoAppMessage *msg)
 					drop_on,
 					0,
 					0,
-					msg->ga_Msg.am_NumArgs,
-					msg->ga_Msg.am_ArgList);
-				ok=0;
+					(amsg)?0:msg,
+					amsg);
+				ok = -2;
 			}
 		}
 
@@ -197,6 +331,9 @@ void lister_receive_drop(Lister *dest,GalileoAppMessage *msg)
 		{
 			function=def_function_copy;
 			func_type=FUNCTION_RUN_FUNCTION_EXTERNAL;
+			dest_lock = dest->cur_buffer->buf_Lock;
+
+			ok = 1;
 		}
 
 		// Unlock backdrop list
@@ -206,32 +343,39 @@ void lister_receive_drop(Lister *dest,GalileoAppMessage *msg)
 	// Drop was in name mode; if drop was into a sub-directory, add that to path
 	else
 	if (over_entry)
-		AddPart(info->buffer,over_entry->de_Node.dn_Name,512);
+	{
+		BPTR over_lock;
+
+		if (over_lock = Lock(over_entry->de_Node.dn_Name,ACCESS_READ))
+		{
+		    dest_lock = over_lock;
+		    launch_flags |= FUNCF_DROPON_LOCK;
+		    ok = 1;
+		}
+	}
 
 	// Or drop into parent area
 	else
 	if (flags&DROPF_PARENT)
-		path_parent(info->buffer);
+	{
+		BPTR over_lock;
+		if (over_lock = ParentDir(dest->cur_buffer->buf_Lock))
+		{
+		    dest_lock = over_lock;
+		    launch_flags |= FUNCF_DROPON_LOCK;
+		    ok = 1;
+		}
+		else
+		    ok = -2;
+	}
 
 	// Ok to do filetype?
-	if (ok)
+	if (ok > 0 || ok == -1)
 	{
 		short action;
 
-		// Get arg array
-		if (!(arg_array=AppArgArray(msg,AAF_ALLOW_DIRS)))
-			return;
-
-		// Get path of first file
-		DevNameFromLock(msg->ga_Msg.am_ArgList[0].wa_Lock,pathname,256);
-
-		// Need source directory; if this is a drawer, get parent
-		if (WBArgDir(&msg->ga_Msg.am_ArgList[0]))
-		{
-			// Get parent of drawer
-			path_parent(pathname);
-		}
-
+		if (!dest_lock)
+		    dest_lock = dest->cur_buffer->buf_Lock;
 /* ACTION_CHANGE
 		// If source is in icon mode, don't use it
 		if (source && (source->flags&LISTERF_VIEW_ICONS) && !(source->flags&LISTERF_ICON_ACTION))
@@ -250,13 +394,17 @@ void lister_receive_drop(Lister *dest,GalileoAppMessage *msg)
 			func_type,
 			function,
 			action,
-			(flags&DROPF_ICON_MODE)?FUNCF_ICONS|FUNCF_DRAG_DROP:FUNCF_DRAG_DROP,
-			source,dest, //(dest && dest->window)?dest:0,
-			pathname,info->buffer,
-			arg_array,
+			launch_flags,
+			source,dest,
+			0,0,
+			0,dest_lock,
 			0,
-			(Buttons *)CopyAppMessage(msg,global_memory_pool));
+			0,
+			(amsg)?(Buttons *)CopyAppMessage(amsg,dest->lister_memory):(Buttons *)msg);
 	}
+	else
+	if (!amsg && ok == 0)
+	    reply_lister_appmsg(msg);
 }
 
 

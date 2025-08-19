@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -47,18 +48,10 @@ For more information on Directory Opus for Windows please see:
 // Patched PutDiskObject()
 BOOL __asm __saveds L_WB_PutDiskObject(
 	register __a0 char *name,
-	register __a1 struct DiskObject *diskobj)
+	register __a1 struct DiskObject *diskobj,
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-	struct MyLibrary *libbase;
 	BOOL result,magic=0;
-
-	// Get library
-	if (!(libbase=(struct MyLibrary *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"galileofm.library")))
-		return 0;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
 
 	// See if icon type is set to inverse magic
 	if (diskobj->do_Magic==(UWORD)~WB_DISKMAGIC)
@@ -71,53 +64,34 @@ BOOL __asm __saveds L_WB_PutDiskObject(
 	}
 
 	// Write icon
-	result=L_WriteIcon(name,diskobj,libbase);
+	result=L_WriteIcon(name,diskobj,GalileoFMBase);
 
 	// Succeeded?
-	if (result && !magic) icon_notify(data,name,0,0);
+	if (result && !magic) icon_notify(&gfmlib_data,name,0,0);
 
 	return result;
 }
 
 
 // Patched DeleteDiskObject()
-BOOL __asm __saveds L_WB_DeleteDiskObject(register __a0 char *name)
+BOOL __asm __saveds L_WB_DeleteDiskObject(register __a0 char *name, register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-	struct MyLibrary *libbase;
 	BOOL result;
 	char *full_name;
-#ifdef RESOURCE_TRACKING
-    struct Library *ResTrackBase;
-#endif
-
-	// Get library
-	if (!(libbase=(struct MyLibrary *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"galileofm.library")))
-		return 0;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
-#ifdef RESOURCE_TRACKING
-	ResTrackBase=data->restrack_base;
-#endif
 
 	// Get full name
-	full_name=icon_fullname(data,name);
+	full_name = L_GetIconFullname(name);
 
 	// Write icon
-	result=L_DeleteIcon(name,libbase);
-
-#define DOSBase (data->dos_base)
+	result=L_DeleteIcon(name,GalileoFMBase);
 
 	// Succeeded?
 	if ((result || IoErr()==ERROR_OBJECT_NOT_FOUND) && full_name)
-		icon_notify(data,full_name,INF_FULLNAME,1);
-
-#undef DOSBase
+		icon_notify(&gfmlib_data,full_name,INF_FULLNAME,1);
 
 	// Free full name buffer
-	FreeVec(full_name);
+	FreeMemH(full_name);
+
 	return result;
 }
 
@@ -126,86 +100,61 @@ BOOL __asm __saveds L_WB_DeleteDiskObject(register __a0 char *name)
 void icon_notify(struct LibData *data,char *name,ULONG flags,short delete)
 {
 	char *full_name;
-#ifdef RESOURCE_TRACKING
-    struct Library *ResTrackBase;
-	ResTrackBase=data->restrack_base;
-#endif
-
 
 	// Given full name?
 	if (flags&INF_FULLNAME) full_name=name;
 
 	// Get full name
 	else
-	if (!(full_name=icon_fullname(data,name)))
+	if (!(full_name = L_GetIconFullname(name)))
 		return;
 
 	// Send notify message
-	L_SendNotifyMsg(GN_WRITE_ICON,0,delete,FALSE,full_name,0,data->galileofm_base);
+	L_SendNotifyMsg(GN_WRITE_ICON,0,delete,FALSE,full_name,0,getreg(REG_A6));
 
 	// Free buffer
-	if (!(flags&INF_FULLNAME)) FreeVec(full_name);
+	if (!(flags&INF_FULLNAME)) L_FreeMemH(full_name);
 }
 
 
 // Get icon full name
-char *icon_fullname(struct LibData *data,char *name)
+char * __asm __saveds L_GetIconFullname(register __a0 char *name)
 {
-	char *full_name,*ptr;
 	BPTR lock;
-	short len;
-#ifdef RESOURCE_TRACKING
-    struct Library *ResTrackBase;
-	ResTrackBase=data->restrack_base;
-#endif
-
-	// Allocate buffer for full name
-	if (!(full_name=AllocVec(300,0))) return 0;
-
-	// Copy name
-	strcpy(full_name,name);
-	ptr=full_name+strlen(full_name);
-	strcat(full_name,".info");
-
-#define DOSBase (data->dos_base)
+	ULONG len = 0;
+	char *full_name,*ptr;
 
 	// Lock icon
-	if (!(lock=Lock(full_name,ACCESS_READ)))
-	{
-		// Strip .info
-		*ptr=0;
-		if (lock=Lock(full_name,ACCESS_READ))
-		{
-			// Add .info back
-			strcpy(ptr,".info");
-		}
-	}
+	if (!(lock=L_LockFromPath(name,NULL,LFPF_TRY_ICON_FIRST)))
+	    return 0;
 
-	// Got lock?
-	if (lock)
+	// Expand path
+	if (full_name = L_PathFromLock(NULL, lock, PFLF_USE_DEVICENAME, NULL))
 	{
-		// Expand path
-		L_DevNameFromLock(lock,full_name,256,data->galileofm_base);
+		len = getreg(REG_D1);
 
 		// Disk?
 		if ((ptr=strchr(full_name,':')) && stricmp(ptr+1,"disk.info")==0)
 		{
+			L_FreeMemH(full_name);
+
 			// Get real full name
-			NameFromLock(lock,full_name,256);
+			if (full_name = L_PathFromLock(NULL, lock, NULL, NULL))
+			{
+			    len = getreg(REG_D1);
 
-			// Strip after colon
-			if (ptr=strchr(full_name,':')) *(ptr+1)=0;
+			    // Strip after colon
+			    if (ptr=strchr(full_name,':')) *(ptr+1)=0;
+			}
 		}
-
-		// Unlock lock
-		UnLock(lock);
 	}
 
-#undef DOSBase
+	// Unlock lock
+	UnLock(lock);
 
 	// Strip .info from name
-	if ((len=strlen(full_name))>5 &&
-		stricmp(full_name+len-5,".info")==0)
+	if (full_name && len>5 &&
+	    stricmp(full_name+len-5,".info")==0)
 	{
 		// Strip it
 		*(full_name+len-5)=0;
@@ -219,18 +168,12 @@ char *icon_fullname(struct LibData *data,char *name)
 BOOL __asm __saveds L_WriteIcon(
 	register __a0 char *name,
 	register __a1 struct DiskObject *icon,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
 	BOOL result;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
 
 	// No icon?
 	if (!icon) return 0;
-
-#define NewIconBase	(data->new_icon_base)
 
 	// A NewIcon?
 	if (L_GetIconType(icon)==ICON_NEWICON && NewIconBase)
@@ -281,23 +224,17 @@ BOOL __asm __saveds L_WriteIcon(
 		// Fix revision
 		if ((((ULONG)icon->do_Gadget.UserData)&WB_DISKREVISIONMASK)==0)
 			*((ULONG *)&icon->do_Gadget.UserData)|=WB_DISKREVISION;
-
-
-#define IconBase	(data->icon_base)
 	
 	if	(IconBase->lib_Version>=44)
 		result=PutIconTags(name,icon,TAG_DONE);
 
 	else
 		// Write the icon
-		result=((BOOL __asm (*)
+		result=((BOOL (* __asm)
 					(register __a0 char *,register __a1 struct DiskObject *,register __a6 struct Library *))
-						data->wb_data.old_function[WB_PATCH_PUTDISKOBJECT])
-					(name,icon,data->icon_base);
+						gfmlib_data.wb_data.old_function[WB_PATCH_PUTDISKOBJECT])
+					(name,icon,IconBase);
 	}
-
-#undef IconBase
-#undef NewIconBase
 
 	return result;
 }
@@ -306,19 +243,14 @@ BOOL __asm __saveds L_WriteIcon(
 // DeleteDiskObject without notification
 BOOL __asm __saveds L_DeleteIcon(
 	register __a0 char *name,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// Delete it
 	return 
-		((BOOL __asm (*)
+		((BOOL (* __asm)
 			(register __a0 char *,register __a6 struct Library *))
-				data->wb_data.old_function[WB_PATCH_DELETEDISKOBJECT])
-			(name,data->icon_base);
+				gfmlib_data.wb_data.old_function[WB_PATCH_DELETEDISKOBJECT])
+			(name,IconBase);
 }
 
 
@@ -407,6 +339,3 @@ short __asm __saveds L_GetIconType(register __a0 struct DiskObject *icon)
 
 	return ICON_NORMAL;
 }
-
-
-

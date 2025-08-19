@@ -31,12 +31,11 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofmlib.h"
-#define BOOPSI_LIBS
 #include "boopsi.h"
 
 static const unsigned char __far

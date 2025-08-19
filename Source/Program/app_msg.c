@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,100 +32,185 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "app_msg_protos.h"
+#include "dirlist_protos.h"
+#include "file_select.h"
 
-// Allocate and fill out an AppMessage
-GalileoAppMessage *alloc_appmsg_files(
-	DirEntry *entry,
-	DirBuffer *buffer,
-	BOOL multifiles)
+// Allocate an AppMessage
+GalileoListerAppMessage *alloc_lister_appmsg(APTR memory,
+					     struct MsgPort *reply,
+					     WORD num)
 {
-	GalileoAppMessage *msg;
-	BPTR dir_lock=0;
-	short arg;
+    GalileoListerAppMessage *msg;
 
-	// Get lock on directory
-	if (!buffer->buf_Path[0] || !(dir_lock=Lock(buffer->buf_Path,ACCESS_READ)))
+    // Allocate message
+    if (!(msg = AllocMemH(memory,
+			    sizeof(GalileoListerAppMessage)+
+			    ((sizeof(struct WBArg) + sizeof(struct GLAData)) * num))))
+    {
+	return 0;
+    }
+
+    // Set check pointer
+    msg->glam_Class = GLAMCLASS_LISTER;
+
+    // Set ArgList pointer
+    msg->glam_NumArgs=num;
+
+    // Set ArgList pointer
+    if (num>0) msg->glam_ArgData=(struct GLAData *)(msg->glam_ArgList + num);
+
+    // Fill out miscellaneous fields
+    //msg->glam_Message.mn_ReplyPort=reply;
+    msg->glam_Version=GLAM_VERSION;
+
+    return msg;
+}
+
+
+// Free an ListerAppMessage
+void free_lister_appmsg(GalileoListerAppMessage *msg)
+{
+    // Valid message?
+    if (msg)
+    {
+	WORD arg;
+
+	if (!(msg->glam_Flags&DROPF_BORROWED_LOCK))
 	{
-		// If lock failed and we don't have a custom handler, and aren't a special path, fail
-		if (!buffer->buf_CustomHandler[0] &&
-			!(buffer->more_flags&(DWF_DEVICE_LIST|DWF_CACHE_LIST))) return 0;
+	    UnLock(msg->glam_Lock);
+	}
+	// Free any arguments
+	if (msg->glam_ArgList)
+	{
+	    for (arg=0;arg<msg->glam_NumArgs;arg++)
+	    {
+		FreeMemH(msg->glam_ArgList[arg].wa_Name);
+
+		if (msg->glam_ArgList[arg].wa_Lock && !(msg->glam_ArgData[arg].glad_Flags&WBAF_NOT_A_LOCK))
+		{
+		    UnLock(msg->glam_ArgList[arg].wa_Lock);
+		}
+	    }
 	}
 
-	// Got a lock?
-	if (dir_lock)
+	// Free message
+	FreeMemH(msg);
+    }
+}
+
+// Reply to an AppMessage
+void reply_lister_appmsg(GalileoListerAppMessage *msg)
+{
+	// Valid message?
+	if (msg)
 	{
-		struct FileInfoBlock __aligned fib;
-
-		// Examine it
-		Examine(dir_lock,&fib);
-
-		// If it's not a directory, ignore it
-		if (fib.fib_DirEntryType<0)
+		if (msg->glam_Message.mn_ReplyPort)
 		{
-			// Unlock it
-			UnLock(dir_lock);
-			dir_lock=0;
-
-			// If we don't have a custom handler, return
-			if (!buffer->buf_CustomHandler[0]) return 0;
+			ReplyMsg((struct Message *)msg);
+		}
+		else
+		{
+			free_lister_appmsg(msg);
 		}
 	}
+}
 
-	// Allocate AppMessage
-	if (!(msg=
-		AllocAppMessage(
-			global_memory_pool,
-			GUI->appmsg_port,
-			(multifiles)?(buffer->buf_SelectedFiles[0]+buffer->buf_SelectedDirs[0]):1)))
-	{
-		UnLock(dir_lock);
-		return 0;
-	}
+// Set a GLArg entry
+BOOL set_glarg(GalileoListerAppMessage *msg,
+	       WORD num,
+	       char *name,
+	       APTR memory)
+{
+	// Valid message and number?
+	if (!msg || num>msg->glam_NumArgs) return 0;
+
+	// Null-name?
+	if (!name) name="";
+
+	// Copy name
+	if (msg->glam_ArgList[num].wa_Name=AllocMemH(memory,strlen(name)+1))
+		strcpy(msg->glam_ArgList[num].wa_Name,name);
+
+	return 1;
+}
+
+
+// Allocate and fill out an AppMessage
+void set_wbargs_files(ULONG numargs,
+		      struct WBArg *args,
+		      struct GLAData *argsdata,
+		      BPTR dir_lock,
+		      DirEntry *entry,
+		      DirBuffer *buffer)
+{
+	WORD arg;
+
 
 	// Any arguments?
-	if (msg->ga_Msg.am_NumArgs>0)
+	if (numargs>0)
 	{
 		// If multi-drag, get first selected file
-		if (multifiles) entry=get_entry(&buffer->entry_list,1,ENTRY_ANYTHING);
+		if (numargs>1) entry=get_entry(&buffer->entry_list,1,ENTRY_ANYTHING);
 
 		// Fill out arguments
-		for (arg=0;arg<msg->ga_Msg.am_NumArgs && entry;arg++)
+		for (arg=0;arg<numargs && entry;arg++)
 		{
 			// Is entry a directory?
-			if (entry->de_Node.dn_Type>=ENTRY_DIRECTORY && dir_lock)
+			if (entry->de_Node.dn_Type>=ENTRY_DIRECTORY)
 			{
+			    if (argsdata)
+			    {
+				// Set name
+				args[arg].wa_Name = CopyString(global_memory_pool, entry->de_Node.dn_Name);
+
+				// Flag as directory
+				argsdata[arg].glad_Flags = AAEF_DIR;
+			    }
+			    else
+			    {
 				BPTR old;
 
 				// Go to directory
 				old=CurrentDir(dir_lock);
 
 				// Null-name
-				SetWBArg(msg,arg,0,0,global_memory_pool);
+				args[arg].wa_Name = (STRPTR)(args + numargs);
 
 				// Get lock on directory
-				if (!(msg->ga_Msg.am_ArgList[arg].wa_Lock=Lock(entry->de_Node.dn_Name,ACCESS_READ)))
+				if (!(args[arg].wa_Lock=Lock(entry->de_Node.dn_Name,ACCESS_READ)))
 				{
 					// If a custom handler, just pass name
 					if (buffer->buf_CustomHandler[0])
-						SetWBArg(msg,arg,0,entry->de_Node.dn_Name,global_memory_pool);
+					    args[arg].wa_Name = CopyString(global_memory_pool, entry->de_Node.dn_Name);
 				}
 
 				// Return to previous directory
 				if (old) CurrentDir(old);
+			    }
 			}
 
 			// A device?
+			// FIXME: Lock????????
 			else
 			if (entry->de_Node.dn_Type==ENTRY_DEVICE)
 			{
 				char *ptr;
+				BPTR lock_entry;
 
+				// Multi assign entry?
+				if (entry->de_SubType == SUBENTRY_MULTI_ASSIGN)
+				{
+					// Use assign name
+					ptr=(char *)GetTagData(DE_AssignName,0,entry->de_Tags);
+				}
 				// Cache?
+				else
 				if (entry->de_SubType==SUBENTRY_BUFFER)
 				{
 					// Use comment if available
@@ -135,88 +221,179 @@ GalileoAppMessage *alloc_appmsg_files(
 					}
 				}
 
-				// Otherwise, use name
-				else ptr=entry->de_Node.dn_Name;
-
-				// Null-name
-				SetWBArg(msg,arg,0,0,global_memory_pool);
-
-				// Lock thingy
-				if (!(msg->ga_Msg.am_ArgList[arg].wa_Lock=Lock(ptr,ACCESS_READ)))
+				// Otherwise, use comment
+				else
 				{
-					// Just pass name
-					SetWBArg(msg,arg,0,entry->de_Node.dn_Name,global_memory_pool);
+				    ptr = (char *)GetTagData(DE_Comment,0,entry->de_Tags);
+				    ptr = stpcpy(buffer->buf_CurrentLister->work_buffer, ptr);
+				    *ptr = ':';
+				    ptr++;
+				    *ptr = 0;
+				    ptr = buffer->buf_CurrentLister->work_buffer;
+				}
+
+				// Duplicate lock if this is an assign
+				if (entry->de_Size == DLT_DIRECTORY)
+				{
+				    lock_entry = DupLock((BPTR)entry->de_UserData);
+				}
+				else
+				if (!entry->de_SubType)
+				{
+				    lock_entry = Lock(entry->de_Node.dn_Name,ACCESS_READ);
+				}
+				else
+				    lock_entry = Lock(ptr, ACCESS_READ);
+
+				// Get lock
+				if (lock_entry)
+				{
+				    if (argsdata)
+				    {
+				        BPTR lock_parent;
+
+				        // If assign, try locking parent
+				        if (entry->de_Size == DLT_DIRECTORY && (lock_parent = ParentDir(lock_entry)))
+				        {
+					    argsdata[arg].glad_Flags = AAEF_DIR;
+
+					    argsdata[arg].glad_Flags |= AAEF_ASSIGN;
+
+					    if (entry->de_SubType==SUBENTRY_ASSIGN)
+					    {
+
+					        UnLock(lock_entry);
+					        lock_entry = lock_parent;
+					    }
+					    else
+					    {
+					        UnLock(lock_parent);
+					    }
+				        }
+				        else
+				        {
+					    argsdata[arg].glad_Flags = AAEF_DEV;
+				        }
+
+					args[arg].wa_Name = CopyString(global_memory_pool, ptr);
+
+				        if (entry->de_SubType==SUBENTRY_MULTI_ASSIGN)
+				        {
+					    argsdata[arg].glad_Flags |= AAEF_MULTI_ASSIGN;
+				        }
+				    }
+				    else
+				    {
+					// Null-name
+					args[arg].wa_Name = (STRPTR)(args + numargs);
+				    }
+
+				    args[arg].wa_Lock = lock_entry;
+				}
+
+				// Set name if not already set
+				if ((argsdata || !args[arg].wa_Lock) && !args[arg].wa_Name)
+				{
+				    args[arg].wa_Name = CopyString(global_memory_pool, entry->de_Node.dn_Name);
 				}
 			}
 
 			// Otherwise, it's a file
-			else SetWBArg(msg,arg,dir_lock,entry->de_Node.dn_Name,global_memory_pool);
+			else
+			{
+			    args[arg].wa_Name = CopyString(global_memory_pool, entry->de_Node.dn_Name);
+			    if (!argsdata)
+				args[arg].wa_Lock = DupLock(dir_lock);
+			}
+
+			// No lock and non-arexx custom handler? use entry
+			if (!args[arg].wa_Lock && buffer->buf_CustomHandler[0] && *(ULONG *)buffer->buf_CustomHandler == CUSTH_TYPE_GFMMODULE)
+			{
+			    args[arg].wa_Lock = (LONG)entry;
+			    argsdata[arg].glad_Flags |= WBAF_NOT_A_LOCK;
+			}
 
 			// Deselect entry
 			deselect_entry(buffer,entry);
 
 			// Get next entry (for multidrag)
-			if (multifiles) entry=get_entry((struct MinList *)entry,1,ENTRY_ANYTHING);
+			if (numargs>1) entry=get_entry((struct MinList *)entry,1,ENTRY_ANYTHING);
 			else break;
 		}
 	}
+}
 
-	// Free directory lock
-	UnLock(dir_lock);
+
+// Allocate and fill out an AppMessage
+GalileoListerAppMessage *alloc_lister_appmsg_files(
+	DirEntry *entry,
+	DirBuffer *buffer,
+	BOOL multifiles)
+{
+	GalileoListerAppMessage *msg;
+
+	// Get lock on directory
+	if (!buffer->buf_Lock)
+	{
+	        // If lock failed and we don't have a custom handler, and aren't a special path, fail
+	        if (!buffer->buf_CustomHandler[0] &&
+		        !(buffer->more_flags&(DWF_DEVICE_LIST|DWF_CACHE_LIST))) return 0;
+	}
+
+	// Allocate AppMessage
+	if (!(msg=
+		alloc_lister_appmsg(
+			global_memory_pool,
+			GUI->appmsg_port,
+			(multifiles)?(buffer->buf_SelectedFiles[0]+buffer->buf_SelectedDirs[0]):1)))
+	{
+		return 0;
+	}
+
+	if (buffer->buf_Lock)
+	{
+	    msg->glam_Lock = buffer->buf_Lock;
+	    msg->glam_Flags|=DROPF_BORROWED_LOCK;
+	}
+
+	// Any arguments?
+	if (msg->glam_NumArgs>0)
+	    set_wbargs_files(msg->glam_NumArgs, msg->glam_ArgList, msg->glam_ArgData, buffer->buf_Lock, entry, buffer);
 
 	return msg;
 }
 
-
-// Get arguments as an array
-struct ArgArray *AppArgArray(GalileoAppMessage *msg,short flags)
+// Allocate and fill out an AppMessage
+struct AppMessage *alloc_appmsg_files(
+	DirEntry *entry,
+	DirBuffer *buffer,
+	BOOL multifiles)
 {
-	return WBArgArray(msg->ga_Msg.am_ArgList,msg->ga_Msg.am_NumArgs,flags);
-}
+	struct AppMessage *msg;
 
-struct ArgArray *WBArgArray(struct WBArg *arglist,short count,short flags)
-{
-	struct ArgArray *array;
-
-	// No arglist?
-	if (!arglist || count<1) return 0;
-
-	// Allocate arg array
-	if (array=NewArgArray())
+	// Get lock on directory
+	if (!buffer->buf_Lock)
 	{
-		short arg;
-		char buf[256];
-
-		// Go through arguments
-		for (arg=0;arg<count;arg++,arglist++)
-		{
-			struct ArgArrayEntry *entry;
-
-			// Skip directories unless allow dirs is set
-			if (!(flags&AAF_ALLOW_DIRS) && !(*arglist->wa_Name))
-				continue;
-
-			// Get name of file
-			GetWBArgPath(arglist,buf,256);
-
-			// If a directory, add trailing /
-			if (!arglist->wa_Name || !*arglist->wa_Name)
-				AddPart(buf,"",256);
-
-			// Allocate this argument
-			if (entry=NewArgArrayEntry(array,buf))
-			{
-				// Directory?
-				if (!arglist->wa_Name || !*arglist->wa_Name)
-					entry->aae_Flags|=AAEF_DIR;
-
-				// Increment array index
-				++array->aa_Count;
-			}
-		}
+		// If lock failed and we don't have a custom handler, and aren't a special path, fail
+		if (!buffer->buf_CustomHandler[0] &&
+			!(buffer->more_flags&(DWF_DEVICE_LIST|DWF_CACHE_LIST))) return 0;
 	}
 
-	return array;
+	// Allocate AppMessage
+	if (!(msg=
+		AllocAppMessage(
+			global_memory_pool,
+			GUI->appmsg_port,
+			(multifiles)?(buffer->buf_SelectedFiles[0]+buffer->buf_SelectedDirs[0]):1)))
+	{
+		return 0;
+	}
+
+	// Any arguments?
+	if (msg->am_NumArgs>0)
+	    set_wbargs_files(msg->am_NumArgs, msg->am_ArgList, NULL, buffer->buf_Lock, entry, buffer);
+
+	return msg;
 }
 
 
@@ -225,6 +402,19 @@ void FreeArgArray(struct ArgArray *array)
 {
 	if (array)
 	{
+		struct ArgArrayEntry *arg;
+
+		// Go through arguments
+		for (arg=(struct ArgArrayEntry *)array->aa_List.mlh_Head;
+			arg->aae_Node.mln_Succ;
+			arg=(struct ArgArrayEntry *)arg->aae_Node.mln_Succ)
+		{
+		    if (arg->aae_Lock)
+		    {
+			UnLock(arg->aae_Lock);
+		    }
+		}
+
 		// Free arguments and array
 		FreeMemHandle(array->aa_Memory);
 		FreeVec(array);
@@ -232,40 +422,10 @@ void FreeArgArray(struct ArgArray *array)
 }
 
 
-// Set AppMessage custom data
-void set_appmsg_data(GalileoAppMessage *msg,ULONG value1,ULONG value2,ULONG value3)
-{
-	if (msg)
-	{
-		// Set check pointer
-		msg->ga_Msg.am_Reserved[6]=(ULONG)msg;
-
-		// Store data
-		msg->ga_Msg.am_Reserved[3]=value1;
-		msg->ga_Msg.am_Reserved[4]=value2;
-		msg->ga_Msg.am_Reserved[5]=value3;
-	}
-}
-
-
-// Get AppMessage custom data
-BOOL get_appmsg_data(GalileoAppMessage *msg,ULONG *value1,ULONG *value2,ULONG *value3)
-{
-	// Check for valid message
-	if (!msg || msg->ga_Msg.am_Reserved[6]!=(ULONG)msg) return 0;
-
-	// Return data
-	if (value1) *value1=msg->ga_Msg.am_Reserved[3];
-	if (value2) *value2=msg->ga_Msg.am_Reserved[4];
-	if (value3) *value3=msg->ga_Msg.am_Reserved[5];
-	return 1;
-}
-
-
 // Find a WBArg by name and lock
-short FindWBArg(struct WBArg *args,short count,char *name)
+WORD FindGLArg(struct WBArg *args,WORD count,char *name)
 {
-	short num;
+	WORD num;
 
 	// Go through arguments
 	for (num=0;num<count;num++)
@@ -276,77 +436,10 @@ short FindWBArg(struct WBArg *args,short count,char *name)
 			// Compare by name
 			if (strcmp(args[num].wa_Name,name)==0) return num;
 		}
-
-		// Compare by lock
-		else
-		{
-			char buf[256];
-
-			// Get full path
-			DevNameFromLock(args[num].wa_Lock,buf,256);
-
-			// Devices?
-			if (buf[strlen(buf)-1]==':' &&
-				name[strlen(name)-1]==':')
-			{
-				// Compare device names
-				if (strcmp(buf,name)==0) return num;
-			}
-
-			// Compare file name
-			else
-			if (strcmp(FilePart(buf),name)==0) return num;
-		}
 	}
 
 	// Not found
 	return -1;
-}
-
-
-// Unlock the locks in a WBArg array
-void UnlockWBArg(struct WBArg *args,short count)
-{
-	short num;
-
-	// Go through arguments
-	for (num=0;num<count;num++)
-	{
-		// Got a lock?
-		if (args[num].wa_Lock)
-		{
-			// Don't have a name?
-			if (!args[num].wa_Name || !*args[num].wa_Name)
-			{
-				char buf[256];
-				char *ptr;
-
-				// Get full path from lock
-				DevNameFromLock(args[num].wa_Lock,buf,256);
-
-				// Device?
-				if (buf[strlen(buf)-1]==':') ptr=buf;
-
-				// Use filename only
-				else ptr=FilePart(buf);
-
-				// Allocate copy
-				if (args[num].wa_Name)
-					FreeMemH(args[num].wa_Name);
-				if (args[num].wa_Name=AllocMemH(0,strlen(ptr)+1))
-					strcpy(args[num].wa_Name,ptr);
-
-#ifdef _DEBUG_ALLOCMEMH
-    			KPrintF("app_msg.c:336 AllocMem: %lx \n", ((ULONG *)args[num].wa_Name)-2 );
-#endif
-
-			}
-
-			// Free the lock
-			UnLock(args[num].wa_Lock);
-			args[num].wa_Lock=0;
-		}
-	}
 }
 
 
@@ -359,7 +452,7 @@ struct ArgArray *BuildArgArray(char *arg,...)
 struct ArgArray *BuildArgArrayA(char **args)
 {
 	struct ArgArray *array;
-	short num;
+	WORD num;
 
 	// Allocate arg array
 	if (array=NewArgArray())

@@ -122,7 +122,7 @@ ULONG __asm __saveds L_Config_Menu(
 
 			while (msg=(struct AppMessage *)GetMsg(data->app_port))
 			{
-				short num,count=0;
+				WORD num,count=0;
 				Cfg_ButtonFunction *function=0;
 				Att_Node *node=0;
 
@@ -942,10 +942,10 @@ Cfg_ButtonBank *lister_menu_load_menu(lister_menu_data *data,Cfg_ButtonBank *ban
 
 		// Try to open bank
 		if (path[0] &&
-			(data->bank=OpenButtonBank(path)))
-            {
-            strcpy(data->menu_name,path);
-            }
+			(data->bank=OpenButtonBank(path, NULL)))
+	        {
+		    strcpy(data->menu_name,path);
+	        }
 	}
 
 	// Check scripts bank
@@ -1188,8 +1188,7 @@ void lister_menu_edit_item(lister_menu_data *data)
 			"galileo_function_editor",
 			(ULONG)FunctionEditor,
 			STACK_DEFAULT,
-			(ULONG)startup,
-			(struct Library *)DOSBase)) && ipc)
+			(ULONG)startup)) && ipc)
 		{
 			success=1;
 
@@ -1242,12 +1241,12 @@ BOOL lister_menu_receive_edit(
 
 		// Add to list
 		else
-        {
-        	AddTail((struct List *)&button->function_list,(struct Node *)func);
-        }
-		
-        // Plug memory leak
-        // Copy new function in
+		{
+			AddTail((struct List *)&button->function_list,(struct Node *)func);
+		}
+
+		// Plug memory leak
+		// Copy new function in
 		CopyFunction(ret->function,data->bank->memory,(Cfg_Function *)func);
 
 		// Update list for hotkeys

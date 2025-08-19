@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -91,7 +92,7 @@ long __asm __saveds L_AsyncRequest(
 		"galileo_requester_proc",
 		(ULONG)requester_proc,
 		STACK_DEFAULT,
-		(ULONG)startup,(struct Library *)DOSBase,libbase)))
+		(ULONG)startup,libbase)))
 	{
 		// Failed to launch
 		FreeVec(startup);
@@ -351,5 +352,9 @@ void __saveds requester_proc(void)
 
 	// Free and exit
 	IPC_Free(ipc);
+
+#ifdef RESOURCE_TRACKING
+    ResourceTrackingEndOfTask();
+#endif
 #undef GalileoFMBase
 }

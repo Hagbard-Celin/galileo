@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,10 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
+#include "function_protos.h"
+#include "rexx_protos.h"
+#include "lsprintf_protos.h"
 
 // LOADFONTS internal function
 GALILEOFM_FUNC(function_loadfonts)
@@ -48,12 +53,16 @@ GALILEOFM_FUNC(function_loadfonts)
 	if (entry=function_get_entry(handle))
 	{
 		APTR iff;
+		BPTR tmplock = 0, org_dir = 0;
 
-		// Build full name
-		function_build_source(handle,entry,handle->func_work_buf);
+		if (entry->fe_lock)
+		    org_dir = CurrentDir(entry->fe_lock);
+		else
+		if (handle->func_source_lock)
+		    org_dir = CurrentDir(handle->func_source_lock);
 
 		// Open IFF file
-		if (iff=IFFOpen(handle->func_work_buf,IFF_READ,ID_PREF))
+		if (iff=IFFOpen(entry->fe_name,IFF_READ,ID_PREF))
 		{
 			ULONG chunk;
 			while ((chunk=IFFNextChunk(iff,ID_FONT))==ID_FONT)
@@ -115,6 +124,13 @@ GALILEOFM_FUNC(function_loadfonts)
 			IFFClose(iff);
 		}
 
+	        // Restore current directory
+	        if (org_dir)
+		    CurrentDir(org_dir);
+
+	        if (tmplock)
+		    UnLock(tmplock);
+
 		// End this entry
 		function_end_entry(handle,entry,1);
 	}
@@ -132,7 +148,7 @@ GALILEOFM_FUNC(function_loadfonts)
 				GUI->screen_pointer,
 				Lock(handle->func_source_path,ACCESS_READ),
 				Open("nil:",MODE_OLDFILE),0,
-				0,0);
+				0,0,NULL);
 		}
 
 		// Send change command

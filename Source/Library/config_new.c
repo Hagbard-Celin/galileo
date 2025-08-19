@@ -31,14 +31,13 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofmlib.h"
 #include "/Program/galileo_config.h"
 
-char *copy_string(APTR,char *);
 
 // Create a new button bank
 Cfg_ButtonBank *__asm __saveds L_NewButtonBank(
@@ -153,7 +152,7 @@ Cfg_Lister *__asm __saveds L_NewLister(
 		return 0;
 
 	// If path is supplied, copy it
-	if (path) lister->path=copy_string(0,path);
+	if (path) lister->path=L_CopyString(0,path);
 
 	return lister;
 }
@@ -212,7 +211,7 @@ Cfg_Instruction *__asm __saveds L_NewInstruction(
 	if ((ins=L_AllocMemH(memory,sizeof(Cfg_Instruction))) &&
 		(!string || (ins->string=L_AllocMemH(memory,strlen(string)+1))))
 	{
-        ins->type=type;
+	ins->type=type;
 		if (string) strcpy(ins->string,string);
 
 		return ins;
@@ -239,19 +238,4 @@ Cfg_Filetype *__asm __saveds L_NewFiletype(register __a0 APTR memory)
 	// Failed
 	L_FreeMemH(type);
 	return 0;
-}
-
-
-// Copy a string
-char *copy_string(APTR memory,char *original)
-{
-	char *copy=0;
-
-	if (original &&
-		(copy=L_AllocMemH(memory,strlen(original)+1)))
-        {
-			strcpy(copy,original);
-        }
-
-	return copy;
 }

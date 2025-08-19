@@ -36,6 +36,12 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lsprintf_protos.h"
+#include "misc_protos.h"
+#include "function_launch_protos.h"
+#include "app_msg_protos.h"
+#include "scripts.h"
+#include "commands.h"
 
 Att_List *script_list=0;
 
@@ -269,7 +275,7 @@ BOOL RunScript_Node(Att_Node *node,char *data)
 				if (func=new_default_function(command,0))
 				{
 					func->function.flags2|=FUNCF2_FREE_FUNCTION;
-					function_launch(FUNCTION_RUN_FUNCTION,func,0,FUNCF_NO_SOURCE,0,0,0,0,0,0,0);
+					function_launch(FUNCTION_RUN_FUNCTION,func,0,FUNCF_NO_SOURCE,0,0,0,0,0,0,0,0,0);
 				}
 			}
 		}
@@ -302,6 +308,7 @@ BOOL RunScript_Node(Att_Node *node,char *data)
 		FUNCTION_RUN_FUNCTION,
 		(Cfg_Function *)func,
 		0,flags,
+		0,0,
 		0,0,
 		0,0,
 		BuildArgArray(data,0),

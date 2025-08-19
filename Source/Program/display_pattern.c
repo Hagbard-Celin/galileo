@@ -31,11 +31,13 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "notify.h"
+#include "lister.h"
 
 #define NUM_PATTERNS	3
 
@@ -484,11 +486,11 @@ void display_free_pattern(void)
 	for (a=PATTERN_MAIN;a<=PATTERN_REQ;a++)
 	{
 		// Free pattern data
-        if (GUI->pattern[a].data)
-        {
+		if (GUI->pattern[a].data)
+		{
 			FreeVec(GUI->pattern[a].data);
 			GUI->pattern[a].data=0;
-        }
+		}
 			// Free pattern
 			FreePattern(&GUI->pattern[a]);
 

@@ -23,6 +23,7 @@ Function Editor Changes:
   time a "Command" follows one of the other types, and the command itself is
   removed.
 
+
 Command Changes:
 
 - Copy, CopyAs, Encrypt, MakeLink and MakeLinkAs are no longer multi-destination.
@@ -31,25 +32,116 @@ Command Changes:
 
 - XADOpen and XADExtract have new commandline options.
   For XADopen they are:
-  		ARCHIVE		Filename of archive to open with full path.
+       	ARCHIVE	    Filename of archive to open with full path.
                     If supplied selected files in source Listers are ignored.
                     Implies "NEWLISTER".
         NEWLISTER/S Open in new Lister Window.
                     If not supplied the current Source/Active Window is used.
   And for XADExtract:
-  		ARCHIVE/M   Filename(s) of archive(s) to extract.
+       	ARCHIVE/M   Filename(s) of archive(s) to extract.
                     If supplied selected files in source Listers are ignored.
         TO/K        Destination directory.
                     If supplied any destination Listers present will be ignored.
 
 - FinishSection is removed. see note in "Function Editor Changes" above.
 
-- DiskInfo is removed and its functionallity integrated into IconInfo
+- DiskInfo is removed and its functionality integrated into IconInfo
   command.
+
 
 LoadGB Changes:
 
-- The qualifier for fallback to LoadWB is canged to the Amiga keys.
-- Updated to support passtrough of all LoadWB arguments as of LoadWB version
+- The qualifier for fallback to LoadWB is changed to the Amiga keys.
+
+- Updated to support pass-trough of all LoadWB arguments as of LoadWB version
   47.1.
+
+
+Lister changes:
+
+- The Listers got a new path-gadget to replace the old string-gadget. Some
+  editing keys have changed functions, supported editing keys are now:
+
+               Key              Function
+               ---              --------
+           Left-Arrow  Cursor to previous character.
+
+       Alt Left-Arrow  Cursor to the start of current path component (the
+                       character after the first ':' or '/' that is found when
+                       going left from current position). Or to the start of
+                       the previous entry if already at the start of
+                       the current one.
+
+     Shift Left-Arrow  Cursor to beginning of path.
+
+          Right-Arrow  Cursor to next character.
+
+      Alt Right-Arrow  Cursor to beginning or the next path component.
+
+    Shift Right-Arrow  Cursor to end of path.
+
+             Up-Arrow  Get previous path from the lister path-history, if
+                       any.
+
+           Down-Arrow  Get the next path from the lister path-history, if
+                       any.
+
+                  Del  Delete the character under the cursor.
+
+              Alt Del  Delete from the character under the cursor to the
+                       end of the current path component (the character in
+                       front of the first ':' or '/' that is found when
+                       going right from current position).
+    .
+            Shift Del  Delete from the character under the cursor to the
+                       end of the line.
+
+            Backspace  Delete the character to left of cursor.
+
+        Alt Backspace  Delete from the character to the left of the
+                       cursor to the start of the current path component.
+
+      Shift Backspace  Delete from the character to the left of the
+                       cursor to the start of the line.
+
+      Return or Enter  Read directory.
+
+               Escape  Undo any changes done since the gadget was activated
+                       and deactivate gadget.
+
+  Home (keycode 0x70)  Equivalent to "Shift Left-Arrow".
+
+   End (keycode 0x71)  Equivalent to "Shift Right-Arrow".
+
+        Right Amiga C  Copy the contents of gadget to clipboard.
+
+  Shift Right Amiga C  Equivalent to "Right Amiga C".
+
+        Right Amiga V  Paste clipboard contents, inserting at cursor
+                       position.
+
+  Shift Right Amiga V  Clear the gadget, then paste contents of clipboard.
+
+        Right Amiga Q  Undo any changes done since the gadget was activated.
+
+        Right Amiga X  Clears the gadget.
+
+               Ctrl A  Equivalent to "Shift Left-Arrow".
+
+               Ctrl H  Equivalent to "Backspace".
+
+               Ctrl K  Equivalent to "Shift Delete".
+
+               Ctrl M  Equivalent to Return or Enter (end gadget).
+
+               Ctrl Q  Undo (like Right Amiga Q).
+
+               Ctrl U  Equivalent to "Shift Backspace".
+
+               Ctrl W  Equivalent to "Alt Backspace".
+
+               Ctrl X  Clears the gadget (like Right Amiga X).
+
+               Ctrl Z  Equivalent to "Shift Right-Arrow".
+
 

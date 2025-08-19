@@ -1670,6 +1670,9 @@ An error occurred while saving!\nDOS error %ld%s
 MSG_ERROR_LOADING_BUILD (//)
 An error occurred while loading!\nDOS error %ld%s
 ;
+MSG_ERROR_LONG_PATH (//)
+Error: Path too long, max %ld characters supported.
+;
 ;
 ;
 ; Function export

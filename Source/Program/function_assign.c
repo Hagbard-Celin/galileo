@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,81 +37,145 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
+#include "function_protos.h"
+#include "misc_protos.h"
+#include "lsprintf_protos.h"
 
 GALILEOFM_FUNC(function_assign)
 {
-	char *ptr,name[35];
-	short suc=0,len;
+	BPTR lock;
+	ULONG pathlen = 0;
+	char *ptr, *pathname,name[35];
+	short suc=0;
 
 	// Valid path?
-	if (!*handle->func_source_path) return 0;
+	if (!handle->func_source_lock) return 0;
 
-	// Strip trailing /
-	if (handle->func_source_path[(len=strlen(handle->func_source_path)-1)]=='/')
-		handle->func_source_path[len]=0;
+	if (handle->flags&FUNCF_DRAG_DROP)
+	    lock = handle->func_source_lock;
+	else
+	    lock = DupLock(handle->func_source_lock);
 
-	// Get pointer to object name
-	if (!(ptr=FilePart(handle->func_source_path)) || !*ptr)
-		ptr=handle->func_source_path;
-
-	// Get truncated file name
-	get_trunc_filename(ptr,name);
-
-	// Loop while unsuccessful
-	while (!suc)
+	// Get path
+	if (pathname = PathFromLock(handle->memory,  handle->func_source_lock, PFLF_USE_DEVICENAME, NULL))
 	{
-		short ret;
-		BPTR lock=0;
+	    pathlen = getreg(REG_D1);
+	    // Get pointer to object name
+	    if (!(ptr=FilePart(pathname)) || !*ptr)
+		    ptr=pathname;
 
-		// Build requester text
-		lsprintf(
-			handle->func_work_buf,
-			GetString(&locale,MSG_ENTER_ASSIGN_NAME),
-			name);
+	    // Get truncated file name
+	    get_trunc_filename(ptr,name);
 
-		// Ask for name
-		if (!(ret=function_request(
-			handle,
-			handle->func_work_buf,
-			SRF_BUFFER|SRF_PATH_FILTER,
-			handle->func_work_buf+512,30,
-			GetString(&locale,MSG_ASSIGN),
-			GetString(&locale,MSG_ADD),
-			GetString(&locale,MSG_PATH),
-			GetString(&locale,MSG_DEFER),
-			GetString(&locale,MSG_ABORT),0)) || !*(handle->func_work_buf+512)) return 0;
+	    // Loop while unsuccessful
+	    while (!suc)
+	    {
+		    short ret;
 
-		// Path assign?
-		if (ret==3) suc=AssignPath(handle->func_work_buf+512,handle->func_source_path);
+		    // Build requester text
+		    lsprintf(
+			    handle->func_work_buf,
+			    GetString(&locale,MSG_ENTER_ASSIGN_NAME),
+			    name);
 
-		// Late assign?
-		else
-		if (ret==4) suc=AssignLate(handle->func_work_buf+512,handle->func_source_path);
+		    if (pathlen > 255)
+		    {
+		        // Ask for name
+		        if (!(ret=function_request(
+			        handle,
+			        handle->func_work_buf,
+			        SRF_BUFFER|SRF_PATH_FILTER,
+			        handle->func_work_buf+512,30,
+			        GetString(&locale,MSG_ASSIGN),
+			        GetString(&locale,MSG_ADD),
+				GetString(&locale,MSG_ABORT),0)) || !*(handle->func_work_buf+512))
+			{
+			    UnLock(lock);
+			    return 0;
+			}
+		    }
+		    else
+		    {
+				// Ask for name
+				if (!(ret=function_request(
+					handle,
+					handle->func_work_buf,
+					SRF_BUFFER|SRF_PATH_FILTER,
+					handle->func_work_buf+512,30,
+					GetString(&locale,MSG_ASSIGN),
+					GetString(&locale,MSG_ADD),
+					GetString(&locale,MSG_PATH),
+					GetString(&locale,MSG_DEFER),
+					GetString(&locale,MSG_ABORT),0)) || !*(handle->func_work_buf+512))
+			{
+			    UnLock(lock);
+			    return 0;
+			}
+		    }
 
-		// Try to lock path
-		else
-		if (lock=Lock(handle->func_source_path,ACCESS_READ))
-		{
-			// Add?
-			if (ret==2) suc=AssignAdd(handle->func_work_buf+512,lock);
+		    // Path assign?
+		    if (ret==3) suc=AssignPath(handle->func_work_buf+512,pathname);
 
-			// Normal assign
-			else suc=AssignLock(handle->func_work_buf+512,lock);
+		    // Late assign?
+		    else
+		    if (ret==4) suc=AssignLate(handle->func_work_buf+512,pathname);
 
-			// Successful?
-			if (suc) lock=0;
-		}
+		    // Try to lock path
+		    else
+		    if (lock)
+		    {
+			    // Add?
+			    if (ret==2) suc=AssignAdd(handle->func_work_buf+512,lock);
 
-		// Error?
-		if (!suc)
-		{
-			// Show error
-			suc=!(function_error(handle,handle->func_work_buf+512,MSG_ASSIGNING,-IoErr()));
-		}
+			    // Normal assign
+			    else suc=AssignLock(handle->func_work_buf+512,lock);
 
-		// Lock to free?
-		if (lock) UnLock(lock);
+			    // Successful?
+			    if (suc) lock=0;
+		    }
+
+		    // Error?
+		    if (!suc)
+		    {
+			    // Show error
+			    suc=!(function_error(handle,handle->func_work_buf+512,MSG_ASSIGNING,-IoErr()));
+		    }
+			else
+			{
+				IPCData *ipc;
+				Lister *lister;
+
+				// Lock lister list
+				lock_listlock(&GUI->lister_list,FALSE);
+
+				// Go through listers
+				for (ipc=(IPCData *)GUI->lister_list.list.lh_Head;
+					ipc->node.mln_Succ;
+					ipc=(IPCData *)ipc->node.mln_Succ)
+				{
+					// Get lister
+					lister=IPCDATA(ipc);
+					// Showing devicelist?
+					if (lister->flags&LISTERF_DEVICE_LIST &&
+						lister->cur_buffer &&
+						lister->cur_buffer->more_flags&DWF_DEVICE_LIST)
+					{
+							// Activate this window
+							IPC_Command(ipc,LISTER_RESCAN,0,0,0,0);
+					}
+				}
+
+				// Unlock lister list
+				unlock_listlock(&GUI->lister_list);
+			}
+	    }
+
+	    // Free pathname
+	    FreeMemH(pathname);
 	}
+	// Lock to free?
+	if (lock) UnLock(lock);
 
 	return 0;
 }

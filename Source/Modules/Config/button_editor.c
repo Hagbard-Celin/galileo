@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -57,10 +58,10 @@ void ButtonEditor(void)
 	short success=0,pending_quit=0;
 	BOOL open_window=1;
 #ifdef RESOURCE_TRACKING
-    struct Library *ResTrackBase;
-    struct ExecBase *Exec=(struct ExecBase *)*((ULONG *)4);
+	struct Library *ResTrackBase;
+	struct ExecBase *Exec=(struct ExecBase *)*((ULONG *)4);
 
-    ResTrackBase=(struct Library *)FindName(&Exec->LibList,"g_restrack.library");
+	ResTrackBase=(struct Library *)FindName(&Exec->LibList,"g_restrack.library");
 #endif
 
 
@@ -567,9 +568,9 @@ void ButtonEditor(void)
 
 			while (appmsg=(struct AppMessage *)GetMsg(data->app_port))	
 			{
-				short num;
 				Cfg_ButtonFunction *func;
 				ButtonEditorNode *editor;
+				WORD num;
 
 				// Get function
 				if (func=buttoned_get_function(data,data->which))
@@ -591,7 +592,7 @@ void ButtonEditor(void)
 						// Get first file for name/icon
 						for (num=0;num<appmsg->am_NumArgs;num++)
 						{
-							char name[256],*ptr;
+							char *name,*ptr;
 
 							// Is button graphical?
 							if (data->button->button.flags&BUTNF_GRAPHIC)
@@ -599,52 +600,80 @@ void ButtonEditor(void)
 								APTR image;
 
 								// Get full name
-								GetWBArgPath(&appmsg->am_ArgList[num],name,256);
-
-								// Try and get image
-								if (!(image=OpenImage(name,0)))
+								if (name = GetWBArgPath(&appmsg->am_ArgList[num]))
 								{
-									// Add .info and try again
-									strcat(name,".info");
-									if (!(image=OpenImage(name,0)))
-										break;
+								    // Try and get image
+								    if (!(image=OpenImage(name,0)))
+								    {
+									    char *icon_name;
+
+									    if (icon_name = JoinString(NULL, name, ".info", NULL, NULL))
+									    {
+										FreeMemH(name);
+										name = 0;
+
+										if (!(image=OpenImage(icon_name,0)))
+										{
+										    FreeMemH(icon_name);
+										    break;
+										}
+										else
+										    name = icon_name;
+									    }
+								    }
+
+								    // Free existing image
+								    CloseImage(func->image);
+
+								    // Save new image pointer
+								    func->image=image;
+
+								    // Remap image
+								    RemapImage(image,data->window->WScreen,&data->remap);
+
+								    // Set change flag
+								    data->change=1;
 								}
-
-								// Free existing image
-								CloseImage(func->image);
-
-								// Save new image pointer
-								func->image=image;
-
-								// Remap image
-								RemapImage(image,data->window->WScreen,&data->remap);
-
-								// Set change flag
-								data->change=1;
 							}
 
 							// Otherwise, get basename of object
-							else strcpy(name,appmsg->am_ArgList[num].wa_Name);
+							else name = CopyString(NULL,appmsg->am_ArgList[num].wa_Name);
 
-							// Free existing label, copy new one
-							FreeMemH(func->label);
-							if (func->label=AllocMemH(0,strlen(name)+1))
-								strcpy(func->label,name);
+							if (name)
+							{
+							    char *tmp_label, *tmp_name, ok = 1;
 
-							// Strip any .info, get pointer to name
-							if (ptr=strstr(name,".info")) *ptr=0;
-							ptr=FilePart(name);
+							    // Copy new label
+							    if (!(tmp_label = CopyString(NULL,name)))
+								ok = 0;
 
-							// Free existing name, copy new one
-							FreeMemH(func->node.ln_Name);
-							if (func->node.ln_Name=AllocMemH(0,strlen(ptr)+1))
-								strcpy(func->node.ln_Name,ptr);
+							    // Strip any .info, get pointer to name
+							    if (ptr=strstr(name,".info")) *ptr=0;
+							    ptr=FilePart(name);
 
-							// Refresh display
-							_buttoned_show_button(data);
+							    // Copy new name
+							    if (!(tmp_name=CopyString(NULL,ptr)))
+								ok = 0;
 
-							// Fix list
-							buttoned_fix_functionlist(data);
+							    FreeMemH(name);
+
+							    if (ok)
+							    {
+								// Free existing label, replace with new one
+								FreeMemH(func->label);
+								func->label = tmp_label;
+
+								// Free existing name, replace with new one
+								FreeMemH(func->node.ln_Name);
+								func->node.ln_Name = tmp_name;
+
+								// Refresh display
+								_buttoned_show_button(data);
+
+								// Fix list
+								buttoned_fix_functionlist(data);
+							    }
+							}
 							break;
 						}
 					}
@@ -778,6 +807,10 @@ void ButtonEditor(void)
 	Att_RemList(data->func_list,0);
 	FreeVec(data);
 	FreeVec(startup);
+
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }
 
 
@@ -789,10 +822,10 @@ ULONG __asm _buttoned_init(
 
 #ifdef RESOURCE_TRACKING
 #undef ResTrackBase
-    struct Library *ResTrackBase;
-    struct ExecBase *Exec=(struct ExecBase *)*((ULONG *)4);
+	struct Library *ResTrackBase;
+	struct ExecBase *Exec=(struct ExecBase *)*((ULONG *)4);
 
-    ResTrackBase=(struct Library *)FindName(&Exec->LibList,"g_restrack.library");
+	ResTrackBase=(struct Library *)FindName(&Exec->LibList,"g_restrack.library");
 #endif
 
 	// Allocate data
@@ -809,7 +842,7 @@ ULONG __asm _buttoned_init(
 	data->locale=startup->func_startup.locale;
 
 #ifdef RESOURCE_TRACKING
-    data->ResTrackBase=ResTrackBase;
+	data->ResTrackBase=ResTrackBase;
 #endif
 
 	// Initialise library bases
@@ -927,8 +960,7 @@ void _button_editor_edit_function(ButtonEdData *data)
 			"galileo_function_editor",
 			(ULONG)FunctionEditor,
 			STACK_DEFAULT,
-			(ULONG)startup,
-			DOSBase)) && ipc)
+			(ULONG)startup)) && ipc)
 		{
 			// Allocate edit node
 			if (editor=AllocVec(sizeof(ButtonEditorNode),MEMF_CLEAR))
@@ -1694,7 +1726,7 @@ void _button_editor_change_label(ButtonEdData *data,UWORD id,BOOL refresh)
 
 	// Copy new name
 	str=(char *)GetGadgetValue(data->objlist,id);
-    buttoned_copy_string(data,str,(id==GAD_BUTTONED_NAME)?&func->node.ln_Name:&func->label);
+	buttoned_copy_string(data,str,(id==GAD_BUTTONED_NAME)?&func->node.ln_Name:&func->label);
 
 	// Changing image/label?
 	if (id==GAD_BUTTONED_LABEL)
@@ -1705,7 +1737,7 @@ void _button_editor_change_label(ButtonEdData *data,UWORD id,BOOL refresh)
 		if (refresh && (!(ptr=(char *)GetGadgetValue(data->objlist,GAD_BUTTONED_NAME)) || !*ptr))
 		{
 			SetGadgetValue(data->objlist,GAD_BUTTONED_NAME,(ULONG)str);
-            buttoned_copy_string(data,str,&func->node.ln_Name);
+			buttoned_copy_string(data,str,&func->node.ln_Name);
 		}
 
 		// If button is graphical, get new image
@@ -1757,7 +1789,7 @@ void _button_editor_change_label(ButtonEdData *data,UWORD id,BOOL refresh)
 			if (!(ptr=(char *)GetGadgetValue(data->objlist,GAD_BUTTONED_LABEL)) || !*ptr)
 			{
 				SetGadgetValue(data->objlist,GAD_BUTTONED_LABEL,(ULONG)str);
-                buttoned_copy_string(data,str,&func->label);
+				buttoned_copy_string(data,str,&func->label);
 				show=1;
 			}
 		}

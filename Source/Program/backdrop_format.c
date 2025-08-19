@@ -36,6 +36,10 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "app_msg_protos.h"
+#include "function_launch_protos.h"
+#include "misc_protos.h"
+#include "backdrop_protos.h"
 
 // Format disks
 void backdrop_format(BackdropInfo *info,BackdropObject *icon)
@@ -67,6 +71,7 @@ void backdrop_format(BackdropInfo *info,BackdropObject *icon)
 					def_function_format,
 					0,
 					0,
+					0,0,
 					0,0,
 					0,0,
 					BuildArgArray(object->bdo_device_name,0),0,0);

@@ -36,6 +36,9 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "function_protos.h"
+#include "start_menu_protos.h"
 
 enum
 {
@@ -178,7 +181,7 @@ GALILEOFM_FUNC(function_closebuttons)
 		// Or the filename?
 		else
 		if (close_bank &&
-			stricmp(close_bank,FilePart(buttons->buttons_file))==0) match=1;
+			stricmp(close_bank,FilePart(buttons->bank->path))==0) match=1;
 
 		// Match bank to close?
 		if (match)

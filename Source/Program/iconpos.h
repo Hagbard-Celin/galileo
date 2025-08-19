@@ -31,10 +31,12 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
+#ifndef GALILEOFM_ICONPOS_H
+#define GALILEOFM_ICONPOS_H
 
 typedef struct
 {
@@ -47,22 +49,4 @@ typedef struct
 	char			ip_Buf[5][4];
 } iconpos_data;
 
-typedef struct
-{
-	WindowID		ip_ID;
-	iconpos_data		ip_Data;
-} iconpos_info;
-
-void iconpos_openwindow(iconpos_info *,struct MsgPort *);
-void iconpos_closewindow(iconpos_info *);
-
-enum
-
-{
-	IPITEM_APPICON,
-	IPITEM_DISKS,
-	IPITEM_LISTERS,
-	IPITEM_GROUPS,
-	IPITEM_LEFTOUT,
-	IPITEM_PRIORITY
-};
+#endif

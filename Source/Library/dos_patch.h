@@ -31,75 +31,66 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
-BPTR __asm L_PatchedCreateDir(register __d1 char *name);
-BPTR __asm L_OriginalCreateDir(
-	register __d1 char *name,
-	register __a6 struct MyLibrary *libbase);
-long __asm L_PatchedDeleteFile(register __d1 char *name);
-long __asm L_OriginalDeleteFile(
-	register __d1 char *name,
-	register __a6 struct MyLibrary *libbase);
-BOOL __asm L_PatchedSetFileDate(
+
+BPTR __asm PatchedCreateDir(register __d1 char *name);
+BPTR __asm OriginalCreateDir(
+	register __d1 char *name);
+long __asm PatchedDeleteFile(register __d1 char *name);
+long __asm OriginalDeleteFile(
+	register __d1 char *name);
+BOOL __asm PatchedSetFileDate(
 	register __d1 char *name,
 	register __d2 struct DateStamp *date);
-BOOL __asm L_OriginalSetFileDate(
+BOOL __asm OriginalSetFileDate(
 	register __d1 char *name,
-	register __d2 struct DateStamp *date,
-	register __a6 struct MyLibrary *libbase);
-BOOL __asm L_PatchedSetComment(
+	register __d2 struct DateStamp *date);
+BOOL __asm PatchedSetComment(
 	register __d1 char *name,
 	register __d2 char *comment);
-BOOL __asm L_OriginalSetComment(
+BOOL __asm OriginalSetComment(
 	register __d1 char *name,
-	register __d2 char *comment,
-	register __a6 struct MyLibrary *libbase);
-BOOL __asm L_PatchedSetProtection(
+	register __d2 char *comment);
+BOOL __asm PatchedSetProtection(
 	register __d1 char *name,
 	register __d2 ULONG mask);
-BOOL __asm L_OriginalSetProtection(
+BOOL __asm OriginalSetProtection(
 	register __d1 char *name,
-	register __d2 ULONG mask,
-	register __a6 struct MyLibrary *libbase);
-BOOL __asm L_PatchedRename(
+	register __d2 ULONG mask);
+BOOL __asm PatchedRename(
 	register __d1 char *oldname,
 	register __d2 char *newname);
-BOOL __asm L_OriginalRename(
+BOOL __asm OriginalRename(
 	register __d1 char *oldname,
-	register __d2 char *newname,
-	register __a6 struct MyLibrary *libbase);
-BPTR __asm L_PatchedOpen(
+	register __d2 char *newname);
+BPTR __asm PatchedOpen(
 	register __d1 char *name,
 	register __d2 LONG accessMode);
-BPTR __asm L_OriginalOpen(
+BPTR __asm OriginalOpen(
 	register __d1 char *name,
-	register __d2 LONG accessMode,
-	register __a6 struct MyLibrary *libbase);
-BOOL __asm L_PatchedClose(register __d1 BPTR file);
-BOOL __asm L_OriginalClose(
-	register __d1 BPTR file,
-	register __a6 struct MyLibrary *libbase);
-LONG __asm L_PatchedWrite(
+	register __d2 LONG accessMode);
+BOOL __asm PatchedClose(register __d1 BPTR file);
+BOOL __asm OriginalClose(
+	register __d1 BPTR file);
+LONG __asm PatchedWrite(
 	register __d1 BPTR file,
 	register __d2 void *data,
 	register __d3 LONG length);
-LONG __asm L_OriginalWrite(
+LONG __asm OriginalWrite(
 	register __d1 BPTR file,
 	register __d2 void *data,
-	register __d3 LONG length,
-	register __a6 struct MyLibrary *libbase);
-BOOL __asm L_PatchedRelabel(
+	register __d3 LONG length);
+BOOL __asm PatchedRelabel(
 	register __d1 char *volumename,
 	register __d2 char *name);
-BOOL __asm L_OriginalRelabel(
+BOOL __asm OriginalRelabel(
 	register __d1 char *volumename,
-	register __d2 char *name,
-	register __a6 struct MyLibrary *libbase);
+	register __d2 char *name);
 
-struct FileInfoBlock *dospatch_fib(BPTR,struct MyLibrary *,BOOL);
+struct FileInfoBlock *dospatch_fib(BPTR,BOOL);
 
 struct FileHandleWrapper
 {
@@ -111,4 +102,4 @@ struct FileHandleWrapper
 
 #define FHWF_WRITTEN		(1<<0)		// File has been written to
 
-struct FileHandleWrapper *find_filehandle(BPTR file,struct LibData *data);
+struct FileHandleWrapper *find_filehandle(BPTR file);

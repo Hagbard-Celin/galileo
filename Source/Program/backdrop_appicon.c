@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,10 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "app_msg_protos.h"
+#include "misc_protos.h"
+#include "backdrop_protos.h"
+#include "position_protos.h"
 
 // Read AppIcon list
 void backdrop_read_appicons(BackdropInfo *info,short flags)
@@ -107,7 +112,7 @@ void backdrop_read_appicons(BackdropInfo *info,short flags)
 BackdropObject *backdrop_add_appicon(AppEntry *appicon,BackdropInfo *info,short flags)
 {
 	BackdropObject *object;
-	leftout_record *left;
+	appicon_record *record;
 
 	// Lock backdrop list
 	if (flags&BDAF_LOCK) lock_listlock(&info->objects,0);
@@ -169,19 +174,19 @@ BackdropObject *backdrop_add_appicon(AppEntry *appicon,BackdropInfo *info,short 
 		lock_listlock(&GUI->positions,FALSE);
 
 		// Look for entry for icon
-		for (left=(leftout_record *)&GUI->positions.list.lh_Head;
-			left->node.ln_Succ;
-			left=(leftout_record *)left->node.ln_Succ)
+		for (record=(appicon_record *)&GUI->positions.list.lh_Head;
+			record->node.ln_Succ;
+			record=(appicon_record *)record->node.ln_Succ)
 		{
 			// Leftout?
-			if (left->node.ln_Type==PTYPE_APPICON)
+			if (record->node.ln_Type==PTYPE_APPICON)
 			{
 				// Match this icon?
-				if (strcmp(left->icon_label,appicon->ae_text)==0)
+				if (strcmp(record->icon_label,appicon->ae_text)==0)
 				{
 					// Set position in icon
-					((struct DiskObject *)appicon->ae_object)->do_CurrentX=left->icon_x;
-					((struct DiskObject *)appicon->ae_object)->do_CurrentY=left->icon_y;
+					((struct DiskObject *)appicon->ae_object)->do_CurrentX=record->icon_x;
+					((struct DiskObject *)appicon->ae_object)->do_CurrentY=record->icon_y;
 					break;
 				}
 			}
@@ -293,11 +298,150 @@ BackdropObject *backdrop_find_appicon(BackdropInfo *info,AppEntry *appicon)
 
 
 // Build an AppMessage from dropped objects
-GalileoAppMessage *backdrop_appmessage(BackdropInfo *info,BOOL need_obj)
+GalileoListerAppMessage *backdrop_lister_appmessage(BackdropInfo *info, ULONG window_id,BOOL need_obj)
 {
-	GalileoAppMessage *msg;
+	GalileoListerAppMessage *msg;
 	BackdropObject *object,*first;
-	short arg=0,count=0,beep=0;
+	WORD arg=0,count=0;
+	short beep=0;
+
+	// Go through backdrop list, count selections
+	for (object=(BackdropObject *)info->objects.list.lh_Head;
+		object->bdo_node.ln_Succ;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
+	{
+		// Set beep if wrong type
+		if (object->bdo_type==BDO_GROUP ||
+			object->bdo_type==BDO_BAD_DISK) beep=1;
+
+		// Selected?
+		else if (object->bdo_state) ++count;
+	}
+
+	// No objects?
+	if (!count && need_obj)
+	{
+		// Beep?
+		if (beep) DisplayBeep(info->window->WScreen);
+		return 0;
+	}
+
+	// Allocate AppMessage
+	if (!(msg=alloc_lister_appmsg(global_memory_pool,GUI->appmsg_port,count)))
+		return 0;
+
+	// Set icon flag
+	msg->glam_Flags|=DROPF_ICON_MODE;
+
+	if (info->lister)
+	{
+	    msg->glam_Lister = info->lister;
+
+	    if(info->lister->cur_buffer && info->lister->cur_buffer->buf_Lock)
+	    {
+		msg->glam_Lock = info->lister->cur_buffer->buf_Lock;
+		msg->glam_Flags|=DROPF_BORROWED_LOCK;
+	    }
+	}
+
+	// Pointer to first selected object
+	if (first=info->last_sel_object)
+	{
+		// Save drag offset
+		msg->glam_DragOffset.x=first->bdo_image_rect.MinX-first->bdo_pos.Left+first->bdo_drag_x_offset-info->offset_x;
+		msg->glam_DragOffset.y=first->bdo_image_rect.MinY-first->bdo_pos.Top+first->bdo_drag_y_offset-info->offset_y;
+	}
+
+	// Go through backdrop list, fill in arguments
+	for (object=(BackdropObject *)info->objects.list.lh_Head;
+		object->bdo_node.ln_Succ && arg<count;
+		object=(BackdropObject *)object->bdo_node.ln_Succ)
+	{
+		// Selected?
+		if (object->bdo_state &&
+			object->bdo_type!=BDO_BAD_DISK &&
+			object->bdo_type!=BDO_GROUP)
+		{
+			// Got position array?
+			if (first)
+			{
+				// Store object position relative to first object
+				msg->glam_ArgData[arg].glad_DropPos.x = object->bdo_pos.Left-first->bdo_pos.Left;
+				msg->glam_ArgData[arg].glad_DropPos.y = object->bdo_pos.Top-first->bdo_pos.Top;
+			}
+
+			// AppIcon?
+			if (object->bdo_type==BDO_APP_ICON)
+			{
+				// Copy name
+				set_glarg(msg,arg,object->bdo_name,global_memory_pool);
+			}
+
+			// Otherwise
+			else
+			{
+#if 0
+			    if (object->bdo_flags&BDOF_LINK_ICON)
+				msg->glam_ArgData[arg].glad_Flags = AAEF_LINK;
+			    else
+#endif
+			    if (object->bdo_icon->do_Type==WBDRAWER || object->bdo_icon->do_Type==WBGARBAGE)
+			    {
+				msg->glam_ArgData[arg].glad_Flags = AAEF_DIR;
+
+			    }
+
+			    // Duplicate lock
+			    if (object->bdo_parent_lock)
+				msg->glam_ArgList[arg].wa_Lock = DupLock(object->bdo_parent_lock);
+
+			    // If not a disk, copy filename
+			    if (object->bdo_icon->do_Type!=WBDISK)
+			    {
+				if (object->bdo_flags&BDOF_DESKTOP_FOLDER)
+				    msg->glam_Lock = DupLock(GUI->desktop_dir_lock);
+
+				if (object->bdo_flags&BDOF_ASSIGN_VOL)
+				    msg->glam_ArgData[arg].glad_Flags = AAEF_DEV;
+				else
+				if (object->bdo_flags&BDOF_ASSIGN)
+				    msg->glam_ArgData[arg].glad_Flags = AAEF_ASSIGN;
+
+				set_glarg(msg,arg,object->bdo_name,global_memory_pool);
+			    }
+			    else
+			    {
+				char *pos, volname[32];
+
+				msg->glam_ArgData[arg].glad_Flags = AAEF_DEV;
+
+				msg->glam_ArgList[arg].wa_Lock = Lock(object->bdo_device_name, ACCESS_READ);
+
+				pos = stpcpy(volname, object->bdo_name);
+				pos[0] = ':';
+				pos[1] = 0;
+
+				set_glarg(msg,arg,volname,global_memory_pool);
+			    }
+			}
+
+			++arg;
+		}
+	}
+
+	// Set flags in message
+	//set_appmsg_data(msg,(ULONG)info->lister,DROPF_ICON_MODE,0);
+	return msg;
+}
+
+
+// Build an AppMessage from dropped objects
+struct AppMessage *backdrop_appmessage(BackdropInfo *info,BOOL need_obj)
+{
+	struct AppMessage *msg;
+	BackdropObject *object;
+	WORD arg=0,count=0;
+	short beep=0;
 
 	// Go through backdrop list, count selections
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
@@ -324,17 +468,6 @@ GalileoAppMessage *backdrop_appmessage(BackdropInfo *info,BOOL need_obj)
 	if (!(msg=AllocAppMessage(global_memory_pool,GUI->appmsg_port,count)))
 		return 0;
 
-	// Set icon flag
-	msg->ga_Flags|=GAPPF_ICON_DROP;
-
-	// Pointer to first selected object
-	if (first=info->last_sel_object)
-	{
-		// Save drag offset
-		msg->ga_DragOffset.x=first->bdo_image_rect.MinX-first->bdo_pos.Left+first->bdo_drag_x_offset-info->offset_x;
-		msg->ga_DragOffset.y=first->bdo_image_rect.MinY-first->bdo_pos.Top+first->bdo_drag_y_offset-info->offset_y;
-	}
-
 	// Go through backdrop list, fill in arguments
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
 		object->bdo_node.ln_Succ && arg<count;
@@ -345,14 +478,6 @@ GalileoAppMessage *backdrop_appmessage(BackdropInfo *info,BOOL need_obj)
 			object->bdo_type!=BDO_BAD_DISK &&
 			object->bdo_type!=BDO_GROUP)
 		{
-			// Got position array?
-			if (first)
-			{
-				// Store object position relative to first object
-				msg->ga_DropPos[arg].x=object->bdo_pos.Left-first->bdo_pos.Left;
-				msg->ga_DropPos[arg].y=object->bdo_pos.Top-first->bdo_pos.Top;
-			}
-
 			// AppIcon?
 			if (object->bdo_type==BDO_APP_ICON)
 			{
@@ -373,14 +498,14 @@ GalileoAppMessage *backdrop_appmessage(BackdropInfo *info,BOOL need_obj)
 					old=CurrentDir(lock);
 
 					// Lock sub-directory
-					if (!(msg->ga_Msg.am_ArgList[arg].wa_Lock=Lock(object->bdo_name,ACCESS_READ)))
+					if (!(msg->am_ArgList[arg].wa_Lock=Lock(object->bdo_name,ACCESS_READ)))
 					{
 						char *name;
 
 						// Couldn't lock directory, so steal lock for parent
 						if (name=AllocVec(strlen(object->bdo_name)+8,0))
 						{
-							msg->ga_Msg.am_ArgList[arg].wa_Lock=lock;
+							msg->am_ArgList[arg].wa_Lock=lock;
 							lock=0;
 
 							// Get filename
@@ -400,8 +525,8 @@ GalileoAppMessage *backdrop_appmessage(BackdropInfo *info,BOOL need_obj)
 			else
 			{
 				// Duplicate lock (unless we've already got one)
-				if (!msg->ga_Msg.am_ArgList[arg].wa_Lock)
-					msg->ga_Msg.am_ArgList[arg].wa_Lock=backdrop_icon_lock(object);
+				if (!msg->am_ArgList[arg].wa_Lock)
+					msg->am_ArgList[arg].wa_Lock=backdrop_icon_lock(object);
 
 				// If not a disk, copy filename
 				if (object->bdo_icon->do_Type!=WBDISK)
@@ -411,35 +536,60 @@ GalileoAppMessage *backdrop_appmessage(BackdropInfo *info,BOOL need_obj)
 			}
 
 			// If no filename given, create a dummy one
-			if (!msg->ga_Msg.am_ArgList[arg].wa_Name)
+			if (!msg->am_ArgList[arg].wa_Name)
 				SetWBArg(msg,arg,0,0,global_memory_pool);
 			++arg;
 		}
 	}
 
-	// Set flags in message
-	set_appmsg_data(msg,(ULONG)info->lister,DROPF_ICON_MODE,0);
 	return msg;
 }
 
 
 // Drop stuff on an AppWindow (nb: will be in Forbid() when we get here)
-void backdrop_drop_appwindow(BackdropInfo *info,struct AppWindow *appwindow,short x,short y)
+void backdrop_drop_lister_appwindow(BackdropInfo *info,struct AppWindow *appwindow,short x,short y)
 {
-	GalileoAppMessage *msg;
+	GalileoListerAppMessage *msg;
+	struct MsgPort *port;
+	AppEntry *entry;
+
+	entry = (AppEntry *)appwindow;
+
+	// Build AppMessage
+	if (msg=backdrop_lister_appmessage(info,entry->ae_id,1))
+	{
+		// Complete message
+		msg->glam_Type=MTYPE_LISTER_APPWINDOW;
+		msg->glam_MouseX=x;
+		msg->glam_MouseY=y;
+		port=WB_AppWindowData(
+			appwindow,
+			(ULONG *)&msg->glam_ID,
+			(ULONG *)&msg->glam_UserData);
+
+		// Send the message
+		PutMsg(port,(struct Message *)msg);
+	}
+}
+
+
+// Drop stuff on an AppWindow (nb: will be in Forbid() when we get here)
+void backdrop_drop_appwindow(BackdropInfo *info,struct AppWindow *appwindow,short x,short y, UWORD type)
+{
+	struct AppMessage *msg;
 	struct MsgPort *port;
 
 	// Build AppMessage
 	if (msg=backdrop_appmessage(info,1))
 	{
 		// Complete message
-		msg->ga_Msg.am_Type=MTYPE_APPWINDOW;
-		msg->ga_Msg.am_MouseX=x;
-		msg->ga_Msg.am_MouseY=y;
+		msg->am_Type=type;
+		msg->am_MouseX=x;
+		msg->am_MouseY=y;
 		port=WB_AppWindowData(
 			appwindow,
-			(ULONG *)&msg->ga_Msg.am_ID,
-			(ULONG *)&msg->ga_Msg.am_UserData);
+			(ULONG *)&msg->am_ID,
+			(ULONG *)&msg->am_UserData);
 
 		// Send the message
 		PutMsg(port,(struct Message *)msg);

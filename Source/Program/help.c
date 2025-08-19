@@ -31,11 +31,18 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "buttons_protos.h"
+#include "function_launch_protos.h"
+#include "function_data.h"
+#include "menu_data.h"
+#include "help.h"
+#include "lsprintf_protos.h"
 
 // Someone pressed the help key
 void help_get_help(short x,short y,unsigned short qual)
@@ -299,8 +306,7 @@ void help_show_help(char *thing,char *file)
 			"galileo_help",
 			(ULONG)help_proc,
 			STACK_DEFAULT,
-			0,
-			(struct Library *)DOSBase)))
+			0)))
 		{
 			// Couldn't launch it
 			return;
@@ -508,6 +514,10 @@ void __saveds help_proc(void)
 
 	// Exit
 	IPC_Free(ipc);
+
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }
 
 

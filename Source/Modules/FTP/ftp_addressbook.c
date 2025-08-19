@@ -611,7 +611,7 @@ if	(node = Att_FindNode( dg->dg_og->og_SiteList, dg->dg_drag_item ))
 
 		stccpy( cm->cm_galileo, dg->dg_galileoport, PORTNAMELEN );
 
-		cm->cm_handle=(ULONG)IPCDATA(ipc);
+		cm->cm_handle=IPCDATA(ipc);
 
 		// send IPC_CONNECT to MAIN proccess so it can open new connection
 		// in curent lister we dropped onto.
@@ -4606,6 +4606,9 @@ if	(GalileoFMBase = OpenLibrary( "galileofm.library", VERSION_GALILEOFMLIB ))
 		}
 	CloseLibrary( GalileoFMBase );
 	}
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }
 
 

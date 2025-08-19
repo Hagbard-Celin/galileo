@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,25 +32,35 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
+#ifndef _GALILEOFM_DESKTOP_H
+#define _GALILEOFM_DESKTOP_H
+
+#include "backdrop.h"
+#include "app_msg.h"
+#include "lister.h"
+
 BOOL desktop_find_hidden(char *,BOOL);
+#ifdef DISTINCT_OK
 Cfg_Desktop *desktop_snapshot_icon(BackdropObject *icon,short x,short y);
+#endif
 Cfg_Desktop *desktop_find_icon(char *name,ULONG *pos);
-BOOL desktop_icon_path(BackdropObject *icon,char *path,short len,BPTR our_lock);
+STRPTR desktop_icon_path(BackdropObject *icon,BPTR our_lock);
 void desktop_refresh_icons(BackdropInfo *info,BOOL);
 
 void desktop_delete(IPCData *,BackdropInfo *,BackdropObject *);
 
-void desktop_drop(BackdropInfo *,struct _GalileoAppMessage *,UWORD);
+ULONG desktop_drop(BackdropInfo *,struct AppMessage *,UWORD);
 
 void notify_disk_name_change(BackdropInfo *,char *,char *);
 void backdrop_update_disk(BackdropInfo *info,devname_change *change,BOOL show);
 
 BOOL desktop_add_hidden(char *name);
 
-BOOL desktop_drop_on_object(BackdropInfo *,GalileoAppMessage **,BackdropObject *,UWORD);
-
+BOOL desktop_drop_on_object(BackdropInfo *,GalileoListerAppMessage *,struct AppMessage *,BackdropObject *,UWORD);
 short read_desktop_folder(BackdropInfo *,BOOL);
+
+#endif

@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -39,6 +40,8 @@ For more information on Directory Opus for Windows please see:
 #define _GALILEOFM_LISTER
 
 #include "popup.h"
+#include "reselect.h"
+#include "lister_ipc.h"
 
 #define SLIDER_VERT			(1<<0)
 #define SLIDER_HORZ			(1<<1)
@@ -52,6 +55,8 @@ For more information on Directory Opus for Windows please see:
 #define LISTER_BFPF_DONT_LOCK		(1<<2)
 #define LISTER_BFPF_DONT_TEST		(1<<3)
 #define LISTER_BFPF_DONT_UNLOCK		(1<<5)
+#define LISTER_BFPF_ONLY_CACHE		(1<<6)
+#define LISTER_BFPF_COMPARE_LOCKADDRESS	(1<<7)
 
 #define LISTERF_MAKE_SOURCE		(1<<0)
 #define LISTERF_ACTIVATE		(1<<1)
@@ -90,105 +95,6 @@ enum
 	GAD_LOCK,
 	GAD_GAUGE,
 	GAD_ZOOM,
-};
-
-enum
-{
-	LISTER_OPEN,			// Open lister display					0
-	LISTER_CLOSE,			// Close lister display
-	LISTER_MAKE_SOURCE,		// Make this lister the source
-	LISTER_ACTIVATE,		// Change activation status
-	LISTER_BUSY,			// Set or clear busy state
-	LISTER_MAKE_DEST,		// Make this lister the destination			5
-	LISTER_OFF,			// Turn this lister off
-
-	LISTER_CHECK_SPECIAL_BUFFER,	// Check if currently showing a special buffer
-	LISTER_SHOW_SPECIAL_BUFFER,	// Show special buffer
-	LISTER_BUFFER_FIND,		// Searches for a named buffer
-
-	LISTER_BUFFER_FIND_EMPTY,	// Finds an empty buffer				10
-	LISTER_BUFFER_LIST,		// List available buffers
-	LISTER_GET_PATH,		// Get current path
-	LISTER_REFRESH_PATH,		// Refresh path field
-	LISTER_REFRESH_WINDOW,		// Refresh lister
-	LISTER_REFRESH_TITLE,		// Refresh lister title					15
-	LISTER_REFRESH_SLIDERS,		// Refresh lister sliders
-	LISTER_ADD_FILE,		// Add file to list
-	LISTER_REMOVE_FILE,		// Remove file from list
-	LISTER_RELOAD_FILE,		// Reload a file in the list
-
-	LISTER_MAKE_RESELECT,		// Make reselection list				20
-	LISTER_DO_RESELECT,		// Reselect from a list
-	LISTER_DO_PARENT_ROOT,		// Do parent/root read
-	LISTER_FIND_FIRST_SEL,		// Scroll to first selected entry
-	LISTER_FIND_ENTRY,		// Scroll to show an entry
-	LISTER_STORE_POS,		// Store lister position				25
-	LISTER_RESTORE_POS,		// Restore old position in lister
-	LISTER_SHOW_INFO,		// Show selection information
-	LISTER_REMOVE_SIZES,		// Remove directory sizes
-	LISTER_SET_LOCKER,		// Set locker port
-
-	LISTER_INIT,			// Initialise and (maybe) open lister			30
-	LISTER_SELECT_GLOBAL_STATE,	// Select global state
-	LISTER_SELECT_GLOBAL_TOGGLE,	// Toggle global state
-	LISTER_STATUS,			// Lister status text
-	LISTER_PROGRESS_ON,		// Progress indicator on
-	LISTER_PROGRESS_OFF,		// Progress indicator off				35
-	LISTER_PROGRESS_UPDATE,		// Progress indicator update
-	LISTER_UNLOCK,			// Unlock this lister
-	LISTER_SELECT_WILD,		// Do wildcard selection
-	LISTER_DEVICE_LIST,		// Display device list in this lister
-
-	LISTER_PARENT,			// Read parent						40
-	LISTER_ROOT,			// Read root
-	LISTER_UPDATE_STAMP,		// Update buffer stamp
-	LISTER_COPY_BUFFER,		// Copy a buffer from somewhere
-	LISTER_RESCAN,			// Rescan contents
-	LISTER_RESCAN_CHECK,		// Rescan contents if date changed			45
-	LISTER_SPLIT,			// Split display
-	LISTER_WAIT,			// Wait for lister to finish
-	LISTER_FILETYPE_SNIFF,		// Sniffed out a filetype
-	LISTER_REFRESH_NAME,		// Refresh lister name
-	LISTER_GET_ICONS,		// Read icons						50
-
-	LISTER_REMOVE_ENTRY,		// Remove an entry
-	LISTER_GET_HANDLE,		// Get lister's handle
-	LISTER_REFRESH_FREE,		// Refresh free space
-
-	LISTER_BACKFILL_CHANGE,		// Backfill pattern has changed
-
-	LISTER_ICONIFY,			// Iconify lister					55
-	LISTER_UNICONIFY,		// Uniconify lister
-
-	LISTER_MODE,			// Change mode
-	LISTER_TOOLBAR,			// New toolbar
-
-	LISTER_WAIT_BUSY,		// Wait for lister to go busy
-
-	LISTER_SHOW_BUFFER,		// Show a buffer in a lister                            60
-
-	LISTER_FILE_PROGRESS_TOTAL,	// Set file progress total
-	LISTER_FILE_PROGRESS_UPDATE,	// Set file progress update
-	LISTER_GET_ICON,		// Get specific icon
-
-	LISTER_DO_FUNCTION,		// Do a function
-	LISTER_CHECK_REFRESH,		// Check for refresh
-
-	LISTER_UPDATE_DEVICE,		// Change a device name
-
-	LISTER_HIGHLIGHT,		// Highlight an entry (perhaps)
-	LISTER_SHOW_ICON,		// Show a specific icon
-	LISTER_FILE_PROGRESS_INFO,	// Set progress info string
-	LISTER_PROGRESS_TOTAL,		// Set total progress
-	LISTER_FILE_PROGRESS_SET,	// Set total file stuff
-	LISTER_PROGRESS_TITLE,		// Set progress title
-	LISTER_PROGRESS_COUNT,		// Update bar count
-
-	LISTER_SET_SNIFF,		// Set sniff flag
-	LISTER_CONFIGURE,		// Change display format
-	LISTER_SELSHOW,			// Select/show entry
-	LISTER_FIND_CACHED_BUFFER,	// Find a buffer in the cache
-	LISTER_SET_GAUGE,		// Set gauge state
 };
 
 // Maximum length we can display in a window
@@ -233,7 +139,7 @@ typedef struct ListerWindow
 	struct Gadget			*_vert_scroll;		// Vertical scroller
 	struct Gadget			*_horiz_scroll;		// Horizontal scroller
 	struct Gadget			*path_field;		// Path field
-	char				path_buffer[512];	// Path field buffer
+	STRPTR				path_buffer;		// Path field string
 	struct Gadget			parent_button;		// Parent button
 
 	Cfg_Lister			*lister;		// Lister pointer
@@ -274,8 +180,6 @@ typedef struct ListerWindow
 	ULONG				sep_old_seconds;	// Old event seconds
 	ULONG				sep_old_micros;		// Old event micros
 
-	char				pad2[50];
-
 	DragInfo			*drag_info;		// File drag information
 	struct MsgPort			*app_port;		// Application message port
 
@@ -307,7 +211,7 @@ typedef struct ListerWindow
 
 	PopUpMenu			lister_menu;		// Lister menus
 	PopUpMenu			lister_tool_menu_old;
-	APTR				memory;			// Lister memory
+	APTR				lister_memory;		// Lister memory
 
 	ULONG				rmb_old_seconds;	// Old event seconds
 	ULONG				rmb_old_micros;		// Old event micros
@@ -450,8 +354,10 @@ typedef struct ListerWindow
 
 	struct RastPort			render_rast;
 
-    struct Border       size_gadget_border;
-    WORD                size_gadget_border_coords[6];
+	BPTR				lister_orgdir;
+
+	struct Border			size_gadget_border;
+	WORD				size_gadget_border_coords[6];
 } Lister;	
 
 
@@ -527,6 +433,7 @@ extern UWORD lister_popup_data[];
 #define REFRESHF_PATH		(1<<12)
 #define REFRESHF_SORTSEL	(1<<13)
 #define REFRESHF_COLOUR		(1<<14)
+#define REFRESHF_NO_DIRLIST	(1<<15)
 
 enum
 {
@@ -538,134 +445,6 @@ enum
 	PP_BASE
 };
 
-// protos
-Lister *lister_new(Cfg_Lister *cfg_lister);
-void lister_free(Lister *lister);
-ULONG lister_command(Lister *,ULONG,ULONG,APTR,APTR,struct MsgPort *);
-Lister *find_lister_path(char *);
-void lister_update(Lister *);
-void listers_update(BOOL,BOOL);
-void lister_init_new(Cfg_Lister *cfg,Lister *lister);
-void lister_tile(long id);
-BOOL set_list_selector(Lister *lister,long pos);
-BOOL lister_iconify(Lister *lister);
-BOOL lister_new_waiter(Lister *lister,IPCMessage *msg,struct Message *msg2,short type);
-void lister_relieve_waiters(Lister *,short);
-void lister_smart_source(Lister *);
-
-void __saveds lister_code(void);
-ULONG __saveds __asm lister_init(register __a0 IPCData *,register __a1 Lister *);
-void lister_cleanup(Lister *,BOOL);
-struct DirectoryBuffer *lister_new_buffer(Lister *);
-void lister_free_buffer(struct DirectoryBuffer *);
-void __asm lister_process_msg(register __d0 Lister *,register __a0 struct IntuiMessage *);
-void check_call(char *,Lister *);
-void lister_send_abort(Lister *);
-int lister_do_function(Lister *,ULONG);
-
-void lister_busy(Lister *,int);
-void lister_unbusy(Lister *,int);
-void lister_progress_on(Lister *,ProgressPacket *);
-void lister_progress_calc_size(Lister *,struct Screen *,long);
-void lister_progress_off(Lister *);
-void lister_progress_update(Lister *,char *,ULONG);
-void check_lister_stored(Lister *lister);
-void lister_progress_filetotal(Lister *lister,long total);
-void lister_progress_fileprogress(Lister *lister,long count);
-void lister_progress_info(Lister *lister,char *info);
-void lister_progress_total(Lister *lister,long total,long count);
-void lister_progress_file(Lister *lister,long total,long count);
-void lister_progress_title(Lister *lister,char *info);
-
-void lister_show_name(Lister *);
-void lister_clear_title(Lister *);
-void lister_show_status(Lister *);
-void lister_title_pens(struct RastPort *,Lister *,int);
-void lister_status(Lister *,char *);
-void lister_clear_title_area(GUI_Element *area);
-
-Lister *lister_source(void);
-Lister *lister_dest(void);
-Lister *lister_default(ULONG,BOOL);
-void lister_check_source(Lister *);
-void lister_check_dest(Lister *);
-void lister_split_display(Lister *lister,Lister *other_lister);
-
-void lister_configure(Lister *);
-void lister_change_format(Lister *,ListFormat *);
-void lister_set_sort(Lister *lister,short item,UWORD);
-BOOL lister_resort(Lister *,short);
-int resort_test(ListFormat *,ListFormat *);
-void lister_parent_popup(Lister *lister,unsigned short code);
-void lister_add_history(Lister *lister);
-
-struct DirectoryBuffer *lister_find_buffer(Lister *,struct DirectoryBuffer *,char *,struct DateStamp *,char *,ULONG);
-struct DirectoryBuffer *lister_buffer_find_empty(Lister *,char *,struct DateStamp *);
-void lister_check_old_buffer(Lister *,BOOL);
-void lister_show_buffer(Lister *,struct DirectoryBuffer *,int,BOOL);
-void update_buffer_stamp(Lister *);
-struct DirectoryBuffer *lister_get_empty_buffer(void);
-void remove_file_global(char *,char *,BOOL);
-void update_lister_global(char *path);
-
-// lister_show.c
-void lister_display_dir(Lister *);
-void display_entry(struct DirectoryEntry *,Lister *,int);
-void lister_draw_entry(Lister *,struct DirectoryEntry *,short,short,short,short,short);
-void setdispcol(struct DirectoryEntry *,Lister *);
-void getdispcol(struct DirectoryEntry *,Lister *,short *,short *);
-void builddisplaystring(struct DirectoryEntry *,char *,Lister *);
-void entry_highlight(Lister *,short);
-void lister_update_name(Lister *);
-void lister_refresh_display(Lister *,ULONG);
-void lister_refresh_name(Lister *);
-void select_show_info(Lister *,BOOL);
-
-// lister_toolbar.c
-void lister_show_toolbar(Lister *);
-void lister_toolbar_click(Lister *,short,short,unsigned short,unsigned short);
-void lister_toolbar_function(Lister *);
-void lister_build_menu(Lister *lister);
-void lister_get_toolbar(BOOL,Cfg_ButtonBank *);
-void lister_toolbar_free_cache(void);
-Cfg_Button *lister_get_toolbar_button(Lister *,short,short,short *);
-
-// lister_icons.c
-void lister_get_icons(struct _FunctionHandle *,Lister *lister,char *,BOOL);
-void lister_icon_copy(Lister *dest,Lister *source,struct _GalileoAppMessage *msg);
-void lister_icon_copy_cleanup(struct icon_copy_data *data);
-void lister_icon_copy_add(struct icon_copy_data *data);
-void lister_icon_copy_rem(Lister *lister,char *name);
-
-// lister_window.c
-struct Window *lister_open(Lister *lister,struct Screen *screen);
-void lister_close(Lister *lister,BOOL);
-
-// lister_display.c
-void lister_init_display(Lister *lister);
-void lister_refresh(Lister *lister,unsigned short mode);
-void lister_init_filelist(Lister *lister);
-void lister_init_lister_area(Lister *lister);
-void lister_add_pathfield(Lister *lister);
-void lister_remove_pathfield(Lister *lister,BOOL);
-void lister_disable_pathfield(Lister *lister,short disable);
-void lister_mode_change(Lister *,struct IBox *);
-
-void lister_toolbar_update_cache(void);
-void center_erase_text(struct RastPort *rp,char *text,short minx,short maxx,short y);
-void lister_check_refresh(Lister *lister);
-BOOL lister_valid_toolbar(Lister *lister);
-void lister_new_toolbar(Lister *lister,char *name,ToolBarInfo *);
-void lister_toolbar_edit(short);
-
-void lister_show_title(Lister *lister,BOOL);
-void lister_title_highlight(Lister *lister,short item,short);
-
-void lister_calc_limits(Lister *lister,struct Screen *screen);
-void lister_set_limits(Lister *lister);
-void lister_update_pathfield(Lister *lister);
-
-void lister_fix_priority(Lister *);
 
 #define FIELD_FONT lister->window->WScreen->RastPort.Font
 
@@ -676,11 +455,11 @@ void lister_fix_priority(Lister *);
 #define LREFRESH_FULL_ICON	(1<<4)
 #define LREFRESH_SIMPLEREFRESH	(1<<5)
 
-void lister_receive_drop(Lister *dest,struct _GalileoAppMessage *amsg);
 
-#define DROPF_DEVICE	(1<<0)	// Dropped item is a device
-#define DROPF_ICON_MODE	(1<<1)	// Source lister in icon mode
-#define DROPF_PARENT	(1<<2)	// Dropped on parent area
+#define DROPF_DEVICE	    (1<<0)  // Dropped item is a device
+#define DROPF_ICON_MODE	    (1<<1)  // Source lister in icon mode
+#define DROPF_PARENT	    (1<<2)  // Dropped on parent area
+#define DROPF_BORROWED_LOCK (1<<3)  // Lock belongs to lister buffer, do not unlock
 
 typedef struct
 {
@@ -689,84 +468,14 @@ typedef struct
 	struct DateStamp	date;
 } devname_change;
 
-BOOL lister_check_valid(Lister *lister);
-
-struct DirectoryEntry *lister_test_drag(Lister *,DragInfo *,short,short,Lister **);
-struct DirectoryEntry *lister_highlight(Lister *,short x,short y,DragInfo *drag);
-
-void lister_show_icon(Lister *lister,struct _BackdropObject *object);
-
-void lister_clip_entries(Lister *lister,unsigned short qual);
-
-void lister_set_title(Lister *lister);
-
-void lister_set_busy_icon(Lister *lister);
-void lister_clear_busy_icon(Lister *lister);
-
-void lister_build_icon_name(Lister *lister);
-
-void lister_fix_menus(Lister *lister,BOOL);
-
-void lister_fix_cd(Lister *lister);
-
-void lister_add_hotname(Lister *lister,char);
-void lister_rem_hotname(Lister *lister);
-void lister_handle_hotname(Lister *lister);
 
 #define LISTERPOPUP_CLOSE	0
 
-void lister_clear_title(Lister *lister);
-
-Lister *lister_open_new(char *,struct _BackdropObject *,struct Window *,Lister *);
-void lister_title_drop(Lister *lister,short item,short x,short y);
-
-void lister_update_icon(Lister *lister);
-
-void lister_end_edit(Lister *,short);
-BOOL lister_edit_key(Lister *,struct IntuiMessage *);
-BOOL lister_start_edit(Lister *,short,short,short);
-BOOL lister_edit_init(Lister *,BOOL);
-short lister_edit_next(Lister *,short);
-BOOL lister_edit_check_item(Lister *);
-BOOL lister_edit_check_cursor(Lister *,short);
-BOOL lister_edit_key_press(Lister *,unsigned char,UWORD);
-BOOL lister_edit_key_string(Lister *,unsigned char,UWORD);
-BOOL lister_edit_key_protect(Lister *,unsigned char);
-BOOL lister_edit_key_netprotect(Lister *,unsigned char);
-
-void __asm __saveds lister_refresh_callback(
-	register __d0 ULONG,
-	register __a0 struct Window *,
-	register __a1 Lister *);
-
-void lister_edit_error(Lister *,short);
-
-char *lister_title_string(struct DirectoryBuffer *buffer,short item);
-
-BOOL lister_find_cached_buffer(Lister *lister,char *path,char *handler);
-void lister_free_caches(Lister *lister,char *handler);
-BOOL lister_select_cache(Lister *,struct DirectoryBuffer *);
-void lister_set_gauge(Lister *,BOOL);
-
-void lister_init_colour(Lister *,short,short);
 
 #define GETICONSF_CLEAN		(1<<0)
 #define GETICONSF_NO_REFRESH	(1<<1)
 #define GETICONSF_SHOW		(1<<2)
 
-BOOL lister_check_ftp(Lister *,char *);
-BOOL lister_want_gauge(Lister *);
-
-struct Window *lister_valid_window(Lister *);
-void lister_zoom_window(Lister *);
-
-struct BitMap *builddisplaystring_prop(struct DirectoryEntry *,char *,Lister *,short);
-
-UWORD lister_listerpopup(Lister *,UWORD);
-
-void lister_edit_calc_position(Lister *lister,short type);
-
-void lister_title_highlight_sep(Lister *lister);
 
 #define LISTER_TABSIZE 3
 

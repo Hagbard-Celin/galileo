@@ -236,7 +236,7 @@ static const struct TagItem
 		{GTIN_MaxChars,2},
 		{TAG_MORE,(ULONG)_environment_relative_taglist}},
 
-	// Hideen drives cycle
+	// Hidden drives cycle
 	_environment_hidden_drives_cycle[]={
 		{GTCustom_LocaleLabels,(ULONG)_environment_hidden_labels},
 		{TAG_MORE,(ULONG)_environment_relative_taglist}},

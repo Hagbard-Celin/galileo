@@ -216,7 +216,7 @@ void __asm __saveds L_UpdatePathList(
     data=(struct LibData *)libbase->ml_UserData;
 
     // Lock path list
-    L_GetSemaphore(&data->path_lock,SEMF_EXCLUSIVE,0);
+    L_GetSemaphore(&data->path_lock,SEMF_EXCLUSIVE,0, libbase);
 
     // Free path list
     L_FreeDosPathList(data->path_list);
@@ -225,7 +225,7 @@ void __asm __saveds L_UpdatePathList(
     data->path_list=L_GetDosPathList(0);
 
     // Unlock path list
-    L_FreeSemaphore(&data->path_lock);
+    L_FreeSemaphore(&data->path_lock, libbase);
 
     // Send command to launcher to reset it
     L_IPC_Command(launcher_ipc,IPC_RESET,0,0,0,NO_PORT_IPC);
@@ -252,13 +252,13 @@ void __asm __saveds L_UpdateMyPaths(
 	return;
 
     // Lock path list
-    L_GetSemaphore(&data->path_lock,SEMF_SHARED,0);
+    L_GetSemaphore(&data->path_lock,SEMF_SHARED,0, libbase);
 
     // Get path list copy
     pathlist=L_GetDosPathList(data->path_list);
 
     // Unlock path list
-    L_FreeSemaphore(&data->path_lock);
+    L_FreeSemaphore(&data->path_lock, libbase);
 
     // Got valid path list?
     if (pathlist)
@@ -360,22 +360,18 @@ void __asm __saveds L_CopyLocalEnv(register __a0 struct Library *DOSBase)
 
 
 // Get a copy of the Galileo path list
-BPTR __asm __saveds L_GetGalileoPathList(register __a6 struct MyLibrary *libbase)
+BPTR __asm __saveds L_GetGalileoPathList(register __a6 struct Library *GalileoFMBase)
 {
     BPTR copy;
-    struct LibData *data;
-
-    // Get library data
-    data=(struct LibData *)libbase->ml_UserData;
 
     // Lock path list
-    L_GetSemaphore(&data->path_lock,SEMF_SHARED,0);
+    L_GetSemaphore(&gfmlib_data.path_lock,SEMF_SHARED,0, GalileoFMBase);
 
     // Copy it
-    copy=L_GetDosPathList(data->path_list);
+    copy=L_GetDosPathList(gfmlib_data.path_list);
 
     // Unlock path list
-    L_FreeSemaphore(&data->path_lock);
+    L_FreeSemaphore(&gfmlib_data.path_lock, GalileoFMBase);
 
     return copy;
 }

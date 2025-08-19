@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -50,7 +50,6 @@ void init_config_string(struct _IFFHandle *iff,string_handle *handle);
 char *read_config_string(APTR memory,string_handle *handle);
 short read_config_short(string_handle *handle);
 void free_config_string(string_handle *handle);
-char *copy_string(APTR,char *);
 void dump_button_info(Cfg_ButtonBank *);
 void env_read_open_bank(APTR,struct OpenEnvironmentData *,ULONG);
 void env_read_open_lister(APTR,struct OpenEnvironmentData *,ULONG);
@@ -156,77 +155,99 @@ Cfg_Lister *__asm __saveds L_ReadListerDef(
 
 // Read a button bank
 Cfg_ButtonBank *__asm __saveds L_OpenButtonBank(
-	register __a0 char *name)
+	register __a0 char *name, register __a1 BPTR *parent_lock)
 {
 	Cfg_ButtonBank *current_bank=0;
 	struct _IFFHandle *iff;
-	BPTR lock,old=0;
-	char *name_ptr=0;
+	BPTR lock,old=0, buttons_dir;
+	char *name_ptr=0, *path = 0;
 	BOOL ok=0;
 
-	// See if file exists as is
-	if (lock=Lock(name,ACCESS_READ))
+	buttons_dir = Lock("PROGDIR:Buttons", ACCESS_READ);
+
+	if (parent_lock && *parent_lock)
 	{
-		struct FileInfoBlock __aligned fib;
+	    if (SameLock(*parent_lock,buttons_dir) == LOCK_SAME)
+	    {
+		UnLock(*parent_lock);
+		*parent_lock = 0;
+	    }
+	    else
+	    {
+		old = CurrentDir(*parent_lock);
 
-		// Examine it
-		Examine(lock,&fib);
-		UnLock(lock);
-
-		// Check it's a file
-		if (fib.fib_DirEntryType<0)
+		if (lock=Lock(name,ACCESS_READ))
 		{
-			// It does
-			name_ptr=name;
-			ok=1;
+		    if (path = L_PathFromLock(NULL, lock, PFLF_USE_DEVICENAME, NULL))
+		    {
+			name_ptr = name;
+			ok = 1;
+		    }
+
+		    UnLock(lock);
 		}
-		lock=0;
+
+	    }
+	}
+	else
+	{
+    	    // See if file exists as is
+	    if (lock=Lock(name,ACCESS_READ))
+	    {
+		    struct FileInfoBlock __aligned fib;
+
+		    // Examine it
+		    Examine(lock,&fib);
+
+		    // Check it's a file
+		    if (fib.fib_DirEntryType<0 && (path = L_PathFromLock(NULL, lock, PFLF_USE_DEVICENAME, NULL)))
+		    {
+			    // It does
+			    name_ptr=name;
+			    ok=1;
+		    }
+
+		    UnLock(lock);
+	    }
+
 	}
 
 	// It doesn't
-	if (!ok)
+	if (!ok && buttons_dir)
 	{
 		// Get filename only
 		name_ptr=FilePart(name);
 
+		// Change directory
+		old=CurrentDir(buttons_dir);
+
 		// See if it's in the buttons drawer
-		if (lock=Lock("Galileo:buttons",ACCESS_READ))
+		if (lock=Lock(name_ptr,ACCESS_READ))
 		{
-			BPTR test;
+		    // It is, get path
+		    if (!(path = L_PathFromLock(NULL, lock, PFLF_USE_DEVICENAME, NULL)))
+			name_ptr = 0;
 
-			// Change directory
-			old=CurrentDir(lock);
-
-			// See if file is in there
-			if (test=Lock(name_ptr,ACCESS_READ))
-			{
-				// It is
-				UnLock(test);
-			}
-
-			// It's not in there
-			else
-			{
-				// Restore directory
-				CurrentDir(old);
-				UnLock(lock);
-				lock=0;
-				name_ptr=0;
-			}
+		    UnLock(lock);
 		}
-		else name_ptr=0;
+
+		// It's not in there
+		else
+		{
+			// Restore directory
+			CurrentDir(old);
+			UnLock(buttons_dir);
+			buttons_dir=0;
+			name_ptr=0;
+		}
 	}
 
 	// Try to open file to read
 	if (name_ptr && (iff=L_IFFOpen(name_ptr,IFF_READ,ID_GILO)))
 	{
-		APTR file;
 		Cfg_Button *current_button;
 		Cfg_ButtonFunction *current_func=0;
 		ULONG chunk;
-
-		// Get file handle
-		file=L_IFFFileHandle(iff);
 
 		// Parse file
 		while (chunk=L_IFFNextChunk(iff,0))
@@ -240,9 +261,10 @@ Cfg_ButtonBank *__asm __saveds L_OpenButtonBank(
 					// Allocate button bank
 					if (current_bank=L_NewButtonBank(0,0))
 					{
-						// Get bank path name
-						if (!(NameFromFH(L_FHFromBuf(file),current_bank->path,256)))
-							strcpy(current_bank->path,name);
+						if (path)
+						    strcpy(current_bank->path,path);
+						else
+						    strcpy(current_bank->path,name_ptr);
 
 						// Read bank data
 						L_IFFReadChunkBytes(iff,&current_bank->window,sizeof(CFG_BTNW));
@@ -304,13 +326,19 @@ Cfg_ButtonBank *__asm __saveds L_OpenButtonBank(
 		L_IFFClose(iff);
 	}
 
-	// Directory to unlock?
-	if (lock)
+	if (path)
+	    L_FreeMemH(path);
+
+	// Directories to unlock?
+	if (old)
+	    CurrentDir(old);
+	if (parent_lock && *parent_lock)
 	{
-		// Restore cd
-		CurrentDir(old);
-		UnLock(lock);
+	    UnLock(*parent_lock);
+	    *parent_lock = 0;
 	}
+	if (buttons_dir)
+	    UnLock(buttons_dir);
 
 	// A version 1 startmenu that needs to be converted?
 	if (current_bank && current_bank->startmenu && !(current_bank->startmenu->flags&STRTF_VERSION2))
@@ -368,7 +396,7 @@ Cfg_Button *__asm __saveds L_ReadButton(
 					L_FreeMemH(label);
 
 					// Copy the name
-					label=copy_string(memory,name);
+					label=L_CopyString(memory,name);
 				}
 			}
 
@@ -384,11 +412,11 @@ Cfg_Button *__asm __saveds L_ReadButton(
 
 				// Strip any suffix (.small for instance)
 				if (ptr=strchr(filename,'.')) *ptr=0;
-				label=copy_string(memory,filename);
+				label=L_CopyString(memory,filename);
 			}
 
 			// Otherwise, copy name
-			else label=copy_string(memory,name);
+			else label=L_CopyString(memory,name);
 
 			// No label?
 			if (!label)
@@ -730,7 +758,7 @@ void free_config_string(string_handle *handle)
 // Convert start menu to version 2
 void __asm L_ConvertStartMenu(register __a0 Cfg_ButtonBank *bank)
 {
-	Cfg_Button *button,*prev=0,*next_but=0;
+	Cfg_Button *button,*prev=0,*next_but;
 
 	// Find first button and remove it - no longer needed
 	if (button=(Cfg_Button *)RemHead(&bank->buttons))
@@ -742,7 +770,7 @@ void __asm L_ConvertStartMenu(register __a0 Cfg_ButtonBank *bank)
 	// Go through remaining buttons
 	for (button=(Cfg_Button *)bank->buttons.lh_Head;button->node.ln_Succ;button=next_but)
 	{
-		Cfg_ButtonFunction *func,*next=0;
+		Cfg_ButtonFunction *func,*next;
 		BOOL first=1;
 
 		// Cache next button

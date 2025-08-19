@@ -31,11 +31,12 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "rexx_protos.h"
 
 short rexx_handler_msg(
 	char *handler,
@@ -154,15 +155,16 @@ short __stdargs rexx_handler_msg_args(
 		// Get result
 		res=msg->rm_Result1;
 
-        // Clear message
-        ClearRexxMsg(msg,count);
+		// Clear message
+		ClearRexxMsg(msg,count);
 
 		// Free message
 		DeleteRexxMsg(msg);
 	}
 
-    // Free the replyport
-    DeleteMsgPort(reply_port);
+	// Free the replyport
+	if (reply_port)
+	    DeleteMsgPort(reply_port);
 
 	// Free despatch
 	FreeVec(desp);

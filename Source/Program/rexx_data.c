@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2023 Hagbard Celine
+Copyright 2023,2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -32,11 +32,12 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "rexx.h"
 
 RexxCommandList
 	rexx_commands[]={
@@ -61,7 +62,10 @@ RexxCommandList
 		{"move",RXCMD_MOVEMENT},
 		{"findcache",RXCMD_FINDCACHE},
 		{"freecaches",RXCMD_FREECACHES},
+		{"assign",RXCMD_ASSIGN},
 
+		{"get",RXCMD_GET},
+		{"free",RXCMD_FREE},
 		{"path",RXCMD_PATH},
 		{"position",RXCMD_POSITION},
 		{"busy",RXCMD_BUSY},
@@ -76,7 +80,7 @@ RexxCommandList
 		{"window",RXCMD_WINDOW},
 		{"proc",RXCMD_PROC},
 		{"value",RXCMD_VALUE},
-        {"sourcedestlock",RXCMD_SOURCEDESTLOCK},
+		{"sourcedestlock",RXCMD_SOURCEDESTLOCK},
 
 		{"files",RXCMD_FILES},
 		{"dirs",RXCMD_DIRS},

@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,12 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "requesters.h"
+#include "backdrop_protos.h"
+#include "desktop.h"
+#include "position_protos.h"
+#include "lsprintf_protos.h"
 
 // Rename some objects
 void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
@@ -167,8 +174,18 @@ void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
 							// Try to rename object
 							if (Rename(object->bdo_device_name,name))
 							{
-								// Store new name
-								strcpy(object->bdo_device_name,name);
+								APTR tmp;
+
+								if (tmp = AllocMemH(info->memory,strlen(name) + 1))
+								{
+								    APTR tmp_free;
+
+								    strcpy(tmp,name);
+								    tmp_free = object->bdo_device_name;
+								    object->bdo_device_name = tmp;
+								    FreeMemH(tmp_free);
+								}
+
 								ret=1;
 								copy=0;
 							}
@@ -241,11 +258,16 @@ void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
 					if (object->bdo_type==BDO_GROUP ||
 						(object->bdo_type==BDO_LEFT_OUT && object->bdo_flags&BDOF_DESKTOP_FOLDER))	
 					{
-						BPTR old=0,lock;
+						BPTR old=0,lock = 0;
 
 						// Change directory
-						if (lock=Lock(object->bdo_path,ACCESS_READ))
+						if (object->bdo_type==BDO_GROUP)
+						{
+						    if (lock=Lock("PROGDIR:groups",ACCESS_READ))
 							old=CurrentDir(lock);
+						}
+						else
+						    old = CurrentDir(GUI->desktop_dir_lock);
 
 						// Rename file
 						if (!(ret=Rename(object->bdo_name,name)))
@@ -305,7 +327,8 @@ void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
 						}
 
 						// Restore directory
-						if (lock) UnLock(CurrentDir(old));
+						if (old) CurrentDir(old);
+						if (lock) UnLock(lock);
 					}
 
 					// Left-out
@@ -342,7 +365,18 @@ void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
 						// Store name in icon
 						if (object->bdo_flags&BDOF_CUSTOM_LABEL)
 						{
-							strcpy(object->bdo_device_name,name);
+							APTR tmp;
+
+							if (tmp = AllocMemH(info->memory,strlen(name) + 1))
+							{
+							    APTR tmp_free;
+
+							    strcpy(tmp,name);
+							    tmp_free = object->bdo_device_name;
+							    object->bdo_device_name = tmp;
+							    FreeMemH(tmp_free);
+							}
+
 							ret=1;
 							copy=0;
 						}
@@ -357,7 +391,18 @@ void icon_rename(IPCData *ipc,BackdropInfo *info,BackdropObject *icon)
 						// Store new name
 						if (copy)
 						{
-							strcpy(object->bdo_name,name);
+							APTR tmp;
+
+							if (tmp = AllocMemH(info->memory,strlen(name) + ((object->bdo_flags&BDOF_ASSIGN)?2:1)))
+							{
+							    APTR tmp_free;
+
+							    strcpy(tmp,name);
+							    tmp_free = object->bdo_name;
+							    object->bdo_name = tmp;
+							    FreeMemH(tmp_free);
+							}
+
 							if (object->bdo_flags&BDOF_ASSIGN) strcat(object->bdo_name,":");
 						}
 
@@ -425,13 +470,33 @@ void notify_disk_name_change(
 		// Correct disk?
 		if (strnicmp(device,buffer->buf_Path,strlen(device))==0)
 		{
+			ULONG len;
+			STRPTR newpath;
+
 			// Change volume name
 			strcpy(buffer->buf_VolumeLabel,new_volume);
 
-			// Get new full path
-			strcpy(buffer->buf_ExpandedPath,new_volume);
+			len = strlen(new_volume) + 1;
 			if (ptr=strchr(buffer->buf_Path,':'))
-				strcat(buffer->buf_ExpandedPath,ptr);
+			    len += strlen(ptr);
+
+			if (newpath = AllocMemH(0,len))
+			{
+			    STRPTR tmp = 0;
+
+			    if (buffer->buf_ExpandedPath)
+				tmp = buffer->buf_ExpandedPath;
+
+			    // Get new full path
+			    strcpy(newpath, new_volume);
+			    if (ptr)
+				strcat(newpath, ptr);
+
+			    buffer->buf_ExpandedPath = newpath;
+
+			    if(tmp)
+				FreeMemH(tmp);
+			}
 
 			// Is buffer currently displayed in a lister?
 			if (buffer->buf_CurrentLister)
@@ -519,11 +584,21 @@ void backdrop_update_disk(BackdropInfo *info,devname_change *change,BOOL show)
 		if (object->bdo_type==BDO_DISK &&
 			stricmp(change->old_name,object->bdo_device_name)==0)
 		{
+			APTR tmp;
+
 			// Erase object
 			if (show) backdrop_erase_icon(info,object,0);
 
 			// Store new name
-			strcpy(object->bdo_name,change->new_name);
+			if (tmp = AllocMemH(info->memory,strlen(change->new_name) + 1))
+			{
+			    APTR tmp_free;
+
+			    strcpy(tmp,change->new_name);
+			    tmp_free = object->bdo_name;
+			    object->bdo_name = tmp;
+			    FreeMemH(tmp_free);
+			}
 
 			// Show new object
 			if (show) backdrop_render_object(info,object,BRENDERF_CLIP);

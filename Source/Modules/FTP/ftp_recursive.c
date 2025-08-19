@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -141,7 +141,7 @@ else
 
 			stccpy( ep->ep_ftpnode->fn_site.se_path, path, PATHLEN + 1 );
 
-			if	(lock = Lock( path, ACCESS_READ ))
+			if	(lock = LockFromPath( path, NULL, NULL ))
 				{
 				UnLock( CurrentDir( lock ) );
 
@@ -2366,7 +2366,7 @@ if	(!(rel = AllocVec( sizeof(struct rec_entry_list), MEMF_CLEAR )))
 NewList( &rel->rl_list );
 
 // Lock directory
-if	(lock = Lock( (char *)dirname ? dirname : "", ACCESS_READ ))
+if	(lock = LockFromPath( (char *)dirname ? dirname : "", NULL, NULL ))
 	{
 	// Examine directory
 	if	(Examine( lock, &fib ))
@@ -2546,7 +2546,7 @@ BPTR lock;
 
 //kprintf( "FS  CWD  %s\n", dirname );
 
-if	(lock = Lock( dirname, ACCESS_READ ))
+if	(lock = LockFromPath( dirname, NULL, NULL ))
 	{
 	UnLock( CurrentDir( lock ) );
 	return 1;

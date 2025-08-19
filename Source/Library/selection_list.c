@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -174,7 +174,7 @@ short __asm __saveds L_SelectionList(
 	register __d4 char *cancel_txt,
 	register __a4 char **switch_txt,
 	register __a5 ULONG *switch_flags,
-	register __a6 struct MyLibrary *lib)
+	register __a6 struct Library *GalileoFMBase)
 {
 	ConfigWindow dims,mindims;
 	NewConfigWindow newwin;
@@ -310,10 +310,10 @@ short __asm __saveds L_SelectionList(
 	objects[GAD_SELECTION_CANCEL].gadget_text=(ULONG)cancel_txt;
 
 	// Open requester
-	if (!(window=L_OpenConfigWindow(&newwin,lib)) ||
-		!(objlist=L_AddObjectList(window,objects,lib)))
+	if (!(window=L_OpenConfigWindow(&newwin,GalileoFMBase)) ||
+		!(objlist=L_AddObjectList(window,objects,GalileoFMBase)))
 	{
-		L_CloseConfigWindow(window,lib);
+		L_CloseConfigWindow(window,GalileoFMBase);
 		FreeVec(objects);
 		return -1;
 	}
@@ -379,12 +379,15 @@ short __asm __saveds L_SelectionList(
 				// Arguments?
 				if (amsg->am_NumArgs>0)
 				{
-					char buf[256];
+					char *buf;
 
 					// Get path from first argument
-					L_DevNameFromLock(amsg->am_ArgList[0].wa_Lock,buf,256,lib);
-					AddPart(buf,(flags&SLF_FILE_FIELD)?amsg->am_ArgList[0].wa_Name:(unsigned char *)"",256);
-					L_SetGadgetValue(objlist,GAD_SELECTION_DIR_FIELD,(ULONG)buf);
+					if (buf = L_PathFromLock(NULL, amsg->am_ArgList[0].wa_Lock, PFLF_USE_DEVICENAME|PFLF_SLASH_APPEND, (flags&SLF_FILE_FIELD)?amsg->am_ArgList[0].wa_Name:(unsigned char *)""))
+					{
+					    L_SetGadgetValue(objlist,GAD_SELECTION_DIR_FIELD,(ULONG)buf);
+
+					    L_FreeMemH(buf);
+					}
 				}
 				ReplyMsg((struct Message *)amsg);
 			}
@@ -413,7 +416,7 @@ short __asm __saveds L_SelectionList(
 						if (flags&SLF_RETURN_PATH)
 						{
 							// See if path has changed
-							if (stricmp(buffer,(char *)L_GetGadgetValue(objlist,GAD_SELECTION_DIR_FIELD,lib))!=0)
+							if (stricmp(buffer,(char *)L_GetGadgetValue(objlist,GAD_SELECTION_DIR_FIELD,GalileoFMBase))!=0)
 							{
 								okay=1;
 								break_flag=1;
@@ -498,15 +501,15 @@ short __asm __saveds L_SelectionList(
 	if (flags&SLF_DIR_FIELD)
 	{
 		// Get buffer value
-		if (buffer) strcpy(buffer,(char *)L_GetGadgetValue(objlist,GAD_SELECTION_DIR_FIELD,lib));
+		if (buffer) strcpy(buffer,(char *)L_GetGadgetValue(objlist,GAD_SELECTION_DIR_FIELD,GalileoFMBase));
 	}
 
 	// Kill AppWindow
 	if (appwindow) RemoveAppWindow(appwindow);
 	if (appport)
     {
-        struct Message *msg;
-        while (msg=GetMsg(appport))
+	struct Message *msg;
+	while (msg=GetMsg(appport))
 			ReplyMsg(msg);
     	DeleteMsgPort(appport);
     }
@@ -517,7 +520,7 @@ short __asm __saveds L_SelectionList(
 		short num;
 		*switch_flags=0;
 		for (num=0;num<switch_count;num++)
-			if (L_GetGadgetValue(objlist,GAD_SELECTION_SWITCH_BASE+num,lib))
+			if (L_GetGadgetValue(objlist,GAD_SELECTION_SWITCH_BASE+num,GalileoFMBase))
 				(*switch_flags)|=1<<num;
 	}
 
@@ -533,7 +536,7 @@ short __asm __saveds L_SelectionList(
 	}
 
 	// Close window
-	L_CloseConfigWindow(window,lib);
+	L_CloseConfigWindow(window,GalileoFMBase);
 
 	return (short)((okay)?selection:-2);
 }

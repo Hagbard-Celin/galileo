@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,11 +32,17 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "dirlist_protos.h"
+#include "misc_protos.h"
+#include "buffers_protos.h"
+#include "path_routines.h"
+#include "backdrop_protos.h"
 
 // Allocate a new buffer for a lister - list must be locked
 DirBuffer *lister_new_buffer(Lister *lister)
@@ -80,36 +87,40 @@ DirBuffer *lister_find_buffer(
 	Lister *lister,
 	DirBuffer *start,
 	char *path,
+	BPTR lock,
 	struct DateStamp *stamp,
 	char *volume,
 	ULONG flags)
 {
 	short ret=0;
 	DirBuffer *buffer;
-	char *path_buffer;
+	char *path_buffer = 0;
 	struct FileInfoBlock *fib;
+
+	if (!path && !lock)
+	    return 0;
 
 	// Got a lister?
 	if (lister)
 	{
-		path_buffer=lister->work_buffer;
 		fib=lister->fib;
 	}
 
 	// Need to allocate data
 	else
 	{
-		if (!(path_buffer=AllocVec(512,0)) ||
-			!(fib=AllocDosObject(DOS_FIB,0)))
+		if (!(fib=AllocDosObject(DOS_FIB,0)))
 		{
-			FreeVec(path_buffer);
 			return 0;
 		}
 	}
 
-	// Copy path, terminate correctly
-	strcpy(path_buffer,path);
-	AddPart(path_buffer,"",512);
+	if (path)
+	{
+	    // Copy path, terminate correctly
+	    if (!(path_buffer = JoinString(NULL, path, NULL, NULL, JSF_FS_ADDPART)))
+		return 0;
+	}
 
 	// Lock buffer list
 	if (!(flags&LISTER_BFPF_DONT_LOCK))
@@ -124,15 +135,33 @@ DirBuffer *lister_find_buffer(
 		buffer=(DirBuffer *)buffer->node.ln_Succ)
 	{
 		// Valid path in this directory?
-		if (buffer->flags&DWF_VALID &&
-				(flags&LISTER_BFPF_DONT_LOCK ||
-					!buffer->buf_CurrentLister ||
-					buffer->buf_CurrentLister==lister))
+		if (buffer->flags&DWF_VALID && ((flags&LISTER_BFPF_ONLY_CACHE && !buffer->buf_CurrentLister) ||
+						(!(flags&LISTER_BFPF_ONLY_CACHE) &&
+						(flags&LISTER_BFPF_DONT_LOCK ||
+						!buffer->buf_CurrentLister ||
+						buffer->buf_CurrentLister==lister))))
+
 		{
-			// Does pathname match?
-			if (stricmp(path_buffer,buffer->buf_Path)==0)
+		    BOOL match=0;
+
+			// If lock is supplied compare locks
+			if (lock)
 			{
-				BOOL match=1;
+			    if (flags&LISTER_BFPF_COMPARE_LOCKADDRESS)
+			    if (lock == buffer->buf_Lock)
+				match = 1;
+			    else
+			    if (SameLock(lock,buffer->buf_Lock) == LOCK_SAME)
+				match = 1;
+			}
+			else
+			// Otherwise compare pathname for match
+			if (stricmp(path_buffer,buffer->buf_Path)==0)
+			    match = 1;
+
+			// Got match?
+			if (match)
+			{
 
 				// If datestamp is supplied, try that
 				if (stamp)
@@ -149,17 +178,22 @@ DirBuffer *lister_find_buffer(
 				// Matched?
 				if (match)
 				{
-					BPTR lock;
+					BPTR test_lock;
 
 					// Do we need to test dates?
 					if (!(flags&LISTER_BFPF_DONT_TEST))
 					{
+						if (lock)
+						    test_lock = DupLock(lock);
+						else
+						    test_lock = LockFromPath(path_buffer, NULL , NULL);
+
 						// Try to lock and examine this directory
-						if (lock=Lock(path_buffer,ACCESS_READ))
+						if (test_lock)
 						{
 							// Examine and unlock
-							Examine(lock,fib);
-							UnLock(lock);
+							Examine(test_lock,fib);
+							UnLock(test_lock);
 
 							// If datestamp on directory has changed, don't go to it
 							if (CompareDates(&fib->fib_Date,&buffer->buf_DirectoryDate)!=0)
@@ -201,10 +235,12 @@ DirBuffer *lister_find_buffer(
 	}
 
 	// Cleanup
+	if (path_buffer)
+	    FreeMemH(path_buffer);
+
 	if (!lister)
 	{
-		FreeVec(path_buffer);
-		FreeDosObject(DOS_FIB,fib);
+	    FreeDosObject(DOS_FIB,fib);
 	}
 
 	return buffer;
@@ -214,9 +250,10 @@ DirBuffer *lister_find_buffer(
 // Searches for an empty buffer, or one with the same name (preferred)
 // If a suitable buffer is not found, it uses the current buffer
 // Called from the LISTER PROCESS
-DirBuffer *lister_buffer_find_empty(Lister *lister,char *path,struct DateStamp *stamp)
+DirBuffer *lister_buffer_find_empty(Lister *lister,char *path,BPTR lock,struct DateStamp *stamp)
 {
 	DirBuffer *buffer,*first_empty=0,*first_unlocked=0;
+	BOOL same = FALSE;
 
 #ifdef DEBUG
 	if (lister) check_call("lister_buffer_find_empty",lister);
@@ -232,7 +269,7 @@ DirBuffer *lister_buffer_find_empty(Lister *lister,char *path,struct DateStamp *
 		buffer_lock(lister->cur_buffer,TRUE);
 
 		// Free buffer
-		buffer_freedir(lister->cur_buffer,1);
+		buffer_freedir(lister->cur_buffer,FREEDIRF_CLEAR_HANDLER|FREEDIRF_FREE_LOCK|FREEDIRF_FREE_PATH|FREEDIRF_FREE_EXPANDEDPATH);
 
 		// Unlock it
 		buffer_unlock(lister->cur_buffer);
@@ -247,15 +284,17 @@ DirBuffer *lister_buffer_find_empty(Lister *lister,char *path,struct DateStamp *
 		buffer->node.ln_Pred;
 		buffer=(DirBuffer *)buffer->node.ln_Pred)
 	{
-		// See if this directory is available and matches our path
-		if (path && stricmp(buffer->buf_Path,path)==0 &&
-			(!stamp || CompareDates(&buffer->buf_VolumeDate,stamp)==0))
+		// See if this directory is available and matches our lock or path
+		if ((lock && (SameLock(lock,buffer->buf_Lock) == LOCK_SAME) ||
+		    (path && buffer->buf_Path && stricmp(buffer->buf_Path,path)==0)) &&
+		    (!stamp || CompareDates(&buffer->buf_VolumeDate,stamp)==0))
 		{
 			// Not locked, or in use by this lister?
 			if (!buffer->buf_CurrentLister || buffer->buf_CurrentLister==lister)
 			{
 				// Store pointer
 				first_empty=buffer;
+				same = TRUE;
 				break;
 			}
 		}
@@ -297,7 +336,7 @@ DirBuffer *lister_buffer_find_empty(Lister *lister,char *path,struct DateStamp *
 	buffer_lock(buffer,TRUE);
 
 	// Free buffer
-	buffer_freedir(buffer,1);
+	buffer_freedir(buffer,FREEDIRF_CLEAR_HANDLER|(same?NULL:FREEDIRF_FREE_LOCK|FREEDIRF_FREE_PATH|FREEDIRF_FREE_EXPANDEDPATH));
 
 	// Unlock buffer
 	buffer_unlock(buffer);
@@ -328,11 +367,12 @@ void lister_check_old_buffer(
 	// If re-read flag is set, and buffer is valid
 	if ((force || environment->env->settings.dir_flags&DIRFLAGS_REREAD_CHANGED) &&
 		lister->cur_buffer->flags&DWF_VALID &&
+		lister->cur_buffer->buf_Path &&
 		lister->cur_buffer->buf_Path[0] &&
 		!lister->cur_buffer->buf_CustomHandler[0])
 	{
 		DirBuffer *buffer;
-		BPTR lock;
+		BPTR lock = 0;
 
 		// Get current buffer
 		buffer=lister->cur_buffer;
@@ -341,12 +381,16 @@ void lister_check_old_buffer(
 		if (!(IsListEmpty((struct List *)&buffer->entry_list)) &&
 			((DirEntry *)buffer->entry_list.mlh_Head)->de_Node.dn_Type==ENTRY_DEVICE) return;
 
+		if (buffer->buf_Lock)
+		    lock = buffer->buf_Lock;
+
 		// Lock and examine directory
-		if (lock=Lock(buffer->buf_Path,ACCESS_READ))
+		if (lock)
 		{
 			// Examine and unlock
 			Examine(lock,lister->fib);
-			UnLock(lock);
+			if (!buffer->buf_Lock)
+			    UnLock(lock);
 
 			// Make sure it's a directory
 			if (lister->fib->fib_DirEntryType>0)
@@ -359,7 +403,7 @@ void lister_check_old_buffer(
 				else
 				if (buffer->buf_VolumeLabel[0])
 				{
-					char rootname[512];
+					char rootname[32];
 
 					// Get root of current directory
 					if (get_path_root(buffer->buf_Path,rootname,0))
@@ -379,6 +423,7 @@ void lister_check_old_buffer(
 			read_directory(
 				lister,
 				buffer->buf_Path,
+				buffer->buf_Lock,
 				GETDIRF_RESELECT);
 		}
 	}
@@ -430,18 +475,23 @@ void lister_show_buffer(Lister *lister,DirBuffer *buffer,int show,BOOL active)
 	if (show && lister_valid_window(lister))
 	{
 		// Is volume present?
-		if (!lister->cur_buffer->buf_CustomHandler[0] &&
+		if (lister->cur_buffer->buf_Lock &&
 			VolumePresent(buffer))
 		{
 			BPTR lock;
 			struct FileInfoBlock __aligned fib;
 
 			// Lock path
-			if (lock=Lock(buffer->buf_Path,ACCESS_READ))
+			if (lock = DupLock(buffer->buf_Lock))
 			{
-				// Store full path
-				NameFromLock(lock,buffer->buf_ExpandedPath,512);
-				AddPart(buffer->buf_ExpandedPath,"",512);
+				STRPTR newpath, oldpath;
+
+				oldpath = buffer->buf_ExpandedPath;
+				if (newpath = PathFromLock(NULL, lock, PFLF_END_SLASH, NULL))
+				{
+				    buffer->buf_ExpandedPath = newpath;
+				    FreeMemH(oldpath);
+				}
 
 				// Examine object
 				Examine(lock,&fib);
@@ -462,9 +512,6 @@ void lister_show_buffer(Lister *lister,DirBuffer *buffer,int show,BOOL active)
 					else stccpy(buffer->buf_ObjectName,FilePart(buffer->buf_ExpandedPath),GUI->def_filename_length-1);
 				}
 			}
-
-			// Failed to lock
-			else strcpy(buffer->buf_ExpandedPath,buffer->buf_Path);
 
 			// Update disk name and size
 			lister_update_name(lister);
@@ -495,7 +542,6 @@ void update_buffer_stamp(Lister *lister)
 {
 	BPTR lock;
 	struct FileInfoBlock __aligned info;
-	char path[512];
 /*
 	DirBuffer *buffer=0;
 */
@@ -505,20 +551,13 @@ void update_buffer_stamp(Lister *lister)
 #endif
 
 	// Invalid window?
-	if (!lister) return;
+	if (!lister || !lister->cur_buffer->buf_Lock) return;
 
-	// Get current path and disk stamp
-	strcpy(path,lister->cur_buffer->buf_Path);
-
-	// Lock the path
-	if (lock=Lock(path,ACCESS_READ))
+	if (lock = DupLock(lister->cur_buffer->buf_Lock))
 	{
-		// Examine and unlock
-		Examine(lock,&info);
-		UnLock(lock);
-
-		// Store new stamp
-		lister->cur_buffer->buf_DirectoryDate=info.fib_Date;
+	    Examine(lock,&info);
+	    lister->cur_buffer->buf_DirectoryDate=info.fib_Date;
+	    UnLock(lock);
 	}
 
 /*
@@ -625,7 +664,7 @@ DirBuffer *lister_get_empty_buffer(void)
 		// Is buffer empty?
 		if (!buffer->buf_CurrentLister && !(buffer->flags&DWF_VALID))
 		{
-			buffer_freedir(buffer,TRUE);
+			buffer_freedir(buffer,FREEDIRF_CLEAR_HANDLER|FREEDIRF_FREE_LOCK|FREEDIRF_FREE_PATH|FREEDIRF_FREE_EXPANDEDPATH);
 			return buffer;
 		}
 	}
@@ -634,7 +673,7 @@ DirBuffer *lister_get_empty_buffer(void)
 
 
 // Do a global datestamp update
-void update_lister_global(char *path)
+void update_lister_global(char *path, BPTR lock)
 {
 	IPCData *ipc;
 	Lister *lister;
@@ -650,7 +689,17 @@ void update_lister_global(char *path)
 		// Get lister
 		lister=IPCDATA(ipc);
 
+		if (lock)
+		{
+		    if (SameLock(lock,lister->cur_buffer->buf_Lock) == LOCK_SAME)
+		    {
+			    // Send update command
+			    lister_command(lister,LISTER_UPDATE_STAMP,0,0,0,0);
+		    }
+
+		}
 		// Compare path
+		else
 		if (stricmp(lister->cur_buffer->buf_Path,path)==0)
 		{
 			// Send update command
@@ -666,17 +715,18 @@ void update_lister_global(char *path)
 // Fix current directory
 void lister_fix_cd(Lister *lister)
 {
-	BPTR lock;
+	BPTR lock, old_lock;
 
-	// Got a path?
-	if (lister->cur_buffer->buf_Path[0] && lister->cur_buffer->flags&DWF_VALID)
+	// Got a lock?
+	if (lister->cur_buffer->buf_Lock && lister->cur_buffer->flags&DWF_VALID)
 	{
-		// Lock current path
-		if (lock=Lock(lister->cur_buffer->buf_Path,ACCESS_READ))
-		{
-			// CD to it
-			UnLock(CurrentDir(lock));
-		}
+	    // Duplicate the lock
+	    lock=DupLock(lister->cur_buffer->buf_Lock);
+
+	    // CD to it
+	    old_lock = CurrentDir(lock);
+	    if (old_lock != lister->lister_orgdir)
+		UnLock(old_lock);
 	}
 }
 
@@ -710,8 +760,8 @@ BOOL lister_find_cached_buffer(
 				short res;
 
 				// Does pathname match?
-				res=(buffer->more_flags&DWF_CASE)?	strcmp(path,buffer->buf_Path):
-													stricmp(path,buffer->buf_Path);
+				res=(buffer->more_flags&DWF_CASE)?  strcmp(path,buffer->buf_Path):
+								    stricmp(path,buffer->buf_Path);
 
 				// Match?
 				if (res==0)

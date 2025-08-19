@@ -31,11 +31,15 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "backdrop.h"
+#include "rexx_protos.h"
+#include "lsprintf_protos.h"
 
 // galileo addappicon port text id [pos pos] [quotes] [info] [snap] [close] [icon filename] [menu stem] [local] [locked]
 
@@ -457,7 +461,7 @@ BOOL rexx_send_appmsg(RexxAppThing *app,short type,struct AppMessage *msg)
 	if (msg && msg->am_NumArgs>0)
 	{
 		// Build string of files
-		if (files=rexx_build_filestring((GalileoAppMessage *)msg,&lister,(app->flags&RATF_QUOTES)?CUSTF_WANT_QUOTES:0))
+		if (files=rexx_build_filestring(msg,&lister,(app->flags&RATF_QUOTES)?CUSTF_WANT_QUOTES:0))
 			entry=files;
 	}
 

@@ -67,17 +67,14 @@ struct muBase			*muBase=0;
 #ifdef RESOURCE_TRACKING
 struct Library 		    *ResTrackBase=0;
 #endif
-struct Process			*main_proc;				// Main process pointer
-IPCData					main_ipc={0};			// Main IPC data
-APTR					global_memory_pool=0;	// Global memory pool for anything to use
-char					*str_space_string;		// A string of spaces
-struct GalileoLocale		locale;					// Locale data
-APTR					main_status=0;			// Main status window
-Cfg_Environment			*environment=0;			// Environment data
-GUI_Glue				*GUI=0;					// GUI data
-BPTR					old_current_dir=0;		// Old current directory
-BOOL                    rem_galileo_assign=0;   // Remove assigns...
-BOOL                    rem_g_themes_assign=0;  // ...if we made them.
+struct Process			*main_proc;		// Main process pointer
+IPCData				main_ipc={0};		// Main IPC data
+APTR				global_memory_pool=0;	// Global memory pool for anything to use
+char				*str_space_string;	// A string of spaces
+struct GalileoLocale		locale;			// Locale data
+APTR				main_status=0;		// Main status window
+Cfg_Environment			*environment=0;		// Environment data
+GUI_Glue			*GUI=0;			// GUI data
 struct IOStdReq			input_req;
 struct IOStdReq			timer_req;
 struct IOStdReq			console_req;
@@ -85,6 +82,10 @@ struct IOStdReq			console_req;
 struct GalileoSemaphore	pub_semaphore;
 
 long main_lister_count=0;
+
+#ifdef _DEBUG_STACK
+StackData stack_check_data;
+#endif
 
 // Internal function definitions
 Cfg_Function	*def_function_leaveout=0;

@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,12 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "function_launch_protos.h"
+#include "misc_protos.h"
+#include "function_protos.h"
+#include "buffers.h"
+#include "lsprintf_protos.h"
 
 typedef struct
 {
@@ -124,9 +131,11 @@ GALILEOFM_FUNC(function_hunt)
 			if (entry->fe_type<0)
 			{
 				BOOL match=0;
+				BPTR org_dir = 0;
 
-				// Build full path
-				function_build_source(handle,entry,handle->func_work_buf+512);
+			        // CD to source-file directory
+				if (entry->fe_lock)
+				    org_dir = CurrentDir(entry->fe_lock);
 
 				// Match comments?
 				if (data->comment)
@@ -134,7 +143,7 @@ GALILEOFM_FUNC(function_hunt)
 					struct FileInfoBlock __aligned fib;
 
 					// Get file information
-					if (GetFileInfo(handle->func_work_buf+512,&fib))
+					if (GetFileInfo(entry->fe_name,&fib))
 					{
 						// Match comment
 						match=MatchPatternNoCase(handle->inst_data+64,fib.fib_Comment);
@@ -145,42 +154,66 @@ GALILEOFM_FUNC(function_hunt)
 				else
 				{
 					// Match name
-					match=MatchPatternNoCase(handle->inst_data+64,FilePart(entry->fe_name));
+					match=MatchPatternNoCase(handle->inst_data+64,entry->fe_name);
 				}
 
 				// Does file match?
 				if (match)
 				{
-					char *ptr,name[35];
+					char name[35], pathbuf[32];
+					BPTR foundin;
+					char *fullpath;
 
-					// Strip filename
-					if (ptr=FilePart(handle->func_work_buf+512)) *ptr=0;
-					get_trunc_filename(FilePart(entry->fe_name),name);
-
-					// Build requester text
-					lsprintf(handle->func_work_buf,
-						GetString(&locale,MSG_HUNT_FOUND_FILE),
-						name,
-						handle->func_work_buf+512);
-
-					// Display requester
-					if (!(ret=function_request(
-						handle,
-						handle->func_work_buf,
-						0,
-						GetString(&locale,MSG_YES),
-						GetString(&locale,MSG_NEW_LISTER),
-						GetString(&locale,MSG_NO),
-						GetString(&locale,MSG_ABORT),0)))
+					if (foundin = DupLock(entry->fe_lock))
 					{
+					    if (!(fullpath = PathFromLock(NULL , foundin, NULL, NULL)))
+					    {
+					        UnLock(foundin);
+
+				                // Restore current directory
+				                if (org_dir)
+					            CurrentDir(org_dir);
+
+					        function_abort(handle);
+					        ret=0;
+					        break;
+					    }
+					    //UnLock(foundin);
+					    get_trunc_filename(entry->fe_name,name);
+					    get_trunc_path(fullpath,pathbuf);
+
+					    // Build requester text
+					    lsprintf(handle->func_work_buf,
+						    GetString(&locale,MSG_HUNT_FOUND_FILE),
+						    name,
+						    pathbuf);
+
+					    FreeMemH(fullpath);
+
+					    // Display requester
+					    if (!(ret=function_request(handle,
+						                       handle->func_work_buf,
+						                       0,
+						                       GetString(&locale,MSG_YES),
+						                       GetString(&locale,MSG_NEW_LISTER),
+						                       GetString(&locale,MSG_NO),
+						                       GetString(&locale,MSG_ABORT),0)))
+					    {
+
+					        // Restore current directory
+					        if (org_dir)
+						    CurrentDir(org_dir);
+
+						UnLock(foundin);
+
 						function_abort(handle);
 						ret=0;
 						break;
-					}
+					    }
 
-					// Go to that directory?
-					if (ret==1)
-					{
+					    // Go to that directory?
+					    if (ret==1)
+					    {
 						PathNode *path;
 
 						// Get current lister
@@ -189,27 +222,37 @@ GALILEOFM_FUNC(function_hunt)
 						{
 							// Read directory
 							handle->flags=GETDIRF_CANCHECKBUFS|GETDIRF_CANMOVEEMPTY;
-							function_read_directory(handle,path->pn_lister,handle->func_work_buf+512);
+							function_read_directory(handle, path->pn_lister, NULL, foundin);
 
 							// Do wildcard selection
 							function_select_file(handle,path->pn_lister,(data->comment)?(char *)FilePart(entry->fe_name):data->pattern);
 
 							// Break out
 							ret=0;
+
+						        // Restore current directory
+						        if (org_dir)
+							    CurrentDir(org_dir);
+
 							break;
 						}
-					}
+					    }
 
-					// New lister?
-					else
-					if (ret==2)
-					{
+					    // New lister?
+					    else
+					    if (ret==2)
+					    {
 						Lister *lister;
+					        struct DateStamp date = {0};
+
+					        VolIdFromLock(foundin, &date, NULL);
 
 						// Open new lister
 						if (lister=
 							lister_open_new(
-								handle->func_work_buf+512,
+								0,
+								&date,
+								foundin,
 								0,
 								0,
 								function_lister_current(&handle->func_source_paths)))
@@ -224,10 +267,15 @@ GALILEOFM_FUNC(function_hunt)
 								0);
 
 							// Do wildcard selection
-							function_select_file(handle,lister,(data->comment)?(char *)FilePart(entry->fe_name):data->pattern);
+							function_select_file(handle,lister,(data->comment)?(char *)entry->fe_name:data->pattern);
 						}
+					    }
 					}
 				}
+
+			        // Restore current directory
+			        if (org_dir)
+				    CurrentDir(org_dir);
 			}
 		}
 

@@ -31,11 +31,16 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "function_launch_protos.h"
+#include "commands.h"
+#include "menu_data.h"
+#include "lsprintf_protos.h"
 
 // See if a path entered means go to FTP
 BOOL lister_check_ftp(Lister *lister,char *path)
@@ -43,6 +48,9 @@ BOOL lister_check_ftp(Lister *lister,char *path)
 	char *ptr;
 	short pos;
 	Cfg_Function *function;
+
+	if (!path || !path[0])
+	    return 0;
 
 	// Look for ftp:// string
 	if (strnicmp(path,"ftp://",6)!=0) return 0;

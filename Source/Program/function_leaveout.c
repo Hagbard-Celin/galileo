@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,10 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
+#include "function_protos.h"
+#include "backdrop_protos.h"
+#include "icons.h"
 
 // Leave some objects out
 GALILEOFM_FUNC(function_leaveout)
@@ -53,6 +58,7 @@ GALILEOFM_FUNC(function_leaveout)
 	while (entry=function_get_entry(handle))
 	{
 		BOOL ok=0;
+		BPTR source_lock;
 
 		// Check for abort
 		if (function_check_abort(handle))
@@ -61,16 +67,20 @@ GALILEOFM_FUNC(function_leaveout)
 			break;
 		}
 
-		// Build source name
-		function_build_source(handle,entry,handle->func_work_buf);
+		// Get source dir lock
+		if (entry->fe_lock)
+		    source_lock = entry->fe_lock;
+		else
+		    source_lock	= path->pn_lock;
 
 		// Ignore if this is an icon
-		if (!(isicon(handle->func_work_buf)))
+		if (!(isicon(entry->fe_name)))
 		{
 			// Leave object out
 			if (backdrop_leave_out(
 				GUI->backdrop,
-				handle->func_work_buf,
+				entry->fe_name,
+				source_lock,
 				BLOF_PERMANENT|BLOF_REFRESH,-1,-1))
 			{
 				ok=1;

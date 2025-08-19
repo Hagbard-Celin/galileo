@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -492,30 +493,43 @@ void FiletypeEditor(void)
 				// Got an argument?
 				if (msg->am_NumArgs>0)
 				{
-					char name[256];
-					short len;
 					APTR image;
+					BPTR org_dir = 0, parent_lock = 0;
+					short len;
+					D_S(struct FileInfoBlock, fib);
 
-					// Get full name
-					NameFromLock(msg->am_ArgList[0].wa_Lock,name,256);
-					if (msg->am_ArgList[0].wa_Name &&
-						*msg->am_ArgList[0].wa_Name)
-						AddPart(name,msg->am_ArgList[0].wa_Name,256);
+					if (msg->am_ArgList[0].wa_Lock)
+					    org_dir = CurrentDir(msg->am_ArgList[0].wa_Lock);
+
+					// Get filename
+					if (msg->am_ArgList[0].wa_Name && *msg->am_ArgList[0].wa_Name)
+					{
+					    strcpy(fib->fib_FileName, msg->am_ArgList[0].wa_Name);
+					}
+					else
+					{
+					    Examine(msg->am_ArgList[0].wa_Lock, fib);
+					    if (parent_lock = ParentDir(msg->am_ArgList[0].wa_Lock))
+						CurrentDir(parent_lock);
+					}
 
 					// Add .info
-					if ((len=strlen(name))<6 ||
-						stricmp(name+len-5,".info")!=0) strcat(name,".info");
+					if ((len = strlen(fib->fib_FileName)) < 6 ||
+					    (stricmp(fib->fib_FileName + len - 5, ".info") != 0 && len < 103))
+					{
+					    strcat(fib->fib_FileName, ".info");
+					}
 
 					// Try to get image
-					if (image=OpenImage(name,0))
+					if (image=OpenImage(fib->fib_FileName,0))
 					{
 						// Store path
 						FreeMemH(data->type->icon_path);
-						if (data->type->icon_path=AllocMemH(0,strlen(name)+1))
-							strcpy(data->type->icon_path,name);
+						data->type->icon_path = PathFromLock(0, msg->am_ArgList[0].wa_Lock, PFLF_SLASH_APPEND, fib->fib_FileName);
+
 
 #ifdef _DEBUG_ALLOCMEMH
-                        KPrintF("filetype_editor.c:478 AllocMem: %lx \n", (data->type->icon_path)-2 );
+						KPrintF("filetype_editor.c:478 AllocMem: %lx \n", (data->type->icon_path)-2 );
 #endif
 
 						// Free existing image
@@ -526,6 +540,12 @@ void FiletypeEditor(void)
 						filetypeed_show_icon(data);
 						change_flag=1;
 					}
+
+					if (org_dir)
+					    CurrentDir(org_dir);
+
+					if (parent_lock)
+					    UnLock(parent_lock);
 				}
 
 				// Reply message
@@ -589,6 +609,10 @@ void FiletypeEditor(void)
 	Att_RemList(data->action_list,0);
 	Att_RemList(data->icon_list,REMLIST_FREEDATA);
 	FreeVec(data);
+
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }
 
 
@@ -735,8 +759,7 @@ void filetypeed_edit_action(
 			"galileo_function_editor",
 			(ULONG)FunctionEditor,
 			STACK_DEFAULT,
-			(ULONG)startup,
-			(struct Library *)DOSBase)) && data->editor[action]) success=1;
+			(ULONG)startup)) && data->editor[action]) success=1;
 	}
 
 	// Free data if not successful
@@ -847,7 +870,7 @@ void filetypeed_edit_definition(filetype_ed_data *data)
 	startup->asl_base=AslBase;
 
 #ifdef RESOURCE_TRACKING
-    startup->restrack_base=ResTrackBase;
+	startup->restrack_base=ResTrackBase;
 #endif
 
 	// Fill out new window
@@ -872,8 +895,7 @@ void filetypeed_edit_definition(filetype_ed_data *data)
 		"galileo_class_editor",
 		(ULONG)FileclassEditor,
 		STACK_DEFAULT,
-		(ULONG)startup,
-		(struct Library *)DOSBase)) && data->class_editor) success=1;
+		(ULONG)startup)) && data->class_editor) success=1;
 
 	// Free data if not successful
 	if (!success)
@@ -904,7 +926,7 @@ void filetypeed_receive_class(
 		strcpy(data->type->recognition,type->recognition);
 
 #ifdef _DEBUG_ALLOCMEMH
-    KPrintF("filetype_editor.c:867 AllocMem: %lx \n", (data->type->recognition)-2 );
+	KPrintF("filetype_editor.c:867 AllocMem: %lx \n", (data->type->recognition)-2 );
 #endif
 
 	// Set new window title
@@ -1009,7 +1031,7 @@ BOOL filetypeed_pick_icon(filetype_ed_data *data)
 			strcpy(data->type->icon_path,path);
 
 #ifdef _DEBUG_ALLOCMEMH
-        KPrintF("filetype_editor.c:972 AllocMem: %lx \n", (data->type->icon_path)-2 );
+		KPrintF("filetype_editor.c:972 AllocMem: %lx \n", (data->type->icon_path)-2 );
 #endif
 
 		// Free existing image
@@ -1190,8 +1212,7 @@ void filetypeed_edit_iconmenu(filetype_ed_data *data,Att_Node *node)
 			"galileo_function_editor",
 			(ULONG)FunctionEditor,
 			STACK_DEFAULT,
-			(ULONG)startup,
-			(struct Library *)DOSBase)) && fndata->editor) success=1;
+			(ULONG)startup)) && fndata->editor) success=1;
 	}
 
 	// Free data if not successful
@@ -1444,14 +1465,14 @@ BOOL filetypeed_end_drag(filetype_ed_data *data,BOOL ok)
 										strcpy(function->node.ln_Name,ins->string);
 
 #ifdef _DEBUG_ALLOCMEMH
-        							KPrintF("filetype_editor.c:1407 AllocMem: %lx \n", (function->node.ln_Name)-2 );
+									KPrintF("filetype_editor.c:1407 AllocMem: %lx \n", (function->node.ln_Name)-2 );
 #endif
 
 									if (function->label=AllocMemH(0,strlen(ins->string)+1))
 										strcpy(function->label,ins->string);
 
 #ifdef _DEBUG_ALLOCMEMH
-        							KPrintF("filetype_editor.c:1414 AllocMem: %lx \n", (function->label)-2 );
+									KPrintF("filetype_editor.c:1414 AllocMem: %lx \n", (function->label)-2 );
 #endif
 
 									// Free instruction

@@ -36,6 +36,9 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
+#include "misc_protos.h"
+#include "function_protos.h"
 
 int function_select_simple(SelectData *,FunctionHandle *);
 int function_select_complex(IPCData *,SelectData *,struct Window *);
@@ -52,9 +55,7 @@ GALILEOFM_FUNC(function_select)
 	if (!(lister=function_lister_current(&handle->func_source_paths)))
 		return 1;
 
-	// Allocate and copy local select data
-	if (!(data=AllocVec(sizeof(SelectData),MEMF_CLEAR)))
-		return 0;
+	data = (SelectData *)handle->inst_data;
 
 	// Parsed arguments?
 	if (instruction->ipa_funcargs)
@@ -191,11 +192,10 @@ GALILEOFM_FUNC(function_select)
 			LISTER_REFRESH_WINDOW,
 			0,0,0,
 			REPLY_NO_PORT);
+
 		ret=1;
 	}
 
-	// Free local select data
-	FreeVec(data);
 	return ret;
 }
 

@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,11 +32,74 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+
+// Get the parent of a path
+STRPTR path_parent_alloch(APTR memory, STRPTR path)
+{
+	ULONG len;
+	STRPTR parent;
+
+	// Get length of path
+	if ((len=strlen(path)-1)<0) return 0;
+
+	// If last character is a :, can't go any further
+	if (path[len]==':') return 0;
+
+	// If last character is a /, start at one before
+	if (path[len]=='/') --len;
+
+	// Go back to previous / or :
+	while (len>0 && path[len]!='/' && path[len]!=':') --len;
+
+	// Got a separator?
+	if (path[len]=='/' || path[len]==':')
+	{
+	    char tmp;
+
+	    tmp = path[len+1];
+	    // Clear after this
+	    path[len+1]=0;
+	    parent = CopyString(memory, path);
+	    path[len+1] = tmp;
+	    return parent;
+	}
+
+	// Nothing
+	return 0;
+}
+
+
+// Get the parent of a path
+STRPTR path_root_alloch(APTR memory, STRPTR path)
+{
+	ULONG len;
+	STRPTR root, pos;
+	char tmp;
+
+	// Get length of path
+	if ((len=strlen(path)-1)<0) return 0;
+
+	// If last character is a :, can't go any further
+	if (path[len]==':') return 0;
+
+	if (!(pos = strchr(path,':')))
+	    return 0;
+
+	pos++;
+
+	tmp = *pos;
+	root = CopyString(memory, path);
+
+	*pos = tmp;
+
+	return root;
+}
+
 
 // Get the parent of a path
 path_parent(char *path)

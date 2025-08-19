@@ -31,7 +31,7 @@
 galileofm.library/DateToStrings                     galileofm.library/DateToStrings
 
     NAME
-        DateToStrings - convert a datestemp to date and time strings
+        DateToStrings - convert a datestamp to date and time strings
 
     SYNOPSIS
         DateToStrings(date, date_buf, time_buf, flags)
@@ -486,6 +486,90 @@
     SEE ALSO
         LaunchWB, LaunchWBNew, LaunchCLI, dos.library/SystemTagList
 
+galileofm.library/LockFromPath                       galileofm.library/LockFromPath
+
+    NAME
+        LockFromPath - lock a directory or file
+
+    SYNOPSIS
+        LockFromPath(path, length, flags)
+                      A0     D0      D1
+
+        BPTR LockFromPath(CONST_STRPTR, ULONG, ULONG);
+
+    FUNCTION
+        This function returns a shared filesystem lock on the file or
+        directory pointed to by the 'path'. This is equivalent to calling
+        the DOS routine Lock() with 'accessMode' set to 'ACCESS_READ', except
+        this routine can handle arbitrary long paths in one call.
+
+    INPUTS
+        path - absolute or relative path to the directory or file to lock
+        length - the function needs the length of the supplied string, if not
+                 supplied here the function will calculate it, if it is known
+                 you SHULD supply it here to avoid the recalculating of a
+                 known value
+        flags - supported flags:
+
+                   LFPF_TRY_ICON       - if 'path' can not be found, append
+                                         ".info" and try again.
+                   LFPF_TRY_ICON_FIRST - append ".info" to 'path' an try to
+                                         lock, if that fails, try to lock
+                                         'path' without the ".info" appended
+
+    RESULT
+        A BPTR to a lock.
+
+    SEE ALSO
+        dos.library/Lock()
+
+galileofm.library/LockFromVolIdPath             galileofm.library/LockFromVolIdPath
+
+    NAME
+        LockFromVolIdPath - lock a directory or a file using unique volume-id
+
+    SYNOPSIS
+        LockFromVolIdPath(volumename, path, volumedate, volname_len, flags)
+                              A0       A1       A2          D0        D1
+
+        BPTR LockFromVolIdPath(STRPTR, CONST_STRPTR, struct DateStamp *,
+        UBYTE, ULONG);
+
+    FUNCTION
+        This function returns a shared filesystem lock on the file or
+        directory pointed to by the 'path' on the disk identified by the
+        combination of 'volumename', 'volumedate' and 'volname_len'. This is
+        equivalent to calling the DOS routine Lock() with 'accessMode' set to
+        'ACCESS_READ' with the following exceptions:
+        - This routine will only return a lock if the 'path' can be found on
+          the disk identified by the combination of 'volumename',
+          'volumedate' and 'volname_len'
+        - It can not handle relative paths
+        - The path MUST begin with a Volume name, paths beginnig with a
+          Device name will fail
+        - Like LockFromPath() it can handle arbitrary long paths in one call
+
+    INPUTS
+        volumename - name of the disk without the ":"
+        path - absolute path to the dir or file to lock
+        volname_len - the function needs the length of 'volumename', if not
+                      supplied here the function will calculate it, if it is
+                      known you SHULD supply it here to avoid the
+                      recalculating of a known value
+        flags - supported flags:
+
+                   LFPF_TRY_ICON       - if 'path' can not be found, append
+                                         ".info" and try again.
+                   LFPF_TRY_ICON_FIRST - append ".info" to 'path' an try to
+                                         lock, if that fails, try to lock
+                                         'path' without the ".info" appended
+
+    RESULT
+        A BPTR to a lock.
+
+    SEE ALSO
+        LockFromPath(), dos.library/Lock()
+
 galileofm.library/ParseDateStrings               galileofm.library/ParseDateStrings
 
     NAME
@@ -522,6 +606,50 @@
 
     SEE ALSO
         DateFromStrings()
+
+galileofm.library/PathFromLock                       galileofm.library/PathFromLock
+
+    NAME
+        PathFromLock - return the full pathname of a file or dir
+
+    SYNOPSIS
+        result:length PathFromLock(memhandle, lock, flags, append)
+            D0:D1                     A0       D0     D1     A1
+
+        STRPTR:ULONG PathFromLock(APTR, BPTR, ULONG, STRPTR);
+
+    FUNCTION
+        Returns a fully qualified path for the lock. The main difference
+        between this function and the equivalent DOS library routine is
+        that this function calculates the required space, and allocates the
+        memory for the returned string itself,. making it able to handle
+        arbitrary long paths in one call. It is the the responsibility of
+        the caller to free this memory after use.
+
+    INPUTS
+        memhandle - as supplied by NewMemHandle(), the function will use this
+                    handle to allocate the string if supplied, optional
+        lock - filelock to obtain the path for
+        flags - supported flags:
+
+                   PFLF_USE_DEVICENAME - return a path beginning with
+                                         devicename like DevNameFromLock()
+                   PFLF_END_SLASH      - add a "/" to the end of the string
+                                         before returning it
+                   PFLF_SLASH_APPEND   - if 'append' is given add a "/"
+                                         before adding 'append'
+
+        append - if you supply a string here, it will be appended to the end
+                 of the result before it is returned
+
+    RESULT
+        The result of this function is a pointer to a buffer of size
+        'strlen(result) + 1' containing the result string, this buffer MUST
+        be freed with FreeMemH() after use. It will also return the actual
+        length of the result string as a ULONG in 'D1'.
+
+    SEE ALSO
+        DevNameFromLock(), dos.library/NameFromLock(), FreeMemH(), NewMemHandle()
 
 galileofm.library/SearchFile                           galileofm.library/SearchFile
 
@@ -560,6 +688,34 @@
         If the supplied string is found, the offset within the file/buffer
         of the first instance is returned. If no match is found or an error
         occurs, -1 is returned.
+
+galileofm.library/VolIdFromLock                     galileofm.library/VolIdFromLock
+
+    NAME
+        VolIdFromLock - get unique volume-id for a disk
+
+    SYNOPSIS
+        VolIdFromLock(lock, date, name)
+                       A0    A1    A2
+
+        UBYTE VolIdFromLock(BPTR, struct DateStamp *, STRPTR);
+
+    FUNCTION
+        This routine sets the named environment variable to the supplied
+        string value, and optionally saves it permanently.
+
+    INPUTS
+        lock - lock to query
+        date - pointer to pre-allocated struct DateStamp where the disk
+               date-stamp will be returned
+        name - pointer to a pre-allocated buffer where the volume name is
+               returned MUST be at-least 32 bytes.
+
+    RESULT
+        The length of the string returned in 'name' or NULL on failure.
+
+    SEE ALSO
+        LockFromVolIdPath()
 
 galileofm.library/SetEnv                                   galileofm.library/SetEnv
 

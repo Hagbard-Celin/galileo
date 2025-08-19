@@ -125,8 +125,7 @@ if	(mldata = AllocVec( sizeof(struct modlaunch_data), MEMF_CLEAR ))
 		"galileo_ftp",			// Name
 		(ULONG)galileo_ftp,		// Code
 		4096 * 2,			// Stack size
-		(ULONG)mldata,			// Data passed to task
-		(struct Library *)DOSBase ))	// Needs pointer to dos.library
+		(ULONG)mldata))			// Data passed to task
 		{
 		if	(mldata->mld_okay)
 			okay = 1;
@@ -201,7 +200,7 @@ if	(fa = ParseArgs( CONNECT_TEMPLATE, args ))
 			flags |= CONN_OPT_PATH;
 			}
 		if	(fa->FA_Arguments[D_OPT_HANDLE])
-			cm->cm_handle = *(int *)fa->FA_Arguments[D_OPT_HANDLE];
+			cm->cm_handle = (APTR)*(int *)fa->FA_Arguments[D_OPT_HANDLE];
 
 		if	(fa->FA_Arguments[D_OPT_SITE])
 			{

@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -78,6 +78,7 @@ typedef struct
 	ULONG			chunk_size;	// Size of last chunk
 	struct DataType		*datatype;	// DataType handle
 	long			flags;
+	char			*fullname;
 	struct InfoData		info;		// Disk information
 	unsigned long		disk_type;	// Disk type
 } MatchHandle;
@@ -174,7 +175,7 @@ Cfg_Filetype *filetype_default_new(APTR,Cfg_FiletypeList *,char *,char *,short,c
 void filetype_default_menu(APTR,Cfg_Filetype *,char *,char *);
 MatchHandle *filetype_new_handle(char *);
 void filetype_free_handle(MatchHandle *);
-Cfg_Filetype *filetype_identify(char *,short,char *,unsigned short);
+Cfg_Filetype *filetype_identify(char *,BPTR,short,char *,unsigned short);
 
 void parse_prot_string(char *,ULONG *);
 void parse_date_string(char *,struct DateStamp *);
@@ -194,6 +195,6 @@ BOOL filetype_check(Cfg_Filetype *match_type);
 
 BOOL is_default_filetype(Cfg_Filetype *type);
 
-BOOL filetype_match_type(char *,Cfg_Filetype *);
+BOOL filetype_match_type(char *,BPTR,Cfg_Filetype *);
 
 #endif

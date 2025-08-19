@@ -22,17 +22,17 @@
 // Definition of the module
 ModuleInfo module_info =
 {
-		1,								// Version
+		1,					// Version
 		"XADbrowser.gfmmodule",		   	// Module name
 		"XADbrowser.catalog",  			// Catalog name
-		NULL,							// Flags
-		2,								// Number of functions
-		{0, "XADOpen", MSG_XADOPEN_DESC, FUNCF_WANT_SOURCE|FUNCF_NEED_FILES|FUNCF_WANT_ENTRIES|FUNCF_SINGLE_SOURCE|FUNCF_WANT_DEST, XADOPEN_ARGS}
+		NULL,					// Flags
+		2,					// Number of functions
+		{0, "XADopen", MSG_XADOPEN_DESC, FUNCF_WANT_SOURCE|FUNCF_NEED_FILES|FUNCF_WANT_ENTRIES|FUNCF_SINGLE_SOURCE|FUNCF_WANT_DEST, XADOPEN_ARGS}
 };
 
 
 ModuleFunction more_functions[] =
 {
-		 1, "XADExtract", MSG_XADEXTRACT_DESC, FUNCF_SYNC|FUNCF_WANT_SOURCE|FUNCF_WANT_DEST|FUNCF_NEED_FILES|FUNCF_WANT_ENTRIES|FUNCF_SINGLE_DEST, XADEXTRACT_ARGS
+		 1, "XADextract", MSG_XADEXTRACT_DESC, FUNCF_SYNC|FUNCF_WANT_SOURCE|FUNCF_WANT_DEST|FUNCF_NEED_FILES|FUNCF_WANT_ENTRIES|FUNCF_SINGLE_DEST, XADEXTRACT_ARGS
 };
 

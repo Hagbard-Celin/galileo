@@ -31,11 +31,14 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "dirlist_protos.h"
+#include "buffers.h"
+#include "icons.h"
 
 // Get an entry
 DirEntry *get_entry(struct MinList *list,BOOL selected,short type)
@@ -235,8 +238,8 @@ BOOL list_is_custom(DirBuffer *buffer)
 
 // Read parent/root of a window
 // Called from the LISTER PROCESS
-void do_parent_root(Lister *lister,char *path)
+void do_parent_root(Lister *lister, char *path, BPTR lock)
 {
 	// Read directory
-	read_directory(lister,path,GETDIRF_CANMOVEEMPTY|GETDIRF_CANCHECKBUFS);
+	read_directory(lister,path,lock,GETDIRF_CANMOVEEMPTY|GETDIRF_CANCHECKBUFS);
 }

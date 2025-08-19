@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -59,11 +59,5 @@ typedef struct
 	struct DateStamp	date;		// File date
 	char			name[1];	// Filename
 } ReselectionFile;
-
-void InitReselect(ReselectionData *);
-void MakeReselect(ReselectionData *,struct DirectoryBuffer *,ULONG);
-void DoReselect(ReselectionData *,struct ListerWindow *,BOOL);
-void GetReselectFiletypes(ReselectionData *,struct MinList *);
-void FreeReselect(ReselectionData *);
 
 #endif

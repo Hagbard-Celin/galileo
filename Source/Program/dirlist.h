@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,12 +32,14 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #ifndef _GALILEOFM_DIRLIST
 #define _GALILEOFM_DIRLIST
+
+#include "lister.h"
 
 #define RESORT_SORT		1
 #define RESORT_REJECTS		2
@@ -93,6 +96,7 @@ typedef struct DirectoryEntry {
 #define DE_Filetype		( TAG_USER + 0x5 )
 #define DE_DisplayString	( TAG_USER + 0x6 )
 #define DE_VersionInfo		( TAG_USER + 0x7 )
+#define	DE_AssignName		( TAG_USER + 0x8 )
 
 #define de_dest_blocksize	de_SubType
 #define de_block_total		de_UserData
@@ -124,7 +128,9 @@ typedef struct DirectoryEntry {
 #define ENTRY_DIRECTORY		1		// Directory
 #define ENTRY_ANYTHING		2		// Used for something different
 
-#define SUBENTRY_BUFFER		1
+#define SUBENTRY_BUFFER		(1<<0)
+#define SUBENTRY_ASSIGN		(1<<1)
+#define SUBENTRY_MULTI_ASSIGN	(1<<2)
 
 // Action codes sent to custom handlers
 #define USERENTRY_ERROR		-1		// Error
@@ -155,7 +161,7 @@ typedef struct DirectoryBuffer
 	DirEntry		*first_file;		// First file in list
 	DirEntry		*first_dir;		// First directory in list
 
-	char			buf_Path[512];		// Path this list is showing
+	char			*buf_Path;		// Path this list is showing
 
 	long			buf_TotalEntries[2];	// Total number of entries
 	long			buf_TotalFiles[2];	// Total number of files
@@ -182,8 +188,8 @@ typedef struct DirectoryBuffer
 
 	char			buf_VolumeLabel[32];	// Volume name
 	char			*buf_ObjectName;	// Object filename
-	char			pad1[28];
-	char			buf_ExpandedPath[512];	// Expanded pathname
+
+	char			*buf_ExpandedPath;	// Expanded pathname
 
 	unsigned short		last_owner;		// Owner ID of last entry we read
 	unsigned short		last_group;		// Group ID of last entry we read
@@ -219,7 +225,8 @@ typedef struct DirectoryBuffer
 
 	ULONG			buf_DiskType;		// Current disk type
 
-	ULONG			pad3[8];
+	ULONG			buf_VolNameLength;	// Name length for current disk
+
 
 	char			buf_CustomHeader[80];	// Custom header
 
@@ -230,7 +237,8 @@ typedef struct DirectoryBuffer
 
 	ULONG			buf_CustomWidthFlags;
 
-	ULONG			pad4[7];
+
+	BPTR			buf_Lock;		// Lock on the dir this buffer represents
 } DirBuffer;
 
 // DirList flags
@@ -264,6 +272,10 @@ typedef struct DirectoryBuffer
 #define CUSTF_INHERIT		(1<<7)	// Support inherit
 #define CUSTF_LEAVEGAUGE	(1<<8)	// Leave fuel gauge alone
 #define CUSTF_SYNCTRAPS		(1<<9)	// Synchronous trap messages
+#define CUSTF_NO_EXT_APPMSG	(1<<10)	// Only supports drag'n'drop form lister or desktop-folder
+
+#define CUSTH_TYPE_GFMMODULE	MAKE_ID('g', 'f', 'm', '_')
+
 
 struct title_entry
 {
@@ -273,46 +285,5 @@ struct title_entry
 	NetworkInfo		network;
 	VersionInfo		version;
 };
-
-// Prototypes
-// dirlist_read.c
-void read_directory(Lister *,char *,int);
-Lister *read_new_lister(char *path,Lister *parent,UWORD qual);
-void removefile(DirBuffer *,DirEntry *);
-
-// dirlist_scroll.c
-void lister_update_slider(Lister *,int);
-lister_pos_slider(Lister *,short);
-void lister_scroll(Lister *,int,int);
-void lister_show_selected(Lister *,int);
-void lister_show_char(Lister *,char *);
-void lister_show_entry(Lister *,DirEntry *);
-BOOL lister_fix_horiz_len(Lister *lister);
-void lister_calc_fieldwidth(Lister *lister,DirEntry *entry);
-void lister_set_fieldwidth(Lister *lister,short which,char *string);
-
-// dirlist_util.c
-DirEntry *get_entry(struct MinList *list,BOOL selected,short type);
-DirEntry *checktot(DirBuffer *);
-DirEntry *checkdirtot(DirBuffer *);
-DirEntry *checkdevtot(DirBuffer *);
-DirEntry *checkalltot(DirBuffer *);
-DirEntry *find_entry(struct MinList *,char *,long *,short);
-DirEntry *get_entry_ord(struct MinList *,long);
-BOOL list_is_custom(DirBuffer *);
-void setdirsize(DirEntry *,unsigned long,Lister *);
-void do_parent_root(Lister *,char *);
-void lister_sel_show(Lister *lister,char *name);
-
-unsigned short scroller_top(
-	unsigned short pot,
-	unsigned short total,
-	unsigned short visible);
-
-long find_entry_offset(struct MinList *list,DirEntry *find);
-
-void lister_check_max_length(Lister *,char *,short *,short);
-void lister_check_max_length_tabs(Lister *,char *,short *,short);
-short lister_get_length(Lister *lister,char *string);
 
 #endif

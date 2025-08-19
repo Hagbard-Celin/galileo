@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,12 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
+#include "function_protos.h"
+#include "rexx_protos.h"
+#include "filetypes_protos.h"
+#include "handler.h"
+#include "lsprintf_protos.h"
 
 enum
 {
@@ -57,7 +64,7 @@ GALILEOFM_FUNC(function_user)
 	PathNode *source;
 	FunctionEntry *entry;
 	short action;
-	char *cmd_ptr=0,cmd_buf[10],*dest_path=0;
+	char *cmd_ptr,cmd_buf[10],*dest_path=0;
 	Lister *dest_lister=0,*source_lister=0;
 	UWORD qual=0;
 
@@ -184,9 +191,18 @@ GALILEOFM_FUNC(function_user)
 	// Go through entries
 	while (entry=function_get_entry(handle))
 	{
+		BPTR parent_lock = 0;
+
 		// Custom handler assigned?
 		if (source_lister && source_lister->cur_buffer->buf_CustomHandler[0])
 		{
+		    if (*(ULONG *)source_lister->cur_buffer->buf_CustomHandler == CUSTH_TYPE_GFMMODULE)
+			galileo_handler_msg(0, "doubleclick",
+					    entry->fe_entry, source_lister,
+					    dest_lister, 0, 0, 0,
+					    0,
+					    qual, 0);
+		    else
 			// Send double-click message
 			rexx_handler_msg(
 				0,
@@ -205,11 +221,14 @@ GALILEOFM_FUNC(function_user)
 			continue;
 		}
 
-		// Build source name
-		function_build_source(handle,entry,handle->func_work_buf);
+		if (entry->fe_lock)
+		    parent_lock = entry->fe_lock;
+		else
+		if (source->pn_lock)
+		    parent_lock = source->pn_lock;
 
 		// Match filetype for this file
-		if (type=filetype_identify(handle->func_work_buf,action,0,0))
+		if (type=filetype_identify(entry->fe_name,parent_lock,action,0,0))
 		{
 			// Get appropriate function
 			if (func=FindFunctionType(&type->function_list,action))
@@ -235,7 +254,7 @@ GALILEOFM_FUNC(function_user)
 				type_function=func;
 
 				// Create a new external entry
-				if (exentry=new_external_entry(handle,handle->func_work_buf))
+				if (exentry=new_external_entry(handle,entry->fe_name, parent_lock))
 				{
 					// Save pointer to lister entry
 					exentry->een_entry=entry->fe_entry;

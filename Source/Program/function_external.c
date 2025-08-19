@@ -36,6 +36,7 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
 
 // Run an external instruction
 function_external_command(
@@ -86,7 +87,18 @@ function_external_command(
 		current_arg=handle->func_current_arg;
 
 		// Get destination path
-		if (path) strcpy(handle->func_dest_path,path->pn_path);
+		if (path)
+		{
+		    char *tmp_path;
+
+		    if (tmp_path = CopyString(handle->memory, path->pn_path))
+		    {
+			if (handle->func_dest_path)
+			    FreeMemH(handle->func_dest_path);
+
+			handle->func_dest_path = tmp_path;
+		    }
+		}
 
 		// Loop until this instruction is finished
 		while (cont==PARSE_MORE_FILES)

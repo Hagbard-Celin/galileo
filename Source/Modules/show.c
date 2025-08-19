@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -49,7 +50,7 @@ int __asm __saveds L_Module_Entry_Internal(
 	register __d1 ULONG mod_data)
 {
 	show_data *data;
-	struct Node *node;
+	Att_LockNode *node;
 	static unsigned short __chip null_pointer[6];
 	short quit_flag=0;
 	char buf[8];
@@ -80,21 +81,26 @@ int __asm __saveds L_Module_Entry_Internal(
 	}
 
 	// Go through files
-	for (node=files->lh_Head;node->ln_Succ;node=node->ln_Succ)
+	for (node=(Att_LockNode *)files->lh_Head;node->node.ln_Succ;node=(Att_LockNode *)node->node.ln_Succ)
 	{
+		BPTR org_dir = 0;
+
 		// Reset quit flag
 		quit_flag=0;
 
+		if (node->att_lock)
+		    org_dir = CurrentDir(node->att_lock);
+
 		// Store file name pointer
-		data->file=node->ln_Name;
+		data->file=node->node.ln_Name;
 		data->pic_ok=0;
 
 		// Try datatypes first?
-		if (dt_first) show_get_dtpic(data,node);
+		if (dt_first) show_get_dtpic(data,(struct Node *)node);
 
 		// If no datatypes picture, try to get ILBM
 		if (!data->pic_ok &&
-			(data->ilbm=ReadILBM(node->ln_Name,ILBMF_GET_BODY)))
+			(data->ilbm=ReadILBM(node->node.ln_Name,ILBMF_GET_BODY)))
 		{
 			BOOL ok=1;
 
@@ -142,9 +148,15 @@ int __asm __saveds L_Module_Entry_Internal(
 			}
 		}
 
+		if (org_dir)
+		{
+		    UnLock(CurrentDir(org_dir));
+		    node->att_lock = 0;
+		}
+
 		// No picture yet? Try datatypes if we haven't already
 		if (!data->pic_ok && !dt_first)
-			show_get_dtpic(data,node);
+			show_get_dtpic(data,(struct Node *)node);
 
 		// Got a picture?
 		if (data->pic_ok)
@@ -500,12 +512,12 @@ int __asm __saveds L_Module_Entry_Internal(
 								// Delete will mark for deletion
 								case 0x7f:
 									quit_flag=1;
-									node->lve_Flags|=SHOWF_DELETE;
+									node->node.lve_Flags|=SHOWF_DELETE;
 									break;
 
 								// Quit
 								case 'q':
-									node->lve_Flags|=SHOWF_SELECTED;
+									node->node.lve_Flags|=SHOWF_SELECTED;
 									quit_flag=1;
 									break;
 
@@ -577,7 +589,7 @@ int __asm __saveds L_Module_Entry_Internal(
 							else
 							if (msg_copy.Code==MIDDLEDOWN)
 							{
-								node->lve_Flags|=SHOWF_SELECTED;
+								node->node.lve_Flags|=SHOWF_SELECTED;
 								quit_flag=1;
 							}
 							break;

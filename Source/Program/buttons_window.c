@@ -31,11 +31,15 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "buttons_protos.h"
+#include "graphics.h"
+#include "scripts.h"
+#include "backdrop.h"
 
 // Open a button bank display
 BOOL buttons_open(Buttons *buttons,struct Screen *screen,short flags)

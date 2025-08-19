@@ -151,7 +151,7 @@ void __asm __saveds L_UpdateGadgetValue(
 	register __a0 ObjectList *list,
 	register __a1 struct IntuiMessage *msg,
 	register __d0 UWORD id,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
 	GL_Object *object;
 	struct Gadget *gadget;
@@ -285,7 +285,7 @@ void __asm __saveds L_UpdateGadgetValue(
 					if (AslRequestTags(((WindowData *)list->window->UserData)->request,
 						ASLFR_Window,list->window,
 						ASLFR_TitleText,
-							L_GetString(&((struct LibData *)libbase->ml_UserData)->locale,
+							L_GetString(&gfmlib_data.locale,
 								(object->object_kind!=DIR_GLASS_KIND && object->object_kind!=DIR_BUTTON_KIND)?
 									MSG_SELECT_FILE:MSG_SELECT_DIRECTORY),
 						ASLFR_InitialFile,(ULONG)file,
@@ -358,9 +358,9 @@ void __asm __saveds L_UpdateGadgetValue(
 					}
 
 					// Fill out mode list array
-					mode_list[0]=L_GetString(&((struct LibData *)libbase->ml_UserData)->locale,MSG_FONT_DRAWMODE);
-					mode_list[1]=L_GetString(&((struct LibData *)libbase->ml_UserData)->locale,MSG_FONT_TEXT);
-					mode_list[2]=L_GetString(&((struct LibData *)libbase->ml_UserData)->locale,MSG_FONT_FIELD_TEXT);
+					mode_list[0]=L_GetString(&gfmlib_data.locale,MSG_FONT_DRAWMODE);
+					mode_list[1]=L_GetString(&gfmlib_data.locale,MSG_FONT_TEXT);
+					mode_list[2]=L_GetString(&gfmlib_data.locale,MSG_FONT_FIELD_TEXT);
 					mode_list[3]=0;
 
 					// Empty font name?
@@ -397,7 +397,7 @@ void __asm __saveds L_UpdateGadgetValue(
 					if (AslRequestTags(data->font_request,
 						ASLFO_Window,list->window,
 						ASLFO_TitleText,
-							L_GetString(&((struct LibData *)libbase->ml_UserData)->locale,MSG_SELECT_FONT),
+							L_GetString(&gfmlib_data.locale,MSG_SELECT_FONT),
 						ASLFO_InitialName,(ULONG)path,
 						ASLFO_InitialSize,size,
 						ASLFO_SleepWindow,TRUE,
@@ -756,7 +756,7 @@ void __asm __saveds L_SetGadgetValue(
 long __asm __saveds L_GetGadgetValue(
 	register __a0 ObjectList *list,
 	register __a1 UWORD id,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
 	GL_Object *object;
 
@@ -769,7 +769,7 @@ long __asm __saveds L_GetGadgetValue(
 		// No string?
 		if (!object->gl_info.gl_gadget.data)
 		{
-			return (long)((struct LibData *)libbase->ml_UserData)->null_string;
+			return (long)gfmlib_data.null_string;
 		}
 
 		// Secure string?

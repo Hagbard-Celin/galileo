@@ -36,6 +36,11 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lsprintf_protos.h"
+#include "misc_protos.h"
+#include "requesters.h"
+#include "backdrop_protos.h"
+#include "icons.h"
 
 void desktop_delete(IPCData *ipc,BackdropInfo *info,BackdropObject *only_one)
 {

@@ -36,6 +36,7 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "menu_data.h"
 
 MenuData
 	galileo_menus[]={

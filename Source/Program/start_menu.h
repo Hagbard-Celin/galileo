@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,16 +32,20 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
+
+#ifndef _GALILEOFM_STARTMENU_H
+#define _GALILEOFM_STARTMENU_H
 
 #define STARTMENUF_POPPED	(1<<0)
 
 typedef struct _StartMenu
 {
 	CFG_STRT		data;
-	char			buttons[256];
+	char			*buttons;
+	BPTR			buttons_parent_lock;
 	short			x;
 	short			y;
 
@@ -82,26 +87,4 @@ typedef struct _StartMenu
 	short			last_id;
 } StartMenu;
 
-
-IPCData *start_new(char *,char *,char *,short,short);
-void __saveds start_proc(void);
-ULONG __asm __saveds start_init(
-	register __a0 IPCData *,
-	register __a1 StartMenu *);
-void start_cleanup(StartMenu *);
-void start_show(StartMenu *,struct Screen *);
-void start_hide(StartMenu *);
-BOOL start_popup(StartMenu *);
-void start_draw_button(StartMenu *,short,short);
-void start_toggle_drag(StartMenu *,short);
-void start_toggle_border(StartMenu *);
-void start_fix_button(StartMenu *);
-BOOL start_edit(StartMenu *);
-BOOL start_save(StartMenu *);
-void start_change_image(StartMenu *);
-void start_change_label(StartMenu *);
-void start_create_new(BOOL);
-void start_add_item(StartMenu *,char *);
-void start_remap_bank(StartMenu *,struct List *,BOOL);
-void start_change_font(StartMenu *,short);
-void start_change_picture(StartMenu *);
+#endif

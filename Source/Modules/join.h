@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -111,6 +112,7 @@ typedef struct
 	char			source[256];
 	char			dest[256];
 
+	PathNode		*source_path;
 	PathNode		*dest_path;
 
 	struct timerequest	timer_req;
@@ -127,17 +129,17 @@ typedef struct
 BOOL join_open(join_data *);
 void join_close(join_data *);
 void join_free(join_data *);
-void join_add_file(join_data *,char *,short);
+void join_add_file(join_data *,char *,BPTR,WORD);
 void join_do_gadgets(join_data *,short);
 void join_remove(join_data *);
 void join_clear(join_data *);
-void join_move(join_data *,short);
+void join_move(join_data *,WORD);
 void join_add(join_data *);
 short join_check_filename(join_data *);
 BOOL join_do_join(join_data *);
 BOOL join_join_files(join_data *);
 short join_show_error(join_data *,short,char *,BOOL);
-void split_do_gadgets(join_data *data,Att_Node *node);
+void split_do_gadgets(join_data *data,Att_LockNode *node);
 short split_do_split(join_data *data);
 short split_split_file(join_data *data);
 

@@ -13,10 +13,10 @@ void main(int argc,char **argv)
 	font_data *data;
 
 #ifdef RESOURCE_TRACKING
-   callerid=(ULONG)&main;
+	callerid=(ULONG)&main;
 
-   if (ResTrackBase=REALL_OpenLibrary("g_restrack.library",0))
-        StartResourceTracking (RTL_ALL);
+	if (ResTrackBase=REALL_OpenLibrary("g_restrack.library",0))
+	     StartResourceTracking (RTL_ALL);
 #endif
 
 	// Need galileo library
@@ -440,7 +440,7 @@ void font_free(font_data *data)
 		if (data->font) CloseFont(data->font);
 
 		// Free port
-        while (msg=GetMsg(data->appport))
+		while (msg=GetMsg(data->appport))
 			ReplyFreeMsg(msg);
 		DeleteMsgPort(data->appport);
 
@@ -451,7 +451,7 @@ void font_free(font_data *data)
 			CloseCatalog(data->locale.li_Catalog);
 		}
 
-        // Change PROGDIR: back and unlock Galileo:
+		// Change PROGDIR: back and unlock Galileo:
 		if (data->lock)
 			UnLock(SetProgramDir(data->lock));
 
@@ -469,7 +469,11 @@ void font_free(font_data *data)
 	CloseLibrary(GalileoFMBase);
 
 #ifdef RESOURCE_TRACKING
-    REALL_CloseLibrary(ResTrackBase);
+	ResourceTrackingEndOfTask();
+#endif
+
+#ifdef RESOURCE_TRACKING
+	REALL_CloseLibrary(ResTrackBase);
 #endif
 }
 

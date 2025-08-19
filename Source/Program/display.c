@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2023, 2024 Hagbard Celine
+Copyright 2023-2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -37,6 +37,16 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "misc_protos.h"
+#include "rexx_protos.h"
+#include "requesters.h"
+#include "backdrop_protos.h"
+#include "palette_routines.h"
+#include "graphics.h"
+#include "clock_task.h"
+#include "scripts.h"
+#include "menu_data.h"
 
 #define ExecLib		((struct ExecBase *)*((ULONG *)4))
 
@@ -432,6 +442,9 @@ BOOL display_open(long flags)
 			// Turn on appicon notification
 			SetNotifyRequest(GUI->notify_req,GN_APP_ICON_LIST,GN_APP_ICON_LIST);
 
+			// Get lock on desktop directory
+			GUI->desktop_dir_lock = Lock(environment->env->desktop_location,ACCESS_READ);
+
 			// Initialise backdrop
 			backdrop_init_info(GUI->backdrop,GUI->window,0);
 
@@ -490,7 +503,7 @@ BOOL display_open(long flags)
 			NAME_CLOCK,
 			(ULONG)clock_proc,
 			STACK_DEFAULT,
-			0,(struct Library *)DOSBase);
+			0);
 	}
 
 	// Remap lister and button icons
@@ -637,6 +650,13 @@ void close_display(int close_flags,BOOL quit_all)
 
 			// Free backdrop stuff
 			backdrop_free_info(GUI->backdrop);
+
+			// Unlock desktop folder
+			if (GUI->desktop_dir_lock)
+			{
+			    UnLock(GUI->desktop_dir_lock);
+			    GUI->desktop_dir_lock = 0;
+			}
 		}
 
 		// Unlock backdrop window pointer
@@ -981,7 +1001,7 @@ void hide_display(void)
 					NAME_HIDDEN_CLOCK,
 					(ULONG)clock_proc,
 					STACK_DEFAULT,
-					0,(struct Library *)DOSBase)))
+					0)))
 				{
 					// Tell it to show itself
 					IPC_Command(ipc,IPC_SHOW,1,0,0,0);

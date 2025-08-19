@@ -267,24 +267,20 @@ void __asm __saveds L_DateToStrings(register __a0 struct DateStamp *date,
 				    register __a1 char *date_buf,
 				    register __a2 char *time_buf,
 				    register __d0 int flags,
- 				    register __a6 struct MyLibrary *libbase)
+ 				    register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
 	struct DateTime datetime;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
 
 	// Initialise DateTime structure
 	datetime.dat_Stamp=*date;
-	datetime.dat_Format=data->date_format;
+	datetime.dat_Format=gfmlib_data.date_format;
 	datetime.dat_Flags=0;
 	datetime.dat_StrDay=0;
 	datetime.dat_StrDate=date_buf;
 	datetime.dat_StrTime=0;
 
 	// Sub-strings ok?
-	if (flags==-1 || (flags==1 && data->locale_flags&DATE_SUBST))
+	if (flags==-1 || (flags==1 && gfmlib_data.locale_flags&DATE_SUBST))
 		datetime.dat_Flags|=DTF_SUBST;
 
 	// Convert date to a string
@@ -294,7 +290,7 @@ void __asm __saveds L_DateToStrings(register __a0 struct DateStamp *date,
 	if (!time_buf) return;
 
 	// Build time string. 12 hour clock?
-	if (flags>0 && data->locale_flags&DATE_12HOUR)
+	if (flags>0 && gfmlib_data.locale_flags&DATE_12HOUR)
 	{
 		int hours;
 		char ampm='a';
@@ -327,34 +323,23 @@ void __asm __saveds L_DateToStrings(register __a0 struct DateStamp *date,
 
 
 // Get locale flags from the library
-UWORD __asm __saveds L_GetLocaleSettings(register __d0 UBYTE type, register __a6 struct MyLibrary *libbase)
+UWORD __asm __saveds L_GetLocaleSettings(register __d0 UBYTE type, register __a6 struct Library *GalileoFMBase)
 {
-    struct LibData *data;
-
-    // Get data pointer
-    data=(struct LibData *)libbase->ml_UserData;
-
-    // Gat flags or dateformat
+    // Get flags or dateformat
     if (!type)
-	return data->locale_flags;
+	return gfmlib_data.locale_flags;
     else
-	return data->date_format;
+	return gfmlib_data.date_format;
 }
 
 
 // Set locale flags in the library
 void __asm __saveds L_SetLocaleFlags(register __d0 UWORD flags,
 				     register __d1 UWORD dateformat,
-				     register __a6 struct MyLibrary *libbase)
+				     register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// Set flags and dateformat
-	data->date_format = dateformat;
-	data->locale_flags = flags;
+	gfmlib_data.date_format = dateformat;
+	gfmlib_data.locale_flags = flags;
 }
-
 

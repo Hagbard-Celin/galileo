@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,10 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
+#include "misc_protos.h"
+#include "function_data.h"
+#include "lsprintf_protos.h"
 
 // Open script file
 function_open_script(FunctionHandle *handle)
@@ -69,32 +74,6 @@ function_open_script(FunctionHandle *handle)
 	// Make sure script bit is set
 	SetProtection(handle->script_name,FIBF_SCRIPT);
 
-	// CD source?
-	if (handle->func_parameters.flags&FUNCF_CD_SOURCE)
-		strcpy(handle->temp_buffer+4,handle->func_source_path);
-
-	// CD destination?
-	else
-	if (handle->func_parameters.flags&FUNCF_CD_DESTINATION)
-		strcpy(handle->temp_buffer+4,handle->func_dest_path);
-
-	// No CD
-	else handle->temp_buffer[4]=0;
-
-	// Directory to CD to?
-	if (handle->temp_buffer[4])
-	{
-		// Fill out command
-		handle->temp_buffer[0]='c';
-		handle->temp_buffer[1]='d';
-		handle->temp_buffer[2]=' ';
-		handle->temp_buffer[3]='\"';
-		strcat(handle->temp_buffer,"\"");
-
-		// Write command
-		function_write_script(handle,handle->temp_buffer,INST_AMIGADOS);
-	}
-
 	// Write stack line
 	lsprintf(handle->temp_buffer,"stack %ld",environment->env->default_stack);
 	function_write_script(handle,handle->temp_buffer,INST_AMIGADOS);
@@ -104,11 +83,11 @@ function_open_script(FunctionHandle *handle)
 
 static char
 	*script_type_intro[]={
-		0,				// INST_COMMAND
-		0,				// INST_AMIGADOS
-		"galileort ", 	// INST_WORKBENCH
-		"execute ",		// INST_SCRIPT
-		"rx ",			// INST_AREXX
+		0,		    // INST_COMMAND
+		0,		    // INST_AMIGADOS
+		"galileort ",	    // INST_WORKBENCH
+		"execute ",	    // INST_SCRIPT
+		"rx ",		    // INST_AREXX
 	};
 
 // Write a line to the script file
@@ -182,6 +161,7 @@ void function_close_script(
 		// Run function?
 		if (run_okay)
 		{
+			BPTR script_currentdir = 0;
 			short need_window=0;
 
 			// Open an output file?
@@ -257,14 +237,23 @@ void function_close_script(
 			// Otherwise, run with output and nil: input
 			else input=Open("nil:",MODE_OLDFILE);
 
+			// CD source?
+			if (handle->func_parameters.flags&FUNCF_CD_SOURCE)
+			    script_currentdir = DupLock(handle->func_source_lock);
+
+			// CD destination?
+			else
+			if (handle->func_parameters.flags&FUNCF_CD_DESTINATION)
+			    script_currentdir = DupLock(handle->func_dest_lock);
+
 			// Launch script
 			if (CLI_Launch(
 				handle->temp_buffer,
 				(struct Screen *)-1,
-				0,
+				script_currentdir,
 				input,output,
 				(!(handle->func_parameters.flags&FUNCF_RUN_ASYNC))|LAUNCHF_USE_STACK,
-				environment->env->default_stack))
+				environment->env->default_stack, NULL))
 			{
 				// Not run async?
 				if (!(handle->func_parameters.flags&FUNCF_RUN_ASYNC))

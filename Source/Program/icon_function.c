@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,12 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "dirlist_protos.h"
+#include "misc_protos.h"
+#include "function_launch_protos.h"
+#include "app_msg_protos.h"
+#include "buffers_protos.h"
+#include "backdrop.h"
 
 // Run a function on some icons
 void icon_function(BackdropInfo *info,BackdropObject *only_one,char *data,Cfg_Function *func,ULONG flags)
@@ -45,6 +52,7 @@ void icon_function(BackdropInfo *info,BackdropObject *only_one,char *data,Cfg_Fu
 	BackdropObject *object;
 	DirBuffer *buffer=0;
 	char *source_path=0;
+	BPTR source_lock;
 
 	// Lock backdrop list
 	lock_listlock(&info->objects,1);
@@ -90,19 +98,21 @@ void icon_function(BackdropInfo *info,BackdropObject *only_one,char *data,Cfg_Fu
 	{
 		// Lock buffer
 		buffer_lock((buffer=info->lister->cur_buffer),FALSE);
+
+		source_lock = info->lister->cur_buffer->buf_Lock;
 	}
 
 	// Source path from icon?
 	else
-	if (only_one && only_one->bdo_path &&
-		(source_path=AllocVec(strlen(only_one->bdo_path)+1,0)))
-		strcpy(source_path,only_one->bdo_path);
-
-	// Otherwise, assume this is the desktop folder
+	if (info->flags&BDIF_MAIN_DESKTOP)
+	{
+		// Get desktop directory lock
+		source_lock = GUI->desktop_dir_lock;
+	}
 	else
-	if (info->flags&BDIF_MAIN_DESKTOP &&
-		(source_path=AllocVec(strlen(environment->env->desktop_location)+1,0)))
-		strcpy(source_path,environment->env->desktop_location);
+	{
+	    return;
+	}
 
 	// Go through backdrop list again
 	for (object=(BackdropObject *)info->objects.list.lh_Head;
@@ -170,9 +180,6 @@ void icon_function(BackdropInfo *info,BackdropObject *only_one,char *data,Cfg_Fu
 					if (object->bdo_flags&BDOF_LINK_ICON) link=1;
 				}
 
-				// Tack on a / for directories
-				if (dir) strcat(name,"/");
-
 				// Allocate array entry
 				if (aae=NewArgArrayEntry(array,name))
 				{
@@ -205,7 +212,8 @@ void icon_function(BackdropInfo *info,BackdropObject *only_one,char *data,Cfg_Fu
 		0,
 		flags,
 		info->lister,0,
-		(info->lister)?info->lister->cur_buffer->buf_Path:source_path,data,
+		0,data,
+		source_lock,0,
 		array,
 		0,0);
 

@@ -200,8 +200,7 @@ void config_menus_edit_item(config_menus_data *data,short type)
 				"galileo_function_editor",
 				(ULONG)FunctionEditor,
 				STACK_DEFAULT,
-				(ULONG)startup,
-				(struct Library *)DOSBase)) && look->ipc)
+				(ULONG)startup)) && look->ipc)
 			{
 				// Add to edit list
 				AddTail(&data->edit_list,(struct Node *)look);
@@ -252,7 +251,7 @@ void config_menus_receive_edit(config_menus_data *data,FunctionReturn *ret)
 					// Free old function
 					FreeInstructionList((Cfg_Function *)func);
 
-                    // Plug memory leak
+					// Plug memory leak
 					// Copy new function in
 					CopyFunction(ret->function,data->bank->memory,(Cfg_Function *)func);
 

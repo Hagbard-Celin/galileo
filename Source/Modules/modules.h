@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -71,6 +72,8 @@ typedef struct
 #define FUNCF_NO_BUSY			(1<<21)	// Don't send lister busy
 #define FUNCF_SYNC				(1<<24)	// Function wants to be synchronous
 
+#define ENTRYF_RECURSE_DIRS		(1<<0)
+
 typedef struct
 {
 	ULONG		ver;		// Module version
@@ -100,10 +103,10 @@ struct GalileoScreenData
 	short			pen_count;
 };	
 
-#define EXT_FUNC(name)	unsigned long __asm (*name)(register __d0 ULONG,register __a0 APTR,register __a1 APTR)
+#define EXT_FUNC(name)	unsigned long (* __asm name)(register __d0 ULONG,register __a0 APTR,register __a1 APTR)
 #define TYPE_EXT(var)	(unsigned long (*)())var
 
-#define IDCMP_FUNC(name)	unsigned long __asm (*name)(register __d0 ULONG,register __a0 struct IntuiMessage *)
+#define IDCMP_FUNC(name)	unsigned long (* __asm name)(register __d0 ULONG,register __a0 struct IntuiMessage *)
 
 #define SHOWF_SELECTED	(1<<0)
 #define SHOWF_DELETE	(1<<1)
@@ -144,6 +147,23 @@ struct GalileoCommandList
 	char		*gcl_Module;
 	char		*gcl_Help;
 };
+
+#define GCNLF_ICONIFIED		  (1<<0)	  // Lister opens iconified
+#define GCNLF_DEVICE_LIST	  (1<<1)	  // Lister shows device list
+#define GCNLF_NO_POSITION	  (1<<2)	  // No position set
+#define GCNLF_LOCK_POS		  (1<<3)	  // Position is locked
+#define GCNLF_SOURCE		  (1<<4)	  // Lister starts as a source
+#define GCNLF_DEST			  (1<<5)	  // Starts as destination
+#define GCNLF_LOCKED		  (1<<6)	  // Source/dest locked
+#define GCNLF_ICON			  (1<<7)	  // View as icons
+#define GCNLF_SHOW_ALL		  (1<<8)	  // Show all
+#define GCNLF_CACHE_LIST	  (1<<9)	  // Cache list
+#define GCNLF_ICON_ACTION	  (1<<10)	  // Icon action
+#define GCNLF_DEV_FULL		  (1<<11)	  // Full device list
+#define GCNLF_DEV_BRIEF		  (1<<12)	  // Brief device list
+#define GCNLF_INVISIBLE		  (1<<13)	  // Opens invisible
+#define GCNLF_NOACTIVE		  (1<<14)	  // No activate
+#define GCNLF_FROMICON        (1<<31)
 
 #endif
 

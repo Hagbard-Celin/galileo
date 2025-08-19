@@ -31,11 +31,14 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "commands.h"
+#include "rexx_protos.h"
 
 // Add a function trap
 short AddFunctionTrap(char *command,char *handler,char *port)

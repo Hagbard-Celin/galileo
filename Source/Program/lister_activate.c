@@ -31,11 +31,13 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "misc_protos.h"
 
 // Get the current source lister
 Lister *lister_source(void)
@@ -73,7 +75,7 @@ Lister *lister_default(ULONG flags,BOOL valid)
 		{
 			// Does lister need to be valid?
 			if (!valid ||
-				lister->cur_buffer->buf_Path[0] ||
+				(lister->cur_buffer->buf_Path && lister->cur_buffer->buf_Path[0]) ||
 				lister->cur_buffer->buf_CustomHandler[0])
 			{
 				// Is this the first lister we find?

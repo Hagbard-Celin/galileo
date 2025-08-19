@@ -47,14 +47,13 @@ For more information on Directory Opus for Windows please see:
 
 struct Window *__asm __saveds L_OpenConfigWindow(
 	register __a0 NewConfigWindow *newwindow,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
 	struct IBox dims;
 	struct Window *parent_window=0,*window;
 	struct TextFont *font;
 	struct Screen *screen;
 	WindowData *data;
-	struct LibData *ldata;
 	ULONG flags;
 	APTR memory;
 	struct Gadget *gadget=0;
@@ -83,11 +82,8 @@ struct Window *__asm __saveds L_OpenConfigWindow(
 	// Get font to use
 	font=(newwindow->font)?newwindow->font:screen->RastPort.Font;
 
-	// Get lib data
-	ldata=(struct LibData *)libbase->ml_UserData;
-
 	// No stipple?
-	if (ldata->flags&LIBDF_NOSTIPPLE)
+	if (gfmlib_data.flags&LIBDF_NOSTIPPLE)
 		flags&=~WINDOW_REQ_FILL;
 
 	// Calculate window dimensions
@@ -182,11 +178,11 @@ struct Window *__asm __saveds L_OpenConfigWindow(
 				0,
 				IM_ICONIFY,
 				GAD_ID_ICONIFY,
-				libbase);
+				GalileoFMBase);
 	}
 
 	// Get backfill hook
-	if (data->backfill=L_LockReqBackFill(screen,libbase))
+	if (data->backfill=L_LockReqBackFill(screen,GalileoFMBase))
 	{
 		// Don't need to stipple?
 		if (((PatternInstance *)data->backfill)->pattern &&
@@ -228,7 +224,7 @@ struct Window *__asm __saveds L_OpenConfigWindow(
 	{
 		// Release backfill hook
 		if (data->backfill)
-			L_UnlockReqBackFill(libbase);
+			L_UnlockReqBackFill(GalileoFMBase);
 
 		// Free draw info
 		FreeScreenDrawInfo(screen,data->drawinfo);
@@ -880,7 +876,7 @@ __asm __saveds L_CalcWindowDims(
 ObjectList *__asm __saveds L_AddObjectList(
 	register __a0 struct Window *window,
 	register __a1 ObjectDef *objects,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
 	ObjectList *list;
 	GL_Object *new_object=0,*last_object=0;
@@ -890,14 +886,12 @@ ObjectList *__asm __saveds L_AddObjectList(
 	WindowData *data;
 	APTR visinfo;
 	short num;
-	struct LibData *ldata;
 
 	// Check valid window and object list
 	if (!window || !objects) return 0;
 
 	// Get data and visual info
 	data=(WindowData *)window->UserData;
-	ldata=(struct LibData *)libbase->ml_UserData;
 	visinfo=data->visinfo;
 
 	// Allocate ObjectList
@@ -1275,7 +1269,7 @@ ObjectList *__asm __saveds L_AddObjectList(
 
 								// Thin borders?
 								if (GetTagData(GLV_ThinBorder,0,taglist) ||
-									ldata->flags&LIBDF_THIN_BORDERS) thin=1;
+									gfmlib_data.flags&LIBDF_THIN_BORDERS) thin=1;
 
 								new_object->gl_info.gl_gadget.gadget=
 									NewObject(
@@ -1293,7 +1287,7 @@ ObjectList *__asm __saveds L_AddObjectList(
 										GLV_ThinBorder,thin,
 										GLV_CompoundGadget,clist?&clist->objects:0,
 										GLV_CompoundObject,clist?cgadget:0,
-										GLV_CompoundCx,clist?ldata->cx_select_up_down:0,
+										GLV_CompoundCx,clist?gfmlib_data.cx_select_up_down:0,
 										ICA_TARGET,ICTARGET_IDCMP,
 										TAG_MORE,(ULONG)taglist);
 							}
@@ -1309,7 +1303,7 @@ ObjectList *__asm __saveds L_AddObjectList(
 								// Thin borders?
 								if (objects[num].flags&BUTTONFLAG_THIN_BORDERS ||
 									GetTagData(GTCustom_ThinBorders,0,taglist) ||
-									ldata->flags&LIBDF_THIN_BORDERS) thin=1;
+									gfmlib_data.flags&LIBDF_THIN_BORDERS) thin=1;
 
 								new_object->gl_info.gl_gadget.gadget=
 									NewObject(
@@ -1344,7 +1338,7 @@ ObjectList *__asm __saveds L_AddObjectList(
 
 								// Thin borders?
 								if (GetTagData(GTCustom_ThinBorders,0,taglist) ||
-									ldata->flags&LIBDF_THIN_BORDERS) thin=1;
+									gfmlib_data.flags&LIBDF_THIN_BORDERS) thin=1;
 
 								// Create gadget
 								new_object->gl_info.gl_gadget.gadget=
@@ -1377,7 +1371,7 @@ ObjectList *__asm __saveds L_AddObjectList(
 								// Thin borders?
 								if (objects[num].flags&BUTTONFLAG_THIN_BORDERS ||
 									GetTagData(GTCustom_ThinBorders,0,taglist) ||
-									ldata->flags&LIBDF_THIN_BORDERS) thin=1;
+									gfmlib_data.flags&LIBDF_THIN_BORDERS) thin=1;
 
 								new_object->gl_info.gl_gadget.gadget=
 									NewObject(
@@ -1409,7 +1403,7 @@ ObjectList *__asm __saveds L_AddObjectList(
 								// Thin borders?
 								if (objects[num].flags&BUTTONFLAG_THIN_BORDERS ||
 									GetTagData(GTCustom_ThinBorders,0,taglist) ||
-									ldata->flags&LIBDF_THIN_BORDERS) thin=1;
+									gfmlib_data.flags&LIBDF_THIN_BORDERS) thin=1;
 
 								// Create object
 								new_object->gl_info.gl_gadget.gadget=
@@ -1440,7 +1434,7 @@ ObjectList *__asm __saveds L_AddObjectList(
 								// Thin borders?
 								if (objects[num].flags&BUTTONFLAG_THIN_BORDERS ||
 									GetTagData(GTCustom_ThinBorders,0,taglist) ||
-									ldata->flags&LIBDF_THIN_BORDERS) thin=1;
+									gfmlib_data.flags&LIBDF_THIN_BORDERS) thin=1;
 
 								new_object->gl_info.gl_gadget.gadget=
 									NewObject(
@@ -1474,7 +1468,7 @@ ObjectList *__asm __saveds L_AddObjectList(
 								// Thin borders?
 								if (objects[num].flags&BUTTONFLAG_THIN_BORDERS ||
 									GetTagData(GTCustom_ThinBorders,0,taglist) ||
-									ldata->flags&LIBDF_THIN_BORDERS) thin=1;
+									gfmlib_data.flags&LIBDF_THIN_BORDERS) thin=1;
 
 								new_object->gl_info.gl_gadget.image=
 									NewObject(

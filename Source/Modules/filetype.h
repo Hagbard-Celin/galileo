@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -60,50 +61,53 @@ enum
 
 typedef struct
 {
-    struct Screen	    *screen;
-    IPCData		    *ipc;
-    IPCData		    *main_ipc;
-    CONST GalileoCallbackInfo     *gci;
+    struct Screen		*screen;
+    IPCData			*ipc;
+    IPCData			*main_ipc;
+    CONST GalileoCallbackInfo	*gci;
 
-    NewConfigWindow	    new_win;
-    struct Window	    *window;
+    NewConfigWindow		new_win;
+    struct Window		*window;
 
-    struct MsgPort	    *app_port;
-    struct AppWindow	    *app_window;
+    struct MsgPort		*app_port;
+    struct AppWindow		*app_window;
 
-    ObjectList		    *list;
+    ObjectList			*list;
 
-    struct pointer_packet   pointer_packet;
-    Att_List		    *filetype_cache;
+    struct pointer_packet	pointer_packet;
+    Att_List			*filetype_cache;
 
-    Att_List		    *filetypes_list;
-    Att_List		    *storage_list;
+    Att_List			*filetypes_list;
+    Att_List			*storage_list;
 
-    Att_List		    *listview_list;
+    Att_List			*listview_list;
 
-    char		    current_entry_path[260];
+    char			current_entry_short[31];
+    char			*current_entry;
+    char			*current_entry_path;
+    BPTR			current_entry_parent;
 
-    int			    count_filetypes;
-    int			    best_filetypes;
-    int			    count_storage;
-    int			    best_storage;
+    int				count_filetypes;
+    int				best_filetypes;
+    int				count_storage;
+    int				best_storage;
 
-    Cfg_FiletypeList	    *filetype_list;
-    Cfg_Filetype	    *best_installed_ft;
-    Cfg_Filetype	    *best_stored_ft;
-    Cfg_Filetype	    *edited_filetype;
+    Cfg_FiletypeList		*filetype_list;
+    Cfg_Filetype		*best_installed_ft;
+    Cfg_Filetype		*best_stored_ft;
+    Cfg_Filetype		*edited_filetype;
 
-    IPCData		    *editor_ipc;
-    IPCData		    *creator_ipc;
-    ULONG		    a4;
+    IPCData			*editor_ipc;
+    IPCData			*creator_ipc;
+    ULONG			a4;
 
-    char		    path[256];
+    char			buffer[1024];
 } finder_data;
 
 struct filetype_info
 {
-    char  fti_path[256 + 1];
-    char  fti_filename[30 + 1];		    /* Null terminated. Max 30 chars used for now */
+    char  fti_filename[108];	            /* Null terminated */
+    BPTR  fti_parent_lock;
     LONG  fti_iff_type;			    /* IFF FORM type */
     ULONG fti_datatype_group;		    /* Group that the DataType is in */
     ULONG fti_datatype_ID;		    /* ID for DataType (same as IFF FORM type) */
@@ -134,7 +138,7 @@ typedef struct
 
     Att_List		    *file_list;
 
-    char		    filetype_name[FILETYPE_MAXLEN + 1];
+    char		    filetype_name[FILETYPE_MAXLEN];
 
     int			    caseflag;
 
@@ -153,6 +157,7 @@ typedef struct
 
     struct FileRequester    *filereq;
     char		    req_dir[256 + 1];
+    BPTR		    rec_dir_parent;
 
     IPCData		    *editor_ipc;
     ULONG		    a4;

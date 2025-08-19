@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,59 +32,60 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofmlib.h"
 
+
 // Allocate an AppMessage
-GalileoAppMessage *__asm __saveds L_AllocAppMessage(
+struct AppMessage *__asm __saveds L_AllocAppMessage(
 	register __a0 APTR memory,
 	register __a1 struct MsgPort *reply,
-	register __d0 short num)
+	register __d0 WORD num)
 {
-	GalileoAppMessage *msg;
+	struct AppMessage *msg;
 
 	// Allocate message
 	if (!(msg=L_AllocMemH(memory,
-		sizeof(GalileoAppMessage)+
-			((sizeof(struct WBArg)+sizeof(Point))*num)))) return 0;
+		sizeof(struct AppMessage)+
+			((sizeof(struct WBArg))*num) + 1))) return 0;
 
 	// Set check pointer
-	msg->ga_Msg.am_Reserved[7]=(ULONG)msg;
+	//msg->am_Reserved[7]=(ULONG)msg;
 
 	// Set ArgList pointer
-	if (num>0) msg->ga_Msg.am_ArgList=(struct WBArg *)(msg+1);
-	msg->ga_Msg.am_NumArgs=num;
+	if (num>0) msg->am_ArgList=(struct WBArg *)(msg+1);
+	msg->am_NumArgs=num;
 
 	// Set drop position array pointer
-	if (num>0) msg->ga_DropPos=(Point *)(msg->ga_Msg.am_ArgList+num);
+	//if (num>0) msg->ga_DropPos=(Point *)(msg->am_ArgList+num);
 
 	// Fill out miscellaneous fields
-	msg->ga_Msg.am_Message.mn_ReplyPort=reply;
-	msg->ga_Msg.am_Version=AM_VERSION;
-	CurrentTime(&msg->ga_Msg.am_Seconds,&msg->ga_Msg.am_Micros);
+	msg->am_Message.mn_ReplyPort=reply;
+	msg->am_Version=AM_VERSION;
+	CurrentTime(&msg->am_Seconds,&msg->am_Micros);
 
 	return msg;
 }
 
 // Free an AppMessage
 void __asm __saveds L_FreeAppMessage(
-	register __a0 GalileoAppMessage *msg)
+	register __a0 struct AppMessage *msg)
 {
 	// Valid message?
 	if (msg)
 	{
-		short arg;
+		WORD arg;
 
 		// Free any arguments
-		if (msg->ga_Msg.am_ArgList)
+		if (msg->am_ArgList)
 		{
-			for (arg=0;arg<msg->ga_Msg.am_NumArgs;arg++)
+			for (arg=0;arg<msg->am_NumArgs;arg++)
 			{
-				UnLock(msg->ga_Msg.am_ArgList[arg].wa_Lock);
-				L_FreeMemH(msg->ga_Msg.am_ArgList[arg].wa_Name);
+				UnLock(msg->am_ArgList[arg].wa_Lock);
+				L_FreeMemH(msg->am_ArgList[arg].wa_Name);
 			}
 		}
 
@@ -94,12 +96,12 @@ void __asm __saveds L_FreeAppMessage(
 
 // Reply to an AppMessage
 void __asm __saveds L_ReplyAppMessage(
-	register __a0 GalileoAppMessage *msg)
+	register __a0 struct AppMessage *msg)
 {
 	// Valid message?
 	if (msg)
 	{
-		if (msg->ga_Msg.am_Message.mn_ReplyPort)
+		if (msg->am_Message.mn_ReplyPort)
 		{
 			ReplyMsg((struct Message *)msg);
 		}
@@ -111,59 +113,49 @@ void __asm __saveds L_ReplyAppMessage(
 }
 
 // Check if a message is a galileo one
-BOOL __asm __saveds L_CheckAppMessage(register __a0 GalileoAppMessage *msg)
+BOOL __asm __saveds L_CheckAppMessage(register __a0 struct AppMessage *msg)
 {
 	// Check check pointer
-	return (BOOL)(msg && msg->ga_Msg.am_Reserved[7]==(ULONG)msg);
+	return (BOOL)(msg->am_Type == MTYPE_LISTER_APPWINDOW &&	msg->am_Class == GLAMCLASS_LISTER);
+	//return (BOOL)(msg && msg->ga_Msg.am_Reserved[7]==(ULONG)msg);
 }
 
 
 // Copy a GalileoAppMessage
-GalileoAppMessage *__asm __saveds L_CopyAppMessage(
-	register __a0 GalileoAppMessage *orig,
+struct AppMessage *__asm __saveds L_CopyAppMessage(
+	register __a0 struct AppMessage *orig,
 	register __a1 APTR memory)
 {
-	GalileoAppMessage *msg;
-	short arg;
+	struct AppMessage *msg;
+	WORD arg;
 
 	// Is the original a Galileo message?
-	if (!L_CheckAppMessage(orig)) return 0;
+	//if (!L_CheckAppMessage(orig)) return 0;
 
 	// Allocate new message
-	if (!(msg=L_AllocAppMessage(memory,0,orig->ga_Msg.am_NumArgs))) return 0;
+	if (!(msg=L_AllocAppMessage(memory,0,orig->am_NumArgs))) return 0;
 
 	// Copy AppMessage fields
-	msg->ga_Msg.am_Type=orig->ga_Msg.am_Type;
-	msg->ga_Msg.am_UserData=orig->ga_Msg.am_UserData;
-	msg->ga_Msg.am_ID=orig->ga_Msg.am_ID;
-	msg->ga_Msg.am_Class=orig->ga_Msg.am_Class;
-	msg->ga_Msg.am_MouseX=orig->ga_Msg.am_MouseX;
-	msg->ga_Msg.am_MouseY=orig->ga_Msg.am_MouseY;
-	msg->ga_Msg.am_Seconds=orig->ga_Msg.am_Seconds;
-	msg->ga_Msg.am_Micros=orig->ga_Msg.am_Micros;
+	msg->am_Type=orig->am_Type;
+	msg->am_UserData=orig->am_UserData;
+	msg->am_ID=orig->am_ID;
+	msg->am_Class=orig->am_Class;
+	msg->am_MouseX=orig->am_MouseX;
+	msg->am_MouseY=orig->am_MouseY;
+	msg->am_Seconds=orig->am_Seconds;
+	msg->am_Micros=orig->am_Micros;
 
 	// Copy arguments
-	for (arg=0;arg<orig->ga_Msg.am_NumArgs;arg++)
+	for (arg=0;arg<orig->am_NumArgs;arg++)
 	{
 		// Copy argument
 		L_SetWBArg(
 			msg,
 			arg,
-			orig->ga_Msg.am_ArgList[arg].wa_Lock,
-			orig->ga_Msg.am_ArgList[arg].wa_Name,
+			orig->am_ArgList[arg].wa_Lock,
+			orig->am_ArgList[arg].wa_Name,
 			memory);
 	}
-
-	// Copy Drop-positions
-	if (orig->ga_DropPos)
-		CopyMem(
-			(char *)orig->ga_DropPos,
-			(char *)msg->ga_DropPos,
-			sizeof(Point)*orig->ga_Msg.am_NumArgs);
-
-	// Copy other info
-	msg->ga_DragOffset=orig->ga_DragOffset;
-	msg->ga_Flags=orig->ga_Flags;
 
 	return msg;
 }
@@ -171,24 +163,24 @@ GalileoAppMessage *__asm __saveds L_CopyAppMessage(
 
 // Set a WBArg entry
 BOOL __asm __saveds L_SetWBArg(
-	register __a0 GalileoAppMessage *msg,
-	register __d0 short num,
+	register __a0 struct AppMessage *msg,
+	register __d0 WORD num,
 	register __d1 BPTR lock,
 	register __a1 char *name,
 	register __a2 APTR memory)
 {
 	// Valid message and number?
-	if (!msg || num>msg->ga_Msg.am_NumArgs) return 0;
+	if (!msg || num>msg->am_NumArgs) return 0;
 
 	// Null-name?
 	if (!name) name="";
 
 	// Copy name
-	if (msg->ga_Msg.am_ArgList[num].wa_Name=L_AllocMemH(memory,strlen(name)+1))
-		strcpy(msg->ga_Msg.am_ArgList[num].wa_Name,name);
+	if (msg->am_ArgList[num].wa_Name=L_AllocMemH(memory,strlen(name)+1))
+		strcpy(msg->am_ArgList[num].wa_Name,name);
 
 	// Copy lock
-	if (lock) msg->ga_Msg.am_ArgList[num].wa_Lock=DupLock(lock);
+	if (lock) msg->am_ArgList[num].wa_Lock=DupLock(lock);
 
 	return 1;
 }

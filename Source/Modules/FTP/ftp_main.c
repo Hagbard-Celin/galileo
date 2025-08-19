@@ -177,10 +177,10 @@ return retval;
 //	Get the source lister handle given a function ipc
 //	(Equivalent to ARexx "lister query source")
 //
-ULONG handle_from_function_handle( struct galileoftp_globals *og, APTR function_handle )
+APTR handle_from_function_handle( struct galileoftp_globals *og, APTR function_handle )
 {
 APTR  path_handle;
-ULONG handle = 0;
+APTR handle = 0;
 
 if	(path_handle = og->og_gci->gc_GetSource( function_handle, 0 ))
 	{
@@ -198,7 +198,7 @@ return handle;
 //
 //	Find the ftp node for a handle
 //
-struct ftp_node *find_ftpnode( struct galileoftp_globals *og, ULONG handle )
+struct ftp_node *find_ftpnode( struct galileoftp_globals *og, APTR handle )
 {
 struct ftp_node *n;
 
@@ -236,7 +236,7 @@ if	(data = AllocVec( sizeof(struct subproc_data), MEMF_CLEAR ))
 	data->spd_a4 = getreg(REG_A4);
 
 	// Listers now have 8k stack * stack_multiplier for recursive safety
-	if	(!IPC_Launch( tasklist, &ipcd, name, (ULONG)proc_code, stack, (ULONG)data, (struct Library *)DOSBase ))
+	if	(!IPC_Launch( tasklist, &ipcd, name, (ULONG)proc_code, stack, (ULONG)data ))
 		ipcd = NULL;
 	}
 
@@ -722,7 +722,7 @@ if	(msg = (IPCMessage *)GetMsg( med->med_ipc->command_port ))
 			if	(med->med_status == STATE_RUNNING)
 				{
 				struct ftp_msg *fm;
-				ULONG           handle;
+				APTR	       handle;
 
 				if	(fm = (struct ftp_msg *)msg->data)
 					{
@@ -817,7 +817,7 @@ struct xfer_msg *xm;
 
 //kprintf( "galileo_dnd_remote()\n" );
 
-if	(argc >= 4 && (srcnode = find_ftpnode( og, atoi(argv[1]) )) && (dstnode = find_ftpnode( og, atoi(argv[3]) )))
+if	(argc >= 4 && (srcnode = find_ftpnode( og, (APTR)atoi(argv[1]) )) && (dstnode = find_ftpnode( og, (APTR)atoi(argv[3]) )))
 	{
 	// We are usually called from the "dropfrom" command
 	// In case this changes, swap the source and destination for the "drop" command
@@ -857,7 +857,7 @@ __aligned struct FileInfoBlock fib;
 BPTR                           lock;
 BOOL                           result = 0;
 
-if	(lock  = Lock( name, ACCESS_READ ))
+if	(lock  = LockFromPath( name, NULL, NULL ))
 	{
 	if	(Examine( lock, &fib ))
 		{
@@ -917,7 +917,7 @@ int              retval = 0;
 
 //kprintf( "galileo_active(%s)\n", argv[3] );
 
-if	(argc < 5 || !(node = find_ftpnode( og, atoi(argv[1]) )))
+if	(argc < 5 || !(node = find_ftpnode( og, (APTR)atoi(argv[1]) )))
 	return 0;
 
 // Redisplay the list if not same path
@@ -956,7 +956,7 @@ struct ftp_node		*node;
 struct ftp_msg		*fm;
 int			 retval = 0;
 
-if	(argc >= 7 && (node = find_ftpnode( og, atoi(argv[1]) )))
+if	(argc >= 7 && (node = find_ftpnode( og, (APTR)atoi(argv[1]) )))
 	{
 	if	(fm = AllocVec( sizeof(struct ftp_msg) + FILENAMELEN + 1, MEMF_CLEAR ))
 		{
@@ -1004,7 +1004,7 @@ static int galileo_drop(
 	char                   **argv )
 {
 struct ftp_node *node;				// Lister receiving drop event
-ULONG            srchandle;			// Source lister's handle if there is one
+APTR		 srchandle;			// Source lister's handle if there is one
 struct xfer_msg *xm;				// Xfer message we will send
 ULONG            flags = XFER_DROP;		// Flags to put in Xfer message
 char             firstname[FILENAMELEN+1];	// First file in message
@@ -1013,11 +1013,11 @@ struct quit_msg *qm;
 int              retval = 0;
 
 // Valid?
-if	(argc < 4 || !(node = find_ftpnode( og, atoi(argv[1]) )))
+if	(argc < 4 || !(node = find_ftpnode( og, (APTR)atoi(argv[1]) )))
 	return 0;
 
 // Source is a lister?
-if	(srchandle = atoi(argv[3]))
+if	(srchandle = (APTR)atoi(argv[3]))
 	{
 	// Ignore Drop if both are FTP listers
 	if	(find_ftpnode( og, srchandle ))
@@ -1252,7 +1252,7 @@ static int galileo_dropfrom(
 	char                   **argv )
 {
 struct ftp_node *node;			// Lister that received 'dropfrom'
-ULONG            desthandle;		// Other lister if there is one
+APTR		 desthandle;		// Other lister if there is one
 struct xfer_msg *xm;			// Xfer message to send
 ULONG            flags = XFER_DROPFROM;	// Xfer flags
 char             desktop[256+1];	// Desktop path
@@ -1262,11 +1262,11 @@ int              retval = 0;		// 1 if ARexx msg has been forwarded
 //kprintf( "galileo_dropfrom()\n" );
 
 // Valid?
-if	(argc < 4 || !(node = find_ftpnode( og, atoi(argv[1]) )))
+if	(argc < 4 || !(node = find_ftpnode( og, (APTR)atoi(argv[1]) )))
 	return 0;
 
 // Destination is a lister?
-if	(desthandle = atoi(argv[3]))
+if	(desthandle = (APTR)atoi(argv[3]))
 	{
 	// Drag to subdir?
 	if	(strstr( argv[6], "subdrop" ))
@@ -1479,7 +1479,7 @@ struct edit_msg *em;
 
 //kprintf( "galileo_edit()\n" );
 
-if	(argc <5 || !(node = find_ftpnode( og, atoi(argv[1]) )))
+if	(argc <5 || !(node = find_ftpnode( og, (APTR)atoi(argv[1]) )))
 	return 0;
 
 if	(!(em = AllocVec( sizeof(struct edit_msg) + strlen(argv[3]) + 1 + strlen(argv[2]) + 1 + strlen(argv[4]) + 1, MEMF_CLEAR )))
@@ -1523,7 +1523,7 @@ int              retval = 0;
 
 //kprintf( "galileo_inactive(%s)\n", argv[3] );
 
-if	(argc >= 3 && (node = find_ftpnode( og, atoi(argv[1]) )))
+if	(argc >= 3 && (node = find_ftpnode( og, (APTR)atoi(argv[1]) )))
 	{
 	// Has lister disappeared?  Ignore if lister is supposed to be invisible
 	if	(atoi(argv[3]))
@@ -1562,7 +1562,7 @@ static int galileo_parent(
 struct ftp_node *node;
 int              retval = 0;
 
-if	(node = find_ftpnode( og, atoi(argv[1]) ))
+if	(node = find_ftpnode( og, (APTR)atoi(argv[1]) ))
 	{
 	IPC_Command( node->fn_ipc, IPC_PARENT, 0, rxmsg, 0, 0 );
 	retval = 1;
@@ -1588,7 +1588,7 @@ struct ftp_msg  *fm;
 int              len;
 int              retval = 0;
 
-if	(node = find_ftpnode( og, atoi(argv[1]) ))
+if	(node = find_ftpnode( og, (APTR)atoi(argv[1]) ))
 	{
 	if	(!strnicmp( argv[2], "ftp://", 6 ))
 		{
@@ -1632,7 +1632,7 @@ static int galileo_reread(
 struct ftp_node *node;
 int              retval = 0;
 
-if	(node = find_ftpnode( og, atoi(argv[1]) ))
+if	(node = find_ftpnode( og, (APTR)atoi(argv[1]) ))
 	{
 	IPC_Command( node->fn_ipc, IPC_REREAD, 0, rxmsg, 0, 0 );
 	retval = 1;
@@ -1655,7 +1655,7 @@ static int galileo_root(
 struct ftp_node *node;
 int              retval = 0;
 
-if	(node = find_ftpnode( og, atoi(argv[1]) ))
+if	(node = find_ftpnode( og, (APTR)atoi(argv[1]) ))
 	{
 	IPC_Command( node->fn_ipc, IPC_ROOT, 0, rxmsg, 0, 0 );
 	retval = 1;
@@ -1678,7 +1678,7 @@ static int galileo_snapshot(
 struct ftp_node *node;
 int              retval = 0;
 
-if	(node = find_ftpnode( og, atoi(argv[1]) ))
+if	(node = find_ftpnode( og, (APTR)atoi(argv[1]) ))
 	{
 	IPC_Command( node->fn_ipc, IPC_SNAPSHOT, 0, rxmsg, 0, 0 );
 	retval = 1;
@@ -1701,7 +1701,7 @@ static int galileo_unsnapshot(
 struct ftp_node *node;
 int              retval = 0;
 
-if	(node = find_ftpnode( og, atoi(argv[1]) ))
+if	(node = find_ftpnode( og, (APTR)atoi(argv[1]) ))
 	{
 	IPC_Command( node->fn_ipc, IPC_UNSNAPSHOT, 0, rxmsg, 0, 0 );
 	retval = 1;
@@ -1725,7 +1725,7 @@ struct ftp_node *node;
 int              retval = 0;
 
 
-if	(node = find_ftpnode( og, atoi(argv[1]) ))
+if	(node = find_ftpnode( og, (APTR)atoi(argv[1]) ))
 	{
 	IPC_Command( node->fn_ipc, IPC_ADD, 0, 0, 0, 0 );
 	retval = 1;
@@ -1748,7 +1748,7 @@ static int popup_options(
 struct ftp_node *node;
 int              retval = 0;
 
-if	(node = find_ftpnode( og, atoi(argv[1]) ))
+if	(node = find_ftpnode( og, (APTR)atoi(argv[1]) ))
 	{
 	IPC_Command( node->fn_ipc, IPC_OPTIONS, 0, 0, 0, 0 );
 	retval = 1;
@@ -1775,7 +1775,7 @@ static int trap_abort(
 struct ftp_node *node;
 int              retval = 0;
 
-if	(node = find_ftpnode( og, atoi(argv[1]) ))
+if	(node = find_ftpnode( og, (APTR)atoi(argv[1]) ))
 	{
 	// Stop high level stuff
 	node->fn_flags |= LST_ABORT;
@@ -1826,7 +1826,7 @@ int              retval = 0;
 //kprintf( "trap_configure()\n" );
 
 // Valid?
-if	(argc < 5 || !argv[1] || !(node = find_ftpnode( og, atoi(argv[1]) )))
+if	(argc < 5 || !argv[1] || !(node = find_ftpnode( og, (APTR)atoi(argv[1]) )))
 	return 0;
 
 if	(fm = AllocVec( sizeof(*fm), MEMF_CLEAR ))
@@ -1970,8 +1970,8 @@ if	(fa = ParseArgs( template, args ))
 		flags |= XFER_OPT_NEWNAME;
 
 	// Which listers are FTP sites?
-	srcnode = find_ftpnode( og, atoi(argv[1]) );
-	dstnode = find_ftpnode( og, atoi(argv[3]) );
+	srcnode = find_ftpnode( og, (APTR)atoi(argv[1]) );
+	dstnode = find_ftpnode( og, (APTR)atoi(argv[3]) );
 
 	// One end local and one end FTP?
 	if	((srcnode || dstnode) && !(srcnode && dstnode))
@@ -2015,7 +2015,7 @@ if	(fa = ParseArgs( template, args ))
 				{
 				if	(atoi(argv[3]))
 					{
-					xm->xm_otherhandle = atoi(argv[3]);
+					xm->xm_otherhandle = (APTR)atoi(argv[3]);
 					}
 				else
 					{
@@ -2024,7 +2024,7 @@ if	(fa = ParseArgs( template, args ))
 				}
 			else
 				{
-				xm->xm_otherhandle = atoi(argv[1]);
+				xm->xm_otherhandle = (APTR)atoi(argv[1]);
 				}
 
 			xm->xm_flags = flags;
@@ -2160,7 +2160,7 @@ if	(!args || !*args)
 	args = " ";
 
 // Valid?
-if	(argc < 8 || !argv[1] || !argv[2] || !(node = find_ftpnode( og, atoi(argv[1]) )))
+if	(argc < 8 || !argv[1] || !argv[2] || !(node = find_ftpnode( og, (APTR)atoi(argv[1]) )))
 	return 0;
 
 // This template MUST be identical to the current internal command template!
@@ -2191,7 +2191,7 @@ if	(fa = ParseArgs( "NAME,QUIET/S", args ))
 
 		if	(num)
 			{
-			h->gc_FirstEntry( function_handle );
+			h->gc_FirstEntry( function_handle, NULL );
 
 		if	(fm = AllocVec( sizeof(struct ftp_msg) + num * sizeof(struct entry_info) + strlen(argv[2]) + 1, MEMF_CLEAR ))
 			{
@@ -2227,7 +2227,7 @@ if	(fa = ParseArgs( "NAME,QUIET/S", args ))
 					++fm->fm_filecount;
 
 				if	(entry2 = h->gc_ConvertEntry( entry ))
-					h->gc_FileQuery( (ULONG)node->fn_handle, entry2, tags );
+					h->gc_FileQuery( node->fn_handle, entry2, tags );
 				else
 					stccpy( ei.ei_name, (char *)h->gc_ExamineEntry( entry, EE_NAME ), FILENAMELEN + 1 );
 
@@ -2275,7 +2275,7 @@ struct findfile_msg *fm;
 int                  retval = 0;
 
 // Valid?
-if	(argc < 5 || !argv[1] || !(node = find_ftpnode( og, atoi(argv[1]) )))
+if	(argc < 5 || !argv[1] || !(node = find_ftpnode( og, (APTR)atoi(argv[1]) )))
 	return retval;
 
 if	(fm = AllocVec( sizeof(struct findfile_msg) + strlen(argv[2]) + 1, MEMF_CLEAR ))
@@ -2330,7 +2330,7 @@ if	(!args || !*args)
 	args = " ";
 
 // Valid?
-if	(argc < 5 || !argv[1] || !(node = find_ftpnode( og, atoi(argv[1]) )))
+if	(argc < 5 || !argv[1] || !(node = find_ftpnode( og, (APTR)atoi(argv[1]) )))
 	return 0;
 
 // This template MUST be identical to the current internal command template!
@@ -2391,7 +2391,7 @@ if	(!args || !*args)
 	args = " ";
 
 // Valid?
-if	(argc < 5 || !argv[1] || !(node = find_ftpnode( og, atoi(argv[1]) )))
+if	(argc < 5 || !argv[1] || !(node = find_ftpnode( og, (APTR)atoi(argv[1]) )))
 	return 0;
 
 // This template MUST be identical to the current internal command template!
@@ -2475,7 +2475,7 @@ if	(!args || !*args)
 	args = " ";
 
 // Valid?
-if	(argc < 5 || !argv[1] || !(node = find_ftpnode( og, atoi(argv[1]) )))
+if	(argc < 5 || !argv[1] || !(node = find_ftpnode( og, (APTR)atoi(argv[1]) )))
 	return retval;
 
 // This template MUST be identical to the current internal command template!
@@ -2545,7 +2545,7 @@ struct ftp_node *node;
 struct ftp_msg  *fm;
 int              retval = 0;
 
-if	(argc >= 3 && argv[1] && argv[2] && (node = find_ftpnode( og, atoi(argv[1]) )))
+if	(argc >= 3 && argv[1] && argv[2] && (node = find_ftpnode( og, (APTR)atoi(argv[1]) )))
 	{
 	if	(fm = AllocVec( sizeof(struct ftp_msg) + strlen(argv[2]) + 1, MEMF_CLEAR ))
 		{
@@ -2590,7 +2590,7 @@ struct traptemp_msg *tm;
 int                  retval = 0;
 
 // Valid?
-if	(argc < 2 || !argv[0] || !argv[1] || !argv[2] || !(node = find_ftpnode( og, atoi(argv[1]) )))
+if	(argc < 2 || !argv[0] || !argv[1] || !argv[2] || !(node = find_ftpnode( og, (APTR)atoi(argv[1]) )))
 	return 0;
 
 if	(tm = AllocVec( sizeof(*tm) + strlen(argv[2]) + 1, MEMF_CLEAR ))
@@ -2629,7 +2629,7 @@ BOOL             args = FALSE;
 int              len;
 struct quit_msg *qm;
 
-if	(argc < 2 || !(node = find_ftpnode( og, atoi(argv[1]) )))
+if	(argc < 2 || !(node = find_ftpnode( og, (APTR)atoi(argv[1]) )))
 	return 0;
 
 if	(argc >= 6 && argv[5] && *argv[5])
@@ -2692,7 +2692,7 @@ if	(!args || !*args)
 	args = " ";
 
 // Valid?
-if	(argc < 2 || !(node = find_ftpnode( og, atoi(argv[1]) )))
+if	(argc < 2 || !(node = find_ftpnode( og, (APTR)atoi(argv[1]) )))
 	return 0;
 
 // This template MUST be identical to the current internal command template...
@@ -2859,7 +2859,7 @@ while	(rxmsg = (struct RexxMsg *)GetMsg( rexport ))
 					{
 					struct ftp_node *node;
 
-					if	(node = find_ftpnode( og, atoi(argv[1]) ))
+					if	(node = find_ftpnode( og, (APTR)atoi(argv[1]) ))
 						{
 						lister_request(
 							node,
@@ -3342,6 +3342,9 @@ if	(ourbase = OpenLibrary( "ftp.gfmmodule", 0 ))
 	}
 
 kprintf( "galileo_ftp() returning\n" );
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }
 
 /********************************/

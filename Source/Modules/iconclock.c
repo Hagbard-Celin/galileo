@@ -75,8 +75,7 @@ int __asm __saveds L_Module_Entry(
 			NAME_ICONCLOCK,
 			(ULONG)icon_clock,
 			4000,
-			(ULONG)data,
-			(struct Library *)DOSBase))) FreeVec(data);
+			(ULONG)data))) FreeVec(data);
 	}
 
 	// No process?
@@ -287,7 +286,7 @@ void __saveds icon_clock(void)
 				amsg->am_NumArgs==0)
 			{
 				// Launch date prefs
-				WB_Launch("sys:prefs/time",0,0);
+				WB_Launch("sys:prefs/time",0,0,4000,0,0,0,0);
 			}
 
 			// Reply to message
@@ -421,6 +420,10 @@ void iconclock_cleanup(iconclock_data *data)
 		IPC_Free(data->ipc);
 		FreeVec(data);
 	}
+
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }
 
 

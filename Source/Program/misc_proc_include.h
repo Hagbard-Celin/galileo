@@ -17,8 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-This program is based on the source code of Directory Opus Magellan II, 
-released by GPSoftware under the APL license in 2012. Re-licensed under GPL by 
+This program is based on the source code of Directory Opus Magellan II,
+released by GPSoftware under the APL license in 2012. Re-licensed under GPL by
 permission of Dr Greg Perry, Managing Director of GPSoftware.
 
 Opus® and Directory Opus® and associated images are registered trademarks of GPSoftware.
@@ -35,40 +35,37 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#ifndef _GALILEOFM_APPMSG
-#define _GALILEOFM_APPMSG
+#ifndef GALILEOFM_MISC_PROC_H
+#define GALILEOFM_MISC_PROC_H
 
-GalileoAppMessage *alloc_appmsg_files(DirEntry *,DirBuffer *,BOOL);
-struct ArgArray *AppArgArray(GalileoAppMessage *,short);
-void FreeArgArray(struct ArgArray *);
-void set_appmsg_data(GalileoAppMessage *,ULONG,ULONG,ULONG);
-BOOL get_appmsg_data(GalileoAppMessage *,ULONG *,ULONG *,ULONG *);
-short FindWBArg(struct WBArg *args,short count,char *name);
-void UnlockWBArg(struct WBArg *args,short count);
-struct ArgArray *WBArgArray(struct WBArg *,short,short);
+#include "galileofm.h"
+#include "misc_protos.h"
+#include "function_launch_protos.h"
+#include "buttons_protos.h"
+#include "cleanup_protos.h"
+#include "requesters.h"
+#include "backdrop_protos.h"
+#include "start_menu_protos.h"
+#include "desktop.h"
+#include "groups.h"
+#include "rexx_protos.h"
+#include "about_protos.h"
+#include "wb.h"
+#include "icons.h"
+#include "iconpos_protos.h"
+#include "file_openwith.h"
+#include "menu_data.h"
+#include "callback.h"
+#include "commands.h"
+#include "/Modules/modules.h"
+#include "/Modules/modules_protos.h"
+#include "/Modules/modules_internal_protos.h"
+#include "scripts.h"
 
-struct ArgArray
-{
-	struct MinList	aa_List;
-	APTR		aa_Memory;
-	ULONG		aa_Flags;
-	ULONG		aa_Count;
-};
+extern CONST GalileoCallbackInfo CallBackInfo;
 
-struct ArgArrayEntry
-{
-	struct MinNode	aae_Node;
-	UWORD		aae_Flags;
-	char		aae_String[1];
-};
+#define HISTORY_MAX		20
 
-#define AAF_ALLOW_DIRS	(1<<0)
+void startup_get_env(void);
 
-#define AAEF_DIR	(1<<0)
-#define AAEF_LINK	(1<<1)
-#define AAEF_FAKE_ICON	(1<<2)
-
-struct ArgArray *BuildArgArray(char *,...);
-struct ArgArray *BuildArgArrayA(char **);
-struct ArgArray *NewArgArray(void);
-struct ArgArrayEntry *NewArgArrayEntry(struct ArgArray *,char *);
+#endif

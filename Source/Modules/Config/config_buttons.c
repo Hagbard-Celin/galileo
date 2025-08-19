@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -370,7 +370,7 @@ int __asm __saveds L_Config_Buttons(
 				// Passed an AppMessage
 				case CFG_APPMESSAGE_PASS:
 					button_receive_appmsg(data,(struct AppMessage *)imsg->data);
-					ReplyAppMessage((GalileoAppMessage *)imsg->data);
+					ReplyAppMessage((struct AppMessage *)imsg->data);
 					break;
 
 
@@ -1082,8 +1082,7 @@ int __asm __saveds L_Config_Buttons(
 											"galileo_paint_box",
 											(ULONG)PaletteBox,
 											STACK_DEFAULT,
-											(ULONG)&data->palette_data,
-											(struct Library *)DOSBase);
+											(ULONG)&data->palette_data);
 									}
 								}
 								break;
@@ -1389,12 +1388,13 @@ void _config_buttons_cleanup(config_buttons_data *data)
 
 		// Close clipboard port
 		if (data->clip_port)
-        {
-            struct Message *msg;
-            while (msg=GetMsg(data->clip_port))
-			ReplyMsg(msg);
-            DeleteMsgPort(data->clip_port);
-        }
+		{
+		    struct Message *msg;
+		    while (msg=GetMsg(data->clip_port))
+			    ReplyMsg(msg);
+		    DeleteMsgPort(data->clip_port);
+		}
+
 		// Close timer
 		FreeTimer(data->drag.timer);
 

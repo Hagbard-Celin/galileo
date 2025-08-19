@@ -79,7 +79,7 @@ typedef struct _GalileoAppMessage
 GalileoAppMessage *AllocAppMessage(APTR,struct MsgPort *,short);
 BOOL CheckAppMessage(GalileoAppMessage *);
 void FreeAppMessage(GalileoAppMessage *);
-BOOL GetWBArgPath(struct WBArg *,char *,long);
+STRPTR GetWBArgPath(struct WBArg *);
 void ReplyAppMessage(GalileoAppMessage *);
 BOOL SetWBArg(GalileoAppMessage *,short,BPTR,char *,APTR);
 

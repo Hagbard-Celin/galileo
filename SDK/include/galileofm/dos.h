@@ -99,5 +99,19 @@ struct StandardPacket64
 // Get 64bit filesize
 ULONG GetFileSize64(BPTR,UQUAD *);
 
+// Paths and Volumes
+UBYTE VolIdFromLock(BPTR lock, struct DateStamp *date, char *name);
+BPTR LockFromVolIdPath(STRPTR volumename, CONST_STRPTR path, struct DateStamp *volumedate, UBYTE namelen);
+BPTR LockFromPath(CONST_STRPTR path, ULONG length, ULONG flags);
+STRPTR PathFromLock(APTR memory, BPTR lock, ULONG flags, CONST_STRPTR append);
+
+
+#define LFPF_TRY_ICON		(1<<0)
+#define LFPF_TRY_ICON_FIRST	(1<<1)
+
+
+#define PFLF_USE_DEVICENAME	(1<<0)
+#define	PFLF_END_SLASH		(1<<1)
+#define	PFLF_SLASH_APPEND	(1<<2)
 
 #endif

@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,12 +32,18 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
+#ifndef _GALILEOFM_POSITION_H
+#define _GALILEOFM_POSITION_H
+
+
 #define ID_POSI		MAKE_ID('P','O','S','I')
+#define ID_POSR		MAKE_ID('P','O','S','R')
 #define ID_LOUT		MAKE_ID('L','O','U','T')
+#define ID_LFTO		MAKE_ID('L','F','T','O')
 #define ID_ICON		MAKE_ID('I','C','O','N')
 
 typedef struct
@@ -60,11 +67,26 @@ typedef struct
 	ULONG			flags;
 	char			icon_label[32];
 	char			name[1];
+} appicon_record;
+
+#define leftout_record_old appicon_record
+
+typedef struct
+{
+	struct Node		node;
+
+	struct DateStamp	vol_date;
+	UBYTE			vol_name_len;
+	short			icon_x;
+	short			icon_y;
+	ULONG			flags;
+	char			icon_label[32];
+	char			name[1];
 } leftout_record;
 
 #define LEFTOUTF_NO_POSITION	(1<<0)
 
-typedef struct position_record
+typedef struct position_record_old
 {
 	struct Node		node;
 
@@ -85,12 +107,43 @@ typedef struct position_record
 
 	char			pad;
 	char			name[1];	// Full pathname
+} position_rec_old;
+
+typedef struct position_record
+{
+	struct Node		node;
+
+	UWORD			type;
+	struct DateStamp	vol_date;
+	//UBYTE			  vol_name_len;
+
+	ListFormatStorage	format;		// Format of lister
+
+	short			icon_x;		// Position of icon
+	short			icon_y;		// Position of icon
+
+	struct IBox		text_dims;	// Window position in text mode
+	struct IBox		icon_dims;	// Window position in icon mode
+
+	UWORD			code;		// Hotkey
+	UWORD			qual;
+	UWORD			qual_mask;
+	UWORD			qual_same;
+
+	ULONG			flags;		// Flags
+
+	char			name[1];	// Full pathname
 } position_rec;
 
 #define PTYPE_POSITION		1
 #define PTYPE_LEFTOUT		2
 #define PTYPE_APPICON		3
 #define PTYPE_STARTMENU		4
+
+#define PPTYPE_NEEDDATE		1
+#define PPTYPE_NODISKID		2
+#define PPTYPE_DISKID		3
+#define PPTYPE_DEVICE		4
 
 #define LISTERMODE_ICON		1
 #define LISTERMODE_SHOW_ALL	2
@@ -107,23 +160,6 @@ typedef struct position_record
 #define POSITIONF_POSITION	(1<<24)		// Has position info
 #define POSITIONF_NEW_FLAG	(1<<25)
 
-void GetPositions(struct ListLock *list,APTR memory,char *name);
-position_rec *GetListerPosition(
-	char *,
-	char *,
-	struct DiskObject *,
-	struct IBox *,
-	short *,
-	ListFormat *,
-	struct Window *,
-	struct ListerWindow *,
-	unsigned long);
-position_rec *PositionUpdate(struct ListerWindow *,short);
-void CopyPositions(struct ListLock *,struct List *,APTR);
-void FreePositions(struct List *);
-void SavePositions(struct List *,char *);
-void PositionRemove(struct ListerWindow *,BOOL);
-
 
 #define GLPF_USE_MODE		(1<<0)		// Mode supplied
 
@@ -132,3 +168,5 @@ void PositionRemove(struct ListerWindow *,BOOL);
 #define POSUPF_FORMAT		(1<<1)
 #define POSUPF_DEFAULT		(1<<2)
 #define POSUPF_FAIL		(1<<3)
+
+#endif

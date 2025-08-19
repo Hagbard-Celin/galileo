@@ -53,7 +53,7 @@ For more information on Directory Opus for Windows please see:
 
 struct DiskObject *__asm __saveds L_GetCachedDefDiskObject(
 	register __d0 long type,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
 	char *name=0;
 	struct DiskObject *icon=NULL;
@@ -113,7 +113,7 @@ struct DiskObject *__asm __saveds L_GetCachedDefDiskObject(
 	{
 
 		// Valid name?
-		if (name && (icon=L_GetCachedDiskObject(name,flags,libbase)))
+		if (name && (icon=L_GetCachedDiskObject(name,flags,GalileoFMBase)))
 			return icon;
 
 	
@@ -131,7 +131,7 @@ struct DiskObject *__asm __saveds L_GetCachedDefDiskObject(
 
 void __asm __saveds L_FreeCachedDiskObject(
 	register __a0 struct DiskObject *icon,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
 	// Valid icon?
 	if (!icon) return;
@@ -147,7 +147,7 @@ void __asm __saveds L_FreeCachedDiskObject(
 			Image_Data *find;
 
 			// Lock image list
-			L_GetSemaphore(&image_lock,SEMF_EXCLUSIVE,0);
+			L_GetSemaphore(&image_lock,SEMF_EXCLUSIVE,0, GalileoFMBase);
 
 			// Check image is in list
 			for (find=(Image_Data *)image_list.lh_Head;
@@ -168,7 +168,7 @@ void __asm __saveds L_FreeCachedDiskObject(
 
 						// Free original icon
 						if (image->ilbm)
-							L_FreeDiskObjectCopy((struct DiskObject *)image->ilbm,libbase);
+							L_FreeDiskObjectCopy((struct DiskObject *)image->ilbm,GalileoFMBase);
 
 						// Free entry
 						free_image(image);
@@ -178,28 +178,23 @@ void __asm __saveds L_FreeCachedDiskObject(
 			}
 
 			// Unlock image list
-			L_FreeSemaphore(&image_lock);
+			L_FreeSemaphore(&image_lock, GalileoFMBase);
 		}
 	}
 
 	// Free as an icon copy
-	L_FreeDiskObjectCopy(icon,libbase);
+	L_FreeDiskObjectCopy(icon,GalileoFMBase);
 }
 
 
 struct DiskObject *__asm __saveds L_GetCachedDiskObject(
 	register __a0 char *name,
 	register __d0 ULONG flags,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
 	Image_Data *image;
 	struct DiskObject *icon=0,*reticon;
 	unsigned long checksum[2];
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 
 		// Load icon
 		// gjp If using OS 3.5
@@ -212,7 +207,7 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObject(
 	}
 
 	// Got NewIcons, and NewIcons is enabled?
-	if (NewIconBase && data->NewIconsFlags&ENVNIF_ENABLE)
+	if (NewIconBase && gfmlib_data.NewIconsFlags&ENVNIF_ENABLE)
 	{
 		struct NewDiskObject *ndo;
 		struct NewIconDiskObject *nido;
@@ -239,7 +234,7 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObject(
 			// Check the image in GadgetRender, as the do_Gadget size is somtimes
 			// bigger than the image.
 			// And just in case, if it finds gadgetrender empty, go with the NewIcon.
-			if (!(data->NewIconsFlags&ENVNIF_DISCOURAGE) ||
+			if (!(gfmlib_data.NewIconsFlags&ENVNIF_DISCOURAGE) ||
 			    (icon->do_Gadget.GadgetRender &&
 			    (((struct Image *)icon->do_Gadget.GadgetRender)->Width<=5 &&
 			    ((struct Image *)icon->do_Gadget.GadgetRender)->Height<=5)) ||
@@ -272,14 +267,14 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObject(
 	}
 
 	// Caching disabled? Return icon as is
-	if (data->flags&LIBDF_NO_CACHING || flags&GCDOF_NOCACHE) return icon;
+	if (gfmlib_data.flags&LIBDF_NO_CACHING || flags&GCDOF_NOCACHE) return icon;
 
 	// Get image checksums
 	checksum[0]=L_IconCheckSum(icon,0);
 	checksum[1]=L_IconCheckSum(icon,1);
 
 	// Lock image list
-	L_GetSemaphore(&image_lock,SEMF_EXCLUSIVE,0);
+	L_GetSemaphore(&image_lock,SEMF_EXCLUSIVE,0, GalileoFMBase);
 
 	// Go through image list
 	for (image=(Image_Data *)image_list.lh_Head;
@@ -305,11 +300,11 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObject(
 
 		// Add entry to image list
 		if (!(image=new_image(im->Width,im->Height,im->Depth)) ||
-			!(image->ilbm=(ILBMHandle *)L_CopyDiskObject(icon,0,libbase)))
+			!(image->ilbm=(ILBMHandle *)L_CopyDiskObject(icon,0,GalileoFMBase)))
 		{
 			// Failed
 			free_image(image);
-			L_FreeSemaphore(&image_lock);
+			L_FreeSemaphore(&image_lock, GalileoFMBase);
 
 			return icon;
 		}
@@ -326,7 +321,7 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObject(
 	}
 
 	// Get a copy of this icon
-	if (reticon=(struct DiskObject *)L_CopyDiskObject(icon,DOCF_NOIMAGE|DOCF_COPYALL,libbase))
+	if (reticon=(struct DiskObject *)L_CopyDiskObject(icon,DOCF_NOIMAGE|DOCF_COPYALL,GalileoFMBase))
 	{
 		// Increment image count
 		++image->count;
@@ -356,7 +351,7 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObject(
 	}
 
 	// Unlock image list
-	L_FreeSemaphore(&image_lock);
+	L_FreeSemaphore(&image_lock, GalileoFMBase);
 
 	return icon;
 }
@@ -365,7 +360,7 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObject(
 struct DiskObject *__asm __saveds L_GetCachedDiskObjectNew(
 	register __a0 char *name,
 	register __d0 ULONG flags,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
 	struct DiskObject *icon;
 	BPTR lock,file;
@@ -373,7 +368,7 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObjectNew(
 	long type=WBPROJECT,val=0;
 
 	// Try for real icon
-	if (flags&GCDOFN_REAL_ICON && (icon=L_GetCachedDiskObject(name,0,libbase)))
+	if (flags&GCDOFN_REAL_ICON && (icon=L_GetCachedDiskObject(name,0,GalileoFMBase)))
 		return icon;
 
 	// Lock object
@@ -412,7 +407,7 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObjectNew(
 	if (stricmp(FilePart(name),"Disk")==0) type=WBDISK;
 
 	// Get default icon
-	return L_GetCachedDefDiskObject(type,libbase);
+	return L_GetCachedDefDiskObject(type,GalileoFMBase);
 }
 
 
@@ -600,37 +595,33 @@ struct DiskObject *__asm __saveds L_GetOriginalIcon(register __a0 struct DiskObj
 void __asm __saveds L_SetNewIconsFlags(
 	register __d0 ULONG flags,
 	register __d1 short precision,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
 
 	// Set flags
-	data->NewIconsFlags=flags;
-	data->NewIconsPrecision=precision;
+	gfmlib_data.NewIconsFlags=flags;
+	gfmlib_data.NewIconsPrecision=precision;
 
 	// Got NewIcons?
-	if (data->new_icon_base)
+	if (gfmlib_data.new_icon_base)
 	{
 		// Set precision
-		((struct NewIconBase *)data->new_icon_base)->nib_Precision=precision;
+		((struct NewIconBase *)gfmlib_data.new_icon_base)->nib_Precision=precision;
 
 		// Set flags
-		if (data->new_icon_base->lib_Version>=38)
+		if (gfmlib_data.new_icon_base->lib_Version>=38)
 		{
 			if (flags&ENVNIF_DITHERING)
-				((struct NewIconBase *)data->new_icon_base)->nib_Flags|=NIFLG_DO_DITHER;
+				((struct NewIconBase *)gfmlib_data.new_icon_base)->nib_Flags|=NIFLG_DO_DITHER;
 			else
-				((struct NewIconBase *)data->new_icon_base)->nib_Flags&=~NIFLG_DO_DITHER;
+				((struct NewIconBase *)gfmlib_data.new_icon_base)->nib_Flags&=~NIFLG_DO_DITHER;
 		}
-		if (data->new_icon_base->lib_Version>=39)
+		if (gfmlib_data.new_icon_base->lib_Version>=39)
 		{
 			if (flags&ENVNIF_RTG)
-				((struct NewIconBase *)data->new_icon_base)->nib_Flags|=NIFLG_RTGMODE;
+				((struct NewIconBase *)gfmlib_data.new_icon_base)->nib_Flags|=NIFLG_RTGMODE;
 			else
-				((struct NewIconBase *)data->new_icon_base)->nib_Flags&=~NIFLG_RTGMODE;
+				((struct NewIconBase *)gfmlib_data.new_icon_base)->nib_Flags&=~NIFLG_RTGMODE;
 		}
 	}
 }

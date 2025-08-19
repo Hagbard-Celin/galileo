@@ -36,6 +36,8 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "menu_data.h"
 
 // Build user menu
 void display_build_user_menu(void)

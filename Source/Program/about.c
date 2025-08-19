@@ -36,6 +36,10 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "requesters.h"
+#include "lsprintf_protos.h"
+#include "about_protos.h"
+
 #include "/Modules/modules_internal_protos.h"
 
 extern short revision_num, version_num;

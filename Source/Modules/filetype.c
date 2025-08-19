@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -69,7 +70,7 @@ Cfg_FiletypeList *creator_generic(
 	IPCData *galileo_ipc,
 	CONST GalileoCallbackInfo *gci,
 	Att_List *list,
-	char *path );
+	BPTR parent_lock );
 
 #define FTLISTF_INSTALLED	(1<<15)
 
@@ -467,7 +468,7 @@ int finder_filetypes_in_cache( finder_data *data )
 
 	    for (ft = (Cfg_Filetype *)ftl->filetype_list.lh_Head; ft->node.ln_Succ; ft = (Cfg_Filetype *)ft->node.ln_Succ)
 	    {
-		if (matchh = GetMatchHandle( data->current_entry_path ))
+		if (matchh = GetMatchHandle( data->current_entry, data->current_entry_parent ))
 		{
 		    if (MatchFiletype( matchh, ft ))
 		    {
@@ -582,7 +583,6 @@ int finder_rescan( finder_data *data )
 int finder_install_filetype( finder_data *data )
 {
     BPTR src, dst;
-    UBYTE buffer[1024];
     LONG len;
     int ok = FALSE;
 
@@ -593,18 +593,18 @@ int finder_install_filetype( finder_data *data )
 			"PROGDIR:Filetypes",
 			data->best_stored_ft->type.name ))
 	{
-	    strcpy( buffer, "PROGDIR:Storage/Filetypes" );
-	    AddPart( buffer, data->best_stored_ft->list->path, 1024 );
-	    if (src = Open( buffer, MODE_OLDFILE ))
+	    strcpy( data->buffer, "PROGDIR:Storage/Filetypes" );
+	    AddPart( data->buffer, data->best_stored_ft->list->path, 1024 );
+	    if (src = Open( data->buffer, MODE_OLDFILE ))
 	    {
-		strcpy( buffer, "PROGDIR:Filetypes" );
-		AddPart( buffer, data->best_stored_ft->type.name, 1024 );
-		if (dst = Open( buffer, MODE_NEWFILE ))
+		strcpy( data->buffer, "PROGDIR:Filetypes" );
+		AddPart( data->buffer, data->best_stored_ft->type.name, 1024 );
+		if (dst = Open( data->buffer, MODE_NEWFILE ))
 		{
 		    ok = TRUE;
 
-		    while ((len = Read( src, buffer, 1024 )) > 0)
-			if (len = Write( dst, buffer, len ) < 0)
+		    while ((len = Read( src, data->buffer, 1024 )) > 0)
+			if (len = Write( dst, data->buffer, len ) < 0)
 			    break;
 
 		    if (len >= 0)
@@ -648,8 +648,6 @@ void __saveds finder_creator_proc_code( void )
     finder_data *data;
     struct Library *GalileoFMBase;
     Att_List *list;
-    char path[256 + 1];
-    char *name;
     struct filetype_info *fti;
     Att_Node *node;
     Cfg_FiletypeList *ftl, *ftl2;
@@ -661,21 +659,17 @@ void __saveds finder_creator_proc_code( void )
 
     putreg( REG_A4, data->a4 );
 
-    strcpy( path, data->current_entry_path );
-    name = FilePart( path );
-    *name = 0;
-    name = FilePart( data->current_entry_path );
-
     if (list = Att_NewList( LISTF_POOL ))
     {
-	if (file_exists( NULL, path, name, EXISTF_FILE ))
+	if (file_exists( data->current_entry_parent, NULL, data->current_entry, EXISTF_FILE ))
 	{
 	    if (fti = AllocMemH( list->memory, sizeof(struct filetype_info) ))
 	    {
-		if (node = Att_NewNode( list, name, (ULONG)fti, 0 ))
+		if (node = Att_NewNode( list, data->current_entry, (ULONG)fti, 0 ))
 		{
-		    strcpy( fti->fti_filename, name );
-		    strncpy( fti->fti_path, path, 256 );
+		    strcpy( fti->fti_filename, data->current_entry );
+
+		    fti->fti_parent_lock = data->current_entry_parent;
 
 		    ftl = creator_generic("",			  //	  char *args,
 			                  data->screen,		  //	  struct Screen *screen,
@@ -684,7 +678,7 @@ void __saveds finder_creator_proc_code( void )
 			                  data->main_ipc,
 					  data->gci,    //      EXT_FUNC(func_callback)
 			                  list,
-			                  path );
+			                  data->current_entry_parent );
 
 		    if (ftl)
 		    {
@@ -716,6 +710,10 @@ void __saveds finder_creator_proc_code( void )
     IPC_Free( data->editor_ipc );
     data->creator_ipc = NULL;
 
+    #ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+    #endif
+
     return;
 }
 
@@ -733,8 +731,7 @@ int finder_create_filetype( finder_data *data )
 	       "filetype_creator",		       // Name
 	       (ULONG)finder_creator_proc_code,	       // Code
 	       4000,				       // Stack size
-	       (ULONG)data,			       // Data passed to task
-	       (struct Library *)DOSBase );	       // Needs pointer to dos.library
+	       (ULONG)data);			       // Data passed to task
 
     return ok;
 }
@@ -866,6 +863,10 @@ void __saveds finder_editor_proc_code( void )
     IPC_Free( data->editor_ipc );
     data->editor_ipc = NULL;
 
+#ifdef RESOURCE_TRACKING
+    ResourceTrackingEndOfTask();
+#endif
+
     return;
 }
 
@@ -883,8 +884,7 @@ int finder_edit_filetype( finder_data *data )
 	       "filetype_editor",	       // Name
 	       (ULONG)finder_editor_proc_code, // Code
 	       4000,			       // Stack size
-	       (ULONG)data,		       // Data passed to task
-	       (struct Library *)DOSBase );    // Needs pointer to dos.library
+	       (ULONG)data);		       // Data passed to task
 
     return ok;
 }
@@ -1251,6 +1251,7 @@ int finder(struct Screen *screen,
 {
     finder_data *data;
     FunctionEntry *entry;
+    //PathNode *source;
     int retval = 0;
     struct Message *msg;
 
@@ -1269,22 +1270,28 @@ int finder(struct Screen *screen,
 
 	if (finder_openwindow( data ))
 	{
-	    // Get path
-	    gci->gc_GetSource( IPCDATA(ipc), data->path );
-
-	    gci->gc_FirstEntry( IPCDATA(ipc) );
+	    gci->gc_FirstEntry( IPCDATA(ipc), NULL );
 
 	    // Get first entry
 	    while (entry = gci->gc_GetEntry( IPCDATA(ipc) ))
 	    {
-		strcpy( data->current_entry_path, data->path );
-		AddPart( data->current_entry_path, entry->fe_name, 256 );
+		data->current_entry = entry->fe_name;
+
+		data->current_entry_parent = entry->fe_lock;
 
 		// Filename
+		if (strlen(data->current_entry) > FILENAME_MAXLEN)
+		{
+		    stccpy(data->current_entry_short, data->current_entry, 27);
+		    strcpy(data->current_entry_short + 27, "...");
+		}
+		else
+		    data->current_entry_short[0] = 0;
+
 		SetGadgetValue( data->list, GAD_FIND_TEXT1,
-			(ULONG)(strlen( data->current_entry_path ) > FILENAME_MAXLEN
-				? (char *)FilePart( data->current_entry_path )
-				: data->current_entry_path) );
+			(ULONG)(data->current_entry_short[0]
+				? data->current_entry_short
+				: data->current_entry) );
 
 		if (!data->filetype_cache)
 		    if (!finder_build_cache( data ))
@@ -1661,14 +1668,12 @@ int creator_get_bytes( struct filetype_info *fti, BPTR lock )
 
 int creator_sniff_filetype( creator_data *data, struct filetype_info *fti )
 {
-    char fullpath[256];
-    BPTR lock;
+    BPTR lock, org_dir;
     __aligned struct FileInfoBlock fib;
 
-    strcpy( fullpath, fti->fti_path );
-    AddPart( fullpath, fti->fti_filename, 256 );
+    org_dir = CurrentDir(fti->fti_parent_lock);
 
-    if (lock = Lock( fullpath, ACCESS_READ ))
+    if (lock = Lock( fti->fti_filename, ACCESS_READ ))
     {
 	if (Examine( lock, &fib ))
 	{
@@ -1683,6 +1688,8 @@ int creator_sniff_filetype( creator_data *data, struct filetype_info *fti )
 	}
 	UnLock( lock );
     }
+
+    CurrentDir(org_dir);
 
     return 0;
 }
@@ -2115,22 +2122,32 @@ int creator_add_file( creator_data *data )
 	{
 	    if (file_exists( NULL, data->filereq->fr_Drawer, data->filereq->fr_File, EXISTF_FILE ))
 	    {
+		BPTR filereq_lock;
+
+		filereq_lock = LockFromPath(data->filereq->fr_Drawer, NULL, NULL);
+
 		// Check for file already in list...
 		if (node = (Att_Node *)FindNameI( (struct List *)data->file_list, data->filereq->fr_File ))
 		{
-			if (stricmp( ((struct filetype_info *)node->att_data)->fti_path, data->filereq->fr_Drawer) == 0)
-			    exists = TRUE;
+		    if(SameLock(((struct filetype_info *)node->att_data)->fti_parent_lock, filereq_lock) == LOCK_SAME)
+		    {
+		        exists = TRUE;
+			UnLock(filereq_lock);
+		    }
 		}
 
 		if (!exists && (fti = AllocMemH( data->file_list->memory, sizeof(struct filetype_info) )))
 		{
 		    strcpy( fti->fti_filename, data->filereq->fr_File );
-		    strncpy( fti->fti_path, data->filereq->fr_Drawer, 256 );
+
+		    fti->fti_parent_lock = filereq_lock;
 
 		    strcpy( data->req_dir, data->filereq->fr_Drawer );
 
-		    if (node = Att_NewNode( data->file_list, fti->fti_filename, (ULONG)fti, 0 ))
+		    if (node = Att_NewNode( data->file_list, fti->fti_filename, (ULONG)fti, ADDNODE_LOCKNODE ))
 		    {
+			((Att_LockNode *)node)->att_lock = filereq_lock;
+
 			// Detach list
 			SetGadgetChoices( data->list, GAD_CREATE_LISTVIEW, (APTR)~0 );
 
@@ -2143,6 +2160,8 @@ int creator_add_file( creator_data *data )
 
 			ok = TRUE;
 		    }
+		    else
+			UnLock(filereq_lock);
 		}
 	    }
 	}
@@ -2328,6 +2347,10 @@ void __saveds creator_editor_proc_code( void )
     IPC_Free( data->editor_ipc );
     data->editor_ipc = NULL;
 
+    #ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+    #endif
+
     return;
 }
 
@@ -2350,8 +2373,7 @@ int creator_edit_filetype( creator_data *data )
 		"filetype_editor",			// Name
 		(ULONG)creator_editor_proc_code,	// Code
 		4000,					// Stack size
-		(ULONG)data,				// Data passed to task
-		(struct Library *)DOSBase );		// Needs pointer to dos.library
+		(ULONG)data);				// Data passed to task
     }
 
     return ok;
@@ -2404,7 +2426,6 @@ int creator_handle_appwindow( creator_data *data )
 {
     struct AppMessage *amsg;
     int a;
-    __aligned char buffer[256 + 1];
     struct filetype_info *fti;
     Att_Node *node;
     int exists = FALSE;
@@ -2423,24 +2444,27 @@ int creator_handle_appwindow( creator_data *data )
 
 	    for (a = 0; a < amsg->am_NumArgs; a++)
 	    {
+		exists = FALSE;
+
 		if (file_exists( amsg->am_ArgList[a].wa_Lock, NULL, amsg->am_ArgList[a].wa_Name, EXISTF_FILE ))
 		{
-		    NameFromLock( amsg->am_ArgList[a].wa_Lock, buffer, 256 );
-
 		    // Check for file already in list...
 		    if (node = (Att_Node *)FindNameI( (struct List *)data->file_list, amsg->am_ArgList[a].wa_Name ))
 		    {
-			if (stricmp( ((struct filetype_info *)node->att_data)->fti_path, buffer) == 0)
+			if (SameLock(amsg->am_ArgList[a].wa_Lock, ((struct filetype_info *)node->att_data)->fti_parent_lock) == LOCK_SAME)
 				exists = TRUE;
 		    }
 
 		    if (!exists && (fti = AllocMemH( data->file_list->memory, sizeof(struct filetype_info) )))
 		    {
 			strcpy( fti->fti_filename, amsg->am_ArgList[a].wa_Name );
-			strncpy( fti->fti_path, buffer, 256 );
 
-			if (node = Att_NewNode( data->file_list, fti->fti_filename, (ULONG)fti, 0 ))
+			fti->fti_parent_lock = DupLock(amsg->am_ArgList[a].wa_Lock);
+
+			if (node = Att_NewNode( data->file_list, fti->fti_filename, (ULONG)fti, ADDNODE_LOCKNODE ))
 			{
+			    ((Att_LockNode *)node)->att_lock = fti->fti_parent_lock;
+
 			    // Find relevant filetype info
 			    creator_sniff_filetype( data, (struct filetype_info *)node->att_data );
 			    creator_addnode( data, (struct filetype_info *)node->att_data );
@@ -2542,7 +2566,13 @@ int creator_event_loop( creator_data *data )
 		switch	(((struct Gadget *)copy_msg.IAddress)->GadgetID)
 		{
 		    case GAD_CREATE_ADD:
-			    creator_add_file( data );
+			    {
+				BPTR org_dir;
+
+				org_dir = CurrentDir(data->rec_dir_parent);
+				creator_add_file( data );
+				CurrentDir(org_dir);
+			    }
 			    break;
 
 		    case GAD_CREATE_DELETE:
@@ -2667,7 +2697,7 @@ Cfg_FiletypeList *creator_generic(
 	IPCData *galileo_ipc,
 	CONST GalileoCallbackInfo *gci,
 	Att_List *list,
-	char *path )
+	BPTR parent_lock )
 {
     creator_data *  data;
     Cfg_FiletypeList *	    ftl = NULL;
@@ -2685,7 +2715,8 @@ Cfg_FiletypeList *creator_generic(
 	data->app_port = CreateMsgPort();
 
 	// Get directory
-	strcpy( data->req_dir, path );
+	strcpy( data->req_dir, "" );
+	data->rec_dir_parent = DupLock(parent_lock);
 
 	// Default filetype name
 	strcpy( data->filetype_name, "Untitled" );
@@ -2740,6 +2771,8 @@ Cfg_FiletypeList *creator_generic(
 	}
 	// Free file requester
 	FreeAslRequest( data->filereq );
+
+	UnLock(data->rec_dir_parent);
 	FreeVec( data );
     }
 
@@ -2758,57 +2791,54 @@ int creator(
     Att_List *list;
     FunctionEntry *entry;
     Att_Node *node;
-    char path[256];
-    struct filetype_info *fti;
+    struct filetype_info *fti = 0;
     Cfg_FiletypeList *ftl;
     int ok = FALSE;
 
-    if (gci->gc_GetSource( IPCDATA(ipc), path ))
+    if (list = Att_NewList( LISTF_POOL ))
     {
-	if (list = Att_NewList( LISTF_POOL ))
+	gci->gc_FirstEntry( IPCDATA(ipc), NULL );
+
+	// Go through files
+	while (entry = gci->gc_GetEntry( IPCDATA(ipc) ))
 	{
-	    gci->gc_FirstEntry( IPCDATA(ipc) );
-
-	    // Go through files
-	    while (entry = gci->gc_GetEntry( IPCDATA(ipc) ))
+	    if (file_exists( entry->fe_lock, NULL, entry->fe_name, EXISTF_FILE ))
 	    {
-		if (file_exists( NULL, path, entry->fe_name, EXISTF_FILE ))
-		{
-		    if (fti = AllocMemH( list->memory, sizeof(struct filetype_info) ))
+	        if (fti = AllocMemH( list->memory, sizeof(struct filetype_info) ))
+	        {
+		    if (node = Att_NewNode( list, entry->fe_name, (ULONG)fti, 0 ))
 		    {
-			if (node = Att_NewNode( list, entry->fe_name, (ULONG)fti, 0 ))
-			{
-			    strcpy( fti->fti_filename, entry->fe_name );
-			    strncpy( fti->fti_path, path, 256 );
-			    ok = TRUE;
-			}
-			else
-			{
-			    FreeMemH( fti );
-			    break;
-			}
+		        strcpy( fti->fti_filename, entry->fe_name );
+		        fti->fti_parent_lock = entry->fe_lock;
+
+		        ok = TRUE;
 		    }
-		}
-
-		// End this entry
-		gci->gc_EndEntry( IPCDATA(ipc), entry, TRUE );
+		    else
+		    {
+		        FreeMemH( fti );
+		        break;
+		    }
+	        }
 	    }
 
-	    if (ftl = creator_generic(args,
-			              screen,
-			              ipc,
-			              main_ipc,
-			              main_ipc,
-				      gci,
-			              list,
-			              path ))
-	    {
-		FreeMemH( ftl );
-		ok = TRUE;
-	    }
-
-	    Att_RemList( list, 0 );
+	    // End this entry
+	    gci->gc_EndEntry( IPCDATA(ipc), entry, TRUE );
 	}
+
+	if (ftl = creator_generic(args,
+		                  screen,
+		                  ipc,
+		                  main_ipc,
+		                  main_ipc,
+			          gci,
+		                  list,
+		                  fti->fti_parent_lock ))
+	{
+	    FreeMemH( ftl );
+	    ok = TRUE;
+	}
+
+	Att_RemList( list, 0 );
     }
 
     return ok;

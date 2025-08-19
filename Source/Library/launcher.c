@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -49,6 +50,7 @@ For more information on Directory Opus for Windows please see:
 
 #define LAUNCH_WB	0
 #define LAUNCH_DOS	1
+#define LAUNCH_WB_ARG	2
 
 #define DOSLIST_TIMER	10
 
@@ -56,44 +58,49 @@ For more information on Directory Opus for Windows please see:
 
 typedef struct
 {
-	char			*name;			// Command to launch
-	struct Screen	*errors;		// Screen for error requesters
-	BPTR			cd;				// Current directory
-	BPTR			in;				// Input file handle
-	BPTR			out;			// Output file handle
-	struct LibData	*data;			// Library data pointer
-	IPCMessage		*exit_reply;	// Message to reply to on exit
-	short			wait;			// Wait for return?
+	BPTR	next;
+	BPTR	lock;
+} PathListEntry;
+
+typedef struct
+{
 	short			type;			// Type of launch
+	short			wait;			// Wait for return?
+	struct Screen		*errors;		// Screen for error requesters
+	BPTR			cd;			// Current directory
+	char			*name;			// Command to launch
+	BPTR			in;			// Input file handle
+	BPTR			out;			// Output file handle
+	struct LibData		*data;			// Library data pointer
+	IPCMessage		*exit_reply;		// Message to reply to on exit
 	long			stack;			// Stack size
-	char			*default_tool;	// Default tool
-	struct Process	**proc_ptr;		// Returns process pointer to the user
-	IPCData			*notify_ipc;	// User signalled when process quits
+	char			*default_tool;		// Default tool
+	struct Process		**proc_ptr;		// Returns process pointer to the user
+	IPCData			*notify_ipc;		// User signalled when process quits
 	ULONG			flags;			// Flags
+	PathListEntry		*path;
 } LaunchPacket;
 
-BOOL __asm L_WB_LaunchNew(register __a0 char *,register __a1 struct Screen *,register __d0 short,register __d1 long,register __a2 char *);
-BOOL __asm L_WB_LaunchNotify(register __a0 char *,register __a1 struct Screen *,register __d0 short,register __d1 long,register __a2 char *,register __a3 struct Process **,register __a4 IPCData *,register __d2 ULONG);
+typedef struct
+{
+	short			type;			// Type of launch
+	short			wait;			// Wait for return?
+	struct Screen		*errors;		// Screen for error requesters
+	BPTR			cd;			// Current directory
+	struct WBArg 		*args;
+	LONG			numargs;
+	struct LibData		*data;			// Library data pointer
+	IPCMessage		*exit_reply;		// Message to reply to on exit
+	long			stack;			// Stack size
+	char			*default_tool;		// Default tool
+	struct Process		**proc_ptr;		// Returns process pointer to the user
+	IPCData			*notify_ipc;		// User signalled when process quits
+	ULONG			flags;			// Flags
+	char			*toolwindow;
+} WBLaunchPacket;
+
 
 BOOL __saveds __asm L_WB_Launch(
-	register __a0 char *name,
-	register __a1 struct Screen *errors,
-	register __d0 short wait)
-{
-	return L_WB_LaunchNotify(name,errors,wait,4000,0,0,0,0);
-}
-
-BOOL __saveds __asm L_WB_LaunchNew(
-	register __a0 char *name,
-	register __a1 struct Screen *errors,
-	register __d0 short wait,
-	register __d1 long stack,
-	register __a2 char *default_tool)
-{
-	return L_WB_LaunchNotify(name,errors,wait,stack,default_tool,0,0,0);
-}
-
-BOOL __saveds __asm L_WB_LaunchNotify(
 	register __a0 char *name,
 	register __a1 struct Screen *errors,
 	register __d0 short wait,
@@ -139,6 +146,87 @@ BOOL __saveds __asm L_WB_LaunchNotify(
 	return result;
 }
 
+
+void __saveds __asm L_FreeLaunchWBArgs(register __a0 struct WBArg **args,
+				       register __d0 LONG numargs)
+{
+    LONG arg = 0;
+    struct WBArg *argsp;
+    STRPTR argnull = ((char *)args) + ((ULONG *)args)[-1];
+
+    // Get WBArgs pointer
+    argsp = *args;
+
+    // Clear original pointer
+    *args = 0;
+
+    do
+    {
+	if (argsp[arg].wa_Name && argsp[arg].wa_Name != argnull)
+	    FreeVec(argsp[arg].wa_Name);
+
+	if (argsp[arg].wa_Lock)
+	    UnLock(argsp[arg].wa_Lock);
+
+	arg++;
+    } while (arg < numargs);
+
+    FreeVec(argsp);
+}
+
+
+BOOL __saveds __asm L_WB_LaunchArg(register __a0 struct LaunchWBArg *wbarg,
+	                           register __a1 struct Screen *errors,
+	                           register __d0 short wait,
+	                           register __a2 struct Process **proc_ptr,
+	                           register __a3 IPCData *notify_ipc,
+	                           register __d1 ULONG flags)
+{
+	WBLaunchPacket *packet;
+	BOOL result;
+	short len;
+
+	// Calculate size
+	len=sizeof(WBLaunchPacket);
+	if (wbarg->lwba_default_tool) len+=strlen(wbarg->lwba_default_tool)+1;
+	if (wbarg->lwba_toolwindow) len+=strlen(wbarg->lwba_toolwindow)+1;
+
+	// Allocate launch packet
+	if (!(packet=AllocVec(len,MEMF_CLEAR)))
+		return 0;
+
+	// Fill out launch packet
+	packet->args = wbarg->lwba_args;
+	packet->numargs = wbarg->lwba_numargs;
+	packet->errors=errors;
+	packet->cd=Lock("",ACCESS_READ);
+	packet->stack=wbarg->lwba_stack;
+	packet->wait=(wait>0)?wait:0;
+	packet->type=LAUNCH_WB_ARG;
+	packet->proc_ptr=proc_ptr;
+	packet->notify_ipc=notify_ipc;
+	packet->flags=flags;
+
+	// Default tool
+	if (wbarg->lwba_default_tool)
+	{
+		packet->default_tool=(char *)(packet + 1);
+		strcpy(packet->default_tool,wbarg->lwba_default_tool);
+	}
+	// Toolwindow
+	if (wbarg->lwba_toolwindow)
+	{
+		packet->toolwindow=packet->default_tool+strlen(wbarg->lwba_default_tool)+1;
+		strcpy(packet->toolwindow,wbarg->lwba_toolwindow);
+	}
+
+	// Send command to launch process
+	result=(BOOL)L_IPC_Command(launcher_ipc,IPC_LAUNCH,0,packet,0,(wait)?REPLY_NO_PORT_IPC:0);
+
+	return result;
+}
+
+
 BOOL __saveds __asm L_CLI_Launch(
 	register __a0 char *name,
 	register __a1 struct Screen *errors,
@@ -146,9 +234,11 @@ BOOL __saveds __asm L_CLI_Launch(
 	register __d1 BPTR input,
 	register __d2 BPTR output,
 	register __d3 short wait,
-	register __d4 long stack)
+	register __d4 long stack,
+	register __d5 BPTR command_dir)
 {
 	LaunchPacket *packet;
+	PathListEntry *path = 0;
 	BOOL result;
 
 	// Use stack parameter?
@@ -161,10 +251,34 @@ BOOL __saveds __asm L_CLI_Launch(
 	// Use default stack
 	else stack=4000;
 
+	if (command_dir)
+	{
+	    // Allocate a new path entry
+	    if (path=AllocVec(sizeof(PathListEntry),MEMF_PUBLIC))
+	    {
+		path->next=0;
+
+		// Get lock on path
+		path->lock = command_dir;
+	    }
+	    else
+	    {
+		// Free things
+		UnLock(command_dir);
+		UnLock(currentdir);
+		if (input) Close(input);
+		if (output) Close(output);
+		return 0;
+	    }
+	}
+
 	// Allocate launch packet
 	if (!(packet=AllocVec(sizeof(LaunchPacket)+strlen(name)+1,MEMF_CLEAR)))
 	{
 		// Free things
+		if (path)
+		    FreeVec(path);
+		UnLock(command_dir);
 		UnLock(currentdir);
 		if (input) Close(input);
 		if (output) Close(output);
@@ -181,6 +295,7 @@ BOOL __saveds __asm L_CLI_Launch(
 	packet->wait=(wait>0)?wait:0;
 	packet->type=LAUNCH_DOS;
 	packet->stack=stack;
+	packet->path=path;
 
 	// Send command to launch process
 	result=(BOOL)L_IPC_Command(launcher_ipc,IPC_LAUNCH,0,packet,0,(wait)?REPLY_NO_PORT_IPC:0);
@@ -230,11 +345,6 @@ void __saveds __asm L_MUFSLogin(
 }
 
 
-#define DOSBase			(data->dos_base)
-#define IconBase		(data->icon_base)
-#define GalileoFMBase		(data->galileofm_base)
-#define IntuitionBase	(data->int_base)
-
 typedef struct
 {
 	struct Node			node;
@@ -257,20 +367,17 @@ typedef struct
 } ErrorNode;
 
 #define LAUNCHF_LAUNCHOK	(1<<0)
+#define LAUNCHF_LAUNCH_WBARG	(1<<1)
 
-typedef struct
-{
-	BPTR	next;
-	BPTR	lock;
-} PathListEntry;
-
+LaunchProc *launcher_launch_arg(struct LibData *data, WBLaunchPacket *packet, struct MinList *list, struct MsgPort *reply);
 LaunchProc *launcher_launch(struct LibData *,LaunchPacket *packet,struct MinList *,struct MsgPort *);
 void launch_cleanup(struct LibData *,LaunchProc *);
 void launch_setarg(LaunchProc *,short,BPTR,char *);
 char *launcher_parse(char *,char *,short);
 BPTR launcher_get_parent(struct LibData *,char *);
 void free_launch_packet(struct LibData *data,LaunchPacket *packet);
-long __asm launch_exit_code(register __d1 LaunchPacket *);
+long __asm launch_exit_codeTr(register __d1 LaunchPacket *);
+long __asm launch_exit_code(register __d1 LaunchPacket *, register __a6 struct Library *GalileoFMBase);
 ErrorNode *__stdargs launch_error(struct LibData *data,LaunchPacket *packet,short,short,char *args,...);
 
 #ifdef FAKEWB
@@ -289,7 +396,7 @@ BOOL doslist_check_double(struct LibData *,struct List *,char *);
 void do_mufs_logout(struct LoginPkt *);
 
 
-void __saveds launcher_proc(void)
+void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 {
 	IPCData *ipc;
 	struct LibData *data;
@@ -303,11 +410,8 @@ void __saveds launcher_proc(void)
 	if (!(ipc=L_IPC_ProcStartup((ULONG *)&data,0)))
 		return;
 
-	// Set a4
-	putreg(REG_A4,data->a4);
-
-#ifdef _DEBUG_IPCPROC
-    KPrintF("launcher_proc ResTrackBase: %lx SysBase: %lx IconBase: %lx \n", ResTrackBase, SysBase, IconBase);
+#ifdef _DEBUG_LAUNCHER
+	KPrintF("launcher_proc ResTrackBase: %lx SysBase: %lx IconBase: %lx \n", ResTrackBase, SysBase, IconBase);
 #endif
 
 #ifdef FAKEWB
@@ -403,17 +507,17 @@ void __saveds launcher_proc(void)
 					IsListEmpty((struct List *)&data->wb_data.app_list) &&
 					IsListEmpty((struct List *)&data->wb_data.rem_app_list))
 				{
-#ifdef _DEBUG
-                    KPrintF("!!!Launcher.c line: %ld DECREASING before %ld \n", __LINE__, GalileoFMBase->ml_Lib.lib_OpenCnt);
+#ifdef _DEBUG_IPCPROC
+				        KPrintF("!!!Launcher.c line: %ld DECREASING before %ld \n", __LINE__, GalileoFMBase->lib_OpenCnt);
 #endif
 					// Decrement library open count so we can get expunged
-					--GalileoFMBase->ml_Lib.lib_OpenCnt;
+					--GalileoFMBase->lib_OpenCnt;
 
-                    // Reset flag for wb.c:new_app_entry()
-                    data->wb_data.first_app_entry=TRUE;
+				        // Reset flag for wb.c:new_app_entry()
+				        data->wb_data.first_app_entry=TRUE;
 
-#ifdef _DEBUG
-                    KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, GalileoFMBase->ml_Lib.lib_OpenCnt);
+#ifdef _DEBUG_IPCPROC
+					KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, GalileoFMBase->lib_OpenCnt);
 #endif
 				}
 
@@ -559,15 +663,12 @@ void __saveds launcher_proc(void)
 					--data->launch_count;
 
 					// Zero count? Decrement library open count
-#ifdef _DEBUG
-                    KPrintF("!!!Launcher.c line: %ld DECREASING if %ld = 0 before %ld \n", __LINE__, data->launch_count, GalileoFMBase->ml_Lib.lib_OpenCnt);
-#endif
-					if (data->launch_count==0) --GalileoFMBase->ml_Lib.lib_OpenCnt;
-#ifdef _DEBUG
-                    {
-                    	KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, GalileoFMBase->ml_Lib.lib_OpenCnt);
-                        break;
-                    }
+					if (data->launch_count==0) --GalileoFMBase->lib_OpenCnt;
+#ifdef _DEBUG_IPCPROC
+				        {
+				            KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, GalileoFMBase->lib_OpenCnt);
+					    break;
+				        }
 #else
 					break;
 #endif
@@ -650,9 +751,10 @@ void __saveds launcher_proc(void)
 						SYS_Asynch,TRUE,
 						SYS_UserShell,TRUE,
 						NP_Cli,TRUE,
+						(packet->path)?NP_Path:TAG_IGNORE,MKBADDR(packet->path),
 						NP_StackSize,packet->stack,
 						NP_WindowPtr,0,
-						(packet->wait)?NP_ExitCode:TAG_IGNORE,launch_exit_code,
+						(packet->wait)?NP_ExitCode:TAG_IGNORE,launch_exit_codeTr,
 						NP_ExitData,packet,
 						TAG_DONE)!=-1)
 					{
@@ -672,14 +774,14 @@ void __saveds launcher_proc(void)
 							// Increment count
 							++data->launch_count;
 
-#ifdef _DEBUG
-                    		KPrintF("!!!Launcher.c line: %ld INCREASING if %ld = 1 before %ld \n", __LINE__, data->launch_count, GalileoFMBase->ml_Lib.lib_OpenCnt);
+#ifdef _DEBUG_IPCPROC
+							KPrintF("!!!Launcher.c line: %ld INCREASING if %ld = 1 before %ld \n", __LINE__, data->launch_count, GalileoFMBase->lib_OpenCnt);
 #endif
 							// First program? Increment open count so we can't be flushed
 							if (data->launch_count==1)
-								++GalileoFMBase->ml_Lib.lib_OpenCnt;
-#ifdef _DEBUG
-                    		KPrintF("!!!Launcher.c line: %ld INCREASING after %ld \n", __LINE__, GalileoFMBase->ml_Lib.lib_OpenCnt);
+								++GalileoFMBase->lib_OpenCnt;
+#ifdef _DEBUG_IPCPROC
+							KPrintF("!!!Launcher.c line: %ld INCREASING after %ld \n", __LINE__, GalileoFMBase->lib_OpenCnt);
 #endif
 
 							// Unlock launch list
@@ -692,7 +794,15 @@ void __saveds launcher_proc(void)
 					}
 
 					// Failed
-					else msg->command=0;
+					else
+					{
+					    if (packet->path)
+					    {
+						UnLock(packet->path->lock);
+						FreeVec(packet->path);
+					    }
+					    msg->command=0;
+					}
 				}
 
 				// Workbench launch 
@@ -701,12 +811,23 @@ void __saveds launcher_proc(void)
 					// Lock launch list
 					GetSemaphore(&data->launch_lock,SEMF_EXCLUSIVE,0);
 
+					if (packet->type == LAUNCHF_LAUNCH_WBARG)
+					{
+					    proc=launcher_launch_arg(data,
+								 (WBLaunchPacket *)packet,
+						                 &data->launch_list,
+								 reply_port);
+					}
+					else
+					{
+					    proc=launcher_launch(data,
+						                 packet,
+						                 &data->launch_list,
+								 reply_port);
+					}
+
 					// Launch program
-					if (proc=launcher_launch(
-						data,
-						packet,
-						&data->launch_list,
-						reply_port))
+					if (proc)
 					{
 						// Success
 						msg->command=1;
@@ -714,16 +835,16 @@ void __saveds launcher_proc(void)
 						// Increment count
 						++data->launch_count;
 
-#ifdef _DEBUG
-                		KPrintF("!!!Launcher.c line: %ld INCREASING if %ld = 1 before %ld \n", __LINE__, data->launch_count, GalileoFMBase->ml_Lib.lib_OpenCnt);
+#ifdef _DEBUG_IPCPROC
+						KPrintF("!!!Launcher.c line: %ld INCREASING if %ld = 1 before %ld \n", __LINE__, data->launch_count, GalileoFMBase->lib_OpenCnt);
 #endif
 
 						// First program? Increment open count so we can't be flushed
 						if (data->launch_count==1)
-							++GalileoFMBase->ml_Lib.lib_OpenCnt;
+							++GalileoFMBase->lib_OpenCnt;
 
-#ifdef _DEBUG
-                		KPrintF("!!!Launcher.c line: %ld INCREASING after %ld \n", __LINE__, GalileoFMBase->ml_Lib.lib_OpenCnt);
+#ifdef _DEBUG_IPCPROC
+						KPrintF("!!!Launcher.c line: %ld INCREASING after %ld \n", __LINE__, GalileoFMBase->lib_OpenCnt);
 #endif
 
 						// Wait for reply?
@@ -901,8 +1022,8 @@ void __saveds launcher_proc(void)
 		}
 	}
 
-    // Delete reply port
-    DeleteMsgPort(reply_port);
+	// Delete reply port
+	DeleteMsgPort(reply_port);
 
 	// Free timers
 	FreeTimer(secondtimer);
@@ -924,6 +1045,196 @@ void __saveds launcher_proc(void)
 
 	// Exit
 	IPC_Free(ipc);
+
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
+}
+
+
+LaunchProc *launcher_launch_arg(
+	struct LibData *data,
+	WBLaunchPacket *packet,
+	struct MinList *list,
+	struct MsgPort *reply)
+{
+	char *run_name;
+	LaunchProc *launch;
+	BPTR old_dir,cur_dir=0,parent;
+	short result=0;
+	char *proc_name,*default_tool=0;
+	struct Library *GalileoFMBase = MyLibBase;
+
+	// Allocate launch data
+	if (!(launch=AllocVec(sizeof(LaunchProc),MEMF_CLEAR)))
+	{
+		// Failed
+		return 0;
+	}
+	// Default tool supplied?
+	if (packet->default_tool) default_tool=packet->default_tool;
+
+	// Save notify port
+	launch->notify_ipc=packet->notify_ipc;
+
+	// Initialise startup message
+	launch->startup.sm_Message.mn_ReplyPort=reply;
+	launch->startup.sm_NumArgs=packet->numargs;;
+	launch->startup.sm_ArgList=packet->args;
+	packet->args = 0;
+	launch->flags = LAUNCHF_LAUNCH_WBARG;
+
+	// Is this a project?
+	if (default_tool)
+	{
+		// We actually run the default tool
+		run_name=FilePart(default_tool);
+
+		// Get parent
+		parent=launcher_get_parent(data,default_tool);
+
+		// Set first argument to default tool
+		launch_setarg(launch,0,parent,run_name);
+	}
+
+	// Not a project, get original name
+	else run_name=launch->startup.sm_ArgList[0].wa_Name;
+	// Change current directory
+	old_dir=CurrentDir(launch->startup.sm_ArgList[0].wa_Lock);
+
+	// Get process name
+	proc_name=FilePart(run_name);
+
+	// Load program
+	if (!(launch->startup.sm_Segment=(BPTR)LoadSeg(run_name)) && default_tool)
+	{
+		// If not an absolute path
+		if (!strchr(run_name,':') && !strchr(run_name,'/'))
+		{
+			PathListEntry *entry;
+
+			// Lock path list
+			GetSemaphore(&data->path_lock,SEMF_SHARED,0);
+
+			// Go through pathlist
+			for (entry=(PathListEntry *)BADDR(data->path_list);
+				entry;
+				entry=(PathListEntry *)BADDR(entry->next))
+			{
+				BPTR old;
+
+				// Change directory to here
+				old=CurrentDir(entry->lock);
+
+				// Load program
+				launch->startup.sm_Segment=(BPTR)LoadSeg(proc_name);
+
+				// Restore directory
+				CurrentDir(old);
+
+				// Did we get the program?
+				if (launch->startup.sm_Segment)
+				{
+					// Duplicate the home directory
+					cur_dir=DupLock(entry->lock);
+
+					// Fix first WBArg lock
+					if (launch->startup.sm_ArgList[0].wa_Lock)
+					    UnLock(launch->startup.sm_ArgList[0].wa_Lock);
+					launch->startup.sm_ArgList[0].wa_Lock = DupLock(cur_dir);
+
+					break;
+				}
+			}
+
+			// Unlock path list
+			FreeSemaphore(&data->path_lock);
+		}
+	}
+
+	// Got segment?
+	if (launch->startup.sm_Segment)
+	{
+		//long stack;
+		BPTR homedir;
+		struct Process *proc;
+
+		// Get home directory
+		homedir=DupLock((cur_dir)?cur_dir:launch->startup.sm_ArgList[0].wa_Lock);
+
+		// Launch program
+		if (proc=CreateNewProcTags(
+			NP_Seglist,launch->startup.sm_Segment,
+			NP_FreeSeglist,FALSE,
+			NP_StackSize,packet->stack,
+			NP_Name,proc_name,
+			NP_Priority,0,
+			NP_HomeDir,homedir,
+			NP_CurrentDir,0,
+			NP_Input,0,
+			NP_Output,0,
+			NP_CloseInput,FALSE,
+			NP_CloseOutput,FALSE,
+			NP_WindowPtr,0,
+			TAG_END))
+		{
+			// Save process pointer in packets
+			if (packet->proc_ptr) *(packet->proc_ptr)=proc;
+			launch->proc=proc;
+
+			// Set process pointer
+			launch->startup.sm_Process=&proc->pr_MsgPort;
+
+			if (packet->toolwindow)
+			{
+				strcpy(launch->toolwindow,packet->toolwindow);
+				launch->startup.sm_ToolWindow=launch->toolwindow;
+			}
+
+			// Set flag
+			launch->flags|=LAUNCHF_LAUNCHOK;
+
+			// Open window under mouse?
+			if (packet->flags&LAUNCHF_OPEN_UNDER_MOUSE)
+				data->open_window_kludge=proc;
+
+			// Send startup message
+			PutMsg(launch->startup.sm_Process,(struct Message *)&launch->startup);
+
+			// Store name
+			stccpy(launch->name,proc_name,39);
+
+			// Add launch info to list
+			AddTail((struct List *)list,(struct Node *)launch);
+			launch->node.ln_Name=proc->pr_Task.tc_Node.ln_Name;
+
+			// Return success
+			result=1;
+		}
+
+		// Failed
+		else UnLock(homedir);
+	}
+
+	// Restore current directory
+	CurrentDir(old_dir);
+	if (cur_dir) UnLock(cur_dir);
+
+	// If failed, show error
+	if (!result) launch_error(data,(LaunchPacket *)packet,MSG_UNABLE_TO_OPEN_TOOL,MSG_OK,proc_name);
+
+	// Free icon
+	//if (icon) FreeDiskObject(icon);
+
+	// If failed, clean up
+	if (!result)
+	{
+		launch_cleanup(data,launch);
+		launch=0;
+	}
+
+	// Return launch process
+	return launch;
 }
 
 
@@ -937,10 +1248,11 @@ LaunchProc *launcher_launch(
 	char name[278],buf[278],*run_name;
 	struct DiskObject *icon;
 	LaunchProc *launch;
-	short arg_count,arg=0;
+	WORD arg_count,arg=0;
 	BPTR old_dir,cur_dir=0,parent;
 	short result=0;
 	char *proc_name,*default_tool=0;
+	struct Library *GalileoFMBase = MyLibBase;
 
 	// Get program name
 	arg_ptr=launcher_parse(packet->name,name,256);
@@ -1086,7 +1398,11 @@ LaunchProc *launcher_launch(
 		if (stack<4000) stack=4000;
 
 		// Get home directory
+#ifdef RESOURCE_TRACKING
+		homedir=NRT_DupLock((cur_dir)?cur_dir:launch->startup.sm_ArgList[0].wa_Lock);
+#else
 		homedir=DupLock((cur_dir)?cur_dir:launch->startup.sm_ArgList[0].wa_Lock);
+#endif
 
 		// Launch program
 		if (proc=CreateNewProcTags(
@@ -1140,7 +1456,11 @@ LaunchProc *launcher_launch(
 		}
 
 		// Failed
+#ifdef RESOURCE_TRACKING
+		else NRT_UnLock(homedir);
+#else
 		else UnLock(homedir);
+#endif
 	}
 
 	// Restore current directory
@@ -1168,22 +1488,33 @@ LaunchProc *launcher_launch(
 // Clean up launch data
 void launch_cleanup(struct LibData *data,LaunchProc *launch)
 {
+	struct Library *GalileoFMBase = MyLibBase;
+
 	if (launch)
 	{
-		short arg;
+		WORD arg;
 
 		// Unload program
 		if (launch->startup.sm_Segment)
 			UnLoadSeg(launch->startup.sm_Segment);
 
-		// Go through arguments
-		for (arg=0;arg<launch->startup.sm_NumArgs;arg++)
+		if (launch->flags&LAUNCHF_LAUNCH_WBARG)
 		{
-			// Free arg
-			UnLock(launch->startup.sm_ArgList[arg].wa_Lock);
-			FreeVec(launch->startup.sm_ArgList[arg].wa_Name);
+		    if (launch->startup.sm_ArgList)
+		    {
+			FreeLaunchWBArgs(&launch->startup.sm_ArgList,launch->startup.sm_NumArgs);
+		    }
 		}
-
+		else
+		{
+		    // Go through arguments
+		    for (arg=0;arg<launch->startup.sm_NumArgs;arg++)
+		    {
+			    // Free arg
+			    UnLock(launch->startup.sm_ArgList[arg].wa_Lock);
+			    FreeVec(launch->startup.sm_ArgList[arg].wa_Name);
+		    }
+		}
 		// Free timer
 		FreeTimer(launch->timeout);
 
@@ -1194,7 +1525,7 @@ void launch_cleanup(struct LibData *data,LaunchProc *launch)
 
 
 // Fill out a WBArg
-void launch_setarg(LaunchProc *launch,short arg,BPTR lock,char *name)
+void launch_setarg(LaunchProc *launch,WORD arg,BPTR lock,char *name)
 {
 	// Store lock
 	launch->startup.sm_ArgList[arg].wa_Lock=lock;
@@ -1263,22 +1594,11 @@ char *launcher_parse(char *string,char *buffer,short bufsize)
 // Get parent lock
 BPTR launcher_get_parent(struct LibData *data,char *name)
 {
-	char buf[256],*ptr,c;
+	char *ptr,c;
 	BPTR lock,parent;
+	struct Library *GalileoFMBase = MyLibBase;
 	
-	// Copy name
-	strcpy(buf,name);
-
-	// Lock file
-	if (!(lock=Lock(name,ACCESS_READ)))
-	{
-		// Try for icon
-		strcat(buf,".info");
-		lock=Lock(buf,ACCESS_READ);
-	}
-
-	// Got lock?
-	if (lock)
+	if (lock=LockFromPath(name,NULL,TRUE))
 	{
 		// Is it a directory?
 		if ((c=name[strlen(name)-1])=='/' || c==':')
@@ -1295,10 +1615,12 @@ BPTR launcher_get_parent(struct LibData *data,char *name)
 	}
 
 	// Strip file, lock path
-	if (ptr=FilePart(buf))
+	if (ptr=FilePart(name))
 	{
+		c = *ptr;
 		*ptr=0;
-		lock=Lock(buf,ACCESS_READ);
+		lock=Lock(name,ACCESS_READ);
+		*ptr = c;
 	}
 
 	// No lock, get current dir
@@ -1306,18 +1628,32 @@ BPTR launcher_get_parent(struct LibData *data,char *name)
 	return lock;
 }
 
-#ifdef RESOURCE_TRACKING
-#define ResTrackBase    (data->restrack_base)
-#endif
+
 // Free launch packet
 void free_launch_packet(struct LibData *data,LaunchPacket *packet)
 {
+	struct Library *GalileoFMBase = MyLibBase;
+
 	if (packet)
 	{
+	    if (packet->type == LAUNCH_WB_ARG)
+	    {
+		WBLaunchPacket *wbpacket = (WBLaunchPacket *)packet;
+		UnLock(wbpacket->cd);
+
+		// Free WBArgs if they still belong to the LaunchPacket
+		if (wbpacket->args)
+		{
+		    FreeLaunchWBArgs(&wbpacket->args, wbpacket->numargs);
+		}
+	    }
+	    else
+	    {
 		UnLock(packet->cd);
 		if (packet->in) Close(packet->in);
 		if (packet->out) Close(packet->out);
-		FreeVec(packet);
+	    }
+	    FreeVec(packet);
 	}
 }
 #ifdef RESOURCE_TRACKING
@@ -1339,47 +1675,42 @@ LONG launcher_SystemTags(struct LibData *data,char *command,Tag tag1,...)
 */
 
 // Launch exit code
-long __saveds __asm launch_exit_code(
-	register __d1 LaunchPacket *packet)
+long __saveds __asm launch_exit_code(register __d1 LaunchPacket *packet,
+				     register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get library data pointer
-	data=packet->data;
-
 	// Message to reply to?
 	if (packet->exit_reply) IPC_Reply(packet->exit_reply);
 
 	// Free launch packet
-	free_launch_packet(data,packet);
+	free_launch_packet(&gfmlib_data,packet);
 
 	// Lock launch list
-	GetSemaphore(&data->launch_lock,SEMF_EXCLUSIVE,0);
+	GetSemaphore(&gfmlib_data.launch_lock,SEMF_EXCLUSIVE,0);
 
-#ifdef _DEBUG
-    KPrintF("!!!Launcher.c line: %ld DECREASING if %ld = 0 before %ld \n", __LINE__, data->launch_count, GalileoFMBase->ml_Lib.lib_OpenCnt);
+#ifdef _DEBUG_IPCPROC
+	KPrintF("!!!Launcher.c line: %ld DECREASING if %ld = 0 before %ld \n", __LINE__, gfmlib_data.launch_count, GalileoFMBase->lib_OpenCnt);
 #endif
 
 	// Decrement launch count, check for zero count
-	if (--data->launch_count==0)
+	if (--gfmlib_data.launch_count==0)
 	{
 		// Decrement library open count
-		--GalileoFMBase->ml_Lib.lib_OpenCnt;
+		--GalileoFMBase->lib_OpenCnt;
 
-#ifdef _DEBUG
-        KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, GalileoFMBase->ml_Lib.lib_OpenCnt);
+#ifdef _DEBUG_IPCPROC
+		KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, GalileoFMBase->lib_OpenCnt);
 #endif
 
 		// Signal to check for pending quit
-		Signal((struct Task *)data->launch_proc->proc,IPCSIG_QUIT);
+		Signal((struct Task *)gfmlib_data.launch_proc->proc,IPCSIG_QUIT);
 	}
-#ifdef _DEBUG
-    else
-		KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, GalileoFMBase->ml_Lib.lib_OpenCnt);
+#ifdef _DEBUG_IPCPROC
+	else
+		KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, GalileoFMBase->lib_OpenCnt);
 #endif
 
 	// Unlock launch list
-	FreeSemaphore(&data->launch_lock);
+	FreeSemaphore(&gfmlib_data.launch_lock);
 
 	return 0;
 }
@@ -1391,6 +1722,7 @@ ErrorNode *__stdargs launch_error(struct LibData *data,LaunchPacket *packet,shor
 	ErrorNode *error;
 	struct EasyStruct easy;
 	struct Window *parent=0;
+	struct Library *GalileoFMBase = MyLibBase;
 
 	// No errors?
 	if (packet && packet->errors==(struct Screen *)-1)
@@ -1434,9 +1766,9 @@ ErrorNode *__stdargs launch_error(struct LibData *data,LaunchPacket *packet,shor
 BOOL install_fake_workbench(struct LibData *data)
 {
 	// If workbench is already running, do nothing
-    Forbid();
+	Forbid();
 	if (FindTask("Workbench")) return 0;
-    Permit();
+	Permit();
 
 	// Launch workbench task
 	IPC_Launch(
@@ -1504,6 +1836,10 @@ void __saveds fake_workbench(void)
 
 	// Free IPC data and exit
 	IPC_Free(ipc);
+
+#ifdef RESOURCE_TRACKING
+    ResourceTrackingEndOfTask();
+#endif
 }
 #endif
 
@@ -1520,6 +1856,7 @@ BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG fla
 	struct Node *node;
 	Att_List *msg_list=0;
 	char name[80];
+	struct Library *GalileoFMBase = MyLibBase;
 
 	// Lock our list
 	GetSemaphore(&data->dos_lock,SEMF_EXCLUSIVE,0);
@@ -1846,15 +2183,26 @@ BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG fla
 
 				// Find device entry for this volume
 				else
-				if (DeviceFromHandler(found->dle_DosList.dol_Task,name))
+				if (found->dle_DeviceName[0])
 				{
+					Att_Node *node;
 					// Send notification
 					if (msg_list)
-						Att_NewNode(
-							msg_list,
-							name,
-							(found->dle_Node.ln_Pri==DL_ADDED)?1:0,
-							ADDNODE_EXCLUSIVE);
+					{
+						if (node = Att_NewNode(msg_list,
+							               found->dle_DeviceName,
+							               (found->dle_Node.ln_Pri==DL_ADDED)?1:0,
+								       ADDNODE_DISKCHANGENODE|ADDNODE_EXCLUSIVE))
+						{
+						    diskchange_data *diskchange;
+
+						    diskchange = (diskchange_data *)node->node.ln_Name;
+						    diskchange->date = found->dle_DosList.dol_misc.dol_volume.dol_VolumeDate;
+
+						    diskchange->volnamelen = stccpy(diskchange->volname, found->dle_Node.ln_Name, sizeof(diskchange->volname));
+						    diskchange->volnamelen--;
+						}
+					}
 				}
 
 				// No device found
@@ -1919,7 +2267,7 @@ void doslist_free(struct LibData *data,struct MinList *list)
 		next=node->ln_Succ;
 
 		// Free this entry
-		FreeMemH(node);
+		L_FreeMemH(node);
 	}
 
 	// Re-initialise list
@@ -1938,7 +2286,7 @@ void __asm __saveds L_NotifyDiskChange(void)
 	}
 }
 
-char *device_check[]={
+static const char *device_check[]={
 	"trackdisk.device",
 	"diskspare.device",
 	"floppy.device",
@@ -1946,7 +2294,7 @@ char *device_check[]={
 	"mfm.device",
 	"diskspare.device",0};
 
-char *device_check_name[]={
+static const char *device_check_name[]={
 	"DF",
 	"DS",
 	"FS",
@@ -2024,26 +2372,22 @@ BOOL doslist_check_double(struct LibData *data,struct List *list,char *name)
 void __asm __saveds L_GetDosListCopy(
 	register __a0 struct List *list,
 	register __a1 APTR memory,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
 	DosListEntry *entry;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
 
 	// Initialise the list
 	NewList(list);
 
 	// Try and get the list
-	if (doslist_get(data,(struct MinList *)list,memory,0))
+	if (doslist_get(&gfmlib_data,(struct MinList *)list,memory,0))
 		return;
 
 	// Lock the dos list copy
-	GetSemaphore(&data->dos_lock,SEMF_EXCLUSIVE,0);
+	GetSemaphore(&gfmlib_data.dos_lock,SEMF_EXCLUSIVE,0);
 
 	// Go through the list
-	for (entry=(DosListEntry *)data->dos_list.mlh_Head;
+	for (entry=(DosListEntry *)gfmlib_data.dos_list.mlh_Head;
 		entry->dle_Node.ln_Succ;
 		entry=(DosListEntry *)entry->dle_Node.ln_Succ)
 	{
@@ -2075,26 +2419,19 @@ void __asm __saveds L_GetDosListCopy(
 	}
 
 	// Release list lock
-	FreeSemaphore(&data->dos_lock);
+	FreeSemaphore(&gfmlib_data.dos_lock);
 }
 
 
 // Free a user copy of the dos list
 void __asm __saveds L_FreeDosListCopy(
 	register __a0 struct List *list,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// Free copy
-	doslist_free(data,(struct MinList *)list);
+	doslist_free(&gfmlib_data,(struct MinList *)list);
 }
 
-
-#undef DOSBase
 
 /*
 // Logout (called from GALILEO_LAUNCHER)

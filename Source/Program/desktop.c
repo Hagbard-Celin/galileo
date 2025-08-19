@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,8 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "backdrop_protos.h"
 
 // Find item in the hidden list
 BOOL desktop_find_hidden(char *name,BOOL bad)
@@ -68,15 +71,16 @@ BOOL desktop_find_hidden(char *name,BOOL bad)
 	return (BOOL)((desk->node.mln_Succ)?TRUE:FALSE);
 }
 
+#ifdef DISTINCT_OK
 
 // Snapshot an icon for the desktop
 Cfg_Desktop *desktop_snapshot_icon(BackdropObject *icon,short x,short y)
 {
 	Cfg_Desktop *desk;
-	char name[256];
+	char *name;
 
 	// Get icon path
-	if (!(desktop_icon_path(icon,name,256,0))) return 0;
+	if (!(name = desktop_icon_path(icon,0))) return 0;
 
 	// Lock desktop list
 	GetSemaphore(&environment->desktop_lock,SEMF_EXCLUSIVE,0);
@@ -112,9 +116,12 @@ Cfg_Desktop *desktop_snapshot_icon(BackdropObject *icon,short x,short y)
 	// Unlock desktop list
 	FreeSemaphore(&environment->desktop_lock);
 
+	FreeMemH(name);
+
 	return desk;
 }
 
+#endif
 
 // See if an icon has been snapshotted for the desktop
 Cfg_Desktop *desktop_find_icon(char *name,ULONG *pos)
@@ -151,26 +158,32 @@ Cfg_Desktop *desktop_find_icon(char *name,ULONG *pos)
 
 
 // Get the path of an icon
-BOOL desktop_icon_path(BackdropObject *icon,char *path,short len,BPTR our_lock)
+STRPTR desktop_icon_path(BackdropObject *icon, BPTR our_lock)
 {
 	BPTR lock;
+	STRPTR path, append = 0;
+	ULONG flags;
 
 	// Get icon lock
 	if (our_lock) lock=our_lock;
 	else if (!(lock=backdrop_icon_lock(icon))) return 0;
 
-	// Get path name
-	DevNameFromLock(lock,path,len);
-	if (!our_lock) UnLock(lock);
+	flags = PFLF_USE_DEVICENAME;
 
 	// File/drawer?
 	if (icon->bdo_icon && icon->bdo_icon->do_Type!=WBDISK)
 	{
-		// Add icon name
-		AddPart(path,icon->bdo_name,len);
+	    flags |= PFLF_SLASH_APPEND;
+	    append = icon->bdo_name;
 	}
 
-	return 1;
+	// Get path name
+	if (!(path = PathFromLock(NULL, lock, flags, append)))
+	    return 0;
+
+	if (!our_lock) UnLock(lock);
+
+	return path;
 }
 
 

@@ -31,11 +31,13 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "icons.h"
 #include <proto/newicon.h>
 
 
@@ -65,7 +67,7 @@ icon_write(short type,char *filename,BOOL replace_image,ULONG iflags,ULONG imask
 
 
 		// See if this file matches a filetype with an icon
-		if (ftype=filetype_identify(filename,FTTYPE_ICON,0,0))
+		if (ftype=filetype_identify(filename,NULL,FTTYPE_ICON,0,0))
 		{
 			char path[256];
 			char *ptr;
@@ -313,7 +315,7 @@ struct DiskObject *GetProperIcon(char *name,short *fake,ULONG flags)
 	if (fake) *fake=1;
 
 	// See if this file matches a filetype with an icon
-	if (ftype=filetype_identify(name,FTTYPE_ICON,0,0))
+	if (ftype=filetype_identify(name,NULL,FTTYPE_ICON,0,0))
 	{
 		char path[256];
 		char *ptr;

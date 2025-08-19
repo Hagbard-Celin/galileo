@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,12 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "environment.h"
+#include "function_launch_protos.h"
+#include "misc_protos.h"
+#include "function_protos.h"
+#include "menu_data.h"
+#include "lsprintf_protos.h"
 
 // LOADENVIRONMENT/LOADSETTINGS/EDITFILETYPE internal function
 GALILEOFM_FUNC(function_loadenvironment)
@@ -46,27 +53,37 @@ GALILEOFM_FUNC(function_loadenvironment)
 	// Get first entry
 	if (entry=function_get_entry(handle))
 	{
-		BPTR lock;
+		BPTR lock, org_dir = 0;
+		char *path = 0;
 
-		// Build full name
-		function_build_source(handle,entry,handle->func_work_buf);
+		if (entry->fe_lock)
+		    org_dir = CurrentDir(entry->fe_lock);
+		else
+		if (handle->func_source_lock)
+		    org_dir = CurrentDir(handle->func_source_lock);
 
 		// See if file exists
-		if (lock=Lock(handle->func_work_buf,ACCESS_READ))
+		if (lock=Lock(entry->fe_name,ACCESS_READ))
+		{
+			path = PathFromLock(NULL, lock, PFLF_USE_DEVICENAME, NULL);
 			UnLock(lock);
+		}
 
 		// Load environment?
 		if (command->function==FUNC_LOADENVIRONMENT)
 		{
 			// If file didn't exist, look in default directory
-			if (!lock) lsprintf(handle->func_work_buf,"PROGDIR:environment/%s",entry->fe_name);
-
+			if (!path)
+			{
+			    path = AllocMemH(0,strlen(entry->fe_name) + 21);
+			    lsprintf(path,"PROGDIR:environment/%s",entry->fe_name);
+			}
 			// Allocate packet
-			if (packet=AllocVec(sizeof(env_packet)+strlen(handle->func_work_buf),0))
+			if (path && (packet=AllocVec(sizeof(env_packet)+strlen(path),0)))
 			{
 				// Fill out packet
 				packet->type=-1;
-				strcpy(packet->name,handle->func_work_buf);
+				strcpy(packet->name,path);
 
 				// Launch process to open environment
 				IPC_Launch(
@@ -75,14 +92,13 @@ GALILEOFM_FUNC(function_loadenvironment)
 					"galileo_environment",
 					(ULONG)environment_proc,
 					STACK_LARGE,
-					(ULONG)packet,
-					(struct Library *)DOSBase);
+					(ULONG)packet);
 			}
 		}
 
 		// Edit filetype
 		else
-		if (command->function==FUNC_EDITFILETYPE)
+		if (path && command->function==FUNC_EDITFILETYPE)
 		{
 			// Must not be iconified
 			if (GUI->window)
@@ -90,14 +106,20 @@ GALILEOFM_FUNC(function_loadenvironment)
 				char *name;
 
 				// Allocate name copy
-				if (name=AllocVec(strlen(handle->func_work_buf)+1,0))
-					strcpy(name,handle->func_work_buf);
+				if (name=AllocVec(strlen(path)+1,0))
+					strcpy(name,path);
 
 				// Launch process to configure filetypes
 				if (!(misc_startup("galileo_config_filetypes",MENU_FILETYPES,GUI->window,name,1)))
 					FreeVec(name);
 			}
 		}
+
+		if (path)
+		    FreeMemH(path);
+
+		if (org_dir)
+		    CurrentDir(org_dir);
 
 		// End this entry
 		function_end_entry(handle,entry,1);

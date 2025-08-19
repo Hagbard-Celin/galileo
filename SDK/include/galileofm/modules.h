@@ -96,173 +96,173 @@ typedef struct
 	ULONG		gc_Count;
 
 	// Create a file entry
-	APTR __asm	(*gc_CreateFileEntry)
-				(register __a0 ULONG lister,
+	APTR		(* __asm gc_CreateFileEntry)
+				(register __a0 APTR lister,
 				 register __a1 struct FileInfoBlock *fib,
 				 register __d0 BPTR lock);
 
 	// Change parameters of a file entry
-	VOID __asm	(*gc_FileSet)
-				(register __a0 ULONG lister,
+	VOID		(* __asm gc_FileSet)
+				(register __a0 APTR lister,
 				 register __a1 APTR entry,
 				 register __a2 struct TagItem *tags);
 
 	// Sort list of entries into a lister
-	VOID __asm	(*gc_SortFileList)
-				(register __a0 ULONG lister,
+	VOID		(* __asm gc_SortFileList)
+				(register __a0 APTR lister,
 				 register __a1 struct List *list,
 				 register __d0 long file_count,
 				 register __d1 long dir_count);
 
 	// Add single entry to a lister
-	APTR __asm	(*gc_AddFileEntry)
-				(register __a0 ULONG lister,
+	APTR		(* __asm gc_AddFileEntry)
+				(register __a0 APTR lister,
 				 register __a1 APTR entry,
 				 register __d0 BOOL sort);
 
 	// Resort a lister
-	VOID __asm	(*gc_ResortLister)
-				(register __a0 ULONG lister,
+	VOID		(* __asm gc_ResortLister)
+				(register __a0 APTR lister,
 				 register __a1 struct ListFormat *format);
 
 	// Refresh a lister
-	VOID __asm	(*gc_RefreshLister)
-				(register __a0 ULONG lister,
+	VOID		(* __asm gc_RefreshLister)
+				(register __a0 APTR lister,
 				 register __d0 ULONG flags);
 
 	// Lock lister file list
-	VOID __asm	(*gc_LockFileList)
-				(register __a0 ULONG lister,
+	VOID		(* __asm gc_LockFileList)
+				(register __a0 APTR lister,
 				 register __d0 BOOL exclusive);
 
 	// Unlock file list
-	VOID __asm	(*gc_UnlockFileList)
-				(register __a0 ULONG lister);
+	VOID		(* __asm gc_UnlockFileList)
+				(register __a0 APTR lister);
 
 	// Find entry in a lister by name
-	APTR __asm	(*gc_FindFileEntry)
-				(register __a0 ULONG lister,
+	APTR		(* __asm gc_FindFileEntry)
+				(register __a0 APTR lister,
 				 register __a1 char *name);
 
 	// Change comment of an entry
-	BOOL __asm	(*gc_SetFileComment)
-				(register __a0 ULONG lister,
+	BOOL		(* __asm gc_SetFileComment)
+				(register __a0 APTR lister,
 				 register __a1 char *name,
 				 register __a2 char *comment);
 
 	// Remove file entry from a lister
-	VOID __asm	(*gc_RemoveFileEntry)
-				(register __a0 ULONG lister,
+	VOID		(* __asm gc_RemoveFileEntry)
+				(register __a0 APTR lister,
 				 register __a1 APTR entry);
 
 	// Query file entry
-	BOOL __asm	(*gc_FileQuery)
-				(register __a0 ULONG lister,
+	BOOL		(* __asm gc_FileQuery)
+				(register __a0 APTR lister,
 				 register __a1 APTR entry,
 				 register __a2 struct TagItem *tags);
 
 	// Show help
-	void __asm	(*gc_ShowHelp)
+	void		(* __asm gc_ShowHelp)
 				(register __a0 char *file_name,
 				 register __a1 char *node_name);
 
 
 	// Convert entry pointer from one type to another
-	APTR __asm	(*gc_ConvertEntry)
+	APTR		(* __asm gc_ConvertEntry)
 				(register __a0 APTR entry);
 
 
 	// Get lister pointer from a path handle
-	ULONG __asm	(*gc_GetLister)
+	APTR		(* __asm gc_GetLister)
 				(register __a0 APTR path);
 
 
 	// Get first source lister
-	APTR __asm 	(*gc_GetSource)
+	APTR		(* __asm gc_GetSource)
 				(register __a0 APTR handle,
 				 register __a1 char *path);
 
 
 	// Get next source lister
-	APTR __asm	(*gc_NextSource)
+	APTR		(* __asm gc_NextSource)
 				(register __a0 APTR handle,
 				 register __a1 char *path);
 
 
 	// Unlock source listers
-	void __asm	(*gc_UnlockSource)
+	void		(* __asm gc_UnlockSource)
 				(register __a0 APTR handle);
 
 
 	// Get next destination lister
-	APTR __asm	(*gc_GetDest)
+	APTR		(* __asm gc_GetDest)
 				(register __a0 APTR handle,
 				 register __a1 char *path);
 
 
 	// End use of source lister
-	void __asm	(*gc_EndSource)
+	void		(* __asm gc_EndSource)
 				(register __a0 APTR handle,
 				 register __d0 long complete);
 
 
 	// End use of destination lister
-	void __asm	(*gc_EndDest)
+	void		(* __asm gc_EndDest)
 				(register __a0 APTR handle,
 				 register __d0 long complete);
 
 
 	// Get next selected entry
-	APTR __asm	(*gc_GetEntry)
+	APTR		(* __asm gc_GetEntry)
 				(register __a0 APTR handle);
 
 
 	// Examine an entry
-	ULONG __asm	(*gc_ExamineEntry)
+	ULONG		(* __asm gc_ExamineEntry)
 				(register __a0 APTR entry,
 				 register __d0 long type);
 
 
 	// End use of an entry
-	void __asm	(*gc_EndEntry)
+	void		(* __asm gc_EndEntry)
 				(register __a0 APTR handle,
 				 register __a1 APTR entry,
 				 register __d0 BOOL deselect);
 
 
 	// Mark an entry for removal
-	void __asm	(*gc_RemoveEntry)
+	void		(* __asm gc_RemoveEntry)
 				(register __a0 APTR entry);
 
 
 	// Return count of selected entries
-	long __asm	(*gc_EntryCount)
+	long		(* __asm gc_EntryCount)
 				(register __a0 APTR handle);
 
 
 	// Mark an entry to be reloaded
-	void __asm	(*gc_ReloadEntry)
+	void		(* __asm gc_ReloadEntry)
 				(register __a0 APTR handle,
 				 register __a1 APTR entry);
 
 
 	// Add a file to a lister
-	void __asm	(*gc_AddFile)
+	void		(* __asm gc_AddFile)
 				(register __a0 APTR handle,
 				 register __a1 char *path,
 				 register __a2 struct FileInfoBlock *fib,
-				 register __a3 ULONG lister);
+				 register __a3 APTR lister);
 
 
 	// Delete a file from a lister
-	void __asm	(*gc_DelFile)
+	void		(* __asm gc_DelFile)
 				(register __a0 APTR handle,
 				 register __a1 char *path,
 				 register __a2 char *name,
-				 register __a3 ULONG lister);
+				 register __a3 APTR lister);
 
 	// Load/reload a file in a lister
-	void __asm	(*gc_LoadFile)
+	void		(* __asm gc_LoadFile)
 				(register __a0 APTR handle,
 				 register __a1 char *path,
 				 register __a2 char *name,
@@ -271,59 +271,59 @@ typedef struct
 
 
 	// Perform changes on a lister
-	void __asm	(*gc_DoChanges)
+	void		(* __asm gc_DoChanges)
 				(register __a0 APTR handle);
 
 
 	// Check for user abort
-	BOOL __asm	(*gc_CheckAbort)
+	BOOL		(* __asm gc_CheckAbort)
 				(register __a0 APTR handle);
 
 
 	// Get window pointer from a path handle
-	struct Window *__asm	(*gc_GetWindow)
-				(register __a0 APTR path);
+	struct Window *	(* __asm gc_GetWindow)
+				(register __a0 APTR lister);
 
 
 	// Get Galileo ARexx port name
-	struct MsgPort *__asm	(*gc_GetPort)
+	struct MsgPort *    (* __asm gc_GetPort)
 				(register __a0 char *ame);
 
 
 	// Get Galileo public screen name
-	struct Screen *__asm	(*gc_GetScreen)
+	struct Screen *	(* __asm gc_GetScreen)
 				(register __a0 char *name);
 
 
 	// Get information about the Galileo screen
-	struct GalileoScreenData *__asm	(*gc_GetScreenData)(void);
+	struct GalileoScreenData *  (* __asm gc_GetScreenData)(void);
 
 
 	// Free screen data structure
-	void __asm	(*gc_FreeScreenData)(void);
+	void		(* __asm gc_FreeScreenData)(void);
 
 
 	// Open progress indicator in a lister
-	void __asm	(*gc_OpenProgress)
+	void		(* __asm gc_OpenProgress)
 				(register __a0 APTR path,
 				 register __a1 char *operation,
 				 register __d0 long total);
 
 
 	// Update progress indicator
-	void __asm	(*gc_UpdateProgress)
+	void		(* __asm gc_UpdateProgress)
 				(register __a0 APTR path,
 				 register __a1 char *name,
 				 register __d0 long count);
 
 
 	// Close progress indicator
-	void __asm	(*gc_CloseProgress)
+	void		(* __asm gc_CloseProgress)
 				(register __a0 APTR path);
 
 
 	// Show 'File exists - Replace?' requester
-	long __asm	(*gc_ReplaceReq)
+	long		(* __asm gc_ReplaceReq)
 				(register __a0 struct Window *window,
 				 register __a1 struct Screen *screen,
 				 register __a2 IPCData *ipc,
@@ -332,15 +332,15 @@ typedef struct
 				 register __d0 long flags);
 
 
-	// Get pointer to Galileo internal things
-	APTR __asm	(*gc_GetPointer)
+	// Get/Free pointer to Galileo internal things
+	APTR		(* __asm gc_GetPointer)
 				(register __a0 struct GetPointerPkt *);
-	void __asm	(*gc_FreePointer)
+	void		(* __asm gc_FreePointer)
 				(register __a0 struct GetPointerPkt *);
 
 
 	// Send an ARexx command direct to Galileo
-	ULONG __asm	(*gc_SendCommand)
+	ULONG		(* __asm gc_SendCommand)
 				(register __a0 APTR handle,
 				 register __a1 char *command,
 				 register __a2 char **result,
@@ -348,29 +348,29 @@ typedef struct
 
 
 	// Make Galileo check if the desktop needs updating
-	void __asm	(*gc_CheckDesktop)
+	void		(* __asm gc_CheckDesktop)
 				(register __a0 char *path);
 
 
 	// Get desktop path
-	short __asm	(*gc_GetDesktop)
+	short		(* __asm gc_GetDesktop)
 				(register __a0 char *buffer);
 
 	// Run script
-	short __asm	(*gc_Script)
+	short		(* __asm gc_Script)
 				(register __a0 char *name,
 				 register __a1 char *data);
 
 	// Popup desktop popup
-	short __asm	(*gc_DesktopPopup)
+	short		(* __asm gc_DesktopPopup)
 				(register __a0 ULONG flags);
 
 	// Reset file entries
-	void __asm	(*gc_FirstEntry)
+	void		(* __asm gc_FirstEntry)
 				(register __a0 APTR handle);
 
 	// Send rexx command direct to Galileo
-	long __asm	(*gc_RexxCommand)
+	long		(* __asm gc_RexxCommand)
 				(register __a0 char *command,
 				 register __a1 char *result,
 				 register __d0 long length,
@@ -378,7 +378,7 @@ typedef struct
 				 register __d1 ULONG flags);
 
 	// Show file requester
-	long __asm	(*gc_FileRequest)
+	long		(* __asm gc_FileRequest)
 				(register __a0 struct Window *parent,
 				 register __a1 char *title,
 				 register __a2 char *initial_path,
@@ -387,25 +387,49 @@ typedef struct
 				 register __d1 char *pattern);
 
 	// Get themes path
-	void __asm	(*gc_GetThemes)
+	void		(* __asm gc_GetThemes)
 				(register __a0 char *buffer);
 
 	// Free pointer without struct pointer_packet
-	void __asm  (*gc_FreePointerDirect)
+	void		(* __asm gc_FreePointerDirect)
 				(register __a0 APTR pointer,
 	    			 register __d0 ULONG type,
 	    			 register __d1 ULONG flags);
 
-	// Check if lister source/dest status is locked
-	BOOL __asm  (*gc_IsSourceDestLock)
-				(register __a0 ULONG lister);
 
-	void __asm  (*gc_FakeDir)
-		       	        (register __a0 ULONG lister,
-				 register __d0 BOOL fakedir);
+	void		(* __asm gc_ListerSet)
+				(register __a0 APTR lister,
+				 register __a1 struct TagItem *tags);
 
-	BOOL __asm  (*gc_IsFakeDir)
-				(register __a0 ULONG lister);
+	BOOL		(* __asm gc_ListerGet)
+				(register __a0 APTR lister,
+				 register __a1 struct TagItem *tags);
+
+	APTR		(* __asm gc_GetFileEntry)
+				(register __a0 APTR lister,
+				 register __a1 APTR from_entry,
+				 register __d0 BOOL selected);
+
+	APTR		(* __asm gc_NewLister)
+				(register __a0 STRPTR path,
+				 register __a1 APTR parent,
+			         register __a2 STRPTR toolbar_path,
+			         register __d0 BPTR path_lock,
+			         register __d1 ULONG flags,
+			         register __d2 WORD Left,
+			         register __d3 WORD Top,
+			         register __d4 WORD Width,
+				 register __d5 WORD Height);
+
+	void		(* __asm gc_ReadDir)
+				(register __a0 APTR lister,
+				 register __a1 STRPTR path,
+				 register __d0 ULONG flags,
+				 register __d1 BPTR path_lock);
+
+	void		(* __asm gc_ClearDir)
+				(register __a0 APTR lister,
+				 register __d0 ULONG flags);
 
 } GalileoCallbackInfo;
 
@@ -427,6 +451,10 @@ typedef struct
 #define HFFS_MENU		( TAG_USER + 0xd )	// struct List *	- Custom menus for entry
 #define HFFS_ICON		( TAG_USER + 0xe )	// struct DiskObject *	- not implemented
 
+// Values for gc_ListerSet/gc_ListerGet
+#define HLT_FAKEDIR		( TAG_USER + 0x1 )	// BOOL			- Not a real dir
+#define HLT_SOURCEDEST_LOCK	( TAG_USER + 0x2 )	// BOOL			- Locked as source or destination
+#define HLT_CURBUFFER_LOCK	( TAG_USER + 0x3 )	// BPTR			- Lock on current dir
 
 // Additional file requester flags
 #define GCRFF_PATTERN		(1<<29)

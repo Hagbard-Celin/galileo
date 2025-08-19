@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -58,17 +58,11 @@ For more information on Directory Opus for Windows please see:
 #include "galileo.strings"
 
 
-#if 0  // Not used anywhere
-// Version number
-#define GALILEOFM_VERSION  5
-#define GALILEOFM_REV      "0"
-#else
-
 #define APPWINID     1
 
 #define VALID_QUALIFIERS (IEQUALIFIER_LCOMMAND|IEQUALIFIER_RCOMMAND|\
-                         IEQUALIFIER_CONTROL|IEQUALIFIER_LSHIFT|\
-                         IEQUALIFIER_RSHIFT|IEQUALIFIER_LALT|IEQUALIFIER_RALT)
+			 IEQUALIFIER_CONTROL|IEQUALIFIER_LSHIFT|\
+			 IEQUALIFIER_RSHIFT|IEQUALIFIER_LALT|IEQUALIFIER_RALT)
 
 #define IEQUAL_ANYSHIFT	(IEQUALIFIER_LSHIFT|IEQUALIFIER_RSHIFT)
 #define IEQUAL_ANYALT	(IEQUALIFIER_LALT|IEQUALIFIER_RALT)
@@ -89,56 +83,9 @@ enum {
 	MAIN_MENU_EVENT,			// Menu event from a sub-process
 };
 
-// Include files
-#include "function_select.h"
-#include "pattern.h"
-#include "toolbar.h"
-#include "display.h"
-#include "reselect.h"
-#include "lister.h"
-#include "buttons.h"
-#include "dirlist.h"
-#include "app_msg.h"
-#include "function_launch.h"
-#include "function_protos.h"
-#include "function_data.h"
-#include "popup.h"
-#include "config.h"
-#include "environment.h"
 
-#include "misc.h"
-#include "rexx.h"
-#include "requesters.h"
-#include "file_op.h"
-#include "filetypes.h"
-#include "buffers.h"
-#include "path_routines.h"
-#include "dates.h"
-#include "links.h"
-#include "cx.h"
-#include "wb.h"
-#include "backdrop.h"
-#include "desktop.h"
-#include "groups.h"
-#include "help.h"
-#include "scripts.h"
-#include "start_menu.h"
-
-#include "position.h"
 #include "galileodata.h"
-#include "palette_routines.h"
-#include "envoy.h"
-#include "notify.h"
-#include "graphics.h"
-#include "file_select.h"
-#include "window_activate.h"
-#include "cleanup.h"
-#include "icons.h"
-#include "menu_data.h"
-#include "tile.h"
-#include "protos.h"
 
-#include "callback.h"
 
 #ifdef RESOURCE_TRACKING
 #include <restrack_protos.h>

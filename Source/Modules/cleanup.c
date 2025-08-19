@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -88,13 +89,16 @@ int __asm __saveds L_Module_Entry(
 			while (id=IFFNextChunk(iff,0))
 			{
 				struct Node *entry;
+				ULONG size;
 
 				// Valid chunk?
-				if (id!=ID_POSI && id!=ID_LOUT && id!=ID_ICON && id!=ID_STRT)
+				if (id!=ID_POSI && id!=ID_LOUT && id!=ID_LFTO  && id!=ID_ICON && id!=ID_STRT)
 					continue;
 
+				size = IFFChunkSize(iff) + sizeof(struct Node);
+
 				// Allocate record
-				if (!(entry=AllocMemH(memory,IFFChunkSize(iff)+sizeof(struct Node))))
+				if (!(entry=AllocMemH(memory,size)))
 				{
 					ok=0;
 					break;
@@ -113,24 +117,61 @@ int __asm __saveds L_Module_Entry(
 				if (id==ID_LOUT)
 				{
 					entry->ln_Type=PTYPE_LEFTOUT;
+					entry->ln_Name=((leftout_record_old *)entry)->name;
+				}
+				else
+				if (id==ID_LFTO)
+				{
+					entry->ln_Type=PTYPE_LEFTOUT;
+				        entry->ln_Pri = 1;
 					entry->ln_Name=((leftout_record *)entry)->name;
 				}
 				else
 				if (id==ID_ICON)
 				{
 					entry->ln_Type=PTYPE_APPICON;
-					entry->ln_Name=((leftout_record *)entry)->name;
+					entry->ln_Name=((appicon_record *)entry)->name;
 				}
 
-				// Only check if a position or leftout
-				if (id==ID_POSI || id==ID_LOUT)
+				// Only check if a leftout
+				if (id==ID_LFTO)
+				{
+				    BPTR volume_lock;
+
+				    // Try to lock volume root
+				    if (volume_lock = LockFromVolIdPath(entry->ln_Name, NULL,
+									&((leftout_record *)entry)->vol_date,
+									((leftout_record *)entry)->vol_name_len, NULL))
+				    {
+					BPTR lock, org_dir = CurrentDir(volume_lock);
+
+					// Get path relative to volume root
+					ptr = entry->ln_Name + ((leftout_record *)entry)->vol_name_len + 1;
+
+					// Try to lock thing
+					if (!(lock = LockFromPath(ptr, NULL, NULL)))
+					{
+						// Failed to find, free node
+						FreeMemH(entry);
+						entry=0;
+						change=1;
+					}
+					else UnLock(lock);
+
+
+					UnLock(CurrentDir(org_dir));
+				    }
+				}
+				// ..or position
+				else
+				if (id==ID_POSI)
 				{
 					// Get device name
 					stccpy(name,entry->ln_Name,39);
 					if (ptr=strchr(name,':')) *ptr=0;
 
 					// Find in dos list
-					if (FindDosEntry(dos,name,(id==ID_POSI)?LDF_VOLUMES:LDF_DEVICES))
+					if (FindDosEntry(dos,name,LDF_VOLUMES))
 					{
 						BPTR lock;
 
@@ -186,9 +227,18 @@ int __asm __saveds L_Module_Entry(
 						else
 						if (node->ln_Type==PTYPE_LEFTOUT)
 						{
+						    if (node->ln_Pri == 1)
+						    {
+							// Get id and chunk size
+							id=ID_LFTO;
+							size=sizeof(leftout_record)-sizeof(struct Node);
+						    }
+						    else
+						    {
 							// Get id and chunk size
 							id=ID_LOUT;
-							size=sizeof(leftout_record)-sizeof(struct Node);
+							size=sizeof(leftout_record_old)-sizeof(struct Node);
+						    }
 						}
 
 						// AppIcon?
@@ -197,7 +247,7 @@ int __asm __saveds L_Module_Entry(
 						{
 							// Get id and chunk size
 							id=ID_ICON;
-							size=sizeof(leftout_record)-sizeof(struct Node);
+							size=sizeof(appicon_record)-sizeof(struct Node);
 						}
 
 						// Write chunk

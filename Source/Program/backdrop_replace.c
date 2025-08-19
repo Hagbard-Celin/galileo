@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -40,20 +41,22 @@ For more information on Directory Opus for Windows please see:
 
 */
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "backdrop_protos.h"
 #include <proto/newicon.h>
 
+char disk[] = "Disk";
 
-void backdrop_replace_icon_image(BackdropInfo *info,char *source_name,BackdropObject *dest)
+UBYTE get_deficon_type(char *name);
+//static const char *disk = "Disk";
+
+void backdrop_replace_icon_image(BackdropInfo *info,char *source_name,BPTR source_lock,BackdropObject *dest)
 {
-    char *buffer;
-    BPTR lock;
-
-    // Allocate buffer
-    if (!(buffer=AllocVec(1024,MEMF_CLEAR)))
-	return;
+    char *dest_name;
+    BPTR lock = 0, dest_lock, org_dir;
 
     // First selected icon?
-    if (!source_name)
+    if (!source_name && !source_lock)
     {
 	BackdropObject *icon;
 
@@ -69,21 +72,15 @@ void backdrop_replace_icon_image(BackdropInfo *info,char *source_name,BackdropOb
 	    if (icon->bdo_state)
 	    {
 		// Get icon lock
-		if (lock=backdrop_icon_lock(icon))
+		if (lock = backdrop_icon_lock(icon))
 		{
-		    // Build name
-		    DevNameFromLock(lock,buffer,512);
+		    // Get name
 		    if (icon->bdo_type==BDO_DISK)
-			AddPart(buffer,"Disk",512);
+			source_name = disk;
 		    else
-			AddPart(buffer,icon->bdo_name,512);
+			source_name = icon->bdo_name;
 
-		    // Unlock lock
-		    UnLock(lock);
-
-		    // Get name pointer
-		    source_name=buffer;
-		    break;
+		    source_lock = lock;
 		}
 	    }
 	}
@@ -92,33 +89,23 @@ void backdrop_replace_icon_image(BackdropInfo *info,char *source_name,BackdropOb
 	unlock_listlock(&info->objects);
     }
 
-    // Otherwise, check for disk
-    else
-    if (source_name[strlen(source_name)-1]==':')
-    {
-	// Build disk icon name
-	strcpy(buffer,source_name);
-	strcat(buffer,"Disk");
-	source_name=buffer;
-    }
-
     // No source, or can't lock destination?
-    if (!source_name || !(lock=backdrop_icon_lock(dest)))
+    if ((!source_name && !source_lock) || !(dest_lock=backdrop_icon_lock(dest)))
     {
-	FreeVec(buffer);	
+	if (lock)
+	    UnLock(lock);
+
 	return;
     }
 
-    // Build destination name
-    DevNameFromLock(lock,buffer+512,512);
-    if (dest->bdo_type==BDO_DISK)
-	AddPart(buffer+512,"Disk",512);
+    if (dest->bdo_type == BDO_DISK)
+    {
+	dest_name = disk;
+    }
     else
-	AddPart(buffer+512,dest->bdo_name,512);
+	dest_name = dest->bdo_name;
 
-    // Unlock lock
-    UnLock(lock);
-
+    org_dir = CurrentDir(source_lock);
 
     if (IconBase->lib_Version>=44)
     {
@@ -131,14 +118,29 @@ void backdrop_replace_icon_image(BackdropInfo *info,char *source_name,BackdropOb
 		           ICONGETA_RemapIcon,FALSE,
 		           TAG_DONE);
 
-	dest=GetIconTags(buffer+512,
+	CurrentDir(dest_lock);
+
+	// Get destination icon
+	if (!(dest=GetIconTags(dest_name,
 		         ICONGETA_FailIfUnavailable,TRUE,
 		         ICONGETA_RemapIcon,FALSE,
-		         TAG_DONE);
+		         TAG_DONE)))
+	{
+	    UBYTE type;
+
+	    // Couldn't load destination, so try deficon
+	    type = get_deficon_type(dest_name);
+
+	    if (type)
+	        dest = GetIconTags(dest_name,
+	             ICONGETA_FailIfUnavailable,TRUE,
+	             ICONGETA_GetDefaultType,type,
+	             ICONGETA_RemapIcon,FALSE,
+	             TAG_DONE);
+	}
 
 	if (source)
 	{
-	    // Get destination icon
 	    if (dest)
 	    {
 		struct DiskObject *new;
@@ -169,7 +171,7 @@ void backdrop_replace_icon_image(BackdropInfo *info,char *source_name,BackdropOb
 		    new->do_ToolWindow=dest->do_ToolWindow;
 				    
 		    // Save new icon
-		    PutDiskObject(buffer+512,new);
+		    PutDiskObject(dest_name,new);
 				    
 		    // recover old data
 		    new->do_DefaultTool=do_DefaultTool;
@@ -184,10 +186,6 @@ void backdrop_replace_icon_image(BackdropInfo *info,char *source_name,BackdropOb
 		// Free destination icon
 		FreeDiskObject(dest);
 	    }
-
-	    // Couldn't load destination, so just write source as new icon
-	    else
-		PutDiskObject(buffer+512,source);
 
 	    // Free source icon
 	    FreeDiskObject(source);
@@ -206,8 +204,21 @@ void backdrop_replace_icon_image(BackdropInfo *info,char *source_name,BackdropOb
 	    {
 		struct NewDiskObject *dest;
 
+
+	        CurrentDir(dest_lock);
+
 		// Get destination icon
-		if (dest=GetNewDiskObject(buffer+512))
+		if (!(dest=GetNewDiskObject(dest_name)))
+		{
+		    UBYTE type;
+
+		    type = get_deficon_type(dest_name);
+
+		    if (type)
+			dest = GetDefNewDiskObject(type);
+		}
+
+		if (dest)
 		{
 		    APTR old_GadgetRender,old_SelectRender;
 		    UWORD old_Flags;
@@ -230,7 +241,7 @@ void backdrop_replace_icon_image(BackdropInfo *info,char *source_name,BackdropOb
 		    dest->ndo_SelectedImage=source->ndo_SelectedImage;
 
 		    // Save new icon
-		    PutNewDiskObject(buffer+512,dest);
+		    PutNewDiskObject(dest_name,dest);
 
 		    // Restore image settings
 		    dest->ndo_StdObject->do_Gadget.GadgetRender=old_GadgetRender;
@@ -242,9 +253,6 @@ void backdrop_replace_icon_image(BackdropInfo *info,char *source_name,BackdropOb
 		    // Free destination icon
 		    FreeNewDiskObject(dest);
 		}
-
-		// Couldn't load destination, so just write source as new icon
-		else PutNewDiskObject(buffer+512,source);
 
 		// Free source icon
 		FreeNewDiskObject(source);
@@ -261,8 +269,20 @@ void backdrop_replace_icon_image(BackdropInfo *info,char *source_name,BackdropOb
 	    {
 		struct DiskObject *dest;
 
+	        CurrentDir(dest_lock);
+
 		// Get destination icon
-		if (dest=GetDiskObject(buffer+512))
+		if (!(dest=GetDiskObject(dest_name)))
+		{
+		    UBYTE type;
+
+		    type = get_deficon_type(dest_name);
+
+		    if (type)
+			dest = GetDefDiskObject(type);
+		}
+
+		if (dest)
 		{
 		    APTR old_GadgetRender,old_SelectRender;
 		    UWORD old_Flags;
@@ -280,7 +300,7 @@ void backdrop_replace_icon_image(BackdropInfo *info,char *source_name,BackdropOb
 		    dest->do_Gadget.Height=source->do_Gadget.Height;
 
 		    // Save new icon
-		    PutDiskObject(buffer+512,dest);
+		    PutDiskObject(dest_name,dest);
 
 		    // Restore image settings
 		    dest->do_Gadget.GadgetRender=old_GadgetRender;
@@ -291,15 +311,46 @@ void backdrop_replace_icon_image(BackdropInfo *info,char *source_name,BackdropOb
 		    FreeDiskObject(dest);
 		}
 
-		// Couldn't load destination, so just write source as new icon
-		else PutDiskObject(buffer+512,source);
-
 		// Free source icon
 		FreeDiskObject(source);
 	    }
 	}
     }
 
-    // Free buffer
-    FreeVec(buffer);
+    if (org_dir)
+	CurrentDir(org_dir);
+
+    if (lock)
+	UnLock(lock);
+
+    UnLock(dest_lock);
+}
+
+// Find deficon type for file
+UBYTE get_deficon_type(char *name)
+{
+    struct FileInfoBlock __aligned fib;
+    BPTR lock;
+    UBYTE type = 0;
+
+    if (name == disk)
+	type = WBDISK;
+    else
+    if (lock = Lock(name, ACCESS_READ))
+    {
+	Examine(lock, &fib);
+
+	if (fib.fib_DirEntryType > 0)
+	    type = WBDRAWER;
+	else
+	if (!(fib.fib_Protection&FIBF_EXECUTE) && !(fib.fib_Protection&FIBF_SCRIPT))
+	    type = WBTOOL;
+	else
+	    type = WBPROJECT;
+
+	UnLock(lock);
+
+    }
+
+    return type;
 }

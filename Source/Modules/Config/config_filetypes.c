@@ -655,8 +655,7 @@ void filetype_edit(
 		"galileo_filetype_editor",
 		(ULONG)FiletypeEditor,
 		STACK_DEFAULT,
-		(ULONG)eddata,
-		(struct Library *)DOSBase)) || !node->editor)
+		(ULONG)eddata)) || !node->editor)
 	{
 		// Failed; free data
 		FreeFiletype(eddata->type);

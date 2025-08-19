@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,13 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "dirlist_protos.h"
+#include "function_launch_protos.h"
+#include "misc_protos.h"
+#include "function_protos.h"
+#include "buffers_protos.h"
+#include "lsprintf_protos.h"
 
 struct device_data
 {
@@ -98,7 +106,10 @@ GALILEOFM_FUNC(function_devicelist)
 			}
 
 			// Or cache list
-			else lister->lister->lister.flags|=GLSTF_CACHE_LIST;
+			else
+		        {
+		            lister->lister->lister.flags|=GLSTF_CACHE_LIST;
+		        }
 
 			// Tell it to open
 			IPC_Command(lister->ipc,LISTER_INIT,0,GUI->screen_pointer,0,0);
@@ -141,9 +152,6 @@ GALILEOFM_FUNC(function_devicelist)
 		// Mark as a cache list
 		lister->cur_buffer->more_flags|=DWF_CACHE_LIST;
 
-        // Mark lister as containing fake directory
-        lister->more_flags|=LISTERF_FAKEDIR;
-
 		// Create temporary list
 		if (list=Att_NewList(0))
 		{
@@ -161,7 +169,7 @@ GALILEOFM_FUNC(function_devicelist)
 				// Valid directory?
 				if (buffer->flags&DWF_VALID)
 				{
-					char *ptr;
+					char *ptr, *tmp_path;
 
 					// Looking for custom buffer?
 					if (custom)
@@ -180,14 +188,20 @@ GALILEOFM_FUNC(function_devicelist)
 					else
 					if (*buffer->buf_CustomHandler) continue;
 
-					// Copy path, strip /
-					strcpy(handle->func_work_buf,buffer->buf_Path);
-					if (*(ptr=handle->func_work_buf+strlen(handle->func_work_buf)-1)=='/')
+					// Copy path
+					if (tmp_path = CopyString(handle->memory, buffer->buf_Path))
+					{
+					    // Strip /
+					    if (*(ptr=tmp_path+strlen(tmp_path)-1)=='/')
 						*ptr=0;
 
-					// Add to list
-					if (handle->func_work_buf[0])
-						Att_NewNode(list,handle->func_work_buf,(ULONG)buffer,ADDNODE_SORT|ADDNODE_EXCLUSIVE);
+
+					    // Add to list
+						if (tmp_path && tmp_path[0])
+						Att_NewNode(list,tmp_path,(ULONG)buffer,ADDNODE_SORT|ADDNODE_EXCLUSIVE);
+
+					    FreeMemH(tmp_path);
+					}
 				}
 			}
 
@@ -235,9 +249,6 @@ GALILEOFM_FUNC(function_devicelist)
 		// Mark as a device list
 		lister->cur_buffer->more_flags|=DWF_DEVICE_LIST;
 
-        // Mark lister as containing fake directory
-        lister->more_flags|=LISTERF_FAKEDIR;
-
 		// Which sort of device-list?
 		if (instruction->ipa_funcargs)
 		{
@@ -274,46 +285,93 @@ GALILEOFM_FUNC(function_devicelist)
 				// Valid device?
 				if (list_entry->dol_Type==DLT_DIRECTORY || list_entry->dol_Task)
 				{
+					STRPTR fullpath = 0;
+					ULONG len;
+
 					// Convert name
 					BtoCStr(list_entry->dol_Name,device_name,32);
+
+					// Ignore temporary assigns made with 'lister assign get' ARexx command
+					if (list_entry->dol_Type == DLT_DIRECTORY)
+					{
+					    len = *((char *)BADDR(list_entry->dol_Name));
+					    if (len == 13 && (!memcmp(device_name, "garx_", 5) ||
+							      !memcmp(device_name, "gars_", 5) ||
+							      !memcmp(device_name, "gard_", 5)))
+					    {
+						UBYTE a;
+						UBYTE skip = 1;
+
+						for (a = 5; a < 13; a++)
+						{
+						    if (!(isxdigit(device_name[a])))
+							skip = 0;
+						}
+
+						if (skip)
+						    continue;
+					    }
+					}
+
+					// Terminate name
 					strcat(device_name,":");
 
+					len = 0;
+
 					// Get pathname
-					if (full) DevNameFromLock(list_entry->dol_Lock,handle->func_work_buf,256);
-					else handle->func_work_buf[0]=0;
+					if (full)
+					{
+					    fullpath = PathFromLock(0, list_entry->dol_Lock , PFLF_USE_DEVICENAME, FALSE);
+					    len = getreg(REG_D1);
+					}
 
 					// Create entry
-					if (node=AllocMemH(handle->entry_memory,sizeof(struct Node)+32+strlen(handle->func_work_buf)+1))
+					if (node=AllocMemH(handle->entry_memory, sizeof(struct Node) + 32 + len + 1))
 					{
 						node->ln_Type=list_entry->dol_Type;
 						strcpy((char *)(node+1),device_name);
-						strcpy(((char *)(node+1))+32,handle->func_work_buf);
+						strcpy(((char *)(node+1))+32,fullpath?fullpath:(STRPTR)"");
 						AddTail(&list[type],node);
 					}
 
+				        if (fullpath)
+					    FreeMemH(fullpath);
+
 					// Multi-path assign?
-					if (type_order[type]==LDF_ASSIGNS &&
-						list_entry->dol_misc.dol_assign.dol_List &&
-						full)
+					if (type_order[type]==LDF_ASSIGNS)
 					{
-						struct AssignList *assign;
+					    // Get lock
+					    if (node)
+						node->ln_Name = (char *)list_entry->dol_Lock;
 
-						// Go through assign list
-						for (assign=list_entry->dol_misc.dol_assign.dol_List;
-							assign;
-							assign=assign->al_Next)
-						{
-							// Get pathname
-							DevNameFromLock(assign->al_Lock,handle->func_work_buf,256);
+					    if (list_entry->dol_misc.dol_assign.dol_List &&
+						full)
+					    {
+						    struct AssignList *assign;
 
-							// Create entry
-							if (node=AllocMemH(handle->entry_memory,sizeof(struct Node)+strlen(handle->func_work_buf)+1))
-							{
-								node->ln_Type=255;
-								strcpy((char *)(node+1),handle->func_work_buf);
-								AddTail(&list[type],node);
-							}
-						}
+						    // Go through assign list
+						    for (assign=list_entry->dol_misc.dol_assign.dol_List;
+							    assign;
+							    assign=assign->al_Next)
+						    {
+							    // Get pathname
+							    fullpath = PathFromLock(0, assign->al_Lock , PFLF_USE_DEVICENAME, FALSE);
+							    len = getreg(REG_D1);
+
+							    // Create entry
+							    if (node=AllocMemH(handle->entry_memory,sizeof(struct Node) + 32 + len +1))
+							    {
+								    node->ln_Type=255;
+								    node->ln_Name = (char *)assign->al_Lock;
+								    strcpy((char *)(node+1),device_name);
+								    strcpy(((char *)(node+1)) + 32,fullpath?fullpath:(STRPTR)"");
+								    AddTail(&list[type],node);
+							    }
+
+							    if (fullpath)
+								FreeMemH(fullpath);
+						    }
+					    }
 					}
 				}
 			}
@@ -553,6 +611,7 @@ GALILEOFM_FUNC(function_devicelist)
 			{
 				char *comment=0;
 				struct DateStamp *date=0;
+				BPTR lock = 0;
 
 				// Device?
 				if (type==0 || type==1)
@@ -610,12 +669,15 @@ GALILEOFM_FUNC(function_devicelist)
 				// Assign
 				else
 				{
+					// Get Lock
+					lock = (BPTR)node->ln_Name;
+
 					// Multi-directory assign?
 					if (node->ln_Type==255)
 					{
-						lsprintf(handle->func_work_buf,"\t\b%ld\b+ %s",asn_multi_x,(char *)(node+1));
-						if (comment=AllocMemH(handle->entry_memory,strlen((char *)(node+1))+1))
-							strcpy(comment,(char *)(node+1));
+						lsprintf(handle->func_work_buf,"\t\b%ld\b+ %s",asn_multi_x,((char *)(node+1)) + 32);
+						if (comment=AllocMemH(handle->entry_memory,strlen(((char *)(node+1)) + 32)+1))
+							strcpy(comment,((char *)(node+1)) + 32);
 					}
 
 					// Build display string
@@ -635,17 +697,21 @@ GALILEOFM_FUNC(function_devicelist)
 				last_entry=add_file_entry(
 					lister->cur_buffer,
 					create_file_entry(
-						lister->cur_buffer,0,
-						(char *)(node+1),
+						lister->cur_buffer,
+						lock,
+						((char *)(node+1)) + ((node->ln_Type==255)?32:0),
 						(node->ln_Type==DLT_DIRECTORY || node->ln_Type==255)?DLT_DIRECTORY:DLT_DEVICE,
 						ENTRY_DEVICE,
 						date,
 						comment,
 						0,
-						(node->ln_Type==255)?SUBENTRY_BUFFER:0,
+						(node->ln_Type==255)?SUBENTRY_MULTI_ASSIGN:(type==2)?SUBENTRY_ASSIGN:0,
 						handle->func_work_buf,0,
 						0),
 					(node->ln_Type==255 && last_entry)?last_entry:add_after);
+
+				if (node->ln_Type==255)
+				    direntry_add_string(lister->cur_buffer,last_entry,DE_AssignName,(char *)(node+1));
 			}
 
 			// Find entry at the end of the list

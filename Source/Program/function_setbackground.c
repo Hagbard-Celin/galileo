@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,10 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
+#include "misc_protos.h"
+#include "function_protos.h"
+#include "menu_data.h"
 
 enum
 {
@@ -59,6 +64,8 @@ GALILEOFM_FUNC(function_setbackground)
 	short which=PATTERN_MAIN;
 	UWORD flags;
 	ULONG colour;
+	BPTR org_dir = 0, lock;
+	char *path = 0;
 
 	// Can only do this under v39
 	if (IntuitionBase->LibNode.lib_Version<39)
@@ -68,111 +75,129 @@ GALILEOFM_FUNC(function_setbackground)
 	if (!(entry=function_get_entry(handle)))
 		return 0;
 
-	// Build full name
-	function_build_source(handle,entry,handle->func_work_buf);
+	if (entry->fe_lock)
+	    org_dir = CurrentDir(entry->fe_lock);
+	else
+	if (handle->func_source_lock)
+	    org_dir = CurrentDir(handle->func_source_lock);
 
-	// Arguments?
-	if (instruction->ipa_funcargs)
+	if (lock = Lock(entry->fe_name, ACCESS_READ))
 	{
-		// Which type?
-		if (instruction->ipa_funcargs->FA_Arguments[ARG_DESKTOP])
-			which=PATTERN_MAIN;
-		else
-		if (instruction->ipa_funcargs->FA_Arguments[ARG_LISTER])
-			which=PATTERN_LISTER;
-		else
-		if (instruction->ipa_funcargs->FA_Arguments[ARG_REQ])
-			which=PATTERN_REQ;
+
+	    path = PathFromLock(NULL, lock, PFLF_USE_DEVICENAME, NULL);
+	    UnLock(lock);
 	}
 
-	// Get flags and colour
-	flags=environment->env->env_BackgroundFlags[which];
-	colour=environment->env->env_BackgroundBorderColour[which];
-
-	// Arguments?
-	if (instruction->ipa_funcargs)
+	if (path)
 	{
-		// Tile?
-		if (instruction->ipa_funcargs->FA_Arguments[ARG_TILE])
-			flags&=~(ENVBF_CENTER_PIC|ENVBF_STRETCH_PIC);
-		else
+	    // Arguments?
+	    if (instruction->ipa_funcargs)
+	    {
+		    // Which type?
+		    if (instruction->ipa_funcargs->FA_Arguments[ARG_DESKTOP])
+			    which=PATTERN_MAIN;
+		    else
+		    if (instruction->ipa_funcargs->FA_Arguments[ARG_LISTER])
+			    which=PATTERN_LISTER;
+		    else
+		    if (instruction->ipa_funcargs->FA_Arguments[ARG_REQ])
+			    which=PATTERN_REQ;
+	    }
 
-		// Stretch?
-		if (instruction->ipa_funcargs->FA_Arguments[ARG_STRETCH] && which==PATTERN_MAIN)
-		{
-			flags&=~ENVBF_CENTER_PIC;
-			flags|=ENVBF_STRETCH_PIC;
-		}
-		else
+	    // Get flags and colour
+	    flags=environment->env->env_BackgroundFlags[which];
+	    colour=environment->env->env_BackgroundBorderColour[which];
 
-		// Center
-		if (instruction->ipa_funcargs->FA_Arguments[ARG_CENTER])
-		{
-			flags&=~ENVBF_STRETCH_PIC;
-			flags|=ENVBF_CENTER_PIC;
-		}
+	    // Arguments?
+	    if (instruction->ipa_funcargs)
+	    {
+		    // Tile?
+		    if (instruction->ipa_funcargs->FA_Arguments[ARG_TILE])
+			    flags&=~(ENVBF_CENTER_PIC|ENVBF_STRETCH_PIC);
+		    else
 
-		// Precision?
-		if (instruction->ipa_funcargs->FA_Arguments[ARG_PRECISION])
-		{
-			short a;
+		    // Stretch?
+		    if (instruction->ipa_funcargs->FA_Arguments[ARG_STRETCH] && which==PATTERN_MAIN)
+		    {
+			    flags&=~ENVBF_CENTER_PIC;
+			    flags|=ENVBF_STRETCH_PIC;
+		    }
+		    else
 
-			// Find keyword match
-			for (a=0;precision_key[a];a++)
-			{
-				if (stricmp((char *)instruction->ipa_funcargs->FA_Arguments[ARG_PRECISION],precision_key[a])==0)
-				{
-					// Clear precision flags
-					flags&=~(ENVBF_PRECISION_NONE|ENVBF_PRECISION_GUI|ENVBF_PRECISION_ICON|ENVBF_PRECISION_IMAGE|ENVBF_PRECISION_EXACT);
+		    // Center
+		    if (instruction->ipa_funcargs->FA_Arguments[ARG_CENTER])
+		    {
+			    flags&=~ENVBF_STRETCH_PIC;
+			    flags|=ENVBF_CENTER_PIC;
+		    }
 
-					// Set appropriate flag
-					flags|=1<<(a+1);
-					break;
-				}
-			}
-		}
+		    // Precision?
+		    if (instruction->ipa_funcargs->FA_Arguments[ARG_PRECISION])
+		    {
+			    short a;
 
-		// Border?
-		if (instruction->ipa_funcargs->FA_Arguments[ARG_BORDER])
-		{
-			// Off?
-			if (stricmp((char *)instruction->ipa_funcargs->FA_Arguments[ARG_BORDER],"off")==0)
-				flags&=~ENVBF_USE_COLOUR;
-			else
-			{
-				flags|=ENVBF_USE_COLOUR;
-				colour=Atoh((char *)instruction->ipa_funcargs->FA_Arguments[ARG_BORDER],-1)<<8;
-			}
-		}
+			    // Find keyword match
+			    for (a=0;precision_key[a];a++)
+			    {
+				    if (stricmp((char *)instruction->ipa_funcargs->FA_Arguments[ARG_PRECISION],precision_key[a])==0)
+				    {
+					    // Clear precision flags
+					    flags&=~(ENVBF_PRECISION_NONE|ENVBF_PRECISION_GUI|ENVBF_PRECISION_ICON|ENVBF_PRECISION_IMAGE|ENVBF_PRECISION_EXACT);
+
+					    // Set appropriate flag
+					    flags|=1<<(a+1);
+					    break;
+				    }
+			    }
+		    }
+
+		    // Border?
+		    if (instruction->ipa_funcargs->FA_Arguments[ARG_BORDER])
+		    {
+			    // Off?
+			    if (stricmp((char *)instruction->ipa_funcargs->FA_Arguments[ARG_BORDER],"off")==0)
+				    flags&=~ENVBF_USE_COLOUR;
+			    else
+			    {
+				    flags|=ENVBF_USE_COLOUR;
+				    colour=Atoh((char *)instruction->ipa_funcargs->FA_Arguments[ARG_BORDER],-1)<<8;
+			    }
+		    }
+	    }
+
+	    // Enable pattern if it's disabled
+	    if (environment->env->display_options&DISPOPTF_NO_BACKDROP)
+	    {
+		    // Ask user
+		    if (!(function_request(
+				    handle,
+				    GetString(&locale,MSG_PATTERN_OFF),
+				    0,
+				    GetString(&locale,MSG_OKAY),
+				    GetString(&locale,MSG_CANCEL),0)))
+			    return 0;
+
+		    // Enable it
+		    environment->env->display_options&=~DISPOPTF_NO_BACKDROP;
+	    }
+
+	    // Switch to using Galileo picture definition
+	    environment->env->display_options&=~DISPOPTF_USE_WBPATTERN;
+
+	    // Store picture in appropriate pattern
+	    stccpy(environment->env->env_BackgroundPic[which],path,sizeof(environment->env->env_BackgroundPic[which])-1);
+	    FreeMemH(path);
+
+	    // Set flags and colour
+	    environment->env->env_BackgroundFlags[which]=flags;
+	    environment->env->env_BackgroundBorderColour[which]=colour;
+
+	    // Launch process to read pattern
+	    misc_startup(NAME_PATTERNS,CMD_REMAP_PATTERNS,0,0,TRUE);
 	}
 
-	// Enable pattern if it's disabled
-	if (environment->env->display_options&DISPOPTF_NO_BACKDROP)
-	{
-		// Ask user
-		if (!(function_request(
-				handle,
-				GetString(&locale,MSG_PATTERN_OFF),
-				0,
-				GetString(&locale,MSG_OKAY),
-				GetString(&locale,MSG_CANCEL),0)))
-			return 0;
+	if (org_dir)
+	    CurrentDir(org_dir);
 
-		// Enable it
-		environment->env->display_options&=~DISPOPTF_NO_BACKDROP;
-	}
-
-	// Switch to using Galileo picture definition
-	environment->env->display_options&=~DISPOPTF_USE_WBPATTERN;
-
-	// Store picture in appropriate pattern
-	stccpy(environment->env->env_BackgroundPic[which],handle->func_work_buf,sizeof(environment->env->env_BackgroundPic[which])-1);
-
-	// Set flags and colour
-	environment->env->env_BackgroundFlags[which]=flags;
-	environment->env->env_BackgroundBorderColour[which]=colour;
-
-	// Launch process to read pattern
-	misc_startup(NAME_PATTERNS,CMD_REMAP_PATTERNS,0,0,TRUE);
 	return 1;
 }

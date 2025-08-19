@@ -31,12 +31,18 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #ifndef _GALILEOFM_FILE_SELECT
 #define _GALILEOFM_FILE_SELECT
+
+#include "lister.h"
+#include "dirlist.h"
+#include "function_select.h"
+#include "function_launch.h"
+
 
 #define DRAG_NO			0	// No dragging
 #define DRAG_OK			1	// Ok to drag

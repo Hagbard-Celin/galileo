@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2024 Hagbard Celine
+Copyright 2024,2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -32,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-				 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -195,26 +195,19 @@ BOOL __asm __saveds L_ConvertRawKey(
 	return ret;
 }
 
+
 // Get address of one-shot left mouse-button up/down injector
-CxObj *__asm __saveds L_GetCxSelectUpDown(register __a6 struct MyLibrary *libbase)
+CxObj *__asm __saveds L_GetCxSelectUpDown(register __a6 struct Library *GalileoFMBase)
 {
-    struct LibData *data;
-
-    // Get data pointer
-    data=(struct LibData *)libbase->ml_UserData;
-
-    return data->cx_select_up_down;
+    return gfmlib_data.cx_select_up_down;
 }
 
 // Set address of one-shot left mouse-button up/down injector
-void __asm __saveds L_SetCxSelectUpDown(register __a1 CxObj * cxo,register __a6 struct MyLibrary *libbase)
+void __asm __saveds L_SetCxSelectUpDown(register __a1 CxObj * cxo,register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-	data->cx_select_up_down = cxo;
+	gfmlib_data.cx_select_up_down = cxo;
 }
+
 
 // Write an icon for a file
 void __asm __saveds L_WriteFileIcon(
@@ -972,25 +965,39 @@ void __saveds __asm L_ReplyFreeMsg(register __a0 struct Message *msg)
 
 
 // Get path from a WBArg
-BOOL __saveds __asm L_GetWBArgPath(
+STRPTR __saveds __asm L_GetWBArgPath(
 	register __a0 struct WBArg *arg,
-	register __a1 char *buffer,
-	register __d0 long size,
 	register __a6 struct MyLibrary *libbase)
 {
+	STRPTR buffer = 0, add = 0;
+	ULONG flags = PFLF_USE_DEVICENAME;
+
 	// Valid argument?
 	if (!arg) return 0;
 
-	// Clear buffer
-	*buffer=0;
+	if (arg->wa_Lock)
+	{
+	    // Add filename
+	    if (arg->wa_Name && *arg->wa_Name)
+	    {
+	        add = arg->wa_Name;
+	        flags |= PFLF_SLASH_APPEND;
+	    }
 
-	// Get path
-	if (arg->wa_Lock) L_DevNameFromLock(arg->wa_Lock,buffer,size,libbase);
+	    // Get path
+	    // NOTE: This forwards the string-length in D1
+	    // ..as long as noting is inserted after this call
+	    buffer = L_PathFromLock(NULL, arg->wa_Lock, flags, add);
+	}
 
-	// Add filename
-	if (arg->wa_Name && *arg->wa_Name) AddPart(buffer,arg->wa_Name,size);
+	// No Lock? just copy name
+	// NOTE: This forwards the string-length in D1
+	// ..as long as noting is inserted after this call
+	else
+	if (arg->wa_Name && *arg->wa_Name)
+	    buffer = L_CopyString(NULL, arg->wa_Name);
 
-	return (BOOL)*buffer;
+	return buffer;
 }
 
 
@@ -1036,37 +1043,28 @@ struct PubScreenNode *__asm __saveds L_FindPubScreen(
 ULONG __asm __saveds L_SetLibraryFlags(
 	register __d0 ULONG flags,
 	register __d1 ULONG mask,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
 	ULONG oldflags;
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
 
 	// Save old flags
-	oldflags=data->flags;
+	oldflags=gfmlib_data.flags;
 
 	// Mask out bits in mask
-	data->flags&=~mask;
+	gfmlib_data.flags&=~mask;
 
 	// Set new flags
-	data->flags|=flags;
+	gfmlib_data.flags|=flags;
 	return oldflags;
 }
 
 
 // Get flags in the library
 ULONG __asm __saveds L_GetLibraryFlags(
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// Return flags
-	return data->flags;
+	return gfmlib_data.flags;
 }
 
 
@@ -1179,66 +1177,51 @@ void __asm __saveds L_SetEnv(
 void __asm __saveds L_SetReqBackFill(
 	register __a0 struct Hook *hook,
 	register __a1 struct Screen **screen,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// If we already have a hook, don't install a new one
-	if (data->backfill && hook)
+	if (gfmlib_data.backfill && hook)
 		return;
 
 	// Lock the requester hook
-	L_GetSemaphore(&data->backfill_lock,SEMF_EXCLUSIVE,0);
+	L_GetSemaphore(&gfmlib_data.backfill_lock,SEMF_EXCLUSIVE,0, GalileoFMBase);
 
 	// Install new hook pointer
-	data->backfill=hook;
-	data->backfill_screen=screen;
+	gfmlib_data.backfill=hook;
+	gfmlib_data.backfill_screen=screen;
 
 	// Unlock requester hook
-	L_FreeSemaphore(&data->backfill_lock);
+	L_FreeSemaphore(&gfmlib_data.backfill_lock, GalileoFMBase);
 }
 
 
 // Get requester backfill
 struct Hook *__asm __saveds L_LockReqBackFill(
 	register __a0 struct Screen *screen,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// Lock the requester hook
-	L_GetSemaphore(&data->backfill_lock,SEMF_SHARED,0);
+	L_GetSemaphore(&gfmlib_data.backfill_lock,SEMF_SHARED,0, GalileoFMBase);
 
 	// No hook, or different screen?
-	if (!data->backfill || (screen && data->backfill_screen && screen!=*data->backfill_screen))
+	if (!gfmlib_data.backfill || (screen && gfmlib_data.backfill_screen && screen!=*gfmlib_data.backfill_screen))
 	{
 		// Unlock the requester hook
-		L_FreeSemaphore(&data->backfill_lock);
+		L_FreeSemaphore(&gfmlib_data.backfill_lock, GalileoFMBase);
 		return 0;
 	}
 
 	// Return hook pointer
-	return data->backfill;
+	return gfmlib_data.backfill;
 }
 
 
 // Release requester backfill
 void __asm __saveds L_UnlockReqBackFill(
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// Unlock the requester hook
-	L_FreeSemaphore(&data->backfill_lock);
+	L_FreeSemaphore(&gfmlib_data.backfill_lock, GalileoFMBase);
 }
 
 
@@ -1265,16 +1248,11 @@ char *strstri(char *string,char *substring)
 
 
 // Statistics
-long __asm L_GetStatistics(register __d0 long id,register __a6 struct MyLibrary *libbase)
+long __asm L_GetStatistics(register __d0 long id,register __a6 struct Library *GalileoFMBase)
 {
-	struct LibData *data;
-
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// Task count?
 	if (id==STATID_TASKCOUNT)
-		return data->task_count;
+		return gfmlib_data.task_count;
 	else
 	if (id==STATID_CPU_USAGE)
 		return GetCPUUsage();

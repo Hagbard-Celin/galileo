@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -39,6 +40,8 @@ For more information on Directory Opus for Windows please see:
 #define _GALILEOFM_PATH_ROUTINES
 
 // Prototypes
+STRPTR path_parent_alloch(APTR memory, STRPTR path);
+STRPTR path_root_alloch(APTR memory, STRPTR path);
 path_parent(char *);
 path_root(char *);
 get_path_root(char *,char *,struct DateStamp *);

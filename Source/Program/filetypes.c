@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,12 +32,16 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "lsprintf_protos.h"
+#include "misc_protos.h"
 #include "music.h"
+#include "icons.h"
+#include "filetypes_protos.h"
 
 #define is_digit(c) ((c)>='0' && (c)<='9')
 
@@ -135,6 +140,8 @@ void filetype_read_list(
 	FreeMemH(anchor);
 }
 
+#define NO_DATATYPE_ICONS 0
+#define NO_DEFAULT_ICONS 0
 
 // Create default filetype list
 void filetype_default_list(
@@ -158,13 +165,13 @@ void filetype_default_list(
 		// Create default icon filetype
 		if (type=filetype_default_new(memory,list,"Icon","ICON",11,"iconinfo",0))
 		{
-			// Recognition string for executable
+			// Recognition string for icon
 			type->recognition[0]=FTOP_MATCH;
 			strcpy(type->recognition+1,"$e3100001");
 		}
 
 		// Create default ILBM filetype
-		if (type=filetype_default_new(memory,list,"Picture, ILBM","ILBM",6,"show",0))
+		if (type=filetype_default_new(memory,list,"Picture, ILBM","ILBM",6,"show",(NO_DEFAULT_ICONS)?0:"ENV:Sys/def_picture.info"))
 		{
 			// Recognition string for ILBM
 			type->recognition[0]=FTOP_MATCHFORM;
@@ -174,7 +181,7 @@ void filetype_default_list(
 		// Create default picture filetype (if we have datatypes)
 		if (DataTypesBase)
 		{
-			if (type=filetype_default_new(memory,list,"Picture","PICTURE",6,"show",0))
+			if (type=filetype_default_new(memory,list,"Picture","PICTURE",6,"show",(NO_DATATYPE_ICONS)?0:"ENV:Sys/def_picture.info"))
 			{
 				// Recognition string for Picture
 				type->recognition[0]=FTOP_MATCHDTGROUP;
@@ -183,7 +190,7 @@ void filetype_default_list(
 		}
 
 		// Create default ANIM filetype
-		if (type=filetype_default_new(memory,list,"Animation, ANIM","ANIM",6,"show",0))
+		if (type=filetype_default_new(memory,list,"Animation, ANIM","ANIM",6,"show",(NO_DEFAULT_ICONS)?0:"ENV:Sys/def_video.info"))
 		{
 			// Recognition string for ANIM
 			type->recognition[0]=FTOP_MATCHFORM;
@@ -191,7 +198,7 @@ void filetype_default_list(
 		}
 
 		// Create default 8SVX filetype
-		if (type=filetype_default_new(memory,list,"Sound, 8SVX","8SVX",6,"play",0))
+		if (type=filetype_default_new(memory,list,"Sound, 8SVX","8SVX",6,"play",(NO_DEFAULT_ICONS)?0:"ENV:Sys/def_sound.info"))
 		{
 			// Recognition string for 8SVX
 			type->recognition[0]=FTOP_MATCHFORM;
@@ -201,7 +208,7 @@ void filetype_default_list(
 		// Create default sound filetype (if we have datatypes)
 		if (DataTypesBase)
 		{
-			if (type=filetype_default_new(memory,list,"Sound","SOUND",6,"play",0))
+			if (type=filetype_default_new(memory,list,"Sound","SOUND",6,"play",(NO_DATATYPE_ICONS)?0:"ENV:Sys/def_sound.info"))
 			{
 				// Recognition string for Sound
 				type->recognition[0]=FTOP_MATCHDTGROUP;
@@ -210,7 +217,7 @@ void filetype_default_list(
 		}
 
 		// Create default executable filetype
-		if (type=filetype_default_new(memory,list,"Program","EXEC",11,"run",0))
+		if (type=filetype_default_new(memory,list,"Program","EXEC",11,"run",(NO_DEFAULT_ICONS)?0:"ENV:Sys/def_tool.info"))
 		{
 			// Recognition string for executable
 			type->recognition[0]=FTOP_MATCH;
@@ -290,7 +297,7 @@ void filetype_default_list(
 		}
 
 		// Font prefs
-		if (type=filetype_default_new(memory,list,"Font Prefs","FONTS",18,"loadfonts",0))
+		if (type=filetype_default_new(memory,list,"Font Prefs","FONTS",18,"loadfonts","ENV:Sys/def_pref.info"))
 		{
 			// Recognition string for fonts
 			lsprintf(type->recognition,"%lcPREF%lc%lcPRHD%lc%lcFONT",FTOP_MATCHFORM,FTOP_AND,FTOP_MATCHCHUNK,FTOP_AND,FTOP_MATCHCHUNK);
@@ -309,7 +316,7 @@ void filetype_default_list(
 		list->flags=FTLISTF_INTERNAL;
 
 		// Final, default filetype
-		if (type=filetype_default_new(memory,list,GetString(&locale,MSG_UNKNOWN_TYPE),"DEFAULT",4,"defftype",0))
+		if (type=filetype_default_new(memory,list,GetString(&locale,MSG_UNKNOWN_TYPE),"DEFAULT",4,"defftype",(NO_DEFAULT_ICONS)?0:"ENV:Sys/def_project.info"))
 		{
 			Cfg_Function *func;
 
@@ -432,7 +439,7 @@ void filetype_default_menu(
 
 
 // Try and match a file to a filetype
-Cfg_Filetype *filetype_identify(char *file,short match_type,char *name,unsigned short qual)
+Cfg_Filetype *filetype_identify(char *file,BPTR parent_lock,short match_type,char *name,unsigned short qual)
 {
 	Cfg_FiletypeList *list;
 	Cfg_Filetype *type=0;
@@ -442,7 +449,7 @@ Cfg_Filetype *filetype_identify(char *file,short match_type,char *name,unsigned 
 	if (name) *name=0;
 
 	// Get match handle for the file
-	if (!(handle=GetMatchHandle(file)))
+	if (!(handle=GetMatchHandle(file,parent_lock)))
 		return 0;
 
 	// Lock filetype lists
@@ -510,6 +517,11 @@ Cfg_Filetype *filetype_identify(char *file,short match_type,char *name,unsigned 
 		// Shift held down?
 		if (qual&IEQUAL_ANYSHIFT)
 		{
+			BPTR org_dir=0;
+
+			if (parent_lock)
+			    org_dir = CurrentDir(parent_lock);
+
 			// If file isn't an icon, try and get icon for it
 			if (!(isicon(file)) && (icon=GetDiskObject(file)))
 			{
@@ -525,6 +537,9 @@ Cfg_Filetype *filetype_identify(char *file,short match_type,char *name,unsigned 
 				// Free icon
 				FreeDiskObject(icon);
 			}
+
+			if (org_dir)
+			    CurrentDir(org_dir);
 		}
 	}
 
@@ -693,7 +708,7 @@ BOOL is_default_filetype(Cfg_Filetype *type)
 
 
 // See if a file matches a given filetype
-BOOL filetype_match_type(char *filename,Cfg_Filetype *match_type)
+BOOL filetype_match_type(char *filename,BPTR lock,Cfg_Filetype *match_type)
 {
 	Cfg_FiletypeList *list;
 	Cfg_Filetype *type;
@@ -701,7 +716,7 @@ BOOL filetype_match_type(char *filename,Cfg_Filetype *match_type)
 	BOOL ok=0,done=0;
 
 	// Get match handle for the file
-	if (!(handle=GetMatchHandle(filename)))
+	if (!(handle=GetMatchHandle(filename, lock)))
 		return 0;
 
 	// Lock filetype lists

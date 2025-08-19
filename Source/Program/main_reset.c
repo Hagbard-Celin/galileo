@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,18 +37,32 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "misc_protos.h"
+#include "environment.h"
+#include "cx.h"
+#include "buffers_protos.h"
+#include "backdrop_protos.h"
+#include "menu_data.h"
+#include "scripts.h"
 
 extern TimerHandle *filetype_timer;
 
 // Handle reset command
 void main_handle_reset(ULONG *flags,APTR data)
 {
+	BOOL done_drives=0;
+
 	// Nothing happens here if startup is not completed
 	if (!(GUI->flags&GUIF_DONE_STARTUP))
 		return;
 
 	// Set busy pointer
 	if (GUI->window) SetBusyPointer(GUI->window);
+
+	// Change NewIcons flags first in case we get full screen reset
+	if (flags[1]&CONFIG_CHANGE_NEWICONS)
+	    SetNewIconsFlags(environment->env->env_NewIconsFlags,environment->env->env_NewIconsPrecision);
 
 	// Screen needs resetting?
 	if (flags[0]&CONFIG_CHANGE_DISPLAY)
@@ -80,6 +95,14 @@ void main_handle_reset(ULONG *flags,APTR data)
 	else
 	{
 		BOOL done_listers=0;
+		BOOL done_backdrop=0;
+
+
+		if (flags[1]&CONFIG_CHANGE_DESKTOP_FOLDER)
+		{
+		    UnLock(GUI->desktop_dir_lock);
+		    GUI->desktop_dir_lock = Lock(environment->env->desktop_location,ACCESS_READ);
+		}
 
 		// Desktop Icon font changed?
 		if (flags[0]&CONFIG_CHANGE_ICON_FONT)
@@ -88,15 +111,22 @@ void main_handle_reset(ULONG *flags,APTR data)
 			backdrop_get_font(GUI->backdrop);
 
 			// Redraw objects
-			backdrop_show_objects(GUI->backdrop,BDSF_CLEAR|BDSF_RESET);
+			backdrop_show_objects(GUI->backdrop,flags[1]&CONFIG_CHANGE_NEWICONS?BDSF_CLEAR|BDSF_RESET|BDSF_RECALC:BDSF_CLEAR|BDSF_RESET);
 
 			// Refresh any buttons (for the icon remap flag)
 			IPC_ListCommand(&GUI->buttons_list,BUTTONEDIT_REDRAW,0,0,FALSE);
 
 			// Set library flag for borderless icons
 			SetLibraryFlags((environment->env->desktop_flags&DESKTOPF_NO_BORDERS)?LIBDF_BORDERS_OFF:0,LIBDF_BORDERS_OFF);
+
+			done_backdrop=1;
 		}
 
+		if (!done_backdrop && flags[1]&CONFIG_CHANGE_DESKTOP_FOLDER)
+		{
+		    backdrop_show_objects(GUI->backdrop,BDSF_CLEAR|BDSF_RECALC);
+		    done_backdrop=1;
+		}
 		// Window icon font changed?
 		if (flags[0]&CONFIG_CHANGE_ICON_FONT_WINDOWS)
 		{
@@ -123,34 +153,12 @@ void main_handle_reset(ULONG *flags,APTR data)
 		if (flags[0]&CONFIG_CHANGE_BAD_DISKS)
 		{
 			// Update devices
-			backdrop_refresh_drives(GUI->backdrop,BDEVF_SHOW|BDEVF_FORCE_LOCK);
-		}
-
-		// Locale settings changed
-		if (flags[0]&CONFIG_CHANGE_LOCALE)
-		{
-			// Set library locale flags
-			SetLocaleFlags(environment->env->settings.date_flags, environment->env->settings.date_format);
-
-		        // Rescan listers
-		        IPC_ListCommand(
-			        &GUI->lister_list,
-			        LISTER_RESCAN,
-			        0,
-			        0,
-			        0);
-
-		        // Refresh listers
-		        IPC_ListCommand(
-			        &GUI->lister_list,
-			        LISTER_REFRESH_WINDOW,
-			        REFRESHF_UPDATE_NAME|REFRESHF_STATUS|REFRESHF_SLIDERS,
-			        0,
-			        0);
+			backdrop_refresh_drives(GUI->backdrop, NULL, BDEVF_SHOW|BDEVF_FORCE_LOCK);
+			done_drives = 1;
 		}
 
 		// Listers need resetting?
-		if (flags[0]&CONFIG_CHANGE_LIST_DISPLAY)
+		if (!done_listers && flags[0]&CONFIG_CHANGE_LIST_DISPLAY)
 		{
 			listers_update(
 				(BOOL)(flags[0]&CONFIG_CHANGE_LIST_FONT),
@@ -206,7 +214,7 @@ void main_handle_reset(ULONG *flags,APTR data)
 			// Load new menu
 			else
 			{
-			    GUI->lister_menu=OpenButtonBank(environment->menu_path);
+			    GUI->lister_menu=OpenButtonBank(environment->menu_path, NULL);
 			}
 			// Got bank?
 			if (GUI->lister_menu)
@@ -248,6 +256,34 @@ void main_handle_reset(ULONG *flags,APTR data)
 				0,
 				0);
 		}
+
+		// FIXME: Need to redraw groups and toolbars.
+		// Color icon settings changed?
+		if (flags[1]&CONFIG_CHANGE_NEWICONS)
+		{
+		    // Reload lister icons
+		    IPC_ListCommand(&GUI->lister_list,LISTER_GET_ICONS,1,0,FALSE);
+
+		    // Reload backdorp icons
+		    if (!done_backdrop)
+			backdrop_show_objects(GUI->backdrop,BDSF_CLEAR|BDSF_RECALC);
+
+		}
+	}
+
+	// Locale settings changed
+	if (flags[0]&CONFIG_CHANGE_LOCALE)
+	{
+		// Set library locale flags
+		SetLocaleFlags(environment->env->settings.date_flags, environment->env->settings.date_format);
+
+	        // Rescan listers
+	        IPC_ListCommand(
+		        &GUI->lister_list,
+		        LISTER_RESCAN,
+		        0,
+		        0,
+		        0);
 	}
 
 	// User menu changed?
@@ -264,9 +300,9 @@ void main_handle_reset(ULONG *flags,APTR data)
 
 		// Load new menu							
 		else
-        {
-        	GUI->user_menu=OpenButtonBank(environment->user_menu_path);
-        }
+		{
+		    GUI->user_menu=OpenButtonBank(environment->user_menu_path, NULL);
+		}
 		// Unlock menu
 		FreeSemaphore(&GUI->user_menu_lock);
 
@@ -303,9 +339,9 @@ void main_handle_reset(ULONG *flags,APTR data)
 
 		// Load new menu							
 		else
-        {
-        	GUI->hotkeys=OpenButtonBank(environment->hotkeys_path);
-        }
+		{
+			GUI->hotkeys=OpenButtonBank(environment->hotkeys_path, NULL);
+		}
 		// Release hotkeys lock
 		FreeSemaphore(&GUI->hotkeys_lock);
 
@@ -338,9 +374,9 @@ void main_handle_reset(ULONG *flags,APTR data)
 
 		// Load new menu							
 		else
-        {
-        	GUI->scripts=OpenButtonBank(environment->scripts_path);
-        }
+		{
+			GUI->scripts=OpenButtonBank(environment->scripts_path, NULL);
+		}
 		// Release hotkeys lock
 		FreeSemaphore(&GUI->scripts_lock);
 	}
@@ -352,10 +388,10 @@ void main_handle_reset(ULONG *flags,APTR data)
 	}
 
 	// Hidden drives changed?
-	if (flags[0]&CONFIG_CHANGE_HIDDEN_DRIVES)
+	if (flags[0]&CONFIG_CHANGE_HIDDEN_DRIVES && !done_drives)
 	{
 		// Refresh drives
-		backdrop_refresh_drives(GUI->backdrop,BDEVF_FORCE_LOCK|BDEVF_SHOW);
+		backdrop_refresh_drives(GUI->backdrop, NULL, BDEVF_FORCE_LOCK|BDEVF_SHOW);
 	}
 
 	// Shift AppIcons to tools?

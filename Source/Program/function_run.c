@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,11 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
+#include "misc_protos.h"
+#include "lister_protos.h"
+#include "status_text_protos.h"
+#include "function_data.h"
 
 // Run a function
 void function_run_function(FunctionHandle *handle)
@@ -56,6 +62,9 @@ void function_run_function(FunctionHandle *handle)
 		{
 			// End recurse stuff
 			MatchEnd(handle->anchor);
+
+			if (handle->recurse_entry_data->fe_lock)
+			    UnLock(handle->recurse_entry_data->fe_lock);
 
 			// Fix CD
 			if (handle->recurse_cd)
@@ -136,13 +145,24 @@ short function_run(FunctionHandle *handle)
 		// Reset ok flag
 		run_okay=1;
 
+		if (handle->func_source_path)
+		    FreeMemH(handle->func_source_path);
+
 		// Get source path
-		if (path)
+		if (path && path->pn_path)
 		{
-			strcpy(handle->func_source_path,path->pn_path);
-			AddPart(handle->func_source_path,"",512);
+		    char *tmp_path;
+
+		    if (tmp_path = CopyString(handle->memory, path->pn_path))
+		    {
+
+			handle->func_source_path = tmp_path;
+		    }
+
+		    handle->func_source_lock = path->pn_lock;
 		}
-		else handle->func_source_path[0]=0;
+		else
+		    handle->func_source_path=0;
 
 		// Reset iteration count
 		handle->func_iterations=0;
@@ -393,7 +413,7 @@ BOOL function_check_paths(FunctionHandle *handle)
 					IPC_Command(lister->ipc,LISTER_OPEN,0,GUI->screen_pointer,0,0);
 
 					// Add this lister
-					function_add_path(handle,&handle->func_source_paths,lister,0);
+					function_add_path(handle,&handle->func_source_paths,lister,0,0);
 
 					// Set flag to say we made our own
 					handle->result_flags|=FRESULTF_MADE_LISTER;
@@ -496,6 +516,7 @@ short function_check_single(
 
 			// Is this lister the right type and not busy, or an icon view?
 			if ((!usetype || lister->flags&usetype) &&
+				lister->cur_buffer->buf_Path &&
 				lister->cur_buffer->buf_Path[0] &&
 				!(lister->flags&LISTERF_BUSY) &&
 				(!(lister->flags&LISTERF_VIEW_ICONS) || lister->flags&LISTERF_ICON_ACTION)) ok=1;
@@ -615,7 +636,27 @@ short function_check_single(
 				// Typed-in path name?
 				if (handle->func_work_buf[0])
 				{
-					strcpy(current->pn_path_buf,handle->func_work_buf);
+					char *tmp_path;
+
+					if(current->pn_lock = LockFromPath(handle->func_work_buf, NULL, NULL))
+					{
+					    current->pn_flags = LISTNF_MADE_LOCK;
+
+					    if (type==LISTERF_SOURCE)
+						handle->func_source_lock = current->pn_lock;
+					    else
+						handle->func_dest_lock = current->pn_lock;
+
+					}
+
+					if (tmp_path = CopyString(handle->memory, handle->func_work_buf))
+					{
+					    if (current->pn_path_buf)
+						FreeMemH(current->pn_path_buf);
+
+					    current->pn_path_buf = tmp_path;
+					}
+
 					current->pn_path=current->pn_path_buf;
 				}
 
@@ -639,6 +680,14 @@ short function_check_single(
 							{
 								// Grab it
 								current->pn_lister=(Lister *)node->att_data;
+
+								if (current->pn_lister->cur_buffer && (current->pn_lock = current->pn_lister->cur_buffer->buf_Lock))
+								{
+								    if (type==LISTERF_SOURCE)
+									handle->func_source_lock = current->pn_lock;
+								    else
+									handle->func_dest_lock = current->pn_lock;
+								}
 								break;
 							}
 						}
@@ -651,8 +700,26 @@ short function_check_single(
 					if (!current->pn_lister)
 					{
 						// Get path
-						if (node) strcpy(current->pn_path_buf,node->node.ln_Name);
-						else current->pn_path[0]=0;
+						if (node)
+						{
+						    char *tmp_path;
+
+						    if (tmp_path = CopyString(handle->memory, node->node.ln_Name))
+						    {
+						        if (current->pn_path_buf)
+							    FreeMemH(current->pn_path_buf);
+
+						        current->pn_path_buf = tmp_path;
+						    }
+						}
+						else
+						{
+						    if (current->pn_path_buf)
+							FreeMemH(current->pn_path_buf);
+
+						    current->pn_path_buf = 0;
+						}
+
 						current->pn_path=current->pn_path_buf;
 					}
 				}
@@ -706,22 +773,37 @@ void function_check_ins_path(
 		// Parsed arguments?
 		if (instruction->ipa_funcargs)
 		{
+			char *path;
+
 			// Get number of path argument
 			short num=atoi(ptr+1);
 
-			// Clear work buffer
-			*handle->func_work_buf=0;
-
-			// Copy to buffer
-			if (instruction->ipa_funcargs->FA_Arguments[num])
-				strcpy(handle->func_work_buf,(char *)instruction->ipa_funcargs->FA_Arguments[num]);
-
 			// Valid path?
-			if (handle->func_work_buf[0])
+			if ((path = (char *)instruction->ipa_funcargs->FA_Arguments[num]) && path[0])
 			{
+				char *tmp_path, **pathp;
+
 				// Replace existing paths with new one
-				function_replace_paths(handle,path_list,handle->func_work_buf,locker);
-				strcpy((path_type=='d')?handle->func_dest_path:handle->func_source_path,handle->func_work_buf);
+				function_replace_paths(handle,path_list,path,locker);
+
+				if (path_type=='d')
+				{
+				    pathp = &handle->func_dest_path;
+				    handle->func_dest_lock = handle->func_dest_paths.current->pn_lock;
+				}
+				else
+				{
+				    pathp = &handle->func_source_path;
+				    handle->func_source_lock = handle->func_source_paths.current->pn_lock;
+				}
+
+			        if (tmp_path = CopyString(handle->memory, path))
+			        {
+				    if (*pathp)
+				        FreeMemH(*pathp);
+
+				    *pathp = tmp_path;
+			        }
 			}
 		}
 	}
@@ -736,10 +818,14 @@ void function_replace_paths(
 	short locker)
 {
 	PathNode *current;
+	BPTR org_dir = 0;
 
 	// Get current path
 	if (current=function_path_current(path_list))
 	{
+		if (current->pn_lock)
+		    org_dir = CurrentDir(current->pn_lock);
+
 		// Unlock current path
 		function_unlock_paths(handle,path_list,locker);
 	}
@@ -751,8 +837,19 @@ void function_replace_paths(
 	// Get new current path
 	if (current=AllocMemH(handle->memory,sizeof(PathNode)))
 	{
-		// Copy path
-		strcpy(current->pn_path_buf,new_path);
+		char *tmp_path;
+
+		if(current->pn_lock = LockFromPath(new_path, NULL, NULL))
+		    current->pn_flags = LISTNF_MADE_LOCK;
+
+		if (tmp_path = CopyString(handle->memory,new_path))
+		{
+		    if (current->pn_path_buf)
+			FreeMemH(current->pn_path_buf);
+
+		    current->pn_path_buf = tmp_path;
+		}
+
 		current->pn_path=current->pn_path_buf;
 
 		// Add to list
@@ -761,4 +858,7 @@ void function_replace_paths(
 		// Fix current pointer
 		path_list->current=current;
 	}
+
+	if (org_dir)
+	    CurrentDir(org_dir);
 }

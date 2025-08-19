@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,11 +32,28 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "lister_protos.h"
+#include "dirlist_protos.h"
+#include "reselect_protos.h"
+#include "misc_protos.h"
+#include "app_msg_protos.h"
+#include "function_launch_protos.h"
+#include "buffers_protos.h"
+#include "backdrop_protos.h"
+#include "desktop.h"
+#include "rexx_protos.h"
+#include "menu_data.h"
+#include "help.h"
+#include "window_activate.h"
+#include "file_select.h"
+#include "graphics.h"
+#include "handler.h"
+#include "position_protos.h"
 
 #define SNIFFF_SHOW		(1<<0)
 #define SNIFFF_SLIDERS	(1<<1)
@@ -48,7 +66,7 @@ void __saveds lister_code(void)
 	Lister *lister;
 	IPCMessage *lmsg;
 	struct IntuiMessage *imsg;
-	GalileoAppMessage *amsg;
+	struct AppMessage *amsg;
 	short pending_quit=0;
 	struct MinList sniff_list;
 
@@ -60,7 +78,7 @@ void __saveds lister_code(void)
 	}
 
 #ifdef _DEBUG_IPCPROC
-    KPrintF("lister_code ResTrackBase: %lx at: %lx SysBase: %lx IconBase: %lx \n", ResTrackBase, &ResTrackBase, SysBase, IconBase);
+	KPrintF("lister_code ResTrackBase: %lx at: %lx SysBase: %lx IconBase: %lx \n", ResTrackBase, &ResTrackBase, SysBase, IconBase);
 #endif
 
 	// Increment lister count
@@ -309,22 +327,33 @@ void __saveds lister_code(void)
 		}
 
 		// Application messages
-		if (amsg=(GalileoAppMessage *)GetMsg(lister->app_port))
+		if (amsg=(struct AppMessage *)GetMsg(lister->app_port))
 		{
+			char reply = 1;
+
 			wait_flag=0;
 
 			// Files dropped?
 			if ((lister->window || lister->appicon) &&
-				amsg->ga_Msg.am_NumArgs>0 &&
+				amsg->am_NumArgs>0 &&
 				!(lister->flags&LISTERF_LOCK))
 			{
-				// Receive the drop
-				lister_receive_drop(lister,amsg);
+				//if (amsg->am_Type == MTYPE_LISTER_APPWINDOW && amsg->am_Class == GLAMCLASS_LISTER)
+				//{
+				    lister_receive_drop(lister,(GalileoListerAppMessage *)amsg);
+
+				    reply = 0;
+				//}
+				//else
+				//{
+				//    // Receive the drop
+				//    lister_receive_drop(lister,amsg);
+				//}
 			}
 
 			// Menu operation?
 			else
-			if (amsg->ga_Msg.am_Type==MTYPE_APPSNAPSHOT)
+			if (amsg->am_Type==MTYPE_APPSNAPSHOT)
 			{
 				struct AppSnapshotMsg *asm;
 
@@ -352,10 +381,10 @@ void __saveds lister_code(void)
 
 			// Or, appicon action?
 			else
-			if (amsg->ga_Msg.am_Type==MTYPE_APPICON)
+			if (amsg->am_Type==MTYPE_APPICON)
 			{
 				// Double-click?
-				if (amsg->ga_Msg.am_NumArgs==0)
+				if (amsg->am_NumArgs==0)
 				{
 					// Clear iconified flag
 					lister->flags&=~LISTERF_ICONIFIED;
@@ -367,9 +396,17 @@ void __saveds lister_code(void)
 					lister_smart_source(lister);
 				}
 			}
+			else
+			if (amsg->am_Type == MTYPE_LISTER_APPWINDOW && amsg->am_Class == GLAMCLASS_LISTER)
+			{
+			    reply_lister_appmsg((GalileoListerAppMessage *)amsg);
+
+			    reply = 0;
+			}
 
 			// Reply the message
-			ReplyAppMessage(amsg);
+			if (reply)
+			    ReplyAppMessage(amsg);
 		}
 
 		// Icon notification
@@ -533,12 +570,13 @@ void __saveds lister_code(void)
 									ActivateWindow(lister->window);
 
 								// Do we need to read a path?
-								if (cfg->path &&
+								if ((cfg->lock || cfg->path) &&
 									!(cfg->lister.flags&(GLSTF_DEVICE_LIST|GLSTF_CACHE_LIST)))
 								{
 									read_directory(
 										lister,
 										cfg->path,
+										cfg->lock,
 										GETDIRF_CANCHECKBUFS);
 								}
 
@@ -808,10 +846,41 @@ void __saveds lister_code(void)
 								if (lister->flags&LISTERF_RESCAN)
 								{
 									lister->flags&=~LISTERF_RESCAN;
-									read_directory(
-										lister,
-										lister->cur_buffer->buf_Path,
-										GETDIRF_RESELECT);
+
+								        // Custom handler?
+								        if (lister->cur_buffer->buf_CustomHandler[0])
+								        {
+								            if (*(ULONG *)lister->cur_buffer->buf_CustomHandler == CUSTH_TYPE_GFMMODULE)
+									        galileo_handler_msg(0, "path",
+											            0, lister,
+											            0, 0, lister->cur_buffer->buf_Path, 0,
+											            0,
+											            0, 0);
+								            else
+									        // Send message
+									        rexx_handler_msg(
+										        0,
+										        lister->cur_buffer,
+										        RXMF_WARN,
+										        HA_String,0,"path",
+										        HA_Value,1,lister,
+										        HA_String,2,lister->cur_buffer->buf_Path,
+										        TAG_END);
+									    break;
+								        }
+								        else
+								        {
+									    if (lister->cur_buffer->more_flags&DWF_CACHE_LIST)
+									        function_launch_quick(FUNCTION_RUN_FUNCTION,def_function_cachelist,lister);
+									    else
+									    if (lister->cur_buffer->more_flags&DWF_DEVICE_LIST)
+									        function_launch_quick(FUNCTION_RUN_FUNCTION,def_function_devicelist,lister);
+									    else
+									        read_directory(lister,
+										               lister->cur_buffer->buf_Path,
+										               lister->cur_buffer->buf_Lock,
+										               GETDIRF_RESELECT);
+								        }
 								}
 							}
 
@@ -850,6 +919,21 @@ void __saveds lister_code(void)
 								lister,
 								0,
 								data,
+								0,
+								(struct DateStamp *)flags,
+								(char *)lmsg->data_free,
+								LISTER_BFPF_DONT_MOVE|LISTER_BFPF_DONT_UNLOCK);
+						break;
+
+
+					// Searches for a named buffer
+					case LISTER_BUFFER_FIND_LOCK:
+						lmsg->command=(ULONG)
+							lister_find_buffer(
+								lister,
+								0,
+								0,
+								(BPTR)data,
 								(struct DateStamp *)flags,
 								(char *)lmsg->data_free,
 								LISTER_BFPF_DONT_MOVE|LISTER_BFPF_DONT_UNLOCK);
@@ -884,11 +968,23 @@ void __saveds lister_code(void)
 
 
 					// Finds an empty buffer
+					case LISTER_BUFFER_FIND_EMPTY_LOCK:
+						lmsg->command=(ULONG)
+							lister_buffer_find_empty(
+								lister,
+								NULL,
+								(BPTR)data,
+								(struct DateStamp *)flags);
+						break;
+
+
+					// Finds an empty buffer
 					case LISTER_BUFFER_FIND_EMPTY:
 						lmsg->command=(ULONG)
 							lister_buffer_find_empty(
 								lister,
 								data,
+								NULL,
 								(struct DateStamp *)flags);
 						break;
 
@@ -900,14 +996,53 @@ void __saveds lister_code(void)
 						break;
 
 
+					case LISTER_SET_PATH:
+						{
+						    STRPTR oldpath;
+
+						    // Lock current buffer
+						    buffer_lock(lister->cur_buffer,TRUE);
+
+						    Forbid();
+						    // Copy path string
+						    oldpath = lister->cur_buffer->buf_Path;
+						    if (lister->cur_buffer->buf_Path = CopyString(0,data))
+						    {
+							if (oldpath)
+							    FreeMemH(oldpath);
+						    }
+						    else
+							lister->cur_buffer->buf_Path = oldpath;
+
+						    oldpath = lister->cur_buffer->buf_ExpandedPath;
+						    if (lister->cur_buffer->buf_ExpandedPath = CopyString(0,data))
+						    {
+							if (oldpath)
+							    FreeMemH(oldpath);
+						    }
+						    else
+							lister->cur_buffer->buf_ExpandedPath = oldpath;
+						    Permit();
+
+						    strcpy(lister->cur_buffer->buf_ObjectName,FilePart(data));
+						}
+
+
 					// Refresh path field
 					case LISTER_REFRESH_PATH:
 
 						// Refresh path field
 						lister_update_pathfield(lister);
 
-						// Update title bar
-						lister_show_name(lister);
+						if (lmsg->command == LISTER_REFRESH_PATH)
+						{
+							// Update title bar
+							lister_show_name(lister);
+						}
+						// Unlock buffer
+						else
+						    buffer_unlock(lister->cur_buffer);
+
 						break;
 
 
@@ -993,7 +1128,7 @@ void __saveds lister_code(void)
 
 					// Do parent/root
 					case LISTER_DO_PARENT_ROOT:
-						do_parent_root(lister,(char *)data);
+						do_parent_root(lister,(char *)data,NULL);
 						break;
 
 
@@ -1173,10 +1308,42 @@ void __saveds lister_code(void)
 
 						// If not busy, reread immediately
 						if (!(lister->flags&LISTERF_LOCK))
-							read_directory(
-								lister,
-								lister->cur_buffer->buf_Path,
-								GETDIRF_RESELECT);
+						{
+						    // Custom handler?
+						    if (lister->cur_buffer->buf_CustomHandler[0])
+						    {
+						        if (*(ULONG *)lister->cur_buffer->buf_CustomHandler == CUSTH_TYPE_GFMMODULE)
+							    galileo_handler_msg(0, "path",
+									        0, lister,
+									        0, 0, lister->cur_buffer->buf_Path, 0,
+									        0,
+									        0, 0);
+						        else
+							    // Send message
+							    rexx_handler_msg(
+								    0,
+								    lister->cur_buffer,
+								    RXMF_WARN,
+								    HA_String,0,"path",
+								    HA_Value,1,lister,
+								    HA_String,2,lister->cur_buffer->buf_Path,
+								    TAG_END);
+							break;
+						    }
+						    else
+						    {
+							if (lister->cur_buffer->more_flags&DWF_CACHE_LIST)
+							    function_launch_quick(FUNCTION_RUN_FUNCTION,def_function_cachelist,lister);
+							else
+							if (lister->cur_buffer->more_flags&DWF_DEVICE_LIST)
+							    function_launch_quick(FUNCTION_RUN_FUNCTION,def_function_devicelist,lister);
+							else
+							    read_directory(lister,
+								           lister->cur_buffer->buf_Path,
+								           lister->cur_buffer->buf_Lock,
+								           GETDIRF_RESELECT);
+						    }
+						}
 
 						// Otherwise, set flag to queue rescan
 						else lister->flags|=LISTERF_RESCAN;
@@ -1523,7 +1690,7 @@ void __saveds lister_code(void)
 				TAG_END);
 
 			// Free filename
-            if (progress_filename)
+			if (progress_filename)
 			    FreeMemH(progress_filename);
 		}
 
@@ -1553,8 +1720,8 @@ void __saveds lister_code(void)
 	// Set flag to indicate closing
 	lister->flags|=LISTERF_CLOSING;
 
-    // Must do this, or some commands will make MuForce hit if run before
-    // opening/activating new lister
+	// Must do this, or some commands will make MuForce hit if run before
+	// opening/activating new lister
 	// Clear pointer to current lister
 	Forbid();
 	if (GUI->current_lister==lister)
@@ -1611,12 +1778,15 @@ ULONG __saveds __asm lister_init(
 		(lister->abort_signal=AllocSignal(-1))==-1)
 		return 0;
 
+	lister->app_port->mp_Node.ln_Type = GNT_LISTER_APPMSG_PORT;
+
 	// Allocate some timers
 	if (!(lister->busy_timer=AllocTimer(UNIT_VBLANK,lister->timer_port)) ||
 		!(lister->scroll_timer=AllocTimer(UNIT_VBLANK,lister->timer_port)) ||
 		!(lister->edit_timer=AllocTimer(UNIT_VBLANK,lister->timer_port)) ||
 		!(lister->foo_timer=AllocTimer(UNIT_VBLANK,lister->timer_port)))
 		return 0;
+
 	StartTimer(lister->foo_timer,5,0);
 
 	// Create regions
@@ -1672,6 +1842,8 @@ ULONG __saveds __asm lister_init(
 		SetFont(&lister->text_area.rast,lister->font);
 	}
 
+	lister->lister_orgdir = ((struct Process *)((struct ExecBase *)*((ULONG *)4))->ThisTask)->pr_CurrentDir;
+
 	return 1;
 }
 
@@ -1680,7 +1852,7 @@ ULONG __saveds __asm lister_init(
 void lister_cleanup(Lister *lister,BOOL bye)
 {
 	struct Node *node;
-    struct Message *msg;
+	struct Message *msg;
 
 	// Send goodbye message?
 	if (bye)
@@ -1745,8 +1917,8 @@ void lister_cleanup(Lister *lister,BOOL bye)
 	// Free ports
 	if (lister->app_port)
 	{
-		GalileoAppMessage *msg;
-		while (msg=(GalileoAppMessage *)GetMsg(lister->app_port))
+		struct AppMessage *msg;
+		while (msg=(struct AppMessage *)GetMsg(lister->app_port))
 			ReplyAppMessage(msg);
 		DeleteMsgPort(lister->app_port);
 	}
@@ -1804,6 +1976,10 @@ void lister_cleanup(Lister *lister,BOOL bye)
 
 	// Decrement count
 	--main_lister_count;
+
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }
 
 
@@ -1835,6 +2011,13 @@ void lister_send_abort(Lister *lister)
 		// Abort trap installed?
 		if (FindFunctionTrap("abort",lister->cur_buffer->buf_CustomHandler,port_name))
 		{
+		    if (*(ULONG *)lister->cur_buffer->buf_CustomHandler == CUSTH_TYPE_GFMMODULE)
+			galileo_handler_msg(0, "abort",
+					    0, lister,
+					    0, 0, 0, 0,
+					    0,
+					    0, 0);
+		    else
 			// Send abort message
 			rexx_handler_msg(
 				port_name,

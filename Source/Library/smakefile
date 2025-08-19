@@ -3,41 +3,42 @@ LIBVER = 0
 LIBREV = 2
 
 
-OBJS = $(OBJ)libinit.o $(OBJ)data.o $(OBJ)string_data.o \
-	$(OBJ)timer.o $(OBJ)pathlist.o \
-	$(OBJ)functions.o $(OBJ)gui.o $(OBJ)list_management.o \
-	$(OBJ)misc.o $(OBJ)simplerequest.o $(OBJ)selection_list.o $(OBJ)strings.o \
-	$(OBJ)drag_routines.o $(OBJ)palette_routines.o \
-	$(OBJ)layout_routines.o $(OBJ)layout_support.o $(OBJ)layout_utils.o \
-	$(OBJ)layout_resize.o \
-	$(OBJ)boopsi.o $(OBJ)image_class.o $(OBJ)button_class.o $(OBJ)listview_class.o \
-	$(OBJ)propgadget_class.o $(OBJ)palette_class.o \
-	$(OBJ)dos_patch.o \
-	$(OBJ)notify.o \
-	$(OBJ)menu_routines.o \
-	$(OBJ)bitmap.o \
-	$(OBJ)args.o \
-	$(OBJ)rexx.o \
-	$(OBJ)popup_menus.o $(OBJ)ipc.o $(OBJ)images.o $(OBJ)memory.o $(OBJ)popup_support.o \
-	$(OBJ)config_new.o $(OBJ)config_open.o $(OBJ)config_default.o $(OBJ)config_save.o \
-	$(OBJ)config_close.o $(OBJ)config_copy.o $(OBJ)config_misc.o \
-	$(OBJ)status_window.o $(OBJ)read_ilbm.o \
-	$(OBJ)anim.o \
-	$(OBJ)buffered_io.o $(OBJ)diskio.o $(OBJ)wb.o $(OBJ)launcher.o $(OBJ)iff.o \
-	$(OBJ)string_hook.o $(OBJ)clipboard.o $(OBJ)semaphores.o \
-	$(OBJ)requesters.o \
-	$(OBJ)progress_win.o \
-	$(OBJ)appmsg.o \
-	$(OBJ)search.o \
-	$(OBJ)dates.o \
-	$(OBJ)filetypes.o \
-	$(OBJ)icons.o \
-	$(OBJ)icon_cache.o \
-	$(OBJ)devices.o \
-	$(OBJ)version.o \
-	$(OBJ)getusage.o \
-	$(OBJ)savepos.o \
-	$(OBJ)lsprintf.o
+OBJS = $(OBJ)userlibinit.o $(OBJ)data.o $(OBJ)string_data.o \
+    $(OBJ)timer.o $(OBJ)pathlist.o \
+    $(OBJ)functions.o $(OBJ)gui.o $(OBJ)list_management.o \
+    $(OBJ)misc.o $(OBJ)simplerequest.o $(OBJ)selection_list.o $(OBJ)strings.o \
+    $(OBJ)setd1.o $(OBJ)paths.o $(OBJ)drag_routines.o $(OBJ)palette_routines.o \
+    $(OBJ)layout_routines.o $(OBJ)layout_support.o $(OBJ)layout_utils.o \
+    $(OBJ)layout_resize.o \
+    $(OBJ)boopsi.o $(OBJ)image_class.o $(OBJ)button_class.o $(OBJ)listview_class.o \
+    $(OBJ)propgadget_class.o $(OBJ)palette_class.o $(OBJ)path_class.o \
+    $(OBJ)dos_patch.o \
+    $(OBJ)notify.o \
+    $(OBJ)menu_routines.o \
+    $(OBJ)bitmap.o \
+    $(OBJ)args.o \
+    $(OBJ)rexx.o $(OBJ)trampoline.o \
+    $(OBJ)popup_menus.o $(OBJ)ipc.o $(OBJ)images.o $(OBJ)memory.o $(OBJ)popup_support.o \
+    $(OBJ)config_new.o $(OBJ)config_open.o $(OBJ)config_default.o $(OBJ)config_save.o \
+    $(OBJ)config_close.o $(OBJ)config_copy.o $(OBJ)config_misc.o \
+    $(OBJ)status_window.o $(OBJ)read_ilbm.o \
+    $(OBJ)anim.o \
+    $(OBJ)buffered_io.o $(OBJ)diskio.o $(OBJ)wb.o $(OBJ)launcher.o $(OBJ)iff.o \
+    $(OBJ)string_hook.o $(OBJ)clipboard.o $(OBJ)semaphores.o \
+    $(OBJ)requesters.o \
+    $(OBJ)progress_win.o \
+    $(OBJ)appmsg.o \
+    $(OBJ)handlermsg.o \
+    $(OBJ)search.o \
+    $(OBJ)dates.o \
+    $(OBJ)filetypes.o \
+    $(OBJ)icons.o \
+    $(OBJ)icon_cache.o \
+    $(OBJ)devices.o \
+    $(OBJ)version.o \
+    $(OBJ)getusage.o \
+    $(OBJ)savepos.o \
+    $(OBJ)lsprintf.o # $(OBJ)stack_check.o
 
 all: galileofmpragmas.h $(LBIN)galileofm.library $(BIN)galileofm.lib $(BIN)galileofmlib.lib
 
@@ -69,7 +70,7 @@ librevision $(LIBREV)
 $(STRIPDEBUG)
 noicons
 maxhunk 51200
-sc sd
+sc
 <
 
 $(OBJ)galileofmlib.o : galileofmlib.c
@@ -89,8 +90,10 @@ $(BIN)galileofm.lib: $(OBJ)galileofmlib.o $(OBJ)lsprintf.o
 
 
 $(OBJ)functions.o: functions.asm
+$(OBJ)trampoline.o: trampoline.asm
 $(OBJ)getusage.o: getusage.asm
 $(OBJ)lsprintf.o: lsprintf.asm
+$(OBJ)setd1.o: setd1.asm
 
 
 .c.o:
@@ -121,10 +124,10 @@ clean:
 
 # DO NOT DELETE THIS LINE makedepend needs it
 
-$(OBJ)libinit.o: libinit.c galileofmlib.h galileofmbase.h
-$(OBJ)libinit.o: /Include/galileo/os.h /Program/galileo_config.h
-$(OBJ)libinit.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
-$(OBJ)libinit.o: dos_patch.h galileofmlib.strings pools.h boopsi.h
+$(OBJ)userlibinit.o: userlibinit.c galileofmlib.h galileofmbase.h
+$(OBJ)userlibinit.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)userlibinit.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)userlibinit.o: dos_patch.h galileofmlib.strings pools.h boopsi.h
 $(OBJ)data.o: data.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
 $(OBJ)data.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
 $(OBJ)data.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
@@ -165,6 +168,10 @@ $(OBJ)strings.o: strings.c galileofmlib.h galileofmbase.h
 $(OBJ)strings.o: /Include/galileo/os.h /Program/galileo_config.h
 $(OBJ)strings.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
 $(OBJ)strings.o: dos_patch.h galileofmlib.strings pools.h
+$(OBJ)paths.o: paths.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
+$(OBJ)paths.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
+$(OBJ)paths.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)paths.o: paths.h
 $(OBJ)drag_routines.o: drag_routines.c galileofmlib.h galileofmbase.h
 $(OBJ)drag_routines.o: /Include/galileo/os.h /Program/galileo_config.h
 $(OBJ)drag_routines.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
@@ -223,6 +230,10 @@ $(OBJ)palette_class.o: /Include/galileo/os.h /Program/galileo_config.h
 $(OBJ)palette_class.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h
 $(OBJ)palette_class.o: images.h dos_patch.h galileofmlib.strings pools.h
 $(OBJ)palette_class.o: boopsi.h
+$(OBJ)path_class.o: path_class.c galileofmlib.h galileofmbase.h
+$(OBJ)path_class.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)path_class.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)path_class.o: dos_patch.h galileofmlib.strings pools.h boopsi.h
 $(OBJ)dos_patch.o: dos_patch.c galileofmlib.h galileofmbase.h
 $(OBJ)dos_patch.o: /Include/galileo/os.h /Program/galileo_config.h
 $(OBJ)dos_patch.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
@@ -349,6 +360,10 @@ $(OBJ)progress_win.o: progress.h /Program/pattern.h
 $(OBJ)appmsg.o: appmsg.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
 $(OBJ)appmsg.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
 $(OBJ)appmsg.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h
+$(OBJ)handlermsg.o: handlermsg.c galileofmlib.h galileofmbase.h
+$(OBJ)handlermsg.o: /Include/galileo/os.h /Program/galileo_config.h
+$(OBJ)handlermsg.o: galileofmpragmas.h read_ilbm.h wb.h filetypes.h images.h
+$(OBJ)handlermsg.o: dos_patch.h galileofmlib.strings pools.h
 $(OBJ)search.o: search.c galileofmlib.h galileofmbase.h /Include/galileo/os.h
 $(OBJ)search.o: /Program/galileo_config.h galileofmpragmas.h read_ilbm.h wb.h
 $(OBJ)search.o: filetypes.h images.h dos_patch.h galileofmlib.strings pools.h

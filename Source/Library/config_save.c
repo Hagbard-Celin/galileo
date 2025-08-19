@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -42,46 +42,6 @@ For more information on Directory Opus for Windows please see:
 write_string(struct _IFFHandle *iff,char *string);
 write_button_list(struct _IFFHandle *iff,struct List *list,long flags);
 write_function_list(struct _IFFHandle *iff,struct List *list);
-
-__asm __saveds L_SaveSettings(
-	register __a0 CFG_SETS *settings,
-	register __a1 char *name,
-	register __a6 struct MyLibrary *libbase)
-{
-	struct _IFFHandle *iff;
-	int success=0;
-
-	// Check valid config and name
-	if (!settings || !name || !name[0]) return -1;
-
-	// Try to open file to write
-	if (iff=L_IFFOpen(name,MODE_NEWFILE,ID_GILO))
-	{
-		char buf[40];
-
-		// Write header chunk
-		if (L_IFFWriteChunk(iff,(char *)settings,ID_SETS,sizeof(CFG_SETS)))
-		{
-			// Succeeded
-			success=1;
-
-			// Write icons?
-			if ((GetVar("Galileo/GalileoFM",buf,sizeof(buf),GVF_GLOBAL_ONLY)>0) &&
-				strstr(buf,"-icons-"))
-			{
-				// Write icon file
-				L_WriteFileIcon("Galileo:icons/Settings",name,libbase);
-			}
-		}
-	}
-
-	if (!success) success=IoErr();
-	else success=0;
-
-	L_IFFClose(iff);
-
-	return success;
-}
 
 
 __asm __saveds L_SaveListerDef(

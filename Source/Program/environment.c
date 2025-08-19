@@ -31,12 +31,20 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "environment.h"
+#include "lister_protos.h"
+#include "misc_protos.h"
+#include "buttons_protos.h"
+#include "main_protos.h"
+#include "start_menu_protos.h"
 #include "scripts.h"
+#include "menu_data.h"
+#include "backdrop.h"
 
 write_env_string(APTR,char *,ULONG);
 
@@ -165,7 +173,7 @@ BOOL environment_open(Cfg_Environment *env,char *name,BOOL first,APTR prog)
 
 		// Free lister menu, get new one
 		CloseButtonBank(GUI->lister_menu);
-		if (GUI->lister_menu=OpenButtonBank(env->menu_path))
+		if (GUI->lister_menu=OpenButtonBank(env->menu_path, NULL))
 		{
 			// Check if it needs conversion
 			if (!(GUI->lister_menu->window.flags&BTNWF_FIX_MENU))
@@ -181,14 +189,14 @@ BOOL environment_open(Cfg_Environment *env,char *name,BOOL first,APTR prog)
 
 		// Free user menu, get new one
 		CloseButtonBank(GUI->user_menu);
-		GUI->user_menu=OpenButtonBank(env->user_menu_path);
+		GUI->user_menu=OpenButtonBank(env->user_menu_path, NULL);
 
 		// Bump progress
 		main_bump_progress(prog,progress++,0);
 
 		// Free scripts, get new set
 		CloseButtonBank(GUI->scripts);
-		GUI->scripts=OpenButtonBank(env->scripts_path);
+		GUI->scripts=OpenButtonBank(env->scripts_path, NULL);
 
 		// Bump progress
 		main_bump_progress(prog,progress++,0);
@@ -204,7 +212,7 @@ BOOL environment_open(Cfg_Environment *env,char *name,BOOL first,APTR prog)
 			Buttons *but;
 
 			// Create button bank from this node
-			if (but=buttons_new(button->node.ln_Name,0,&button->pos,0,button->flags|BUTTONF_FAIL))
+			if (but=buttons_new(button->node.ln_Name,0,0,0,&button->pos,0,button->flags|BUTTONF_FAIL))
 			{
 				// Set icon position
 				but->icon_pos_x=button->icon_pos_x;
@@ -228,7 +236,7 @@ BOOL environment_open(Cfg_Environment *env,char *name,BOOL first,APTR prog)
 			ButtonBankNode *next=(ButtonBankNode *)button->node.ln_Succ;
 
 			// Create new start menu
-			start_new(button->node.ln_Name,0,0,button->pos.Left,button->pos.Top);
+			start_new(button->node.ln_Name,0,0,0,button->pos.Left,button->pos.Top);
 
 			// Free this node, get next
 			Remove((struct Node *)button);
@@ -445,8 +453,8 @@ environment_save(Cfg_Environment *env,char *name,short snapshot,CFG_ENVR *data)
 				// Write lister data
 				if (!(SaveListerDef(iff,(Cfg_Lister *)lister->lister))) break;
 
-                // Plug memory leak
-                FreeListerDef((Cfg_Lister *)lister->lister);
+				// Plug memory leak
+				FreeListerDef((Cfg_Lister *)lister->lister);
 
 				// Remove this node, get next
 				Remove((struct Node *)lister);
@@ -953,6 +961,10 @@ void __saveds environment_proc(void)
 
 	// Exit
 	IPC_Free(ipc);
+
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }
 
 // Free a desktop list

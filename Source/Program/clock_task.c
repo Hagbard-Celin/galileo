@@ -31,11 +31,15 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "menu_data.h"
+#include "clock_task.h"
+#include "lsprintf_protos.h"
 #include <proto/SysInfo.h>
 #include <libraries/SysInfo.h>
 
@@ -200,8 +204,8 @@ void __saveds clock_proc(void)
 										mem_msg=MSG_MEMORY_COUNTER_CLOCK;
 									}
 
-                                    // Free DrawInfo
-                                    FreeScreenDrawInfo(screen, drawinfo);
+								        // Free DrawInfo
+								        FreeScreenDrawInfo(screen, drawinfo);
 								}
 
 								// Otherwise, open window
@@ -575,6 +579,10 @@ void __saveds clock_proc(void)
 
 	// Exit
 	IPC_Free(ipc);
+
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }
 
 // Show free memory
@@ -636,7 +644,7 @@ void title_error(char *txt,short time)
 	if (ipc=IPC_FindProc(&GUI->process_list,NAME_CLOCK,0,0))
 	{
 		// Allocate copy of text
-		if (!txt || (copy=AllocVec(strlen(txt)+1,0)))
+		if (!txt || (copy = AllocVec(strlen(txt) + 1, MEMF_PUBLIC)))
 		{
 			// Copy text
 			if (copy) strcpy(copy,txt);

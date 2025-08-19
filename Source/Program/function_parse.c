@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,11 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
+#include "misc_protos.h"
+#include "scripts.h"
+#include "function_data.h"
+#include "lsprintf_protos.h"
 
 #define MAXPARSEDEPTH	10
 
@@ -199,7 +205,7 @@ function_parse_function(FunctionHandle *handle)
 				// Can this supply a destination?
 				if (ptr=strchr(parse->ipa_command->template_key,FUNCKEY_DIR))
 				{
-					// Source supplied?
+					// Dest supplied?
 					if ((ptr=(char *)parse->ipa_funcargs->FA_ArgArray[atoi(ptr+1)]) &&
 					    (strchr(ptr,':') || strchr(ptr,'/')))
 					{
@@ -688,7 +694,7 @@ function_build_instruction(FunctionHandle *handle,
     Lister *source,*dest;
     PathNode *path;
     FunctionEntry *entry=0;
-    short len,source_len,cont_flag=PARSE_END,max_len,limit;
+    short len,source_len = 0,cont_flag=PARSE_END,max_len,limit;
     UBYTE ch;
     BOOL okay;
     BOOL quote_flag=0,wb_func=0;
@@ -716,7 +722,8 @@ function_build_instruction(FunctionHandle *handle,
     if (*instruction=='#') ++instruction;
 
     // Get length of source path and instruction string
-    source_len=strlen(handle->func_source_path);
+    if (handle->func_source_path)
+	source_len=strlen(handle->func_source_path);
     func_len=strlen(instruction);
 
     // Get cll limit
@@ -826,6 +833,8 @@ function_build_instruction(FunctionHandle *handle,
 		    // Get next entry to use
 		    if (entry=function_get_entry(handle))
 		    {
+		        char *tmp_name;
+
 		        // Are quotes ok?
 		        if (quote_value && !quote_flag &&
 			    (func_pos==0 || function_buf[func_pos-1]==' '))
@@ -844,8 +853,13 @@ function_build_instruction(FunctionHandle *handle,
 					                (wb_func && entry->fe_type>ENTRY_DEVICE));
 
 		        // Store name
-		        strcpy(handle->last_filename,handle->func_source_path);
-		        AddPart(handle->last_filename,entry->fe_name,512);
+			if (tmp_name = JoinString(handle->memory, handle->func_source_path, entry->fe_name, NULL, JSF_FS_SLASH))
+		        {
+			    if (handle->last_filename)
+			        FreeMemH(handle->last_filename);
+
+			    handle->last_filename = tmp_name;
+		        }
 
 		        // Reload this file?
 		        if (handle->func_parameters.flags&FUNCF_RELOAD_FILES &&
@@ -853,7 +867,7 @@ function_build_instruction(FunctionHandle *handle,
 			    !(entry->fe_flags&FUNCENTF_ICON_ACTION))
 		        {
 			    // Add for reload
-			    function_filechange_reloadfile(handle,handle->func_source_path,entry->fe_name,FFLF_DEFERRED);
+			    function_filechange_reloadfile(handle,handle->func_source_path,handle->func_source_lock,entry->fe_name,FFLF_DEFERRED);
 		        }
 
 		        // Say we're done with this entry
@@ -965,7 +979,7 @@ function_build_instruction(FunctionHandle *handle,
 				!(entry->fe_flags&FUNCENTF_ICON_ACTION))
 			    {
 				// Add for reload
-				function_filechange_reloadfile(handle,handle->func_source_path,entry->fe_name,FFLF_DEFERRED);
+				function_filechange_reloadfile(handle,handle->func_source_path,handle->func_source_lock,entry->fe_name,FFLF_DEFERRED);
 			    }
 
 			    // Done with this entry

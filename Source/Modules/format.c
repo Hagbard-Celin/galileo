@@ -98,7 +98,7 @@ int __asm __saveds L_Module_Entry_Internal(
 			if (data->info.id_DiskType==ID_FFS_DISK ||
 				data->info.id_DiskType==ID_INTER_FFS_DISK ||
 				data->info.id_DiskType==ID_FASTDIR_FFS_DISK ||
-                data->info.id_DiskType==ID_LONG_FFS_DISK) data->default_ffs=1;
+				data->info.id_DiskType==ID_LONG_FFS_DISK) data->default_ffs=1;
 
 			// >=39?
 			if (DOSBase->dl_lib.lib_Version>=39)
@@ -115,18 +115,18 @@ int __asm __saveds L_Module_Entry_Internal(
 					data->default_cache=1;
 				}
 
-                // >=46
-                if (DOSBase->dl_lib.lib_Version>=46)
-                {
-                    // Long?
+				// >=46
+				if (DOSBase->dl_lib.lib_Version>=46)
+				{
+				        // Long?
 					if (data->info.id_DiskType==ID_LONG_DOS_DISK ||
 					data->info.id_DiskType==ID_LONG_FFS_DISK)
 					{
-                        data->default_long=1;
+						data->default_long=1;
 						data->default_int=1;
 						data->default_cache=0;
 					}
-                }
+				}
 			}
 
 			// If previously formatted, assume no verify needed
@@ -265,7 +265,7 @@ int __asm __saveds L_Module_Entry_Internal(
 									// If on, check International
 									if (state) SetGadgetValue(data->list,GAD_FORMAT_INTERNATIONAL,1);
 
-                                    // Enable/disable Caching gadget
+									// Enable/disable Caching gadget
 									DisableObject(data->list,GAD_FORMAT_CACHING,state);
 
 									// If on, check International
@@ -407,7 +407,7 @@ BOOL format_open(format_data *data,BOOL noactive)
 	SetGadgetValue(data->list,GAD_FORMAT_FFS,data->default_ffs);
 	SetGadgetValue(data->list,GAD_FORMAT_INTERNATIONAL,data->default_int);
 	SetGadgetValue(data->list,GAD_FORMAT_CACHING,data->default_cache);
-    SetGadgetValue(data->list,GAD_FORMAT_LONG,data->default_long);
+	SetGadgetValue(data->list,GAD_FORMAT_LONG,data->default_long);
 	SetGadgetValue(data->list,GAD_FORMAT_TRASHCAN,data->default_trash);
 	SetGadgetValue(data->list,GAD_FORMAT_INSTALL,data->default_boot);
 	SetGadgetValue(data->list,GAD_FORMAT_VERIFY,data->default_verify);
@@ -442,7 +442,7 @@ void format_close(format_data *data)
 		data->default_ffs=GetGadgetValue(data->list,GAD_FORMAT_FFS);
 		data->default_int=GetGadgetValue(data->list,GAD_FORMAT_INTERNATIONAL);
 		data->default_cache=GetGadgetValue(data->list,GAD_FORMAT_CACHING);
-        data->default_long=GetGadgetValue(data->list,GAD_FORMAT_LONG);
+		data->default_long=GetGadgetValue(data->list,GAD_FORMAT_LONG);
 		data->default_trash=GetGadgetValue(data->list,GAD_FORMAT_TRASHCAN);
 		data->default_boot=GetGadgetValue(data->list,GAD_FORMAT_INSTALL);
 		data->default_verify=GetGadgetValue(data->list,GAD_FORMAT_VERIFY);
@@ -573,29 +573,13 @@ void show_device_info(format_data *data)
 	SetGadgetValue(data->list,GAD_FORMAT_STATUS,(ULONG)info_buf);
 
 	// If this isn't a standard dos disk, disable FFS, etc
-#if 1
-    if ((dos_type&ID_DOS_DISK)!=ID_DOS_DISK)
-    {
-        DisableObject(data->list,GAD_FORMAT_FFS,TRUE);
-        DisableObject(data->list,GAD_FORMAT_LONG,TRUE);
-        DisableObject(data->list,GAD_FORMAT_CACHING,TRUE);
-        DisableObject(data->list,GAD_FORMAT_INTERNATIONAL,TRUE);
-    }
-#else
-	DisableObject(data->list,GAD_FORMAT_FFS,(dos_type&ID_DOS_DISK)!=ID_DOS_DISK);
-    DisableObject(data->list,GAD_FORMAT_LONG,(dos_type&ID_DOS_DISK)!=ID_DOS_DISK);
-	DisableObject(
-    	data->list,
-        GAD_FORMAT_CACHING,
-        ((dos_type&ID_DOS_DISK)!=ID_DOS_DISK ||
-        (GetGadgetValue(data->list,GAD_FORMAT_LONG))  ));
-	DisableObject(
-		data->list,
-		GAD_FORMAT_INTERNATIONAL,
-		((dos_type&ID_DOS_DISK)!=ID_DOS_DISK ||
-        (GetGadgetValue(data->list,GAD_FORMAT_CACHING)) ||
-        (GetGadgetValue(data->list,GAD_FORMAT_LONG))  ));
-#endif
+	if ((dos_type&ID_DOS_DISK)!=ID_DOS_DISK)
+	{
+	    DisableObject(data->list,GAD_FORMAT_FFS,TRUE);
+	    DisableObject(data->list,GAD_FORMAT_LONG,TRUE);
+	    DisableObject(data->list,GAD_FORMAT_CACHING,TRUE);
+	    DisableObject(data->list,GAD_FORMAT_INTERNATIONAL,TRUE);
+	}
 
 	// Disable install if no bootblock entry in table
 	DisableObject(data->list,GAD_FORMAT_INSTALL,(table_size<DE_BOOTBLOCKS));

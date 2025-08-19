@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,11 +32,22 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "dirlist_protos.h"
+#include "lister_protos.h"
+#include "links.h"
+#include "dates.h"
+#include "icons.h"
+#include "envoy.h"
+#include "filetypes.h"
+#include "rexx_protos.h"
+#include "handler.h"
+#include "buffers_protos.h"
 #include <libraries/multiuser.h>
 #include <proto/multiuser.h>
 
@@ -83,6 +95,11 @@ void buffer_free(DirBuffer *buffer)
 	// Valid buffer?
 	if (buffer)
 	{
+		// Unlock the directory
+		if (buffer->buf_Lock)
+		{
+		    UnLock(buffer->buf_Lock);
+		}
 		// Free networking things
 		FreeVec(buffer->user_info);
 		FreeVec(buffer->group_info);
@@ -93,6 +110,10 @@ void buffer_free(DirBuffer *buffer)
 		}
 
 		// Free buffer memory
+		if (buffer->buf_Path)
+		    FreeMemH(buffer->buf_Path);
+		if (buffer->buf_ExpandedPath)
+		    FreeMemH(buffer->buf_ExpandedPath);
 		FreeMemHandle(buffer->memory);
 		FreeVec(buffer->buf_ObjectName);
 		FreeVec(buffer);
@@ -101,7 +122,7 @@ void buffer_free(DirBuffer *buffer)
 
 
 // Free the contents of a buffer
-BOOL buffer_freedir(DirBuffer *buffer,BOOL clear_handler)
+BOOL buffer_freedir(DirBuffer *buffer,ULONG flags)
 {
 	short a;
 
@@ -110,6 +131,34 @@ BOOL buffer_freedir(DirBuffer *buffer,BOOL clear_handler)
 
 	// Clear buffer memory
 	ClearMemHandle(buffer->memory);
+
+	if (flags&FREEDIRF_FREE_LOCK)
+	{
+	    // Unlock the directory
+	    if (buffer->buf_Lock)
+	    {
+	        UnLock(buffer->buf_Lock);
+	    }
+	    buffer->buf_Lock=0;
+	}
+
+	if (flags&FREEDIRF_FREE_EXPANDEDPATH)
+	{
+	    // Unlock the directory
+	    if (buffer->buf_ExpandedPath)
+		FreeMemH(buffer->buf_ExpandedPath);
+
+	    buffer->buf_ExpandedPath=0;
+	}
+
+	if (flags&FREEDIRF_FREE_PATH)
+	{
+	    // Unlock the directory
+	    if (buffer->buf_Path)
+		FreeMemH(buffer->buf_Path);
+
+	    buffer->buf_Path=0;
+	}
 
 	// Reset buffer
 	NewList((struct List *)&buffer->entry_list);
@@ -156,7 +205,7 @@ BOOL buffer_freedir(DirBuffer *buffer,BOOL clear_handler)
 			buffer->buf_FieldWidth[a]=0;
 
 	// Clear handler?
-	if (clear_handler)
+	if (flags&FREEDIRF_CLEAR_HANDLER)
 	{
 		// Clear custom title and label
 		buffer->buf_CustomTitle[0]=0;
@@ -215,7 +264,7 @@ DirEntry *create_file_entry(
 	if (entry_type==ST_SOFTLINK)
 	{
 		// Get soft-link info
-		if (ReadSoftLink(lock,buffer->buf_Path,entry_name,&sinfo))
+		if (ReadSoftLink(lock,0,entry_name,&sinfo))
 		{
 			// Get info from soft link
 			entry_size=sinfo.sli_Fib.fib_Size;
@@ -261,7 +310,7 @@ DirEntry *create_file_entry(
 	if (description && *description)
 		direntry_add_string(buffer,newentry,DE_Filetype,description);
 
-	// Don't need this stuff for devices
+	// Don't need all this stuff for devices
 	if (entry_type!=ENTRY_DEVICE)
 	{
 		// Store date (if supplied)
@@ -284,6 +333,15 @@ DirEntry *create_file_entry(
 		else
 		if (entry_type==ST_LINKDIR || entry_type==ST_LINKFILE)
 			newentry->de_Flags|=ENTF_LINK;
+	}
+	else
+	{
+		// Store date (if supplied)
+		if (entry_date) newentry->de_Date=*entry_date;
+
+		// Store lock for assigns
+		if (entry_size==DLT_DIRECTORY || entry_subtype == SUBENTRY_BUFFER)
+			newentry->de_UserData = (ULONG)lock;
 	}
 
 	// Network info?
@@ -423,7 +481,7 @@ DirEntry *add_file_entry(
 	if (newentry->de_Node.dn_Type==ENTRY_DEVICE)
 	{
 		// Buffers sorted by display string
-		if (newentry->de_SubType==SUBENTRY_BUFFER) sort_method=-2;
+		if (newentry->de_SubType==SUBENTRY_BUFFER || newentry->de_SubType==SUBENTRY_MULTI_ASSIGN) sort_method=-2;
 
 		// Volumes also sorted by display string
 		else
@@ -580,8 +638,8 @@ DirEntry *add_file_entry(
 			if (entry->de_Node.dn_Type==ENTRY_DEVICE)
 			{
 				// Is this entry a multi-path assign?
-				if (entry->de_SubType==SUBENTRY_BUFFER &&
-					newentry->de_SubType!=SUBENTRY_BUFFER)
+				if (entry->de_SubType==SUBENTRY_MULTI_ASSIGN &&
+					newentry->de_SubType!=SUBENTRY_MULTI_ASSIGN)
 				{
 					// Skip this entry for sorting
 					continue;
@@ -1181,6 +1239,13 @@ void buffer_clear_lock(DirBuffer *buffer,short arg)
 // Send inactive message
 void buffer_inactive(DirBuffer *buffer,short arg)
 {
+	if (*(ULONG *)buffer->buf_CustomHandler == CUSTH_TYPE_GFMMODULE)
+	galileo_handler_msg(0, "inactive",
+			    0, buffer->buf_CurrentLister,
+			    0, 0, 0, 0,
+			    (ULONG)((buffer->buf_CustomTitle[0])?buffer->buf_CustomTitle:buffer->buf_Path),
+			    0, 0);
+	else
 	rexx_handler_msg(
 		0,
 		buffer,
@@ -1197,6 +1262,13 @@ void buffer_inactive(DirBuffer *buffer,short arg)
 // Send active message
 void buffer_active(DirBuffer *buffer,short arg)
 {
+	if (*(ULONG *)buffer->buf_CustomHandler == CUSTH_TYPE_GFMMODULE)
+	galileo_handler_msg(0, "active",
+			    0, (buffer->buf_CurrentLister)?buffer->buf_CurrentLister:buffer->buf_OwnerLister,
+			    0, 0, 0, 0,
+			    (ULONG)((buffer->buf_CustomTitle[0])?buffer->buf_CustomTitle:buffer->buf_Path),
+			    0, 0);
+	else
 	rexx_handler_msg(
 		0,
 		buffer,

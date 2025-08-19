@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -35,19 +36,7 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#include "galileofm.h"
-
-extern CONST GalileoCallbackInfo CallBackInfo;
-
-#define DELETE_TIMER	300
-#define MENU_TIMER		5
-#define FILETYPE_TIMER	5
-#define DESKTOP_TIMER	5
-#define SEED_TIMER		60
-
-void handle_icon_notify(GalileoNotify *);
-
-TimerHandle *filetype_timer=0;
+#include "event_loop_include.h"
 
 // Main event loop
 void event_loop()
@@ -106,78 +95,66 @@ void event_loop()
 		{
 			// App message reply?
 			if (msg->mn_Node.ln_Type==NT_REPLYMSG &&
-				(((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_APPWINDOW ||
-				((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_APPICON ||
-				((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_APPMENUITEM ||
-				((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_APPSNAPSHOT))
+				(((struct AppMessage *)msg)->am_Type==MTYPE_APPWINDOW ||
+				((struct AppMessage *)msg)->am_Type==MTYPE_APPICON ||
+				((struct AppMessage *)msg)->am_Type==MTYPE_APPMENUITEM ||
+				((struct AppMessage *)msg)->am_Type==MTYPE_APPSNAPSHOT))
 			{
 				// Free the message
-				FreeAppMessage((GalileoAppMessage *)msg);
+				FreeAppMessage((struct AppMessage *)msg);
 				msg=0;
 			}
-
+			else
+			if (msg->mn_Node.ln_Type==NT_REPLYMSG &&
+				((GalileoListerAppMessage *)msg)->glam_Type==MTYPE_LISTER_APPWINDOW)
+			{
+				free_lister_appmsg((GalileoListerAppMessage *)msg);
+				msg = 0;
+			}
 			// File drop on backdrop window?
 			else
-			if ((((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_GALILEOFM ||
-				((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_APPWINDOW) &&
-				((GalileoAppMessage *)msg)->ga_Msg.am_ID==WINDOW_BACKDROP)
+			if ((((struct AppMessage *)msg)->am_Type==MTYPE_GALILEOFM ||
+				((struct AppMessage *)msg)->am_Type==MTYPE_APPWINDOW ||
+				((GalileoListerAppMessage *)msg)->glam_Type==MTYPE_LISTER_APPWINDOW) &&
+				((struct AppMessage *)msg)->am_ID==WINDOW_BACKDROP)
 			{
+				ULONG reply;
+
 				// Handle drop
-				desktop_drop(GUI->backdrop,(GalileoAppMessage *)msg,PeekQualifier());
-				msg=0;
+				reply = desktop_drop(GUI->backdrop,(struct AppMessage *)msg,PeekQualifier());
+				if (reply == 1)
+				    ReplyAppMessage((struct AppMessage *)msg);
+				else
+				if (reply == 2)
+				    reply_lister_appmsg((GalileoListerAppMessage *)msg);
+
+				msg = 0;
 			}
 
 			// Hidden App message
 			else
-			if ((((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_APPICON ||
-				((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_APPWINDOW ||
-				((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_APPMENUITEM) &&
-				((GalileoAppMessage *)msg)->ga_Msg.am_ID==0x12345678)
+			if ((((struct AppMessage *)msg)->am_Type==MTYPE_APPICON ||
+				((struct AppMessage *)msg)->am_Type==MTYPE_APPWINDOW ||
+				((struct AppMessage *)msg)->am_Type==MTYPE_APPMENUITEM) &&
+				((struct AppMessage *)msg)->am_ID==0x12345678)
 			{
 				// Files dropped on AppIcon?
-				if ((((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_APPICON ||
-					((GalileoAppMessage *)msg)->ga_Msg.am_Type==MTYPE_APPWINDOW) &&
-					((GalileoAppMessage *)msg)->ga_Msg.am_NumArgs>0)
+				if ((((struct AppMessage *)msg)->am_Type==MTYPE_APPICON ||
+					((struct AppMessage *)msg)->am_Type==MTYPE_APPWINDOW) &&
+					((struct AppMessage *)msg)->am_NumArgs>0)
 				{
-					struct ArgArray *arg_array;
-					char *pathname;
-					GalileoAppMessage *amsg=(GalileoAppMessage *)msg;
-					BPTR lock;
-
-					// Allocate buffer
-					if (pathname=AllocVec(512,0))
-					{
-						// Get arg array
-						if (arg_array=AppArgArray(amsg,0))
-						{
-							// Get pathname of first file
-							DevNameFromLock(amsg->ga_Msg.am_ArgList[0].wa_Lock,pathname,512);
-
-							// Need source directory; if no name, get parent
-							if ((!amsg->ga_Msg.am_ArgList[0].wa_Name ||
-								!*amsg->ga_Msg.am_ArgList[0].wa_Name) &&
-								(lock=ParentDir(amsg->ga_Msg.am_ArgList[0].wa_Lock)))
-							{
-								// Get pathname of parent
-								DevNameFromLock(lock,pathname,512);
-								UnLock(lock);
-							}
-
-							// Do filetype action
-							function_launch(
-								FUNCTION_FILETYPE,
-								0,
-								FTTYPE_DOUBLE_CLICK,
-								0,
-								0,0,
-								pathname,0,
-								arg_array,
-								0,0);
-						}
-
-						// Free buffer
-						FreeVec(pathname);
-					}
+				    // Do filetype action
+				    function_launch(
+					    FUNCTION_FILETYPE,
+					    0,
+					    FTTYPE_DOUBLE_CLICK,
+					    FUNCF_WBARG_PASSTRUGH,
+					    0,0,
+					    0,0,
+					    0,0,
+					    0,
+					    0,
+					    (Buttons *)CopyAppMessage((struct AppMessage *)msg, global_memory_pool));
 				}
 
 				// Otherwise, re-open program
@@ -188,7 +165,7 @@ void event_loop()
 				}
 
 				// Reply message
-				ReplyAppMessage((GalileoAppMessage *)msg);
+				ReplyAppMessage((struct AppMessage *)msg);
 				msg=0;
 			}
 
@@ -434,6 +411,9 @@ void event_loop()
 					get_screen_data((GalileoScreenData *)ipc_msg->data);
 					break;
 
+				case MAINCMD_TITLE_ERROR:
+					title_error((char *)ipc_msg->data_free, 0);
+					break;
 
 				// Help
 				case IPC_HELP:
@@ -1275,7 +1255,7 @@ BOOL menu_process_event(
 				Buttons *buttons;
 
 				// Create new button bank
-				if (buttons=buttons_new((char *)-1,0,0,0,0))
+				if (buttons=buttons_new((char *)-1,0,0,0,0,0,0))
 				{
 					// Open bank
 					IPC_Command(
@@ -1383,8 +1363,7 @@ BOOL menu_process_event(
 						"galileo_environment",
 						(ULONG)environment_proc,
 						STACK_LARGE,
-						(ULONG)packet,
-						(struct Library *)DOSBase);
+						(ULONG)packet);
 				}
 			}
 			break;
@@ -1556,6 +1535,9 @@ BOOL menu_process_event(
 		case MENU_ICON_DELETE:
 			{
 				iconopen_packet *packet;
+#ifdef _DEBUG
+				KPrintF("\n	**event_loop.c: Renaming \n");
+#endif
 
 				// Get packet
 				if (packet=get_icon_packet(GUI->backdrop,0,0,0))
@@ -1721,18 +1703,18 @@ BOOL menu_process_event(
 					// Item we want?
 					if (appitem==(APTR)id)
 					{
-						GalileoAppMessage *msg;
+						struct AppMessage *msg;
 						struct MsgPort *port;
 
 						// Build AppMessage
 						if (msg=backdrop_appmessage(GUI->backdrop,0))
 						{
 							// Complete message
-							msg->ga_Msg.am_Type=MTYPE_APPMENUITEM;
+							msg->am_Type=MTYPE_APPMENUITEM;
 							port=WB_AppWindowData(
 								(struct AppWindow *)appitem,
-								&msg->ga_Msg.am_ID,
-								&msg->ga_Msg.am_UserData);
+								&msg->am_ID,
+								&msg->am_UserData);
 
 							// Send the message
 							PutMsg(port,(struct Message *)msg);
@@ -1756,6 +1738,7 @@ BOOL menu_process_event(
 				FUNCF_ICONS|FUNCF_RESCAN_DESKTOP,
 				0,0,
 				environment->env->desktop_location,0,
+				0,0,
 				0,0,
 				0);
 			break;

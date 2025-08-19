@@ -40,10 +40,3 @@ short version_num=0;
 char *version_string="Buildable Beta";
 
 char *_version_str="$VER: Galileo 0.2 "__AMIGADATE__" ";
-
-/*
-short revision_num=1610;
-char *version_string="MagBETA";
-
-char *_version_str="$VER: Galileo 5.1610 (23.4.99)";
-*/

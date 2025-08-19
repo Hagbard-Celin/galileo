@@ -3,7 +3,7 @@
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
 Copyright 2012 Roman Kargin <kas1e@yandex.ru>
-Copyright 2024 Hagbard Celine
+Copyright 2024,2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -43,6 +43,9 @@ For more information on Directory Opus for Windows please see:
 #include "/Include/galileo/os.h"
 
 #include "/Program/galileo_config.h"
+#ifdef _DEBUG_STACK
+#include "stack_check.h"
+#endif
 
 
 typedef struct _DragInfo
@@ -547,7 +550,7 @@ typedef struct _CompoundObject
 #define LVEF_TEMP		(1<<2)			// Temporary flag for something
 
 // Propgadget tags
-#define GPGA_SpringLoaded   	TAG_USER + 61
+#define GPGA_SpringLoaded   	TAG_USER + 63
 
 // Gauge tags
 #define GGG_Total		( TAG_USER + 0x64 )	// Total size
@@ -564,6 +567,39 @@ typedef struct _CompoundObject
 #define GPG_Pen			TAG_USER + 21		// Ordinal selected pen
 #define GPG_SelectPrevious	TAG_USER + 22		// Select previous pen
 #define GPG_SelectNext		TAG_USER + 23		// Select next pen
+
+//Pathgadget tags
+#define PATHGA_TextVal          TAG_USER + 64
+#define PATHGA_StringPointer	TAG_USER + 65
+#define PATHGA_EditBuffer       TAG_USER + 66
+
+// Pathgadget editbuffer flags
+#define PEBPF_LAST_PART 	(1<<7)
+
+// Pathgadget editbuffer length
+#define PWB_PART_LEN 119
+//#define PWB_PART_LEN 4
+//#define PWB_PART_LEN 24
+
+//Pathgadget editbuffer
+struct PathEditBufferPart
+{
+    struct MinNode  pebp_Node;
+    UBYTE       pebp_Length;
+    TEXT        pebp_Buf[PWB_PART_LEN];
+};
+
+struct PathEditBuffer
+{
+    struct MinList	    peb_List;
+    ULONG		    peb_Length;
+    struct PathEditBufferPart	    *peb_DisplayPart;
+    ULONG		    peb_DPOffset;
+    struct PathEditBufferPart	    *peb_CursorPart;
+    ULONG		    peb_CursorPos;
+    ULONG		    peb_CPOffset;
+    struct PathEditBufferPart	    peb_FirstPart;
+};
 
 // Some useful macros
 #define GADGET(obj) (obj->gl_info.gl_gadget.gadget)
@@ -629,19 +665,37 @@ typedef struct _Att_List
 
 typedef struct _Att_Node
 {
-	struct Node		node;		// Node structure
-	Att_List		*list;		// Pointer to list (inefficient!)
-	ULONG			att_data;	// User data
+    struct Node		    node;	    // Node structure
+    Att_List		    *list;	    // Pointer to list (inefficient!)
+    ULONG		    att_data;	    // User data
 } Att_Node;
+
+typedef struct _Att_LockNode
+{
+    struct Node		    node;	    // Node structure
+    Att_List		    *list;	    // Pointer to list (inefficient!)
+    ULONG		    att_data;	    // User data
+    BPTR		    att_lock;	    // Parent lock
+} Att_LockNode;
 
 #define ADDNODE_SORT		1		// Sort names
 #define ADDNODE_EXCLUSIVE	2		// Exclusive entry
 #define ADDNODE_NUMSORT		4		// Numerical name sort
 #define ADDNODE_PRI		8		// Priority insertion
+#define ADDNODE_LOCKNODE	16		// Create Att_LockNode
+#define ADDNODE_DISKCHANGENODE	32		// Create Att_DiskChangeNode
+
+#define ATTNODE_DISKCHANGENODE	175
+#define ATTNODE_LOCKNODE	176
+#define ATTNODE_TYPE_MASK	240
+
+#define ISATTDISKCHANGENODE(type) ((type&ATTNODE_TYPE_MASK) == ATTNODE_DISKCHANGENODE)
+#define ISATTLOCKNODE(type)     ((type&ATTNODE_TYPE_MASK) == ATTNODE_LOCKNODE)
 
 #define REMLIST_FREEDATA	1		// FreeVec data when freeing list
 #define REMLIST_SAVELIST	2		// Don't free list itself
 #define REMLIST_FREEMEMH	4		// FreeMemH data when freeing list
+#define REMLIST_UNLOCK		8		// UnLock locks when freeing list
 
 Att_List *Att_NewList(ULONG);
 Att_Node *Att_NewNode(Att_List *list,char *name,ULONG data,ULONG flags);
@@ -680,6 +734,13 @@ void StopTimer(TimerHandle *);
 BOOL TimerActive(TimerHandle *);
 struct Library *GetTimerBase(void);
 
+typedef struct
+{
+    char		    devname[40];
+    char		    volname[32];
+    struct DateStamp	    date;
+    UBYTE		    volnamelen;
+} diskchange_data;
 
 // Notification message
 typedef struct
@@ -758,6 +819,9 @@ typedef struct _IPC {
     APTR		    memory;	    // Memory
     struct MsgPort	    *reply_port;    // Port for replies
     ULONG		    flags;	    // Flags
+#ifdef _DEBUG_STACK
+    StackData		    stack_debug;
+#endif
 } IPCData;
 
 #define IPCF_INVALID		(1<<0)
@@ -1114,9 +1178,9 @@ typedef struct {
 
 struct DosPacket64
 {
-    struct Message  *dp_Link;    /* EXEC message                    */
-    struct MsgPort  *dp_Port;    /* Reply port for the packet,      */
-							    /* must be filled in on each send. */
+    struct Message  *dp_Link;   /* EXEC message                    */
+    struct MsgPort  *dp_Port;   /* Reply port for the packet,      */
+				/* must be filled in on each send. */
     LONG	    dp_Type;    /* See ACTION_... below            */
     LONG	    dp_Res0;    /* Special compatibility field. [See below] */
 
@@ -1176,8 +1240,21 @@ BuildKeyString(unsigned short,unsigned short,unsigned short,unsigned short,char 
 UWORD QualValid(unsigned short);
 ConvertRawKey(unsigned short,unsigned short,char *);
 void SetBusyPointer(struct Window *);
+
+// strings
+#define JSF_FS_SLASH	(1<<0)
+#define JSF_ST_SLASH	(1<<1)
+#define JSF_E_SLASH		(1<<2)
+#define JSF_FS_ADDPART	(1<<3)
+#define JSF_ST_ADDPART	(1<<4)
+#define JSF_E_ADDPART	(1<<5)
+
 StrCombine(char *,char *,char *,int);
 StrConcat(char *,char *,int);
+STRPTR JoinString(APTR memory, STRPTR first, STRPTR second, STRPTR third, ULONG flags);
+STRPTR CopyString(APTR memory, STRPTR original);
+BOOL GetLastPathComponent(STRPTR dest, STRPTR path);
+
 BPTR GetDosPathList(BPTR);
 void FreeDosPathList(BPTR);
 void CopyLocalEnv(struct Library *);
@@ -1249,7 +1326,7 @@ Cfg_Filetype *NewFiletype(APTR memory);
 
 short ReadSettings(CFG_SETS *,char *);
 Cfg_Lister *ReadListerDef(APTR,ULONG);
-Cfg_ButtonBank *OpenButtonBank(char *name);
+Cfg_ButtonBank *OpenButtonBank(char *name, BPTR *parent_lock);
 Cfg_FiletypeList *ReadFiletypes(char *name,APTR memory);
 Cfg_Button *ReadButton(APTR iff,APTR memory);
 Cfg_Function *ReadFunction(APTR iff,APTR memory,struct List *func_list,Cfg_Function *function);
@@ -1263,7 +1340,6 @@ void DefaultSettings(CFG_SETS *);
 void DefaultEnvironment(CFG_ENVR *);
 Cfg_ButtonBank *DefaultButtonBank(void);
 SaveFiletypeList(Cfg_FiletypeList *list,char *name);
-SaveSettings(CFG_SETS *,char *name);
 SaveListerDef(APTR,Cfg_Lister *lister);
 SaveButtonBank(Cfg_ButtonBank *bank,char *name);
 SaveButton(APTR,Cfg_Button *);
@@ -1292,9 +1368,8 @@ Cfg_Function *FindFunctionType(struct List *list,UWORD type);
 
 
 // IPC
-IPC_Launch(struct ListLock *,IPCData **,char *,ULONG,ULONG,ULONG,struct Library *);
-IPC_Launch_Local(struct ListLock *,IPCData **,char *,ULONG,ULONG,ULONG,struct Library *);
-IPC_Startup(IPCData *,APTR,struct MsgPort *);
+BOOL IPC_Launch(struct ListLock *,IPCData **,char *,ULONG,ULONG,ULONG);
+BOOL IPC_Startup(IPCData *,APTR,struct MsgPort *);
 ULONG IPC_Command(IPCData *,ULONG,ULONG,APTR,APTR,struct MsgPort *);
 ULONG IPC_SafeCommand(IPCData *,ULONG,ULONG,APTR,APTR,struct MsgPort *,struct ListLock *);
 void IPC_Reply(IPCMessage *);
@@ -1315,6 +1390,7 @@ void IPC_QuitName(struct ListLock *,char *,ULONG);
 // gui
 void DrawBox(struct RastPort *,struct Rectangle *,struct DrawInfo *,BOOL);
 void DrawFieldBox(struct RastPort *,struct Rectangle *,struct DrawInfo *);
+char *GetIconFullname(char *name);
 BOOL WriteIcon(char *,struct DiskObject *);
 BOOL DeleteIcon(char *);
 
@@ -1361,7 +1437,7 @@ void FixTitleGadgets(struct Window *);
 ULONG DivideU(unsigned long,unsigned long,unsigned long *,struct Library *);
 
 void ReplyFreeMsg(APTR);
-BOOL GetWBArgPath(struct WBArg *,char *,long);
+STRPTR GetWBArgPath(struct WBArg *);
 
 void WriteFileIcon(char *,char *);
 
@@ -1373,11 +1449,20 @@ struct PubScreenNode *FindPubScreen(struct Screen *,BOOL);
 #define LAUNCH_WAIT			1
 #define LAUNCH_WAIT_TIMEOUT		2
 
+struct LaunchWBArg
+{
+    struct WBArg    *lwba_args;
+    LONG            lwba_numargs;
+    long            lwba_stack;
+    char            *lwba_default_tool;
+    char            *lwba_toolwindow;
+};
 
-BOOL WB_Launch(char *,struct Screen *,short);
-BOOL WB_LaunchNew(char *,struct Screen *,short,long,char *);
-BOOL WB_LaunchNotify(char *,struct Screen *,short,long,char *,struct Process **,IPCData *,ULONG);
-BOOL CLI_Launch(char *,struct Screen *,BPTR,BPTR,BPTR,short,long);
+void FreeLaunchWBArgs(struct WBArg **args, LONG numargs);
+BOOL WB_LaunchArg(struct LaunchWBArg *, struct Screen *, short, struct Process **, IPCData *, ULONG);
+
+BOOL WB_Launch(char *,struct Screen *,short,long,char *,struct Process **,IPCData *,ULONG);
+BOOL CLI_Launch(char *,struct Screen *,BPTR,BPTR,BPTR,short,long,BPTR);
 void MUFSLogin(struct Window *,char *,char *);
 
 #define LAUNCHF_USE_STACK		(1<<14)
@@ -1394,6 +1479,22 @@ struct DosList *DeviceFromHandler(struct MsgPort *,char *);
 BOOL DevNameFromLock(BPTR,char *,long);
 BOOL IsDiskDevice(struct MsgPort *);
 BOOL GetDeviceUnit(BPTR,char *,short *);
+
+// paths
+UBYTE VolIdFromLock(BPTR lock, struct DateStamp *date, char *name);
+BPTR LockFromVolIdPath(STRPTR volumename, CONST_STRPTR path, struct DateStamp *volumedate, UBYTE namelen, ULONG flags);
+BPTR LockFromPathQuick(CONST_STRPTR,ULONG);
+BPTR LockFromPath(CONST_STRPTR,ULONG,ULONG);
+STRPTR PathFromLock(APTR,BPTR,ULONG,CONST_STRPTR);
+
+#define LFPF_TRY_ICON		(1<<0)
+#define LFPF_TRY_ICON_FIRST	(1<<1)
+
+
+#define PFLF_USE_DEVICENAME	(1<<0)
+#define	PFLF_END_SLASH		(1<<1)
+#define	PFLF_SLASH_APPEND	(1<<2)
+
 
 #define ERROR_NOT_CONFIG -1
 
@@ -1477,7 +1578,9 @@ typedef struct
 void WB_Install_Patch(void);
 BOOL WB_Remove_Patch(void);
 struct AppWindow *WB_AddAppWindow(ULONG,ULONG,struct Window *,struct MsgPort *,struct TagItem *);
+struct AppWindow *WB_AddAppWindowTr(ULONG,ULONG,struct Window *,struct MsgPort *,struct TagItem *);
 BOOL WB_RemoveAppWindow(struct AppWindow *);
+BOOL WB_RemoveAppWindowTr(struct AppWindow *);
 struct AppWindow *WB_FindAppWindow(struct Window *);
 struct MsgPort *WB_AppWindowData(struct AppWindow *,ULONG *,ULONG *);
 BOOL WB_AppWindowLocal(struct AppWindow *);
@@ -1526,7 +1629,7 @@ void FreeDiskObjectCopy(struct DiskObject *);
 
 struct DiskObject *GetCachedDefDiskObject(long);
 void FreeCachedDiskObject(struct DiskObject *);
-struct DiskObject *GetCachedDiskObject(char *,long);
+struct DiskObject *GetCachedDiskObject(char *,ULONG);
 struct DiskObject *GetCachedDiskObjectNew(char *,ULONG);
 unsigned long IconCheckSum(struct DiskObject *,short);
 BOOL RemapIcon(struct DiskObject *,struct Screen *,short);
@@ -1549,23 +1652,81 @@ long SetAppIconMenuState(APTR,long,long);
 
 #define MTYPE_GALILEOFM		(UWORD)-1
 
+#define GNT_LISTER_APPMSG_PORT  161
+#define GNT_APPMSG_PORT		173
+#define GNT_MAIN_APPMSG_PORT    196
+#define	MTYPE_LISTER_APPWINDOW	167
+#define GLAM_VERSION		1
+#define GLAMCLASS_LISTER	162
+#define GLAMCLASS_LISTER_ICON	163
+#define GLAMCLASS_DESKTOP_ICON	164
+#define GLAMCLASS_GROUP_ICON	165
+
+
+struct GLArg {
+    BYTE *		gla_Name;	 /* a string relative to that lock */
+    Point		gla_DropPos;
+    ULONG		gla_Flags;
+};
+
+struct GLAData {
+    Point		glad_DropPos;
+    ULONG		glad_Flags;
+};
+
 typedef struct _GalileoAppMessage
 {
-    struct AppMessage	    ga_Msg;
-    Point		    *ga_DropPos;
-    Point		    ga_DragOffset;
-    ULONG		    ga_Flags;
-    ULONG		    ga_Pad[2];
+    struct AppMessage	ga_Msg;
+    Point		*ga_DropPos;
+    Point		ga_DragOffset;
+    ULONG		ga_Flags;
+    ULONG		ga_Pad[2];
 } GalileoAppMessage;
 
 #define GAPPF_ICON_DROP		(1<<16)		// Dropped with icon
 
-GalileoAppMessage *AllocAppMessage(APTR,struct MsgPort *,short);
-void FreeAppMessage(GalileoAppMessage *);
-void ReplyAppMessage(GalileoAppMessage *);
-BOOL CheckAppMessage(GalileoAppMessage *);
-GalileoAppMessage *CopyAppMessage(GalileoAppMessage *,APTR);
-BOOL SetWBArg(GalileoAppMessage *,short,BPTR,char *,APTR);
+struct AppMessage *AllocAppMessage(APTR,struct MsgPort *,WORD);
+void FreeAppMessage(struct AppMessage *);
+void ReplyAppMessage(struct AppMessage *);
+BOOL CheckAppMessage(struct AppMessage *);
+struct AppMessage *CopyAppMessage(struct AppMessage *,APTR);
+BOOL SetWBArg(struct AppMessage *,WORD,BPTR,char *,APTR);
+
+#define WBAF_NOT_A_LOCK		(1<<31)
+
+typedef struct
+{
+    struct Message	gham_Message;
+    STRPTR		gham_Command;
+    APTR		gham_SourceLister;
+    APTR		gham_DestLister;
+    BPTR		gham_DestLock;
+    ULONG		gham_NumArgs;
+    UWORD		gham_Qual;
+    UWORD		gham_Flags;
+    struct GLAData	*gham_ArgData;
+    struct WBArg	gham_ArgList[0];
+} GalileoHandlerAppMessage;
+
+
+typedef struct
+{
+    struct Message	ghm_Message;
+    STRPTR		ghm_Command;
+    ULONG		ghm_Data;
+    APTR		ghm_SourceLister;
+    APTR		ghm_DestLister;
+    BPTR		ghm_DestLock;
+    APTR		ghm_Entry;
+    STRPTR		ghm_Args;
+    APTR		ghm_FunctionHandle;
+    UWORD		ghm_Qual;
+    UWORD		ghm_Flags;
+} GalileoHandlerMessage;
+
+
+void FreeHandlerMessage(GalileoHandlerMessage *msg);
+void ReplyHandlerMessage(GalileoHandlerMessage *msg);
 
 // Progress window
 APTR OpenProgressWindow(struct TagItem *);
@@ -1632,7 +1793,7 @@ void DateToStrings(struct DateStamp *date,char *date_buf,char *time_buf,int flag
 
 
 // Filetype matching
-APTR GetMatchHandle(char *);
+APTR GetMatchHandle(char *,BPTR);
 void FreeMatchHandle(APTR);
 BOOL MatchFiletype(APTR,APTR);
 void ClearFiletypeCache(void);

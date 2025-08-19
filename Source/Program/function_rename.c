@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +37,9 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "function_launch_protos.h"
+#include "function_protos.h"
 
 enum
 {
@@ -47,8 +51,8 @@ typedef struct
 {
 	short	wild_flag;
 	short	confirm_each;
-	char	new_name_edit[256];
-	char	old_name_edit[256];
+	char	new_name_edit[108];
+	char	old_name_edit[108];
 } RenameData;
 
 // RENAME internal function
@@ -56,11 +60,10 @@ GALILEOFM_FUNC(function_rename)
 {
 	FunctionEntry *entry;
 	int ret=1,count=1;
-	char *source_file,*dest_file,*dest_name;
-	char *new_name;
 	PathNode *path;
 	RenameData *data;
 	BOOL progress=0;
+	char dest_file[108], new_name[108];
 
 	// Get current source path
 	if (!(path=function_path_current(&handle->func_source_paths)))
@@ -72,16 +75,11 @@ GALILEOFM_FUNC(function_rename)
 	// Tell this lister to update it's datestamp at the end
 	path->pn_flags|=LISTNF_UPDATE_STAMP;
 
-	// Allocate memory for strings
-	if (!(source_file=AllocVec(1024,MEMF_CLEAR))) return 0;
-	dest_file=source_file+256;
-	dest_name=dest_file+256;
-	new_name=dest_name+256;
-
 	// Go through entries
 	while (entry=function_get_entry(handle))
 	{
 		BOOL file_ok=1,asked=0;
+		BPTR tmplock = 0, org_dir, source_lock = 0;
 
 		// Update progress indicator
 		if (function_progress_update(handle,entry,count))
@@ -91,18 +89,27 @@ GALILEOFM_FUNC(function_rename)
 			break;
 		}
 
-		// Build source name
-		function_build_source(handle,entry,source_file);
+	        // CD to source-file directory
+		if (entry->fe_lock)
+		    source_lock = entry->fe_lock;
+	        else
+	        if (path->pn_lock)
+		    source_lock = path->pn_lock;
+
+		// CD to source dir
+		org_dir = CurrentDir(source_lock);
+
+		//strcpy(source_file,entry->fe_name);
 
 		// Get destination filename
-		strcpy(dest_name,entry->fe_name);
+		strcpy(dest_file,entry->fe_name);
 
 		// An icon entry?
 		if (entry->fe_flags&FUNCENTF_ICON)
 		{
 			// Get new name, tack a .info to the end
-			strcpy(dest_name,new_name);
-			strcat(dest_name,".info");
+			strcpy(dest_file,new_name);
+			strcat(dest_file,".info");
 		}
 
 		// Normal entry
@@ -141,6 +148,13 @@ ask_point:
 						GetString(&locale,MSG_ABORT),0)))
 					{
 						function_abort(handle);
+
+					        if (org_dir)
+						    CurrentDir(org_dir);
+
+					        if (tmplock)
+						    UnLock(tmplock);
+
 						break;
 					}
 
@@ -177,7 +191,7 @@ ask_point:
 					else
 					{
 						// Store new name
-						strcpy(dest_name,data->new_name_edit);
+						strcpy(dest_file,data->new_name_edit);
 					}
 				}
 			}
@@ -202,14 +216,14 @@ ask_point:
 					data->old_name_edit,
 					data->new_name_edit,
 					entry->fe_name,
-					dest_name);
+					dest_file);
 			}
 
 			// Still ok?
 			if (file_ok)
 			{
 				// Get new name
-				strcpy(new_name,dest_name);
+				strcpy(new_name,dest_file);
 			}
 		}
 
@@ -217,15 +231,11 @@ ask_point:
 		if (file_ok)
 		{
 			// Check names are different
-			if (strcmp(dest_name,entry->fe_name)!=0)
+			if (strcmp(dest_file,entry->fe_name)!=0)
 			{
-				// Get destination path
-				strcpy(dest_file,handle->func_source_path);
-				AddPart(dest_file,dest_name,256);
-
 				// Check destination is ok
-				if ((stricmp(dest_name,entry->fe_name))==0 ||
-					(ret=check_file_destination(handle,entry,dest_file,&data->confirm_each))==1)
+				if ((stricmp(dest_file,entry->fe_name))==0 ||
+					(ret=check_file_destination(handle,entry,dest_file,source_lock,&data->confirm_each))==1)
 				{
 					short suc=0;
 
@@ -236,13 +246,13 @@ ask_point:
 						if (entry->fe_entry)
 						{
 							// Use original function
-							suc=OriginalRename(source_file,dest_file);
+							suc=OriginalRename(entry->fe_name,dest_file);
 						}
 
 						// Otherwise, allow patched function to be used
 						else
 						{
-							suc=Rename(source_file,dest_file);
+							suc=Rename(entry->fe_name,dest_file);
 						}
 
 						// Successful?
@@ -273,7 +283,6 @@ ask_point:
 					{
 						// Examine it
 						Examine(lock,handle->s_info);
-						UnLock(lock);
 
 						// Was it a link?
 						if (entry->fe_entry && entry->fe_entry->de_Flags&ENTF_LINK)
@@ -287,18 +296,36 @@ ask_point:
 						}
 
 						// Add new file to listers
-						function_filechange_addfile(handle,path->pn_path,handle->s_info,0,0);
+						function_filechange_addfile(handle,path->pn_path,path->pn_lock,handle->s_info,0,0);
 
 						// Is it a directory?
 						if (handle->s_info->fib_DirEntryType>0)
 						{
-							// Make sure paths are terminated
-							AddPart(source_file,"",256);
-							AddPart(dest_file,"",256);
+							STRPTR sourcepath, destpath;
+							ULONG srclen, dstlen, size;
 
-							// Rename any buffers showing this
-							function_filechange_rename(handle,source_file,dest_file);
+							srclen = strlen(path->pn_path) + strlen(entry->fe_name) + 2;
+							dstlen = strlen(path->pn_path) + strlen(dest_file) + 2;
+
+							size = srclen + dstlen;
+
+							if (sourcepath = AllocMem(size,MEMF_ANY))
+							{
+							    destpath = sourcepath + srclen;
+							    strcpy(sourcepath, path->pn_path);
+							    strcat(sourcepath, entry->fe_name);
+							    sourcepath[srclen - 2] = '/';
+							    sourcepath[srclen - 1] = 0;
+							    strcpy(destpath, path->pn_path);
+							    strcat(destpath, dest_file);
+							    destpath[dstlen - 2] = '/';
+							    destpath[dstlen - 1] = 0;
+							    function_filechange_rename(handle, sourcepath, NULL, destpath);
+							    FreeMem(sourcepath, size);
+							}
+
 						}
+						UnLock(lock);
 					}
 				}
 
@@ -306,6 +333,13 @@ ask_point:
 				else file_ok=0;
 			}
 		}
+
+	        // Restore current directory
+	        if (org_dir)
+		    CurrentDir(org_dir);
+
+	        if (tmplock)
+		    UnLock(tmplock);
 
 		// Aborted?
 		if (ret==-1)
@@ -322,9 +356,6 @@ ask_point:
 		ret=1;
 	}
 
-	// Free data
-	FreeVec(source_file);
-
 	return ret;
 }
 
@@ -332,20 +363,18 @@ ask_point:
 // Given a source and destination "pattern" and an old name, build a new name
 BOOL rename_get_wild(char *src_pattern,char *dst_pattern,char *old_name,char *new_name)
 {
-	char *buffer;
 	char *src_prefix,*src_suffix;
 	char *dst_prefix,*dst_suffix;
 	char *keep_bit;
 	int len,prefix_len=0,suffix_len=0;
 	int a;
 
-	if (!(buffer=AllocVec(700,0)))
+	if (!(src_prefix=AllocVec(540,0)))
 		return 0;
-	src_prefix=buffer;
-	src_suffix=src_prefix+140;
-	dst_prefix=src_suffix+140;
-	dst_suffix=dst_prefix+140;
-	keep_bit=dst_suffix+140;
+	src_suffix=src_prefix+108;
+	dst_prefix=src_suffix+108;
+	dst_suffix=dst_prefix+108;
+	keep_bit=dst_suffix+108;
 
 	// Initialise source prefix and suffix
 	src_prefix[0]=0;
@@ -397,6 +426,8 @@ BOOL rename_get_wild(char *src_pattern,char *dst_pattern,char *old_name,char *ne
 		// If no suffix, or old name matches the suffix
 		(suffix_len==0 || (len>=suffix_len && (stricmp(&old_name[len-suffix_len],src_suffix))==0)))
 	{
+		UWORD size;
+
 		// Get length of bit to keep
 		len-=prefix_len+suffix_len;
 
@@ -405,19 +436,19 @@ BOOL rename_get_wild(char *src_pattern,char *dst_pattern,char *old_name,char *ne
 		keep_bit[len]=0;
 
 		// Build new name
-		strcpy(new_name,dst_prefix);
-		strcat(new_name,keep_bit);
-		strcat(new_name,dst_suffix);
+		size = stccpy(new_name, dst_prefix, 108);
+		size--;
+		size += stccpy(new_name + size, keep_bit, 108 - size);
+		size--;
+		strncat(new_name,dst_suffix, 108 - size);
 
 		// New name is valid?
 		if (new_name[0]!=0)
 		{
-			FreeVec(buffer);
 			return 1;
 		}
 	}
 
 	// Invalid (didn't match)
-	FreeVec(buffer);
 	return 0;
 }

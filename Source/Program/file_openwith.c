@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,17 +32,22 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #include "galileofm.h"
+#include "misc_protos.h"
+#include "file_openwith.h"
+#include "lsprintf_protos.h"
 
-void file_open_with(struct Window *window,char *name,ULONG flags)
+void file_open_with(struct Window *window,char *name,BPTR parent_lock, ULONG flags)
 {
-	char *buffer;
-	short len,wb=0,ok=0;
+	char tmp, *buffer, *pos;
 	struct DiskObject *icon;
+	BPTR org_dir, tool_parent = 0;
+	ULONG stack_size;
+	short len,wb=0,ok=0;
 
 	// Allocate buffer
 	if (!(buffer=AllocVec(1400,MEMF_CLEAR)))
@@ -83,6 +89,9 @@ void file_open_with(struct Window *window,char *name,ULONG flags)
 	// Need to ask?
 	if (!ok)
 	{
+		BPTR lock;
+		char *fullpath = 0;
+
 		// Build title
 		lsprintf(buffer+1024,GetString(&locale,MSG_SELECT_APP),FilePart(name));
 
@@ -98,37 +107,160 @@ void file_open_with(struct Window *window,char *name,ULONG flags)
 			return;
 		}
 
+		if (!(lock = LockFromPath(buffer+1, NULL, FALSE)))
+		{
+			FreeVec(buffer);
+			return;
+		}
+
+		// Relative path? convert to absolute
+		if (!(strchr(buffer + 1, ':')))
+		    fullpath = PathFromLock(NULL, lock, NULL, NULL);
+
 		// Add App to OpenWith list
-		add_open_with(buffer+1);
+		add_open_with(fullpath?fullpath:buffer + 1);
+
+		tool_parent = ParentDir(lock);
+
+		if (fullpath)
+		    FreeMemH(fullpath);
+
+		UnLock(lock);
 	}
 
+	pos = FilePart(buffer+1);
+	tmp = *pos;
+	*pos = 0;
+
+	if (!tool_parent && !(tool_parent = LockFromPath(buffer + 1, NULL, FALSE)))
+	{
+	    FreeVec(buffer);
+	    return;
+	}
+
+	org_dir = CurrentDir(tool_parent);
+
+	*pos = tmp;
+
 	// See if app has an icon
-	if (icon=GetDiskObject(buffer+1))
+	if (icon=GetDiskObject(pos))
 	{
 		// Is it a tool?
 		if (icon->do_Type==WBTOOL)
 		{
-			// Launch as Workbench App
-			wb=1;
+		    // Launch as Workbench App
+		    wb=1;
 		}
 
 		// Free icon
+		else
 		FreeDiskObject(icon);
 	}
 
-	// Fill in quotes
-	buffer[0]='\"';
-	buffer[(len=strlen(buffer))]='\"';
+	CurrentDir(org_dir);
 
-	// Add filename in quotes
-	buffer[len+1]=' ';
-	buffer[len+2]='\"';
-	strcpy(buffer+len+3,name);
-	buffer[(len=strlen(buffer))]='\"';
-	buffer[len+1]=0;
+	if (wb)
+	{
+	    struct WBArg *args;
+	    LONG argsnum = 1;
 
-	// Launch the function
-	file_launch(buffer,wb,"ram:");
+	    ok = 0;
+
+	    if (args = AllocVec(sizeof(struct WBArg) * 2 + 1, MEMF_CLEAR|MEMF_PUBLIC))
+	    {
+		if (args[0].wa_Name = AllocVec(strlen(pos) + 1, MEMF_PUBLIC))
+		{
+		    strcpy(args[0].wa_Name, pos);
+		    args[0].wa_Lock = tool_parent;
+
+		    if (args[1].wa_Name = AllocVec(strlen(name) + 1, MEMF_PUBLIC))
+		    {
+			strcpy(args[1].wa_Name, name);
+			args[1].wa_Lock = parent_lock;
+		    }   ok = 1;
+		}
+	    }
+
+	    if (ok)
+	    {
+		struct LaunchWBArg wbargs;
+
+		if (icon->do_StackSize > environment->env->default_stack)
+		    stack_size = icon->do_StackSize;
+		else
+		    stack_size = environment->env->default_stack;
+
+	        // Fill in data for launch-packet.
+	        wbargs.lwba_args = args;
+		wbargs.lwba_numargs = 2;
+	        wbargs.lwba_stack = stack_size;
+		wbargs.lwba_default_tool = 0;
+	        if (icon->do_ToolWindow)
+		    wbargs.lwba_toolwindow = icon->do_ToolWindow;
+	        else
+		    wbargs.lwba_toolwindow = 0;
+
+	        if (!(WB_LaunchArg(&wbargs,GUI->screen_pointer,0,0,0,0)))
+	        {
+		    FreeLaunchWBArgs(&args,argsnum);
+	        }
+	    }
+	    else
+	    {
+		if (args)
+		{
+		    if (args[0].wa_Name)
+			FreeVec(args[0].wa_Name);
+
+		    //if (args[0].wa_Lock)
+			//UnLock(args[0].wa_Lock);
+
+		    FreeVec(args);
+
+		}
+
+		UnLock(tool_parent);
+
+		if (parent_lock)
+		    UnLock(parent_lock);
+	    }
+
+	    FreeDiskObject(icon);
+
+	}
+	else
+	{
+	    char output[180];
+	    BPTR file;
+
+	    if (pos != buffer + 1)
+	     strcpy(buffer + 1, pos);
+
+	    // Fill in quotes
+	    buffer[0]='\"';
+	    buffer[(len=strlen(buffer))]='\"';
+
+	    // Add filename in quotes
+	    buffer[len+1]=' ';
+	    buffer[len+2]='\"';
+	    strcpy(buffer+len+3,name);
+	    buffer[(len=strlen(buffer))]='\"';
+	    buffer[len+1]=0;
+
+	    // Output window
+	    lsprintf(output,"%s%s/AUTO/CLOSE/WAIT/SCREEN %s",
+		    environment->env->output_device,
+		    environment->env->output_window,
+		    get_our_pubscreen());
+
+	    // Open output
+	    if (!(file=Open(output,MODE_OLDFILE)))
+		    file=Open("nil:",MODE_OLDFILE);
+
+	    // Launch the function
+	    CLI_Launch(buffer,(struct Screen *)-1,parent_lock,file,0,LAUNCHF_USE_STACK,environment->env->default_stack,tool_parent);
+	    //file_launch(buffer,wb,"ram:");
+	}
 
 	// Free buffer
 	FreeVec(buffer);
@@ -142,7 +274,7 @@ BOOL file_launch(char *name,short wb,char *curdir)
 	BPTR file;
 
 	// Workbench launch?
-	if (wb) return WB_LaunchNew(name,(struct Screen *)-1,0,environment->env->default_stack,0);
+	if (wb) return WB_Launch(name,(struct Screen *)-1,0,environment->env->default_stack,0,0,0,0);
 
 	// Output window
 	lsprintf(output,"%s%s/AUTO/CLOSE/WAIT/SCREEN %s",
@@ -155,7 +287,7 @@ BOOL file_launch(char *name,short wb,char *curdir)
 		file=Open("nil:",MODE_OLDFILE);
 
 	// Run command
-	return CLI_Launch(name,(struct Screen *)-1,Lock(curdir,ACCESS_READ),file,0,LAUNCHF_USE_STACK,environment->env->default_stack);
+	return CLI_Launch(name,(struct Screen *)-1,Lock(curdir,ACCESS_READ),file,0,LAUNCHF_USE_STACK,environment->env->default_stack,NULL);
 }
 
 

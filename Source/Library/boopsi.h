@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2024 Hagbard Celine
+Copyright 2024,2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -44,9 +44,10 @@ For more information on Directory Opus for Windows please see:
 #define CLASS_VIEW		0x1236
 #define CLASS_FRAME		0x1237
 #define CLASS_GAUGE		0x1238
+#define CLASS_PATHGAD		0x1239
 
 
-Class *init_class(struct LibData *,char *,char *,unsigned long (*)(),long);
+Class *init_class(struct LibData *,char *,char *,struct IClass *,unsigned long (*)(),long);
 
 typedef struct
 {
@@ -200,10 +201,19 @@ typedef struct
     ButtonData	    data;
     struct IBox	    border;
     struct TextFont *string_font;
-    char	    *buffer;
     struct Task	    *change_task;
     short	    change_bit;
+    char	    *buffer;
 } StringData;
+
+typedef struct
+{
+    ButtonData	    data;
+    struct IBox	    border;
+    struct TextFont *string_font;
+    struct Task	    *change_task;
+    short	    change_bit;
+} PathData;
 
 typedef struct
 {
@@ -237,6 +247,7 @@ typedef struct
 #define BUTTONF_NOBORDER	(1<<14)	// No border
 #define BUTTONF_RECESSED	(1<<15)	// Recessed
 #define BUTTONF_GAUGE		(1<<16)	// Gauge
+#define BUTTONF_PATH		(1<<17)	// Path gadget
 
 typedef struct
 {
@@ -265,11 +276,43 @@ typedef struct
     struct TagItem	    notify_tags[3]; // Tags for OM_NOTIFY
 } PaletteData;
 
+#define PATH_NO_INPUTEVENT 256
+#define PATHF_EDITBUF_ACTIVE (1<<0)
+#define PATHF_FAKE_SPACE     (1<<1)
+#define PATHF_CANCEL	     (1<<2)
+#define PATHF_RESIZE	     (1<<3)
+#define PATHF_FROM_END	     (1<<4)
+
+typedef struct
+{
+    struct Rectangle	    Gadget;
+    WORD 		    Height;
+    WORD 		    Width;
+    WORD		    DomainWidth;
+    WORD		    DomainHeight;
+    struct TextFont	    *Font;
+    ULONG		    Length;
+    STRPTR		    *String;
+    Att_List		    *History;
+    ULONG                   DisplayPos;
+    UWORD		    DisplayLength;
+    UWORD		    Flags;
+} PathGadgetData;
+
+
 ULONG __asm image_dispatch(register __a0 Class *cl,register __a2 Object *obj,register __a1 Msg msg);
 ULONG __asm button_dispatch(register __a0 Class *cl,register __a2 Object *obj,register __a1 Msg msg);
 ULONG __asm propgadget_dispatch(register __a0 Class *cl, register __a2 Object *obj, register __a1 Msg msg);
 ULONG __asm listview_dispatch(register __a0 Class *cl,register __a2 Object *obj,register __a1 Msg msg);
 ULONG __asm palette_dispatch(register __a0 Class *cl,register __a2 Object *obj,register __a1 Msg msg);
+ULONG __asm pathgadget_dispatch(register __a0 Class * cl, register __a2 Object * obj, register __a1 Msg msg);
+
+ULONG __asm image_dispatchTr(register __a0 Class *cl,register __a2 Object *obj,register __a1 Msg msg);
+ULONG __asm button_dispatchTr(register __a0 Class *cl,register __a2 Object *obj,register __a1 Msg msg);
+ULONG __asm propgadget_dispatchTr(register __a0 Class *cl, register __a2 Object *obj, register __a1 Msg msg);
+ULONG __asm listview_dispatchTr(register __a0 Class *cl,register __a2 Object *obj,register __a1 Msg msg);
+ULONG __asm palette_dispatchTr(register __a0 Class *cl,register __a2 Object *obj,register __a1 Msg msg);
+ULONG __asm pathgadget_dispatchTr(register __a0 Class * cl, register __a2 Object * obj, register __a1 Msg msg);
 
 
 void image_draw(Class *,struct Image *,BoopsiImageData *,struct impDraw *);
@@ -285,6 +328,21 @@ short listview_get_sel(Class *,struct Gadget *,ListViewData *,struct gpInput *,s
 void listview_get_dims(Class *,ListViewData *);
 void listview_resize(Class *,struct Gadget *,ListViewData *,struct gpResize *);
 
+void pathgadget_filleditbuffer(Class *cl, PathGadgetData *data, STRPTR fromstring);
+void pathgadget_workbuffertostring(Class *cl, PathGadgetData *data);
+void pathgadget_clearworkbuffer(Class *cl, PathGadgetData *data);
+STRPTR pathgadget_setfromstring(PathGadgetData *data, CONST_STRPTR input_string);
+LONG pathgadget_clipcopy(Class *cl, PathGadgetData *data);
+BOOL pathgadget_clippastereplace(Class *cl, PathGadgetData *data, struct gpInput *msg);
+BOOL pathgadget_insert(Class *cl, PathGadgetData *data, struct gpInput *msg, STRPTR string, ULONG len, BOOL fromclipboard);
+void pathgadget_remove_rew(Class *cl, PathGadgetData *data, struct gpInput *msg, ULONG len, BOOL find);
+void pathgadget_remove_fwd(Class *cl, PathGadgetData *data, struct gpInput *msg, ULONG len, BOOL find);
+void pathgadget_calc_coords(PathGadgetData *data, struct Gadget *gadget, struct GadgetInfo *gi);
+ULONG pathgadget_render(Class *cl, struct Gadget *gadget, struct gpRender *msg);
+//void   pathgadget_notify(Class *cl, Object *obj, struct opUpdate *msg, PathGadgetData *data);
+ULONG pathgadget_handleinput(Class *cl, struct Gadget *gadget, struct gpInput *msg);
+
+
 void button_resize(Class *,struct Gadget *,ButtonData *,struct gpResize *);
 void button_field_shrink(StringData *,struct Gadget *,struct Window *,struct Requester *);
 
@@ -295,18 +353,6 @@ void palette_render(Class *,struct Gadget *,PaletteData *,struct gpRender *);
 #define GOTBUF_UNDO	(1<<1)
 #define GOTBUF_WORK	(1<<2)
 #define GOTBUF_ALL	(GOTBUF_MAIN|GOTBUF_UNDO|GOTBUF_WORK)
-
-#ifdef BOOPSI_LIBS
-#define IntuitionBase	((struct LibData *)cl->cl_Dispatcher.h_Data)->int_base
-#define GfxBase		((struct LibData *)cl->cl_Dispatcher.h_Data)->gfx_base
-#define UtilityBase	((struct LibData *)cl->cl_Dispatcher.h_Data)->wb_data.utility_base
-#define LayersBase	((struct LibData *)cl->cl_Dispatcher.h_Data)->LayersBase
-#define CxBase		((struct LibData *)cl->cl_Dispatcher.h_Data)->CxBase
-#ifdef RESOURCE_TRACKING
-#define ResTrackBase	((struct LibData *)cl->cl_Dispatcher.h_Data)->restrack_base
-#endif
-#define DOSBase		((struct LibData *)cl->cl_Dispatcher.h_Data)->dos_base
-#endif
 
 struct gpRenderExt
 {

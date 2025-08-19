@@ -36,6 +36,8 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_protos.h"
+#include "commands.h"
 
 enum
 {

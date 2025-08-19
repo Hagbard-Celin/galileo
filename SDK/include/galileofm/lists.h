@@ -26,14 +26,29 @@ typedef struct _Att_Node
 	ULONG			att_data;	    // User data
 } Att_Node;
 
+typedef struct _Att_LockNode
+{
+	struct Node		node;		// Node structure
+	Att_List		*list;		// Pointer to list (inefficient!)
+	ULONG			att_data;	// User data
+	BPTR			att_lock;	// Parent lock
+} Att_LockNode;
+
 #define ADDNODEF_SORT		1		// Sort names
 #define ADDNODEF_EXCLUSIVE	2		// Exclusive entry
 #define ADDNODEF_NUMSORT	4		// Numerical name sort
 #define ADDNODEF_PRI		8		// Priority insertion
+#define ADDNODE_LOCKNODE	16              // Create Att_LockNode
+
+#define ATTNODE_LOCKNODE	176
+#define ATTNODE_LOCKNODE_MASK	240
+
+#define ISATTLOCKNODE(type)    ((type&ATTNODE_LOCKNODE_MASK) == ATTNODE_LOCKNODE)
 
 #define REMLISTF_FREEDATA	1		// FreeVec data when freeing list
 #define REMLISTF_SAVELIST	2		// Don't free list itself
 #define REMLISTF_FREEMEMH	4		// Use FreeMemH to free data
+#define REMLIST_UNLOCK		8		// UnLock locks when freeing list
 
 void AddSorted(struct List *,struct Node *node);
 void Att_ChangeNodeName(Att_Node *,char *);

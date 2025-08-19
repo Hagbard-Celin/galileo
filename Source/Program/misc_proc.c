@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -35,15 +36,7 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#include "galileofm.h"
-#include "/Modules/modules.h"
-#include "/Modules/modules_protos.h"
-#include "/Modules/modules_internal_protos.h"
-#include "scripts.h"
-
-extern CONST GalileoCallbackInfo CallBackInfo;
-
-#define HISTORY_MAX		20
+#include "misc_proc_include.h"
 
 // Starts the miscellaneous process
 IPCData *misc_startup(
@@ -75,7 +68,7 @@ IPCData *misc_startup(
 			name,
 			(ULONG)misc_proc,
 			STACK_DEFAULT,
-			(ULONG)startup,(struct Library *)DOSBase)) return ipc;
+			(ULONG)startup)) return ipc;
 
 		// Failed
 		FreeVec(startup);
@@ -235,7 +228,7 @@ void __saveds misc_proc(void)
 							GetString(&locale,MSG_CANCEL),0))) break;
 
 					// Create new button bank
-					if (buttons=buttons_new(0,0,0,ret-1,0))
+					if (buttons=buttons_new(0,0,0,0,0,ret-1,0))
 					{
 						buttons_edit_packet packet;
 
@@ -441,7 +434,6 @@ void __saveds misc_proc(void)
 					BackdropInfo *info;
 					BackdropObject *object;
 					iconopen_packet *packet;
-					char name[512];
 
 					// Get packet
 					if (!(packet=startup->data))
@@ -471,17 +463,8 @@ void __saveds misc_proc(void)
 								// Get icon lock
 								if (lock=backdrop_icon_lock(object))
 								{
-									// Build name
-									DevNameFromLock(lock,name,512);
-									if (object->bdo_icon->do_Type==WBPROJECT ||
-										object->bdo_icon->do_Type==WBTOOL)
-										AddPart(name,object->bdo_name,512);
-
-									// Unlock lock
-									UnLock(lock);
-
 									// Open with
-									file_open_with(startup->window,name,packet->flags);
+									file_open_with(startup->window, object->bdo_name, lock, packet->flags);
 								}
 							}
 
@@ -489,7 +472,7 @@ void __saveds misc_proc(void)
 							else
 							{
 								// Open object
-								backdrop_object_open(info,object,packet->qual,0,-1,0);
+								backdrop_object_open(info,object,packet->qual,BOOF_NOARGS,0,0);
 							}
 
 							// Only do one?
@@ -679,6 +662,8 @@ void __saveds misc_proc(void)
 					// Get startup
 					read=(struct read_startup *)startup->data;
 
+					ipc->flags|=IPCF_ASYNC;
+
 					// Get read module
 					if (InternalModuleBase=OpenModule("read.gfmmodule"))
 					{
@@ -697,7 +682,7 @@ void __saveds misc_proc(void)
 					// Failed, need to free
 					else
 					{
-						Att_RemList((Att_List *)read->files,0);
+						Att_RemList((Att_List *)read->files,REMLIST_UNLOCK);
 						FreeVec(read);
 					}
 				}
@@ -929,6 +914,8 @@ void __saveds misc_proc(void)
 								flags|=(list->lh_Type<<8);
 						}
 
+						ipc->flags|=IPCF_ASYNC;
+
 						// Do the thing
 						Module_Entry_Internal(
 							(struct List *)startup->data,
@@ -943,7 +930,7 @@ void __saveds misc_proc(void)
 					}
 
 					// Free list
-					Att_RemList((Att_List *)startup->data,0);
+					Att_RemList((Att_List *)startup->data,REMLIST_UNLOCK);
 				}
 				break;
 
@@ -986,8 +973,6 @@ void __saveds misc_proc(void)
 				// Handle the diskchange
 				handle_diskchange((GalileoNotify *)startup->data);
 
-				// Free message
-				ReplyFreeMsg((GalileoNotify *)startup->data);
 
 			// Refresh drive icons
 			case REFRESH_MAIN_DRIVES:
@@ -997,8 +982,11 @@ void __saveds misc_proc(void)
 					!(GUI->backdrop->flags&(BDIF_DRAGGING|BDIF_RUBBERBAND)))
 				{
 					// Update drive icons
-					backdrop_refresh_drives(GUI->backdrop,BDEVF_SHOW|BDEVF_FORCE_LOCK);
+					backdrop_refresh_drives(GUI->backdrop, (GalileoNotify *)startup->data, BDEVF_SHOW|BDEVF_FORCE_LOCK);
 				}
+
+				// Free message
+				ReplyFreeMsg((GalileoNotify *)startup->data);
 				break;
 
 
@@ -1050,6 +1038,7 @@ void __saveds misc_proc(void)
 				{
 					char *name;
 					ULONG flags=0;
+					struct open_arg *oarg;
 
 					// Get pointer to process name
 					name=FindTask(0)->tc_Node.ln_Name;
@@ -1060,9 +1049,10 @@ void __saveds misc_proc(void)
 						// Get flags
 						flags=(1<<30)|atoi(name+8);
 					}
-
 					// Open with
-					file_open_with(startup->window,(char *)startup->data,flags);
+					oarg = (struct open_arg *)startup->data;
+					file_open_with(startup->window, oarg->name, DupLock(oarg->parent_dir), flags);
+
 					FreeVec(startup->data);
 				}
 				break;
@@ -1102,6 +1092,10 @@ void __saveds misc_proc(void)
 
 	// Exit
 	IPC_Free(ipc);
+
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }
 
 

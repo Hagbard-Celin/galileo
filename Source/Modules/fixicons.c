@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -138,13 +139,22 @@ BPTR open_temp_file( char *filename, IPCData *ipc )
 }
 
 // Print the result of a fix to the output file
-void print_result( BPTR outfile, char *path, BOOL result, ULONG flags )
+void print_result( BPTR outfile, char *path, BPTR parent_lock, BOOL result, ULONG flags )
 {
     int i, f = 0;
-    char buf[512] = "";
+    char *lockpath;
+    char buf[96] = ".info";
 
-    strcpy( buf, GetString( locale, result ? MSG_FIXED : MSG_COULDNT_FIX ) );
-    lsprintf( buf + strlen(buf), " %s.info", path );
+    FPuts( outfile, GetString( locale, result ? MSG_FIXED : MSG_COULDNT_FIX ) );
+
+    if (parent_lock && (lockpath = PathFromLock(NULL, parent_lock, PFLF_USE_DEVICENAME|PFLF_END_SLASH, NULL)))
+    {
+	FPuts( outfile, lockpath );
+
+	FreeMemH(lockpath);
+    }
+
+    FPuts( outfile, path );
 
     if (flags)
     {
@@ -167,7 +177,8 @@ void print_result( BPTR outfile, char *path, BOOL result, ULONG flags )
     FPuts( outfile, buf );
 }
 
-static struct locals *next_state(APTR memhandle, struct MinList *dirs, char *path, int xoff, int yoff)
+// Set up local variables for next sub-directory
+static struct locals *next_state(APTR memhandle, struct MinList *dirs, char *path, BPTR parent_lock, int xoff, int yoff)
 {
     struct locals *l;
 
@@ -176,16 +187,17 @@ static struct locals *next_state(APTR memhandle, struct MinList *dirs, char *pat
     
     AddHead((struct List *)dirs, (struct Node *)l);
 
-    strcpy(l->path, path);
+    l->path = path;
     l->xoff = xoff;
     l->yoff = yoff;
+    l->parent_lock = parent_lock;
 
     return l;
 }
 
 
 // The main routine
-static int fix_icon( APTR progress, char *path, long *args, int xoff, int yoff, BPTR outfile, int *changes )
+static int fix_icon( APTR progress, char *path, BPTR parent_lock, long *args, int xoff, int yoff, BPTR outfile, int *changes )
 {
     struct MinList dirs;
     APTR memhandle;
@@ -203,9 +215,10 @@ static int fix_icon( APTR progress, char *path, long *args, int xoff, int yoff, 
     if (!(l = AllocMemH( memhandle, sizeof(struct locals))))
 	goto fi_failure;;
     
-    stccpy(l->path, path, sizeof(l->path));
+    l->path = path;
     l->xoff = xoff;
     l->yoff = yoff;
+    l->parent_lock = parent_lock;
 
     AddHead((struct List *)&dirs, (struct Node *)l);
 
@@ -222,6 +235,9 @@ fi_iter1:
 		l->isicon = 1;
 	    }
 	}
+
+	if (l->parent_lock)
+	    l->org_dir = CurrentDir(l->parent_lock);
 
 	if (l->obj = GetDiskObject( l->path ))
 	{
@@ -347,7 +363,7 @@ fi_iter1:
 		    ++ *changes;
 
 	        if (outfile)
-		    print_result( outfile, l->path, r, l->flags );
+		    print_result( outfile, l->path, l->parent_lock, r, l->flags );
 	    }
 
 	    FreeDiskObject( l->obj );
@@ -363,23 +379,22 @@ fi_iter1:
 	        if (ExNext( l->lock, &l->fib ))
 	        {
 		    //int more_files;
+		    l->newparent_lock = DupLock(l->lock);
 
-		    stccpy( l->newpath, l->path, sizeof(l->newpath) );
-		    AddPart( l->newpath, l->fib.fib_FileName, 256 );
+		    strcpy( l->newpath, l->fib.fib_FileName );
 
 		    l->more_files = ExNext( l->lock, &l->fib );
 
 		    // Update progress window
-		    SetProgressWindowTags(progress,PW_FileName,FilePart(l->path),TAG_END);
+		    SetProgressWindowTags(progress,PW_FileName,l->path,TAG_END);
 
 		    l->return_to = 2;
-		    if (!(l = next_state(memhandle, &dirs, l->newpath, l->newxoff, l->newyoff)))
+		    if (!(l = next_state(memhandle, &dirs, l->newpath, l->newparent_lock, l->newxoff, l->newyoff)))
 			goto fi_failure;
 		    
 		    goto fi_iter1;
 
 fi_iter2:
-
 		    if (l->more_files)
 		    {
 		        do
@@ -388,28 +403,32 @@ fi_iter2:
 			    if (CheckProgressAbort( progress ))
 			        break;
 
-			    stccpy( l->newpath, l->path, sizeof(l->newpath) );
-			    AddPart( l->newpath, l->fib.fib_FileName, 256 );
+			    strcpy( l->newpath, l->fib.fib_FileName );
 
 			    if (l->more_files)
 			        l->more_files = ExNext( l->lock, &l->fib );
 
 			    // Update progress window
-			    SetProgressWindowTags(progress,PW_FileName,FilePart(l->path),TAG_END);
+			    SetProgressWindowTags(progress,PW_FileName,l->path,TAG_END);
 
 			    l->return_to = 3;
-			    if (!(l = next_state(memhandle, &dirs, l->newpath, l->newxoff, l->newyoff)))
+			    if (!(l = next_state(memhandle, &dirs, l->newpath, l->newparent_lock, l->newxoff, l->newyoff)))
 				goto fi_failure;
 
 			    goto fi_iter1;
+
 fi_iter3:
 			    ;
 			} while (l->more_files);
 		    }
+		    UnLock(l->newparent_lock);
 	        }
 	    }
 	    UnLock( l->lock );
 	}
+
+	if (l->org_dir)
+	    CurrentDir(l->org_dir);
 
 	Remove((struct Node *)l);
 	FreeMemH( l );
@@ -426,7 +445,7 @@ fi_iter3:
 		    goto fi_iter2;
 
 		default:
-		      continue;
+		    goto fi_iter1;
 	    }
 	}
 	else
@@ -450,23 +469,26 @@ int __asm __saveds L_Module_Entry(
 {
     Att_List *files;
     Att_Node *node;
-    char source[256],path[300];
-    APTR progress;
+    PathNode *pathnode;
+    APTR progress = 0;
     short count=1;
     FuncArgs *args;
     struct DiskObject *obj;
     int xoff = 0;
     int yoff = 0;
     BPTR outfile = 0;
-    char temp_filename[256];
+    char temp_filename[32];
     int changes = 0;
+    BPTR parent_lock = 0, org_dir = 0, arg_dir = 0;
+    BOOL is_disk = FALSE;
+    char *ptr, *tmp;
 
     // Create list
     if (!(files=Att_NewList(LISTF_POOL)))
 	    return 0;
 
     // Get source path
-    gci->gc_GetSource(IPCDATA(ipc),source);
+    pathnode = gci->gc_GetSource(IPCDATA(ipc), NULL);
 
     // Parse arguments
     args=ParseArgs(arg_template,argstring);
@@ -493,7 +515,7 @@ int __asm __saveds L_Module_Entry(
     {
 	FunctionEntry *entry;
 
-	gci->gc_FirstEntry( IPCDATA(ipc) );
+	gci->gc_FirstEntry( IPCDATA(ipc), NULL );
 
 	// Get entries
 	while (entry = gci->gc_GetEntry(IPCDATA(ipc)))
@@ -510,9 +532,7 @@ int __asm __saveds L_Module_Entry(
     if (IsListEmpty((struct List *)files))
     {
 	// Free and return
-	Att_RemList(files,0);
-	DisposeArgs(args);
-	return 1;
+	goto fi_exit;
     }
 
     // Need output file?
@@ -525,28 +545,65 @@ int __asm __saveds L_Module_Entry(
 	}
     }
 
+    if (pathnode)
+	parent_lock = pathnode->pn_lock;
+
     // Need to process Disk.info first?
     if (!args || !args->FA_Arguments[FI_NFO])
     {
+	BPTR test_lock = 0;
+
+	if (parent_lock && (test_lock = ParentDir(parent_lock)))
+	{
+	    UnLock(test_lock);
+	}
+
 	for (node=(Att_Node *)files->list.lh_Head;node->node.ln_Succ;node=(Att_Node *)node->node.ln_Succ)
 	{
-	    if (!stricmp( "Disk.info", FilePart( node->node.ln_Name )))
+	    ptr = FilePart( node->node.ln_Name );
+
+	    if (ptr == node->node.ln_Name && ptr[strlen(ptr) - 1] == ':')
+		is_disk = TRUE;
+
+	    if (is_disk || ((!stricmp( "Disk.info", ptr )) &&
+		((ptr == node->node.ln_Name && !test_lock) || ptr[-1] == ':')))
 	    {
-		// Not a full path?
-		if (!strchr(node->node.ln_Name,':') && !strchr(node->node.ln_Name,'/'))
+		if (is_disk)
 		{
-		    // Build full path
-		    strcpy(path,source);
-		    AddPart(path,node->node.ln_Name,300);
+		    // Can not handle multiple arguments if one is a disk
+		    if (node->node.ln_Succ->ln_Succ || node->node.ln_Pred->ln_Pred)
+			goto fi_exit;
+
+		    if (arg_dir = Lock(ptr, ACCESS_READ))
+			org_dir = CurrentDir(arg_dir);
+		    else
+			goto fi_exit;
+
+		}
+		else
+		if ((tmp = strrchr(node->node.ln_Name,'/')) || (tmp = strrchr(node->node.ln_Name,':')))
+		{
+		    if (tmp[0] == ':')
+			tmp++;
+
+		    tmp[0] = 0;
+
+		    if (arg_dir = Lock(node->node.ln_Name, ACCESS_READ))
+			org_dir = CurrentDir(arg_dir);
+		    else
+			goto fi_exit;
 		}
 
-		// Full path supplied
-		else strcpy(path,node->node.ln_Name);
-
 		// Strip .info
-		path[strlen(path) - 5] = 0;
+		ptr[strlen(ptr) - 5] = 0;
 
-		if (obj = GetDiskObject( path ))
+		if (!org_dir && parent_lock)
+		    org_dir = CurrentDir(parent_lock);
+
+		if (arg_dir)
+		    parent_lock = arg_dir;
+
+		if (obj = GetDiskObject( ptr ))
 		{
 		    if (obj->do_DrawerData &&
 			    obj->do_Type == WBDISK)
@@ -561,18 +618,30 @@ int __asm __saveds L_Module_Entry(
 			    obj->do_DrawerData->dd_CurrentX = 0;
 			    obj->do_DrawerData->dd_CurrentY = 0;
 
-			    if (result = PutDiskObject( path, obj ))
+			    if (result = PutDiskObject( ptr, obj ))
 				++ changes;
 
 			    if (outfile)
-				print_result( outfile, path, result, 1 << FI_NFO );
+				print_result( outfile, ptr, parent_lock, result, 1 << FI_NFO );
 			}
 		    }
 
 		    FreeDiskObject( obj );
 		}
 
-		Att_RemNode( node );
+		if (org_dir)
+		    ParentDir(org_dir);
+
+		if (!is_disk)
+		{
+		    if (arg_dir)
+		    {
+			UnLock(arg_dir);
+			arg_dir = 0;
+		    }
+
+		    Att_RemNode( node );
+		}
 		break;
 	    }
 	}
@@ -593,33 +662,60 @@ int __asm __saveds L_Module_Entry(
 	if (CheckProgressAbort(progress))
 		break;
 
-	// Not a full path?
-	if (!strchr(node->node.ln_Name,':') && !strchr(node->node.ln_Name,'/'))
-	{
-	    // Build full path
-	    strcpy(path,source);
-	    AddPart(path,node->node.ln_Name,300);
-	}
-
-	// Full path supplied
-	else strcpy(path,node->node.ln_Name);
-
 	// Update progress window
 	SetProgressWindowTags(
 		progress,
-		PW_FileName,FilePart(path),
+		PW_FileName,FilePart(node->node.ln_Name),
 		PW_FileNum,count,
 		TAG_END);
 
+	if (is_disk)
+	{
+	    node->node.ln_Name[0] = 0;
+	    ptr = node->node.ln_Name;
+	}
+	else
+	if ((tmp = strrchr(node->node.ln_Name,'/')) || (tmp = strrchr(node->node.ln_Name,':')))
+	{
+	    char keep;
+
+	    if (tmp[0] == ':')
+	    {
+		tmp++;
+		ptr = tmp;
+	    }
+	    else
+		ptr = tmp + 1;
+
+	    keep = tmp[0];
+	    tmp[0] = 0;
+
+	    if (!(arg_dir = Lock(node->node.ln_Name, ACCESS_READ)))
+		goto fi_exit;
+
+	    tmp[0] = keep;
+	}
+	else
+	    ptr = node->node.ln_Name;
+
+	if (arg_dir)
+	    parent_lock = arg_dir;
+
 	/*********************** MAIN CODE BODY GOES HERE ****************************/
 
-	fix_icon( progress, path, args ? args->FA_Arguments : 0, xoff, yoff, outfile, &changes );
+	fix_icon( progress, ptr, parent_lock, args ? args->FA_Arguments : 0, xoff, yoff, outfile, &changes );
 
 	/*********************** MAIN CODE BODY GOES HERE ****************************/
+
+	if (arg_dir)
+	    UnLock(arg_dir);
     }
 
+fi_exit:
+
     // Free stuff
-    CloseProgressWindow(progress);
+    if (progress)
+	CloseProgressWindow(progress);
 
     // Need to show results?
     if (outfile)

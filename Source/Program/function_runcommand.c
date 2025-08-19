@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,26 +37,42 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include "function_launch_protos.h"
+#include "function_protos.h"
+#include "commands.h"
 
 // RUNCOMMAND internal function
 GALILEOFM_FUNC(function_runcommand)
 {
 	FunctionEntry *entry;
-	Cfg_Function *func;
+	Cfg_Function *func = 0;
 
 	// Get first entry
 	if (!(entry=function_get_entry(handle)))
 		return 0;
 
-	// Build full name
-	function_build_source(handle,entry,handle->func_work_buf);
+	if (entry->fe_lock || handle->func_source_lock)
+	{
+	    BPTR org_dir;
 
-	// Load command
-	func=function_load_function(handle->func_work_buf);
+	    if (entry->fe_lock)
+		org_dir = CurrentDir(entry->fe_lock);
+	    else
+		org_dir = CurrentDir(handle->func_source_lock);
+
+	    func = function_load_function(entry->fe_name);
+
+	    CurrentDir(org_dir);
+	}
 
 	// Got function?
 	if (func)
 	{
+		BOOL wbargs = FALSE;
+
+		if (handle->flags&FUNCF_WBARG_PASSTRUGH)
+		    wbargs = TRUE;
+
 		// Set flag to free function when done
 		func->function.flags2|=FUNCF2_FREE_FUNCTION;
 
@@ -64,12 +81,13 @@ GALILEOFM_FUNC(function_runcommand)
 				FUNCTION_RUN_FUNCTION_EXTERNAL,
 				func,
 				0,
-				0,
+				(wbargs)?FUNCF_DRAG_DROP:0,
 				0,0,
 				0,0,
-				handle->arg_passthru,
+				0,0,
+				(wbargs)?0:handle->arg_passthru,
 				0,
-				0))
+				(wbargs)?(Buttons *)handle->arg_passthru:0))
 		{
 			// Clear arg passthru since we passed it on
 			handle->arg_passthru=0;
@@ -89,11 +107,21 @@ GALILEOFM_FUNC(function_editcommand)
 	if (!(entry=function_get_entry(handle)))
 		return 0;
 
-	// Build full name
-	function_build_source(handle,entry,handle->func_work_buf);
+	if (entry->fe_lock || handle->func_source_lock)
+	{
+	    BPTR org_dir;
 
-	// Edit the command
-	command_new(GUI->backdrop,handle->ipc,handle->func_work_buf);
+	    if (entry->fe_lock)
+		org_dir = CurrentDir(entry->fe_lock);
+	    else
+		org_dir = CurrentDir(handle->func_source_lock);
+
+	    // Edit the command
+	    command_new(GUI->backdrop,handle->ipc,entry->fe_name);
+
+	    CurrentDir(org_dir);
+	}
+
 	return 1;
 }
 

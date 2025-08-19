@@ -32,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -52,7 +52,7 @@ APTR __asm __saveds L_OpenImage(
 	if ((!name || !name[0]) && !info) return 0;
 
 	// Lock image list
-	L_GetSemaphore(&image_lock,SEMF_EXCLUSIVE,0);
+	L_GetSemaphore(&image_lock,SEMF_EXCLUSIVE,0, getreg(REG_A6));
 
 	// Look for image in image list
 #ifdef IMAGE_CACHING
@@ -83,7 +83,7 @@ APTR __asm __saveds L_OpenImage(
 #endif
 
 	// Unlock image list
-	L_FreeSemaphore(&image_lock);
+	L_FreeSemaphore(&image_lock, getreg(REG_A6));
 
 	// Get an image?
 	if (image)
@@ -100,7 +100,7 @@ APTR __asm __saveds L_OpenImage(
 void __asm __saveds L_CloseImage(register __a0 APTR ptr)
 {
 	// Lock image list
-	L_GetSemaphore(&image_lock,SEMF_EXCLUSIVE,0);
+	L_GetSemaphore(&image_lock,SEMF_EXCLUSIVE,0, getreg(REG_A6));
 
 	// Valid image?
 	if (ptr)
@@ -125,7 +125,7 @@ void __asm __saveds L_CloseImage(register __a0 APTR ptr)
 	}
 
 	// Unlock image list
-	L_FreeSemaphore(&image_lock);
+	L_FreeSemaphore(&image_lock, getreg(REG_A6));
 }
 
 
@@ -133,7 +133,7 @@ void __asm __saveds L_CloseImage(register __a0 APTR ptr)
 APTR __asm __saveds L_CopyImage(register __a0 APTR ptr)
 {
 	// Lock image list
-	L_GetSemaphore(&image_lock,SEMF_EXCLUSIVE,0);
+	L_GetSemaphore(&image_lock,SEMF_EXCLUSIVE,0, getreg(REG_A6));
 
 	// Valid image?
 	if (ptr)
@@ -148,7 +148,7 @@ APTR __asm __saveds L_CopyImage(register __a0 APTR ptr)
 	}
 
 	// Unlock image list
-	L_FreeSemaphore(&image_lock);
+	L_FreeSemaphore(&image_lock, getreg(REG_A6));
 
 	return ptr;
 }
@@ -160,7 +160,7 @@ void __asm __saveds L_FlushImages(void)
 	Image_Data *image;
 
 	// Lock image list
-	L_GetSemaphore(&image_lock,SEMF_EXCLUSIVE,0);
+	L_GetSemaphore(&image_lock,SEMF_EXCLUSIVE,0, getreg(REG_A6));
 
 	// Go through image list
 	for (image=(Image_Data *)image_list.lh_Head;
@@ -184,7 +184,7 @@ void __asm __saveds L_FlushImages(void)
 	NewList(&image_list);
 
 	// Unlock image list
-	L_FreeSemaphore(&image_lock);
+	L_FreeSemaphore(&image_lock, getreg(REG_A6));
 }
 
 
@@ -285,7 +285,7 @@ short __asm __saveds L_RenderImage(
 	planesize=((image->width+15)>>4)*image->height;
 
 	// Get image lock
-	L_GetSemaphore(&image->lock,SEMF_SHARED,0);
+	L_GetSemaphore(&image->lock,SEMF_SHARED,0, getreg(REG_A6));
 
 	// Got remap planes?
 	if (image->remap_count)
@@ -666,7 +666,7 @@ short __asm __saveds L_RenderImage(
 	}
 
 	// Unlock image
-	L_FreeSemaphore(&image->lock);
+	L_FreeSemaphore(&image->lock, getreg(REG_A6));
 	return ret;
 }
 
@@ -1145,9 +1145,9 @@ void free_image(Image_Data *image)
 					for (a=0;a<image->depth;a++)
 					{
 						// Plug memory leak
-                        // For ILBM only free what FreeILBM would leave behind
-                        if (b==1||(!(image->flags&IMAGEF_ILBM)))
-                        FreeVec(image->planes[b][a]);
+						// For ILBM only free what FreeILBM would leave behind
+						if (b==1||(!(image->flags&IMAGEF_ILBM)))
+						FreeVec(image->planes[b][a]);
 					}
 				}
 #else
@@ -1211,8 +1211,8 @@ void free_image(Image_Data *image)
 			if (image->flags&IMAGEF_ILBM) L_FreeILBM(image->ilbm);
 
 			// Free image path
-            if (image->node.ln_Name)
-			    L_FreeMemH(image->node.ln_Name);
+		        if (image->node.ln_Name)
+			        L_FreeMemH(image->node.ln_Name);
 
 			// Free NewIcon
 			if (image->new_diskobj)
@@ -1387,7 +1387,7 @@ BOOL __asm __saveds L_RemapImage(
 	if (image->new_diskobj)
 	{
 		// Get image lock
-		L_GetSemaphore(&image->lock,SEMF_EXCLUSIVE,0);
+		L_GetSemaphore(&image->lock,SEMF_EXCLUSIVE,0, getreg(REG_A6));
 
 		// Already remapped?
 		if (image->remap_count>0)
@@ -1396,7 +1396,7 @@ BOOL __asm __saveds L_RemapImage(
 			++image->remap_count;
 
 			// Free semaphore
-			L_FreeSemaphore(&image->lock);
+			L_FreeSemaphore(&image->lock, getreg(REG_A6));
 			return 1;
 		}
 
@@ -1452,7 +1452,7 @@ BOOL __asm __saveds L_RemapImage(
 		image->remap_info=remap;
 
 		// Unlock image
-		L_FreeSemaphore(&image->lock);
+		L_FreeSemaphore(&image->lock, getreg(REG_A6));
 		return 1;
 	}
 
@@ -1476,7 +1476,7 @@ BOOL __asm __saveds L_RemapImage(
 	if (!(pen_lookup=AllocVec(2<<image->depth,MEMF_CLEAR))) return 0;
 
 	// Get image lock
-	L_GetSemaphore(&image->lock,SEMF_EXCLUSIVE,0);
+	L_GetSemaphore(&image->lock,SEMF_EXCLUSIVE,0, getreg(REG_A6));
 
 	// Already remapped?
 	if (image->remap_count>0)
@@ -1485,7 +1485,7 @@ BOOL __asm __saveds L_RemapImage(
 		++image->remap_count;
 
 		// Free semaphore and table
-		L_FreeSemaphore(&image->lock);
+		L_FreeSemaphore(&image->lock, getreg(REG_A6));
 		FreeVec(pen_lookup);
 		return 1;
 	}
@@ -1512,10 +1512,10 @@ BOOL __asm __saveds L_RemapImage(
 	if (plane==colours)
 	{
 		// Unlock image
-		L_FreeSemaphore(&image->lock);
+		L_FreeSemaphore(&image->lock, getreg(REG_A6));
 
-        // Plug memory leak
-        FreeVec(pen_lookup);
+	// Plug memory leak
+	FreeVec(pen_lookup);
 
 		return 1;
 	}
@@ -1692,7 +1692,7 @@ BOOL __asm __saveds L_RemapImage(
 	FreeBitMap(writebm);
 
 	// Unlock image
-	L_FreeSemaphore(&image->lock);
+	L_FreeSemaphore(&image->lock, getreg(REG_A6));
 	return 1;
 }
 
@@ -1708,7 +1708,7 @@ void __asm __saveds L_FreeRemapImage(
 	if (!image || !image->remap_count) return;
 
 	// Get image lock
-	L_GetSemaphore(&image->lock,SEMF_EXCLUSIVE,0);
+	L_GetSemaphore(&image->lock,SEMF_EXCLUSIVE,0, getreg(REG_A6));
 
 
 	if	(IconBase->lib_Version>=44 && image->new_diskobj)
@@ -1736,7 +1736,7 @@ void __asm __saveds L_FreeRemapImage(
 				for (plane=0;plane<8;plane++)
 				{
 					// Free plane
-                    if (image->remap_planes[loop][plane])
+					if (image->remap_planes[loop][plane])
 						FreeVec(image->remap_planes[loop][plane]);
 					image->remap_planes[loop][plane]=0;
 				}
@@ -1763,5 +1763,5 @@ void __asm __saveds L_FreeRemapImage(
 		}
 	}
 	// Unlock image
-	L_FreeSemaphore(&image->lock);
+	L_FreeSemaphore(&image->lock, getreg(REG_A6));
 }

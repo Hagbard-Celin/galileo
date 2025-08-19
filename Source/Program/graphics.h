@@ -31,12 +31,14 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
 #ifndef _GALILEOFM_GRAPHICS
 #define _GALILEOFM_GRAPHICS
+
+#include "lister.h"
 
 // Prototypes
 void do3dbox(struct RastPort *,struct Rectangle *,BOOL);

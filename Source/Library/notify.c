@@ -2,6 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
+Copyright 2025 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -42,10 +43,9 @@ APTR __asm __saveds L_AddNotifyRequest(
 	register __d0 ULONG type,
 	register __d1 ULONG userdata,
 	register __a0 struct MsgPort *port,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
 	NotifyNode *node;
-	struct LibData *data;
 
 	// Allocate a new node
 	if (!(node=AllocVec(sizeof(NotifyNode),MEMF_CLEAR)))
@@ -56,17 +56,14 @@ APTR __asm __saveds L_AddNotifyRequest(
 	node->userdata=userdata;
 	node->type=type;
 
-	// Get data pointer
-	data=(struct LibData *)libbase->ml_UserData;
-
 	// Lock notify list
-	ObtainSemaphore(&data->notify_lock);
+	ObtainSemaphore(&gfmlib_data.notify_lock);
 
 	// Add to list
-	AddTail((struct List *)&data->notify_list,(struct Node *)node);
+	AddTail((struct List *)&gfmlib_data.notify_list,(struct Node *)node);
 
 	// Unlock notify list
-	ReleaseSemaphore(&data->notify_lock);
+	ReleaseSemaphore(&gfmlib_data.notify_lock);
 	return node;
 }
 
@@ -74,7 +71,7 @@ APTR __asm __saveds L_AddNotifyRequest(
 // Remove a notify request
 void __asm __saveds L_RemoveNotifyRequest(
 	register __a0 NotifyNode *node,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
 	GalileoNotify *msg;
 
@@ -82,7 +79,7 @@ void __asm __saveds L_RemoveNotifyRequest(
 	if (!node) return;
 
 	// Lock notify list
-	L_GetSemaphore(&((struct LibData *)libbase->ml_UserData)->notify_lock,SEMF_EXCLUSIVE,0);
+	L_GetSemaphore(&gfmlib_data.notify_lock,SEMF_EXCLUSIVE,0, GalileoFMBase);
 
 	// Remove node
 	Remove((struct Node *)node);
@@ -113,7 +110,7 @@ void __asm __saveds L_RemoveNotifyRequest(
 	Permit();
 
 	// Unlock notify list
-	L_FreeSemaphore(&((struct LibData *)libbase->ml_UserData)->notify_lock);
+	L_FreeSemaphore(&gfmlib_data.notify_lock, GalileoFMBase);
 
 	// Free node
 	FreeVec(node);
@@ -128,7 +125,7 @@ void __asm __saveds L_SendNotifyMsg(
 	register __d3 short wait,
 	register __a0 char *name,
 	register __a1 struct FileInfoBlock *fib,
-	register __a6 struct MyLibrary *libbase)
+	register __a6 struct Library *GalileoFMBase)
 {
 	NotifyNode *node;
 	struct Task *this_task=0;
@@ -149,10 +146,10 @@ void __asm __saveds L_SendNotifyMsg(
 	}
 
 	// Lock notify list
-	L_GetSemaphore(&((struct LibData *)libbase->ml_UserData)->notify_lock,SEMF_SHARED,0);
+	L_GetSemaphore(&gfmlib_data.notify_lock,SEMF_SHARED,0, GalileoFMBase);
 
 	// Go through notify list
-	for (node=(NotifyNode *)((struct LibData *)libbase->ml_UserData)->notify_list.mlh_Head;
+	for (node=(NotifyNode *)gfmlib_data.notify_list.mlh_Head;
 		node->node.mln_Succ;
 		node=(NotifyNode *)node->node.mln_Succ)
 	{
@@ -165,7 +162,13 @@ void __asm __saveds L_SendNotifyMsg(
 
 			// Calculate size
 			size=sizeof(GalileoNotify);
-			if (name) size+=strlen(name);
+			if (name)
+			{
+			    if (type == GN_DISKCHANGE)
+				size += sizeof(diskchange_data);
+			    else
+				size+=strlen(name);
+			}
 			if (fib) size+=sizeof(struct FileInfoBlock)+1;
 
 			// Allocate message
@@ -178,7 +181,21 @@ void __asm __saveds L_SendNotifyMsg(
 				msg->gn_Data=data;
 				msg->gn_Flags=flags;
 				msg->gn_UserData=node->userdata;
-				if (name) strcpy(msg->gn_Name,name);
+				if (name)
+				{
+				    strcpy(msg->gn_Name,name);
+
+				    if (type == GN_DISKCHANGE)
+				    {
+					diskchange_data *dcd_msg, *dcd;
+
+					dcd = (diskchange_data *)name;
+					dcd_msg = (diskchange_data *)msg->gn_Name;
+					dcd_msg->volnamelen = dcd->volnamelen;
+					dcd_msg->date = dcd->date;
+					strcpy(dcd_msg->volname, dcd->volname);
+				    }
+				}
 
 				// Got FileInfoBlock?
 				if (fib)
@@ -215,7 +232,7 @@ void __asm __saveds L_SendNotifyMsg(
 	}
 
 	// Unlock notify list
-	L_FreeSemaphore(&((struct LibData *)libbase->ml_UserData)->notify_lock);
+	L_FreeSemaphore(&gfmlib_data.notify_lock, GalileoFMBase);
 
 	// Wait for replies?
 	if (wait && count)

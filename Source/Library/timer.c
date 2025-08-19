@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -172,7 +172,7 @@ BOOL __asm __saveds L_TimerActive(register __a0 TimerHandle *handle)
 
 
 // Get timer base
-struct Library *__asm __saveds L_GetTimerBase(register __a6 struct MyLibrary *lib)
+struct Library *__asm __saveds L_GetTimerBase(register __a6 struct Library *GalileoFMBase)
 {
-	return ((struct LibData *)lib->ml_UserData)->TimerBase;
+	return gfmlib_data.TimerBase;
 }
