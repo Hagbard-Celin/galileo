@@ -1119,6 +1119,9 @@ ULONG __asm __saveds listview_dispatch(register __a0 Class *cl,
 					    {
 						struct Layer *layer;
 
+						// Lock screen layers
+						LockLayerInfo(&input->gpi_GInfo->gi_Screen->LayerInfo);
+
 						// Find window under mouse pointer
 						if (layer=WhichLayer(&input->gpi_GInfo->gi_Screen->LayerInfo,
 								     input->gpi_GInfo->gi_Screen->MouseX,
@@ -1152,6 +1155,9 @@ ULONG __asm __saveds listview_dispatch(register __a0 Class *cl,
 							}
 						    }
 						}
+
+						// Unlock layers
+						UnlockLayerInfo(&input->gpi_GInfo->gi_Screen->LayerInfo);
 					    }
 					    break;
 					}
