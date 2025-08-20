@@ -1119,12 +1119,12 @@ ULONG __asm __saveds listview_dispatch(register __a0 Class *cl,
 					    {
 						struct Layer *layer;
 
-						// Find which layer we dropped it on
+						// Find window under mouse pointer
 						if (layer=WhichLayer(&input->gpi_GInfo->gi_Screen->LayerInfo,
 								     input->gpi_GInfo->gi_Screen->MouseX,
 								     input->gpi_GInfo->gi_Screen->MouseY))
 						{
-						    // Does layer have a window?
+						    // Is it ours?
 						    if (layer->Window == input->gpi_GInfo->gi_Window)
 						    {
 							CompoundObject * node;
