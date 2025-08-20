@@ -50,13 +50,13 @@ For more information on Directory Opus for Windows please see:
 #include "lsprintf_protos.h"
 
 #define BPF_SNAPSHOT	(1<<0)
-#define BPF_CLOSE		(1<<1)
-#define BPF_TRASH		(1<<2)
-#define BPF_CANINFO		(1<<3)
-#define BPF_DISK		(1<<4)
-#define BPF_FTYPE		(1<<5)
+#define BPF_CLOSE	(1<<1)
+#define BPF_TRASH	(1<<2)
+#define BPF_CANINFO	(1<<3)
+#define BPF_DISK	(1<<4)
+#define BPF_FTYPE	(1<<5)
 #define BPF_FTLOCKED	(1<<6)
-#define BPF_OLOCKED		(1<<7)
+#define BPF_OLOCKED	(1<<7)
 #define BPF_WRITEPROT	(1<<8)
 #define BPF_NOFORMAT	(1<<9)
 #define BPF_DIRECTORY	(1<<10)
@@ -65,7 +65,7 @@ BOOL backdrop_test_rmb(
 	BackdropInfo *info,
 	struct IntuiMessage *msg,
 	struct IntuiMessage *msg_copy,
-	BOOL only_icon)
+	ULONG mode)
 {
 	short x,y;
 	BOOL ret=0;
@@ -88,8 +88,8 @@ BOOL backdrop_test_rmb(
 		lock_listlock(&info->objects,0);
 
 		// Check if we can swallow this
-		if ((only_icon && backdrop_get_object(info,msg->MouseX,msg->MouseY,0)) ||
-			(!only_icon && !cx_mouse_outside(info->window,msg->MouseX,msg->MouseY)))
+		if (!mode || (mode&BTRM_ICON && backdrop_get_object(info,msg->MouseX,msg->MouseY,0)) ||
+		    (mode&BTRM_NOBORDER && !cx_mouse_outside(info->window,msg->MouseX,msg->MouseY)))
 		{
 			// Cancel menu event
 			msg->Code=MENUCANCEL;

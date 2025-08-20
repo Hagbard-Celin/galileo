@@ -374,4 +374,9 @@ enum
 #define CLEANUP_START_Y		7
 #define ICON_LABEL_SPACE	3
 
+
+#define BTRM_WINDOW     0
+#define BTRM_NOBORDER   1
+#define BTRM_ICON	2
+
 #endif

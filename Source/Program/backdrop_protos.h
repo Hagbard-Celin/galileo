@@ -161,7 +161,7 @@ short backdrop_cleanup_list(BackdropInfo *info,long type);
 void backdrop_refresh_drives(BackdropInfo *info, GalileoNotify *notify, BOOL);
 void backdrop_remove_leftouts(BackdropInfo *info,BackdropObject *disk);
 
-BOOL backdrop_test_rmb(BackdropInfo *,struct IntuiMessage *,struct IntuiMessage *,BOOL);
+BOOL backdrop_test_rmb(BackdropInfo *,struct IntuiMessage *,struct IntuiMessage *,ULONG);
 BOOL backdrop_popup(BackdropInfo *,short,short,UWORD,long,char *,DirEntry *);
 
 
