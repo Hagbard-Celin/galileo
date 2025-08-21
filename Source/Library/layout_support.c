@@ -133,8 +133,7 @@ void __asm __saveds L_CloseWindowSafely(register __a0 struct Window *window)
 
 void __asm __saveds L_StoreGadgetValue(
 	register __a0 ObjectList *list,
-	register __a1 struct IntuiMessage *msg,
-	register __a6 struct MyLibrary *libbase)
+	register __a1 struct IntuiMessage *msg)
 {
 	// Check for gadget message
 	if (msg->Class!=IDCMP_GADGETUP &&
@@ -440,8 +439,7 @@ void __asm __saveds L_UpdateGadgetValue(
 
 
 void __asm __saveds L_UpdateGadgetList(
-	register __a0 ObjectList *list,
-	register __a6 struct MyLibrary *libbase)
+	register __a0 ObjectList *list)
 {
 	GL_Object *object;
 
@@ -1564,7 +1562,7 @@ struct IntuiMessage *__asm __saveds L_GetWindowMsg(
 			if (msg->Class==IDCMP_GADGETUP || msg->Class==IDCMP_GADGETDOWN)
 			{
 				// Update gadget values
-				L_StoreGadgetValue(OBJLIST(msg->IDCMPWindow),msg,(struct MyLibrary *)getreg(REG_A6));
+				L_StoreGadgetValue(OBJLIST(msg->IDCMPWindow),msg);
 			}
 		}
 

@@ -258,8 +258,7 @@ void __asm __saveds L_SendNotifyMsg(
 void __asm __saveds L_SetNotifyRequest(
 	register __a0 NotifyNode *node,
 	register __d0 ULONG new_flags,
-	register __d1 ULONG mask,
-	register __a6 struct MyLibrary *libbase)
+	register __d1 ULONG mask)
 {
 	// Valid node?
 	if (!node) return;

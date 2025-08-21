@@ -43,8 +43,7 @@ For more information on Directory Opus for Windows please see:
 
 __asm __saveds L_DoSimpleRequest(
 	register __a0 struct Window *parent,
-	register __a1 struct GalileoSimpleRequest *simple,
-	register __a6 struct Library *libbase)
+	register __a1 struct GalileoSimpleRequest *simple)
 {
 	APTR memory;
 	simplereq_data *data;
@@ -66,7 +65,6 @@ __asm __saveds L_DoSimpleRequest(
 	data->parent=parent;
 	data->string_buffer=simple->string_buffer;
 	data->gadgets=simple->gadgets;
-	data->libbase=(struct MyLibrary *)libbase;
 	data->signal=-1;
 	data->memory=memory;
 
@@ -464,8 +462,7 @@ __asm __saveds L_SimpleRequest(
 	register __a4 char *buffer,
 	register __a5 APTR params,
 	register __d0 long buffersize,
-	register __d1 ULONG flags,
-	register __a6 struct Library *libbase)
+	register __d1 ULONG flags)
 {
 	char *data,*ptr;
 	struct GalileoSimpleRequest *simple;
@@ -542,7 +539,7 @@ __asm __saveds L_SimpleRequest(
 	simple->flags|=flags;
 
 	// Do requester
-	a=L_DoSimpleRequest(parent,simple,libbase);
+	a=L_DoSimpleRequest(parent,simple);
 
 	// Free data
 	FreeVec(data);

@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -69,9 +69,6 @@ typedef struct _ProgressWindow
 
 	struct Task		*pw_SigTask;		// Task to signal for abort
 	long			pw_SigBit;		// Signal bit to use
-
-	long			pw_A4;			// A4 register
-	struct MyLibrary	*pw_Lib;		// Library pointer
 
 	Point			pw_Offset;		// Coordinate offset
 	struct Gadget		*pw_Abort;		// Abort gadget

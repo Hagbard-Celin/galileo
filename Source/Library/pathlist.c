@@ -207,25 +207,19 @@ BPTR __asm __saveds L_GetDosPathList(register __a0 BPTR copy_list)
 
 
 /// Update our path list
-void __asm __saveds L_UpdatePathList(
-	register __a6 struct MyLibrary *libbase)
+void __asm __saveds L_UpdatePathList(void)
 {
-    struct LibData *data;
-
-    // Get library data
-    data=(struct LibData *)libbase->ml_UserData;
-
     // Lock path list
-    L_GetSemaphore(&data->path_lock,SEMF_EXCLUSIVE,0);
+    L_GetSemaphore(&gfmlib_data.path_lock,SEMF_EXCLUSIVE,0);
 
     // Free path list
-    L_FreeDosPathList(data->path_list);
+    L_FreeDosPathList(gfmlib_data.path_list);
 
     // Get new path list
-    data->path_list=L_GetDosPathList(0);
+    gfmlib_data.path_list=L_GetDosPathList(0);
 
     // Unlock path list
-    L_FreeSemaphore(&data->path_lock);
+    L_FreeSemaphore(&gfmlib_data.path_lock);
 
     // Send command to launcher to reset it
     L_IPC_Command(launcher_ipc,IPC_RESET,0,0,0,NO_PORT_IPC);

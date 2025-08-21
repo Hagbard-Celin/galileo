@@ -43,8 +43,7 @@ For more information on Directory Opus for Windows please see:
 // Allocate a MatchHandle for a file
 APTR __asm __saveds L_GetMatchHandle(
 	register __a0 char *name,
-	register __d0 BPTR lock,
-	register __a6 struct MyLibrary *lib)
+	register __d0 BPTR lock)
 {
 	MatchHandle *handle;
 

@@ -67,8 +67,7 @@ struct Window *__asm __saveds L_OpenStatusWindow(
 	register __a1 char *text,
 	register __a2 struct Screen *screen,
 	register __d1 LONG graph,
-	register __d0 ULONG flags,
-	register __a6 struct MyLibrary *libbase)
+	register __d0 ULONG flags)
 {
 	struct Window *window;
 	NewConfigWindow newwin;

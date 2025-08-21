@@ -51,8 +51,7 @@ void progress_bar(ProgressWindow *,unsigned long,long,long);
 
 // Open a progress window
 ProgressWindow *__asm __saveds L_OpenProgressWindow(
-	register __a0 struct TagItem *tags,
-	register __a6 struct MyLibrary *lib)
+	register __a0 struct TagItem *tags)
 {
 	ProgressWindow *prog;
 	char *ptr;
@@ -78,10 +77,6 @@ ProgressWindow *__asm __saveds L_OpenProgressWindow(
 	// If we have both size and the bar set, we swap them around
 	if (prog->pw_Flags&PWF_FILESIZE && prog->pw_Flags&PWF_GRAPH)
 		prog->pw_Flags|=PWF_SWAP;
-
-	// Save A4 and library pointer
-	prog->pw_A4=getreg(REG_A4);
-	prog->pw_Lib=lib;
 
 	// Initialise task name
 	strcpy(prog->pw_TaskName,"galileo_progressbar");
@@ -206,7 +201,6 @@ BOOL __asm __saveds L_CheckProgressAbort(
 	return abort;
 }
 
-#define GalileoFMBase	(prog->pw_Lib)
 
 // Progress window task
 void __asm __saveds progress_task(void)
@@ -218,9 +212,6 @@ void __asm __saveds progress_task(void)
 	// Do startup
 	if (!(ipc=L_IPC_ProcStartup((ULONG *)&prog,0)))
 		return;
-
-	// Fix A4 pointer
-	putreg(REG_A4,prog->pw_A4);
 
 /*
 	// Debug?
@@ -320,7 +311,7 @@ void __asm __saveds progress_task(void)
 			}
 
 			// Reply to the message
-			IPC_Reply(msg);
+			L_IPC_Reply(msg);
 		}
 
 		// Quit?
@@ -335,7 +326,7 @@ void __asm __saveds progress_task(void)
 	progress_close(prog);
 
 	// Free IPC data
-	IPC_Free(ipc);
+	L_IPC_Free(ipc);
 
 	// Free control structure
 	FreeVec(prog);
@@ -352,7 +343,6 @@ void progress_open(ProgressWindow *prog)
 	struct IBox win;
 	struct TextFont *font;
 	struct Screen *wbscreen=0,*screen;
-	struct LibData *libdata;
 	short a,last=-1;
 
 	// Already open?
@@ -363,9 +353,6 @@ void progress_open(ProgressWindow *prog)
 			MoveWindowInFrontOf(prog->pw_Window,prog->pw_OwnerWindow);
 		return;
 	}
-
-	// Get library data pointer
-	libdata=(struct LibData *)prog->pw_Lib->ml_UserData;
 
 	// Got a screen to open on?
 	if (!(screen=prog->pw_Screen) &&
@@ -408,7 +395,7 @@ void progress_open(ProgressWindow *prog)
 			short len;
 
 			// Get appropriate string
-			ptr=GetString(&libdata->locale,(prog->pw_Flags&PWF_SWAP)?MSG_FILE_FIT:MSG_SIZE_FIT);
+			ptr=L_GetString(&gfmlib_data.locale,(prog->pw_Flags&PWF_SWAP)?MSG_FILE_FIT:MSG_SIZE_FIT);
 
 			// Get length of byte string
 			len=TextLength(&screen->RastPort,ptr,strlen(ptr));
@@ -421,7 +408,7 @@ void progress_open(ProgressWindow *prog)
 			prog->pw_Coords[PROG_SIZE].Height=font->tf_YSize;
 
 			// Cache size string
-			prog->pw_SizeString=GetString(&libdata->locale,(prog->pw_Flags&PWF_SWAP)?MSG_FILE:MSG_SIZE);
+			prog->pw_SizeString=L_GetString(&gfmlib_data.locale,(prog->pw_Flags&PWF_SWAP)?MSG_FILE:MSG_SIZE);
 			last=PROG_SIZE;
 		}
 
@@ -534,7 +521,7 @@ void progress_open(ProgressWindow *prog)
 	// Want abort gadget?
 	if ((prog->pw_SigTask || prog->pw_Flags&PWF_ABORT) && !(prog->pw_Flags&PWF_NOABORT))
 	{
-		char *ptr=GetString(&libdata->locale,MSG_ABORT);
+		char *ptr=L_GetString(&gfmlib_data.locale,MSG_ABORT);
 		short len;
 
 		// Get length of abort string
@@ -635,7 +622,7 @@ void progress_open(ProgressWindow *prog)
 	}
 
 	// Set ID
-	SetWindowID(prog->pw_Window,&prog->pw_ID,WINDOW_UNDEFINED,0);
+	L_SetWindowID(prog->pw_Window,&prog->pw_ID,WINDOW_UNDEFINED,0);
 
 	// Activate window if owner was active
 	if (prog->pw_OwnerWindow && prog->pw_OwnerWindow->Flags&WFLG_WINDOWACTIVE)
@@ -660,7 +647,7 @@ void progress_open(ProgressWindow *prog)
 			GA_Width,prog->pw_Coords[PROG_LAST].Width,
 			GA_Height,prog->pw_Coords[PROG_LAST].Height,
 			GA_RelVerify,TRUE,
-			GA_Text,GetString(&libdata->locale,MSG_ABORT),
+			GA_Text,L_GetString(&gfmlib_data.locale,MSG_ABORT),
 			GTCustom_ThinBorders,TRUE,
 			ICA_TARGET,ICTARGET_IDCMP,
 			TAG_DONE))
@@ -1005,7 +992,7 @@ void progress_bar(ProgressWindow *prog,unsigned long flags,long count,long num)
 		rect.MaxY=rect.MinY+prog->pw_Coords[PROG_GRAPH].Height-1;
 
 		// Draw border
-		DrawBox(rp,&rect,prog->pw_DrawInfo,TRUE);
+		L_DrawBox(rp,&rect,prog->pw_DrawInfo,TRUE);
 		prog->pw_ProgWidth=-1;
 	}
 

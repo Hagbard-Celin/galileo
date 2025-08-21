@@ -212,8 +212,7 @@ void __asm __saveds L_SetCxSelectUpDown(register __a1 CxObj * cxo)
 // Write an icon for a file
 void __asm __saveds L_WriteFileIcon(
 	register __a0 char *source,
-	register __a1 char *dest,
-	register __a6 struct MyLibrary *libbase)
+	register __a1 char *dest)
 {
 	char *buffer;
 	BPTR lock;
@@ -966,8 +965,7 @@ void __saveds __asm L_ReplyFreeMsg(register __a0 struct Message *msg)
 
 // Get path from a WBArg
 STRPTR __saveds __asm L_GetWBArgPath(
-	register __a0 struct WBArg *arg,
-	register __a6 struct MyLibrary *libbase)
+	register __a0 struct WBArg *arg)
 {
 	STRPTR buffer = 0, add = 0;
 	ULONG flags = PFLF_USE_DEVICENAME;

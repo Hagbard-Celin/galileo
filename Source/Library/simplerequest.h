@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -67,7 +67,6 @@ typedef struct
 	ULONG waitbits;
 	short first_object;
 	char **gadgets;
-	struct MyLibrary *libbase;
 	short signal;
 	struct GalileoSimpleRequest *simple;
 

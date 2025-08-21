@@ -66,8 +66,7 @@ __asm __saveds L_SaveListerDef(
 
 __asm __saveds L_SaveButtonBank(
 	register __a0 Cfg_ButtonBank *bank,
-	register __a1 char *name,
-	register __a6 struct MyLibrary *libbase)
+	register __a1 char *name)
 {
 	struct _IFFHandle *iff;
 	short success=0;
@@ -123,7 +122,7 @@ __asm __saveds L_SaveButtonBank(
 			strstr(buf,"-icons-"))
 		{
 			// Write icon file
-			L_WriteFileIcon("Galileo:icons/Buttons",name,libbase);
+			L_WriteFileIcon("Galileo:icons/Buttons",name);
 		}
 		break;
 	}
@@ -139,8 +138,7 @@ __asm __saveds L_SaveButtonBank(
 
 __asm __saveds L_SaveFiletypeList(
 	register __a0 Cfg_FiletypeList *list,
-	register __a1 char *name,
-	register __a6 struct MyLibrary *libbase)
+	register __a1 char *name)
 {
 	struct _IFFHandle *iff;
 	Cfg_Filetype *type;
@@ -195,7 +193,7 @@ __asm __saveds L_SaveFiletypeList(
 			strstr(buf,"-icons-"))
 		{
 			// Write icon file
-			L_WriteFileIcon("Galileo:icons/Filetype",name,libbase);
+			L_WriteFileIcon("Galileo:icons/Filetype",name);
 		}
 		break;
 	}

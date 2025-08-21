@@ -345,11 +345,9 @@ ULONG __asm L_GetFileSize64(
 	register __a1 UQUAD * size);
 void __asm L_WriteFileIcon(
 	register __a0 char *source,
-	register __a1 char *dest,
-	register __a6 struct MyLibrary *libbase);
+	register __a1 char *dest);
 STRPTR __asm L_GetWBArgPath(
-	register __a0 struct WBArg *arg,
-	register __a6 struct MyLibrary *libbase);
+	register __a0 struct WBArg *arg);
 struct PubScreenNode *__asm L_FindPubScreen(
 	register __a0 struct Screen *screen,
 	register __d0 BOOL lock);
@@ -357,8 +355,7 @@ struct PubScreenNode *__asm L_FindPubScreen(
 
 // simplerequest.c
 __asm L_DoSimpleRequest(register __a0 struct Window *,
-	register __a1 struct GalileoSimpleRequest *,
-	register __a6 struct Library *);
+	register __a1 struct GalileoSimpleRequest *);
 __asm L_SimpleRequest(
 	register __a0 struct Window *parent,
 	register __a1 char *title,
@@ -367,8 +364,7 @@ __asm L_SimpleRequest(
 	register __a4 char *buffer,
 	register __a5 APTR params,
 	register __d0 long buffersize,
-	register __d1 ULONG flags,
-	register __a6 struct Library *);
+	register __d1 ULONG flags);
 
 
 // drag_routines.c
@@ -377,8 +373,7 @@ DragInfo *__asm L_GetDragInfo(
 	register __a1 struct RastPort *,
 	register __d0 long width,
 	register __d1 long height,
-	register __d2 long,
-	register __a6 struct MyLibrary *);
+	register __d2 long);
 void __asm L_FreeDragInfo(register __a0 DragInfo *drag);
 void __asm L_HideDragImage(register __a0 DragInfo *drag);
 void __asm L_GetDragImage(
@@ -446,8 +441,7 @@ GL_Object *__asm L_GetObject(
 	register __d0 int id);
 void __asm L_StoreGadgetValue(
 	register __a0 ObjectList *list,
-	register __a1 struct IntuiMessage *msg,
-	register __a6 struct MyLibrary *);
+	register __a1 struct IntuiMessage *msg);
 void __asm L_UpdateGadgetValue(
 	register __a0 ObjectList *list,
 	register __a1 struct IntuiMessage *msg,
@@ -757,8 +751,7 @@ struct Window *__asm L_OpenStatusWindow(
 	register __a1 char *,
 	register __a2 struct Screen *,
 	register __d1 LONG,
-	register __d0 ULONG,
-	register __a6 struct MyLibrary *);
+	register __d0 ULONG);
 void __asm L_SetStatusText(
 	register __a0 struct Window *,
 	register __a1 char *text);
@@ -1006,8 +999,7 @@ short __asm L_GetIconType(
 
 // progress
 struct _ProgressWindow *__asm L_OpenProgressWindow(
-	register __a0 struct TagItem *,
-	register __a6 struct MyLibrary *lib);
+	register __a0 struct TagItem *);
 void __asm L_CloseProgressWindow(
 	register __a0 struct _ProgressWindow *);
 void __asm L_HideProgressWindow(
@@ -1068,8 +1060,7 @@ void __asm L_SetLocaleFlags(
 
 // filetypes
 APTR __asm L_GetMatchHandle(register __a0 char *name,
-			    register __d0 BPTR lock,
-			    register __a6 struct MyLibrary *);
+			    register __d0 BPTR lock);
 void __asm L_FreeMatchHandle(register __a0 MatchHandle *handle);
 BOOL __asm L_MatchFiletype(
 	register __a0 MatchHandle *handle,
@@ -1092,8 +1083,7 @@ long __asm L_AsyncRequest(
 	register __a1 struct Window *,
 	register __a2 REF_CALLBACK(callback),
 	register __a3 APTR data,
-	register __d1 struct TagItem *tags,
-	register __a6 struct MyLibrary *libbase);
+	register __d1 struct TagItem *tags);
 struct IntuiMessage *__asm L_CheckRefreshMsg(
 	register __a0 struct Window *,
 	register __d0 ULONG mask);

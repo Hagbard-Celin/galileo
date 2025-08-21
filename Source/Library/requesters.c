@@ -40,12 +40,10 @@ For more information on Directory Opus for Windows please see:
 
 typedef struct
 {
-	ULONG				command;
+	ULONG			command;
 	struct Window		*window;
-	APTR				data;
-	IPCData				*ipc;
-	ULONG				a4;
-	struct MyLibrary	*libbase;
+	APTR			data;
+	IPCData			*ipc;
 } ReqStartup;
 
 struct RequestData
@@ -67,8 +65,7 @@ long __asm __saveds L_AsyncRequest(
 	register __a1 struct Window *window,
 	register __a2 REF_CALLBACK(callback),
 	register __a3 APTR data,
-	register __d1 struct TagItem *tags,
-	register __a6 struct MyLibrary *libbase)
+	register __d1 struct TagItem *tags)
 {
 	ReqStartup *startup;
 	IPCData *ipc;
@@ -83,8 +80,6 @@ long __asm __saveds L_AsyncRequest(
 	startup->window=window;
 	startup->data=tags;
 	startup->ipc=my_ipc;
-	startup->a4=getreg(REG_A4);
-	startup->libbase=libbase;
 
 	// Start process
 	if (!(L_IPC_Launch(
@@ -197,19 +192,11 @@ void __asm __saveds requester_proc(void)
 	IPCData *ipc;
 	ReqStartup *startup=0;
 	struct TagItem *tags;
-	struct LibData *libdata;
 	long result=0;
 
 	// Do startup
 	if (!(ipc=L_IPC_ProcStartup((ULONG *)&startup,0)))
 		return;
-
-	// Restore A4
-	putreg(REG_A4,startup->a4);
-
-	// Get library data pointer
-	libdata=(struct LibData *)startup->libbase->ml_UserData;
-#define GalileoFMBase	(libdata->galileofm_base)
 
 	// Get tags pointer
 	tags=(struct TagItem *)startup->data;
@@ -260,7 +247,7 @@ void __asm __saveds requester_proc(void)
 
 				// Get title
 				data->request.title=(char *)
-					GetTagData(AR_Title,(ULONG)GetString(&libdata->locale,MSG_GALILEO_FM_REQUEST),tags);
+					GetTagData(AR_Title,(ULONG)L_GetString(&gfmlib_data.locale,MSG_GALILEO_FM_REQUEST),tags);
 
 				// Get message
 				data->request.message=(char *)GetTagData(AR_Message,0,tags);
@@ -337,7 +324,7 @@ void __asm __saveds requester_proc(void)
 					data->request.flags|=SRF_FILEREQ;
 
 				// Do the request
-				result=DoSimpleRequest(parent,&data->request);
+				result=L_DoSimpleRequest(parent,&data->request);
 
 				// Free data
 				FreeVec(data);
@@ -349,13 +336,12 @@ void __asm __saveds requester_proc(void)
 	Forbid();
 
 	// Send result back
-	IPC_Command(startup->ipc,REQCMD_END,result,0,0,0);
+	L_IPC_Command(startup->ipc,REQCMD_END,result,0,0,0);
 
 	// Free and exit
-	IPC_Free(ipc);
+	L_IPC_Free(ipc);
 
 #ifdef RESOURCE_TRACKING
-    ResourceTrackingEndOfTask();
+	ResourceTrackingEndOfTask();
 #endif
-#undef GalileoFMBase
 }

@@ -49,8 +49,7 @@ DragInfo *__asm __saveds L_GetDragInfo(
 	register __a1 struct RastPort *rast,
 	register __d0 long width,
 	register __d1 long height,
-	register __d2 long flags,
-	register __a6 struct MyLibrary *libbase)
+	register __d2 long flags)
 {
 	DragInfo *drag;
 	int plane;
