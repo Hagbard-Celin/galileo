@@ -621,7 +621,7 @@ void __saveds __asm L_LockAttList(
 {
 	// List requires locking?
 	if (list && list->flags&LISTF_LOCK)
-		L_GetSemaphore(&list->lock,(exclusive)?SEMF_EXCLUSIVE:SEMF_SHARED,0, getreg(REG_A6));
+		L_GetSemaphore(&list->lock,(exclusive)?SEMF_EXCLUSIVE:SEMF_SHARED,0);
 }
 
 
@@ -630,7 +630,7 @@ void __saveds __asm L_UnlockAttList(register __a0 Att_List *list)
 {
 	// List required locking?
 	if (list && list->flags&LISTF_LOCK)
-		L_FreeSemaphore(&list->lock, getreg(REG_A6));
+		L_FreeSemaphore(&list->lock);
 }
 
 
@@ -682,12 +682,12 @@ BOOL __asm __saveds L_IsListLockEmpty(register __a0 struct ListLock *list)
 	BOOL empty;
 
 	// Lock list
-	L_GetSemaphore(&list->lock,SEMF_SHARED,0, getreg(REG_A6));
+	L_GetSemaphore(&list->lock,SEMF_SHARED,0);
 
 	// See if it's empty
 	empty=IsListEmpty(&list->list)?TRUE:FALSE;
 
 	// Unlock list
-	L_FreeSemaphore(&list->lock, getreg(REG_A6));
+	L_FreeSemaphore(&list->lock);
 	return empty;
 }

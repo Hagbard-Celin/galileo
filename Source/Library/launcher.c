@@ -377,7 +377,7 @@ char *launcher_parse(char *,char *,short);
 BPTR launcher_get_parent(struct LibData *,char *);
 void free_launch_packet(struct LibData *data,LaunchPacket *packet);
 long __asm launch_exit_codeTr(register __d1 LaunchPacket *);
-long __asm launch_exit_code(register __d1 LaunchPacket *, register __a6 struct Library *GalileoFMBase);
+long __asm launch_exit_code(register __d1 LaunchPacket *);
 ErrorNode *__stdargs launch_error(struct LibData *data,LaunchPacket *packet,short,short,char *args,...);
 
 #ifdef FAKEWB
@@ -396,7 +396,7 @@ BOOL doslist_check_double(struct LibData *,struct List *,char *);
 void do_mufs_logout(struct LoginPkt *);
 
 
-void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
+void __asm __saveds launcher_proc(void)
 {
 	IPCData *ipc;
 	struct LibData *data;
@@ -420,11 +420,11 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 #endif
 
 	// Set up timers
-	if (timer=AllocTimer(UNIT_VBLANK,0))
+	if (timer=L_AllocTimer(UNIT_VBLANK,0))
 	{
-		StartTimer(timer,DOSLIST_TIMER,0);
-		if (secondtimer=AllocTimer(UNIT_VBLANK,timer->port))
-			StartTimer(secondtimer,1,0);
+		L_StartTimer(timer,DOSLIST_TIMER,0);
+		if (secondtimer=L_AllocTimer(UNIT_VBLANK,timer->port))
+			L_StartTimer(secondtimer,1,0);
 	}
 
 	// Store process pointer
@@ -434,7 +434,7 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 	reply_port=CreateMsgPort();
 
 	// Copy environment variables
-	CopyLocalEnv(DOSBase);
+	L_CopyLocalEnv();
 
 	// Set program name
 	SetProgramName(ipc->proc->pr_Task.tc_Node.ln_Name);
@@ -445,7 +445,7 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 	data->task_count+=L_Att_NodeCount((Att_List *)&ExecLib->TaskWait);
 
 	// Install patches
-	WB_Install_Patch();
+	L_WB_Install_Patch();
 	Permit();
 
 	// Get a dos list copy
@@ -464,27 +464,27 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 		if (timer)
 		{
 			// DOS list timer?
-			if (CheckTimer(timer))
+			if (L_CheckTimer(timer))
 			{
 				// Update dos list (check for diskchange)
 				if (!(doslist_get(data,&data->dos_list,data->dos_list_memory,DLGF_NOTIFY)))
 				{
 					// Failed, so we try again soon
-					StartTimer(timer,1,0);
+					L_StartTimer(timer,1,0);
 				}
 
 				// Restart timer
-				else StartTimer(timer,DOSLIST_TIMER,0);
+				else L_StartTimer(timer,DOSLIST_TIMER,0);
 			}
 
 			// Second timer
-			if (CheckTimer(secondtimer))
+			if (L_CheckTimer(secondtimer))
 			{
 				AppEntry *entry,*next;
 				short count=0;
 
 				// Lock AppEntry list
-				GetSemaphore(&data->wb_data.patch_lock,SEMF_EXCLUSIVE,0);
+				L_GetSemaphore(&data->wb_data.patch_lock,SEMF_EXCLUSIVE,0);
 
 				// Go through free list
 				for (entry=(AppEntry *)data->wb_data.rem_app_list.mlh_Head;
@@ -508,24 +508,24 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 					IsListEmpty((struct List *)&data->wb_data.rem_app_list))
 				{
 #ifdef _DEBUG_IPCPROC
-				        KPrintF("!!!Launcher.c line: %ld DECREASING before %ld \n", __LINE__, GalileoFMBase->lib_OpenCnt);
+					KPrintF("!!!Launcher.c line: %ld DECREASING before %ld \n", __LINE__, ((struct Library *)getreg(REG_A6))->lib_OpenCnt);
 #endif
 					// Decrement library open count so we can get expunged
-					--GalileoFMBase->lib_OpenCnt;
+					--((struct Library *)getreg(REG_A6))->lib_OpenCnt;
 
 				        // Reset flag for wb.c:new_app_entry()
 				        data->wb_data.first_app_entry=TRUE;
 
 #ifdef _DEBUG_IPCPROC
-					KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, GalileoFMBase->lib_OpenCnt);
+					KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, ((struct Library *)getreg(REG_A6))->lib_OpenCnt);
 #endif
 				}
 
 				// Unlock AppEntry list
-				FreeSemaphore(&data->wb_data.patch_lock);
+				L_FreeSemaphore(&data->wb_data.patch_lock);
 
 				// Restart timer
-				StartTimer(secondtimer,1,0);
+				L_StartTimer(secondtimer,1,0);
 			}
 		}
 
@@ -556,7 +556,7 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 					if (error->proc)
 					{
 						// Lock launch list
-						GetSemaphore(&data->launch_lock,SEMF_EXCLUSIVE,0);
+						L_GetSemaphore(&data->launch_lock,SEMF_EXCLUSIVE,0);
 
 						// Find process in the launch list
 						for (proc=(LaunchProc *)data->launch_list.mlh_Head;
@@ -574,7 +574,7 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 							if (ret==1)
 							{
 								// Restart wait timer
-								if (proc->timeout) StartTimer(proc->timeout,LAUNCH_TIMEOUT,0);
+								if (proc->timeout) L_StartTimer(proc->timeout,LAUNCH_TIMEOUT,0);
 							}
 
 							// Don't wait any more
@@ -584,7 +584,7 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 								if (proc->exit_reply)
 								{
 									free_launch_packet(data,(LaunchPacket *)proc->exit_reply->data);
-									IPC_Reply(proc->exit_reply);
+									L_IPC_Reply(proc->exit_reply);
 								}
 
 								// Clear reply field
@@ -593,7 +593,7 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 						}
 
 						// Unlock launch list
-						FreeSemaphore(&data->launch_lock);
+						L_FreeSemaphore(&data->launch_lock);
 					}
 
 					// Free error node
@@ -603,7 +603,7 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 		}
 
 		// Lock launch list
-		GetSemaphore(&data->launch_lock,SEMF_EXCLUSIVE,0);
+		L_GetSemaphore(&data->launch_lock,SEMF_EXCLUSIVE,0);
 
 		// Any returned startup messages?
 		while (startup=(struct WBStartup *)GetMsg(reply_port))
@@ -626,7 +626,7 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 
 						// Reply to exit message
 						free_launch_packet(data,(LaunchPacket *)proc->exit_reply->data);
-						IPC_Reply(proc->exit_reply);
+						L_IPC_Reply(proc->exit_reply);
 
 						// Go through error requesters
 						for (error=(ErrorNode *)data->error_list.mlh_Head;
@@ -653,7 +653,7 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 					if (proc->notify_ipc)
 					{
 						// Send message
-						IPC_Command(proc->notify_ipc,IPC_GOT_GOODBYE,0,proc->proc,0,0);
+						L_IPC_Command(proc->notify_ipc,IPC_GOT_GOODBYE,0,proc->proc,0,0);
 					}
 
 					// Do process cleanup
@@ -663,10 +663,10 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 					--data->launch_count;
 
 					// Zero count? Decrement library open count
-					if (data->launch_count==0) --GalileoFMBase->lib_OpenCnt;
+					if (data->launch_count==0) --((struct Library *)getreg(REG_A6))->lib_OpenCnt;
 #ifdef _DEBUG_IPCPROC
 				        {
-				            KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, GalileoFMBase->lib_OpenCnt);
+				            KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, ((struct Library *)getreg(REG_A6))->lib_OpenCnt);
 					    break;
 				        }
 #else
@@ -682,7 +682,7 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 			proc=(LaunchProc *)proc->node.ln_Succ)
 		{
 			// Timeout timer completed?
-			if (proc->timeout && CheckTimer(proc->timeout))
+			if (proc->timeout && L_CheckTimer(proc->timeout))
 			{
 				ErrorNode *error;
 
@@ -696,7 +696,7 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 		}
 
 		// Unlock launch list
-		FreeSemaphore(&data->launch_lock);
+		L_FreeSemaphore(&data->launch_lock);
 
 		// Quit?
 		if (quit_msg) break;
@@ -769,23 +769,23 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 						if (packet->wait)
 						{
 							// Lock launch list
-							GetSemaphore(&data->launch_lock,SEMF_EXCLUSIVE,0);
+							L_GetSemaphore(&data->launch_lock,SEMF_EXCLUSIVE,0);
 
 							// Increment count
 							++data->launch_count;
 
 #ifdef _DEBUG_IPCPROC
-							KPrintF("!!!Launcher.c line: %ld INCREASING if %ld = 1 before %ld \n", __LINE__, data->launch_count, GalileoFMBase->lib_OpenCnt);
+							KPrintF("!!!Launcher.c line: %ld INCREASING if %ld = 1 before %ld \n", __LINE__, data->launch_count, ((struct Library *)getreg(REG_A6))->lib_OpenCnt);
 #endif
 							// First program? Increment open count so we can't be flushed
 							if (data->launch_count==1)
-								++GalileoFMBase->lib_OpenCnt;
+								++((struct Library *)getreg(REG_A6))->lib_OpenCnt;
 #ifdef _DEBUG_IPCPROC
-							KPrintF("!!!Launcher.c line: %ld INCREASING after %ld \n", __LINE__, GalileoFMBase->lib_OpenCnt);
+							KPrintF("!!!Launcher.c line: %ld INCREASING after %ld \n", __LINE__, ((struct Library *)getreg(REG_A6))->lib_OpenCnt);
 #endif
 
 							// Unlock launch list
-							FreeSemaphore(&data->launch_lock);
+							L_FreeSemaphore(&data->launch_lock);
 
 							// Save reply message
 							packet->exit_reply=msg;
@@ -809,7 +809,7 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 				else
 				{
 					// Lock launch list
-					GetSemaphore(&data->launch_lock,SEMF_EXCLUSIVE,0);
+					L_GetSemaphore(&data->launch_lock,SEMF_EXCLUSIVE,0);
 
 					if (packet->type == LAUNCHF_LAUNCH_WBARG)
 					{
@@ -836,15 +836,15 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 						++data->launch_count;
 
 #ifdef _DEBUG_IPCPROC
-						KPrintF("!!!Launcher.c line: %ld INCREASING if %ld = 1 before %ld \n", __LINE__, data->launch_count, GalileoFMBase->lib_OpenCnt);
+						KPrintF("!!!Launcher.c line: %ld INCREASING if %ld = 1 before %ld \n", __LINE__, data->launch_count, ((struct Library *)getreg(REG_A6))->lib_OpenCnt);
 #endif
 
 						// First program? Increment open count so we can't be flushed
 						if (data->launch_count==1)
-							++GalileoFMBase->lib_OpenCnt;
+							++((struct Library *)getreg(REG_A6))->lib_OpenCnt;
 
 #ifdef _DEBUG_IPCPROC
-						KPrintF("!!!Launcher.c line: %ld INCREASING after %ld \n", __LINE__, GalileoFMBase->lib_OpenCnt);
+						KPrintF("!!!Launcher.c line: %ld INCREASING after %ld \n", __LINE__, ((struct Library *)getreg(REG_A6))->lib_OpenCnt);
 #endif
 
 						// Wait for reply?
@@ -858,10 +858,10 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 							if (packet->wait==LAUNCH_WAIT_TIMEOUT)
 							{
 								// Get timeout timer
-								if (proc->timeout=AllocTimer(UNIT_VBLANK,timer->port))
+								if (proc->timeout=L_AllocTimer(UNIT_VBLANK,timer->port))
 								{
 									// Start timeout timer
-									StartTimer(proc->timeout,LAUNCH_TIMEOUT,0);
+									L_StartTimer(proc->timeout,LAUNCH_TIMEOUT,0);
 								}
 							}
 						}
@@ -871,7 +871,7 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 					else msg->command=0;
 
 					// Unlock launch list
-					FreeSemaphore(&data->launch_lock);
+					L_FreeSemaphore(&data->launch_lock);
 				}
 
 				// Restore current dir
@@ -902,17 +902,17 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 				clip->result=0;
 
 				// Open clipboard
-				if (cb=OpenClipBoard(0))
+				if (cb=L_OpenClipBoard(0))
 				{
 					// Put string?
 					if (msg->command==CLIP_PUTSTRING)
-						clip->result=WriteClipString(cb,clip->string,clip->length);
+						clip->result=L_WriteClipString(cb,clip->string,clip->length);
 
 					// Get string
-					else clip->result=ReadClipString(cb,clip->string,clip->length);
+					else clip->result=L_ReadClipString(cb,clip->string,clip->length);
 
 					// Close clipboard
-					CloseClipBoard(cb);
+					L_CloseClipBoard(cb);
 				}
 			}
 
@@ -921,7 +921,7 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 			if (msg->command==STRING_CONVERT_KEY)
 			{
 				// Build the key string
-				BuildKeyString(
+				L_BuildKeyString(
 					(msg->flags>>16)&0xffff,
 					msg->flags&0xffff,
 					0xffff,
@@ -934,7 +934,7 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 			if (msg->command==IPC_RESET)
 			{
 				// Get new path list
-				UpdateMyPaths();
+				L_UpdateMyPaths();
 
 #ifdef FAKEWB
 				// Re-install the fake Workbench program
@@ -948,14 +948,14 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 			}		
 
 			// Reply to the message
-			IPC_Reply(msg);
+			L_IPC_Reply(msg);
 
 			// Quit?
 			if (quit_msg) break;
 		}
 
 		// Lock launch list
-		GetSemaphore(&data->launch_lock,SEMF_SHARED,0);
+		L_GetSemaphore(&data->launch_lock,SEMF_SHARED,0);
 
 		// Got zero count and pending quit?
 		if (data->launch_count==0 && pending_quit)
@@ -965,7 +965,7 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 		}
 
 		// Unlock launch list
-		FreeSemaphore(&data->launch_lock);
+		L_FreeSemaphore(&data->launch_lock);
 
 		// Quit?
 		if (quit_msg) break;
@@ -982,7 +982,7 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 			if (doslist_get(data,&data->dos_list,data->dos_list_memory,DLGF_NOTIFY))
 			{
 				// Restart timer
-				StartTimer(timer,DOSLIST_TIMER,0);
+				L_StartTimer(timer,DOSLIST_TIMER,0);
 			}
 		}
 
@@ -991,7 +991,7 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 		if (waitres&(1<<data->low_mem_signal))
 		{
 			// Broadcast notify message
-			SendNotifyMsg(GN_FLUSH_MEM,0,0,0,0,0);
+			L_SendNotifyMsg(GN_FLUSH_MEM,0,0,0,0,0);
 		}
 	}
 
@@ -1026,8 +1026,8 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 	DeleteMsgPort(reply_port);
 
 	// Free timers
-	FreeTimer(secondtimer);
-	FreeTimer(timer);
+	L_FreeTimer(secondtimer);
+	L_FreeTimer(timer);
 
 #ifdef FAKEWB
 	// Kill fake workbench
@@ -1041,10 +1041,10 @@ void __saveds __asm launcher_proc(register __a6 struct Library *GalileoFMBase)
 	Forbid();
 
 	// Reply to quit message
-	IPC_Reply(quit_msg);
+	L_IPC_Reply(quit_msg);
 
 	// Exit
-	IPC_Free(ipc);
+	L_IPC_Free(ipc);
 
 #ifdef RESOURCE_TRACKING
 	ResourceTrackingEndOfTask();
@@ -1063,7 +1063,6 @@ LaunchProc *launcher_launch_arg(
 	BPTR old_dir,cur_dir=0,parent;
 	short result=0;
 	char *proc_name,*default_tool=0;
-	struct Library *GalileoFMBase = MyLibBase;
 
 	// Allocate launch data
 	if (!(launch=AllocVec(sizeof(LaunchProc),MEMF_CLEAR)))
@@ -1114,7 +1113,7 @@ LaunchProc *launcher_launch_arg(
 			PathListEntry *entry;
 
 			// Lock path list
-			GetSemaphore(&data->path_lock,SEMF_SHARED,0);
+			L_GetSemaphore(&data->path_lock,SEMF_SHARED,0);
 
 			// Go through pathlist
 			for (entry=(PathListEntry *)BADDR(data->path_list);
@@ -1148,7 +1147,7 @@ LaunchProc *launcher_launch_arg(
 			}
 
 			// Unlock path list
-			FreeSemaphore(&data->path_lock);
+			L_FreeSemaphore(&data->path_lock);
 		}
 	}
 
@@ -1252,7 +1251,6 @@ LaunchProc *launcher_launch(
 	BPTR old_dir,cur_dir=0,parent;
 	short result=0;
 	char *proc_name,*default_tool=0;
-	struct Library *GalileoFMBase = MyLibBase;
 
 	// Get program name
 	arg_ptr=launcher_parse(packet->name,name,256);
@@ -1353,7 +1351,7 @@ LaunchProc *launcher_launch(
 			PathListEntry *entry;
 
 			// Lock path list
-			GetSemaphore(&data->path_lock,SEMF_SHARED,0);
+			L_GetSemaphore(&data->path_lock,SEMF_SHARED,0);
 
 			// Go through pathlist
 			for (entry=(PathListEntry *)BADDR(data->path_list);
@@ -1381,7 +1379,7 @@ LaunchProc *launcher_launch(
 			}
 
 			// Unlock path list
-			FreeSemaphore(&data->path_lock);
+			L_FreeSemaphore(&data->path_lock);
 		}
 	}
 
@@ -1488,8 +1486,6 @@ LaunchProc *launcher_launch(
 // Clean up launch data
 void launch_cleanup(struct LibData *data,LaunchProc *launch)
 {
-	struct Library *GalileoFMBase = MyLibBase;
-
 	if (launch)
 	{
 		WORD arg;
@@ -1502,7 +1498,7 @@ void launch_cleanup(struct LibData *data,LaunchProc *launch)
 		{
 		    if (launch->startup.sm_ArgList)
 		    {
-			FreeLaunchWBArgs(&launch->startup.sm_ArgList,launch->startup.sm_NumArgs);
+			L_FreeLaunchWBArgs(&launch->startup.sm_ArgList,launch->startup.sm_NumArgs);
 		    }
 		}
 		else
@@ -1516,7 +1512,7 @@ void launch_cleanup(struct LibData *data,LaunchProc *launch)
 		    }
 		}
 		// Free timer
-		FreeTimer(launch->timeout);
+		L_FreeTimer(launch->timeout);
 
 		// Free launch packet
 		FreeVec(launch);
@@ -1596,9 +1592,8 @@ BPTR launcher_get_parent(struct LibData *data,char *name)
 {
 	char *ptr,c;
 	BPTR lock,parent;
-	struct Library *GalileoFMBase = MyLibBase;
 	
-	if (lock=LockFromPath(name,NULL,TRUE))
+	if (lock=L_LockFromPath(name,NULL,TRUE))
 	{
 		// Is it a directory?
 		if ((c=name[strlen(name)-1])=='/' || c==':')
@@ -1632,8 +1627,6 @@ BPTR launcher_get_parent(struct LibData *data,char *name)
 // Free launch packet
 void free_launch_packet(struct LibData *data,LaunchPacket *packet)
 {
-	struct Library *GalileoFMBase = MyLibBase;
-
 	if (packet)
 	{
 	    if (packet->type == LAUNCH_WB_ARG)
@@ -1644,7 +1637,7 @@ void free_launch_packet(struct LibData *data,LaunchPacket *packet)
 		// Free WBArgs if they still belong to the LaunchPacket
 		if (wbpacket->args)
 		{
-		    FreeLaunchWBArgs(&wbpacket->args, wbpacket->numargs);
+		    L_FreeLaunchWBArgs(&wbpacket->args, wbpacket->numargs);
 		}
 	    }
 	    else
@@ -1675,30 +1668,29 @@ LONG launcher_SystemTags(struct LibData *data,char *command,Tag tag1,...)
 */
 
 // Launch exit code
-long __saveds __asm launch_exit_code(register __d1 LaunchPacket *packet,
-				     register __a6 struct Library *GalileoFMBase)
+long __saveds __asm launch_exit_code(register __d1 LaunchPacket *packet)
 {
 	// Message to reply to?
-	if (packet->exit_reply) IPC_Reply(packet->exit_reply);
+	if (packet->exit_reply) L_IPC_Reply(packet->exit_reply);
 
 	// Free launch packet
 	free_launch_packet(&gfmlib_data,packet);
 
 	// Lock launch list
-	GetSemaphore(&gfmlib_data.launch_lock,SEMF_EXCLUSIVE,0);
+	L_GetSemaphore(&gfmlib_data.launch_lock,SEMF_EXCLUSIVE,0);
 
 #ifdef _DEBUG_IPCPROC
-	KPrintF("!!!Launcher.c line: %ld DECREASING if %ld = 0 before %ld \n", __LINE__, gfmlib_data.launch_count, GalileoFMBase->lib_OpenCnt);
+	KPrintF("!!!Launcher.c line: %ld DECREASING if %ld = 0 before %ld \n", __LINE__, gfmlib_data.launch_count, ((struct Library *)getreg(REG_A6))->lib_OpenCnt);
 #endif
 
 	// Decrement launch count, check for zero count
 	if (--gfmlib_data.launch_count==0)
 	{
 		// Decrement library open count
-		--GalileoFMBase->lib_OpenCnt;
+		--((struct Library *)getreg(REG_A6))->lib_OpenCnt;
 
 #ifdef _DEBUG_IPCPROC
-		KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, GalileoFMBase->lib_OpenCnt);
+		KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, ((struct Library *)getreg(REG_A6))->lib_OpenCnt);
 #endif
 
 		// Signal to check for pending quit
@@ -1706,11 +1698,11 @@ long __saveds __asm launch_exit_code(register __d1 LaunchPacket *packet,
 	}
 #ifdef _DEBUG_IPCPROC
 	else
-		KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, GalileoFMBase->lib_OpenCnt);
+		KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, ((struct Library *)getreg(REG_A6))->lib_OpenCnt);
 #endif
 
 	// Unlock launch list
-	FreeSemaphore(&gfmlib_data.launch_lock);
+	L_FreeSemaphore(&gfmlib_data.launch_lock);
 
 	return 0;
 }
@@ -1722,7 +1714,6 @@ ErrorNode *__stdargs launch_error(struct LibData *data,LaunchPacket *packet,shor
 	ErrorNode *error;
 	struct EasyStruct easy;
 	struct Window *parent=0;
-	struct Library *GalileoFMBase = MyLibBase;
 
 	// No errors?
 	if (packet && packet->errors==(struct Screen *)-1)
@@ -1736,8 +1727,8 @@ ErrorNode *__stdargs launch_error(struct LibData *data,LaunchPacket *packet,shor
 	easy.es_StructSize=sizeof(easy);
 	easy.es_Flags=0;
 	easy.es_Title="Galileo";
-	easy.es_TextFormat=GetString(&data->locale,msg);
-	easy.es_GadgetFormat=GetString(&data->locale,buttons);
+	easy.es_TextFormat=L_GetString(&data->locale,msg);
+	easy.es_GadgetFormat=L_GetString(&data->locale,buttons);
 
 	// Get parent window
 	if (packet && packet->errors)
@@ -1821,7 +1812,7 @@ void __saveds fake_workbench(void)
 				break;
 
 			// Reply it
-			IPC_Reply(msg);
+			L_IPC_Reply(msg);
 		}
 
 		// Wait for messages
@@ -1832,10 +1823,10 @@ void __saveds fake_workbench(void)
 	Forbid();
 
 	// Reply to the quit message
-	IPC_Reply(msg);
+	L_IPC_Reply(msg);
 
 	// Free IPC data and exit
-	IPC_Free(ipc);
+	L_IPC_Free(ipc);
 
 #ifdef RESOURCE_TRACKING
     ResourceTrackingEndOfTask();
@@ -1856,10 +1847,9 @@ BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG fla
 	struct Node *node;
 	Att_List *msg_list=0;
 	char name[80];
-	struct Library *GalileoFMBase = MyLibBase;
 
 	// Lock our list
-	GetSemaphore(&data->dos_lock,SEMF_EXCLUSIVE,0);
+	L_GetSemaphore(&data->dos_lock,SEMF_EXCLUSIVE,0);
 
 	// Lock the DOS list
 	if (!(doslist=	(flags&DLGF_FORCE) ? LockDosList(LDF_DEVICES|LDF_VOLUMES|LDF_READ) :
@@ -1867,7 +1857,7 @@ BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG fla
 		 (doslist==(struct DosList *)1))
 	{
 		// Failed; unlock our semaphore
-		FreeSemaphore(&data->dos_lock);
+		L_FreeSemaphore(&data->dos_lock);
 		return 0;
 	}
 
@@ -1911,7 +1901,7 @@ BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG fla
 		if (!found)
 		{
 			// Allocate new entry
-			if (found=AllocMemH(memory,sizeof(DosListEntry)+strlen(name)+1))
+			if (found=L_AllocMemH(memory,sizeof(DosListEntry)+strlen(name)+1))
 			{
 				// Store name
 				found->dle_Node.ln_Name=(char *)(found+1);
@@ -1922,7 +1912,7 @@ BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG fla
 				found->dle_Node.ln_Pri=DL_ADDED;
 
 				// Get device and unit
-				GetDeviceUnit(dos->dol_misc.dol_handler.dol_Startup,found->dle_DeviceName,&found->dle_DeviceUnit);
+				L_GetDeviceUnit(dos->dol_misc.dol_handler.dol_Startup,found->dle_DeviceName,&found->dle_DeviceUnit);
 			}
 
 			// Add to list
@@ -1951,7 +1941,7 @@ BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG fla
 		device[0]=0;
 
 		// Get device name
-		DeviceFromHandler(dos->dol_Task,device);
+		L_DeviceFromHandler(dos->dol_Task,device);
 
 		// Convert volume name
 		lsprintf(name,"%b",dos->dol_Name);
@@ -2005,7 +1995,7 @@ BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG fla
 		if (!found)
 		{
 			// Allocate new entry
-			if (found=AllocMemH(memory,sizeof(DosListEntry)+strlen(name)+1))
+			if (found=L_AllocMemH(memory,sizeof(DosListEntry)+strlen(name)+1))
 			{
 				// Store name
 				found->dle_Node.ln_Name=(char *)(found+1);
@@ -2109,7 +2099,7 @@ BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG fla
 
 				// Need to create it
 				else
-				if (test=AllocMemH(memory,sizeof(DosListEntry)+strlen(name)+1))
+				if (test=L_AllocMemH(memory,sizeof(DosListEntry)+strlen(name)+1))
 				{
 					// Store name
 					test->dle_Node.ln_Name=(char *)(test+1);
@@ -2141,7 +2131,7 @@ BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG fla
 	/***************************************************************/
 
 	// Allocate message list if needed
-	if (flags&DLGF_NOTIFY) msg_list=Att_NewList(0);
+	if (flags&DLGF_NOTIFY) msg_list=L_Att_NewList(0);
 
 	// Go through DOS list
 	for (found=(DosListEntry *)list->mlh_Head;
@@ -2172,13 +2162,13 @@ BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG fla
 							lsprintf(name,"%s:",found->dle_Node.ln_Name+5);
 
 							// Send notification
-							if (msg_list) Att_NewNode(msg_list,name,(ULONG)-1,ADDNODE_EXCLUSIVE);
+							if (msg_list) L_Att_NewNode(msg_list,name,(ULONG)-1,ADDNODE_EXCLUSIVE);
 						}
 					}
 
 					// Removed; send notification
 					else
-					if (msg_list) Att_NewNode(msg_list,name,(ULONG)-2,ADDNODE_EXCLUSIVE);
+					if (msg_list) L_Att_NewNode(msg_list,name,(ULONG)-2,ADDNODE_EXCLUSIVE);
 				}
 
 				// Find device entry for this volume
@@ -2189,7 +2179,7 @@ BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG fla
 					// Send notification
 					if (msg_list)
 					{
-						if (node = Att_NewNode(msg_list,
+						if (node = L_Att_NewNode(msg_list,
 							               found->dle_DeviceName,
 							               (found->dle_Node.ln_Pri==DL_ADDED)?1:0,
 								       ADDNODE_DISKCHANGENODE|ADDNODE_EXCLUSIVE))
@@ -2215,7 +2205,7 @@ BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG fla
 					lsprintf(name,"%s:",found->dle_Node.ln_Name);
 
 					// Send notification based on name
-					if (msg_list) Att_NewNode(msg_list,name,(found->dle_Node.ln_Pri==DL_ADDED)?1:0,ADDNODE_EXCLUSIVE);
+					if (msg_list) L_Att_NewNode(msg_list,name,(found->dle_Node.ln_Pri==DL_ADDED)?1:0,ADDNODE_EXCLUSIVE);
 				}
 			}
 		}
@@ -2225,7 +2215,7 @@ BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG fla
 		{
 			// Remove from list and free it
 			Remove((struct Node *)found);
-			FreeMemH(found);
+			L_FreeMemH(found);
 		}
 	}
 
@@ -2240,15 +2230,15 @@ BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG fla
 			node=(Att_Node *)node->node.ln_Succ)
 		{
 			// Send notify message
-			SendNotifyMsg(GN_DISKCHANGE,0,node->att_data,FALSE,node->node.ln_Name,0);
+			L_SendNotifyMsg(GN_DISKCHANGE,0,node->att_data,FALSE,node->node.ln_Name,0);
 		}
 
 		// Free list
-		Att_RemList(msg_list,0);
+		L_Att_RemList(msg_list,0);
 	}
 
 	// Release our semaphore lock
-	FreeSemaphore(&data->dos_lock);
+	L_FreeSemaphore(&data->dos_lock);
 	return 1;
 }
 
@@ -2371,8 +2361,7 @@ BOOL doslist_check_double(struct LibData *data,struct List *list,char *name)
 // Get a user copy of the dos list
 void __asm __saveds L_GetDosListCopy(
 	register __a0 struct List *list,
-	register __a1 APTR memory,
-	register __a6 struct Library *GalileoFMBase)
+	register __a1 APTR memory)
 {
 	DosListEntry *entry;
 
@@ -2384,7 +2373,7 @@ void __asm __saveds L_GetDosListCopy(
 		return;
 
 	// Lock the dos list copy
-	GetSemaphore(&gfmlib_data.dos_lock,SEMF_EXCLUSIVE,0);
+	L_GetSemaphore(&gfmlib_data.dos_lock,SEMF_EXCLUSIVE,0);
 
 	// Go through the list
 	for (entry=(DosListEntry *)gfmlib_data.dos_list.mlh_Head;
@@ -2400,7 +2389,7 @@ void __asm __saveds L_GetDosListCopy(
 			length=strlen(name);
 
 		// Create a new entry
-		if (new=AllocMemH(memory,sizeof(DosListEntry)+length+1))
+		if (new=L_AllocMemH(memory,sizeof(DosListEntry)+length+1))
 		{
 			// Set name
 			if (name)
@@ -2419,14 +2408,13 @@ void __asm __saveds L_GetDosListCopy(
 	}
 
 	// Release list lock
-	FreeSemaphore(&gfmlib_data.dos_lock);
+	L_FreeSemaphore(&gfmlib_data.dos_lock);
 }
 
 
 // Free a user copy of the dos list
 void __asm __saveds L_FreeDosListCopy(
-	register __a0 struct List *list,
-	register __a6 struct Library *GalileoFMBase)
+	register __a0 struct List *list)
 {
 	// Free copy
 	doslist_free(&gfmlib_data,(struct MinList *)list);

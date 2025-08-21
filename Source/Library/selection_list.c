@@ -173,8 +173,7 @@ short __asm __saveds L_SelectionList(
 	register __d3 char *okay_txt,
 	register __d4 char *cancel_txt,
 	register __a4 char **switch_txt,
-	register __a5 ULONG *switch_flags,
-	register __a6 struct Library *GalileoFMBase)
+	register __a5 ULONG *switch_flags)
 {
 	ConfigWindow dims,mindims;
 	NewConfigWindow newwin;
@@ -310,10 +309,10 @@ short __asm __saveds L_SelectionList(
 	objects[GAD_SELECTION_CANCEL].gadget_text=(ULONG)cancel_txt;
 
 	// Open requester
-	if (!(window=L_OpenConfigWindow(&newwin,GalileoFMBase)) ||
-		!(objlist=L_AddObjectList(window,objects,GalileoFMBase)))
+	if (!(window=L_OpenConfigWindow(&newwin)) ||
+		!(objlist=L_AddObjectList(window,objects)))
 	{
-		L_CloseConfigWindow(window,GalileoFMBase);
+		L_CloseConfigWindow(window);
 		FreeVec(objects);
 		return -1;
 	}
@@ -416,7 +415,7 @@ short __asm __saveds L_SelectionList(
 						if (flags&SLF_RETURN_PATH)
 						{
 							// See if path has changed
-							if (stricmp(buffer,(char *)L_GetGadgetValue(objlist,GAD_SELECTION_DIR_FIELD,GalileoFMBase))!=0)
+							if (stricmp(buffer,(char *)L_GetGadgetValue(objlist,GAD_SELECTION_DIR_FIELD))!=0)
 							{
 								okay=1;
 								break_flag=1;
@@ -501,7 +500,7 @@ short __asm __saveds L_SelectionList(
 	if (flags&SLF_DIR_FIELD)
 	{
 		// Get buffer value
-		if (buffer) strcpy(buffer,(char *)L_GetGadgetValue(objlist,GAD_SELECTION_DIR_FIELD,GalileoFMBase));
+		if (buffer) strcpy(buffer,(char *)L_GetGadgetValue(objlist,GAD_SELECTION_DIR_FIELD));
 	}
 
 	// Kill AppWindow
@@ -520,7 +519,7 @@ short __asm __saveds L_SelectionList(
 		short num;
 		*switch_flags=0;
 		for (num=0;num<switch_count;num++)
-			if (L_GetGadgetValue(objlist,GAD_SELECTION_SWITCH_BASE+num,GalileoFMBase))
+			if (L_GetGadgetValue(objlist,GAD_SELECTION_SWITCH_BASE+num))
 				(*switch_flags)|=1<<num;
 	}
 
@@ -536,7 +535,7 @@ short __asm __saveds L_SelectionList(
 	}
 
 	// Close window
-	L_CloseConfigWindow(window,GalileoFMBase);
+	L_CloseConfigWindow(window);
 
 	return (short)((okay)?selection:-2);
 }

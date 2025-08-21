@@ -87,7 +87,7 @@ DragInfo *__asm __saveds L_GetDragInfo(
 	if (flags&DRAGF_CUSTOM)
 	{
 		// Check we can do it
-		if (window && L_DragCustomOk(window->WScreen->RastPort.BitMap,libbase))
+		if (window && L_DragCustomOk(window->WScreen->RastPort.BitMap))
 		{
 			// Set flag
 			drag->flags|=DRAGF_CUSTOM;
@@ -1088,8 +1088,7 @@ void __asm __saveds L_RemoveDragImage(register __a0 DragInfo *drag)
 
 // See if custom dragging is OK
 BOOL __asm __saveds L_DragCustomOk(
-	register __a0 struct BitMap *bm,
-	register __a6 struct Library *GalileoFMBase)
+	register __a0 struct BitMap *bm)
 {
 	BOOL ok=0;
 

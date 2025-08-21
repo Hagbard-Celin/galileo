@@ -46,8 +46,7 @@ For more information on Directory Opus for Windows please see:
  ****************************************************************************/
 
 struct Window *__asm __saveds L_OpenConfigWindow(
-	register __a0 NewConfigWindow *newwindow,
-	register __a6 struct Library *GalileoFMBase)
+	register __a0 NewConfigWindow *newwindow)
 {
 	struct IBox dims;
 	struct Window *parent_window=0,*window;
@@ -177,12 +176,11 @@ struct Window *__asm __saveds L_OpenConfigWindow(
 				!(flags&(WINDOW_SIZE_RIGHT|WINDOW_SIZE_BOTTOM)),
 				0,
 				IM_ICONIFY,
-				GAD_ID_ICONIFY,
-				GalileoFMBase);
+				GAD_ID_ICONIFY);
 	}
 
 	// Get backfill hook
-	if (data->backfill=L_LockReqBackFill(screen,GalileoFMBase))
+	if (data->backfill=L_LockReqBackFill(screen))
 	{
 		// Don't need to stipple?
 		if (((PatternInstance *)data->backfill)->pattern &&
@@ -224,7 +222,7 @@ struct Window *__asm __saveds L_OpenConfigWindow(
 	{
 		// Release backfill hook
 		if (data->backfill)
-			L_UnlockReqBackFill(GalileoFMBase);
+			L_UnlockReqBackFill();
 
 		// Free draw info
 		FreeScreenDrawInfo(screen,data->drawinfo);
@@ -318,8 +316,7 @@ struct Window *__asm __saveds L_OpenConfigWindow(
  ****************************************************************************/
 
 void __asm __saveds L_CloseConfigWindow(
-	register __a0 struct Window *window,
-	register __a6 struct MyLibrary *libbase)
+	register __a0 struct Window *window)
 {
 	// Check valid window
 	if (window)
@@ -349,7 +346,7 @@ void __asm __saveds L_CloseConfigWindow(
 
 		// Release backfill hook
 		if (wdata->backfill)
-			L_UnlockReqBackFill(libbase);
+			L_UnlockReqBackFill();
 
 		// Free draw info
 		FreeScreenDrawInfo(screen,wdata->drawinfo);
@@ -875,8 +872,7 @@ __asm __saveds L_CalcWindowDims(
 
 ObjectList *__asm __saveds L_AddObjectList(
 	register __a0 struct Window *window,
-	register __a1 ObjectDef *objects,
-	register __a6 struct Library *GalileoFMBase)
+	register __a1 ObjectDef *objects)
 {
 	ObjectList *list;
 	GL_Object *new_object=0,*last_object=0;

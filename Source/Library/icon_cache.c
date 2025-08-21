@@ -52,8 +52,7 @@ For more information on Directory Opus for Windows please see:
 #define TESTGP
 
 struct DiskObject *__asm __saveds L_GetCachedDefDiskObject(
-	register __d0 long type,
-	register __a6 struct Library *GalileoFMBase)
+	register __d0 long type)
 {
 	char *name=0;
 	struct DiskObject *icon=NULL;
@@ -113,7 +112,7 @@ struct DiskObject *__asm __saveds L_GetCachedDefDiskObject(
 	{
 
 		// Valid name?
-		if (name && (icon=L_GetCachedDiskObject(name,flags,GalileoFMBase)))
+		if (name && (icon=L_GetCachedDiskObject(name,flags)))
 			return icon;
 
 	
@@ -130,8 +129,7 @@ struct DiskObject *__asm __saveds L_GetCachedDefDiskObject(
 
 
 void __asm __saveds L_FreeCachedDiskObject(
-	register __a0 struct DiskObject *icon,
-	register __a6 struct Library *GalileoFMBase)
+	register __a0 struct DiskObject *icon)
 {
 	// Valid icon?
 	if (!icon) return;
@@ -147,7 +145,7 @@ void __asm __saveds L_FreeCachedDiskObject(
 			Image_Data *find;
 
 			// Lock image list
-			L_GetSemaphore(&image_lock,SEMF_EXCLUSIVE,0, GalileoFMBase);
+			L_GetSemaphore(&image_lock,SEMF_EXCLUSIVE,0);
 
 			// Check image is in list
 			for (find=(Image_Data *)image_list.lh_Head;
@@ -168,7 +166,7 @@ void __asm __saveds L_FreeCachedDiskObject(
 
 						// Free original icon
 						if (image->ilbm)
-							L_FreeDiskObjectCopy((struct DiskObject *)image->ilbm,GalileoFMBase);
+							L_FreeDiskObjectCopy((struct DiskObject *)image->ilbm);
 
 						// Free entry
 						free_image(image);
@@ -178,19 +176,18 @@ void __asm __saveds L_FreeCachedDiskObject(
 			}
 
 			// Unlock image list
-			L_FreeSemaphore(&image_lock, GalileoFMBase);
+			L_FreeSemaphore(&image_lock);
 		}
 	}
 
 	// Free as an icon copy
-	L_FreeDiskObjectCopy(icon,GalileoFMBase);
+	L_FreeDiskObjectCopy(icon);
 }
 
 
 struct DiskObject *__asm __saveds L_GetCachedDiskObject(
 	register __a0 char *name,
-	register __d0 ULONG flags,
-	register __a6 struct Library *GalileoFMBase)
+	register __d0 ULONG flags)
 {
 	Image_Data *image;
 	struct DiskObject *icon=0,*reticon;
@@ -274,7 +271,7 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObject(
 	checksum[1]=L_IconCheckSum(icon,1);
 
 	// Lock image list
-	L_GetSemaphore(&image_lock,SEMF_EXCLUSIVE,0, GalileoFMBase);
+	L_GetSemaphore(&image_lock,SEMF_EXCLUSIVE,0);
 
 	// Go through image list
 	for (image=(Image_Data *)image_list.lh_Head;
@@ -300,11 +297,11 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObject(
 
 		// Add entry to image list
 		if (!(image=new_image(im->Width,im->Height,im->Depth)) ||
-			!(image->ilbm=(ILBMHandle *)L_CopyDiskObject(icon,0,GalileoFMBase)))
+			!(image->ilbm=(ILBMHandle *)L_CopyDiskObject(icon,0)))
 		{
 			// Failed
 			free_image(image);
-			L_FreeSemaphore(&image_lock, GalileoFMBase);
+			L_FreeSemaphore(&image_lock);
 
 			return icon;
 		}
@@ -321,7 +318,7 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObject(
 	}
 
 	// Get a copy of this icon
-	if (reticon=(struct DiskObject *)L_CopyDiskObject(icon,DOCF_NOIMAGE|DOCF_COPYALL,GalileoFMBase))
+	if (reticon=(struct DiskObject *)L_CopyDiskObject(icon,DOCF_NOIMAGE|DOCF_COPYALL))
 	{
 		// Increment image count
 		++image->count;
@@ -351,7 +348,7 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObject(
 	}
 
 	// Unlock image list
-	L_FreeSemaphore(&image_lock, GalileoFMBase);
+	L_FreeSemaphore(&image_lock);
 
 	return icon;
 }
@@ -359,8 +356,7 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObject(
 
 struct DiskObject *__asm __saveds L_GetCachedDiskObjectNew(
 	register __a0 char *name,
-	register __d0 ULONG flags,
-	register __a6 struct Library *GalileoFMBase)
+	register __d0 ULONG flags)
 {
 	struct DiskObject *icon;
 	BPTR lock,file;
@@ -368,7 +364,7 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObjectNew(
 	long type=WBPROJECT,val=0;
 
 	// Try for real icon
-	if (flags&GCDOFN_REAL_ICON && (icon=L_GetCachedDiskObject(name,0,GalileoFMBase)))
+	if (flags&GCDOFN_REAL_ICON && (icon=L_GetCachedDiskObject(name,0)))
 		return icon;
 
 	// Lock object
@@ -407,7 +403,7 @@ struct DiskObject *__asm __saveds L_GetCachedDiskObjectNew(
 	if (stricmp(FilePart(name),"Disk")==0) type=WBDISK;
 
 	// Get default icon
-	return L_GetCachedDefDiskObject(type,GalileoFMBase);
+	return L_GetCachedDefDiskObject(type);
 }
 
 
@@ -594,8 +590,7 @@ struct DiskObject *__asm __saveds L_GetOriginalIcon(register __a0 struct DiskObj
 // Set NewIcons flags
 void __asm __saveds L_SetNewIconsFlags(
 	register __d0 ULONG flags,
-	register __d1 short precision,
-	register __a6 struct Library *GalileoFMBase)
+	register __d1 short precision)
 {
 
 	// Set flags

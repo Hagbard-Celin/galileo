@@ -208,8 +208,7 @@ void __asm __saveds L_FreeMatchHandle(register __a0 MatchHandle *handle)
 // See if a file matches a particular type
 BOOL __asm __saveds L_MatchFiletype(
 	register __a0 MatchHandle *handle,
-	register __a1 Cfg_Filetype *type,
-	register __a6 struct Library *GalileoFMBase)
+	register __a1 Cfg_Filetype *type)
 {
 	unsigned long recog_pos;
 	short buffer_pos=0;
@@ -1125,7 +1124,7 @@ void AddFiletypeCache(MatchHandle *handle,Cfg_Filetype *type,ULONG result,struct
 		return;
 
 	// Lock cache list
-	L_GetSemaphore(&data->filetype_cache.lock,TRUE,0, getreg(REG_A6));
+	L_GetSemaphore(&data->filetype_cache.lock,TRUE,0);
 
 	// See if it's already in the cache
 	if (!(cache=(FileTypeCache *)L_FindNameI(&data->filetype_cache.list,handle->fullname)))
@@ -1189,7 +1188,7 @@ void AddFiletypeCache(MatchHandle *handle,Cfg_Filetype *type,ULONG result,struct
 	}
 
 	// Unlock list
-	L_FreeSemaphore(&data->filetype_cache.lock, getreg(REG_A6));
+	L_FreeSemaphore(&data->filetype_cache.lock);
 }
 
 
@@ -1204,7 +1203,7 @@ ULONG FindFiletypeCache(MatchHandle *handle,Cfg_Filetype *type,struct LibData *d
 		return result;
 
 	// Lock cache list
-	L_GetSemaphore(&data->filetype_cache.lock,FALSE,0, getreg(REG_A6));
+	L_GetSemaphore(&data->filetype_cache.lock,FALSE,0);
 
 	// See if it's in the cache
 	if (cache=(FileTypeCache *)L_FindNameI(&data->filetype_cache.list,handle->fullname))
@@ -1227,7 +1226,7 @@ ULONG FindFiletypeCache(MatchHandle *handle,Cfg_Filetype *type,struct LibData *d
 	}
 
 	// Unlock list
-	L_FreeSemaphore(&data->filetype_cache.lock, getreg(REG_A6));
+	L_FreeSemaphore(&data->filetype_cache.lock);
 
 	return result;
 }
@@ -1288,18 +1287,18 @@ void FreeFiletypeCache(struct LibData *data,FileTypeCache *one)
 
 
 // Free all cached entries
-void __asm __saveds L_ClearFiletypeCache(register __a6 struct Library *GalileoFMBase)
+void __asm __saveds L_ClearFiletypeCache(void)
 {
 	// Cache disabled?
 	if (!(gfmlib_data.flags&LIBDF_FT_CACHE))
 		return;
 
 	// Lock cache list
-	L_GetSemaphore(&gfmlib_data.filetype_cache.lock,TRUE,0, GalileoFMBase);
+	L_GetSemaphore(&gfmlib_data.filetype_cache.lock,TRUE,0);
 
 	// Clear the cache
 	FreeFiletypeCache(&gfmlib_data,0);
 
 	// Unlock list
-	L_FreeSemaphore(&gfmlib_data.filetype_cache.lock, GalileoFMBase);
+	L_FreeSemaphore(&gfmlib_data.filetype_cache.lock);
 }

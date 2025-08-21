@@ -266,8 +266,7 @@ BOOL __asm __saveds L_DateFromStrings(
 void __asm __saveds L_DateToStrings(register __a0 struct DateStamp *date,
 				    register __a1 char *date_buf,
 				    register __a2 char *time_buf,
-				    register __d0 int flags,
- 				    register __a6 struct Library *GalileoFMBase)
+				    register __d0 int flags)
 {
 	struct DateTime datetime;
 
@@ -323,7 +322,7 @@ void __asm __saveds L_DateToStrings(register __a0 struct DateStamp *date,
 
 
 // Get locale flags from the library
-UWORD __asm __saveds L_GetLocaleSettings(register __d0 UBYTE type, register __a6 struct Library *GalileoFMBase)
+UWORD __asm __saveds L_GetLocaleSettings(register __d0 UBYTE type)
 {
     // Get flags or dateformat
     if (!type)
@@ -335,8 +334,7 @@ UWORD __asm __saveds L_GetLocaleSettings(register __d0 UBYTE type, register __a6
 
 // Set locale flags in the library
 void __asm __saveds L_SetLocaleFlags(register __d0 UWORD flags,
-				     register __d1 UWORD dateformat,
-				     register __a6 struct Library *GalileoFMBase)
+				     register __d1 UWORD dateformat)
 {
 	// Set flags and dateformat
 	gfmlib_data.date_format = dateformat;

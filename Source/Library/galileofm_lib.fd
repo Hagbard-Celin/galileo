@@ -229,7 +229,7 @@ StrConcat(s1,s2,len)(a0/a1,d0)
 *
 WB_LaunchArg(wbarg,screen,wait,proc,notify,flags)(a0/a1,d0,a2/a3,d1)
 *
-CopyLocalEnv(a0)(a0)
+CopyLocalEnv()()
 *
 CLI_Launch(name,screen,cd,in,out,wait,stack,command_dir)(a0/a1,d0/d1/d2/d3/d4/d5)
 *

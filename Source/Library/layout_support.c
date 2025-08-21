@@ -143,15 +143,14 @@ void __asm __saveds L_StoreGadgetValue(
 		return;
 
 	// Update value
-	L_UpdateGadgetValue(list,msg,((struct Gadget *)msg->IAddress)->GadgetID,libbase);
+	L_UpdateGadgetValue(list,msg,((struct Gadget *)msg->IAddress)->GadgetID);
 }
 
 
 void __asm __saveds L_UpdateGadgetValue(
 	register __a0 ObjectList *list,
 	register __a1 struct IntuiMessage *msg,
-	register __d0 UWORD id,
-	register __a6 struct Library *GalileoFMBase)
+	register __d0 UWORD id)
 {
 	GL_Object *object;
 	struct Gadget *gadget;
@@ -459,7 +458,7 @@ void __asm __saveds L_UpdateGadgetList(
 			if (object->type==OD_GADGET)
 			{
 				// Update it
-				L_UpdateGadgetValue(list,0,object->id,libbase);
+				L_UpdateGadgetValue(list,0,object->id);
 			}
 
 			// Get next
@@ -755,8 +754,7 @@ void __asm __saveds L_SetGadgetValue(
 
 long __asm __saveds L_GetGadgetValue(
 	register __a0 ObjectList *list,
-	register __a1 UWORD id,
-	register __a6 struct Library *GalileoFMBase)
+	register __a1 UWORD id)
 {
 	GL_Object *object;
 

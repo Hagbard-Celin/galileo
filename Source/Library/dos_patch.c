@@ -42,14 +42,14 @@ For more information on Directory Opus for Windows please see:
 /********************************** CreateDir **********************************/
 
 // Patched CreateDir()    
-BPTR __asm __saveds L_PatchedCreateDir(register __d1 char *name, register __a6 struct Library *GalileoFMBase)
+BPTR __asm __saveds L_PatchedCreateDir(register __d1 char *name)
 {
 	struct FileInfoBlock *fib;
 	BPTR lock;
 
 	// Call original function
 	lock=((BPTR (* __asm)
-			(register __d1 char *,register __a6 struct Library *))
+			(register __d1 char *,register __a6 struct DosLibrary *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_CREATEDIR])
 			(name,DOSBase);
 
@@ -60,7 +60,7 @@ BPTR __asm __saveds L_PatchedCreateDir(register __d1 char *name, register __a6 s
 	if (fib=dospatch_fib(lock,1))
 	{
 		// Send notification
-		L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_CREATEDIR,0,(char *)(fib+1),fib,GalileoFMBase);
+		L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_CREATEDIR,0,(char *)(fib+1),fib);
 
 		// Free info block
 		FreeVec(fib);
@@ -71,8 +71,7 @@ BPTR __asm __saveds L_PatchedCreateDir(register __d1 char *name, register __a6 s
 
 // Calls original CreateDir directly
 BPTR __asm __saveds L_OriginalCreateDir(
-	register __d1 char *name,
-	register __a6 struct Library *GalileoFMBase)
+	register __d1 char *name)
 {
 	// If patch wasn't installed, call DOS directly
 	if (!(gfmlib_data.flags&LIBDF_DOS_PATCH))
@@ -81,7 +80,7 @@ BPTR __asm __saveds L_OriginalCreateDir(
 	// Create directory
 	return
 		((BPTR (* __asm)
-			(register __d1 char *,register __a6 struct Library *))
+			(register __d1 char *,register __a6 struct DosLibrary *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_CREATEDIR])
 			(name,DOSBase);
 }
@@ -89,7 +88,7 @@ BPTR __asm __saveds L_OriginalCreateDir(
 /********************************** DeleteFile **********************************/
 
 // Patched DeleteFile()
-long __asm __saveds L_PatchedDeleteFile(register __d1 char *name, register __a6 struct Library *GalileoFMBase)
+long __asm __saveds L_PatchedDeleteFile(register __d1 char *name)
 {
 	char *buf=0;
 	BPTR lock;
@@ -125,7 +124,7 @@ long __asm __saveds L_PatchedDeleteFile(register __d1 char *name, register __a6 
 
 	// Call original function
 	res=((long (* __asm)
-			(register __d1 char *,register __a6 struct Library *))
+			(register __d1 char *,register __a6 struct DosLibrary *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_DELETEFILE])
 			(name,DOSBase);
 
@@ -136,12 +135,12 @@ long __asm __saveds L_PatchedDeleteFile(register __d1 char *name, register __a6 
 	if (buf && *buf)
 	{
 		// Send notification
-		L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_DELETEFILE,0,buf,0,GalileoFMBase);
+		L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_DELETEFILE,0,buf,0);
 	}
 
 	// Free buffer
 	if (buf)
-	    FreeMemH(buf);
+	    L_FreeMemH(buf);
 
 	return res;
 }
@@ -149,8 +148,7 @@ long __asm __saveds L_PatchedDeleteFile(register __d1 char *name, register __a6 
 
 // Original DeleteFile
 long __asm __saveds L_OriginalDeleteFile(
-	register __d1 char *name,
-	register __a6 struct Library *GalileoFMBase)
+	register __d1 char *name)
 {
 	// If patch wasn't installed, call DOS directly
 	if (!(gfmlib_data.flags&LIBDF_DOS_PATCH))
@@ -159,7 +157,7 @@ long __asm __saveds L_OriginalDeleteFile(
 	// Delete file
 	return
 		((BPTR (* __asm)
-			(register __d1 char *,register __a6 struct Library *))
+			(register __d1 char *,register __a6 struct DosLibrary *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_DELETEFILE])
 			(name,DOSBase);
 }
@@ -170,8 +168,7 @@ long __asm __saveds L_OriginalDeleteFile(
 // Patched SetFileDate()
 BOOL __asm __saveds L_PatchedSetFileDate(
 	register __d1 char *name,
-	register __d2 struct DateStamp *date,
-	register __a6 struct Library *GalileoFMBase)
+	register __d2 struct DateStamp *date)
 {
 	BOOL res;
 	BPTR lock;
@@ -180,7 +177,7 @@ BOOL __asm __saveds L_PatchedSetFileDate(
 
 	// Call original function
 	res=((BOOL (* __asm)
-			(register __d1 char *,register __d2 struct DateStamp *,register __a6 struct Library *))
+			(register __d1 char *,register __d2 struct DateStamp *,register __a6 struct DosLibrary *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_SETFILEDATE])
 			(name,date,DOSBase);
 
@@ -209,7 +206,7 @@ BOOL __asm __saveds L_PatchedSetFileDate(
 		if (fib=dospatch_fib(lock,0))
 		{
 			// Send notification
-			L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_SETFILEDATE,0,(char *)(fib+1),fib,GalileoFMBase);
+			L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_SETFILEDATE,0,(char *)(fib+1),fib);
 
 			// Free info block
 			FreeVec(fib);
@@ -229,8 +226,7 @@ BOOL __asm __saveds L_PatchedSetFileDate(
 // Calls original SetFileDate directly
 BOOL __asm __saveds L_OriginalSetFileDate(
 	register __d1 char *name,
-	register __d2 struct DateStamp *date,
-	register __a6 struct Library *GalileoFMBase)
+	register __d2 struct DateStamp *date)
 {
 	// If patch wasn't installed, call DOS directly
 	if (!(gfmlib_data.flags&LIBDF_DOS_PATCH))
@@ -239,7 +235,7 @@ BOOL __asm __saveds L_OriginalSetFileDate(
 	// Set date
 	return
 		((BOOL (* __asm)
-			(register __d1 char *,register __d2 struct DateStamp *,register __a6 struct Library *))
+			(register __d1 char *,register __d2 struct DateStamp *,register __a6 struct DosLibrary *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_SETFILEDATE])
 			(name,date,DOSBase);
 }
@@ -250,8 +246,7 @@ BOOL __asm __saveds L_OriginalSetFileDate(
 // Patched SetComment()
 BOOL __asm __saveds L_PatchedSetComment(
 	register __d1 char *name,
-	register __d2 char *comment,
-	register __a6 struct Library *GalileoFMBase)
+	register __d2 char *comment)
 {
 	BOOL res;
 	BPTR lock;
@@ -260,7 +255,7 @@ BOOL __asm __saveds L_PatchedSetComment(
 
 	// Call original function
 	res=((BOOL (* __asm)
-			(register __d1 char *,register __d2 char *,register __a6 struct Library *))
+			(register __d1 char *,register __d2 char *,register __a6 struct DosLibrary *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_SETCOMMENT])
 			(name,comment,DOSBase);
 
@@ -289,7 +284,7 @@ BOOL __asm __saveds L_PatchedSetComment(
 		if (fib=dospatch_fib(lock,0))
 		{
 			// Send notification
-			L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_SETCOMMENT,0,(char *)(fib+1),fib,GalileoFMBase);
+			L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_SETCOMMENT,0,(char *)(fib+1),fib);
 
 			// Free info block
 			FreeVec(fib);
@@ -309,8 +304,7 @@ BOOL __asm __saveds L_PatchedSetComment(
 // Calls original SetComment directly
 BOOL __asm __saveds L_OriginalSetComment(
 	register __d1 char *name,
-	register __d2 char *comment,
-	register __a6 struct Library *GalileoFMBase)
+	register __d2 char *comment)
 {
 	// If patch wasn't installed, call DOS directly
 	if (!(gfmlib_data.flags&LIBDF_DOS_PATCH))
@@ -319,7 +313,7 @@ BOOL __asm __saveds L_OriginalSetComment(
 	// Set comment
 	return
 		((BOOL (* __asm)
-			(register __d1 char *,register __d2 char *,register __a6 struct Library *))
+			(register __d1 char *,register __d2 char *,register __a6 struct DosLibrary *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_SETCOMMENT])
 			(name,comment,DOSBase);
 }
@@ -330,8 +324,7 @@ BOOL __asm __saveds L_OriginalSetComment(
 // Patched SetProtection()
 BOOL __asm __saveds L_PatchedSetProtection(
 	register __d1 char *name,
-	register __d2 ULONG mask,
-	register __a6 struct Library *GalileoFMBase)
+	register __d2 ULONG mask)
 {
 	BOOL res;
 	BPTR lock;
@@ -340,7 +333,7 @@ BOOL __asm __saveds L_PatchedSetProtection(
 
 	// Call original function
 	res=((BOOL (* __asm)
-			(register __d1 char *,register __d2 ULONG,register __a6 struct Library *))
+			(register __d1 char *,register __d2 ULONG,register __a6 struct DosLibrary *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_SETPROTECTION])
 			(name,mask,DOSBase);
 
@@ -369,7 +362,7 @@ BOOL __asm __saveds L_PatchedSetProtection(
 		if (fib=dospatch_fib(lock,0))
 		{
 			// Send notification
-			L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_SETPROTECTION,0,(char *)(fib+1),fib,GalileoFMBase);
+			L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_SETPROTECTION,0,(char *)(fib+1),fib);
 
 			// Free info block
 			FreeVec(fib);
@@ -388,8 +381,7 @@ BOOL __asm __saveds L_PatchedSetProtection(
 // Calls original SetProtection directly
 BOOL __asm __saveds L_OriginalSetProtection(
 	register __d1 char *name,
-	register __d2 ULONG mask,
-	register __a6 struct Library *GalileoFMBase)
+	register __d2 ULONG mask)
 {
 	// If patch wasn't installed, call DOS directly
 	if (!(gfmlib_data.flags&LIBDF_DOS_PATCH))
@@ -398,7 +390,7 @@ BOOL __asm __saveds L_OriginalSetProtection(
 	// Set protection
 	return
 		((BOOL (* __asm)
-			(register __d1 char *,register __d2 ULONG,register __a6 struct Library *))
+			(register __d1 char *,register __d2 ULONG,register __a6 struct DosLibrary *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_SETPROTECTION])
 			(name,mask,DOSBase);
 }
@@ -409,8 +401,7 @@ BOOL __asm __saveds L_OriginalSetProtection(
 // Patched Rename()
 BOOL __asm __saveds L_PatchedRename(
 	register __d1 char *oldname,
-	register __d2 char *newname,
-	register __a6 struct Library *GalileoFMBase)
+	register __d2 char *newname)
 {
 	struct FileInfoBlock *fib=0;
 	BOOL res;
@@ -449,7 +440,7 @@ BOOL __asm __saveds L_PatchedRename(
 
 	// Call original function
 	res=((BOOL (* __asm)
-			(register __d1 char *,register __d2 char *,register __a6 struct Library *))
+			(register __d1 char *,register __d2 char *,register __a6 struct DosLibrary *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_RENAME])
 			(oldname,newname,DOSBase);
 
@@ -481,7 +472,7 @@ BOOL __asm __saveds L_PatchedRename(
 		strcpy(fib->fib_FileName,old_name);
 
 		// Send notification
-		L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_RENAME,0,(char *)(fib+1),fib,GalileoFMBase);
+		L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_RENAME,0,(char *)(fib+1),fib);
 	}
 
 	// Free info block and lock
@@ -497,8 +488,7 @@ BOOL __asm __saveds L_PatchedRename(
 // Calls original Rename directly
 BOOL __asm __saveds L_OriginalRename(
 	register __d1 char *oldname,
-	register __d2 char *newname,
-	register __a6 struct Library *GalileoFMBase)
+	register __d2 char *newname)
 {
 	// If patch wasn't installed, call DOS directly
 	if (!(gfmlib_data.flags&LIBDF_DOS_PATCH))
@@ -507,7 +497,7 @@ BOOL __asm __saveds L_OriginalRename(
 	// Rename file
 	return
 		((BOOL (* __asm)
-			(register __d1 char *,register __d2 char *,register __a6 struct Library *))
+			(register __d1 char *,register __d2 char *,register __a6 struct DosLibrary *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_RENAME])
 			(oldname,newname,DOSBase);
 }
@@ -518,15 +508,14 @@ BOOL __asm __saveds L_OriginalRename(
 // Patched Relabel()
 BOOL __asm __saveds L_PatchedRelabel(
 	register __d1 char *volumename,
-	register __d2 char *name,
-	register __a6 struct Library *GalileoFMBase)
+	register __d2 char *name)
 {
 	struct FileInfoBlock fib;
 	BOOL res;
 
 	// Call original function
 	res=((BOOL (* __asm)
-			(register __d1 char *,register __d2 char *,register __a6 struct Library *))
+			(register __d1 char *,register __d2 char *,register __a6 struct DosLibrary *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_RELABEL])
 			(volumename,name,DOSBase);
 
@@ -537,7 +526,7 @@ BOOL __asm __saveds L_PatchedRelabel(
 	strcpy(fib.fib_FileName,name);
 
 	// Send notification
-	L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_RELABEL,0,volumename,&fib,GalileoFMBase);
+	L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_RELABEL,0,volumename,&fib);
 	return res;
 }
 
@@ -545,13 +534,12 @@ BOOL __asm __saveds L_PatchedRelabel(
 // Calls original Relabel directly
 BOOL __asm __saveds L_OriginalRelabel(
 	register __d1 char *volumename,
-	register __d2 char *name,
-	register __a6 struct Library *GalileoFMBase)
+	register __d2 char *name)
 {
 	// Relabel disk
 	return
 		((BOOL (* __asm)
-			(register __d1 char *,register __d2 char *,register __a6 struct Library *))
+			(register __d1 char *,register __d2 char *,register __a6 struct DosLibrary *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_RELABEL])
 			(volumename,name,DOSBase);
 }
@@ -562,8 +550,7 @@ BOOL __asm __saveds L_OriginalRelabel(
 // Patched Open()
 BPTR __asm __saveds L_PatchedOpen(
 	register __d1 char *name,
-	register __d2 LONG accessMode,
-	register __a6 struct Library *GalileoFMBase)
+	register __d2 LONG accessMode)
 {
 	BPTR file,lock;
 	BOOL create=0;
@@ -605,7 +592,7 @@ BPTR __asm __saveds L_PatchedOpen(
 
 	// Call original function
 	file=((BPTR (* __asm)
-			(register __d1 char *,register __d2 LONG,register __a6 struct Library *))
+			(register __d1 char *,register __d2 LONG,register __a6 struct DosLibrary *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_OPEN])
 			(name,accessMode,DOSBase);
 
@@ -671,7 +658,7 @@ BPTR __asm __saveds L_PatchedOpen(
 				if (ExamineFH(file,fib))
 				{
 					// Send notification
-					L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_CREATE,0,path,fib,GalileoFMBase);
+					L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_CREATE,0,path,fib);
 				}
 
 				// Free fib
@@ -694,8 +681,7 @@ BPTR __asm __saveds L_PatchedOpen(
 // Calls original Open directly
 BPTR __asm __saveds L_OriginalOpen(
 	register __d1 char *name,
-	register __d2 LONG accessMode,
-	register __a6 struct Library *GalileoFMBase)
+	register __d2 LONG accessMode)
 {
 	// If patch wasn't installed, call DOS directly
 	if (!(gfmlib_data.flags&LIBDF_DOS_PATCH))
@@ -704,7 +690,7 @@ BPTR __asm __saveds L_OriginalOpen(
 	// Open file
 	return
 		((BPTR (* __asm)
-			(register __d1 char *,register __d2 LONG,register __a6 struct Library *))
+			(register __d1 char *,register __d2 LONG,register __a6 struct DosLibrary *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_OPEN])
 			(name,accessMode,DOSBase);
 }
@@ -713,7 +699,7 @@ BPTR __asm __saveds L_OriginalOpen(
 /********************************** Close **********************************/
 
 // Patched Close()
-BOOL __asm __saveds L_PatchedClose(register __d1 BPTR file, register __a6 struct Library *GalileoFMBase)
+BOOL __asm __saveds L_PatchedClose(register __d1 BPTR file)
 {
 	// Get library
 	if (!file) return 0;
@@ -779,7 +765,7 @@ BOOL __asm __saveds L_PatchedClose(register __d1 BPTR file, register __a6 struct
 					if (ExamineFH(file,fib))
 					{
 						// Send notification
-						L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_CLOSE,0,path,fib,GalileoFMBase);
+						L_SendNotifyMsg(GN_DOS_ACTION,0,GNF_DOS_CLOSE,0,path,fib);
 					}
 
 					// Free fib
@@ -806,7 +792,7 @@ BOOL __asm __saveds L_PatchedClose(register __d1 BPTR file, register __a6 struct
 	// Close file
 	return
 		((BOOL (* __asm)
-			(register __d1 BPTR,register __a6 struct Library *))
+			(register __d1 BPTR,register __a6 struct DosLibrary *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_CLOSE])
 			(file,DOSBase);
 }
@@ -814,8 +800,7 @@ BOOL __asm __saveds L_PatchedClose(register __d1 BPTR file, register __a6 struct
 
 // Calls original Close directly
 BOOL __asm __saveds L_OriginalClose(
-	register __d1 BPTR file,
-	register __a6 struct Library *GalileoFMBase)
+	register __d1 BPTR file)
 {
 	// If patch wasn't installed, call DOS directly
 	if (!(gfmlib_data.flags&LIBDF_DOS_PATCH))
@@ -824,7 +809,7 @@ BOOL __asm __saveds L_OriginalClose(
 	// Close file
 	return
 		((BOOL (* __asm)
-			(register __d1 BPTR,register __a6 struct Library *))
+			(register __d1 BPTR,register __a6 struct DosLibrary *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_CLOSE])
 			(file,DOSBase);
 }
@@ -836,8 +821,7 @@ BOOL __asm __saveds L_OriginalClose(
 LONG __asm __saveds L_PatchedWrite(
 	register __d1 BPTR file,
 	register __d2 void *wdata,
-	register __d3 LONG length,
-	register __a6 struct Library *GalileoFMBase)
+	register __d3 LONG length)
 {
 	struct FileHandleWrapper *handle;
 
@@ -864,7 +848,7 @@ LONG __asm __saveds L_PatchedWrite(
 	// Write data
 	return
 		((LONG (* __asm)
-			(register __d1 BPTR,register __d2 void *,register __d3 LONG,register __a6 struct Library *))
+			(register __d1 BPTR,register __d2 void *,register __d3 LONG,register __a6 struct DosLibrary *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_WRITE])
 			(file,wdata,length,DOSBase);
 }
@@ -874,8 +858,7 @@ LONG __asm __saveds L_PatchedWrite(
 LONG __asm __saveds L_OriginalWrite(
 	register __d1 BPTR file,
 	register __d2 void *wdata,
-	register __d3 LONG length,
-	register __a6 struct Library *GalileoFMBase)
+	register __d3 LONG length)
 {
 	// If patch wasn't installed, call DOS directly
 	if (!(gfmlib_data.flags&LIBDF_DOS_PATCH))
@@ -884,7 +867,7 @@ LONG __asm __saveds L_OriginalWrite(
 	// Write data
 	return
 		((LONG (* __asm)
-			(register __d1 BPTR,register __d2 void *,register __d3 LONG,register __a6 struct Library *))
+			(register __d1 BPTR,register __d2 void *,register __d3 LONG,register __a6 struct DosLibrary *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_WRITE])
 			(file,wdata,length,DOSBase);
 }

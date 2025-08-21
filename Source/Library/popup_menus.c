@@ -48,8 +48,7 @@ UWORD __asm __saveds L_DoPopUpMenu(
 	register __a0 struct Window *window,
 	register __a1 PopUpMenu *menu,
 	register __a2 PopUpItem **sel_item,
-	register __d0 UWORD code,
-	register __a6 struct Library *GalileoFMBase)
+	register __d0 UWORD code)
 {
 	PopUpData *data;
 	PopUpItem *item;
@@ -1808,7 +1807,7 @@ void __saveds __asm L_GetPopUpImageSize(
 }
 
 
-void __asm __saveds L_SetPopUpDelay(register __d0 short delay,register __a6 struct Library *GalileoFMBase)
+void __asm __saveds L_SetPopUpDelay(register __d0 short delay)
 {
 	gfmlib_data.popup_delay=delay;
 }

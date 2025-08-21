@@ -114,11 +114,9 @@ struct AppWindow *__asm L_WB_AddAppWindowTr(
 	register __d1 ULONG userdata,
 	register __a0 struct Window *window,
 	register __a1 struct MsgPort *port,
-	register __a2 struct TagItem *tags,
-	register __a6 struct Library *GalileoFMBase);
+	register __a2 struct TagItem *tags);
 BOOL __asm L_WB_RemoveAppWindowTr(
-	register __a0 struct AppWindow *window,
-	register __a6 struct Library *GalileoFMBase);
+	register __a0 struct AppWindow *window);
 struct AppIcon *__asm L_WB_AddAppIconTr(
 	register __d0 ULONG id,
 	register __d1 ULONG userdata,
@@ -126,100 +124,79 @@ struct AppIcon *__asm L_WB_AddAppIconTr(
 	register __a1 struct MsgPort *port,
 	register __a2 BPTR lock,
 	register __a3 struct DiskObject *object,
-	register __a4 struct TagItem *tags,
-	register __a6 struct Library *GalileoFMBase);
+	register __a4 struct TagItem *tags);
 BOOL __asm L_WB_RemoveAppIconTr(
-	register __a0 struct AppIcon *icon,
-	register __a6 struct Library *GalileoFMBase);
+	register __a0 struct AppIcon *icon);
 struct AppMenuItem *__asm L_WB_AddAppMenuItemTr(
 	register __d0 ULONG id,
 	register __d1 ULONG userdata,
 	register __a0 char *text,
 	register __a1 struct MsgPort *port,
-	register __a2 struct TagItem *tags,
-	register __a6 struct Library *GalileoFMBase);
+	register __a2 struct TagItem *tags);
 BOOL __asm L_WB_RemoveAppMenuItemTr(
-	register __a0 struct AppMenuItem *item,
-	register __a6 struct Library *GalileoFMBase);
-LONG __asm L_WB_CloseWorkBenchTr(register __a6 struct Library *GalileoFMBase);
-ULONG __asm L_WB_OpenWorkBenchTr(register __a6 struct Library *GalileoFMBase);
+	register __a0 struct AppMenuItem *item);
+LONG __asm L_WB_CloseWorkBenchTr(void);
+ULONG __asm L_WB_OpenWorkBenchTr(void);
 
 BOOL __asm L_WB_PutDiskObjectTr(
 	register __a0 char *name,
 	register __a1 struct DiskObject *diskobj);
-BOOL __asm L_WB_DeleteDiskObjectTr(register __a0 char *name,
-	register __a6 struct Library *GalileoFMBase);
+BOOL __asm L_WB_DeleteDiskObjectTr(register __a0 char *name);
 
-void __asm L_WB_AddPortTr(register __a1 struct MsgPort *port,
-	register __a6 struct Library *GalileoFMBase);
+void __asm L_WB_AddPortTr(register __a1 struct MsgPort *port);
 
-void __asm L_WB_CloseWindowTr(register __a0 struct Window *window,
-	register __a6 struct Library *GalileoFMBase);
+void __asm L_WB_CloseWindowTr(register __a0 struct Window *window);
 
-BPTR __asm L_PatchedCreateDirTr(register __d1 char *name,
-	register __a6 struct Library *GalileoFMBase);
-long __asm L_PatchedDeleteFileTr(register __d1 char *name,
-	register __a6 struct Library *GalileoFMBase);
+BPTR __asm L_PatchedCreateDirTr(register __d1 char *name);
+long __asm L_PatchedDeleteFileTr(register __d1 char *name);
 BOOL __asm L_PatchedSetFileDateTr(
 	register __d1 char *name,
-	register __d2 struct DateStamp *date,
-	register __a6 struct Library *GalileoFMBase);
+	register __d2 struct DateStamp *date);
 BOOL __asm L_PatchedSetCommentTr(
 	register __d1 char *name,
-	register __d2 char *comment,
-	register __a6 struct Library *GalileoFMBase);
+	register __d2 char *comment);
 BOOL __asm L_PatchedSetProtectionTr(
 	register __d1 char *name,
-	register __d2 ULONG mask,
-	register __a6 struct Library *GalileoFMBase);
+	register __d2 ULONG mask);
 BOOL __asm L_PatchedRenameTr(
 	register __d1 char *oldname,
-	register __d2 char *newname,
-	register __a6 struct Library *GalileoFMBase);
+	register __d2 char *newname);
 BPTR __asm L_PatchedOpenTr(
 	register __d1 char *name,
 	register __d2 LONG accessMode);
-BOOL __asm L_PatchedCloseTr(register __d1 BPTR file,
-	register __a6 struct Library *GalileoFMBase);
+BOOL __asm L_PatchedCloseTr(register __d1 BPTR file);
 LONG __asm L_PatchedWriteTr(
 	register __d1 BPTR file,
 	register __d2 void *data,
-	register __d3 LONG length,
-	register __a6 struct Library *GalileoFMBase);
+	register __d3 LONG length);
 BOOL __asm L_PatchedRelabelTr(
 	register __d1 char *volumename,
-	register __d2 char *name,
-	register __a6 struct Library *GalileoFMBase);
+	register __d2 char *name);
 
 ULONG __asm L_PatchedWBInfoTr(
 	register __a0 BPTR lock,
 	register __a1 char *name,
-	register __a2 struct Screen *screen,
-	register __a6 struct Library *GalileoFMBase);
+	register __a2 struct Screen *screen);
 
-APTR __asm L_PatchedAddTaskTr(register __a1 struct Task *task,register __a2 APTR initialPC,register __a3 APTR finalPC,
-	register __a6 struct Library *GalileoFMBase);
-void __asm L_PatchedRemTaskTr(register __a1 struct Task *task,
-	register __a6 struct Library *GalileoFMBase);
-struct Task *__asm L_PatchedFindTaskTr(register __a1 char *name,
-	register __a6 struct Library *GalileoFMBase);
-struct Window *__asm L_PatchedOpenWindowTagsTr(register __a0 struct NewWindow *,register __a1 struct TagItem *,
-	register __a6 struct Library *GalileoFMBase);
+APTR __asm L_PatchedAddTaskTr(register __a1 struct Task *task,register __a2 APTR initialPC,register __a3 APTR finalPC);
+void __asm L_PatchedRemTaskTr(register __a1 struct Task *task);
+struct Task *__asm L_PatchedFindTaskTr(register __a1 char *name);
+struct Window *__asm L_PatchedOpenWindowTagsTr(register __a0 struct NewWindow *,register __a1 struct TagItem *);
 
 
 
 // wb.c
-void __asm WB_Install_Patch(void);
-BOOL __asm WB_Remove_Patch(void);
+void __asm L_WB_Install_Patch(void);
+BOOL __asm L_WB_Remove_Patch(void);
 struct AppWindow *__asm WB_AddAppWindow(
 	register __d0 ULONG id,
 	register __d1 ULONG userdata,
 	register __a0 struct Window *window,
 	register __a1 struct MsgPort *port,
 	register __a2 struct TagItem *tags);
-BOOL __asm WB_RemoveAppWindow(
+BOOL __asm L_WB_RemoveAppWindow(
 	register __a0 struct AppWindow *window);
-struct AppIcon *__asm WB_AddAppIcon(
+struct AppIcon *__asm L_WB_AddAppIcon(
 	register __d0 ULONG id,
 	register __d1 ULONG userdata,
 	register __a0 char *text,
@@ -227,15 +204,15 @@ struct AppIcon *__asm WB_AddAppIcon(
 	register __a2 BPTR lock,
 	register __a3 struct DiskObject *object,
 	register __a4 struct TagItem *tags);
-BOOL __asm WB_RemoveAppIcon(
+BOOL __asm L_WB_RemoveAppIcon(
 	register __a0 struct AppIcon *icon);
-struct AppMenuItem *__asm WB_AddAppMenuItem(
+struct AppMenuItem *__asm L_WB_AddAppMenuItem(
 	register __d0 ULONG id,
 	register __d1 ULONG userdata,
 	register __a0 char *text,
 	register __a1 struct MsgPort *port,
 	register __a2 struct TagItem *tags);
-BOOL __asm WB_RemoveAppMenuItem(
+BOOL __asm L_WB_RemoveAppMenuItem(
 	register __a0 struct AppMenuItem *item);
 
 struct AppWindow __asm *WB_FindAppWindow(
@@ -244,16 +221,16 @@ struct MsgPort *__asm WB_AppWindowData(
 	register __a0 struct AppWindow *window,
 	register __a1 ULONG *id,
 	register __a2 ULONG *userdata);
-BOOL __asm WB_AppWindowLocal(
+BOOL __asm L_WB_AppWindowLocal(
 	register __a0 struct AppWindow *window);
-BOOL __asm WB_AppIconSnapshot(
+BOOL __asm L_WB_AppIconSnapshot(
 	register __a0 struct AppIcon *icon);
 
-APTR __asm LockAppList(void);
-APTR __asm NextAppEntry(
+APTR __asm L_LockAppList(void);
+APTR __asm L_NextAppEntry(
 	register __a0 APTR last,
 	register __d0 ULONG type);
-void __asm UnlockAppList(void);
+void __asm L_UnlockAppList(void);
 
 AppEntry *new_app_entry(
 	ULONG type,
@@ -270,10 +247,10 @@ APTR rem_app_entry(
 void free_app_entry(AppEntry *entry,WB_Data *);
 AppEntry *find_app_entry(AppEntry *entry,WB_Data *wb_data);
 
-LONG __asm WB_CloseWorkBench(void);
-ULONG __asm WB_OpenWorkBench(void);
+LONG __asm L_WB_CloseWorkBench(void);
+ULONG __asm L_WB_OpenWorkBench(void);
 
-BOOL __asm WB_PutDiskObject(
+BOOL __asm L_WB_PutDiskObject(
 	register __a0 char *name,
 	register __a1 struct DiskObject *diskobj);
 
@@ -287,29 +264,29 @@ typedef struct
     APTR		    doc_Data;
 } DiskObjectCopy;
 
-struct DiskObject *__asm CopyDiskObject(
+struct DiskObject *__asm L_CopyDiskObject(
 	register __a0 struct DiskObject *icon,
 	register __d0 ULONG flags);
 
-void __asm FreeDiskObjectCopy(
+void __asm L_FreeDiskObjectCopy(
 	register __a0 struct DiskObject *icon);
 
-BOOL __asm WB_DeleteDiskObject(register __a0 char *name);
+BOOL __asm L_WB_DeleteDiskObject(register __a0 char *name);
 
-void __asm ChangeAppIcon(
+void __asm L_ChangeAppIcon(
 	register __a0 APTR appicon,
 	register __a1 struct Image *render,
 	register __a2 struct Image *select,
 	register __a3 char *title,
 	register __d0 ULONG flags);
 
-long __asm SetAppIconMenuState(
+long __asm L_SetAppIconMenuState(
 	register __a0 APTR appicon,
 	register __d0 long item,
 	register __d1 long state);
-void __asm WB_AddPort(register __a1 struct MsgPort *port);
+void __asm L_WB_AddPort(register __a1 struct MsgPort *port);
 
-void __asm WB_CloseWindow(register __a0 struct Window *window);
+void __asm L_WB_CloseWindow(register __a0 struct Window *window);
 
 void icon_notify(struct LibData *data,char *name,ULONG flags,short);
 
@@ -317,17 +294,17 @@ void icon_notify(struct LibData *data,char *name,ULONG flags,short);
 
 struct Library *wb_get_patchbase(short type);
 
-ULONG __asm PatchedWBInfo(
+ULONG __asm L_PatchedWBInfo(
 	register __a0 BPTR lock,
 	register __a1 char *name,
 	register __a2 struct Screen *screen);
 
-APTR __asm PatchedAddTask(register __a1 struct Task *task,register __a2 APTR initialPC,register __a3 APTR finalPC);
-void __asm PatchedRemTask(register __a1 struct Task *task);
-struct Task *__asm PatchedFindTask(register __a1 char *name);
-struct Window *__asm PatchedOpenWindowTags(register __a0 struct NewWindow *,register __a1 struct TagItem *);
+APTR __asm L_PatchedAddTask(register __a1 struct Task *task,register __a2 APTR initialPC,register __a3 APTR finalPC);
+void __asm L_PatchedRemTask(register __a1 struct Task *task);
+struct Task *__asm L_PatchedFindTask(register __a1 char *name);
+struct Window *__asm L_PatchedOpenWindowTags(register __a0 struct NewWindow *,register __a1 struct TagItem *);
 
-struct BitMap *__asm PatchedAllocBitmap(
+struct BitMap *__asm L_PatchedAllocBitmap(
 	register __d0 ULONG,
 	register __d1 ULONG,
 	register __d2 ULONG,

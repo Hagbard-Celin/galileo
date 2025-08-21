@@ -39,7 +39,8 @@ For more information on Directory Opus for Windows please see:
 #include "progress.h"
 #include "/Program/pattern.h"
 
-void __saveds progress_task(void);
+void __asm progress_task(void);
+void __asm progress_taskTr(void);
 void progress_open(ProgressWindow *);
 void progress_close(ProgressWindow *);
 void progress_draw(ProgressWindow *,unsigned long);
@@ -89,10 +90,9 @@ ProgressWindow *__asm __saveds L_OpenProgressWindow(
 	L_IPC_Launch(
 		0,&prog->pw_IPC,
 		prog->pw_TaskName,
-		(ULONG)progress_task,
+		(ULONG)progress_taskTr,
 		STACK_DEFAULT,
-		(ULONG)prog,
-		lib);
+		(ULONG)prog);
 
 	// Failed?
 	if (!prog->pw_IPC)
@@ -209,7 +209,7 @@ BOOL __asm __saveds L_CheckProgressAbort(
 #define GalileoFMBase	(prog->pw_Lib)
 
 // Progress window task
-void __saveds progress_task(void)
+void __asm __saveds progress_task(void)
 {
 	IPCData *ipc;
 	ProgressWindow *prog;
@@ -602,7 +602,7 @@ void progress_open(ProgressWindow *prog)
 	}
 
 	// Get backfill hook
-	prog->pw_Backfill=L_LockReqBackFill(screen,prog->pw_Lib);
+	prog->pw_Backfill=L_LockReqBackFill(screen);
 
 	// Open window
 	prog->pw_Window=OpenWindowTags(0,
@@ -628,7 +628,7 @@ void progress_open(ProgressWindow *prog)
 		// Unlock backfill
 		if (prog->pw_Backfill)
 		{
-			L_UnlockReqBackFill(prog->pw_Lib);
+			L_UnlockReqBackFill();
 			prog->pw_Backfill=0;
 			return;
 		}
@@ -718,7 +718,7 @@ void progress_close(ProgressWindow *prog)
 		if (prog->pw_Backfill)
 		{
 			// Unlock hook
-			L_UnlockReqBackFill(prog->pw_Lib);
+			L_UnlockReqBackFill();
 			prog->pw_Backfill=0;
 		}
 

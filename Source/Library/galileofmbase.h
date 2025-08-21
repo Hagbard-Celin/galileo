@@ -1257,7 +1257,7 @@ BOOL GetLastPathComponent(STRPTR dest, STRPTR path);
 
 BPTR GetDosPathList(BPTR);
 void FreeDosPathList(BPTR);
-void CopyLocalEnv(struct Library *);
+void CopyLocalEnv(void);
 void UpdatePathList(void);
 void UpdateMyPaths(void);
 BPTR GetGalileoPathList(void);

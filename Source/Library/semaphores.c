@@ -58,8 +58,7 @@ typedef struct SemaphoreNode
 long __asm __saveds L_GetSemaphore(
 	register __a0 struct SignalSemaphore *sem,
 	register __d0 long exclusive,
-	register __a1 char *name,
-	register __a6 struct Library *GalileoFMBase)
+	register __a1 char *name)
 {
 #ifdef TRAP_SEMAPHORE
 	SemaphoreNode *node;
@@ -192,8 +191,7 @@ long __asm __saveds L_GetSemaphore(
 }
 
 void __asm __saveds L_FreeSemaphore(
-	register __a0 struct SignalSemaphore *sem,
-	register __a6 struct Library *GalileoFMBase)
+	register __a0 struct SignalSemaphore *sem)
 {
 #ifdef TRAP_SEMAPHORE
 	SemaphoreNode *node;
@@ -253,8 +251,7 @@ void __asm __saveds L_FreeSemaphore(
 }
 
 void __asm __saveds L_ShowSemaphore(
-	register __a0 struct SignalSemaphore *sem,
-	register __a6 struct Library *GalileoFMBase)
+	register __a0 struct SignalSemaphore *sem)
 {
 #ifdef TRAP_SEMAPHORE
 	SemaphoreNode *node;

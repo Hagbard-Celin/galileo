@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -84,11 +84,11 @@ struct Window *__asm __saveds L_OpenStatusWindow(
 	newwin.font=0;
 
 	// Open new window
-	if (!(window=L_OpenConfigWindow(&newwin,libbase)))
+	if (!(window=L_OpenConfigWindow(&newwin)))
 		return 0;
 
 	// Add objects
-	if (list=L_AddObjectList(window,_status_objects,libbase))
+	if (list=L_AddObjectList(window,_status_objects))
 	{
 		// Display text
 		if (text) L_SetGadgetValue(list,1,(ULONG)text);

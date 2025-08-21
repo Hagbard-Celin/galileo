@@ -83,10 +83,10 @@ static const PatchList
 		};
 
 // Install workbench emulation patches
-void __asm __saveds L_WB_Install_Patch(register __a6 struct Library *GalileoFMBase)
+void __asm __saveds L_WB_Install_Patch(void)
 {
 	// Lock patch information
-	L_GetSemaphore(&gfmlib_data.wb_data.patch_lock,SEMF_EXCLUSIVE,0, GalileoFMBase);
+	L_GetSemaphore(&gfmlib_data.wb_data.patch_lock,SEMF_EXCLUSIVE,0);
 
 	// Are patches not installed?
 	if (gfmlib_data.wb_data.patch_count==0)
@@ -123,19 +123,19 @@ void __asm __saveds L_WB_Install_Patch(register __a6 struct Library *GalileoFMBa
 	}
 
 	// Unlock patch information
-	L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock, GalileoFMBase);
+	L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock);
 }
 
 
 // Remove workbench patches
-BOOL __asm __saveds L_WB_Remove_Patch(register __a6 struct Library *GalileoFMBase)
+BOOL __asm __saveds L_WB_Remove_Patch(void)
 {
 	short patch;
 	BOOL fail=0;
 	APTR old_patch_val[WB_PATCH_COUNT];
 
 	// Lock patch information
-	L_GetSemaphore(&gfmlib_data.wb_data.patch_lock,SEMF_EXCLUSIVE,0, GalileoFMBase);
+	L_GetSemaphore(&gfmlib_data.wb_data.patch_lock,SEMF_EXCLUSIVE,0);
 
 	// Really remove patches?
 	if (gfmlib_data.wb_data.patch_count==1)
@@ -204,7 +204,7 @@ BOOL __asm __saveds L_WB_Remove_Patch(register __a6 struct Library *GalileoFMBas
 		--gfmlib_data.wb_data.patch_count;
 
 	// Unlock patch information
-	L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock, GalileoFMBase);
+	L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock);
 
 	return (BOOL)(!fail);
 }
@@ -216,8 +216,7 @@ struct AppWindow *__asm __saveds L_WB_AddAppWindow(
 	register __d1 ULONG userdata,
 	register __a0 struct Window *window,
 	register __a1 struct MsgPort *port,
-	register __a2 struct TagItem *tags,
-	register __a6 struct Library *GalileoFMBase)
+	register __a2 struct TagItem *tags)
 {
 	AppEntry *app_entry;
 
@@ -249,7 +248,7 @@ struct AppWindow *__asm __saveds L_WB_AddAppWindow(
 		}
 
 		// Send notification
-		L_SendNotifyMsg(GN_APP_WINDOW_LIST,(ULONG)app_entry,0,FALSE,0,0,GalileoFMBase);
+		L_SendNotifyMsg(GN_APP_WINDOW_LIST,(ULONG)app_entry,0,FALSE,0,0);
 	}
 
 	// Return object
@@ -265,8 +264,7 @@ struct AppIcon *__asm __saveds L_WB_AddAppIcon(
 	register __a1 struct MsgPort *port,
 	register __a2 BPTR lock,
 	register __a3 struct DiskObject *icon,
-	register __a4 struct TagItem *tags,
-	register __a6 struct Library *GalileoFMBase)
+	register __a4 struct TagItem *tags)
 {
 	AppEntry *app_entry=0;
 	BOOL osonly=0;
@@ -289,7 +287,7 @@ struct AppIcon *__asm __saveds L_WB_AddAppIcon(
 			userdata,
 			text,
 			port,
-			tags,GalileoFMBase);
+			tags);
 	}
 
 	// Get new AppEntry
@@ -410,7 +408,7 @@ struct AppIcon *__asm __saveds L_WB_AddAppIcon(
 
 		// Send notification
 		if (app_entry)
-			L_SendNotifyMsg(GN_APP_ICON_LIST,(ULONG)app_entry,0,FALSE,0,0,GalileoFMBase);
+			L_SendNotifyMsg(GN_APP_ICON_LIST,(ULONG)app_entry,0,FALSE,0,0);
 	}
 
 	// Return object
@@ -424,8 +422,7 @@ struct AppMenuItem *__asm __saveds L_WB_AddAppMenuItem(
 	register __d1 ULONG userdata,
 	register __a0 char *text,
 	register __a1 struct MsgPort *port,
-	register __a2 struct TagItem *tags,
-	register __a6 struct Library *GalileoFMBase)
+	register __a2 struct TagItem *tags)
 {
 	AppEntry *app_entry=0;
 	BOOL osonly=0;
@@ -477,7 +474,7 @@ struct AppMenuItem *__asm __saveds L_WB_AddAppMenuItem(
 				toolmanger=1;
 
 			// Send notify message
-			L_SendNotifyMsg(GN_APP_MENU_LIST,(ULONG)app_entry,toolmanger,FALSE,0,0,GalileoFMBase);
+			L_SendNotifyMsg(GN_APP_MENU_LIST,(ULONG)app_entry,toolmanger,FALSE,0,0);
 		}
 	}
 
@@ -488,8 +485,7 @@ struct AppMenuItem *__asm __saveds L_WB_AddAppMenuItem(
 
 // RemoveAppWindow()
 BOOL __asm __saveds L_WB_RemoveAppWindow(
-	register __a0 struct AppWindow *window,
-	register __a6 struct Library *GalileoFMBase)
+	register __a0 struct AppWindow *window)
 {
 	AppEntry *entry;
 	APTR os_object;
@@ -511,15 +507,14 @@ BOOL __asm __saveds L_WB_RemoveAppWindow(
 	}
 
 	// Send notification
-	L_SendNotifyMsg(GN_APP_WINDOW_LIST,(ULONG)window,GNF_WINDOW_REMOVED,FALSE,0,0,GalileoFMBase);
+	L_SendNotifyMsg(GN_APP_WINDOW_LIST,(ULONG)window,GNF_WINDOW_REMOVED,FALSE,0,0);
 	return 1;
 }
 
 
 // RemoveAppIcon()
 BOOL __asm __saveds L_WB_RemoveAppIcon(
-	register __a0 struct AppIcon *icon,
-	register __a6 struct Library *GalileoFMBase)
+	register __a0 struct AppIcon *icon)
 {
 	AppEntry *entry;
 	APTR os_object;
@@ -535,19 +530,19 @@ BOOL __asm __saveds L_WB_RemoveAppIcon(
 		if (entry->ae_type==APP_MENU)
 		{
 			// Unlock list
-			L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock, GalileoFMBase);
+			L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock);
 
 			// Remove as menu item
-			return L_WB_RemoveAppMenuItem((struct AppMenuItem *)icon,GalileoFMBase);
+			return L_WB_RemoveAppMenuItem((struct AppMenuItem *)icon);
 		}
 
 		// Send notification
-		L_SendNotifyMsg(GN_APP_ICON_LIST,(ULONG)entry,GNF_ICON_REMOVED,FALSE,0,0,GalileoFMBase);
+		L_SendNotifyMsg(GN_APP_ICON_LIST,(ULONG)entry,GNF_ICON_REMOVED,FALSE,0,0);
 
 //*********************************************************************TRUE ???
 
 		// Unlock list
-		L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock, GalileoFMBase);
+		L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock);
 
 	}
 
@@ -567,8 +562,7 @@ BOOL __asm __saveds L_WB_RemoveAppIcon(
 
 // RemoveAppMenuItem()
 BOOL __asm __saveds L_WB_RemoveAppMenuItem(
-	register __a0 struct AppMenuItem *item,
-	register __a6 struct Library *GalileoFMBase)
+	register __a0 struct AppMenuItem *item)
 {
 	AppEntry *entry;
 	APTR os_object;
@@ -592,7 +586,7 @@ BOOL __asm __saveds L_WB_RemoveAppMenuItem(
 
 	// Send notification
 	if (os_object!=(APTR)entry)
-		L_SendNotifyMsg(GN_APP_MENU_LIST,(ULONG)entry,1,!local,0,0,GalileoFMBase);
+		L_SendNotifyMsg(GN_APP_MENU_LIST,(ULONG)entry,1,!local,0,0);
 
 	return 1;
 }
@@ -600,13 +594,12 @@ BOOL __asm __saveds L_WB_RemoveAppMenuItem(
 
 // Find AppWindow
 struct AppWindow __asm __saveds *L_WB_FindAppWindow(
-	register __a0 struct Window *window,
-	register __a6 struct Library *GalileoFMBase)
+	register __a0 struct Window *window)
 {
 	AppEntry *app_entry,*app_window=0;
 
 	// Lock list
-	L_GetSemaphore(&gfmlib_data.wb_data.patch_lock,SEMF_SHARED,0, GalileoFMBase);
+	L_GetSemaphore(&gfmlib_data.wb_data.patch_lock,SEMF_SHARED,0);
 
 	// Go through app objects
 	for (app_entry=(AppEntry *)gfmlib_data.wb_data.app_list.mlh_Head;
@@ -627,7 +620,7 @@ struct AppWindow __asm __saveds *L_WB_FindAppWindow(
 	}
 
 	// Unlock list
-	L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock, GalileoFMBase);
+	L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock);
 	return (struct AppWindow *)app_window;
 }
 
@@ -636,8 +629,7 @@ struct AppWindow __asm __saveds *L_WB_FindAppWindow(
 struct MsgPort *__asm __saveds L_WB_AppWindowData(
 	register __a0 struct AppWindow *window,
 	register __a1 ULONG *id,
-	register __a2 ULONG *userdata,
-	register __a6 struct Library *GalileoFMBase)
+	register __a2 ULONG *userdata)
 {
 	AppEntry *entry;
 
@@ -654,8 +646,7 @@ struct MsgPort *__asm __saveds L_WB_AppWindowData(
 
 // Is an AppWindow "local"?
 BOOL __asm __saveds L_WB_AppWindowLocal(
-	register __a0 struct AppWindow *window,
-	register __a6 struct Library *GalileoFMBase)
+	register __a0 struct AppWindow *window)
 {
 	return (BOOL)((((AppEntry *)window)->ae_flags&APPENTF_LOCAL)?1:0);
 }
@@ -663,8 +654,7 @@ BOOL __asm __saveds L_WB_AppWindowLocal(
 
 // Get AppWindow window pointer
 struct Window *__asm __saveds L_WB_AppWindowWindow(
-	register __a0 struct AppWindow *window,
-	register __a6 struct Library *GalileoFMBase)
+	register __a0 struct AppWindow *window)
 {
 	return (struct Window *)(((AppEntry *)window)->ae_object);
 }
@@ -672,8 +662,7 @@ struct Window *__asm __saveds L_WB_AppWindowWindow(
 
 // Get AppIcon flags
 unsigned long __asm __saveds L_WB_AppIconFlags(
-	register __a0 struct AppIcon *icon,
-	register __a6 struct Library *GalileoFMBase)
+	register __a0 struct AppIcon *icon)
 {
 	return ((AppEntry *)icon)->ae_flags;
 }
@@ -710,7 +699,7 @@ AppEntry *new_app_entry(
 		struct DiskObject *icon_copy;
 
 		// Copy icon
-		if (icon_copy=L_CopyDiskObject((struct DiskObject *)object,0, getreg(REG_A6)))
+		if (icon_copy=L_CopyDiskObject((struct DiskObject *)object,0))
 		{
 			// Use copy
 			entry->ae_object=icon_copy;
@@ -732,7 +721,7 @@ AppEntry *new_app_entry(
 	KPrintF("!!!!!!wb.c line: %ld ADDING app_entry \n", __LINE__);
 #endif
 	// Lock patch list
-	L_GetSemaphore(&gfmlib_data.wb_data.patch_lock,SEMF_EXCLUSIVE,0, getreg(REG_A6));
+	L_GetSemaphore(&gfmlib_data.wb_data.patch_lock,SEMF_EXCLUSIVE,0);
 
 	// Is this the first entry?
 	if ((IsListEmpty((struct List *)&gfmlib_data.wb_data.app_list))&&(gfmlib_data.wb_data.first_app_entry))
@@ -762,7 +751,7 @@ AppEntry *new_app_entry(
 	AddTail((struct List *)&gfmlib_data.wb_data.app_list,(struct Node *)entry);
 
 	// Unlock list
-	L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock, getreg(REG_A6));
+	L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock);
 	return entry;
 }
 
@@ -787,7 +776,7 @@ APTR rem_app_entry(
 	if (local) *local=0;
 
 	// Lock AppEntry list
-	L_GetSemaphore(&gfmlib_data.wb_data.patch_lock,SEMF_EXCLUSIVE,0, getreg(REG_A6));
+	L_GetSemaphore(&gfmlib_data.wb_data.patch_lock,SEMF_EXCLUSIVE,0);
 
 	// Look for entry in list
 	for (app_entry=(AppEntry *)gfmlib_data.wb_data.app_list.mlh_Head;
@@ -814,7 +803,7 @@ APTR rem_app_entry(
 	}
 
 	// Unlock list
-	L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock, getreg(REG_A6));
+	L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock);
 
 	// Return pointer to OS object
 	return retval;
@@ -844,7 +833,7 @@ void free_app_entry(AppEntry *entry,WB_Data *wb_data)
 
 	// Free icon
 	if (entry->ae_flags&APPENTF_ICON_COPY)
-		L_FreeDiskObjectCopy((struct DiskObject *)entry->ae_object,getreg(REG_A6));
+		L_FreeDiskObjectCopy((struct DiskObject *)entry->ae_object);
 
 	// Free data structure
 	FreeVec(entry);
@@ -857,7 +846,7 @@ AppEntry *find_app_entry(AppEntry *entry,WB_Data *wb_data)
 	AppEntry *app_entry;
 
 	// Lock AppEntry list
-	L_GetSemaphore(&gfmlib_data.wb_data.patch_lock,SEMF_SHARED,0, getreg(REG_A6));
+	L_GetSemaphore(&gfmlib_data.wb_data.patch_lock,SEMF_SHARED,0);
 
 	// Look for entry in list
 	for (app_entry=(AppEntry *)gfmlib_data.wb_data.app_list.mlh_Head;
@@ -868,7 +857,7 @@ AppEntry *find_app_entry(AppEntry *entry,WB_Data *wb_data)
 	if (app_entry==entry) return entry;
 
 	// Unlock list
-	L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock, getreg(REG_A6));
+	L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock);
 
 	// Not found
 	return 0;
@@ -876,10 +865,10 @@ AppEntry *find_app_entry(AppEntry *entry,WB_Data *wb_data)
 
 
 // Lock the AppList
-APTR __asm __saveds L_LockAppList(register __a6 struct Library *GalileoFMBase)
+APTR __asm __saveds L_LockAppList(void)
 {
 	// Get a lock on the list
-	L_GetSemaphore(&gfmlib_data.wb_data.patch_lock,SEMF_SHARED,0, GalileoFMBase);
+	L_GetSemaphore(&gfmlib_data.wb_data.patch_lock,SEMF_SHARED,0);
 
 	// Increment lock count
 	++gfmlib_data.wb_data.lock_count;
@@ -892,8 +881,7 @@ APTR __asm __saveds L_LockAppList(register __a6 struct Library *GalileoFMBase)
 // Get the next app entry of a certain type
 APTR __asm __saveds L_NextAppEntry(
 	register __a0 APTR last,
-	register __d0 ULONG type,
-	register __a6 struct Library *GalileoFMBase)
+	register __d0 ULONG type)
 {
 	AppEntry *entry;
 
@@ -922,13 +910,13 @@ APTR __asm __saveds L_NextAppEntry(
 
 
 // Unlock the AppList
-void __asm __saveds L_UnlockAppList(register __a6 struct Library *GalileoFMBase)
+void __asm __saveds L_UnlockAppList(void)
 {
 	// Check it's locked
 	if (gfmlib_data.wb_data.lock_count>0)
 	{
 		// Unlock the list
-		L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock, GalileoFMBase);
+		L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock);
 
 		// Decrement lock count
 		--gfmlib_data.wb_data.lock_count;
@@ -937,17 +925,17 @@ void __asm __saveds L_UnlockAppList(register __a6 struct Library *GalileoFMBase)
 
 
 // Close Workbench screen
-LONG __asm __saveds L_WB_CloseWorkBench(register __a6 struct Library *GalileoFMBase)
+LONG __asm __saveds L_WB_CloseWorkBench(void)
 {
 	LONG result;
 
 	// Send notification
-	L_SendNotifyMsg(GN_CLOSE_WORKBENCH,0,0,FALSE,0,0,GalileoFMBase);
+	L_SendNotifyMsg(GN_CLOSE_WORKBENCH,0,0,FALSE,0,0);
 
 	// Close workbench screen
 	result=
 		((LONG (* __asm)
-			(register __a6 struct Library *))gfmlib_data.wb_data.old_function[WB_PATCH_CLOSEWORKBENCH])
+			(register __a6 struct IntuitionBase *))gfmlib_data.wb_data.old_function[WB_PATCH_CLOSEWORKBENCH])
 			(IntuitionBase);
 
 	return result;
@@ -955,17 +943,17 @@ LONG __asm __saveds L_WB_CloseWorkBench(register __a6 struct Library *GalileoFMB
 
 
 // Open Workbench screen
-ULONG __asm __saveds L_WB_OpenWorkBench(register __a6 struct Library *GalileoFMBase)
+ULONG __asm __saveds L_WB_OpenWorkBench(void)
 {
 	ULONG result;
 
 	// Send notification
-	L_SendNotifyMsg(GN_OPEN_WORKBENCH,0,0,FALSE,0,0,GalileoFMBase);
+	L_SendNotifyMsg(GN_OPEN_WORKBENCH,0,0,FALSE,0,0);
 
 	// Open workbench screen
 	result=
 		((ULONG (* __asm)
-			(register __a6 struct Library *))gfmlib_data.wb_data.old_function[WB_PATCH_OPENWORKBENCH])
+			(register __a6 struct IntuitionBase *))gfmlib_data.wb_data.old_function[WB_PATCH_OPENWORKBENCH])
 			(IntuitionBase);
 
 	return result;
@@ -978,13 +966,12 @@ void __asm __saveds L_ChangeAppIcon(
 	register __a1 struct Image *render,
 	register __a2 struct Image *select,
 	register __a3 char *title,
-	register __d0 ULONG flags,
-	register __a6 struct Library *GalileoFMBase)
+	register __d0 ULONG flags)
 {
 	AppEntry *app_entry;
 
 	// Lock AppEntry list
-	L_GetSemaphore(&gfmlib_data.wb_data.patch_lock,SEMF_SHARED,0, GalileoFMBase);
+	L_GetSemaphore(&gfmlib_data.wb_data.patch_lock,SEMF_SHARED,0);
 
 	// Look for entry in list
 	for (app_entry=(AppEntry *)gfmlib_data.wb_data.app_list.mlh_Head;
@@ -1040,12 +1027,12 @@ void __asm __saveds L_ChangeAppIcon(
 			if (flags&CAIF_UNBUSY) app_entry->ae_flags&=~APPENTF_BUSY;
 
 			// Send notification
-			L_SendNotifyMsg(GN_APP_ICON_LIST,(ULONG)app_entry,notify_flags,FALSE,0,0,GalileoFMBase);
+			L_SendNotifyMsg(GN_APP_ICON_LIST,(ULONG)app_entry,notify_flags,FALSE,0,0);
 		}
 	}
 
 	// Unlock list
-	L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock, GalileoFMBase);
+	L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock);
 }
 
 
@@ -1082,8 +1069,7 @@ long __asm __saveds L_SetAppIconMenuState(
 // Copy a DiskObject
 struct DiskObject *__asm __saveds L_CopyDiskObject(
 	register __a0 struct DiskObject *icon,
-	register __d0 ULONG flags,
-	register __a6 struct Library *GalileoFMBase)
+	register __d0 ULONG flags)
 {
 	DiskObjectCopy *copy;
 	long planesize;
@@ -1241,8 +1227,7 @@ struct DiskObject *__asm __saveds L_CopyDiskObject(
 
 // Free a DiskObject copy
 void __asm __saveds L_FreeDiskObjectCopy(
-	register __a0 struct DiskObject *icon,
-	register __a6 struct Library *GalileoFMBase)
+	register __a0 struct DiskObject *icon)
 {
 	short type;
 
@@ -1309,7 +1294,7 @@ void __asm __saveds L_FreeDiskObjectCopy(
 
 
 // AddPort patch
-void __asm __saveds L_WB_AddPort(register __a1 struct MsgPort *port, register __a6 struct Library *GalileoFMBase)
+void __asm __saveds L_WB_AddPort(register __a1 struct MsgPort *port)
 {
 	// Invalid port?
 	if (!port) return;
@@ -1319,18 +1304,18 @@ void __asm __saveds L_WB_AddPort(register __a1 struct MsgPort *port, register __
 		strcmp(port->mp_Node.ln_Name,"REXX")==0)
 	{
 		// Send notification
-		L_SendNotifyMsg(GN_REXX_UP,0,0,0,0,0,GalileoFMBase);
+		L_SendNotifyMsg(GN_REXX_UP,0,0,0,0,0);
 	}
 
 	// Pass through
 	((void (* __asm)
 		(register __a1 struct MsgPort *,register __a6 struct ExecBase *))gfmlib_data.wb_data.old_function[WB_PATCH_ADDPORT])
-		(port,(struct Library *)*((ULONG *)4));
+		(port,(struct ExecBase *)*((ULONG *)4));
 }
 
 
 // CloseWindow patch
-void __asm __saveds L_WB_CloseWindow(register __a0 struct Window *window, register __a6 struct Library *GalileoFMBase)
+void __asm __saveds L_WB_CloseWindow(register __a0 struct Window *window)
 {
 	struct PubScreenNode *node;
 	struct Task *sigtask=0;
@@ -1340,7 +1325,7 @@ void __asm __saveds L_WB_CloseWindow(register __a0 struct Window *window, regist
 	if (!window) return;
 
 	// See if the screen is public
-	if (node=FindPubScreen(window->WScreen,0))
+	if (node=L_FindPubScreen(window->WScreen,0))
 	{
 		// Is it the Galileo screen?
 		if (strncmp(node->psn_Node.ln_Name,"GALILEO.",8)==0)
@@ -1353,7 +1338,7 @@ void __asm __saveds L_WB_CloseWindow(register __a0 struct Window *window, regist
 
 	// Close window
 	((void (* __asm)
-		(register __a0 struct Window *,register __a6 struct Library *))gfmlib_data.wb_data.old_function[WB_PATCH_CLOSEWINDOW])
+		(register __a0 struct Window *,register __a6 struct IntuitionBase *))gfmlib_data.wb_data.old_function[WB_PATCH_CLOSEWINDOW])
 		(window,IntuitionBase);
 
 	// Task to signal?
@@ -1416,8 +1401,7 @@ struct Library *wb_get_patchbase(short type)
 ULONG __asm __saveds L_PatchedWBInfo(
 	register __a0 BPTR lock,
 	register __a1 char *name,
-	register __a2 struct Screen *screen,
-	register __a6 struct Library *GalileoFMBase)
+	register __a2 struct Screen *screen)
 {
 	struct GalileoSemaphore *sem;
 	IPCData *main_ipc=0;
@@ -1473,7 +1457,7 @@ ULONG __asm __saveds L_PatchedWBInfo(
 
 
 // Patched AddTask (for statistics)
-APTR __asm __saveds L_PatchedAddTask(register __a1 struct Task *task,register __a2 APTR initialPC,register __a3 APTR finalPC, register __a6 struct Library *GalileoFMBase)
+APTR __asm __saveds L_PatchedAddTask(register __a1 struct Task *task,register __a2 APTR initialPC,register __a3 APTR finalPC)
 {
 	// Increment task count
 	++gfmlib_data.task_count;
@@ -1486,7 +1470,7 @@ APTR __asm __saveds L_PatchedAddTask(register __a1 struct Task *task,register __
 }
 
 // Patched RemTask (for statistics)
-void __asm __saveds L_PatchedRemTask(register __a1 struct Task *task, register __a6 struct Library *GalileoFMBase)
+void __asm __saveds L_PatchedRemTask(register __a1 struct Task *task)
 {
 	// Decrement task count
 	--gfmlib_data.task_count;
@@ -1500,7 +1484,7 @@ void __asm __saveds L_PatchedRemTask(register __a1 struct Task *task, register _
 
 
 // Patched FindTask
-struct Task *__asm __saveds L_PatchedFindTask(register __a1 char *name, register __a6 struct Library *GalileoFMBase)
+struct Task *__asm __saveds L_PatchedFindTask(register __a1 char *name)
 {
 	struct Task *task;
 
@@ -1528,7 +1512,7 @@ struct Task *__asm __saveds L_PatchedFindTask(register __a1 char *name, register
 
 
 // OpenWindowTags patch
-struct Window *__asm __saveds L_PatchedOpenWindowTags(register __a0 struct NewWindow *newwin,register __a1 struct TagItem *tags, register __a6 struct Library *GalileoFMBase)
+struct Window *__asm __saveds L_PatchedOpenWindowTags(register __a0 struct NewWindow *newwin,register __a1 struct TagItem *tags)
 {
 	// Is window being opened by the kludge task?
 	if (gfmlib_data.open_window_kludge==(struct Process *)((struct ExecBase *)*((ULONG *)4))->ThisTask)
@@ -1571,6 +1555,6 @@ struct Window *__asm __saveds L_PatchedOpenWindowTags(register __a0 struct NewWi
 
 	// Open window
 	return ((struct Window * (* __asm)
-		(register __a0 struct NewWindow *,register __a1 struct TagItem *,register __a6 struct Library *))gfmlib_data.wb_data.old_function[WB_PATCH_OPENWINDOWTAGS])
+		(register __a0 struct NewWindow *,register __a1 struct TagItem *,register __a6 struct IntuitionBase *))gfmlib_data.wb_data.old_function[WB_PATCH_OPENWINDOWTAGS])
 		(newwin,tags,IntuitionBase);
 }

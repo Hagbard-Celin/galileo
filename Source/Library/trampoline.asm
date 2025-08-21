@@ -52,5 +52,7 @@ _\1Tr:
         TRAMPOLINE propgadget_dispatch
         TRAMPOLINE launcher_proc
         TRAMPOLINE launch_exit_code
+        TRAMPOLINE progress_task
+        TRAMPOLINE requester_proc
 
         END

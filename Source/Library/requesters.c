@@ -55,7 +55,8 @@ struct RequestData
 	long return_values[10];
 };
 
-void __saveds requester_proc(void);
+void __asm requester_proc(void);
+void __asm requester_procTr(void);
 
 #define REQCMD_END	0x8752
 
@@ -90,9 +91,9 @@ long __asm __saveds L_AsyncRequest(
 		0,
 		&ipc,
 		"galileo_requester_proc",
-		(ULONG)requester_proc,
+		(ULONG)requester_procTr,
 		STACK_DEFAULT,
-		(ULONG)startup,libbase)))
+		(ULONG)startup)))
 	{
 		// Failed to launch
 		FreeVec(startup);
@@ -191,7 +192,7 @@ struct IntuiMessage *__asm __saveds L_CheckRefreshMsg(
 
 
 // Requester process
-void __saveds requester_proc(void)
+void __asm __saveds requester_proc(void)
 {
 	IPCData *ipc;
 	ReqStartup *startup=0;

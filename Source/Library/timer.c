@@ -172,7 +172,7 @@ BOOL __asm __saveds L_TimerActive(register __a0 TimerHandle *handle)
 
 
 // Get timer base
-struct Library *__asm __saveds L_GetTimerBase(register __a6 struct Library *GalileoFMBase)
+struct Library *__asm __saveds L_GetTimerBase(void)
 {
 	return gfmlib_data.TimerBase;
 }

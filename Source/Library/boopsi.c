@@ -262,8 +262,7 @@ struct Gadget *__asm __saveds L_CreateTitleGadget(
 	register __d0 BOOL cover_zoom,
 	register __d1 short offset,
 	register __d2 short type,
-	register __d3 unsigned short id,
-	register __a6 struct MyLibrary *libbase)
+	register __d3 unsigned short id)
 {
 	short width,left,height=0,top=0;
 	struct Gadget *gadget;

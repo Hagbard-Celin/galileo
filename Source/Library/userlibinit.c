@@ -84,7 +84,7 @@ void free_libdata(struct MyLibrary *libbase)
 		    if (wb_data->patch_count>0)
 		    {
 			    wb_data->patch_count=1;
-			    L_WB_Remove_Patch(libbase);
+			    L_WB_Remove_Patch();
 		    }
 	    }
 
@@ -470,7 +470,7 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 		"GALILEO_LAUNCHER",
 		(ULONG)launcher_procTr,
 		STACK_LARGE|IPCF_GETPATH,
-		(ULONG)&gfmlib_data,libbase)) || !launcher_ipc)
+		(ULONG)&gfmlib_data)) || !launcher_ipc)
 	{
 	    free_libdata(libbase);
 	    return 1;

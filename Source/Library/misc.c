@@ -197,13 +197,13 @@ BOOL __asm __saveds L_ConvertRawKey(
 
 
 // Get address of one-shot left mouse-button up/down injector
-CxObj *__asm __saveds L_GetCxSelectUpDown(register __a6 struct Library *GalileoFMBase)
+CxObj *__asm __saveds L_GetCxSelectUpDown(void)
 {
     return gfmlib_data.cx_select_up_down;
 }
 
 // Set address of one-shot left mouse-button up/down injector
-void __asm __saveds L_SetCxSelectUpDown(register __a1 CxObj * cxo,register __a6 struct Library *GalileoFMBase)
+void __asm __saveds L_SetCxSelectUpDown(register __a1 CxObj * cxo)
 {
 	gfmlib_data.cx_select_up_down = cxo;
 }
@@ -238,12 +238,12 @@ void __asm __saveds L_WriteFileIcon(
 
 	// Free buffer, get icon
 	FreeVec(buffer);
-	if (!(icon=L_GetCachedDiskObjectNew(source,1,libbase)))
+	if (!(icon=L_GetCachedDiskObjectNew(source,1)))
 		return;
 
 	// Write icon and free it
 	PutDiskObject(dest,icon);
-	L_FreeCachedDiskObject(icon,libbase);
+	L_FreeCachedDiskObject(icon);
 }
 
 
@@ -1042,8 +1042,7 @@ struct PubScreenNode *__asm __saveds L_FindPubScreen(
 // Set flags in the library
 ULONG __asm __saveds L_SetLibraryFlags(
 	register __d0 ULONG flags,
-	register __d1 ULONG mask,
-	register __a6 struct Library *GalileoFMBase)
+	register __d1 ULONG mask)
 {
 	ULONG oldflags;
 
@@ -1060,8 +1059,7 @@ ULONG __asm __saveds L_SetLibraryFlags(
 
 
 // Get flags in the library
-ULONG __asm __saveds L_GetLibraryFlags(
-	register __a6 struct Library *GalileoFMBase)
+ULONG __asm __saveds L_GetLibraryFlags(void)
 {
 	// Return flags
 	return gfmlib_data.flags;
@@ -1176,38 +1174,36 @@ void __asm __saveds L_SetEnv(
 // Set requester hook
 void __asm __saveds L_SetReqBackFill(
 	register __a0 struct Hook *hook,
-	register __a1 struct Screen **screen,
-	register __a6 struct Library *GalileoFMBase)
+	register __a1 struct Screen **screen)
 {
 	// If we already have a hook, don't install a new one
 	if (gfmlib_data.backfill && hook)
 		return;
 
 	// Lock the requester hook
-	L_GetSemaphore(&gfmlib_data.backfill_lock,SEMF_EXCLUSIVE,0, GalileoFMBase);
+	L_GetSemaphore(&gfmlib_data.backfill_lock,SEMF_EXCLUSIVE,0);
 
 	// Install new hook pointer
 	gfmlib_data.backfill=hook;
 	gfmlib_data.backfill_screen=screen;
 
 	// Unlock requester hook
-	L_FreeSemaphore(&gfmlib_data.backfill_lock, GalileoFMBase);
+	L_FreeSemaphore(&gfmlib_data.backfill_lock);
 }
 
 
 // Get requester backfill
 struct Hook *__asm __saveds L_LockReqBackFill(
-	register __a0 struct Screen *screen,
-	register __a6 struct Library *GalileoFMBase)
+	register __a0 struct Screen *screen)
 {
 	// Lock the requester hook
-	L_GetSemaphore(&gfmlib_data.backfill_lock,SEMF_SHARED,0, GalileoFMBase);
+	L_GetSemaphore(&gfmlib_data.backfill_lock,SEMF_SHARED,0);
 
 	// No hook, or different screen?
 	if (!gfmlib_data.backfill || (screen && gfmlib_data.backfill_screen && screen!=*gfmlib_data.backfill_screen))
 	{
 		// Unlock the requester hook
-		L_FreeSemaphore(&gfmlib_data.backfill_lock, GalileoFMBase);
+		L_FreeSemaphore(&gfmlib_data.backfill_lock);
 		return 0;
 	}
 
@@ -1217,11 +1213,10 @@ struct Hook *__asm __saveds L_LockReqBackFill(
 
 
 // Release requester backfill
-void __asm __saveds L_UnlockReqBackFill(
-	register __a6 struct Library *GalileoFMBase)
+void __asm __saveds L_UnlockReqBackFill(void)
 {
 	// Unlock the requester hook
-	L_FreeSemaphore(&gfmlib_data.backfill_lock, GalileoFMBase);
+	L_FreeSemaphore(&gfmlib_data.backfill_lock);
 }
 
 
@@ -1248,7 +1243,7 @@ char *strstri(char *string,char *substring)
 
 
 // Statistics
-long __asm L_GetStatistics(register __d0 long id,register __a6 struct Library *GalileoFMBase)
+long __asm __saveds L_GetStatistics(register __d0 long id)
 {
 	// Task count?
 	if (id==STATID_TASKCOUNT)

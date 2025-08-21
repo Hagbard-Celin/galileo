@@ -280,7 +280,6 @@ BPTR __saveds __asm L_LockFromPath(register __a0 CONST_STRPTR path,
 		strcpy(part_end, ".info");
 		if (!(dir = Lock(part,ACCESS_READ)))
 		    *part_end = 0;
-
 	    }
 
 	    // Try lock
@@ -370,12 +369,7 @@ STRPTR __saveds __asm L_PathFromLock(register __a0 APTR memory, register __d0 BP
 	{
 	    D_S(struct FileInfoBlock,tmp_fib);
 	    BPTR parent_lock;
-	    struct Library *GalileoFMBase;
 	    UWORD  parts_used;
-
-	    // Get library pointer
-	    if (!(GalileoFMBase=(struct Library *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"galileofm.library")))
-		return 0;
 
 	    // Init
 	    parts->truncated = 0;
@@ -393,7 +387,7 @@ STRPTR __saveds __asm L_PathFromLock(register __a0 APTR memory, register __d0 BP
 
 		if (flags&PFLF_USE_DEVICENAME)
 		{
-		    DeviceFromLock(lock,tmp_fib->fib_FileName);
+		    L_DeviceFromLock(lock,tmp_fib->fib_FileName);
 
 		    path_len = stccpy(partname, tmp_fib->fib_FileName, 108);
 		}
@@ -402,7 +396,7 @@ STRPTR __saveds __asm L_PathFromLock(register __a0 APTR memory, register __d0 BP
 		    path_len++;
 
 		// Allocate space for result string
-		if (path = AllocMemH(memory,path_len))
+		if (path = L_AllocMemH(memory,path_len))
 		{
 		    STRPTR tmp;
 
@@ -472,7 +466,7 @@ STRPTR __saveds __asm L_PathFromLock(register __a0 APTR memory, register __d0 BP
 		    {
 			char a;
 
-			DeviceFromLock(parent_lock,tmp_fib->fib_FileName);
+			L_DeviceFromLock(parent_lock,tmp_fib->fib_FileName);
 
 			// Remove trailing ':'
 			a = strlen(tmp_fib->fib_FileName);

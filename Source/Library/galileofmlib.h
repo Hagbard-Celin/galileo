@@ -225,10 +225,6 @@ ULONG __asm L_DivideU(
 
 #include "pools.h"
 
-#ifdef GALILEOFM_MAINLIB
-#include "galileofm_libprotos.h"
-#endif
-
 
 // functions.asm
 __asm L_BtoCStr(register __a0 BSTR,register __a1 char *,register __d0 int);
@@ -239,11 +235,14 @@ void __asm L_FreeTimer(register __a0 struct TimerHandle *handle);
 void __asm L_StartTimer(register __a0 TimerHandle *handle,register __d0 ULONG seconds,register __d1 ULONG micros);
 BOOL __asm L_CheckTimer(register __a0 TimerHandle *handle);
 void __asm L_StopTimer(register __a0 TimerHandle *handle);
+struct Library *__asm L_GetTimerBase(void);
 
 // pathlist.c
 BPTR __asm L_GetDosPathList(register __a0 BPTR);
 void __asm L_FreeDosPathList(register __a0 BPTR);
-void __asm L_CopyLocalEnv(register __a0 struct Library *DOSBase);
+void __asm L_CopyLocalEnv(void);
+void __asm L_UpdateMyPaths(void);
+BPTR __asm L_GetGalileoPathList(void);
 
 // strings.c
 __asm L_StrCombine(register __a0 char *buf,
@@ -271,10 +270,10 @@ void __asm L_DrawFieldBox(
 	register __a1 struct Rectangle *rect,
 	register __a2 struct DrawInfo *info);
 char * __asm __saveds L_GetIconFullname(register __a0 char *name);
-BOOL __asm WriteIcon(
+BOOL __asm L_WriteIcon(
 	register __a0 char *name,
 	register __a1 struct DiskObject *diskobj);
-BOOL __asm DeleteIcon(
+BOOL __asm L_DeleteIcon(
 	register __a0 char *name);
 ULONG __asm L_ScreenInfo(register __a0 struct Screen *screen);
 
@@ -408,14 +407,14 @@ BOOL __asm L_BuildTransDragMask(
 	register __d3 long flags);
 void __asm L_DrawDragList(register __a0 struct RastPort *,register __a1 struct ViewPort *,register __d0 long);
 void __asm L_RemoveDragImage(register __a0 DragInfo *);
-BOOL __asm DragCustomOk(
+BOOL __asm L_DragCustomOk(
 	register __a0 struct BitMap *bm);
 
 
 // layout_routines.c
-struct Window *__asm OpenConfigWindow(
+struct Window *__asm L_OpenConfigWindow(
 	register __a0 NewConfigWindow *);
-void __asm L_CloseConfigWindow(register __a0 struct Window *,register __a6 struct MyLibrary *);
+void __asm L_CloseConfigWindow(register __a0 struct Window *);
 void __asm L_StripIntuiMessages(register __a0 struct Window *);
 void __asm L_StripWindowMessages(register __a0 struct MsgPort *,register __a1 struct IntuiMessage *);
 void __asm L_CloseWindowSafely(register __a0 struct Window *);
@@ -435,7 +434,7 @@ __asm L_CalcWindowDims(
 	register __a2 struct IBox *dest_pos,
 	register __a3 struct TextFont *font,
 	register __d0 ULONG flags);
-ObjectList *__asm AddObjectList(
+ObjectList *__asm L_AddObjectList(
 	register __a0 struct Window *,
 	register __a1 ObjectDef *objects);
 void __asm L_FreeObject(
@@ -449,7 +448,7 @@ void __asm L_StoreGadgetValue(
 	register __a0 ObjectList *list,
 	register __a1 struct IntuiMessage *msg,
 	register __a6 struct MyLibrary *);
-void __asm UpdateGadgetValue(
+void __asm L_UpdateGadgetValue(
 	register __a0 ObjectList *list,
 	register __a1 struct IntuiMessage *msg,
 	register __d0 UWORD id);
@@ -457,7 +456,7 @@ void __asm L_SetGadgetValue(
 	register __a0 ObjectList *list,
 	register __d0 UWORD id,
 	register __d1 ULONG value);
-long __asm GetGadgetValue(
+long __asm L_GetGadgetValue(
 	register __a0 ObjectList *list,
 	register __a1 UWORD id);
 __asm L_CheckObjectArea(
@@ -665,13 +664,13 @@ Cfg_Function *__asm L_FindFunctionType(
 
 
 // popup menus
-UWORD __asm DoPopUpMenu(register __a0 struct Window *,register __a1 PopUpMenu *,register __a2 PopUpItem **,register __d0 UWORD);
-void __asm SetPopUpDelay(register __d0 short delay);
+UWORD __asm L_DoPopUpMenu(register __a0 struct Window *,register __a1 PopUpMenu *,register __a2 PopUpItem **,register __d0 UWORD);
+void __asm L_SetPopUpDelay(register __d0 short delay);
 PopUpItem *__asm L_GetPopUpItem(register __a0 PopUpMenu *menu,register __d0 UWORD id);
 
 
 // ipc
-BOOL __asm  IPC_Launch(
+BOOL __asm  L_IPC_Launch(
 	register __a0 struct ListLock *list,
 	register __a1 IPCData **storage,
 	register __a2 char *name,
@@ -867,8 +866,7 @@ struct Gadget *__asm L_CreateTitleGadget(
 	register __d0 BOOL cover_zoom,
 	register __d1 short offset,
 	register __d2 short type,
-	register __d3 unsigned short id,
-	register __a6 struct MyLibrary *libbase);
+	register __d3 unsigned short id);
 struct Gadget *__asm L_FindGadgetType(
 	register __a0 struct Gadget *gadget,
 	register __d0 UWORD type);
@@ -877,7 +875,7 @@ void __asm L_FixTitleGadgets(register __a0 struct Window *window);
 
 // launcher
 void __asm launcher_procTr(void);
-void __asm launcher_proc(register __a6 struct Library *GalileoFMBase);
+void __asm launcher_proc(void);
 
 
 // iff
@@ -913,13 +911,13 @@ unsigned long __asm L_IFFChunkID(register __a0 struct _IFFHandle *handle);
 unsigned long __asm L_IFFGetFORM(register __a0 struct _IFFHandle *handle);
 
 
-long __asm GetSemaphore(
+long __asm L_GetSemaphore(
 	register __a0 struct SignalSemaphore *sem,
 	register __d0 long exclusive,
 	register __a1 char *data);
-void __asm FreeSemaphore(
+void __asm L_FreeSemaphore(
 	register __a0 struct SignalSemaphore *sem);
-void __asm ShowSemaphore(
+void __asm L_ShowSemaphore(
 	register __a0 struct SignalSemaphore *sem);
 void __asm L_InitListLock(
 	register __a0 struct ListLock *ll,
@@ -940,13 +938,13 @@ void __asm L_LayoutResize(register __a0 struct Window *);
 
 
 // devices
-struct DosList *__asm DeviceFromLock(
+struct DosList *__asm L_DeviceFromLock(
 	register __a0 BPTR lock,
 	register __a1 char *name);
-struct DosList *__asm DeviceFromHandler(
+struct DosList *__asm L_DeviceFromHandler(
 	register __a0 struct MsgPort *port,
 	register __a1 char *name);
-BOOL __asm DevNameFromLock(
+BOOL __asm L_DevNameFromLock(
 	register __d1 BPTR lock,
 	register __d2 char *buffer,
 	register __d3 long len);
@@ -989,14 +987,14 @@ void dt_remove_patch(struct LibData *data);
 
 
 // icon cache
-struct DiskObject *__asm GetCachedDefDiskObject(
+struct DiskObject *__asm L_GetCachedDefDiskObject(
 	register __d0 long type);
-void __asm FreeCachedDiskObject(
+void __asm L_FreeCachedDiskObject(
 	register __a0 struct DiskObject *icon);
-struct DiskObject *__asm GetCachedDiskObject(
+struct DiskObject *__asm L_GetCachedDiskObject(
 	register __a0 char *name,
 	register __d0 ULONG flags);
-struct DiskObject *__asm GetCachedDiskObjectNew(
+struct DiskObject *__asm L_GetCachedDiskObjectNew(
 	register __a0 char *name,
 	register __d0 ULONG flags);
 unsigned long __asm L_IconCheckSum(
@@ -1056,15 +1054,15 @@ BOOL __asm L_DateFromStrings(
 	register __a2 struct DateStamp *ds,
 	register __d0 ULONG);
 
-void __asm DateToStrings(
+void __asm L_DateToStrings(
 	register __a0 struct DateStamp *date,
 	register __a1 char *date_buf,
 	register __a2 char *time_buf,
 	register __d0 int flags);
 
-UWORD __asm GetLocaleSettings(register __d0 UBYTE type);
+UWORD __asm L_GetLocaleSettings(register __d0 UBYTE type);
 
-void __asm SetLocaleFlags(
+void __asm L_SetLocaleFlags(
 	register __d0 UWORD flags,
 	register __d1 UWORD dateformat);
 
@@ -1073,17 +1071,17 @@ APTR __asm L_GetMatchHandle(register __a0 char *name,
 			    register __d0 BPTR lock,
 			    register __a6 struct MyLibrary *);
 void __asm L_FreeMatchHandle(register __a0 MatchHandle *handle);
-BOOL __asm MatchFiletype(
+BOOL __asm L_MatchFiletype(
 	register __a0 MatchHandle *handle,
 	register __a1 Cfg_Filetype *type);
 
 
 // dos patches
-BPTR __asm PatchedCreateDir(register __d1 char *name);
-BPTR __asm OriginalCreateDir(
+BPTR __asm L_PatchedCreateDir(register __d1 char *name);
+BPTR __asm L_OriginalCreateDir(
 	register __d1 char *name);
-BPTR __asm PatchedDeleteFile(register __d1 char *name);
-long __asm OriginalDeleteFile(
+BPTR __asm L_PatchedDeleteFile(register __d1 char *name);
+long __asm L_OriginalDeleteFile(
 	register __d1 char *name);
 
 
@@ -1146,13 +1144,13 @@ void __asm L_ReplyHandlerMessage(
 	register __a0 GalileoHandlerMessage *msg);
 
 // notify.c
-APTR __asm AddNotifyRequest(
+APTR __asm L_AddNotifyRequest(
 	register __d0 ULONG type,
 	register __d1 ULONG userdata,
 	register __a0 struct MsgPort *port);
-void __asm RemoveNotifyRequest(
+void __asm L_RemoveNotifyRequest(
 	register __a0 NotifyNode *node);
-void __asm SendNotifyMsg(
+void __asm L_SendNotifyMsg(
 	register __d0 ULONG type,
 	register __d1 ULONG data,
 	register __d2 ULONG flags,
@@ -1161,12 +1159,12 @@ void __asm SendNotifyMsg(
 	register __a1 struct FileInfoBlock *fib);
 
 // backfill stuff
-void __asm SetReqBackFill(
+void __asm L_SetReqBackFill(
 	register __a0 struct Hook *hook,
 	register __a1 struct Screen **screen);
-struct Hook *__asm LockReqBackFill(
+struct Hook *__asm L_LockReqBackFill(
 	register __a0 struct Screen *screen);
-void __asm  UnlockReqBackFill(void);
+void __asm  L_UnlockReqBackFill(void);
 
 char *strstri(char *,char *);
 

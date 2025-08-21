@@ -52,8 +52,7 @@ BOOL __asm __saveds L_IPC_Launch(
 	register __a2 char *name,
 	register __d0 ULONG entry,
 	register __d1 ULONG stack,
-	register __d2 ULONG data,
-	register __a6 struct Library *GalileoFMBase)
+	register __d2 ULONG data)
 {
 	IPCData *ipc;
 	BOOL path=0;
@@ -107,13 +106,13 @@ BOOL __asm __saveds L_IPC_Launch(
 	{
 
 		// Lock path list
-		GetSemaphore(&gfmlib_data.path_lock,SEMF_SHARED,0);
+		L_GetSemaphore(&gfmlib_data.path_lock,SEMF_SHARED,0);
 
 		// Get path list copy
-		pathlist=GetDosPathList(gfmlib_data.path_list);
+		pathlist=L_GetDosPathList(gfmlib_data.path_list);
 
 		// Unlock path list
-		FreeSemaphore(&gfmlib_data.path_lock);
+		L_FreeSemaphore(&gfmlib_data.path_lock);
 
 #ifdef _DEBUG_IPCPROC
 	KPrintF("L_IPC_Launch3 Launching: %s with Pathlist: %lx \n", name, pathlist);
@@ -139,7 +138,7 @@ BOOL __asm __saveds L_IPC_Launch(
 	{
 	// Plug memory leak
 	if (path)
-		FreeDosPathList(pathlist);
+		L_FreeDosPathList(pathlist);
 		
 	FreeVec(ipc);
 		return 0;
@@ -239,9 +238,9 @@ IPCData *__asm L_IPC_ProcStartup(
 		if (ipc->list)
 		{
 			// Lock and add to list
-			L_GetSemaphore(&ipc->list->lock,SEMF_EXCLUSIVE,0, getreg(REG_A6));
+			L_GetSemaphore(&ipc->list->lock,SEMF_EXCLUSIVE,0);
 			AddTail(&ipc->list->list,(struct Node *)ipc);
-			L_FreeSemaphore(&ipc->list->lock, getreg(REG_A6));
+			L_FreeSemaphore(&ipc->list->lock);
 
 			// Set flag to say we're listed
 			ipc->flags|=IPCF_LISTED;
@@ -325,16 +324,8 @@ ULONG __asm __saveds L_IPC_Command(
 	struct Task *task;
 	APTR memory=0;
 
-#ifdef RESOURCE_TRACKING
-	struct Library *RTlib;
-	//if (!ResTrackBase)
-	RTlib=(struct Library *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"g_restrack.library");
-	//else
-	//RTlib=ResTrackBase;
 #ifdef _DEBUG_IPCCOMMAND
 	KPrintF("IPC_Command: ResTrackBase: %lx RTlib: %lx \n", ResTrackBase, RTlib);
-#endif
-#define ResTrackBase RTlib
 #endif
 
 	// Valid IPC?
@@ -469,10 +460,7 @@ mes->command,mes->flags,mes->data);
 
 	return result;
 }
-#ifdef RESOURCE_TRACKING
-#undef ResTrackBase
-#undef GalileoFMBase
-#endif
+
 
 // Send a safe command
 ULONG __asm __saveds L_IPC_SafeCommand(
@@ -488,7 +476,7 @@ ULONG __asm __saveds L_IPC_SafeCommand(
 	ULONG res=(ULONG)-1;
 
 	// Lock list
-	L_GetSemaphore(&list->lock,SEMF_SHARED,0, getreg(REG_A6));
+	L_GetSemaphore(&list->lock,SEMF_SHARED,0);
 
 	// See if locker is still valid
 	for (look=(IPCData *)list->list.lh_Head;
@@ -505,7 +493,7 @@ ULONG __asm __saveds L_IPC_SafeCommand(
 	}
 
 	// Unlock list
-	L_FreeSemaphore(&list->lock, getreg(REG_A6));
+	L_FreeSemaphore(&list->lock);
 	return res;
 }
 
@@ -540,7 +528,7 @@ IPCData *__asm __saveds L_IPC_FindProc(
 	IPCData *ipc;
 
 	// Lock list
-	L_GetSemaphore(&list->lock,SEMF_SHARED,0, getreg(REG_A6));
+	L_GetSemaphore(&list->lock,SEMF_SHARED,0);
 
 	// Go through list
 	for (ipc=(IPCData *)list->list.lh_Head;
@@ -563,7 +551,7 @@ IPCData *__asm __saveds L_IPC_FindProc(
 	else ipc=0;
 
 	// Release semaphore
-	L_FreeSemaphore(&list->lock, getreg(REG_A6));
+	L_FreeSemaphore(&list->lock);
 
 	return ipc;
 }
@@ -578,7 +566,7 @@ void __asm __saveds L_IPC_QuitName(
 	IPCData *ipc;
 
 	// Lock list
-	L_GetSemaphore(&list->lock,SEMF_SHARED,0, getreg(REG_A6));
+	L_GetSemaphore(&list->lock,SEMF_SHARED,0);
 
 	// Go through list
 	for (ipc=(IPCData *)list->list.lh_Head;
@@ -597,7 +585,7 @@ void __asm __saveds L_IPC_QuitName(
 	}
 
 	// Release semaphore
-	L_FreeSemaphore(&list->lock, getreg(REG_A6));
+	L_FreeSemaphore(&list->lock);
 }
 
 
@@ -680,7 +668,7 @@ ULONG __asm __saveds L_IPC_ListQuit(
 	long count=0;
 
 	// Lock list
-	L_GetSemaphore(&list->lock,SEMF_SHARED,0, getreg(REG_A6));
+	L_GetSemaphore(&list->lock,SEMF_SHARED,0);
 
 	// Tell all processes to quit
 	for (ipc=(IPCData *)list->list.lh_Head;
@@ -693,7 +681,7 @@ ULONG __asm __saveds L_IPC_ListQuit(
 	}
 
 	// Unlock list
-	L_FreeSemaphore(&list->lock, getreg(REG_A6));
+	L_FreeSemaphore(&list->lock);
 
 	// Not waiting?
 	if (!wait || !owner) return (ULONG)count;
@@ -765,7 +753,7 @@ void __asm __saveds L_IPC_ListCommand(
 		port->mp_Node.ln_Pri = PORT_ASYNC_MAGIC; //original dopus5code: port->mp_Flags|=PF_ASYNC;
 
 	// Lock list
-	L_GetSemaphore(&list->lock,SEMF_SHARED,0, getreg(REG_A6));
+	L_GetSemaphore(&list->lock,SEMF_SHARED,0);
 
 	// Send command to processes in list
 	for (ipc=(IPCData *)list->list.lh_Head;
@@ -777,7 +765,7 @@ void __asm __saveds L_IPC_ListCommand(
 	}
 
 	// Unlock list
-	L_FreeSemaphore(&list->lock, getreg(REG_A6));
+	L_FreeSemaphore(&list->lock);
 
 	// Wait for replies?
 	if (port)
@@ -814,9 +802,9 @@ void ipc_remove_list(IPCData *ipc)
 	// Valid list?
 	if (ipc->list && (ipc->flags&IPCF_LISTED))
 	{
-		L_GetSemaphore(&ipc->list->lock,SEMF_EXCLUSIVE,0, getreg(REG_A6));
+		L_GetSemaphore(&ipc->list->lock,SEMF_EXCLUSIVE,0);
 		Remove((struct Node *)ipc);
-		L_FreeSemaphore(&ipc->list->lock, getreg(REG_A6));
+		L_FreeSemaphore(&ipc->list->lock);
 		ipc->flags&=~IPCF_LISTED;
 	}
 }

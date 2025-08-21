@@ -198,7 +198,7 @@ __asm __saveds L_DoSimpleRequest(
 							struct TagItem tags[4];
 
 							// Get initial path and file
-							strcpy(buf,(char *)L_GetGadgetValue(data->objlist,GAD_STRING_ID,data->libbase));
+							strcpy(buf,(char *)L_GetGadgetValue(data->objlist,GAD_STRING_ID));
 							if (ptr=FilePart(buf))
 							{
 								stccpy(file,ptr,40);
@@ -302,7 +302,7 @@ BOOL _simplereq_open(simplereq_data *data,void *parent)
 		data->new_win.parent=parent;
 
 		// Open window
-		if (!(data->window=L_OpenConfigWindow(&data->new_win,data->libbase)))
+		if (!(data->window=L_OpenConfigWindow(&data->new_win)))
 			return 0;
 
 		// Are gadgets smaller than text?
@@ -398,9 +398,9 @@ BOOL _simplereq_open(simplereq_data *data,void *parent)
 		}
 
 		// Add objects
-		if (!(data->objlist=L_AddObjectList(data->window,data->objects,data->libbase)))
+		if (!(data->objlist=L_AddObjectList(data->window,data->objects)))
 		{
-			L_CloseConfigWindow(data->window,data->libbase);
+			L_CloseConfigWindow(data->window);
 			data->window=0;
 			return 0;
 		}
@@ -441,15 +441,15 @@ void _simplereq_close(simplereq_data *data)
 		{
 			strcpy(
 				data->string_buffer,
-				(char *)L_GetGadgetValue(data->objlist,GAD_STRING_ID,data->libbase));
+				(char *)L_GetGadgetValue(data->objlist,GAD_STRING_ID));
 
 			if (data->string_buffer_2)
 				strcpy(data->string_buffer_2,
-					(char *)L_GetGadgetValue(data->objlist,GAD_STRING2_ID,data->libbase));
+					(char *)L_GetGadgetValue(data->objlist,GAD_STRING2_ID));
 		}
 
 		// Close window
-		L_CloseConfigWindow(data->window,data->libbase);
+		L_CloseConfigWindow(data->window);
 		data->window=0;
 	}
 }

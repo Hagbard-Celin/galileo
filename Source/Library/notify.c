@@ -42,8 +42,7 @@ For more information on Directory Opus for Windows please see:
 APTR __asm __saveds L_AddNotifyRequest(
 	register __d0 ULONG type,
 	register __d1 ULONG userdata,
-	register __a0 struct MsgPort *port,
-	register __a6 struct Library *GalileoFMBase)
+	register __a0 struct MsgPort *port)
 {
 	NotifyNode *node;
 
@@ -70,8 +69,7 @@ APTR __asm __saveds L_AddNotifyRequest(
 
 // Remove a notify request
 void __asm __saveds L_RemoveNotifyRequest(
-	register __a0 NotifyNode *node,
-	register __a6 struct Library *GalileoFMBase)
+	register __a0 NotifyNode *node)
 {
 	GalileoNotify *msg;
 
@@ -79,7 +77,7 @@ void __asm __saveds L_RemoveNotifyRequest(
 	if (!node) return;
 
 	// Lock notify list
-	L_GetSemaphore(&gfmlib_data.notify_lock,SEMF_EXCLUSIVE,0, GalileoFMBase);
+	L_GetSemaphore(&gfmlib_data.notify_lock,SEMF_EXCLUSIVE,0);
 
 	// Remove node
 	Remove((struct Node *)node);
@@ -110,7 +108,7 @@ void __asm __saveds L_RemoveNotifyRequest(
 	Permit();
 
 	// Unlock notify list
-	L_FreeSemaphore(&gfmlib_data.notify_lock, GalileoFMBase);
+	L_FreeSemaphore(&gfmlib_data.notify_lock);
 
 	// Free node
 	FreeVec(node);
@@ -124,8 +122,7 @@ void __asm __saveds L_SendNotifyMsg(
 	register __d2 ULONG flags,
 	register __d3 short wait,
 	register __a0 char *name,
-	register __a1 struct FileInfoBlock *fib,
-	register __a6 struct Library *GalileoFMBase)
+	register __a1 struct FileInfoBlock *fib)
 {
 	NotifyNode *node;
 	struct Task *this_task=0;
@@ -146,7 +143,7 @@ void __asm __saveds L_SendNotifyMsg(
 	}
 
 	// Lock notify list
-	L_GetSemaphore(&gfmlib_data.notify_lock,SEMF_SHARED,0, GalileoFMBase);
+	L_GetSemaphore(&gfmlib_data.notify_lock,SEMF_SHARED,0);
 
 	// Go through notify list
 	for (node=(NotifyNode *)gfmlib_data.notify_list.mlh_Head;
@@ -232,7 +229,7 @@ void __asm __saveds L_SendNotifyMsg(
 	}
 
 	// Unlock notify list
-	L_FreeSemaphore(&gfmlib_data.notify_lock, GalileoFMBase);
+	L_FreeSemaphore(&gfmlib_data.notify_lock);
 
 	// Wait for replies?
 	if (wait && count)

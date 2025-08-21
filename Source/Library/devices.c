@@ -40,8 +40,7 @@ For more information on Directory Opus for Windows please see:
 
 struct DosList *__saveds __asm L_DeviceFromLock(
 	register __a0 BPTR lock,
-	register __a1 char *name,
-	register __a6 struct Library *GalileoFMBase)
+	register __a1 char *name)
 {
 	struct FileLock *fl;
 
@@ -52,13 +51,12 @@ struct DosList *__saveds __asm L_DeviceFromLock(
 	if (!(fl=(struct FileLock *)BADDR(lock))) return 0;
 
 	// Pass to DeviceFromHandler
-	return L_DeviceFromHandler(fl->fl_Task,name,GalileoFMBase);
+	return L_DeviceFromHandler(fl->fl_Task,name);
 }
 
 struct DosList *__saveds __asm L_DeviceFromHandler(
 	register __a0 struct MsgPort *port,
-	register __a1 char *name,
-	register __a6 struct Library *GalileoFMBase)
+	register __a1 char *name)
 {
 	struct DosList *dos,*dos_list=0;
 	DeviceNode *node,*match_node=0;
@@ -174,8 +172,7 @@ struct DosList *__saveds __asm L_DeviceFromHandler(
 BOOL __saveds __asm L_DevNameFromLock(
 	register __d1 BPTR lock,
 	register __d2 char *buffer,
-	register __d3 long len,
-	register __a6 struct Library *GalileoFMBase)
+	register __d3 long len)
 {
 	char devicename[34],*temp,*ptr;
 
@@ -189,7 +186,7 @@ BOOL __saveds __asm L_DevNameFromLock(
 	if (!(NameFromLock(lock,buffer,len))) return 0;
 
 	// Get device name
-	if (!(L_DeviceFromLock(lock,devicename,GalileoFMBase))) return 1;
+	if (!(L_DeviceFromLock(lock,devicename))) return 1;
 
 	// Allocate temporary buffer
 	if (!(temp=AllocVec(len+strlen(devicename)+1,MEMF_CLEAR))) return 1;

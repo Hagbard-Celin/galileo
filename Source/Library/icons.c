@@ -48,8 +48,7 @@ For more information on Directory Opus for Windows please see:
 // Patched PutDiskObject()
 BOOL __asm __saveds L_WB_PutDiskObject(
 	register __a0 char *name,
-	register __a1 struct DiskObject *diskobj,
-	register __a6 struct Library *GalileoFMBase)
+	register __a1 struct DiskObject *diskobj)
 {
 	BOOL result,magic=0;
 
@@ -64,7 +63,7 @@ BOOL __asm __saveds L_WB_PutDiskObject(
 	}
 
 	// Write icon
-	result=L_WriteIcon(name,diskobj,GalileoFMBase);
+	result=L_WriteIcon(name,diskobj);
 
 	// Succeeded?
 	if (result && !magic) icon_notify(&gfmlib_data,name,0,0);
@@ -74,7 +73,7 @@ BOOL __asm __saveds L_WB_PutDiskObject(
 
 
 // Patched DeleteDiskObject()
-BOOL __asm __saveds L_WB_DeleteDiskObject(register __a0 char *name, register __a6 struct Library *GalileoFMBase)
+BOOL __asm __saveds L_WB_DeleteDiskObject(register __a0 char *name)
 {
 	BOOL result;
 	char *full_name;
@@ -83,14 +82,14 @@ BOOL __asm __saveds L_WB_DeleteDiskObject(register __a0 char *name, register __a
 	full_name = L_GetIconFullname(name);
 
 	// Write icon
-	result=L_DeleteIcon(name,GalileoFMBase);
+	result=L_DeleteIcon(name);
 
 	// Succeeded?
 	if ((result || IoErr()==ERROR_OBJECT_NOT_FOUND) && full_name)
 		icon_notify(&gfmlib_data,full_name,INF_FULLNAME,1);
 
 	// Free full name buffer
-	FreeMemH(full_name);
+	L_FreeMemH(full_name);
 
 	return result;
 }
@@ -110,7 +109,7 @@ void icon_notify(struct LibData *data,char *name,ULONG flags,short delete)
 		return;
 
 	// Send notify message
-	L_SendNotifyMsg(GN_WRITE_ICON,0,delete,FALSE,full_name,0,getreg(REG_A6));
+	L_SendNotifyMsg(GN_WRITE_ICON,0,delete,FALSE,full_name,0);
 
 	// Free buffer
 	if (!(flags&INF_FULLNAME)) L_FreeMemH(full_name);
@@ -167,8 +166,7 @@ char * __asm __saveds L_GetIconFullname(register __a0 char *name)
 // PutDiskObject without notification
 BOOL __asm __saveds L_WriteIcon(
 	register __a0 char *name,
-	register __a1 struct DiskObject *icon,
-	register __a6 struct Library *GalileoFMBase)
+	register __a1 struct DiskObject *icon)
 {
 	BOOL result;
 
@@ -242,8 +240,7 @@ BOOL __asm __saveds L_WriteIcon(
 
 // DeleteDiskObject without notification
 BOOL __asm __saveds L_DeleteIcon(
-	register __a0 char *name,
-	register __a6 struct Library *GalileoFMBase)
+	register __a0 char *name)
 {
 	// Delete it
 	return 
