@@ -970,14 +970,6 @@ STRPTR __asm L_PathFromLock(
 	register __d1 ULONG flags,
 	register __a1 CONST_STRPTR append);
 
-// datatypes
-ULONG __asm dt_dispatch(
-	register __a0 Class *cl,
-	register __a2 Object *obj,
-	register __a1 Msg msg);
-void dt_install_patch(struct LibData *data);
-void dt_remove_patch(struct LibData *data);
-
 
 // icon cache
 struct DiskObject *__asm L_GetCachedDefDiskObject(
