@@ -57,10 +57,6 @@ DragInfo *__asm __saveds L_GetDragInfo(
 	BOOL real=1;
 	short word_width;
 
-/*
-    volatile char *a = 0;
-        *a = 0;
-*/
 	// Not a real drag?
 	if (width<0 || height<0)
 	{
@@ -119,14 +115,14 @@ DragInfo *__asm __saveds L_GetDragInfo(
 				drag->sprite.Depth,
 				NULL,
 				window->WScreen->RastPort.BitMap,
-                NULL)))
+				NULL)))
 		{
 			FreeVec(drag);
 
 			return 0;
 		}
 
-        // Allocate backup buffer
+		// Allocate backup buffer
 		if (real &&
 			!(drag->bob.SaveBuffer=(WORD *)
 				p96AllocBitMap(
@@ -135,7 +131,7 @@ DragInfo *__asm __saveds L_GetDragInfo(
 					drag->sprite.Depth,
 					NULL,
 					window->WScreen->RastPort.BitMap,
-                    NULL)))
+					NULL)))
 		{
 			L_FreeDragInfo(drag);
 			return 0;
@@ -170,7 +166,7 @@ DragInfo *__asm __saveds L_GetDragInfo(
 			return 0;
 		}
 
-        // Initialise dummy bitmap
+		// Initialise dummy bitmap
 		InitBitMap(&drag->drag_bm,drag->sprite.Depth,word_width<<4,drag->height);
 
 		// Get bitmap planes
@@ -363,15 +359,7 @@ void __asm __saveds L_GetDragMask(register __a0 DragInfo *drag)
 			depth>8 &&
 			p96GetBitMapAttr(imagebm,P96BMA_ISP96))
 		{
-            UBYTE *image_array;
-
-            //UBYTE *image_array;
-            
-            //struct RenderInfo rinfo = {0,0,0,0};
-            //struct RenderInfo *rinfop = &rinfo;
-
-            //rinfop->RGBFormat=p96GetBitMapAttr(imagebm,P96BMA_RGBFORMAT);
-            //rinfop->BytesPerRow=drag->sprite.Width*3;
+			UBYTE *image_array;
 
 			// Allocate image array
 			if (image_array=AllocVec(drag->sprite.Width*drag->sprite.Height*3,MEMF_CLEAR))
@@ -380,13 +368,14 @@ void __asm __saveds L_GetDragMask(register __a0 DragInfo *drag)
 				long pixfmt,count,num,array_pos,word_pos;
 				ULONG colour0[3];
 				UWORD word_data;
-                struct TrueColorInfo image_array_info = {3,0,0,0,0};
-            	image_array_info.BytesPerRow=drag->sprite.Width*3;
-            	image_array_info.RedData=image_array;
-            	image_array_info.GreenData=image_array+1;
-            	image_array_info.BlueData=image_array+2;
 
-                // Get the palette value of colour 0
+				struct TrueColorInfo image_array_info = {3,0,0,0,0};
+				image_array_info.BytesPerRow=drag->sprite.Width*3;
+				image_array_info.RedData=image_array;
+				image_array_info.GreenData=image_array+1;
+				image_array_info.BlueData=image_array+2;
+
+				// Get the palette value of colour 0
 				GetRGB32(drag->viewport->ColorMap,0,1,colour0);
 
 				// Calculate mask for pixel format
@@ -409,26 +398,9 @@ void __asm __saveds L_GetDragMask(register __a0 DragInfo *drag)
 				colour0[2]&=mask[0];
 
 				// Read the image
-
-                p96ReadTrueColorData(
-                	&image_array_info,0,0,
-                    &drag->drag_rp,0,0,
-                    drag->sprite.Width,drag->sprite.Height);
-
-
-
-/*                p96ReadPixelArray(
-                    rinfop,0,0,
-                    &drag->drag_rp,0,0,
-                    drag->sprite.Width,drag->sprite.Height);
-*/
-/*				  ReadPixelArray(
-					image_array,0,0,
-					drag->sprite.Width*3,
-					&drag->drag_rp,0,0,
-					drag->sprite.Width,drag->sprite.Height,
-					RECTFMT_RGB);
-*/
+				p96ReadTrueColorData(&image_array_info,0,0,
+						     &drag->drag_rp,0,0,
+						     drag->sprite.Width,drag->sprite.Height);
 
 				// Get number of pixels
 				count=drag->sprite.Width*drag->sprite.Height;
@@ -486,8 +458,8 @@ void __asm __saveds L_GetDragMask(register __a0 DragInfo *drag)
 		// (Semi)-normal mode; Allocate temporary bitmap
 		else
 		if (tempbm=AllocBitMap(drag->sprite.Width,drag->sprite.Height,depth,BMF_CLEAR,0))
-		{   
-            short columns;
+		{
+			short columns;
 
 			// Get plane size
 			columns=(drag->sprite.Width+15)>>4;
@@ -637,14 +609,14 @@ void __asm __saveds L_ShowDragImage(
 // Add bob to list
 void __asm __saveds L_AddDragImage(register __a0 DragInfo *drag)
 {
-	// If bob not visible, add to list
-	if (!(drag->flags&DRAGF_VALID))
-	{
-		if (!(drag->flags&DRAGF_CUSTOM))
-        {
-        	AddBob(&drag->bob,drag->rastport);
-        }
-        else
+		// If bob not visible, add to list
+		if (!(drag->flags&DRAGF_VALID))
+		{
+			if (!(drag->flags&DRAGF_CUSTOM))
+		{
+			AddBob(&drag->bob,drag->rastport);
+		}
+		else
 		{
 			// Custom dragging is abusing the GELs list merely for keeping track of
 			// the dragged objects, thus use AddVSprite() to link it into the list
@@ -666,7 +638,6 @@ void __asm __saveds L_RemDragImage(register __a0 DragInfo *drag)
 		{
 			// Remove image
 			L_RemoveDragImage(drag);
-            //remove bob here
 		}
 
 		// Double-buffering?
@@ -1105,7 +1076,7 @@ void __asm __saveds L_RemoveDragImage(register __a0 DragInfo *drag)
 				0xc0);
 		}
 
-        // Clear save flag
+		// Clear save flag
 		drag->sprite.Flags&=~BACKSAVED;
 	}
 
