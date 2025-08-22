@@ -128,6 +128,10 @@ BPTR __saveds __asm L_LockFromVolIdPath(register __a0 STRPTR volumename,
     if (found && doslist->dol_Task)
     {
 	lock = DoPkt(doslist->dol_Task,ACTION_LOCATE_OBJECT,0,MKBADDR(&nullbstr),SHARED_LOCK,0,0);
+#ifdef RESOURCE_TRACKING
+	if (lock)
+	    RT_InjectLock(lock, __FILE__, __LINE__);
+#endif
     }
 
     UnLockDosList(LDF_VOLUMES|LDF_READ);
