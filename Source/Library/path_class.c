@@ -280,7 +280,7 @@ void pathgadget_clearworkbuffer(Class *cl, PathGadgetData *data)
     struct PathEditBufferPart *node;
     struct PathEditBuffer *editbuff;
 
-    editbuff = &((struct LibData *)cl->cl_Dispatcher.h_Data)->path_editbuff;
+    editbuff = &gfmlib_data.path_editbuff;
 
     node = (struct PathEditBufferPart *)editbuff->peb_List.mlh_Head;
 
@@ -1845,7 +1845,7 @@ BOOL pathgadget_deletepart(Class *cl, PathGadgetData *data, struct PathEditBuffe
     BOOL ret = TRUE;
     struct PathEditBuffer *editbuff;
 
-    editbuff = &((struct LibData *)cl->cl_Dispatcher.h_Data)->path_editbuff;
+    editbuff = &gfmlib_data.path_editbuff;
 
     // First part?
     if (!offset)
@@ -2149,7 +2149,7 @@ BOOL pathgadget_insert(Class *cl, PathGadgetData *data, struct gpInput *msg, STR
     BOOL ok = TRUE;
     struct PathEditBuffer *editbuff;
 
-    editbuff = &((struct LibData *)cl->cl_Dispatcher.h_Data)->path_editbuff;
+    editbuff = &gfmlib_data.path_editbuff;
     pos = editbuff->peb_CursorPos - editbuff->peb_CPOffset;
 
     if (fromclipboard)
