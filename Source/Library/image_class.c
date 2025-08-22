@@ -75,7 +75,6 @@ ULONG __asm __saveds image_dispatch(
 				// Initialise data
 				data->type=GetTagData(GIA_Type,0,tags);
 				data->fpen=GetTagData(GIA_FrontPen,-1,tags);
-				data->data=(struct LibData *)cl->cl_Dispatcher.h_Data;
 				data->flags=0;
 				if (GetTagData(GIA_ThinBorders,0,tags))
 					data->flags|=BIF_THIN_BORDERS;
@@ -351,7 +350,7 @@ void image_draw(
 				if (y>maxy-6) y=maxy-6;
 
 				// SysIHack/3D appearance?
-				if (data->data->flags&LIBDF_3DLOOK && box.Height>9)
+				if (gfmlib_data.flags&LIBDF_3DLOOK && box.Height>9)
 					normal=0;
 
 				// Is gadget selected?

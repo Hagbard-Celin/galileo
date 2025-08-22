@@ -47,7 +47,7 @@ For more information on Directory Opus for Windows please see:
 #define CLASS_PATHGAD		0x1239
 
 
-Class *init_class(struct LibData *,char *,char *,struct IClass *,unsigned long (*)(),long);
+Class *init_class(char *,char *,struct IClass *,unsigned long (*)(),long);
 
 typedef struct
 {
@@ -175,7 +175,6 @@ typedef struct
 {
     short		    type;
     short		    fpen;
-    struct LibData	    *data;
     unsigned short	    flags;
 } BoopsiImageData;
 

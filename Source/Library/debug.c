@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -136,18 +136,16 @@ struct Message *__asm __saveds L_WaitPort_Debug(register __a0 struct MsgPort *po
 
 /*******************************************/
 
-#define GalileoFMBase		(data->wb_data.galileofm_base)
 
-void __saveds debug_proc(void)
+void __asm __saveds debug_proc(void)
 {
 	IPCData *ipc;
-	struct LibData *data;
 	struct List debug_list;
 	IPCMessage *quit=0;
 	DebugNode *node;
 
 	// Do startup
-	if (!(ipc=L_IPC_ProcStartup((ULONG *)&data,0))) return;
+	if (!(ipc=L_IPC_ProcStartup(NULL,0))) return;
 
 	// Initialise list
 	NewList(&debug_list);
@@ -265,10 +263,10 @@ void __saveds debug_proc(void)
 	}
 
 	// Reply the quit message
-	IPC_Reply(quit);
+	L_IPC_Reply(quit);
 
 	// Exit
-	IPC_Free(ipc);
+	L_IPC_Free(ipc);
 }
 
 #endif

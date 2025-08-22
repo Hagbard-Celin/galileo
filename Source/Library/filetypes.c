@@ -217,7 +217,7 @@ BOOL __asm __saveds L_MatchFiletype(
 	ULONG res;
 
 	// See if this is in the cache
-	if ((res=FindFiletypeCache(handle,type,&gfmlib_data))!=(ULONG)-1)
+	if ((res=FindFiletypeCache(handle,type))!=(ULONG)-1)
 		return (BOOL)res;
 
 	// If no valid filetype or recognition string, return
@@ -878,7 +878,7 @@ BOOL __asm __saveds L_MatchFiletype(
 	if (!handle->file && !dir_flag && !disk_flag) match_okay=0;
 
 	// Add to cache
-	AddFiletypeCache(handle,type,match_okay,&gfmlib_data);
+	AddFiletypeCache(handle,type,match_okay);
 	return match_okay;
 }
 
@@ -1114,22 +1114,22 @@ void parse_date_string(char *string,struct DateStamp *date)
 
 
 // Add entry to the filetype cache
-void AddFiletypeCache(MatchHandle *handle,Cfg_Filetype *type,ULONG result,struct LibData *data)
+void AddFiletypeCache(MatchHandle *handle,Cfg_Filetype *type,ULONG result)
 {
 	FileTypeCache *cache;
 
 	// Cache disabled?
-	if (!(data->flags&LIBDF_FT_CACHE))
+	if (!(gfmlib_data.flags&LIBDF_FT_CACHE))
 		return;
 
 	// Lock cache list
-	L_GetSemaphore(&data->filetype_cache.lock,TRUE,0);
+	L_GetSemaphore(&gfmlib_data.filetype_cache.lock,TRUE,0);
 
 	// See if it's already in the cache
-	if (!(cache=(FileTypeCache *)L_FindNameI(&data->filetype_cache.list,handle->fullname)))
+	if (!(cache=(FileTypeCache *)L_FindNameI(&gfmlib_data.filetype_cache.list,handle->fullname)))
 	{
 		// Allocate a new entry
-		if (cache=L_AllocMemH(data->memory,sizeof(FileTypeCache)+strlen(handle->fullname)))
+		if (cache=L_AllocMemH(gfmlib_data.memory,sizeof(FileTypeCache)+strlen(handle->fullname)))
 		{
 			// Initialise entry
 			cache->ftc_Node.ln_Name=cache->ftc_Name;
@@ -1137,17 +1137,17 @@ void AddFiletypeCache(MatchHandle *handle,Cfg_Filetype *type,ULONG result,struct
 			NewList((struct List *)&cache->ftc_List);
 
 			// Add to list
-			AddTail(&data->filetype_cache.list,&cache->ftc_Node);
+			AddTail(&gfmlib_data.filetype_cache.list,&cache->ftc_Node);
 
 			// Max cache number reached?
-			if (data->ft_cache_count==data->ft_cache_max)
+			if (gfmlib_data.ft_cache_count==gfmlib_data.ft_cache_max)
 			{
 				// Remove the first one
-				FreeFiletypeCache(data,(FileTypeCache *)data->filetype_cache.list.lh_Head);
+				FreeFiletypeCache((FileTypeCache *)gfmlib_data.filetype_cache.list.lh_Head);
 			}
 
 			// Increment cache count
-			++data->ft_cache_count;
+			++gfmlib_data.ft_cache_count;
 		}
 	}
 
@@ -1170,7 +1170,7 @@ void AddFiletypeCache(MatchHandle *handle,Cfg_Filetype *type,ULONG result,struct
 		if (!entry->fte_Node.mln_Succ)
 		{
 			// Allocate new entry
-			if (entry=L_AllocMemH(data->memory,sizeof(FileTypeEntry)))
+			if (entry=L_AllocMemH(gfmlib_data.memory,sizeof(FileTypeEntry)))
 			{
 				// Initialise entry and add to list
 				entry->fte_Pointer=type;
@@ -1187,25 +1187,25 @@ void AddFiletypeCache(MatchHandle *handle,Cfg_Filetype *type,ULONG result,struct
 	}
 
 	// Unlock list
-	L_FreeSemaphore(&data->filetype_cache.lock);
+	L_FreeSemaphore(&gfmlib_data.filetype_cache.lock);
 }
 
 
 // Find entry in the filetype cache
-ULONG FindFiletypeCache(MatchHandle *handle,Cfg_Filetype *type,struct LibData *data)
+ULONG FindFiletypeCache(MatchHandle *handle,Cfg_Filetype *type)
 {
 	FileTypeCache *cache;
 	ULONG result=(ULONG)-1;
 
 	// Cache disabled?
-	if (!(data->flags&LIBDF_FT_CACHE))
+	if (!(gfmlib_data.flags&LIBDF_FT_CACHE))
 		return result;
 
 	// Lock cache list
-	L_GetSemaphore(&data->filetype_cache.lock,FALSE,0);
+	L_GetSemaphore(&gfmlib_data.filetype_cache.lock,FALSE,0);
 
 	// See if it's in the cache
-	if (cache=(FileTypeCache *)L_FindNameI(&data->filetype_cache.list,handle->fullname))
+	if (cache=(FileTypeCache *)L_FindNameI(&gfmlib_data.filetype_cache.list,handle->fullname))
 	{
 		FileTypeEntry *entry;
 
@@ -1225,23 +1225,23 @@ ULONG FindFiletypeCache(MatchHandle *handle,Cfg_Filetype *type,struct LibData *d
 	}
 
 	// Unlock list
-	L_FreeSemaphore(&data->filetype_cache.lock);
+	L_FreeSemaphore(&gfmlib_data.filetype_cache.lock);
 
 	return result;
 }
 
 
 // Free a cached entry or all (list must be locked)
-void FreeFiletypeCache(struct LibData *data,FileTypeCache *one)
+void FreeFiletypeCache(FileTypeCache *one)
 {
 	FileTypeCache *cache,*next;
 
 	// Cache disabled?
-	if (!(data->flags&LIBDF_FT_CACHE))
+	if (!(gfmlib_data.flags&LIBDF_FT_CACHE))
 		return;
 
 	// Go through list, if given an entry start with that
-	for (cache=(one)?one:(FileTypeCache *)data->filetype_cache.list.lh_Head;
+	for (cache=(one)?one:(FileTypeCache *)gfmlib_data.filetype_cache.list.lh_Head;
 		cache->ftc_Node.ln_Succ;
 		cache=next)
 	{
@@ -1266,7 +1266,7 @@ void FreeFiletypeCache(struct LibData *data,FileTypeCache *one)
 		if (one)
 		{
 			Remove((struct Node *)one);
-			--data->ft_cache_count;
+			--gfmlib_data.ft_cache_count;
 		}
 
 		// Free cache entry
@@ -1279,8 +1279,8 @@ void FreeFiletypeCache(struct LibData *data,FileTypeCache *one)
 	// If we freed the whole lot, reinitialise the list
 	if (!one)
 	{
-		NewList(&data->filetype_cache.list);
-		data->ft_cache_count=0;
+		NewList(&gfmlib_data.filetype_cache.list);
+		gfmlib_data.ft_cache_count=0;
 	}
 }
 
@@ -1296,7 +1296,7 @@ void __asm __saveds L_ClearFiletypeCache(void)
 	L_GetSemaphore(&gfmlib_data.filetype_cache.lock,TRUE,0);
 
 	// Clear the cache
-	FreeFiletypeCache(&gfmlib_data,0);
+	FreeFiletypeCache(0);
 
 	// Unlock list
 	L_FreeSemaphore(&gfmlib_data.filetype_cache.lock);

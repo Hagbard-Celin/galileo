@@ -71,7 +71,6 @@ typedef struct
 	char			*name;			// Command to launch
 	BPTR			in;			// Input file handle
 	BPTR			out;			// Output file handle
-	struct LibData		*data;			// Library data pointer
 	IPCMessage		*exit_reply;		// Message to reply to on exit
 	long			stack;			// Stack size
 	char			*default_tool;		// Default tool
@@ -89,7 +88,6 @@ typedef struct
 	BPTR			cd;			// Current directory
 	struct WBArg 		*args;
 	LONG			numargs;
-	struct LibData		*data;			// Library data pointer
 	IPCMessage		*exit_reply;		// Message to reply to on exit
 	long			stack;			// Stack size
 	char			*default_tool;		// Default tool
@@ -347,15 +345,15 @@ void __saveds __asm L_MUFSLogin(
 
 typedef struct
 {
-	struct Node			node;
-	char				name[40];
-	IPCMessage			*exit_reply;
-	IPCData				*notify_ipc;
+	struct Node		node;
+	char			name[40];
+	IPCMessage		*exit_reply;
+	IPCData			*notify_ipc;
 	struct Process		*proc;
-	TimerHandle			*timeout;
-	long				flags;
+	TimerHandle		*timeout;
+	long			flags;
 	struct WBStartup	startup;
-	char				toolwindow[256];
+	char			toolwindow[256];
 	struct WBArg		args[1];
 } LaunchProc;
 
@@ -363,35 +361,36 @@ typedef struct
 {
 	struct MinNode		node;
 	struct Window		*window;
-	LaunchProc			*proc;
+	LaunchProc		*proc;
 } ErrorNode;
 
 #define LAUNCHF_LAUNCHOK	(1<<0)
 #define LAUNCHF_LAUNCH_WBARG	(1<<1)
 
-LaunchProc *launcher_launch_arg(struct LibData *data, WBLaunchPacket *packet, struct MinList *list, struct MsgPort *reply);
-LaunchProc *launcher_launch(struct LibData *,LaunchPacket *packet,struct MinList *,struct MsgPort *);
-void launch_cleanup(struct LibData *,LaunchProc *);
+LaunchProc *launcher_launch_arg(WBLaunchPacket *packet, struct MinList *list, struct MsgPort *reply);
+LaunchProc *launcher_launch(LaunchPacket *packet,struct MinList *,struct MsgPort *);
+void launch_cleanup(LaunchProc *);
 void launch_setarg(LaunchProc *,short,BPTR,char *);
 char *launcher_parse(char *,char *,short);
-BPTR launcher_get_parent(struct LibData *,char *);
-void free_launch_packet(struct LibData *data,LaunchPacket *packet);
+BPTR launcher_get_parent(char *);
+void free_launch_packet(LaunchPacket *packet);
 long __asm launch_exit_codeTr(register __d1 LaunchPacket *);
 long __asm launch_exit_code(register __d1 LaunchPacket *);
-ErrorNode *__stdargs launch_error(struct LibData *data,LaunchPacket *packet,short,short,char *args,...);
+ErrorNode *__stdargs launch_error(LaunchPacket *packet,short,short,char *args,...);
 
 #ifdef FAKEWB
-BOOL install_fake_workbench(struct LibData *);
-void remove_fake_workbench(struct LibData *);
-void __saveds fake_workbench(void);
+BOOL install_fake_workbench(void);
+void remove_fake_workbench(void);
+void __asm __saveds fake_workbenchTr(void);
+void __asm __saveds fake_workbench(void);
 #endif
 
 #define DLGF_FORCE		(1<<0)
 #define DLGF_NOTIFY		(1<<1)
 
-BOOL doslist_get(struct LibData *,struct MinList *,APTR,ULONG);
-void doslist_free(struct LibData *,struct MinList *);
-BOOL doslist_check_double(struct LibData *,struct List *,char *);
+BOOL doslist_get(struct MinList *,APTR,ULONG);
+void doslist_free(struct MinList *);
+BOOL doslist_check_double(struct List *,char *);
 
 void do_mufs_logout(struct LoginPkt *);
 
@@ -399,7 +398,6 @@ void do_mufs_logout(struct LoginPkt *);
 void __asm __saveds launcher_proc(void)
 {
 	IPCData *ipc;
-	struct LibData *data;
 	IPCMessage *msg,*quit_msg=0;
 	struct WBStartup *startup;
 	struct MsgPort *reply_port;
@@ -407,7 +405,7 @@ void __asm __saveds launcher_proc(void)
 	struct TimerHandle *timer,*secondtimer=0;
 
 	// Do startup
-	if (!(ipc=L_IPC_ProcStartup((ULONG *)&data,0)))
+	if (!(ipc=L_IPC_ProcStartup(NULL, 0)))
 		return;
 
 #ifdef _DEBUG_LAUNCHER
@@ -416,7 +414,7 @@ void __asm __saveds launcher_proc(void)
 
 #ifdef FAKEWB
 	// Install fake workbench task
-	install_fake_workbench(data);
+	install_fake_workbench();
 #endif
 
 	// Set up timers
@@ -428,7 +426,7 @@ void __asm __saveds launcher_proc(void)
 	}
 
 	// Store process pointer
-	data->launch_proc=ipc;
+	gfmlib_data.launch_proc=ipc;
 
 	// Create reply port (better not fail!)
 	reply_port=CreateMsgPort();
@@ -441,18 +439,18 @@ void __asm __saveds launcher_proc(void)
 
 	// We need to initialise task count
 	Forbid();
-	data->task_count=L_Att_NodeCount((Att_List *)&ExecLib->TaskReady);
-	data->task_count+=L_Att_NodeCount((Att_List *)&ExecLib->TaskWait);
+	gfmlib_data.task_count=L_Att_NodeCount((Att_List *)&ExecLib->TaskReady);
+	gfmlib_data.task_count+=L_Att_NodeCount((Att_List *)&ExecLib->TaskWait);
 
 	// Install patches
 	L_WB_Install_Patch();
 	Permit();
 
 	// Get a dos list copy
-	doslist_get(data,&data->dos_list,data->dos_list_memory,DLGF_FORCE);
+	doslist_get(&gfmlib_data.dos_list,gfmlib_data.dos_list_memory,DLGF_FORCE);
 
 	// Allocate a signal bit
-	data->low_mem_signal=AllocSignal(-1);
+	gfmlib_data.low_mem_signal=AllocSignal(-1);
 
 	// Event loop
 	FOREVER
@@ -467,7 +465,7 @@ void __asm __saveds launcher_proc(void)
 			if (L_CheckTimer(timer))
 			{
 				// Update dos list (check for diskchange)
-				if (!(doslist_get(data,&data->dos_list,data->dos_list_memory,DLGF_NOTIFY)))
+				if (!(doslist_get(&gfmlib_data.dos_list,gfmlib_data.dos_list_memory,DLGF_NOTIFY)))
 				{
 					// Failed, so we try again soon
 					L_StartTimer(timer,1,0);
@@ -484,10 +482,10 @@ void __asm __saveds launcher_proc(void)
 				short count=0;
 
 				// Lock AppEntry list
-				L_GetSemaphore(&data->wb_data.patch_lock,SEMF_EXCLUSIVE,0);
+				L_GetSemaphore(&gfmlib_data.wb_data.patch_lock,SEMF_EXCLUSIVE,0);
 
 				// Go through free list
-				for (entry=(AppEntry *)data->wb_data.rem_app_list.mlh_Head;
+				for (entry=(AppEntry *)gfmlib_data.wb_data.rem_app_list.mlh_Head;
 					entry->ae_node.mln_Succ;
 					entry=next)
 				{
@@ -497,15 +495,15 @@ void __asm __saveds launcher_proc(void)
 					// Has this entry's time expired?
 					if (++entry->ae_menu_id_base==5)
 					{
-						free_app_entry(entry,&data->wb_data);
+						free_app_entry(entry,&gfmlib_data.wb_data);
 						++count;
 					}
 				}
 
 				// Is the list empty now?
 				if (count>0 &&
-					IsListEmpty((struct List *)&data->wb_data.app_list) &&
-					IsListEmpty((struct List *)&data->wb_data.rem_app_list))
+					IsListEmpty((struct List *)&gfmlib_data.wb_data.app_list) &&
+					IsListEmpty((struct List *)&gfmlib_data.wb_data.rem_app_list))
 				{
 #ifdef _DEBUG_IPCPROC
 					KPrintF("!!!Launcher.c line: %ld DECREASING before %ld \n", __LINE__, ((struct Library *)getreg(REG_A6))->lib_OpenCnt);
@@ -514,7 +512,7 @@ void __asm __saveds launcher_proc(void)
 					--((struct Library *)getreg(REG_A6))->lib_OpenCnt;
 
 				        // Reset flag for wb.c:new_app_entry()
-				        data->wb_data.first_app_entry=TRUE;
+				        gfmlib_data.wb_data.first_app_entry=TRUE;
 
 #ifdef _DEBUG_IPCPROC
 					KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, ((struct Library *)getreg(REG_A6))->lib_OpenCnt);
@@ -522,7 +520,7 @@ void __asm __saveds launcher_proc(void)
 				}
 
 				// Unlock AppEntry list
-				L_FreeSemaphore(&data->wb_data.patch_lock);
+				L_FreeSemaphore(&gfmlib_data.wb_data.patch_lock);
 
 				// Restart timer
 				L_StartTimer(secondtimer,1,0);
@@ -531,12 +529,12 @@ void __asm __saveds launcher_proc(void)
 
 		// Any error requesters open?
 		// This will need to be protected if it gets taken out of the launcher
-		if (!(IsListEmpty((struct List *)&data->error_list)))
+		if (!(IsListEmpty((struct List *)&gfmlib_data.error_list)))
 		{
 			ErrorNode *error,*next;
 
 			// Go through error requesters
-			for (error=(ErrorNode *)data->error_list.mlh_Head;
+			for (error=(ErrorNode *)gfmlib_data.error_list.mlh_Head;
 				error->node.mln_Succ;
 				error=next)
 			{
@@ -556,10 +554,10 @@ void __asm __saveds launcher_proc(void)
 					if (error->proc)
 					{
 						// Lock launch list
-						L_GetSemaphore(&data->launch_lock,SEMF_EXCLUSIVE,0);
+						L_GetSemaphore(&gfmlib_data.launch_lock,SEMF_EXCLUSIVE,0);
 
 						// Find process in the launch list
-						for (proc=(LaunchProc *)data->launch_list.mlh_Head;
+						for (proc=(LaunchProc *)gfmlib_data.launch_list.mlh_Head;
 							proc->node.ln_Succ;
 							proc=(LaunchProc *)proc->node.ln_Succ)
 						{
@@ -583,7 +581,7 @@ void __asm __saveds launcher_proc(void)
 								// Message to reply to?
 								if (proc->exit_reply)
 								{
-									free_launch_packet(data,(LaunchPacket *)proc->exit_reply->data);
+									free_launch_packet((LaunchPacket *)proc->exit_reply->data);
 									L_IPC_Reply(proc->exit_reply);
 								}
 
@@ -593,7 +591,7 @@ void __asm __saveds launcher_proc(void)
 						}
 
 						// Unlock launch list
-						L_FreeSemaphore(&data->launch_lock);
+						L_FreeSemaphore(&gfmlib_data.launch_lock);
 					}
 
 					// Free error node
@@ -603,13 +601,13 @@ void __asm __saveds launcher_proc(void)
 		}
 
 		// Lock launch list
-		L_GetSemaphore(&data->launch_lock,SEMF_EXCLUSIVE,0);
+		L_GetSemaphore(&gfmlib_data.launch_lock,SEMF_EXCLUSIVE,0);
 
 		// Any returned startup messages?
 		while (startup=(struct WBStartup *)GetMsg(reply_port))
 		{
 			// Find process in the launch list
-			for (proc=(LaunchProc *)data->launch_list.mlh_Head;
+			for (proc=(LaunchProc *)gfmlib_data.launch_list.mlh_Head;
 				proc->node.ln_Succ;
 				proc=(LaunchProc *)proc->node.ln_Succ)
 			{
@@ -625,11 +623,11 @@ void __asm __saveds launcher_proc(void)
 						ErrorNode *error,*next;
 
 						// Reply to exit message
-						free_launch_packet(data,(LaunchPacket *)proc->exit_reply->data);
+						free_launch_packet((LaunchPacket *)proc->exit_reply->data);
 						L_IPC_Reply(proc->exit_reply);
 
 						// Go through error requesters
-						for (error=(ErrorNode *)data->error_list.mlh_Head;
+						for (error=(ErrorNode *)gfmlib_data.error_list.mlh_Head;
 							error->node.mln_Succ;
 							error=next)
 						{
@@ -657,13 +655,13 @@ void __asm __saveds launcher_proc(void)
 					}
 
 					// Do process cleanup
-					launch_cleanup(data,proc);
+					launch_cleanup(proc);
 
 					// Decrement count and break out
-					--data->launch_count;
+					--gfmlib_data.launch_count;
 
 					// Zero count? Decrement library open count
-					if (data->launch_count==0) --((struct Library *)getreg(REG_A6))->lib_OpenCnt;
+					if (gfmlib_data.launch_count==0) --((struct Library *)getreg(REG_A6))->lib_OpenCnt;
 #ifdef _DEBUG_IPCPROC
 				        {
 				            KPrintF("!!!Launcher.c line: %ld DECREASING after %ld \n", __LINE__, ((struct Library *)getreg(REG_A6))->lib_OpenCnt);
@@ -677,7 +675,7 @@ void __asm __saveds launcher_proc(void)
 		}
 
 		// Go through the launch list
-		for (proc=(LaunchProc *)data->launch_list.mlh_Head;
+		for (proc=(LaunchProc *)gfmlib_data.launch_list.mlh_Head;
 			proc->node.ln_Succ;
 			proc=(LaunchProc *)proc->node.ln_Succ)
 		{
@@ -687,7 +685,7 @@ void __asm __saveds launcher_proc(void)
 				ErrorNode *error;
 
 				// Show error
-				if (error=launch_error(data,0,MSG_SICK_OF_WAITING,MSG_WAIT_CANCEL,proc->name))
+				if (error=launch_error(0,MSG_SICK_OF_WAITING,MSG_WAIT_CANCEL,proc->name))
 				{
 					// Store launch proc in error node
 					error->proc=proc;
@@ -696,7 +694,7 @@ void __asm __saveds launcher_proc(void)
 		}
 
 		// Unlock launch list
-		L_FreeSemaphore(&data->launch_lock);
+		L_FreeSemaphore(&gfmlib_data.launch_lock);
 
 		// Quit?
 		if (quit_msg) break;
@@ -708,7 +706,7 @@ void __asm __saveds launcher_proc(void)
 			if (msg->command==IPC_QUIT)
 			{
 				// Any outstanding messages?
-				if (data->launch_count>0)
+				if (gfmlib_data.launch_count>0)
 				{
 					// Make pending quit
 					if (!pending_quit) pending_quit=msg;
@@ -733,9 +731,6 @@ void __asm __saveds launcher_proc(void)
 
 				// Get launch packet
 				packet=(LaunchPacket *)msg->data;
-
-				// Save library pointer
-				packet->data=data;
 
 				// Change current dir
 				old=CurrentDir(packet->cd);
@@ -769,23 +764,23 @@ void __asm __saveds launcher_proc(void)
 						if (packet->wait)
 						{
 							// Lock launch list
-							L_GetSemaphore(&data->launch_lock,SEMF_EXCLUSIVE,0);
+							L_GetSemaphore(&gfmlib_data.launch_lock,SEMF_EXCLUSIVE,0);
 
 							// Increment count
-							++data->launch_count;
+							++gfmlib_data.launch_count;
 
 #ifdef _DEBUG_IPCPROC
-							KPrintF("!!!Launcher.c line: %ld INCREASING if %ld = 1 before %ld \n", __LINE__, data->launch_count, ((struct Library *)getreg(REG_A6))->lib_OpenCnt);
+							KPrintF("!!!Launcher.c line: %ld INCREASING if %ld = 1 before %ld \n", __LINE__, gfmlib_data.launch_count, ((struct Library *)getreg(REG_A6))->lib_OpenCnt);
 #endif
 							// First program? Increment open count so we can't be flushed
-							if (data->launch_count==1)
+							if (gfmlib_data.launch_count==1)
 								++((struct Library *)getreg(REG_A6))->lib_OpenCnt;
 #ifdef _DEBUG_IPCPROC
 							KPrintF("!!!Launcher.c line: %ld INCREASING after %ld \n", __LINE__, ((struct Library *)getreg(REG_A6))->lib_OpenCnt);
 #endif
 
 							// Unlock launch list
-							L_FreeSemaphore(&data->launch_lock);
+							L_FreeSemaphore(&gfmlib_data.launch_lock);
 
 							// Save reply message
 							packet->exit_reply=msg;
@@ -809,20 +804,18 @@ void __asm __saveds launcher_proc(void)
 				else
 				{
 					// Lock launch list
-					L_GetSemaphore(&data->launch_lock,SEMF_EXCLUSIVE,0);
+					L_GetSemaphore(&gfmlib_data.launch_lock,SEMF_EXCLUSIVE,0);
 
 					if (packet->type == LAUNCHF_LAUNCH_WBARG)
 					{
-					    proc=launcher_launch_arg(data,
-								 (WBLaunchPacket *)packet,
-						                 &data->launch_list,
-								 reply_port);
+					    proc=launcher_launch_arg((WBLaunchPacket *)packet,
+								     &gfmlib_data.launch_list,
+								     reply_port);
 					}
 					else
 					{
-					    proc=launcher_launch(data,
-						                 packet,
-						                 &data->launch_list,
+					    proc=launcher_launch(packet,
+						                 &gfmlib_data.launch_list,
 								 reply_port);
 					}
 
@@ -833,14 +826,14 @@ void __asm __saveds launcher_proc(void)
 						msg->command=1;
 
 						// Increment count
-						++data->launch_count;
+						++gfmlib_data.launch_count;
 
 #ifdef _DEBUG_IPCPROC
-						KPrintF("!!!Launcher.c line: %ld INCREASING if %ld = 1 before %ld \n", __LINE__, data->launch_count, ((struct Library *)getreg(REG_A6))->lib_OpenCnt);
+						KPrintF("!!!Launcher.c line: %ld INCREASING if %ld = 1 before %ld \n", __LINE__, gfmlib_data.launch_count, ((struct Library *)getreg(REG_A6))->lib_OpenCnt);
 #endif
 
 						// First program? Increment open count so we can't be flushed
-						if (data->launch_count==1)
+						if (gfmlib_data.launch_count==1)
 							++((struct Library *)getreg(REG_A6))->lib_OpenCnt;
 
 #ifdef _DEBUG_IPCPROC
@@ -871,14 +864,14 @@ void __asm __saveds launcher_proc(void)
 					else msg->command=0;
 
 					// Unlock launch list
-					L_FreeSemaphore(&data->launch_lock);
+					L_FreeSemaphore(&gfmlib_data.launch_lock);
 				}
 
 				// Restore current dir
 				CurrentDir(old);
 
 				// Free packet (unless waiting)
-				if (msg) free_launch_packet(data,packet);
+				if (msg) free_launch_packet(packet);
 			}
 
 			// MUFS login
@@ -938,11 +931,11 @@ void __asm __saveds launcher_proc(void)
 
 #ifdef FAKEWB
 				// Re-install the fake Workbench program
-				if (data->fake_wb)
+				if (gfmlib_data.fake_wb)
 				{
 					// Remove and re-install it
-					remove_fake_workbench(data);
-					install_fake_workbench(data);
+					remove_fake_workbench();
+					install_fake_workbench();
 				}
 #endif
 			}		
@@ -955,17 +948,17 @@ void __asm __saveds launcher_proc(void)
 		}
 
 		// Lock launch list
-		L_GetSemaphore(&data->launch_lock,SEMF_SHARED,0);
+		L_GetSemaphore(&gfmlib_data.launch_lock,SEMF_SHARED,0);
 
 		// Got zero count and pending quit?
-		if (data->launch_count==0 && pending_quit)
+		if (gfmlib_data.launch_count==0 && pending_quit)
 		{
 			// Set quit flag
 			quit_msg=pending_quit;
 		}
 
 		// Unlock launch list
-		L_FreeSemaphore(&data->launch_lock);
+		L_FreeSemaphore(&gfmlib_data.launch_lock);
 
 		// Quit?
 		if (quit_msg) break;
@@ -973,13 +966,13 @@ void __asm __saveds launcher_proc(void)
 		// Wait for message
 		if ((waitres=Wait(	1<<ipc->command_port->mp_SigBit|
 							1<<reply_port->mp_SigBit|
-							data->error_wait|
+							gfmlib_data.error_wait|
 							((timer)?1<<timer->port->mp_SigBit:0)|
-							1<<data->low_mem_signal|
+							1<<gfmlib_data.low_mem_signal|
 							SIGBREAKF_CTRL_F))&SIGBREAKF_CTRL_F)
 		{
 			// Update dos list
-			if (doslist_get(data,&data->dos_list,data->dos_list_memory,DLGF_NOTIFY))
+			if (doslist_get(&gfmlib_data.dos_list,gfmlib_data.dos_list_memory,DLGF_NOTIFY))
 			{
 				// Restart timer
 				L_StartTimer(timer,DOSLIST_TIMER,0);
@@ -988,7 +981,7 @@ void __asm __saveds launcher_proc(void)
 
 		// Low memory handler?
 		else
-		if (waitres&(1<<data->low_mem_signal))
+		if (waitres&(1<<gfmlib_data.low_mem_signal))
 		{
 			// Broadcast notify message
 			L_SendNotifyMsg(GN_FLUSH_MEM,0,0,0,0,0);
@@ -996,20 +989,20 @@ void __asm __saveds launcher_proc(void)
 	}
 
 	// Free signal bit
-	if (data->low_mem_signal!=-1)
+	if (gfmlib_data.low_mem_signal!=-1)
 	{
 		// Free it
-		FreeSignal(data->low_mem_signal);
-		data->low_mem_signal=-1;
+		FreeSignal(gfmlib_data.low_mem_signal);
+		gfmlib_data.low_mem_signal=-1;
 	}
 
 	// Any outstanding error requesters?
-	if (!(IsListEmpty((struct List *)&data->error_list)))
+	if (!(IsListEmpty((struct List *)&gfmlib_data.error_list)))
 	{
 		ErrorNode *error,*next;
 
 		// Go through error requesters
-		for (error=(ErrorNode *)data->error_list.mlh_Head;
+		for (error=(ErrorNode *)gfmlib_data.error_list.mlh_Head;
 			error->node.mln_Succ;
 			error=next)
 		{
@@ -1031,11 +1024,11 @@ void __asm __saveds launcher_proc(void)
 
 #ifdef FAKEWB
 	// Kill fake workbench
-	remove_fake_workbench(data);
+	remove_fake_workbench();
 #endif
 
 	// Free dos list copy
-	doslist_free(data,&data->dos_list);
+	doslist_free(&gfmlib_data.dos_list);
 
 	// Forbid while we reply and exit
 	Forbid();
@@ -1053,7 +1046,6 @@ void __asm __saveds launcher_proc(void)
 
 
 LaunchProc *launcher_launch_arg(
-	struct LibData *data,
 	WBLaunchPacket *packet,
 	struct MinList *list,
 	struct MsgPort *reply)
@@ -1090,7 +1082,7 @@ LaunchProc *launcher_launch_arg(
 		run_name=FilePart(default_tool);
 
 		// Get parent
-		parent=launcher_get_parent(data,default_tool);
+		parent=launcher_get_parent(default_tool);
 
 		// Set first argument to default tool
 		launch_setarg(launch,0,parent,run_name);
@@ -1113,10 +1105,10 @@ LaunchProc *launcher_launch_arg(
 			PathListEntry *entry;
 
 			// Lock path list
-			L_GetSemaphore(&data->path_lock,SEMF_SHARED,0);
+			L_GetSemaphore(&gfmlib_data.path_lock,SEMF_SHARED,0);
 
 			// Go through pathlist
-			for (entry=(PathListEntry *)BADDR(data->path_list);
+			for (entry=(PathListEntry *)BADDR(gfmlib_data.path_list);
 				entry;
 				entry=(PathListEntry *)BADDR(entry->next))
 			{
@@ -1147,7 +1139,7 @@ LaunchProc *launcher_launch_arg(
 			}
 
 			// Unlock path list
-			L_FreeSemaphore(&data->path_lock);
+			L_FreeSemaphore(&gfmlib_data.path_lock);
 		}
 	}
 
@@ -1195,7 +1187,7 @@ LaunchProc *launcher_launch_arg(
 
 			// Open window under mouse?
 			if (packet->flags&LAUNCHF_OPEN_UNDER_MOUSE)
-				data->open_window_kludge=proc;
+				gfmlib_data.open_window_kludge=proc;
 
 			// Send startup message
 			PutMsg(launch->startup.sm_Process,(struct Message *)&launch->startup);
@@ -1220,7 +1212,7 @@ LaunchProc *launcher_launch_arg(
 	if (cur_dir) UnLock(cur_dir);
 
 	// If failed, show error
-	if (!result) launch_error(data,(LaunchPacket *)packet,MSG_UNABLE_TO_OPEN_TOOL,MSG_OK,proc_name);
+	if (!result) launch_error((LaunchPacket *)packet,MSG_UNABLE_TO_OPEN_TOOL,MSG_OK,proc_name);
 
 	// Free icon
 	//if (icon) FreeDiskObject(icon);
@@ -1228,7 +1220,7 @@ LaunchProc *launcher_launch_arg(
 	// If failed, clean up
 	if (!result)
 	{
-		launch_cleanup(data,launch);
+		launch_cleanup(launch);
 		launch=0;
 	}
 
@@ -1238,7 +1230,6 @@ LaunchProc *launcher_launch_arg(
 
 
 LaunchProc *launcher_launch(
-	struct LibData *data,
 	LaunchPacket *packet,
 	struct MinList *list,
 	struct MsgPort *reply)
@@ -1303,7 +1294,7 @@ LaunchProc *launcher_launch(
 		run_name=FilePart(default_tool);
 
 		// Get parent
-		parent=launcher_get_parent(data,default_tool);
+		parent=launcher_get_parent(default_tool);
 
 		// Set first argument to default tool
 		launch_setarg(launch,0,parent,run_name);
@@ -1317,7 +1308,7 @@ LaunchProc *launcher_launch(
 	else run_name=name;
 
 	// Get parent of name
-	parent=launcher_get_parent(data,name);
+	parent=launcher_get_parent(name);
 
 	// Fill out first argument
 	launch_setarg(launch,arg++,parent,FilePart(name));
@@ -1330,7 +1321,7 @@ LaunchProc *launcher_launch(
 		if (!buf[0]) break;
 
 		// Get parent
-		parent=launcher_get_parent(data,buf);
+		parent=launcher_get_parent(buf);
 
 		// Fill out argument
 		launch_setarg(launch,arg,parent,FilePart(buf));
@@ -1351,10 +1342,10 @@ LaunchProc *launcher_launch(
 			PathListEntry *entry;
 
 			// Lock path list
-			L_GetSemaphore(&data->path_lock,SEMF_SHARED,0);
+			L_GetSemaphore(&gfmlib_data.path_lock,SEMF_SHARED,0);
 
 			// Go through pathlist
-			for (entry=(PathListEntry *)BADDR(data->path_list);
+			for (entry=(PathListEntry *)BADDR(gfmlib_data.path_list);
 				entry;
 				entry=(PathListEntry *)BADDR(entry->next))
 			{
@@ -1379,7 +1370,7 @@ LaunchProc *launcher_launch(
 			}
 
 			// Unlock path list
-			L_FreeSemaphore(&data->path_lock);
+			L_FreeSemaphore(&gfmlib_data.path_lock);
 		}
 	}
 
@@ -1437,7 +1428,7 @@ LaunchProc *launcher_launch(
 
 			// Open window under mouse?
 			if (packet->flags&LAUNCHF_OPEN_UNDER_MOUSE)
-				data->open_window_kludge=proc;
+				gfmlib_data.open_window_kludge=proc;
 
 			// Send startup message
 			PutMsg(launch->startup.sm_Process,(struct Message *)&launch->startup);
@@ -1466,7 +1457,7 @@ LaunchProc *launcher_launch(
 	if (cur_dir) UnLock(cur_dir);
 
 	// If failed, show error
-	if (!result) launch_error(data,packet,MSG_UNABLE_TO_OPEN_TOOL,MSG_OK,proc_name);
+	if (!result) launch_error(packet,MSG_UNABLE_TO_OPEN_TOOL,MSG_OK,proc_name);
 
 	// Free icon
 	if (icon) FreeDiskObject(icon);
@@ -1474,7 +1465,7 @@ LaunchProc *launcher_launch(
 	// If failed, clean up
 	if (!result)
 	{
-		launch_cleanup(data,launch);
+		launch_cleanup(launch);
 		launch=0;
 	}
 
@@ -1484,7 +1475,7 @@ LaunchProc *launcher_launch(
 
 
 // Clean up launch data
-void launch_cleanup(struct LibData *data,LaunchProc *launch)
+void launch_cleanup(LaunchProc *launch)
 {
 	if (launch)
 	{
@@ -1588,7 +1579,7 @@ char *launcher_parse(char *string,char *buffer,short bufsize)
 
 
 // Get parent lock
-BPTR launcher_get_parent(struct LibData *data,char *name)
+BPTR launcher_get_parent(char *name)
 {
 	char *ptr,c;
 	BPTR lock,parent;
@@ -1625,7 +1616,7 @@ BPTR launcher_get_parent(struct LibData *data,char *name)
 
 
 // Free launch packet
-void free_launch_packet(struct LibData *data,LaunchPacket *packet)
+void free_launch_packet(LaunchPacket *packet)
 {
 	if (packet)
 	{
@@ -1655,13 +1646,13 @@ void free_launch_packet(struct LibData *data,LaunchPacket *packet)
 
 /*
 // varargs CreateNewProcTags
-struct Process *launcher_CreateNewProcTags(struct LibData *data,Tag tag1,...)
+struct Process *launcher_CreateNewProcTags(Tag tag1,...)
 {
 	return CreateNewProc((struct TagItem *)&tag1);
 }
 
 // varargs SystemTags
-LONG launcher_SystemTags(struct LibData *data,char *command,Tag tag1,...)
+LONG launcher_SystemTags(char *command,Tag tag1,...)
 {
 	return SystemTagList(command,(struct TagItem *)&tag1);
 }
@@ -1674,7 +1665,7 @@ long __saveds __asm launch_exit_code(register __d1 LaunchPacket *packet)
 	if (packet->exit_reply) L_IPC_Reply(packet->exit_reply);
 
 	// Free launch packet
-	free_launch_packet(&gfmlib_data,packet);
+	free_launch_packet(packet);
 
 	// Lock launch list
 	L_GetSemaphore(&gfmlib_data.launch_lock,SEMF_EXCLUSIVE,0);
@@ -1709,7 +1700,7 @@ long __saveds __asm launch_exit_code(register __d1 LaunchPacket *packet)
 
 
 // Signal an error
-ErrorNode *__stdargs launch_error(struct LibData *data,LaunchPacket *packet,short msg,short buttons,char *args,...)
+ErrorNode *__stdargs launch_error(LaunchPacket *packet,short msg,short buttons,char *args,...)
 {
 	ErrorNode *error;
 	struct EasyStruct easy;
@@ -1727,8 +1718,8 @@ ErrorNode *__stdargs launch_error(struct LibData *data,LaunchPacket *packet,shor
 	easy.es_StructSize=sizeof(easy);
 	easy.es_Flags=0;
 	easy.es_Title="Galileo";
-	easy.es_TextFormat=L_GetString(&data->locale,msg);
-	easy.es_GadgetFormat=L_GetString(&data->locale,buttons);
+	easy.es_TextFormat=L_GetString(&gfmlib_data.locale,msg);
+	easy.es_GadgetFormat=L_GetString(&gfmlib_data.locale,buttons);
 
 	// Get parent window
 	if (packet && packet->errors)
@@ -1744,17 +1735,17 @@ ErrorNode *__stdargs launch_error(struct LibData *data,LaunchPacket *packet,shor
 	}
 
 	// Get bit to wait on
-	data->error_wait|=1<<error->window->UserPort->mp_SigBit;
+	gfmlib_data.error_wait|=1<<error->window->UserPort->mp_SigBit;
 
 	// Add to error list
-	AddTail((struct List *)&data->error_list,(struct Node *)error);
+	AddTail((struct List *)&gfmlib_data.error_list,(struct Node *)error);
 	return error;
 }
 
 
 #ifdef FAKEWB
 // Install fake workbench task
-BOOL install_fake_workbench(struct LibData *data)
+BOOL install_fake_workbench(void)
 {
 	// If workbench is already running, do nothing
 	Forbid();
@@ -1763,39 +1754,37 @@ BOOL install_fake_workbench(struct LibData *data)
 
 	// Launch workbench task
 	IPC_Launch(
-		0,&data->fake_wb,
+		0,&gfmlib_data.fake_wb,
 		"Workbench",
-		(ULONG)fake_workbench,
+		(ULONG)fake_workbenchTr,
 		4000|IPCF_GETPATH,
-		(ULONG)data,
-		DOSBase);
+		NULL);
 
 	// Success?
-	return (BOOL)((data->fake_wb)?1:0);
+	return (BOOL)((gfmlib_data.fake_wb)?1:0);
 }
 
 
 // Remove fake workbench task
-void remove_fake_workbench(struct LibData *data)
+void remove_fake_workbench(void)
 {
 	// Send quit command
-	if (data->fake_wb)
+	if (gfmlib_data.fake_wb)
 	{
-		IPC_Quit(data->fake_wb,0,TRUE);
-		data->fake_wb=0;
+		IPC_Quit(gfmlib_data.fake_wb,0,TRUE);
+		gfmlib_data.fake_wb=0;
 	}
 }
 
 
 // Fake workbench task
-void __saveds fake_workbench(void)
+void __asm __saveds fake_workbench(void)
 {
 	IPCData *ipc;
-	struct LibData *data;
 	IPCMessage *msg=0;
 
 	// Do startup
-	if (!(ipc=L_IPC_ProcStartup((ULONG *)&data,0)))
+	if (!(ipc=L_IPC_ProcStartup(NULL, 0)))
 		return;
 
 	// Set program name
@@ -1829,7 +1818,7 @@ void __saveds fake_workbench(void)
 	L_IPC_Free(ipc);
 
 #ifdef RESOURCE_TRACKING
-    ResourceTrackingEndOfTask();
+	ResourceTrackingEndOfTask();
 #endif
 }
 #endif
@@ -1839,7 +1828,7 @@ void __saveds fake_workbench(void)
 #define DL_ADDED		2
 
 // Get a copy of the dos list
-BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG flags)
+BOOL doslist_get(struct MinList *list,APTR memory,ULONG flags)
 {
 	struct DosList *dos,*doslist;
 	DosListEntry *found,*next,*search;
@@ -1849,7 +1838,7 @@ BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG fla
 	char name[80];
 
 	// Lock our list
-	L_GetSemaphore(&data->dos_lock,SEMF_EXCLUSIVE,0);
+	L_GetSemaphore(&gfmlib_data.dos_lock,SEMF_EXCLUSIVE,0);
 
 	// Lock the DOS list
 	if (!(doslist=	(flags&DLGF_FORCE) ? LockDosList(LDF_DEVICES|LDF_VOLUMES|LDF_READ) :
@@ -1857,7 +1846,7 @@ BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG fla
 		 (doslist==(struct DosList *)1))
 	{
 		// Failed; unlock our semaphore
-		L_FreeSemaphore(&data->dos_lock);
+		L_FreeSemaphore(&gfmlib_data.dos_lock);
 		return 0;
 	}
 
@@ -2156,7 +2145,7 @@ BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG fla
 					if (found->dle_Node.ln_Pri==DL_ADDED)
 					{
 						// Check that this isn't a doubled-up disk
-						if (doslist_check_double(data,(struct List *)list,found->dle_Node.ln_Name+5))
+						if (doslist_check_double((struct List *)list,found->dle_Node.ln_Name+5))
 						{
 							// Copy name, with trailing colon
 							lsprintf(name,"%s:",found->dle_Node.ln_Name+5);
@@ -2238,13 +2227,13 @@ BOOL doslist_get(struct LibData *data,struct MinList *list,APTR memory,ULONG fla
 	}
 
 	// Release our semaphore lock
-	L_FreeSemaphore(&data->dos_lock);
+	L_FreeSemaphore(&gfmlib_data.dos_lock);
 	return 1;
 }
 
 
 // Free a dos list copy
-void doslist_free(struct LibData *data,struct MinList *list)
+void doslist_free(struct MinList *list)
 {
 	struct Node *node,*next;
 
@@ -2293,7 +2282,7 @@ static const char *device_check_name[]={
 	"PS",0};
 
 // Check that a bad disk isn't doubled up with a good disk
-BOOL doslist_check_double(struct LibData *data,struct List *list,char *name)
+BOOL doslist_check_double(struct List *list,char *name)
 {
 	DosListEntry *disk;
 	char device[40];
@@ -2369,7 +2358,7 @@ void __asm __saveds L_GetDosListCopy(
 	NewList(list);
 
 	// Try and get the list
-	if (doslist_get(&gfmlib_data,(struct MinList *)list,memory,0))
+	if (doslist_get((struct MinList *)list,memory,0))
 		return;
 
 	// Lock the dos list copy
@@ -2417,7 +2406,7 @@ void __asm __saveds L_FreeDosListCopy(
 	register __a0 struct List *list)
 {
 	// Free copy
-	doslist_free(&gfmlib_data,(struct MinList *)list);
+	doslist_free((struct MinList *)list);
 }
 
 

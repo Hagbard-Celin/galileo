@@ -55,4 +55,12 @@ _\1Tr:
         TRAMPOLINE progress_task
         TRAMPOLINE requester_proc
 
+        IFD FAKEWB
+        TRAMPOLINE fake_workbench
+        ENDC
+
+        IFD DEBUG
+        TRAMPOLINE debug_proc
+        ENDC
+
         END

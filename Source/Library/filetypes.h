@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -123,6 +123,6 @@ typedef struct
 	ULONG		fte_Result;
 } FileTypeEntry;
 
-void AddFiletypeCache(MatchHandle *,Cfg_Filetype *,ULONG,struct LibData *);
-ULONG FindFiletypeCache(MatchHandle *,Cfg_Filetype *,struct LibData *);
-void FreeFiletypeCache(struct LibData *,FileTypeCache *);
+void AddFiletypeCache(MatchHandle *,Cfg_Filetype *,ULONG);
+ULONG FindFiletypeCache(MatchHandle *,Cfg_Filetype *);
+void FreeFiletypeCache(FileTypeCache *);

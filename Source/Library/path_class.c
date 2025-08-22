@@ -57,7 +57,7 @@ ULONG __asm __saveds pathgadget_dispatch(register __a0 Class *cl,
     ULONG msgnr = 0;
 #endif
 
-    editbuff = &((struct LibData *)cl->cl_Dispatcher.h_Data)->path_editbuff;
+    editbuff = &gfmlib_data.path_editbuff;
 
     //msgnr++;
 
@@ -347,7 +347,7 @@ struct PathEditBufferPart *pathgadget_addbufpart(Class *cl, PathGadgetData *data
     struct PathEditBufferPart *part;
     struct PathEditBuffer *editbuff;
 
-    editbuff = &((struct LibData *)cl->cl_Dispatcher.h_Data)->path_editbuff;
+    editbuff = &gfmlib_data.path_editbuff;
 
     if (part = AllocMem(sizeof(struct PathEditBufferPart),MEMF_ANY))
     {
@@ -368,7 +368,7 @@ void pathgadget_filleditbuffer(Class *cl, PathGadgetData *data, STRPTR fromstrin
     STRPTR string;
     struct PathEditBuffer *editbuff;
 
-    editbuff = &((struct LibData *)cl->cl_Dispatcher.h_Data)->path_editbuff;
+    editbuff = &gfmlib_data.path_editbuff;
 
     // First part
     part = (struct PathEditBufferPart *)editbuff->peb_List.mlh_Head;
@@ -456,7 +456,7 @@ void pathgadget_workbuffertostring(Class *cl, PathGadgetData *data)
     STRPTR string = 0, old;
     struct PathEditBuffer *editbuff;
 
-    editbuff = &((struct LibData *)cl->cl_Dispatcher.h_Data)->path_editbuff;
+    editbuff = &gfmlib_data.path_editbuff;
     
     old = *data->String;
 
@@ -582,7 +582,7 @@ ULONG pathgadget_render(Class *cl, struct Gadget *gadget, struct gpRender *msg)
 	    BOOL done = FALSE;
 	    struct PathEditBuffer *editbuff;
 
-	    editbuff = &((struct LibData *)cl->cl_Dispatcher.h_Data)->path_editbuff;
+	    editbuff = &gfmlib_data.path_editbuff;
 
 	    Move(rp, data->Gadget.MinX, ypos + rp->TxBaseline);
 	    SetAPen(rp, text);
@@ -739,7 +739,7 @@ ULONG pathgadget_textfit(Class *cl, PathGadgetData *data, struct gpInput *msg, U
     ULONG offset;
     struct PathEditBuffer *editbuff;
 
-    editbuff = &((struct LibData *)cl->cl_Dispatcher.h_Data)->path_editbuff;
+    editbuff = &gfmlib_data.path_editbuff;
 
     if (rp = ObtainGIRPort(msg->gpi_GInfo))
     {
@@ -870,7 +870,7 @@ ULONG pathgadget_handleinput(Class *cl, struct Gadget *gadget, struct gpInput *m
     struct PathEditBuffer *editbuff;
     UWORD ieclass;
 
-    editbuff = &((struct LibData *)cl->cl_Dispatcher.h_Data)->path_editbuff;
+    editbuff = &gfmlib_data.path_editbuff;
 
     if (ie)
 	ieclass = ie->ie_Class;
@@ -1613,7 +1613,7 @@ LONG pathgadget_clipcopy(Class *cl, PathGadgetData *data)
     BOOL success = FALSE;
     struct PathEditBuffer *editbuff;
 
-    editbuff = &((struct LibData *)cl->cl_Dispatcher.h_Data)->path_editbuff;
+    editbuff = &gfmlib_data.path_editbuff;
 
     if (ClipMP=CreatePort(0L,0L) )
     {
@@ -1704,7 +1704,7 @@ BOOL pathgadget_clippastereplace(Class *cl, PathGadgetData *data, struct gpInput
     BOOL success = FALSE;
     struct PathEditBuffer *editbuff;
 
-    editbuff = &((struct LibData *)cl->cl_Dispatcher.h_Data)->path_editbuff;
+    editbuff = &gfmlib_data.path_editbuff;
 
     if (ClipMP=CreatePort(0L,0L) )
     {
@@ -1913,7 +1913,7 @@ void pathgadget_remove_fwd(Class *cl, PathGadgetData *data, struct gpInput *msg,
     UBYTE part_len;
     struct PathEditBuffer *editbuff;
 
-    editbuff = &((struct LibData *)cl->cl_Dispatcher.h_Data)->path_editbuff;
+    editbuff = &gfmlib_data.path_editbuff;
 
     part = editbuff->peb_CursorPart;
     pos = editbuff->peb_CursorPos - editbuff->peb_CPOffset;
@@ -2025,7 +2025,7 @@ void pathgadget_remove_rew(Class *cl, PathGadgetData *data, struct gpInput *msg,
     UWORD pos;
     struct PathEditBuffer *editbuff;
 
-    editbuff = &((struct LibData *)cl->cl_Dispatcher.h_Data)->path_editbuff;
+    editbuff = &gfmlib_data.path_editbuff;
 
     pos = editbuff->peb_CursorPos - editbuff->peb_CPOffset;
     part = editbuff->peb_CursorPart;

@@ -66,7 +66,7 @@ BOOL __asm __saveds L_WB_PutDiskObject(
 	result=L_WriteIcon(name,diskobj);
 
 	// Succeeded?
-	if (result && !magic) icon_notify(&gfmlib_data,name,0,0);
+	if (result && !magic) icon_notify(name,0,0);
 
 	return result;
 }
@@ -86,7 +86,7 @@ BOOL __asm __saveds L_WB_DeleteDiskObject(register __a0 char *name)
 
 	// Succeeded?
 	if ((result || IoErr()==ERROR_OBJECT_NOT_FOUND) && full_name)
-		icon_notify(&gfmlib_data,full_name,INF_FULLNAME,1);
+		icon_notify(full_name,INF_FULLNAME,1);
 
 	// Free full name buffer
 	L_FreeMemH(full_name);
@@ -96,7 +96,7 @@ BOOL __asm __saveds L_WB_DeleteDiskObject(register __a0 char *name)
 
 
 // Send icon notification
-void icon_notify(struct LibData *data,char *name,ULONG flags,short delete)
+void icon_notify(char *name,ULONG flags,short delete)
 {
 	char *full_name;
 

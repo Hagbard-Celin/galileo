@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -66,4 +66,4 @@ void __asm L_SetDebug(
 	register __d1 ULONG flags);
 void __asm L_ClearDebug(void);
 void __asm L_ShowDebug(register __a0 char *name);
-void debug_proc(void);
+void __asm debug_proc(void);

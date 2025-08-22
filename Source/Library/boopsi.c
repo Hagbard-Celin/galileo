@@ -40,7 +40,6 @@ For more information on Directory Opus for Windows please see:
 
 // Initialise a BOOPSI class
 Class *init_class(
-	struct LibData *data,
 	char *name,
 	char *super,
 	struct IClass *super_pointer,
@@ -54,7 +53,6 @@ Class *init_class(
 	{
 		// Initialise
 		cl->cl_Dispatcher.h_Entry=dispatcher;
-		cl->cl_Dispatcher.h_Data=data;
 
 		// Make it available
 		AddClass(cl);

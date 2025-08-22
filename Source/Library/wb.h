@@ -288,7 +288,7 @@ void __asm L_WB_AddPort(register __a1 struct MsgPort *port);
 
 void __asm L_WB_CloseWindow(register __a0 struct Window *window);
 
-void icon_notify(struct LibData *data,char *name,ULONG flags,short);
+void icon_notify(char *name,ULONG flags,short);
 
 #define INF_FULLNAME	(1<<0)
 

@@ -41,13 +41,13 @@ For more information on Directory Opus for Windows please see:
 
 int __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase);
 void __asm __saveds __UserLibCleanup(register __a6 struct MyLibrary *libbase);
-__asm low_mem_handler(register __a0 struct MemHandlerData *,register __a1 struct LibData *);
+__asm low_mem_handler(register __a0 struct MemHandlerData *);
 
 char *_ProgramName="galileofm.library";
 
 void init_locale_data(struct GalileoLocale *locale);
 void free_locale_data(struct GalileoLocale *locale);
-void free_libdata(struct MyLibrary *libbase);
+void free_libdata(void);
 
 static const struct TextAttr topaz_attr={"topaz.font",8,0,0};
 
@@ -62,45 +62,39 @@ ULONG callerid;
 #define SysBase		((struct ExecBase *)*((ULONG *)4))
 
 
-void free_libdata(struct MyLibrary *libbase)
+void free_libdata(void)
 {
-    struct LibData *data;
+    WB_Data *wb_data;
 
-    // Library data?
-    if ((data=(struct LibData *)libbase->ml_UserData))
+    // Get workbench data
+    wb_data=&gfmlib_data.wb_data;
+
+    // Remove low-memory handler
+    if (gfmlib_data.low_mem_handler.is_Node.ln_Pri==50)
+	    RemMemHandler(&gfmlib_data.low_mem_handler);
+
+    // Remove patch information
+    if (wb_data)
     {
-	    WB_Data *wb_data;
-
-	    // Get workbench data
-	    wb_data=&data->wb_data;
-
-	    // Remove low-memory handler
-	    if (data->low_mem_handler.is_Node.ln_Pri==50)
-		    RemMemHandler(&data->low_mem_handler);
-
-	    // Remove patch information
-	    if (wb_data)
+	    if (wb_data->patch_count>0)
 	    {
-		    if (wb_data->patch_count>0)
-		    {
-			    wb_data->patch_count=1;
-			    L_WB_Remove_Patch();
-		    }
+		    wb_data->patch_count=1;
+		    L_WB_Remove_Patch();
 	    }
-
-	    // Free path list
-	    if (data->path_list) L_FreeDosPathList(data->path_list);
-
-	    // Free locale stuff
-	    free_locale_data(&data->locale);
-
-	    // Free memory
-	    if (data->memory) L_FreeMemHandle(data->memory);
-	    if (data->dos_list_memory) L_FreeMemHandle(data->dos_list_memory);
-
-	    // Close timer
-	    if (data->TimerBase) CloseDevice(&data->timer_io);
     }
+
+    // Free path list
+    if (gfmlib_data.path_list) L_FreeDosPathList(gfmlib_data.path_list);
+
+    // Free locale stuff
+    free_locale_data(&gfmlib_data.locale);
+
+    // Free memory
+    if (gfmlib_data.memory) L_FreeMemHandle(gfmlib_data.memory);
+    if (gfmlib_data.dos_list_memory) L_FreeMemHandle(gfmlib_data.dos_list_memory);
+
+    // Close timer
+    if (gfmlib_data.TimerBase) CloseDevice(&gfmlib_data.timer_io);
 
     if (listview_class) FreeClass(listview_class);
     if (path_class) FreeClass(path_class);
@@ -210,7 +204,7 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 		!(IconBase=OpenLibrary("icon.library",37)) ||
 		!(WorkbenchBase=OpenLibrary("workbench.library",37)))
 	{
-	    free_libdata(NULL);
+	    free_libdata();
 	    return 1;
 	}
 
@@ -222,10 +216,6 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 
 	// Save our library base with in far-data to make it always available.
 	MyLibBase = (struct Library *)libbase;
-
-	// Need this for now, as not all functions have been rewritten
-	// after LibData was moved to the near-data section
-	libbase->ml_UserData = (ULONG)&gfmlib_data;
 
 	// Check for OS 3.5 icon library
 	// if <44 then try for NewIcons. Don't open NewIcons under V44
@@ -243,7 +233,7 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 	// Get topaz font
 	if (!(topaz_font=OpenFont(&topaz_attr)))
 	{
-	    free_libdata(libbase);
+	    free_libdata();
 	    return 1;
 	}
 
@@ -332,7 +322,6 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 	// Initialise boopsi classes
 	if (!(image_class=
 			init_class(
-				&gfmlib_data,
 				"galileoiclass",
 				"imageclass",
 				NULL,
@@ -341,7 +330,6 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 
 		!(button_class=
 			init_class(
-				&gfmlib_data,
 				"galileobuttongclass",
 				"gadgetclass",
 				NULL,
@@ -350,7 +338,6 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 
 		!(string_class=
 			init_class(
-				&gfmlib_data,
 				"galileostrgclass",
 				"strgclass",
 				NULL,
@@ -359,7 +346,6 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 
 		!(check_class=
 			init_class(
-				&gfmlib_data,
 				"galileocheckgclass",
 				"gadgetclass",
 				NULL,
@@ -368,7 +354,6 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 
 		!(view_class=
 			init_class(
-				&gfmlib_data,
 				"galileoviewgclass",
 				"gadgetclass",
 				NULL,
@@ -377,7 +362,6 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 
 		!(palette_class=
 			init_class(
-				&gfmlib_data,
 				"galileopalettegclass",
 				"gadgetclass",
 				NULL,
@@ -386,7 +370,6 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 
 		!(frame_class=
 			init_class(
-				&gfmlib_data,
 				"galileoframeclass",
 				"gadgetclass",
 				NULL,
@@ -395,7 +378,6 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 
 		!(gauge_class=
 			init_class(
-				&gfmlib_data,
 				"galileogaugeclass",
 				"gadgetclass",
 				NULL,
@@ -404,7 +386,6 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 
 		!(propgadget_class=
 			init_class(
-				&gfmlib_data,
 				"galileopropgclass",
 				"gadgetclass",
 				NULL,
@@ -413,7 +394,6 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 
 		!(pathg_class=
 			init_class(
-				&gfmlib_data,
 				NULL,
 				"gadgetclass",
 				NULL,
@@ -422,7 +402,6 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 
 		!(path_class=
 			init_class(
-				&gfmlib_data,
 				"galileopathgclass",
 				NULL,
 				pathg_class,
@@ -431,14 +410,13 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 
 		!(listview_class=
 			init_class(
-				&gfmlib_data,
 				"galileolistviewgclass",
 				"gadgetclass",
 				NULL,
 				(unsigned long (*)())listview_dispatchTr,
 				sizeof(ListViewData))))
 	{
-		free_libdata(libbase);
+		free_libdata();
 	        return 1;
 	}
 
@@ -470,9 +448,9 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 		"GALILEO_LAUNCHER",
 		(ULONG)launcher_procTr,
 		STACK_LARGE|IPCF_GETPATH,
-		(ULONG)&gfmlib_data)) || !launcher_ipc)
+		NULL)) || !launcher_ipc)
 	{
-	    free_libdata(libbase);
+	    free_libdata();
 	    return 1;
 	}
 	gfmlib_data.launcher=launcher_ipc;
@@ -507,21 +485,19 @@ void __asm __saveds __UserLibCleanup(register __a6 struct MyLibrary *libbase)
 		L_IPC_Command(launcher_ipc,IPC_QUIT,0,0,0,REPLY_NO_PORT_IPC);
 	}
 
-	free_libdata(libbase);
+	free_libdata();
 }
 
 
 // Low memory handler
-__asm low_mem_handler(
-	register __a0 struct MemHandlerData *memh,
-	register __a1 struct LibData *data)
+__asm low_mem_handler(register __a0 struct MemHandlerData *memh)
 {
 	// Is this the first time?
 	if (!(memh->memh_Flags&MEMHF_RECYCLE))
 	{
 		// Signal the launcher to send the message
-		if (data->low_mem_signal>-1)
-			Signal((struct Task *)data->launcher->proc,1<<data->low_mem_signal);
+		if (gfmlib_data.low_mem_signal>-1)
+			Signal((struct Task *)gfmlib_data.launcher->proc,1<<gfmlib_data.low_mem_signal);
 
 		// Tell it to try again
 		return MEM_TRY_AGAIN;
