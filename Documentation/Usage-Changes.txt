@@ -145,3 +145,13 @@ Lister changes:
                Ctrl Z  Equivalent to "Shift Right-Arrow".
 
 
+StringGadget changes:
+
+- The edit keys for pasting from clipboard are changed to match those of the
+  new PathGadget:
+
+        Right Amiga V  Paste clipboard contents, inserting at cursor
+                       position.
+
+  Shift Right Amiga V  Clear the gadget, then paste contents of clipboard.
+

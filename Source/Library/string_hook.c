@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -310,7 +310,7 @@ ULONG __asm string_edit_hook(
 								data.length=work->StringInfo->MaxChars;
 
 								// Try to allocate buffer for insert
-								if (work->Code=='V' &&
+								if (work->Code=='v' &&
 									(buffer=AllocVec((work->StringInfo->MaxChars+1)*2,MEMF_CLEAR)))
 								{
 									// Fill out packet
