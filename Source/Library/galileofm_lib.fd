@@ -435,7 +435,7 @@ FreeDosListCopy(list)(a0)
 RemapIcon(icon,screen,free)(a0/a1,d0)
 GetOriginalIcon(icon)(a0)
 *
-CalcPercent(amount,total,utilbase)(d0/d1,a0)
+CalcPercent(amount,total,utilbase)(d0/d1)
 *
 IsDiskDevice(port)(a0)
 *

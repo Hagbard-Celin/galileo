@@ -50,9 +50,7 @@ HookData *__asm __saveds L_GetEditHook(
 	if (hook=AllocVec(sizeof(HookData),MEMF_CLEAR))
 	{
 		// Fill out hook
-		hook->hook.h_Entry=(ULONG (*)())string_edit_hook;
-		hook->a4=getreg(REG_A4);
-		hook->a6=getreg(REG_A6);
+		hook->hook.h_Entry=(ULONG (*)())string_edit_hookTr;
 		hook->type=type;
 		hook->flags=flags;
 
@@ -90,7 +88,7 @@ char *__asm __saveds L_GetSecureString(
 }
 
 
-ULONG __asm string_edit_hook(
+ULONG __asm __saveds string_edit_hook(
 	register __a0 HookData *hook,
 	register __a1 ULONG *msg,
 	register __a2 struct SGWork *work)
@@ -101,10 +99,6 @@ ULONG __asm string_edit_hook(
 
 	// Cache buffer position
 	buffer_pos=work->StringInfo->BufferPos;
-
-	// Fix registers
-	putreg(REG_A4,hook->a4);
-	putreg(REG_A6,hook->a6);
 
 	// Key press?
 	while (*msg==SGH_KEY)

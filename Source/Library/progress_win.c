@@ -759,7 +759,7 @@ void progress_draw(ProgressWindow *prog,unsigned long flags)
 
 				// Calculate
 				else
-				if ((pcent=L_CalcPercent(prog->pw_FileDone,prog->pw_FileSize,UtilityBase))>100)
+				if ((pcent=L_CalcPercent(prog->pw_FileDone,prog->pw_FileSize))>100)
 					pcent=100;
 			}
 
@@ -1000,7 +1000,7 @@ void progress_bar(ProgressWindow *prog,unsigned long flags,long count,long num)
 	if (count>0)
 	{
 		// Get percentage
-		if ((full=L_CalcPercent(num,count,UtilityBase))>0)
+		if ((full=L_CalcPercent(num,count))>0)
 		{
 			// Get width of fill area
 			width=UDivMod32((prog->pw_Coords[PROG_GRAPH].Width-2)*full,100);
@@ -1044,8 +1044,7 @@ void progress_bar(ProgressWindow *prog,unsigned long flags,long count,long num)
 // Calculate a percentage
 long __asm __saveds L_CalcPercent(
 	register __d0 ULONG amount,
-	register __d1 ULONG total,
-	register __a0 struct Library *UtilityBase)
+	register __d1 ULONG total)
 {
 	long pcent;
 

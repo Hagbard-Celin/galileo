@@ -39,8 +39,8 @@ For more information on Directory Opus for Windows please see:
 #include "galileofmlib.h"
 #include "boopsi.h"
 
-int __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase);
-void __asm __saveds __UserLibCleanup(register __a6 struct MyLibrary *libbase);
+int __asm __saveds __UserLibInit(register __a6 struct Library *libbase);
+void __asm __saveds __UserLibCleanup(register __a6 struct Library *libbase);
 __asm low_mem_handler(register __a0 struct MemHandlerData *);
 
 char *_ProgramName="galileofm.library";
@@ -142,7 +142,7 @@ void free_libdata(void)
 
 
 // Initialise libraries we need
-__asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
+__asm __saveds __UserLibInit(register __a6 struct Library *libbase)
 {
 	char buf[16];
 
@@ -215,7 +215,7 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 	P96Base=OpenLibrary("Picasso96API.library",0);
 
 	// Save our library base with in far-data to make it always available.
-	MyLibBase = (struct Library *)libbase;
+	MyLibBase = libbase;
 
 	// Check for OS 3.5 icon library
 	// if <44 then try for NewIcons. Don't open NewIcons under V44
@@ -240,15 +240,6 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 	// Initialise stuff
 	gfmlib_data.low_mem_signal=-1;
 	gfmlib_data.wb_data.first_app_entry=TRUE;
-	gfmlib_data.dos_base=(struct Library *)DOSBase;
-	gfmlib_data.icon_base=IconBase;
-	gfmlib_data.new_icon_base=(struct Library *)NewIconBase;
-	gfmlib_data.int_base=(struct Library *)IntuitionBase;
-	gfmlib_data.galileofm_base=libbase;
-	gfmlib_data.gfx_base=GfxBase;
-	gfmlib_data.LayersBase = LayersBase;
-	gfmlib_data.CxBase = CxBase;
-	gfmlib_data.KeymapBase = KeymapBase;
 
 #ifdef RESOURCE_TRACKING
 	gfmlib_data.restrack_base=ResTrackBase;
@@ -311,9 +302,6 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 		// Set cache flag
 		gfmlib_data.flags|=LIBDF_FT_CACHE;
 	}
-
-	// Save a4
-	gfmlib_data.a4=getreg(REG_A4);
 
 	// Create some memory handles
 	gfmlib_data.memory=L_NewMemHandle(sizeof(IPCMessage)<<5,sizeof(IPCMessage)<<4,MEMF_CLEAR|MEMF_PUBLIC);
@@ -475,7 +463,7 @@ __asm __saveds __UserLibInit(register __a6 struct MyLibrary *libbase)
 
 
 // Clean up
-void __asm __saveds __UserLibCleanup(register __a6 struct MyLibrary *libbase)
+void __asm __saveds __UserLibCleanup(register __a6 struct Library *libbase)
 {
 	L_FlushImages();
 

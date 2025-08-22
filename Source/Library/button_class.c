@@ -927,7 +927,7 @@ void button_render(
 		if (data->flags&BUTTONF_THIN)
 		{
 			// Normal string box
-			draw_field_box(rp,&rect,render->gpr_GInfo->gi_DrInfo,(struct Library *)GfxBase);
+			draw_field_box(rp,&rect,render->gpr_GInfo->gi_DrInfo);
 
 			// Calculate interior
 			interior.MinX+=2;
@@ -1090,7 +1090,7 @@ void button_render(
 		box.Height-=2;
 
 		// Get percentage free
-		pcent=L_CalcPercent(gauge->free,gauge->total,UtilityBase);
+		pcent=L_CalcPercent(gauge->free,gauge->total);
 
 		// Get height of selected area		
 		height=UDivMod32(box.Height*pcent,100);

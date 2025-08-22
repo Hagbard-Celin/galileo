@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -78,14 +78,13 @@ void __asm __saveds L_DrawFieldBox(
 	register __a1 struct Rectangle *rect,
 	register __a2 struct DrawInfo *info)
 {
-	draw_field_box(rp,rect,info,(struct Library *)GfxBase);
+	draw_field_box(rp,rect,info);
 }
 
 void draw_field_box(
 	struct RastPort *rp,
 	struct Rectangle *rect,
-	struct DrawInfo *info,
-	struct Library *GfxBase)
+	struct DrawInfo *info)
 {
 	// Do shine lines
 	SetAPen(rp,info->dri_Pens[SHINEPEN]);

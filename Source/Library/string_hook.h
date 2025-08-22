@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -41,11 +41,14 @@ typedef struct
 	Att_List	*history;
 	ULONG		type;
 	ULONG		flags;
-	ULONG		a4;
-	ULONG		a6;
 	struct Task	*change_task;
 	short		change_bit;
 } HookData;
+
+ULONG __asm string_edit_hookTr(
+	register __a0 HookData *hook,
+	register __a1 ULONG *msg,
+	register __a2 struct SGWork *work);
 
 ULONG __asm string_edit_hook(
 	register __a0 HookData *hook,

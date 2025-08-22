@@ -43,7 +43,6 @@ For more information on Directory Opus for Windows please see:
 struct backfill_hook
 {
     struct Hook		hook;
-    struct Library	*GfxBase;
     UWORD		dither[2];
     struct RastPort	rp;
     short		shinepen;

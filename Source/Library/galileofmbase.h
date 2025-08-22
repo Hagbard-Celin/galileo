@@ -1736,7 +1736,7 @@ void ShowProgressWindow(APTR,struct Screen *,struct Window *);
 void SetProgressWindow(APTR,struct TagItem *);
 void GetProgressWindow(APTR,struct TagItem *);
 BOOL CheckProgressAbort(APTR);
-long CalcPercent(ULONG,ULONG,struct Library *);
+long CalcPercent(ULONG,ULONG);
 
 APTR __stdargs OpenProgressWindowTags(Tag,...);
 void __stdargs SetProgressWindowTags(APTR,Tag,...);

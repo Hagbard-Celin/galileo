@@ -50,14 +50,6 @@ For more information on Directory Opus for Windows please see:
 #define CATCOMP_NUMBERS
 #include "galileofmlib.strings"
 
-struct MyLibrary
-{
-	struct             Library ml_Lib;
-	ULONG              ml_SegList;
-	ULONG              ml_Flags;
-	APTR               ml_ExecBase; /* pointer to exec base  */
-	ULONG              ml_UserData;
-};
 
 struct LibData
 {
@@ -67,9 +59,6 @@ struct LibData
 	struct MinList		notify_list;
 	struct SignalSemaphore	notify_lock;
 
-	struct Library		*dos_base;
-	struct Library		*icon_base;
-
 	IPCData			*launch_proc;
 	struct MinList		launch_list;
 	struct SignalSemaphore	launch_lock;
@@ -77,8 +66,6 @@ struct LibData
 
 	BPTR			path_list;
 	struct SignalSemaphore	path_lock;
-
-	struct Library		*int_base;
 	struct MinList		error_list;
 	ULONG			error_wait;
 
@@ -95,14 +82,8 @@ struct LibData
 
 	Class			*dt_class;
 	ULONG			old_openlib;
-	struct MyLibrary	dt_lib;
-
-	ULONG			a4;
 
 	IPCData			*fake_wb;
-	struct MyLibrary	*galileofm_base;
-	struct GfxBase		*gfx_base;
-
 	struct ListLock		file_list;
 	BPTR			last_file;
 
@@ -116,8 +97,6 @@ struct LibData
 	struct MinList		dos_list;
 	APTR			dos_list_memory;
 	struct SignalSemaphore	dos_lock;
-
-	struct Library		*new_icon_base;
 
 	ULONG			NewIconsFlags;
 	short			NewIconsPrecision;
@@ -139,11 +118,6 @@ struct LibData
 	struct ListLock		allocbitmap_patch;
 
 	CxObj			*cx_select_up_down;
-
-	struct Library	        *LayersBase;
-	struct Library	        *CxBase;
-	struct Library	        *KeymapBase;
-
 	struct PathEditBuffer   path_editbuff;
 
 #ifdef RESOURCE_TRACKING
@@ -209,7 +183,6 @@ extern char decimal_point;
 
 extern IPCData *launcher_ipc;
 
-#define GET_GALILEOFMLIB	((struct MyLibrary *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"galileofm.library"))
 
 #if 0
 void KPrintF __ARGS((char *,...));
@@ -280,8 +253,7 @@ ULONG __asm L_ScreenInfo(register __a0 struct Screen *screen);
 void draw_field_box(
 	struct RastPort *rp,
 	struct Rectangle *rect,
-	struct DrawInfo *info,
-	struct Library *GfxBase);
+	struct DrawInfo *info);
 
 
 // misc.c
@@ -1007,8 +979,7 @@ BOOL __asm L_CheckProgressAbort(
 	register __a0 struct _ProgressWindow *prog);
 long __asm L_CalcPercent(
 	register __d0 ULONG amount,
-	register __d1 ULONG total,
-	register __a0 struct Library *UtilityBase);
+	register __d1 ULONG total);
 
 
 // string_hook

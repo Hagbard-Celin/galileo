@@ -54,6 +54,7 @@ _\1Tr:
         TRAMPOLINE launch_exit_code
         TRAMPOLINE progress_task
         TRAMPOLINE requester_proc
+        TRAMPOLINE string_edit_hook
 
         IFD FAKEWB
         TRAMPOLINE fake_workbench

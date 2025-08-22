@@ -598,25 +598,25 @@ void __asm __saveds L_SetNewIconsFlags(
 	gfmlib_data.NewIconsPrecision=precision;
 
 	// Got NewIcons?
-	if (gfmlib_data.new_icon_base)
+	if (NewIconBase)
 	{
 		// Set precision
-		((struct NewIconBase *)gfmlib_data.new_icon_base)->nib_Precision=precision;
+		NewIconBase->nib_Precision=precision;
 
 		// Set flags
-		if (gfmlib_data.new_icon_base->lib_Version>=38)
+		if (NewIconBase->nib_Lib.lib_Version>=38)
 		{
 			if (flags&ENVNIF_DITHERING)
-				((struct NewIconBase *)gfmlib_data.new_icon_base)->nib_Flags|=NIFLG_DO_DITHER;
+				NewIconBase->nib_Flags|=NIFLG_DO_DITHER;
 			else
-				((struct NewIconBase *)gfmlib_data.new_icon_base)->nib_Flags&=~NIFLG_DO_DITHER;
+				NewIconBase->nib_Flags&=~NIFLG_DO_DITHER;
 		}
-		if (gfmlib_data.new_icon_base->lib_Version>=39)
+		if (NewIconBase->nib_Lib.lib_Version>=39)
 		{
 			if (flags&ENVNIF_RTG)
-				((struct NewIconBase *)gfmlib_data.new_icon_base)->nib_Flags|=NIFLG_RTGMODE;
+				NewIconBase->nib_Flags|=NIFLG_RTGMODE;
 			else
-				((struct NewIconBase *)gfmlib_data.new_icon_base)->nib_Flags&=~NIFLG_RTGMODE;
+				NewIconBase->nib_Flags&=~NIFLG_RTGMODE;
 		}
 	}
 }

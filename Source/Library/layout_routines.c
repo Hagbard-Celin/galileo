@@ -1187,9 +1187,7 @@ ObjectList *__asm __saveds L_AddObjectList(
 							struct TagItem *tag;
 
 							// Fill out hook
-							hook->hook.h_Entry=(ULONG (*)())string_edit_hook;
-							hook->a4=getreg(REG_A4);
-							hook->a6=getreg(REG_A6);
+							hook->hook.h_Entry=(ULONG (*)())string_edit_hookTr;
 
 							// Don't select next field?
 							if (GetTagData(GTCustom_NoSelectNext,0,taglist))
