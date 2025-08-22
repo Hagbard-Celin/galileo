@@ -115,7 +115,7 @@ CONFIGMYOBJS = $(OBJ)$(CONFIGDIR)config_drag.o \
 	$(OBJ)$(CONFIGDIR)edit.o \
 	$(OBJ)$(CONFIGDIR)ipc.o
 
-CONFIGOBJS  = $(OBJ)$(CONFIGDIR)libinit.o $(OBJ)lsprintf.o $(OBJ)$(CONFIGDIR)config.o $(OBJ)$(CONFIGDIR)config_strings.o $(CONFIGMYOBJS)
+CONFIGOBJS  = $(OBJ)$(CONFIGDIR)userlibinit.o $(OBJ)lsprintf.o $(OBJ)$(CONFIGDIR)config.o $(OBJ)$(CONFIGDIR)config_strings.o $(CONFIGMYOBJS)
 CONFIGVER   = 0
 CONFIGREV   = 2
 
@@ -1058,14 +1058,16 @@ $(OBJ)xadbrowser/XADbrowser_progress.o: /Program/galileo_config.h
 $(OBJ)xadbrowser/XADbrowser_progress.o: /Library/galileofmpragmas.h modules.h
 $(OBJ)xadbrowser/XADbrowser_progress.o: /Program/lister_ipc.h module.h
 
-$(OBJ)config/libinit.o: config/libinit.c config/config_lib.h
-$(OBJ)config/libinit.o: /Library/galileofmbase.h /Include/galileo/os.h
-$(OBJ)config/libinit.o: /Program/galileo_config.h /Library/galileofmpragmas.h
-$(OBJ)config/libinit.o: config/galileoconfig.h config/galileoconfig_pragmas.h
-$(OBJ)config/libinit.o: /Modules/modules.h config/config.strings
-$(OBJ)config/libinit.o: config/enums.h config/config_data.h
-$(OBJ)config/libinit.o: config/function_export.h config/function_editor.h
-$(OBJ)config/libinit.o: config/select_colours.h config/button_editor.h
+$(OBJ)config/userlibinit.o: config/userlibinit.c config/config_lib.h
+$(OBJ)config/userlibinit.o: /Library/galileofmbase.h /Include/galileo/os.h
+$(OBJ)config/userlibinit.o: /Program/galileo_config.h
+$(OBJ)config/userlibinit.o: /Library/galileofmpragmas.h
+$(OBJ)config/userlibinit.o: config/galileoconfig.h
+$(OBJ)config/userlibinit.o: config/galileoconfig_pragmas.h /Modules/modules.h
+$(OBJ)config/userlibinit.o: config/config.strings config/enums.h
+$(OBJ)config/userlibinit.o: config/config_data.h config/function_export.h
+$(OBJ)config/userlibinit.o: config/function_editor.h config/select_colours.h
+$(OBJ)config/userlibinit.o: config/button_editor.h
 $(OBJ)config/config.o: config/config.c config/config_lib.h
 $(OBJ)config/config.o: /Library/galileofmbase.h /Include/galileo/os.h
 $(OBJ)config/config.o: /Program/galileo_config.h /Library/galileofmpragmas.h

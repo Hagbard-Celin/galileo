@@ -45,21 +45,21 @@ char *_ProgramName="galileoconfig.gfmmodule";
 
 char *version="$VER: galileoconfig.gfmmodule 0.2 "__AMIGADATE__" ";
 
-struct DosLibrary *DOSBase=0;
-struct Library *GalileoFMBase=0;
-struct IntuitionBase *IntuitionBase=0;
-struct GfxBase *GfxBase=0;
-struct Library *LayersBase=0;
-struct Library *DiskfontBase=0;
-struct Library *GadToolsBase=0;
-struct Library *WorkbenchBase=0;
-struct Library *IconBase=0;
-struct Library *AslBase=0;
-struct Library *CxBase=0;
-struct Library *UtilityBase=0;
-struct Library *P96Base=0;
-struct LocaleBase *LocaleBase=0;
-struct GalileoLocale *locale=0;
+struct DosLibrary *DOSBase;
+struct Library *GalileoFMBase;
+struct IntuitionBase *IntuitionBase;
+struct GfxBase *GfxBase;
+struct Library *LayersBase;
+struct Library *DiskfontBase;
+struct Library *GadToolsBase;
+struct Library *WorkbenchBase;
+struct Library *IconBase;
+struct Library *AslBase;
+struct Library *CxBase;
+struct Library *UtilityBase;
+struct Library *P96Base;
+struct LocaleBase *LocaleBase;
+struct GalileoLocale *locale;
 
 #ifdef RESOURCE_TRACKING
 struct Library *ResTrackBase;
@@ -78,6 +78,22 @@ __asm __saveds __UserLibInit()
    if (ResTrackBase=REALS_OpenLibrary("g_restrack.library",0))
 		StartResourceTracking (RTL_ALL);
 #endif
+	// Initialise
+	DOSBase = 0;
+	GalileoFMBase = 0;
+	IntuitionBase = 0;
+	GfxBase = 0;
+	LayersBase = 0;
+	DiskfontBase = 0;
+	GadToolsBase = 0;
+	WorkbenchBase = 0;
+	IconBase = 0;
+	AslBase = 0;
+	CxBase = 0;
+	UtilityBase = 0;
+	P96Base = 0;
+	LocaleBase = 0;
+	locale = 0;
 
 	// DOS
 	DOSBase=(struct DosLibrary *)OpenLibrary("dos.library",0);
@@ -93,7 +109,11 @@ __asm __saveds __UserLibInit()
 		!(IconBase=OpenLibrary("icon.library",37)) ||
 		!(AslBase=OpenLibrary("asl.library",37)) ||
 		!(CxBase=OpenLibrary("commodities.library",37)) ||
-		!(UtilityBase=OpenLibrary("utility.library",37))) return 1;
+		!(UtilityBase=OpenLibrary("utility.library",37)))
+	{
+	    __UserLibCleanup();
+	    return 1;
+	}
 
 	// Under 39?
 	if (GfxBase->LibNode.lib_Version>=39)
@@ -103,7 +123,11 @@ __asm __saveds __UserLibInit()
 
 	// Allocate and open locale data
 	if (!(locale=AllocVec(sizeof(struct GalileoLocale),MEMF_CLEAR)))
+	{
+		__UserLibCleanup();
 		return 1;
+	}
+
 	init_locale_data(locale);
 
 	if (LocaleBase=(struct LocaleBase *)OpenLibrary("locale.library",38))
@@ -137,18 +161,18 @@ void __asm __saveds __UserLibCleanup()
 		CloseLibrary(P96Base);
 
 	// Close libraries
-	CloseLibrary(GalileoFMBase);
-	CloseLibrary((struct Library *)IntuitionBase);
-	CloseLibrary((struct Library *)GfxBase);
-	CloseLibrary(LayersBase);
-	CloseLibrary(GadToolsBase);
-	CloseLibrary(DiskfontBase);
-	CloseLibrary(WorkbenchBase);
-	CloseLibrary(IconBase);
-	CloseLibrary(AslBase);
-	CloseLibrary(CxBase);
-	CloseLibrary(UtilityBase);
-	CloseLibrary((struct Library *)DOSBase);
+	if (UtilityBase) CloseLibrary(UtilityBase);
+	if (CxBase) CloseLibrary(CxBase);
+	if (AslBase) CloseLibrary(AslBase);
+	if (IconBase) CloseLibrary(IconBase);
+	if (WorkbenchBase) CloseLibrary(WorkbenchBase);
+	if (DiskfontBase) CloseLibrary(DiskfontBase);
+	if (GadToolsBase) CloseLibrary(GadToolsBase);
+	if (LayersBase) CloseLibrary(LayersBase);
+	if (GfxBase) CloseLibrary((struct Library *)GfxBase);
+	if (IntuitionBase) CloseLibrary((struct Library *)IntuitionBase);
+	if (GalileoFMBase) CloseLibrary(GalileoFMBase);
+	if (DOSBase) CloseLibrary((struct Library *)DOSBase);
 
 #ifdef RESOURCE_TRACKING
 	KPrintF("Config Quitting......\n");
