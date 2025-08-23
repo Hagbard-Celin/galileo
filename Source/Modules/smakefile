@@ -103,6 +103,7 @@ CONFIGMYOBJS = $(OBJ)$(CONFIGDIR)config_drag.o \
 	$(OBJ)$(CONFIGDIR)config_buttons_god.o $(OBJ)$(CONFIGDIR)config_buttons_support.o \
 	$(OBJ)$(CONFIGDIR)button_editor.o $(OBJ)$(CONFIGDIR)button_editor_data.o \
 	$(OBJ)$(CONFIGDIR)function_editor.o $(OBJ)$(CONFIGDIR)function_editor_data.o \
+	$(OBJ)$(CONFIGDIR)trampoline.o \
 	$(OBJ)$(CONFIGDIR)select_colours.o $(OBJ)$(CONFIGDIR)select_colours_data.o \
 	$(OBJ)$(CONFIGDIR)config_convert.o $(OBJ)$(CONFIGDIR)config_convert_data.o \
 	$(OBJ)$(CONFIGDIR)old_config.o $(OBJ)$(CONFIGDIR)config_filetypes.o \
@@ -208,6 +209,8 @@ modules_internal_pragmas.h: modules_internal.fd
     fd2pragma modules_internal.fd modules_internal_pragmas.h
 
 $(OBJ)lsprintf.o: lsprintf.asm
+$(OBJ)$(CONFIGDIR)trampoline.o: $(CONFIGDIR)trampoline.asm
+    sc:c/asm -o$(OBJ)$(CONFIGDIR) -iASMINC: $*.asm
 $(OBJ)$(XADDIR)trampoline.o: $(XADDIR)trampoline.asm
     sc:c/asm -o$(OBJ)$(XADDIR) -iASMINC: $*.asm
 $(OBJ)$(FTPDIR)ftp_ver.o: $(FTPDIR)ftp_ver.c
@@ -567,8 +570,8 @@ sc
 
 #########################################################################
 
-$(BIN)galileoconfig.gfmmodule: $(CONFIGOBJS) 
-	slink with lib:utillib.with with <<
+$(BIN)galileoconfig.gfmmodule: $(CONFIGOBJS)
+    slink with lib:utillib.with with <<
 define __ctype=___ctype
 libprefix _L_
 libfd $(CONFIGDIR)galileoconfig.fd
@@ -578,7 +581,7 @@ lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(CONFIGVER)
 librevision $(CONFIGREV)
 $(STRIPDEBUG) noicons
-sc sd
+sc
 maxhunk 51200
 <
 

@@ -82,7 +82,7 @@ Cfg_Function *__asm __saveds L_Config_EditFunction(
 		0,
 		&editor,
 		"galileo_function_editor",
-		(ULONG)FunctionEditor,
+		(ULONG)FunctionEditorTr,
 		STACK_DEFAULT,
 		(ULONG)startup)) || !editor)
 	{

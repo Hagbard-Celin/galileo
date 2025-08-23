@@ -41,36 +41,18 @@ For more information on Directory Opus for Windows please see:
 
 void buttoned_copy_string(ButtonEdData *data,char *from,char **to);
 
-#define GalileoFMBase		(data->GalileoFMBase)
-#define DOSBase			(data->DOSBase)
-#define IntuitionBase	(data->IntuitionBase)
-#define CxBase			(data->CxBase)
-#define WorkbenchBase	(data->WorkbenchBase)
-#define GfxBase			(data->GfxBase)
-#define UtilityBase		(data->UtilityBase)
-#define LayersBase		(data->LayersBase)
 
-void ButtonEditor(void)
+void __asm __saveds ButtonEditor(void)
 {
 	ButtonEdStartup *startup=0;
 	ButtonEdData *data;
 	IPCData *ipc;
 	short success=0,pending_quit=0;
 	BOOL open_window=1;
-#ifdef RESOURCE_TRACKING
-	struct Library *ResTrackBase;
-	struct ExecBase *Exec=(struct ExecBase *)*((ULONG *)4);
-
-	ResTrackBase=(struct Library *)FindName(&Exec->LibList,"g_restrack.library");
-#endif
-
 
 	// Do startup
-	if (!(ipc=Local_IPC_ProcStartup((ULONG *)&startup,_buttoned_init)))
+	if (!(ipc=IPC_ProcStartup((ULONG *)&startup,_buttoned_init)))
 		return;
-
-	// Fix A4
-	putreg(REG_A4,startup->func_startup.a4);
 
 	// Get data pointer
 	data=startup->data;
@@ -79,8 +61,8 @@ void ButtonEditor(void)
 	// Fill in new window
 	data->newwin.parent=startup->window;
 	data->newwin.dims=startup->win_text_def;
-	data->newwin.locale=data->locale;
-	data->newwin.title=GetString(data->locale,MSG_BUTTONED_TITLE);
+	data->newwin.locale=locale;
+	data->newwin.title=GetString(locale,MSG_BUTTONED_TITLE);
 	data->newwin.flags=WINDOW_VISITOR|WINDOW_REQ_FILL|WINDOW_AUTO_KEYS;
 
 	// Build function list
@@ -235,7 +217,7 @@ void ButtonEditor(void)
 
 				// Fill out tags
 				tags[0].ti_Tag=GTPA_NumColors;
-				tags[0].ti_Data=data->startup->palette_data.screen_data.pen_count+((GfxBase->lib_Version>=39)?8:4);
+				tags[0].ti_Data=data->startup->palette_data.screen_data.pen_count+((GfxBase->LibNode.lib_Version>=39)?8:4);
 				tags[1].ti_Tag=GTPA_ColorTable;
 				tags[1].ti_Data=(ULONG)data->startup->palette_data.pen_array;
 				tags[2].ti_Tag=TAG_END;
@@ -248,7 +230,7 @@ void ButtonEditor(void)
 				pen=(a==GAD_PALETTE_FOREGROUND)?data->button->button.fpen:data->button->button.bpen;
 
 				// Map top colours
-				if (GfxBase->lib_Version>=39)
+				if (GfxBase->LibNode.lib_Version>=39)
 				{
 					if (pen>=252) pen-=248;
 					else
@@ -491,7 +473,7 @@ void ButtonEditor(void)
 								bg=GetGadgetValue(data->objlist,GAD_PALETTE_BACKGROUND);
 
 								// Map colours under 39
-								if (GfxBase->lib_Version>=39)
+								if (GfxBase->LibNode.lib_Version>=39)
 								{
 									if (fg>=4 && fg<8) fg+=248;
 									else
@@ -820,14 +802,6 @@ ULONG __asm _buttoned_init(
 {
 	ButtonEdData *data;
 
-#ifdef RESOURCE_TRACKING
-#undef ResTrackBase
-	struct Library *ResTrackBase;
-	struct ExecBase *Exec=(struct ExecBase *)*((ULONG *)4);
-
-	ResTrackBase=(struct Library *)FindName(&Exec->LibList,"g_restrack.library");
-#endif
-
 	// Allocate data
 	if (!(data=AllocVec(sizeof(ButtonEdData),MEMF_CLEAR)))
 		return 0;
@@ -839,21 +813,6 @@ ULONG __asm _buttoned_init(
 	data->ipc=ipc;
 	data->startup=startup;
 	data->button=startup->button;
-	data->locale=startup->func_startup.locale;
-
-#ifdef RESOURCE_TRACKING
-	data->ResTrackBase=ResTrackBase;
-#endif
-
-	// Initialise library bases
-	GalileoFMBase=startup->func_startup.galileofm_base;
-	DOSBase=startup->func_startup.dos_base;
-	IntuitionBase=startup->func_startup.int_base;
-	CxBase=startup->func_startup.cx_base;
-	WorkbenchBase=startup->func_startup.wb_base;
-	GfxBase=startup->func_startup.gfx_base;
-	UtilityBase=startup->func_startup.util_base;
-	LayersBase=startup->func_startup.layers_base;
 
 	// Initialise process list
 	InitListLock(&data->proc_list,0);
@@ -872,9 +831,6 @@ ULONG __asm _buttoned_init(
 	return 1;
 }
 
-#ifdef RESOURCE_TRACKING
-#define ResTrackBase    (data->ResTrackBase)
-#endif
 
 // Show the button being edited
 void _buttoned_show_button(ButtonEdData *data)
@@ -895,8 +851,7 @@ void _buttoned_show_button(ButtonEdData *data)
 		(short *)data->startup->palette_data.screen_data.pen_array,
 		DRAW_MASK,
 		0,0,
-		-1,
-		GalileoFMBase,GfxBase);
+		-1);
 
 	// Fill out fields
 	SetGadgetValue(data->objlist,GAD_BUTTONED_NAME,(func)?(ULONG)func->node.ln_Name:0);
@@ -958,7 +913,7 @@ void _button_editor_edit_function(ButtonEdData *data)
 			&data->proc_list,
 			&ipc,
 			"galileo_function_editor",
-			(ULONG)FunctionEditor,
+			(ULONG)FunctionEditorTr,
 			STACK_DEFAULT,
 			(ULONG)startup)) && ipc)
 		{
@@ -1617,7 +1572,7 @@ void buttoned_build_function_list(ButtonEdData *data)
 
 	// Add nodes
 	for (a=0;a<3;a++)
-		Att_NewNode(data->func_list,GetString(data->locale,MSG_BUTTONED_LEFT_FUNCTION+a),a,0);
+		Att_NewNode(data->func_list,GetString(locale,MSG_BUTTONED_LEFT_FUNCTION+a),a,0);
 
 	// Go through button functions
 	for (func=(Cfg_ButtonFunction *)data->button->function_list.mlh_Head;
@@ -1809,8 +1764,7 @@ void _button_editor_change_label(ButtonEdData *data,UWORD id,BOOL refresh)
 			(short *)data->startup->palette_data.screen_data.pen_array,
 			(refresh)?DRAW_MASK:0,
 			0,0,
-			-1,
-			GalileoFMBase,GfxBase);
+			-1);
 
 		// Fill out fields on a real refresh
 		if (refresh)

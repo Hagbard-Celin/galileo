@@ -211,8 +211,7 @@ void config_env_paths_end_drag(config_env_data *data,BOOL ok)
 		sel=functioned_get_line(
 				data->window,
 				GetObject(data->objlist,GAD_SETTINGS_PATHLIST),
-				data->drag.drag_x,data->drag.drag_y,
-				(struct Library *)IntuitionBase);
+				data->drag.drag_x,data->drag.drag_y);
 
 		// Valid selection?
 		if (sel!=item)

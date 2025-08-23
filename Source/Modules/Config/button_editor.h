@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -88,26 +88,11 @@ typedef struct _ButtonEdData
 	short			which;		// Function being editor (left/right/etc)
 	GL_Object		*display;	// Button display area
 	struct Rectangle	button_rect;	// Button display rectangle
-
-	struct GalileoLocale	*locale;
 	ButtonEdStartup		*startup;
 
 	Att_List		*func_list;
 
 	struct ListLock		proc_list;
-
-	struct Library		*GalileoFMBase;
-	struct Library		*DOSBase;
-	struct Library		*IntuitionBase;
-	struct Library		*UtilityBase;
-	struct Library		*CxBase;
-	struct Library		*WorkbenchBase;
-	struct Library		*GfxBase;
-	struct Library		*LayersBase;
-
-#ifdef RESOURCE_TRACKING
-    struct Library      *ResTrackBase;
-#endif
 
 	struct AppWindow	*appwindow;
 	struct MsgPort		*app_port;
@@ -141,7 +126,8 @@ enum
 };
 
 // prototypes
-void ButtonEditor(void);
+void __asm ButtonEditorTr(void);
+void __asm ButtonEditor(void);
 ULONG __asm _buttoned_init(register __a0 IPCData *,register __a1 ButtonEdStartup *);
 void _buttoned_show_button(ButtonEdData *);
 void _button_editor_edit_function(ButtonEdData *);

@@ -61,7 +61,7 @@ extern struct Library		*IconBase;
 extern struct Library		*AslBase;
 extern struct Library		*CxBase;
 extern struct Library		*UtilityBase;
-extern struct Library       *P96Base;
+extern struct Library		*P96Base;
 extern struct LocaleBase	*LocaleBase;
 extern struct GalileoLocale	*locale;
 
@@ -71,24 +71,6 @@ extern struct Library *ResTrackBase;
 extern ULONG callerid;
 #endif
 
-typedef struct
-{
-	struct Library		*DOSBase;
-	struct Library		*GalileoFMBase;
-	struct Library		*IntuitionBase;
-	struct Library		*GfxBase;
-	struct Library		*LayersBase;
-	struct Library		*DiskfontBase;
-	struct Library		*GadToolsBase;
-	struct Library		*WorkbenchBase;
-	struct Library		*IconBase;
-	struct Library		*AslBase;
-	struct Library		*CxBase;
-	struct Library		*UtilityBase;
-    struct Library      *P96Base;
-	struct Library		*LocaleBase;
-	struct GalileoLocale	locale;
-} libdata;
 
 // Config sub-option handles
 typedef struct _SubOptionHandle {
@@ -108,8 +90,8 @@ IPCData *__saveds Local_IPC_ProcStartup(
 	ULONG (*code)(IPCData *,APTR));
 
 #define VALID_QUALIFIERS (IEQUALIFIER_LCOMMAND|IEQUALIFIER_RCOMMAND|\
-                         IEQUALIFIER_CONTROL|IEQUALIFIER_LSHIFT|\
-                         IEQUALIFIER_RSHIFT|IEQUALIFIER_LALT|IEQUALIFIER_RALT)
+			 IEQUALIFIER_CONTROL|IEQUALIFIER_LSHIFT|\
+			 IEQUALIFIER_RSHIFT|IEQUALIFIER_LALT|IEQUALIFIER_RALT)
 
 typedef struct
 {

@@ -43,13 +43,8 @@ For more information on Directory Opus for Windows please see:
 
 #define FUNCF_PRIVATE			(1<<26) // Function is private
 
-#define GalileoFMBase		(data->startup->galileofm_base)
 
-#ifdef RESOURCE_TRACKING
-#define ResTrackBase    (data->startup->restrack_base)
-#endif
-
-void FunctionEditor(void)
+void __asm __saveds FunctionEditor(void)
 {
 	struct IntuiMessage *gmsg,msg;
 	int break_flag=0;
@@ -66,14 +61,11 @@ void FunctionEditor(void)
 	ConfigWindow windims;
 
 	// Do startup
-	if (!(ipc=Local_IPC_ProcStartup((ULONG *)&startup,funced_init)))
+	if (!(ipc=IPC_ProcStartup((ULONG *)&startup,funced_init)))
 	{
 		funced_cleanup(startup->data);
 		return;
 	}
-
-	// Fix A4
-	putreg(REG_A4,startup->a4);
 
 	// Get data pointer
 	data=startup->data;
@@ -94,8 +86,8 @@ void FunctionEditor(void)
 	// Fill in new window
 	newwin.parent=startup->window;
 	newwin.dims=&windims;
-	newwin.title=(startup->title[0])?startup->title:(char *)GetString(startup->locale,MSG_FUNCED_TITLE);
-	newwin.locale=startup->locale;
+	newwin.title=(startup->title[0])?startup->title:(char *)GetString(locale,MSG_FUNCED_TITLE);
+	newwin.locale=locale;
 	newwin.port=0;
 	newwin.flags=WINDOW_VISITOR|WINDOW_AUTO_KEYS|WINDOW_REQ_FILL;//|WINDOW_SIZE_BOTTOM;
 	newwin.font=0;
@@ -559,8 +551,7 @@ void FunctionEditor(void)
 									funced_edit_insertstring(
 										data->objlist,
 										GAD_FUNCED_EDIT,
-										buffer,
-										GalileoFMBase,(struct Library *)IntuitionBase);
+										buffer);
 								}
 								break;
 
@@ -583,8 +574,7 @@ void FunctionEditor(void)
 									funced_edit_insertstring(
 										data->objlist,
 										GAD_FUNCED_EDIT,
-										buffer,
-										GalileoFMBase,(struct Library *)IntuitionBase);
+										buffer);
 								}
 								break;
 
@@ -606,7 +596,7 @@ void FunctionEditor(void)
 									tags[0].ti_Tag=ASLFR_Window;
 									tags[0].ti_Data=(ULONG)data->window;
 									tags[1].ti_Tag=ASLFR_TitleText;
-									tags[1].ti_Data=(ULONG)GetString(startup->locale,MSG_FUNCED_SELECT_FILE);
+									tags[1].ti_Data=(ULONG)GetString(locale,MSG_FUNCED_SELECT_FILE);
 									tags[2].ti_Tag=ASLFR_Flags1;
 									tags[2].ti_Data=FRF_DOSAVEMODE|FRF_PRIVATEIDCMP;
 									tags[3].ti_Tag=ASLFR_Flags2;
@@ -629,7 +619,7 @@ void FunctionEditor(void)
 										if (gadgetid==MENU_FUNCED_EXPORT_CMD)
 											function_export_cmd(data->buffer,0,data->function);
 										else
-											L_FunctionExportASCII(data->buffer,0,data->function,startup->a4);
+											L_FunctionExportASCII(data->buffer,0,data->function,0);
 									}
 
 									// Remove busy pointer
@@ -905,23 +895,12 @@ void FunctionEditor(void)
 	FreeVec(startup);
 }
 
-#ifdef RESOURCE_TRACKING
-#undef ResTrackBase
-#endif
 
 ULONG __asm funced_init(
 	register __a0 IPCData *ipc,
 	register __a1 FunctionStartup *startup)
 {
 	FuncEdData *data;
-
-#ifdef RESOURCE_TRACKING
-	struct Library *ResTrackBase;
-	struct ExecBase *Exec=(struct ExecBase *)*((ULONG *)4);
-
-	ResTrackBase=(struct Library *)FindName(&Exec->LibList,"g_restrack.library");
-#endif
-
 
 	// Allocate data
 	if (!(data=AllocVec(sizeof(FuncEdData),MEMF_CLEAR)))
@@ -933,11 +912,6 @@ ULONG __asm funced_init(
 	// Initialise some pointers
 	data->startup=startup;
 	data->function=startup->function;
-	data->locale=startup->locale;
-
-#ifdef RESOURCE_TRACKING
-	data->startup->restrack_base=ResTrackBase;
-#endif
 
 	// Create timer
 	if (!(data->drag.timer=AllocTimer(UNIT_VBLANK,0)))
@@ -956,15 +930,6 @@ ULONG __asm funced_init(
 
 void funced_cleanup(FuncEdData *data)
 {
-#ifdef RESOURCE_TRACKING
-    	struct Library *ResTrackBase;
-	struct ExecBase *Exec=(struct ExecBase *)*((ULONG *)4);
-
-    	ResTrackBase=(struct Library *)FindName(&Exec->LibList,"g_restrack.library");
-#endif
-#ifdef RESOURCE_TRACKING
-	ResourceTrackingEndOfTask();
-#endif
 	if (data)
 	{
 		// Free timer
@@ -980,9 +945,6 @@ void funced_cleanup(FuncEdData *data)
 	}
 }
 
-#ifdef RESOURCE_TRACKING
-#define ResTrackBase    (data->startup->restrack_base)
-#endif
 
 // Build list of flags
 void funced_build_flaglist(FuncEdData *data)
@@ -995,7 +957,7 @@ void funced_build_flaglist(FuncEdData *data)
 		// Add flag to the list
 		Att_NewNode(
 			data->flag_list,
-			GetString(data->locale,data->startup->flag_list[flag+1]),
+			GetString(locale,data->startup->flag_list[flag+1]),
 			data->startup->flag_list[flag],
 			ADDNODE_SORT);
 	}
@@ -1143,7 +1105,7 @@ void funced_build_entrydisplay(
 	if (node->node.ln_Name=AllocMemH(data->func_display_list->memory,strlen(entry->buffer)+32))
 	{
 		// Build new name
-		strcpy(node->node.ln_Name,GetString(data->locale,data->startup->func_labels[entry->type]));
+		strcpy(node->node.ln_Name,GetString(locale,data->startup->func_labels[entry->type]));
 		if (entry->buffer[0])
 		{
 			strcat(node->node.ln_Name,"\a\xc");
@@ -1692,7 +1654,7 @@ BOOL funced_command_req(FuncEdData *data,char *buffer,short type)
 
 			// Go through strings
 			for (num=MSG_FUNCED_ARGUMENT_1;
-				*(str=GetString(data->locale,num))!='-';
+				*(str=GetString(locale,num))!='-';
 				num++)
 			{
 				// Add to requester list
@@ -1716,10 +1678,10 @@ BOOL funced_command_req(FuncEdData *data,char *buffer,short type)
 				SelectionList(
 					command_list,
 					data->window,0,
-					GetString(data->startup->locale,(type==-1)?MSG_FUNCED_SELECT_ARG:MSG_FUNCED_SELECT_COMMAND),
+					GetString(locale,(type==-1)?MSG_FUNCED_SELECT_ARG:MSG_FUNCED_SELECT_COMMAND),
 					-1,0,0,
-					GetString(data->startup->locale,MSG_OKAY),
-					GetString(data->startup->locale,MSG_CANCEL),0,0);
+					GetString(locale,MSG_OKAY),
+					GetString(locale,MSG_CANCEL),0,0);
 		}
 
 		// Valid selection?
@@ -1775,7 +1737,7 @@ BOOL funced_command_req(FuncEdData *data,char *buffer,short type)
 		tags[0].ti_Tag=ASLFR_Window;
 		tags[0].ti_Data=(ULONG)data->window;
 		tags[1].ti_Tag=ASLFR_TitleText;
-		tags[1].ti_Data=(ULONG)GetString(data->locale,MSG_SELECT_FILE);
+		tags[1].ti_Data=(ULONG)GetString(locale,MSG_SELECT_FILE);
 		tags[2].ti_Tag=ASLFR_InitialFile;
 		tags[2].ti_Data=(ULONG)"";
 		tags[3].ti_Tag=(data->last_type!=type)?ASLFR_InitialDrawer:TAG_IGNORE;
@@ -1870,7 +1832,7 @@ void funced_appmsg(FuncEdData *data,struct AppMessage *msg)
 			    DisplayBeep(data->window->WScreen);
 
 			    // Make error message
-			    lsprintf(data->buffer, GetString(data->locale, MSG_ERROR_LONG_PATH), 79);
+			    lsprintf(data->buffer, GetString(locale, MSG_ERROR_LONG_PATH), 79);
 
 			    // Allocate copy of message
 			    if (copy = AllocVec(strlen(data->buffer) + 1, MEMF_PUBLIC))
@@ -1944,13 +1906,9 @@ void funced_appmsg(FuncEdData *data,struct AppMessage *msg)
 	}
 }
 
-#ifdef RESOURCE_TRACKING
-#undef ResTrackBase
-#define ResTrackBase    (struct Library *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"g_restrack.library")
-#endif
 
 // See if an app argument is ok
-short funced_appmsg_arg(struct WBArg *arg,char *buffer,struct Library *DOSBase)
+short funced_appmsg_arg(struct WBArg *arg,char *buffer)
 {
 	BPTR old,file;
 	long test=0;
@@ -2020,10 +1978,6 @@ short funced_appmsg_arg(struct WBArg *arg,char *buffer,struct Library *DOSBase)
 	return type;
 }
 
-#ifdef RESOURCE_TRACKING
-#undef ResTrackBase
-#define ResTrackBase    (data->startup->restrack_base)
-#endif
 
 // End drag
 void functioned_end_drag(FuncEdData *data,short ok)
@@ -2067,7 +2021,7 @@ void functioned_end_drag(FuncEdData *data,short ok)
 		sel=functioned_get_line(
 			data->window,
 			GetObject(data->objlist,GAD_FUNCED_LISTER),
-			data->drag.drag_x,data->drag.drag_y,(struct Library *)IntuitionBase);
+			data->drag.drag_x,data->drag.drag_y);
 
 		// Valid selection?
 		if (sel!=drag_item)
@@ -2228,7 +2182,7 @@ void functioned_copy_line(
 		sel=functioned_get_line(
 			data->window,
 			GetObject(data->objlist,GAD_FUNCED_LISTER),
-			pos->x,pos->y,(struct Library *)IntuitionBase);
+			pos->x,pos->y);
 
 		// Get node to insert before
 		data->edit_node=Att_FindNode(data->func_display_list,sel);
@@ -2258,15 +2212,12 @@ void functioned_copy_line(
 	}
 }
 
-#undef GalileoFMBase
 
 // Insert a string into a string gadget
 void funced_edit_insertstring(
 	ObjectList *list,
 	ULONG id,
-	char *string,
-	struct Library *GalileoFMBase,
-	struct Library *IntuitionBase)
+	char *string)
 {
 	char buffer[256],tempbuf[256];
 	struct Gadget *gadget;
@@ -2315,9 +2266,6 @@ void funced_edit_insertstring(
 	ActivateGadget(gadget,list->window,0);
 }
 
-#ifdef RESOURCE_TRACKING
-#undef ResTrackBase
-#endif
 
 // Get rexx arguments from a script
 BOOL funced_rexx_args(char *name,char *buffer)
@@ -2326,13 +2274,6 @@ BOOL funced_rexx_args(char *name,char *buffer)
 	BPTR file;
 	short size,len=0;
 	short got_rexx=0;
-
-#ifdef RESOURCE_TRACKING
-    struct Library *ResTrackBase;
-    struct ExecBase *Exec=(struct ExecBase *)*((ULONG *)4);
-
-    ResTrackBase=(struct Library *)FindName(&Exec->LibList,"g_restrack.library");
-#endif
 
 	// Allocate buffer
 	if (!(buf=AllocVec(4096,MEMF_CLEAR)))

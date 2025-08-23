@@ -37,24 +37,18 @@ For more information on Directory Opus for Windows please see:
 
 #include "config_lib.h"
 
-#define GalileoFMBase		(data->GalileoFMBase)
-#define IntuitionBase	(data->IntuitionBase)
-
-#ifdef RESOURCE_TRACKING
-#define ResTrackBase    (data->ResTrackBase)
-#endif
 
 struct Window *palette_box_open(PaletteBoxData *data,ObjectDef *,short *,short *);
 void palette_box_colour(PaletteBoxData *,GL_Object *,short,ULONG *,short,ULONG);
 
-void __saveds PaletteBox(void)
+void __asm __saveds PaletteBox(void)
 {
 	PaletteBoxData *data;
 	struct Window *window;
 	IPCData *ipc;
 
 	// Do startup
-	if (!(ipc=Local_IPC_ProcStartup((ULONG *)&data,0)))
+	if (!(ipc=IPC_ProcStartup((ULONG *)&data,0)))
 	{
 		Forbid();
 		return;
@@ -133,7 +127,7 @@ void __saveds PaletteBox(void)
 						bg=GetGadgetValue(OBJLIST(window),GAD_PALETTE_BACKGROUND);
 
 						// Fix pens
-						if (IntuitionBase->lib_Version>=39)
+						if (IntuitionBase->LibNode.lib_Version>=39)
 						{
 							if (fg>=4 && fg<8) fg=248+fg;
 							else
@@ -220,7 +214,7 @@ struct Window *palette_box_open(
 
 			// Fill out tags
 			tags[0].ti_Tag=GTPA_NumColors;
-			tags[0].ti_Data=data->pen_count+((IntuitionBase->lib_Version>=39)?8:4);
+			tags[0].ti_Data=data->pen_count+((IntuitionBase->LibNode.lib_Version>=39)?8:4);
 			tags[1].ti_Tag=GTPA_ColorTable;
 			tags[1].ti_Data=(ULONG)((a==0)?pen_array1:pen_array2);
 			tags[2].ti_Tag=TAG_END;
@@ -238,7 +232,7 @@ struct Window *palette_box_open(
 		bpen=data->bgpen;
 
 		// Map top colours
-		if (IntuitionBase->lib_Version>=39)
+		if (IntuitionBase->LibNode.lib_Version>=39)
 		{
 			if (fpen>=252) fpen-=248;
 			else
@@ -263,13 +257,6 @@ struct Window *palette_box_open(
 	return 0;
 }
 
-
-#undef GalileoFMBase
-#undef IntuitionBase
-
-#ifdef RESOURCE_TRACKING
-#undef ResTrackBase
-#endif
 
 // Show palette box
 long __asm __saveds L_ShowPaletteBox(
@@ -333,13 +320,6 @@ long __asm __saveds L_ShowPaletteBox(
 		data->pen_count++;
 	}
 
-	// Libraries
-	data->GalileoFMBase=GalileoFMBase;
-	data->IntuitionBase=(struct Library *)IntuitionBase;
-
-#ifdef RESOURCE_TRACKING
-    data->ResTrackBase=ResTrackBase;
-#endif
 
 	// Bits per gun defaults to 4
 	data->stuff2.gun_bits[0]=4;

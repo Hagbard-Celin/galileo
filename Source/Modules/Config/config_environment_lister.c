@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -89,7 +89,7 @@ void _config_env_status_list(ObjectList *objlist,ULONG id,long first,long last)
 			else stccpy(buf,node->node.ln_Name,sizeof(buf));
 
 			// Insert into gadget
-			funced_edit_insertstring(objlist,id,buf,GalileoFMBase,(struct Library *)IntuitionBase);
+			funced_edit_insertstring(objlist,id,buf);
 		}
 	}
 

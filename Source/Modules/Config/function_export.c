@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -45,19 +45,12 @@ BOOL __asm __saveds L_FunctionExportASCII(
 	register __a0 char *filename,
 	register __a1 Cfg_Button *button,
 	register __a2 Cfg_Function *function,
-	register __d0 ULONG a4)
+	register __d0 ULONG export_type)
 {
 	APTR file;
 	char *func_ptr;
 	short func_len,type_len=0,a;
 	BOOL ret=1;
-	short export_type=0;
-
-	// A4 supplied?
-	if (a4) putreg(REG_A4,a4);
-
-	// Export for Key Finder
-	else export_type=1;
 
 	// Open file
 	if (!(file=OpenBuf(filename,MODE_READWRITE,2048)))

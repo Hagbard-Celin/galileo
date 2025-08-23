@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -94,4 +94,5 @@ extern ConfigWindow _palette_box_window,_palette_box_cust_window;
 extern struct TagItem _palette_box_tags[];
 extern ObjectDef _palette_box_objects[],_palette_box_cust_objects[];
 
-void __saveds PaletteBox(void);
+void __asm __saveds PaletteBoxTr(void);
+void __asm __saveds PaletteBox(void);

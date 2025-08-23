@@ -44,7 +44,7 @@ For more information on Directory Opus for Windows please see:
 
 #define NUM_CHANGE_FLAGS	2
 
-void funced_edit_insertstring(ObjectList *,ULONG,char *string,struct Library *,struct Library *);
+void funced_edit_insertstring(ObjectList *,ULONG,char *string);
 BOOL config_env_popkey(config_env_data *);
 void config_env_load(config_env_data *,UWORD);
 BOOL config_env_save(config_env_data *,short);
@@ -107,9 +107,6 @@ unsigned long __asm __saveds L_Config_Environment(
 
 	// Fix font pen table
 	_config_env_fix_font_pens(data);
-
-	// Store graphics library
-	data->GfxBase=(struct Library *)GfxBase;
 
 	// Build sub-option list, open display
 	if (!(data->options=build_sub_options(_environment_options)) ||

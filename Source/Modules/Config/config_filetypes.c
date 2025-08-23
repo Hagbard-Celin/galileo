@@ -605,27 +605,6 @@ void filetype_edit(
 	eddata->node=node;
 	eddata->action_lookup=filetype_action_lookup;
 
-	// Supply libraries
-	eddata->func_startup.galileofm_base=GalileoFMBase;
-	eddata->func_startup.dos_base=(struct Library *)DOSBase;
-	eddata->func_startup.int_base=(struct Library *)IntuitionBase;
-	eddata->func_startup.util_base=UtilityBase;
-	eddata->func_startup.cx_base=CxBase;
-	eddata->func_startup.wb_base=WorkbenchBase;
-	eddata->func_startup.gfx_base=(struct Library *)GfxBase;
-	eddata->func_startup.asl_base=AslBase;
-	eddata->func_startup.layers_base=LayersBase;
-
-#ifdef RESOURCE_TRACKING
-    eddata->func_startup.restrack_base=ResTrackBase;
-#endif
-
-	// Supply a4
-	eddata->func_startup.a4=getreg(REG_A4);
-
-	// Supply locale
-	eddata->func_startup.locale=locale;
-
 	// Supply gui data pointers
 	eddata->new_win.parent=data->window;
 	eddata->new_win.dims=&_filetype_editor_window;
@@ -653,7 +632,7 @@ void filetype_edit(
 		&data->proc_list,
 		&node->editor,
 		"galileo_filetype_editor",
-		(ULONG)FiletypeEditor,
+		(ULONG)FiletypeEditorTr,
 		STACK_DEFAULT,
 		(ULONG)eddata)) || !node->editor)
 	{

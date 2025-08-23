@@ -381,8 +381,7 @@ BOOL config_menus_clip_button(config_menus_data *data,Cfg_Button *button,Point *
 			data->window,
 			GetObject(data->objlist,GAD_MENUS_MENU),
 			pos->x,
-			pos->y,
-			(struct Library *)IntuitionBase))==-1)
+			pos->y))==-1)
 		{
 			// Can't drop here
 			DisplayBeep(data->window->WScreen);
@@ -538,8 +537,7 @@ void config_menus_move_item(
 				data->window,
 				GetObject(data->objlist,GAD_MENUS_MENU+drop_type),
 				data->window->LeftEdge+x,
-				data->window->TopEdge+y,
-				(struct Library *)IntuitionBase);
+				data->window->TopEdge+y);
 
 		// Get node we dropped over
 		if (!(drop_node=Att_FindNode(data->menu_list[drop_type],drop_line)))
@@ -680,8 +678,7 @@ void config_menus_add_func(config_menus_data *data,short type,struct WBArg *arg)
 		data->bank->memory,
 		arg,
 		ins,
-		0,
-		(struct Library *)DOSBase,GalileoFMBase)))
+		0)))
 	{
 		// Failed
 		FreeInstruction(ins);

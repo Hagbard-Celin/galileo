@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -144,7 +144,7 @@ void button_to_clipboard(config_buttons_data *data,Cfg_Button *button);
 void button_save_clipboard(config_buttons_data *data,BOOL save);
 void button_load_clipboard(config_buttons_data *data);
 void show_button_clipboard(config_buttons_data *data,BOOL move);
-void button_draw(Cfg_Button *,struct IBox *,struct Rectangle *,struct Window *,short,Cfg_ButtonFunction *,short *,short,short,short,short,struct Library *,struct Library *);
+void button_draw(Cfg_Button *,struct IBox *,struct Rectangle *,struct Window *,short,Cfg_ButtonFunction *,short *,short,short,short,short);
 void _config_buttons_fix_controls(config_buttons_data *data);
 void _config_buttons_drop_button(config_buttons_data *data,short x,short y);
 void _config_buttons_fake_return(config_buttons_data *data,Cfg_Button *orig_button,Cfg_Button *new_button);
@@ -173,6 +173,4 @@ Cfg_Button *button_create_drop(
 	APTR memory,
 	struct WBArg *arg,
 	Cfg_Instruction *ins,
-	unsigned long flags,
-	struct Library *DOSBase,
-	struct Library *GalileoFMBase);
+	unsigned long flags);

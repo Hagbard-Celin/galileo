@@ -72,10 +72,6 @@ typedef struct
 	struct Rectangle	mode_size_limit;	// Limits of screen mode size
 	struct Rectangle	mode_size_default;	// Screen mode default size
 	unsigned short		mode_max_colours;	// Screen mode max colours
-	short 			pad;
-
-	struct Library		*GfxBase;
-
 	short			palette_colours;	// Number of colours in the palette
 	short			palette_count;		// Total number of colours
 	short			palette_array[16];	// Palette array
@@ -89,8 +85,6 @@ typedef struct
 
 	Att_List		*lister_items;		// Lister display items
 	struct FontRequester	*font_req;		// Font requester
-
-	ULONG			pad1;
 
 	struct MsgPort		*app_port;
 	struct AppWindow	*appwindow;

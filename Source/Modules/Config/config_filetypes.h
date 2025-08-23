@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -122,12 +122,6 @@ typedef struct
 	IPCData			*owner_ipc;	// Owner's IPC port
 
 	Cfg_Filetype		*type;		// Copy of recognition string
-
-	struct Library		*galileofm_base;	// Library pointers
-	struct Library		*dos_base;
-	struct Library		*int_base;
-	struct Library		*gfx_base;
-
 	NewConfigWindow		new_win;	// New window data
 	struct Window		*window;	// Window pointer
 	ObjectDef		*obj_def;	// Object definitions
@@ -143,16 +137,7 @@ typedef struct
 	short			last_selection;
 
 	IPCData			*main_owner;	// Main program
-
-	struct Library		*rexx_base;	// Rexx library
 	struct MsgPort		*reply_port;	// ReplyPort
-
-	struct Library		*asl_base;
-
-#ifdef RESOURCE_TRACKING
-    struct Library      *restrack_base;
-#endif
-
 	struct MinList		readers;	// Text readers
 } fileclass_ed_data;
 
@@ -234,7 +219,8 @@ BOOL filetype_receive_edit(config_filetypes_data *,Cfg_Filetype *,FiletypeNode *
 BOOL filetype_remove(config_filetypes_data *,Att_Node *,short);
 short filetype_save(config_filetypes_data *);
 
-void FiletypeEditor(void);
+void __asm FiletypeEditorTr(void);
+void __asm FiletypeEditor(void);
 ULONG __asm _filetypeed_init(register __a0 IPCData *,register __a1 filetype_ed_data *);
 void filetypeed_update_actions(filetype_ed_data *);
 void filetypeed_edit_action(filetype_ed_data *,short,char *);
@@ -244,7 +230,8 @@ void filetypeed_receive_class(filetype_ed_data *,Cfg_Filetype *);
 void filetypeed_show_icon(filetype_ed_data *);
 BOOL filetypeed_pick_icon(filetype_ed_data *);
 
-void FileclassEditor(void);
+void __asm FileclassEditorTr(void);
+void __asm FileclassEditor(void);
 ULONG __asm _fileclassed_init(register __a0 IPCData *,register __a1 fileclass_ed_data *);
 void _fileclassed_build_list(fileclass_ed_data *);
 void _fileclassed_build_recognition(fileclass_ed_data *);

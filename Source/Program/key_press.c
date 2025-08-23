@@ -433,7 +433,7 @@ void key_finder(IPCData *ipc)
 				if (GalileoConfigBase=OpenModule(config_name))
 				{
 					// Export function as ASCII to temporary file
-					if (FunctionExportASCII("t:keyfinder.tmp",0,function,0))
+					if (FunctionExportASCII("t:keyfinder.tmp",0,function,1))
 					{
 						APTR in;
 

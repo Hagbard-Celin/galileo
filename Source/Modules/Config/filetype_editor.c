@@ -40,25 +40,8 @@ For more information on Directory Opus for Windows please see:
 #include "config_filetypes.h"
 #include "config_buttons.h"
 
-#define GalileoFMBase		(data->func_startup.galileofm_base)
-#define Locale			(data->func_startup.locale)
 
-#ifdef RESOURCE_TRACKING
-#define ResTrackBase    (data->func_startup.restrack_base)
-#endif
-
-/*
-#define DOSBase			(data->func_startup.dos_base)
-#define IntuitionBase	(data->func_startup.int_base)
-#define GfxBase			(data->func_startup.gfx_base)
-#define AslBase			(data->func_startup.asl_base)
-#define WorkbenchBase	(data->func_startup.wb_base)
-#define UtilityBase		(data->func_startup.util_base)
-#define LayersBase		(data->func_startup.layers_base)
-*/
-
-
-void FiletypeEditor(void)
+void __asm __saveds FiletypeEditor(void)
 {
 	filetype_ed_data *data=0;
 	IPCData *ipc;
@@ -66,11 +49,8 @@ void FiletypeEditor(void)
 	BOOL change_flag=0;
 
 	// Do startup
-	if (!(ipc=Local_IPC_ProcStartup((ULONG *)&data,_filetypeed_init)))
+	if (!(ipc=IPC_ProcStartup((ULONG *)&data,_filetypeed_init)))
 		return;
-
-	// Fix A4
-	putreg(REG_A4,data->func_startup.a4);
 
 	// Create App stuff
 	if (data->app_port=CreateMsgPort())
@@ -623,9 +603,6 @@ ULONG __asm _filetypeed_init(
 {
 	short a;
 
-	// Fix A4
-	putreg(REG_A4,data->func_startup.a4);
-
 	// Store IPC pointer
 	data->ipc=ipc;
 
@@ -658,7 +635,7 @@ ULONG __asm _filetypeed_init(
 	{
 		Att_NewNode(
 			data->action_list,
-			GetString(Locale,data->action_lookup[a]),
+			GetString(locale,data->action_lookup[a]),
 			data->action_lookup[a+1],
 			0);
 	}
@@ -757,7 +734,7 @@ void filetypeed_edit_action(
 			&data->proc_list,
 			&data->editor[action],
 			"galileo_function_editor",
-			(ULONG)FunctionEditor,
+			(ULONG)FunctionEditorTr,
 			STACK_DEFAULT,
 			(ULONG)startup)) && data->editor[action]) success=1;
 	}
@@ -862,22 +839,11 @@ void filetypeed_edit_definition(filetype_ed_data *data)
 	startup->owner_ipc=data->ipc;
 	startup->main_owner=data->func_startup.main_owner;
 
-	// Supply some library pointers
-	startup->galileofm_base=GalileoFMBase;
-	startup->dos_base=(struct Library *)DOSBase;
-	startup->int_base=(struct Library *)IntuitionBase;
-	startup->gfx_base=(struct Library *)GfxBase;
-	startup->asl_base=AslBase;
-
-#ifdef RESOURCE_TRACKING
-	startup->restrack_base=ResTrackBase;
-#endif
-
 	// Fill out new window
 	startup->new_win.parent=data->window;
 	startup->new_win.dims=data->class_win;
 	startup->new_win.title=data->type->type.name;
-	startup->new_win.locale=Locale;
+	startup->new_win.locale=locale;
 	startup->new_win.flags=WINDOW_VISITOR|WINDOW_REQ_FILL|WINDOW_AUTO_KEYS;
 
 	// Supply object pointers
@@ -893,7 +859,7 @@ void filetypeed_edit_definition(filetype_ed_data *data)
 		&data->proc_list,
 		&data->class_editor,
 		"galileo_class_editor",
-		(ULONG)FileclassEditor,
+		(ULONG)FileclassEditorTr,
 		STACK_DEFAULT,
 		(ULONG)startup)) && data->class_editor) success=1;
 
@@ -1007,7 +973,7 @@ BOOL filetypeed_pick_icon(filetype_ed_data *data)
 	if (AslRequestTags(DATA(data->window)->request,
 		ASLFR_Flags1,FRF_PRIVATEIDCMP,
 		ASLFR_Window,data->window,
-		ASLFR_TitleText,GetString(Locale,MSG_FILETYPE_PICK_ICON),
+		ASLFR_TitleText,GetString(locale,MSG_FILETYPE_PICK_ICON),
 		ASLFR_InitialDrawer,path,
 		ASLFR_InitialFile,file,
 		ASLFR_InitialPattern,"#?.info",
@@ -1203,14 +1169,14 @@ void filetypeed_edit_iconmenu(filetype_ed_data *data,Att_Node *node)
 		startup->flags|=FUNCEDF_LABEL;
 
 		// Build title
-		lsprintf(startup->title,"%s : %s",data->type->type.name,GetString(Locale,MSG_ICON_MENU));
+		lsprintf(startup->title,"%s : %s",data->type->type.name,GetString(locale,MSG_ICON_MENU));
 
 		// Launch editor
 		if ((IPC_Launch(
 			&data->proc_list,
 			&fndata->editor,
 			"galileo_function_editor",
-			(ULONG)FunctionEditor,
+			(ULONG)FunctionEditorTr,
 			STACK_DEFAULT,
 			(ULONG)startup)) && fndata->editor) success=1;
 	}

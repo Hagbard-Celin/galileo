@@ -38,39 +38,22 @@ For more information on Directory Opus for Windows please see:
 #include "config_lib.h"
 #include "config_filetypes.h"
 
-#define GalileoFMBase		(data->galileofm_base)
-#define DOSBase			(data->dos_base)
-#define IntuitionBase	(data->int_base)
-#define GfxBase			(data->gfx_base)
-#define RexxSysBase		(data->rexx_base)
-#define AslBase			(data->asl_base)
 
-#ifdef RESOURCE_TRACKING
-#define ResTrackBase    (data->restrack_base)
-#endif
-
-void __saveds FileclassEditor(void)
+void __asm __saveds FileclassEditor(void)
 {
 	fileclass_ed_data *data;
 	IPCData *ipc;
 	short success=0;
 	ReaderNode *node;
-    struct Message *msg;
+	struct Message *msg;
 
 	// Do startup
-	if (!(ipc=Local_IPC_ProcStartup((ULONG *)&data,_fileclassed_init)))
+	if (!(ipc=IPC_ProcStartup((ULONG *)&data,_fileclassed_init)))
 		return;
 
-	// Open REXX library
-	if ((data->rexx_base=OpenLibrary("rexxsyslib.library",0)) &&
-		!(data->reply_port=CreateMsgPort()))
-	{
-		CloseLibrary(data->rexx_base);
-		data->rexx_base=0;
-	}
-
 	// Can't view files if no ARexx
-	if (!RexxSysBase) DisableObject(data->objlist,GAD_FILECLASSED_VIEW_FILE,TRUE);
+	if (!RexxSysBase || !(data->reply_port=CreateMsgPort()))
+	    DisableObject(data->objlist,GAD_FILECLASSED_VIEW_FILE,TRUE);
 
 	// Message loop
 	FOREVER
@@ -393,7 +376,6 @@ void __saveds FileclassEditor(void)
 	IPC_Goodbye(ipc,data->owner_ipc,(ULONG)-1);
 
 	// Close REXX library
-	CloseLibrary(data->rexx_base);
 	while (msg=GetMsg(data->reply_port))
 		FreeVec(msg);
 	DeleteMsgPort(data->reply_port);

@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -57,8 +57,7 @@ Att_List *build_sub_options(SubOptionHandle *list)
 short functioned_get_line(
 	struct Window *window,
 	GL_Object *object,
-	unsigned short x,unsigned short y,
-	struct Library *IntuitionBase)
+	unsigned short x,unsigned short y)
 {
 	ULONG storage;
 
@@ -159,7 +158,7 @@ Cfg_Instruction *instruction_from_wbarg(struct WBArg *arg,APTR memory)
 	BOOL quotes=0;
 
 	// Check argument
-	if ((type=funced_appmsg_arg(arg,buf,(struct Library *)DOSBase))==-1)
+	if ((type=funced_appmsg_arg(arg,buf))==-1)
 		return 0;
 
 	// Clear buffer

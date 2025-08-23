@@ -68,27 +68,6 @@ Cfg_Filetype *__asm __saveds L_EditFiletype(
 	data->owner_ipc=ipc;
 	data->action_lookup=filetype_action_lookup;
 
-	// Supply libraries
-	data->func_startup.galileofm_base=GalileoFMBase;
-	data->func_startup.dos_base=(struct Library *)DOSBase;
-	data->func_startup.int_base=(struct Library *)IntuitionBase;
-	data->func_startup.util_base=UtilityBase;
-	data->func_startup.cx_base=CxBase;
-	data->func_startup.wb_base=WorkbenchBase;
-	data->func_startup.gfx_base=(struct Library *)GfxBase;
-	data->func_startup.asl_base=AslBase;
-	data->func_startup.layers_base=LayersBase;
-
-#ifdef RESOURCE_TRACKING
-    data->func_startup.restrack_base=ResTrackBase;
-#endif
-
-	// Supply a4
-	data->func_startup.a4=getreg(REG_A4);
-
-	// Supply locale
-	data->func_startup.locale=locale;
-
 	// Supply gui data pointers
 	data->new_win.parent=window;
 	data->new_win.dims=&_filetype_editor_window;
@@ -118,7 +97,7 @@ Cfg_Filetype *__asm __saveds L_EditFiletype(
 		0,
 		&editor,
 		"galileo_filetype_editor",
-		(ULONG)FiletypeEditor,
+		(ULONG)FiletypeEditorTr,
 		STACK_DEFAULT,
 		(ULONG)data)) || !editor)
 	{

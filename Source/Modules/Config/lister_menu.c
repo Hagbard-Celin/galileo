@@ -1186,7 +1186,7 @@ void lister_menu_edit_item(lister_menu_data *data)
 			&data->proc_list,
 			&ipc,
 			"galileo_function_editor",
-			(ULONG)FunctionEditor,
+			(ULONG)FunctionEditorTr,
 			STACK_DEFAULT,
 			(ULONG)startup)) && ipc)
 		{
@@ -1547,8 +1547,7 @@ void lister_menu_end_drag(lister_menu_data *data,BOOL ok)
 			sel=functioned_get_line(
 				data->window,
 				GetObject(data->objlist,GAD_LISTER_MENU_ITEMS),
-				data->drag.drag_x,data->drag.drag_y,
-				(struct Library *)IntuitionBase);
+				data->drag.drag_x,data->drag.drag_y);
 
 			// Valid selection?
 			if (sel!=item)

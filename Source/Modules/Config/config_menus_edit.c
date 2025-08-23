@@ -198,7 +198,7 @@ void config_menus_edit_item(config_menus_data *data,short type)
 				&data->proc_list,
 				&look->ipc,
 				"galileo_function_editor",
-				(ULONG)FunctionEditor,
+				(ULONG)FunctionEditorTr,
 				STACK_DEFAULT,
 				(ULONG)startup)) && look->ipc)
 			{

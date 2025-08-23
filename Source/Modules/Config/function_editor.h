@@ -42,18 +42,6 @@ typedef struct
 	APTR			memory;
 	IPCData			*owner_ipc;
 	struct _FuncEdData	*data;
-
-	struct Library		*galileofm_base;
-	struct Library		*dos_base;
-	struct Library		*int_base;
-	struct Library		*util_base;
-	struct Library		*cx_base;
-	struct Library		*wb_base;
-	struct Library		*gfx_base;
-	struct Library		*asl_base;
-
-	struct GalileoLocale	*locale;
-
 	ConfigWindow		*win_def;
 	ObjectDef		*obj_def;
 
@@ -73,16 +61,6 @@ typedef struct
 	ULONG			flags;
 
 	IPCData			*main_owner;
-
-	struct Library		*layers_base;
-
-	ULONG			a4;
-
-#ifdef RESOURCE_TRACKING
-    struct Library      *restrack_base;
-#else
-	ULONG			pad;
-#endif
 } FunctionStartup;
 
 #define FUNCEDF_NO_KEY		(1<<0)
@@ -112,8 +90,6 @@ typedef struct _FuncEdData
 	Att_List		*function_list;		// Function list
 	Att_List		*func_display_list;	// Function display list
 	Att_List		*flag_list;		// List of flags
-
-	struct GalileoLocale	*locale;
 	FunctionStartup		*startup;
 
 	short			last_type;
@@ -209,7 +185,8 @@ enum
 extern MenuData _funced_menus[];
 
 // prototypes
-void FunctionEditor(void);
+void __asm FunctionEditorTr(void);
+void __asm FunctionEditor(void);
 ULONG __asm funced_init(register __a0 IPCData *,register __a1 FunctionStartup *);
 void funced_cleanup(FuncEdData *);
 void funced_build_flaglist(FuncEdData *);
@@ -222,14 +199,14 @@ void funced_start_edit(FuncEdData *);
 BOOL funced_end_edit(FuncEdData *,Att_Node *,int,UWORD);
 Att_Node *funced_new_entry(FuncEdData *,Att_Node *,FunctionEditorEntry *);
 void funced_check_flag(ULONG *,ULONG);
-void funced_edit_insertstring(ObjectList *,ULONG,char *,struct Library *,struct Library *);
+void funced_edit_insertstring(ObjectList *,ULONG,char *);
 void funced_store_edits(FuncEdData *);
 void funced_init_gads(FuncEdData *);
 BOOL funced_command_req(FuncEdData *,char *,short);
 void funced_appmsg(FuncEdData *,struct AppMessage *);
-short funced_appmsg_arg(struct WBArg *,char *,struct Library *);
+short funced_appmsg_arg(struct WBArg *,char *);
 void functioned_end_drag(FuncEdData *,short);
 void functioned_copy_line(FuncEdData *,FunctionEditorEntry *,unsigned short,Point *);
-short functioned_get_line(struct Window *,GL_Object *,unsigned short,unsigned short,struct Library *);
+short functioned_get_line(struct Window *,GL_Object *,unsigned short,unsigned short);
 void funced_show_key(FuncEdData *data);
 BOOL funced_rexx_args(char *name,char *buffer);

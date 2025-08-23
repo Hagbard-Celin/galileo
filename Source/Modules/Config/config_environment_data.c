@@ -38,6 +38,11 @@ For more information on Directory Opus for Windows please see:
 #include "config_lib.h"
 #include "config_environment.h"
 
+void __asm __saveds _palette_slider_callbackTr(
+	register __a1 struct TagItem *tag,
+	register __a2 struct Window *window);
+
+
 // environment window dimensions
 ConfigWindow
 	_config_environment_window={
@@ -46,16 +51,14 @@ ConfigWindow
 
 
 // Palette slider callback hook
-static void __asm __saveds _palette_slider_callback(
+void __asm __saveds _palette_slider_callback(
 	register __a1 struct TagItem *tag,
 	register __a2 struct Window *window)
 {
 	config_env_data *data;
-	struct Library *GfxBase;
 
 	// Get data pointer
 	data=(config_env_data *)CFGDATA(window);
-	GfxBase=data->GfxBase;
 
 	// Change tag to max pixel length
 	tag->ti_Tag=GTSL_MaxPixelLen;
@@ -162,7 +165,7 @@ static const struct TagItem
 		{GTSL_MaxLevelLen,5},
 		{GTSL_LevelFormat,(ULONG)"%ld  "},
 		{GTSL_LevelPlace,PLACETEXT_RIGHT},
-		{GTCustom_CallBack,(ULONG)_palette_slider_callback},
+		{GTCustom_CallBack,(ULONG)_palette_slider_callbackTr},
 		{TAG_MORE,(ULONG)_environment_relative_taglist}},
 
 	// Colour count slider

@@ -39,7 +39,7 @@ For more information on Directory Opus for Windows please see:
 
 #define LIB_VER 0
 
-int __asm __saveds __UserLibInit(void);
+int __asm __saveds __UserLibInit(register __a6 struct Library *libbase);
 void __asm __saveds __UserLibCleanup(void);
 char *_ProgramName="galileoconfig.gfmmodule";
 
@@ -58,25 +58,27 @@ struct Library *AslBase;
 struct Library *CxBase;
 struct Library *UtilityBase;
 struct Library *P96Base;
+struct RxsLib *RexxSysBase;
 struct LocaleBase *LocaleBase;
 struct GalileoLocale *locale;
+
+struct Library __far	*MyLibBase;
 
 #ifdef RESOURCE_TRACKING
 struct Library *ResTrackBase;
 
 ULONG callerid;
-
 #endif
 
 
 // Initialise libraries we need
-__asm __saveds __UserLibInit()
+__asm __saveds __UserLibInit(register __a6 struct Library *libbase)
 {
 #ifdef RESOURCE_TRACKING
-   callerid=(ULONG)&__UserLibInit;
+	callerid=(ULONG)&__UserLibInit;
 
-   if (ResTrackBase=REALS_OpenLibrary("g_restrack.library",0))
-		StartResourceTracking (RTL_ALL);
+	if (ResTrackBase=REALS_OpenLibrary("g_restrack.library",0))
+		     StartResourceTracking (RTL_ALL);
 #endif
 	// Initialise
 	DOSBase = 0;
@@ -92,6 +94,7 @@ __asm __saveds __UserLibInit()
 	CxBase = 0;
 	UtilityBase = 0;
 	P96Base = 0;
+	RexxSysBase = 0;
 	LocaleBase = 0;
 	locale = 0;
 
@@ -120,6 +123,10 @@ __asm __saveds __UserLibInit()
 	{
 	    P96Base=OpenLibrary("Picasso96API.library",0);
 	}
+
+	RexxSysBase = (struct RxsLib *)OpenLibrary("rexxsyslib.library",0);
+
+	MyLibBase = libbase;
 
 	// Allocate and open locale data
 	if (!(locale=AllocVec(sizeof(struct GalileoLocale),MEMF_CLEAR)))
@@ -157,8 +164,9 @@ void __asm __saveds __UserLibCleanup()
 		FreeVec(locale);
 	}
 
-	if (P96Base)
-		CloseLibrary(P96Base);
+
+	if (RexxSysBase) CloseLibrary((struct Library *)RexxSysBase);
+	if (P96Base) CloseLibrary(P96Base);
 
 	// Close libraries
 	if (UtilityBase) CloseLibrary(UtilityBase);
@@ -182,75 +190,6 @@ void __asm __saveds __UserLibCleanup()
 #endif
 
 }
-
-/*
-libdata *init_libs(void)
-{
-	libdata *data;
-
-	// Allocate library data
-	if (!(data=AllocVec(sizeof(libdata),MEMF_CLEAR)))
-		return 0;
-
-	// Get libraries we need
-	if (!(data->DOSBase=OpenLibrary("dos.library",0)) ||
-		!(data->GalileoFMBase=OpenLibrary("galileofm.library",40)) ||
-		!(data->IntuitionBase=OpenLibrary("intuition.library",37)) ||
-		!(data->GfxBase=OpenLibrary("graphics.library",37)) ||
-		!(data->LayersBase=OpenLibrary("layers.library",37)) ||
-		!(data->GadToolsBase=OpenLibrary("gadtools.library",37)) ||
-		!(data->DiskfontBase=OpenLibrary("diskfont.library",37)) ||
-		!(data->WorkbenchBase=OpenLibrary("workbench.library",37)) ||
-		!(data->IconBase=OpenLibrary("icon.library",37)) ||
-		!(data->AslBase=OpenLibrary("asl.library",37)) ||
-		!(data->CxBase=OpenLibrary("commodities.library",37)) ||
-		!(data->UtilityBase=OpenLibrary("utility.library",37)))
-	{
-		free_libs(data);
-		return 0;
-	}
-
-	// Open locale data
-	init_locale_data(&data->locale);
-	if (data->LocaleBase=OpenLibrary("locale.library",38))
-	{
-		data->locale.li_LocaleBase=LocaleBase;
-		data->locale.li_Catalog=OpenCatalogA(NULL,"GalileoConfig.catalog",0);
-	}
-
-	return data;
-}
-
-void free_libs(libdata *data)
-{
-	if (data)
-	{
-		// Free locale stuff
-		if (data->LocaleBase)
-		{
-			CloseCatalog(data->locale.li_Catalog);
-			CloseLibrary(data->LocaleBase);
-		}
-
-		// Close libraries
-		if (data->GalileoFMBase) CloseLibrary(data->GalileoFMBase);
-		if (data->IntuitionBase) CloseLibrary(data->IntuitionBase);
-		if (data->GfxBase) CloseLibrary(data->GfxBase);
-		if (data->LayersBase) CloseLibrary(data->LayersBase);
-		if (data->GadToolsBase) CloseLibrary(data->GadToolsBase);
-		if (data->DiskfontBase) CloseLibrary(data->DiskfontBase);
-		if (data->WorkbenchBase) CloseLibrary(data->WorkbenchBase);
-		if (data->IconBase) CloseLibrary(data->IconBase);
-		if (data->AslBase) CloseLibrary(data->AslBase);
-		if (data->CxBase) CloseLibrary(data->CxBase);
-		if (data->UtilityBase) CloseLibrary(data->UtilityBase);
-		if (data->DOSBase) CloseLibrary(data->DOSBase);
-
-		// Free data
-		FreeVec(data);
-	}
-}
-*/
 
 void __stdargs _XCEXIT(long poo) {}
 void __stdargs _CXFERR(int code) {}

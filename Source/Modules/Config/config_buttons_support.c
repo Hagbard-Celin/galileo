@@ -207,7 +207,7 @@ void _config_buttons_edit_button(
 				&data->bank_node->proc_list,
 				&ipc,
 				"galileo_button_editor",
-				(ULONG)ButtonEditor,
+				(ULONG)ButtonEditorTr,
 				STACK_DEFAULT,
 				(ULONG)startup)) && ipc)
 			{
@@ -504,8 +504,7 @@ void show_button_clipboard(config_buttons_data *data,BOOL move)
 			(short *)data->screen_data.pen_array,
 			0,
 			0,0,
-			-1,
-			GalileoFMBase,(struct Library *)GfxBase);
+			-1);
 
 		// Set valid flag
 		data->clip_valid=1;
@@ -525,9 +524,7 @@ void button_draw(
 	short flags,
 	short fixed_width,
 	short fixed_height,
-	short gfx,
-	struct Library *GalileoFMBase,
-	struct Library *GfxBase)
+	short gfx)
 {
 	short fpen,bpen;
 	struct IBox display_area;
@@ -1104,14 +1101,6 @@ void palette_editor_init(PaletteBoxData *data)
 	data->stuff1.object_def[1].taglist=data->stuff1.palette_tags;
 	data->stuff1.object_def[2].taglist=data->stuff1.palette_tags;
 
-	// Libraries
-	data->GalileoFMBase=GalileoFMBase;
-	data->IntuitionBase=(struct Library *)IntuitionBase;
-
-#ifdef RESOURCE_TRACKING
-    data->ResTrackBase=ResTrackBase;
-#endif
-
 	data->flags=0;
 }
 
@@ -1119,26 +1108,6 @@ void palette_editor_init(PaletteBoxData *data)
 // Initialise function editor startup
 void function_editor_init(FunctionStartup *startup,ULONG command_list)
 {
-	// Supply libraries
-	startup->galileofm_base=GalileoFMBase;
-	startup->dos_base=(struct Library *)DOSBase;
-	startup->int_base=(struct Library *)IntuitionBase;
-	startup->util_base=UtilityBase;
-	startup->cx_base=CxBase;
-	startup->wb_base=WorkbenchBase;
-	startup->gfx_base=(struct Library *)GfxBase;
-	startup->asl_base=AslBase;
-	startup->layers_base=LayersBase;
-
-#ifdef RESOURCE_TRACKING
-    startup->restrack_base=ResTrackBase;
-#endif
-
-	startup->a4=getreg(REG_A4);
-
-	// Supply locale
-	startup->locale=locale;
-
 	// Supply data pointers for function editor
 	startup->win_def=&_function_editor_window;
 	startup->obj_def=_function_editor_objects;
@@ -1171,8 +1140,7 @@ void button_receive_appmsg(config_buttons_data *data,struct AppMessage *msg)
 		data->bank_node->bank->memory,
 		arg,
 		ins,
-		data->bank_node->bank->window.flags,
-		(struct Library *)DOSBase,GalileoFMBase)))
+		data->bank_node->bank->window.flags)))
 	{
 		// Failed
 		FreeInstruction(ins);
@@ -1190,9 +1158,7 @@ Cfg_Button *button_create_drop(
 	APTR memory,
 	struct WBArg *arg,
 	Cfg_Instruction *ins,
-	unsigned long flags,
-	struct Library *DOSBase,
-	struct Library *GalileoFMBase)
+	unsigned long flags)
 {
 	Cfg_Button *button;
 	Cfg_ButtonFunction *func;
@@ -1200,7 +1166,7 @@ Cfg_Button *button_create_drop(
 	short type;
 
 	// Get argument name and type
-	if ((type=funced_appmsg_arg(arg,buf,DOSBase))==-1)
+	if ((type=funced_appmsg_arg(arg,buf))==-1)
 		return 0;
 
 	// Get name
