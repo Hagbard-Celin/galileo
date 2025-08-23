@@ -4488,7 +4488,6 @@ if 	(dg)
 	if	(dg->idcmp_port)
 		{
 		dump_IDCMP_messages(dg);
-
 		DeleteMsgPort(dg->idcmp_port);
 		}
 
@@ -4569,45 +4568,36 @@ free_address_book(ogp);
  *	Initialises the system then sits in idle_loop waiting for messages
  */
 
-void addressbook( void )
+void __asm __saveds addressbook( void )
 {
-struct Library	*GalileoFMBase;
 struct subproc_data *data = 0;
 IPCMessage	*loop_quitmsg=0;
 struct display_globals *dg;
 
-
-if	(GalileoFMBase = OpenLibrary( "galileofm.library", VERSION_GALILEOFMLIB ))
+/* returns true if 'data' is filled in correctly */
+if	(IPC_ProcStartup( (ULONG *)&data, addressbook_init ))
 	{
-	/* returns true if 'data' is filled in correctly */
-	if	(IPC_ProcStartup( (ULONG *)&data, addressbook_init ))
+	if	(dg=init_globals(data))
 		{
-		/* Setup a4 correctly; from this point on we have access to global data */
-		putreg( REG_A4, data->spd_a4 );
-
-		if	(dg=init_globals(data))
-			{
-			idle_loop(dg,data,&loop_quitmsg);
-			cleanup_globals(dg);
-			}
-
-		// if there is one then
-		// Reply to the quit message (might want to do some cleanup first) 
-		if	(loop_quitmsg)
-			IPC_Reply(loop_quitmsg);
-
-
-		IPC_Flush( data->spd_ipc );
-		IPC_Goodbye( data->spd_ipc, data->spd_owner_ipc, 0 );
-		addressbook_cleanup( data->spd_ogp, data->spd_ipc );
-
-		IPC_Free( data->spd_ipc );
-		FreeVec( data );
+		idle_loop(dg,data,&loop_quitmsg);
+		cleanup_globals(dg);
 		}
-	CloseLibrary( GalileoFMBase );
+
+	// if there is one then
+	// Reply to the quit message (might want to do some cleanup first) 
+	if	(loop_quitmsg)
+		IPC_Reply(loop_quitmsg);
+
+
+	IPC_Flush( data->spd_ipc );
+	IPC_Goodbye( data->spd_ipc, data->spd_owner_ipc, 0 );
+	addressbook_cleanup( data->spd_ogp, data->spd_ipc );
+
+	IPC_Free( data->spd_ipc );
+	FreeVec( data );
 	}
 #ifdef RESOURCE_TRACKING
-	ResourceTrackingEndOfTask();
+ResourceTrackingEndOfTask();
 #endif
 }
 
@@ -4625,8 +4615,6 @@ struct galileoftp_globals *ogp;
 
 if	(data)
 	{
-	putreg( REG_A4, data->spd_a4 );
-
 	ogp = data->spd_ogp;
 
 	data->spd_ipc = ipc;	/* 'ipc' points to this task's tc_UserData field */

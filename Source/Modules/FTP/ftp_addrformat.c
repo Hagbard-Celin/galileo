@@ -63,13 +63,12 @@ ListFormat	*current;
 #define kprintf ;   /##/
 #endif
 
-
+void __asm format_codeTr(void);
 
 // Sub-process data used when launching new processes
 struct format_data
 {
 struct galileoftp_globals	*fd_ogp;
-ULONG			fd_a4;
 IPCData			*fd_ipc;	
 IPCData			*fd_main_ipc;	// Main GALILEO ipc passed to listformat.gfmmodule
 IPCMessage		*fd_imsg;	// from caller - if called bt IPC_CONFIGURE from a lister
@@ -120,9 +119,6 @@ ULONG ok = FALSE;
 
 if	(data)
 	{
-	/* Setup a4 correctly; from this point on we have access to global data */
-	putreg( REG_A4, data->fd_a4 );
-
 	data->fd_ipc = ipc;	/* 'ipc' points to this task's tc_UserData field */
 
 	// store back pointer so we can send this task a quit!
@@ -141,89 +137,81 @@ return(ok);
 
 // Code for the spawned sub-task
 
-static void format_code(void)
+void __asm __saveds format_code(void)
 {
-struct Library	*GalileoFMBase;
 struct format_data *data = 0;
 struct Library *InternalModuleBase;
 BOOL result=0;
 int function_no=2;
 
-if	(GalileoFMBase = OpenLibrary( "galileofm.library", VERSION_GALILEOFMLIB ))
+if	(IPC_ProcStartup( (ULONG *)&data, format_init ))
 	{
-	if	(IPC_ProcStartup( (ULONG *)&data, format_init ))
+	struct window_params *wp=NULL;
+
+	// if from our task then get semaphore for orderly abort from addressbook
+	if	(!data->fd_imsg)
 		{
-		struct window_params *wp=NULL;
-
-		/* Setup a4 correctly; from this point on we have access to global data */
-		putreg( REG_A4, data->fd_a4 );
-
-		// if from our task then get semaphore for orderly abort from addressbook
-		if	(!data->fd_imsg)
-			{
-			// safety
-			if	(wp=data->fd_wp)
-				ObtainSemaphore(&wp->wp_extask_semaphore);
-			}
-
-			// if we default ftp format and galileo NOT the same then use big requester
-			if	(CompareListFormat(data->fd_f.def_galileo_format,data->fd_f.def_ftp_format))
-				function_no=3;
-
-		// Get lister format module
-		if	(InternalModuleBase=OpenLibrary("PROGDIR:modules/listerformat.gfmmodule",0))
-			{
-			// Edit format
-			result=Module_Entry_Internal(
-				(struct List *)data->fd_f.current,
-				(struct Screen *)data->fd_win,
-				data->fd_ipc,
-				data->fd_main_ipc,
-				function_no,(ULONG)&data->fd_f);
-				CloseLibrary(InternalModuleBase);
-			}
-
-
-		if	(result==1) // convert no change into cancel
-			result=0;
-
-		// do we have a calling msg?
-		if	(data->fd_imsg)
-			{
-			data->fd_imsg->command=result;
-			IPC_Reply(data->fd_imsg);
-			}
-		else
-			{
-			// No msg? Then must be called from addressbook or options
-			
-			ClearWindowBusy(data->fd_win); // unblock calling window
-
-			// release the semaphore on the window data
-			if	(wp) // safety
-				{
-				// adjust flag to reflect if we have custom or default formats
-				if	(CompareListFormat(data->fd_f.current,data->fd_f.def_ftp_format))
-					data->fd_env->e_custom_format=TRUE;
-				else
-					data->fd_env->e_custom_format=FALSE;
-
-
-				//  Tell adr process we have changed format. 
-				IPC_Command(wp->wp_dg->dg_ipc,IPC_GOODBYE,result,(APTR)wp,0,0);
-
-				ReleaseSemaphore(&wp->wp_extask_semaphore);
-				wp->wp_extask_ipc=NULL;
-				}
-			}
-
-		IPC_Free( data->fd_ipc );
-		FreeVec( data );
+		// safety
+		if	(wp=data->fd_wp)
+			ObtainSemaphore(&wp->wp_extask_semaphore);
 		}
-	CloseLibrary(GalileoFMBase);
+
+		// if we default ftp format and galileo NOT the same then use big requester
+		if	(CompareListFormat(data->fd_f.def_galileo_format,data->fd_f.def_ftp_format))
+			function_no=3;
+
+	// Get lister format module
+	if	(InternalModuleBase=OpenLibrary("PROGDIR:modules/listerformat.gfmmodule",0))
+		{
+		// Edit format
+		result=Module_Entry_Internal(
+			(struct List *)data->fd_f.current,
+			(struct Screen *)data->fd_win,
+			data->fd_ipc,
+			data->fd_main_ipc,
+			function_no,(ULONG)&data->fd_f);
+			CloseLibrary(InternalModuleBase);
+		}
+
+
+	if	(result==1) // convert no change into cancel
+		result=0;
+
+	// do we have a calling msg?
+	if	(data->fd_imsg)
+		{
+		data->fd_imsg->command=result;
+		IPC_Reply(data->fd_imsg);
+		}
+	else
+		{
+		// No msg? Then must be called from addressbook or options
+			
+		ClearWindowBusy(data->fd_win); // unblock calling window
+
+		// release the semaphore on the window data
+		if	(wp) // safety
+			{
+			// adjust flag to reflect if we have custom or default formats
+			if	(CompareListFormat(data->fd_f.current,data->fd_f.def_ftp_format))
+				data->fd_env->e_custom_format=TRUE;
+			else
+				data->fd_env->e_custom_format=FALSE;
+
+
+			//  Tell adr process we have changed format. 
+			IPC_Command(wp->wp_dg->dg_ipc,IPC_GOODBYE,result,(APTR)wp,0,0);
+
+			ReleaseSemaphore(&wp->wp_extask_semaphore);
+			wp->wp_extask_ipc=NULL;
+			}
+		}
+
+	IPC_Free( data->fd_ipc );
+	FreeVec( data );
 	}
 #ifdef RESOURCE_TRACKING
-	ResourceTrackingEndOfTask();
+ResourceTrackingEndOfTask();
 #endif
 }
 
@@ -237,7 +225,6 @@ BOOL result=0;
 if	(data = AllocVec( sizeof(struct format_data), MEMF_CLEAR ))
 	{
 	data->fd_ogp = og;
-	data->fd_a4 = getreg(REG_A4);
 
 	data->fd_win=win;
 	data->fd_main_ipc=og->og_main_ipc;
@@ -257,7 +244,7 @@ if	(data = AllocVec( sizeof(struct format_data), MEMF_CLEAR ))
 		0,				// List to add task to (optional, but useful)
 		&format_ipc,			// IPCData ** to store task IPC pointer in (optional)
 		"galileo_ftp_format",		// Name
-		(ULONG)format_code,		// Code
+		(ULONG)format_codeTr,		// Code
 		4096,				// Stack size
 		(ULONG)data);			// Data passed to task
 	

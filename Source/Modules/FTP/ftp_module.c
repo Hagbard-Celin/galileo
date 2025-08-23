@@ -56,7 +56,8 @@ For more information on Directory Opus for Windows please see:
 
 #define min(a,b) (((a)<(b))?(a):(b))
 
-void galileo_ftp( void );
+void __asm galileo_ftpTr( void );
+void __asm galileo_ftp( void );
 
 // WARNING - This initialises the structure to 0 the first time only!
 // struct galileoftp_globals og = { 0 };
@@ -113,7 +114,6 @@ if	(!gci->gc_CheckDesktop) // new 2/5/97
 // Allocate data for the new process
 if	(mldata = AllocVec( sizeof(struct modlaunch_data), MEMF_CLEAR ))
 	{
-	mldata->mld_a4            = getreg(REG_A4);	// Instead of __saveds
 	mldata->mld_screen        = og.og_screen;	// Galileo's screen (should be passed to support multiple Galileos)
 	mldata->mld_function_ipc  = function_ipc;	// Module IPC for new callback hooks
 	mldata->mld_og            = &og;		// Global info
@@ -123,7 +123,7 @@ if	(mldata = AllocVec( sizeof(struct modlaunch_data), MEMF_CLEAR ))
 		NULL,				// List to add task to (optional, but useful)
 		&og.og_main_ipc, 		// IPCData ** to store task IPC pointer in (optional)
 		"galileo_ftp",			// Name
-		(ULONG)galileo_ftp,		// Code
+		(ULONG)galileo_ftpTr,		// Code
 		4096 * 2,			// Stack size
 		(ULONG)mldata))			// Data passed to task
 		{
@@ -482,7 +482,6 @@ int __asm __saveds L_Module_Entry(
 	register __d0 ULONG          mod_id,
 	register __d1 CONST GalileoCallbackInfo *gci)
 {
-struct Library             *GalileoFMBase, *DOSBase;	// Avoid stomping on the global bases!
 struct MsgPort             *ftpport;			// If we find this GalileoFTP is already running
 struct module_command_info *mci;
 int	                    arglen;			// length of args (including null terminator)
@@ -506,88 +505,81 @@ og.og_gci = gci;
 // Screen pointer should not be global to support multiple Galileos
 og.og_screen = screen;
 
-if	(GalileoFMBase = OpenLibrary( "PROGDIR:libs/galileofm.library", VERSION_GALILEOFMLIB ))
+// Create a ReadArgs() compatible copy of the arguments
+if	(!args || !*args)
 	{
-	if	(DOSBase = OpenLibrary( "dos.library", 0 ))
-		{
-		// Create a ReadArgs() compatible copy of the arguments
-		if	(!args || !*args)
-			{
-			// length of args - including LF
-			arglen = 1;
+	// length of args - including LF
+	arglen = 1;
 	
-			// args must not end with LF
-			args = "";
-			}
-		else
-			{
-			// length of args - including LF
-			arglen = strlen(args);
-	
-			// args must not end with LF
-			args[arglen - 1] = 0;
-			}
-	
-		Forbid();
-		ftpport = FindPort( PORTNAME );
-		Permit();
-
-		// Get Galileo's ARexx port name
-		og.og_gci->gc_GetPort(  og.og_galileoname );
-
-		if	(mod_id == ID_QUIT || ftpport )
-			{
-			//kprintf( "not launching galileo_ftp\n" );
-			if	(ftpport)
-				;//kprintf( "\tbecause it's already running\n" );
-			if	(mod_id == ID_QUIT)
-				;//kprintf( "\tbecause function is quit\n" );
-
-			okay = TRUE;
-			}
-		else
-			{
-			// Have we started and are waiting for response from user
-			// to bad version arexx request ?
-			//
-			// if so the ipc ptr should be set
-			// so okay should remain false so we do not re-start prog
-			// og.og_ftp_launched is initialised by mod_init and
-			// cleared when process quits mod_quit and at end of
-			// fn galileo_ftp()
-
-			if	(!og.og_ftp_launched)
-				{
-				if	(!(okay = mod_init( galileo_ipc, function_ipc )))
-					og.og_ftp_launched = FALSE;
-				}
-			}
-			
-		// If GalileoFTP process already existed or launched successfully, send a command to it
-		if	(okay)
-			{
-			// kprintf( "  sending message for running process\n" );
-
-			// Send a message to the main FTP process
-			for	(mci = module_command_table; mci->mci_id != 0xffffffff; ++mci)
-				{
-				if	(mci->mci_id == mod_id && (!mci->mci_need_port || ftpport))
-					{
-					okay = mci->mci_function( function_ipc, args, arglen );
-					break;
-					}
-				}
-
-			if	(mci->mci_id == 0xffffffff)
-				kprintf( "unknown mod_id:%ld\n", mod_id );
-
-			}
-
-		CloseLibrary( DOSBase );
-		}
-	
-	CloseLibrary( GalileoFMBase );
+	// args must not end with LF
+	args = "";
 	}
+else
+	{
+	// length of args - including LF
+	arglen = strlen(args);
+	
+	// args must not end with LF
+	args[arglen - 1] = 0;
+	}
+	
+Forbid();
+ftpport = FindPort( PORTNAME );
+Permit();
+
+// Get Galileo's ARexx port name
+og.og_gci->gc_GetPort(  og.og_galileoname );
+
+if	(mod_id == ID_QUIT || ftpport )
+	{
+	//kprintf( "not launching galileo_ftp\n" );
+	if	(ftpport)
+		;//kprintf( "\tbecause it's already running\n" );
+	if	(mod_id == ID_QUIT)
+		;//kprintf( "\tbecause function is quit\n" );
+
+	okay = TRUE;
+	}
+else
+	{
+	// Have we started and are waiting for response from user
+	// to bad version arexx request ?
+	//
+	// if so the ipc ptr should be set
+	// so okay should remain false so we do not re-start prog
+	// og.og_ftp_launched is initialised by mod_init and
+	// cleared when process quits mod_quit and at end of
+	// fn galileo_ftp()
+
+	if	(!og.og_ftp_launched)
+		{
+		if	(!(okay = mod_init( galileo_ipc, function_ipc )))
+			og.og_ftp_launched = FALSE;
+		}
+	}
+			
+// If GalileoFTP process already existed or launched successfully, send a command to it
+if	(okay)
+	{
+	// kprintf( "  sending message for running process\n" );
+
+	// Send a message to the main FTP process
+	for	(mci = module_command_table; mci->mci_id != 0xffffffff; ++mci)
+		{
+		if	(mci->mci_id == mod_id && (!mci->mci_need_port || ftpport))
+			{
+			okay = mci->mci_function( function_ipc, args, arglen );
+			break;
+			}
+		}
+
+	if	(mci->mci_id == 0xffffffff)
+		kprintf( "unknown mod_id:%ld\n", mod_id );
+
+	}
+#ifdef _DEBUG_STACK
+	//L_StackCheckEnd(FindTask(0), function_ipc->stack_debug);
+#endif
 
 FindTask(0)->tc_Node.ln_Name = oldtaskname;
 

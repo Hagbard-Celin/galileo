@@ -52,7 +52,6 @@ struct subproc_data
 struct galileoftp_globals	*spd_ogp;
 IPCData			*spd_ipc;
 IPCData			*spd_owner_ipc;
-ULONG			spd_a4;
 };
 
 // Custom IPC message

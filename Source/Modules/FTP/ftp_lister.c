@@ -1239,8 +1239,6 @@ register struct globals         *g;
 
 if	(data)
 	{
-	putreg( REG_A4, data->spd_a4 );
-
 	ogp = data->spd_ogp;
 
 	data->spd_ipc = ipc;	/* 'ipc' points to this task's tc_UserData field */
@@ -3375,63 +3373,54 @@ if	(timer)
 //	Disconnect (if we were connected).
 //	End lister process.
 //
-void lister( void )
+void __asm __saveds lister( void )
 {
 struct galileoftp_globals *og;
-struct Library         *GalileoFMBase;
 int                     zero = 0;
 struct subproc_data    *data;		// This is passed from the creator process
 struct msg_loop_data    mld;
 
-if	(GalileoFMBase = OpenLibrary( "galileofm.library", VERSION_GALILEOFMLIB ))
+// This returns true if 'data' is filled in correctly
+if	(IPC_ProcStartup( (ULONG *)&data, ftplister_init ))
 	{
-	// This returns true if 'data' is filled in correctly
-	if	(IPC_ProcStartup( (ULONG *)&data, ftplister_init ))
+	og               = data->spd_ogp;
+	mld.mld_ipc      = data->spd_ipc;
+	mld.mld_node     = NULL;
+	mld.mld_ftpreply = &zero;
+	mld.mld_quitmsg  = NULL;
+	mld.mld_done     = FALSE;
+
+	lister_msg_loop( og, &mld );
+
+	// We have a lister here (but it may be closed)
+	if	(mld.mld_node)
+		lister_disconnect( og, &mld );
+
+	// Clean up quit message
+	if	(mld.mld_quitmsg)
 		{
-		// Setup a4 correctly; from this point on we have access to global data
-		putreg( REG_A4, data->spd_a4 );
-
-		og               = data->spd_ogp;
-		mld.mld_ipc      = data->spd_ipc;
-		mld.mld_node     = NULL;
-		mld.mld_ftpreply = &zero;
-		mld.mld_quitmsg  = NULL;
-		mld.mld_done     = FALSE;
-
-		lister_msg_loop( og, &mld );
-
-		// We have a lister here (but it may be closed)
-		if	(mld.mld_node)
-			lister_disconnect( og, &mld );
-
-		// Clean up quit message
-		if	(mld.mld_quitmsg)
+		// Our quit message structure attached?
+		if	(mld.mld_quitmsg->flags)
 			{
-			// Our quit message structure attached?
-			if	(mld.mld_quitmsg->flags)
-				{
-				// ARexx message?
-				if	(((struct quit_msg *)mld.mld_quitmsg->flags)->qm_rxmsg)
-					reply_rexx( ((struct quit_msg *)mld.mld_quitmsg->flags)->qm_rxmsg, 1, 0 );
+			// ARexx message?
+			if	(((struct quit_msg *)mld.mld_quitmsg->flags)->qm_rxmsg)
+				reply_rexx( ((struct quit_msg *)mld.mld_quitmsg->flags)->qm_rxmsg, 1, 0 );
 
-				FreeVec( (APTR)mld.mld_quitmsg->flags );
-				}
-
-			mld.mld_quitmsg->command = TRUE;
-			IPC_Reply( mld.mld_quitmsg );
+			FreeVec( (APTR)mld.mld_quitmsg->flags );
 			}
 
-		IPC_Flush( data->spd_ipc );
-		IPC_Goodbye( data->spd_ipc, data->spd_owner_ipc, 0 );
-		ftplister_cleanup( og, data->spd_ipc );
-		IPC_Free( data->spd_ipc );
-		FreeVec( data );
+		mld.mld_quitmsg->command = TRUE;
+		IPC_Reply( mld.mld_quitmsg );
 		}
 
-	CloseLibrary( GalileoFMBase );
+	IPC_Flush( data->spd_ipc );
+	IPC_Goodbye( data->spd_ipc, data->spd_owner_ipc, 0 );
+	ftplister_cleanup( og, data->spd_ipc );
+	IPC_Free( data->spd_ipc );
+	FreeVec( data );
 	}
 #ifdef RESOURCE_TRACKING
-	ResourceTrackingEndOfTask();
+ResourceTrackingEndOfTask();
 #endif
 }
 

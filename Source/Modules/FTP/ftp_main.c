@@ -103,8 +103,10 @@ extern struct Library *GalileoFMBase;
 typedef int (*rxfuncptr)( struct galileoftp_globals *, struct RexxMsg *, int argc, char *argv[] );
 
 // Sub processes
-void addressbook( void );
-void lister( void );
+void __asm addressbookTr( void );
+void __asm addressbook( void );
+void __asm listerTr( void );
+void __asm lister( void );
 
 // What state is the main process in?
 enum
@@ -233,7 +235,6 @@ if	(data = AllocVec( sizeof(struct subproc_data), MEMF_CLEAR ))
 	int stack =4096*2;
 	data->spd_ogp = og;
 	data->spd_owner_ipc = ipc;
-	data->spd_a4 = getreg(REG_A4);
 
 	// Listers now have 8k stack * stack_multiplier for recursive safety
 	if	(!IPC_Launch( tasklist, &ipcd, name, (ULONG)proc_code, stack, (ULONG)data ))
@@ -617,7 +618,7 @@ if	(cm)
 		if	(check_socketlib( og, ipc ))
 			{
 			// Launch FTP lister task
-			if	(listerproc = launch( og, ipc, tasklist, "galileo_ftp_lister", lister))
+			if	(listerproc = launch( og, ipc, tasklist, "galileo_ftp_lister", listerTr))
 				{
 				// Send connect message
 				ipc_forward( listerproc, msg, 0 );
@@ -3130,7 +3131,7 @@ if	(lock1 = Lock( "PROGDIR:System", ACCESS_READ ))
 
 /********************************/
 
-void galileo_ftp( void )
+void __asm __saveds galileo_ftp( void )
 {
 struct main_event_data  med = {0};
 struct galileoftp_globals *og;
@@ -3150,193 +3151,181 @@ med.med_status = STATE_RUNNING;
 // Open our module so we can't be expunged
 if	(ourbase = OpenLibrary( "ftp.gfmmodule", 0 ))
 	{
-	if	(GalileoFMBase=(struct Library *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"galileofm.library"))
+	// Process startup function
+	if	(IPC_ProcStartup( (ULONG *)&mldata, galileo_ftp_init ))
 		{
-		// Process startup function
-		if	(IPC_ProcStartup( (ULONG *)&mldata, galileo_ftp_init ))
+		// Fix pointer to global info
+		og = mldata->mld_og;
+
+		// IPC for "galileo_ftp" process
+		og->og_main_ipc = mldata->mld_ftp_ipc;
+		med.med_ipc = mldata->mld_ftp_ipc;
+
+		// Get Galileo ARexx port name via callbacks
+		og->og_gci->gc_GetPort( med.med_galileo );
+
+		// Scan configuration file
+		med.med_log_fp = setup_config( og );
+
+		// Make sure the script file has been created
+		check_script_file();
+
+		if	((rexport = CreateMsgPort()) && (nfyport = CreateMsgPort()))
 			{
-			// Setup a4 correctly; from this point on we have access to global data
-			putreg( REG_A4, mldata->mld_a4 );
+			rexbit = 1 << rexport->mp_SigBit;
+			nfybit = 1 << nfyport->mp_SigBit;
 
-			// Fix pointer to global info
-			og = mldata->mld_og;
+			// Make the ARexx port public so Galileo can find it
+			rexport->mp_Node.ln_Name = PORTNAME;
+			AddPort( rexport );
+			kprintf( "**** GALILEOFTP PORT ADDED ****\n" );
 
-			// IPC for "galileo_ftp" process
-			og->og_main_ipc = mldata->mld_ftp_ipc;
-			med.med_ipc = mldata->mld_ftp_ipc;
-
-			// Get Galileo ARexx port name via callbacks
-			og->og_gci->gc_GetPort( med.med_galileo );
-
-			// Scan configuration file
-			med.med_log_fp = setup_config( og );
-
-			// Make sure the script file has been created
-			check_script_file();
-
-			if	((rexport = CreateMsgPort()) && (nfyport = CreateMsgPort()))
+			// Ask Galileo to tell us when it will be hidden or revealed
+			if	(notify_req = AddNotifyRequest( GN_GALILEOFM_HIDE | GN_GALILEOFM_SHOW | GN_FLUSH_MEM,0, nfyport))
 				{
-				rexbit = 1 << rexport->mp_SigBit;
-				nfybit = 1 << nfyport->mp_SigBit;
+				ipc_setup( &med.med_tasklist );
+				ipcbit = 1 << mldata->mld_ftp_ipc->command_port->mp_SigBit;
 
-				// Make the ARexx port public so Galileo can find it
-				rexport->mp_Node.ln_Name = PORTNAME;
-				AddPort( rexport );
-				kprintf( "**** GALILEOFTP PORT ADDED ****\n" );
+				// Set up info for last login
+				ad_InitListLock( &og->og_listerlist, &og->og_listercount );
 
-				// Ask Galileo to tell us when it will be hidden or revealed
-				if	(notify_req = AddNotifyRequest( GN_GALILEOFM_HIDE | GN_GALILEOFM_SHOW | GN_FLUSH_MEM,0, nfyport))
+				// init addressbook memory semaphore
+				InitSemaphore( &og->og_SiteList_semaphore);
+
+				// Trap some internal Galileo commands
+				addtraps( med.med_galileo );
+
+				add_lister_popup_extensions( med.med_galileo );
+
+				// Spawn address book
+				og->og_addrproc = launch( og, mldata->mld_ftp_ipc, &med.med_tasklist, "galileo_ftp_address_book", addressbookTr);
+
+				// Make sure address book has set up before continuing
+				IPC_Command( og->og_addrproc, IPC_HURRYUP, 0, 0, 0, REPLY_NO_PORT );
+
+				// Event loop
+				while	(med.med_status < STATE_DONE)
 					{
-					ipc_setup( &med.med_tasklist );
-					ipcbit = 1 << mldata->mld_ftp_ipc->command_port->mp_SigBit;
+					sigbits = Wait( SIGBREAKF_CTRL_C | ipcbit | rexbit | nfybit );
 
-					// Set up info for last login
-					ad_InitListLock( &og->og_listerlist, &og->og_listercount );
-
-					// init addressbook memory semaphore
-					InitSemaphore( &og->og_SiteList_semaphore);
-
-					// Trap some internal Galileo commands
-					addtraps( med.med_galileo );
-
-					add_lister_popup_extensions( med.med_galileo );
-
-					// Spawn address book
-					og->og_addrproc = launch( og, mldata->mld_ftp_ipc, &med.med_tasklist, "galileo_ftp_address_book", addressbook);
-
-					// Make sure address book has set up before continuing
-					IPC_Command( og->og_addrproc, IPC_HURRYUP, 0, 0, 0, REPLY_NO_PORT );
-
-					// Event loop
-					while	(med.med_status < STATE_DONE)
+					// Check for Break signal
+					if	(sigbits & SIGBREAKF_CTRL_C && med.med_status == STATE_RUNNING)
 						{
-						sigbits = Wait( SIGBREAKF_CTRL_C | ipcbit | rexbit | nfybit );
+						med.med_status = STATE_START_QUITTING_FORCE;
+						sigbits &= ~SIGBREAKF_CTRL_C;
+						}
 
-						// Check for Break signal
-						if	(sigbits & SIGBREAKF_CTRL_C && med.med_status == STATE_RUNNING)
+					// Check for IPC, ARexx, and Notify messages
+					while	(sigbits & (ipcbit | rexbit | nfybit))
+						{
+						// Handle a single IPC message
+						if	(!(sigbits & ipcbit) && (SetSignal( 0L, 0L ) & ipcbit))
+							sigbits |= ipcbit;
+
+						if	(sigbits & ipcbit)
 							{
-							med.med_status = STATE_START_QUITTING_FORCE;
-							sigbits &= ~SIGBREAKF_CTRL_C;
+							if	(!handle_ipc_msg( og, &med ))
+								sigbits &= ~ipcbit;
 							}
 
-						// Check for IPC, ARexx, and Notify messages
-						while	(sigbits & (ipcbit | rexbit | nfybit))
+						// Handle ARexx messages
+						if	(!(sigbits & rexbit) && (SetSignal( 0L, 0L ) & rexbit))
+							sigbits |= rexbit;
+
+						if	(sigbits & rexbit)
 							{
-							// Handle a single IPC message
-							if	(!(sigbits & ipcbit) && (SetSignal( 0L, 0L ) & ipcbit))
-								sigbits |= ipcbit;
-
-							if	(sigbits & ipcbit)
-								{
-								if	(!handle_ipc_msg( og, &med ))
-									sigbits &= ~ipcbit;
-								}
-
-							// Handle ARexx messages
-							if	(!(sigbits & rexbit) && (SetSignal( 0L, 0L ) & rexbit))
-								sigbits |= rexbit;
-
-							if	(sigbits & rexbit)
-								{
-								handle_rexx( og, &med, rexport );
-								sigbits &= ~rexbit;
-								}
-
-							// Handle Galileo Notify messages
-							// Can quit on low memory
-							if	(!(sigbits & nfybit) && (SetSignal( 0L, 0L ) & nfybit))
-								sigbits |= nfybit;
-
-							if	(sigbits & nfybit)
-								{
-								if	(handle_notify( og, nfyport ))
-									med.med_status = STATE_START_QUITTING;
-
-								sigbits &= ~nfybit;
-								}
+							handle_rexx( og, &med, rexport );
+							sigbits &= ~rexbit;
 							}
 
-						if	(quittry < 3
-							&& med.med_status == STATE_START_QUITTING
-							|| med.med_status == STATE_START_QUITTING_FORCE
-							|| med.med_status == STATE_CONTINUE_QUITTING)
+						// Handle Galileo Notify messages
+						// Can quit on low memory
+						if	(!(sigbits & nfybit) && (SetSignal( 0L, 0L ) & nfybit))
+							sigbits |= nfybit;
+
+						if	(sigbits & nfybit)
 							{
-							// Should only send signals if trapped ARexx quit event
-							// or if FTPQuit FORCE is used
-							// or if received CTRL C
+							if	(handle_notify( og, nfyport ))
+								med.med_status = STATE_START_QUITTING;
 
-							if	(med.med_status == STATE_START_QUITTING_FORCE)
-								{
-								// Turn all requesters off for quick quit
-								og->og_noreq = TRUE;
-
-								ipc_list_signal( &og->og_listerlist, 1 );
-								}
-
-							// kprintf( "** ABORT %ld listers...\n", og->og_listercount );
-
-							IPC_ListQuit( &med.med_tasklist, mldata->mld_ftp_ipc, 0, FALSE );
-
-							++quittry;
-							Delay( 50 );
-
-							med.med_status = STATE_CONTINUE_QUITTING;
+							sigbits &= ~nfybit;
 							}
 						}
 
-					if	(med.med_quitmsg)
+					if	(quittry < 3
+						&& med.med_status == STATE_START_QUITTING
+						|| med.med_status == STATE_START_QUITTING_FORCE
+						|| med.med_status == STATE_CONTINUE_QUITTING)
 						{
-						med.med_quitmsg->command = TRUE;
-						IPC_Reply( med.med_quitmsg );
+						// Should only send signals if trapped ARexx quit event
+						// or if FTPQuit FORCE is used
+						// or if received CTRL C
+
+						if	(med.med_status == STATE_START_QUITTING_FORCE)
+							{
+							// Turn all requesters off for quick quit
+							og->og_noreq = TRUE;
+
+							ipc_list_signal( &og->og_listerlist, 1 );
+							}
+
+						// kprintf( "** ABORT %ld listers...\n", og->og_listercount );
+
+						IPC_ListQuit( &med.med_tasklist, mldata->mld_ftp_ipc, 0, FALSE );
+
+						++quittry;
+						Delay( 50 );
+
+						med.med_status = STATE_CONTINUE_QUITTING;
 						}
-
-					// Reply to arexx quit command
-					if	(med.med_rxquitmsg)
-						reply_rexx( med.med_rxquitmsg, 0, 0 );
-
-					remove_lister_popup_extensions( med.med_galileo );
-
-					send_rexxa( med.med_galileo, REXX_REPLY_NONE, "galileo remtrap '*' '%s'", PORTNAME );
-
-					RemoveNotifyRequest( notify_req );
 					}
+
+				if	(med.med_quitmsg)
+					{
+					med.med_quitmsg->command = TRUE;
+					IPC_Reply( med.med_quitmsg );
+					}
+
+				// Reply to arexx quit command
+				if	(med.med_rxquitmsg)
+					reply_rexx( med.med_rxquitmsg, 0, 0 );
+
+				remove_lister_popup_extensions( med.med_galileo );
+
+				send_rexxa( med.med_galileo, REXX_REPLY_NONE, "galileo remtrap '*' '%s'", PORTNAME );
+
+				RemoveNotifyRequest( notify_req );
 				}
-
-			// Remove, flush and delete ARexx port
-			if	(rexport)
-				{
-				RemPort( rexport );
-				kprintf( "**** GALILEOFTP PORT REMOVED ****\n" );
-				flush_arexxport( rexport );
-				DeleteMsgPort( rexport );
-				}
-
-			// Flush and delete notify port
-			if	(nfyport)
-				{
-				while	(msg = GetMsg( nfyport ))
-					ReplyFreeMsg( msg );
-
-				DeleteMsgPort( nfyport );
-				}
-
-			cleanup_config( med.med_log_fp );
-
-			IPC_Flush( mldata->mld_ftp_ipc );
-			IPC_Free( mldata->mld_ftp_ipc );
-			FreeVec( mldata );
-
-			// so we do not re-start prog
-			// og_ftp_launched is initialised by mod_init and
-			// cleared when process quits mod_quit
-			og->og_ftp_launched = FALSE;
 			}
-#if 0
-		// Don't close via the global pointer
-		// because A4 might not be valid !!
-		if (L_GalileoFMBase)
-			CloseLibrary( L_GalileoFMBase );
-#endif
+
+		// Remove, flush and delete ARexx port
+		if	(rexport)
+			{
+			RemPort( rexport );
+			kprintf( "**** GALILEOFTP PORT REMOVED ****\n" );
+			flush_arexxport( rexport );
+			DeleteMsgPort( rexport );
+			}
+
+		// Flush and delete notify port
+		if	(nfyport)
+			{
+			while	(msg = GetMsg( nfyport ))
+				ReplyFreeMsg( msg );
+
+			DeleteMsgPort( nfyport );
+			}
+
+		cleanup_config( med.med_log_fp );
+
+		IPC_Flush( mldata->mld_ftp_ipc );
+		IPC_Free( mldata->mld_ftp_ipc );
+		FreeVec( mldata );
+
+		// so we do not re-start prog
+		// og_ftp_launched is initialised by mod_init and
+		// cleared when process quits mod_quit
+		og->og_ftp_launched = FALSE;
 		}
 	CloseLibrary( ourbase );
 	}
