@@ -41,6 +41,7 @@ For more information on Directory Opus for Windows please see:
 
 int __asm __saveds __UserLibInit(register __a6 struct Library *libbase);
 void __asm __saveds __UserLibCleanup(register __a6 struct Library *libbase);
+__asm low_mem_handlerTr(register __a0 struct MemHandlerData *);
 __asm low_mem_handler(register __a0 struct MemHandlerData *);
 
 char *_ProgramName="galileofm.library";
@@ -451,7 +452,7 @@ __asm __saveds __UserLibInit(register __a6 struct Library *libbase)
 		gfmlib_data.low_mem_handler.is_Node.ln_Type=NT_INTERRUPT;
 		gfmlib_data.low_mem_handler.is_Node.ln_Name="galileo memhandler";
 		gfmlib_data.low_mem_handler.is_Data=&gfmlib_data;
-		gfmlib_data.low_mem_handler.is_Code=(void (*)())low_mem_handler;
+		gfmlib_data.low_mem_handler.is_Code=(void (*)())low_mem_handlerTr;
 
 		// Add the handler
 		AddMemHandler(&gfmlib_data.low_mem_handler);
@@ -478,7 +479,7 @@ void __asm __saveds __UserLibCleanup(register __a6 struct Library *libbase)
 
 
 // Low memory handler
-__asm low_mem_handler(register __a0 struct MemHandlerData *memh)
+__asm __saveds low_mem_handler(register __a0 struct MemHandlerData *memh)
 {
 	// Is this the first time?
 	if (!(memh->memh_Flags&MEMHF_RECYCLE))

@@ -55,6 +55,7 @@ _\1Tr:
         TRAMPOLINE progress_task
         TRAMPOLINE requester_proc
         TRAMPOLINE string_edit_hook
+        TRAMPOLINE low_mem_handler
 
         IFD FAKEWB
         TRAMPOLINE fake_workbench
