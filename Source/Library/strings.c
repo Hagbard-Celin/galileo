@@ -40,7 +40,7 @@ For more information on Directory Opus for Windows please see:
 
 // When one insists on perusing a scheme that is in no way supported
 // by neither language or compiler....
-// Tried using setreg(), but the global optimizer would not have it
+// Tried using putreg(), but the global optimizer would not have it
 // Stubbornness won, and this was created
 void __asm set_d1(register __d1 ULONG value);
 

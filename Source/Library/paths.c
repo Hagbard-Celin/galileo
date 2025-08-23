@@ -39,7 +39,7 @@ For more information on Directory Opus for Windows please see:
 #include "paths.h"
 
 // How to do a dirty hack in the least amount of code
-// The global optimizer refused to let my setreg() be, I refused to abandon the
+// The global optimizer refused to let my putreg() be, I refused to abandon the
 // idea of pushing the string length in d1, so this happened....
 void __asm set_d1(register __d1 ULONG value);
 
