@@ -67,8 +67,10 @@ void function_filetype(FunctionHandle *handle)
 	struct GLAData *argdata = 0;
 	filetype_data *data;
 
-	// Set data pointer
-	data = (filetype_data *)handle->temp_buffer;
+	// Allocate data
+	if (!(data = AllocMemH(handle->memory, sizeof(filetype_data))))
+	    return;
+
 	data->last_type = 0;
 	data->type_function = 0;
 	data->argd = 0;
@@ -244,6 +246,8 @@ void function_filetype(FunctionHandle *handle)
 		Remove(node);
 		AddTail(&handle->filechange,node);
 	}
+
+	FreeMemH(data);
 }
 
 static void filetype_get(FunctionHandle *handle, filetype_data *data)
