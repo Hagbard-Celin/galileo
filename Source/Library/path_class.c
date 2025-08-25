@@ -2232,7 +2232,15 @@ BOOL pathgadget_insert(Class *cl, PathGadgetData *data, struct gpInput *msg, STR
     {
 	if (!(data->Flags&PATHF_FAKE_SPACE))
 	    movmem(curs_part->pebp_Buf + pos, curs_part->pebp_Buf + pos + len,(curs_part->pebp_Length&~PEBPF_LAST_PART) - pos);
-	memcpy(curs_part->pebp_Buf + pos, string, len);
+	if (ClipIO)
+	{
+	    // Read string
+	    ClipIO->io_Data = curs_part->pebp_Buf + pos;
+	    ClipIO->io_Length = len;
+	    if (DoIO((struct IORequest *)ClipIO)) goto ClipFail;
+	}
+	else
+	    memcpy(curs_part->pebp_Buf + pos, string, len);
 	curs_part->pebp_Length += len;
 	editbuff->peb_CursorPos += len;
 	editbuff->peb_Length += len;
