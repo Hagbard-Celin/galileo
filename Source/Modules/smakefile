@@ -113,8 +113,7 @@ CONFIGMYOBJS = $(OBJ)$(CONFIGDIR)config_drag.o \
 	$(OBJ)$(CONFIGDIR)config_menus.o $(OBJ)$(CONFIGDIR)config_menus_data.o \
 	$(OBJ)$(CONFIGDIR)config_menus_edit.o $(OBJ)$(CONFIGDIR)config_menus_io.o \
 	$(OBJ)$(CONFIGDIR)config_menus_drag.o $(OBJ)$(CONFIGDIR)function_export.o \
-	$(OBJ)$(CONFIGDIR)edit.o \
-	$(OBJ)$(CONFIGDIR)ipc.o
+	$(OBJ)$(CONFIGDIR)edit.o
 
 CONFIGOBJS  = $(OBJ)$(CONFIGDIR)userlibinit.o $(OBJ)lsprintf.o $(OBJ)$(CONFIGDIR)config.o $(OBJ)$(CONFIGDIR)config_strings.o $(CONFIGMYOBJS)
 CONFIGVER   = 0
