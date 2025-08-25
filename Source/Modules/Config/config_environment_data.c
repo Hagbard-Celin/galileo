@@ -55,11 +55,6 @@ void __asm __saveds _palette_slider_callback(
 	register __a1 struct TagItem *tag,
 	register __a2 struct Window *window)
 {
-	config_env_data *data;
-
-	// Get data pointer
-	data=(config_env_data *)CFGDATA(window);
-
 	// Change tag to max pixel length
 	tag->ti_Tag=GTSL_MaxPixelLen;
 	tag->ti_Data=TextLength(window->RPort,"8888",4);

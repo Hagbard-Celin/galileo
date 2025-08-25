@@ -57,33 +57,22 @@ typedef struct
 
 	IPCData				*owner_ipc;
 
-	struct Library			*GalileoFMBase;
-	struct Library			*IntuitionBase;
-
 	unsigned long			flags;
 
-	GalileoScreenData			screen_data;
-	short				pen_array[18];
-
-	unsigned char			fgpen;
-	unsigned char			bgpen;
+	GalileoScreenData		screen_data;
 
 	IPCData				*main_ipc;
-
-	short				pen_count;
-	short				pad;
 
 	struct TextAttr			*font;
 	struct Window			*window;
 	ObjectList			*list;
 
-#ifdef RESOURCE_TRACKING
-    struct Library          *ResTrackBase;
+	short				pen_array[18];
 
-    ULONG               pad1;
-#else
-	ULONG				pad1[2];
-#endif
+	unsigned char			fgpen;
+	unsigned char			bgpen;
+
+	short				pen_count;
 } PaletteBoxData;
 
 #define PBF_NO_FG	(1<<0)
