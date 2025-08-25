@@ -50,10 +50,10 @@ int __asm __saveds L_Module_Entry(
 	iconclock_data *data;
 	IPCData *clock_ipc=0;
 
-    Forbid();
+	Forbid();
 	// Already running?
 	if (FindSemaphore(NAME_ICONCLOCK)) return 1;
-    Permit();
+	Permit();
 
 	// Allocate data
 	if (data=AllocVec(sizeof(iconclock_data),MEMF_CLEAR))
@@ -729,7 +729,7 @@ void iconclock_info(iconclock_data *data)
 	easy.es_StructSize=sizeof(easy);
 	easy.es_Flags=0;
 	easy.es_Title=GetString(locale,MSG_ICONCLOCK_TITLE);
-	easy.es_TextFormat="Galileo Icon Clock\nv55.2 (26.05.97)\n\n© 1997 Jonathan Potter";
+	easy.es_TextFormat="Galileo Icon Clock\nv0.2 (26.05.97)\n\n© 1997 Jonathan Potter";
 	easy.es_GadgetFormat=GetString(locale,MSG_OK);
 
 	// Open requester

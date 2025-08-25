@@ -43,30 +43,30 @@ For more information on Directory Opus for Windows please see:
 int __asm __saveds __UserLibInit(register __a6 struct Library *libbase);
 void __asm __saveds __UserLibCleanup(void);
 
-struct DosLibrary *DOSBase;
-struct IntuitionBase *IntuitionBase;
-struct GfxBase *GfxBase;
+struct DosLibrary	*DOSBase;
+struct IntuitionBase	*IntuitionBase;
+struct GfxBase		*GfxBase;
 
-struct Library *GalileoFMBase;
-struct Library *IconBase;
-struct LocaleBase *LocaleBase;
-struct Library *UtilityBase;
-struct Library *LayersBase;
-struct Library *WorkbenchBase;
-struct Library *GadToolsBase;
-struct Library *AslBase;
-struct Library *DiskfontBase;
-struct Device  *TimerBase;
-struct RxsLib  *RexxSysBase;
-struct GalileoLocale *locale;
+struct Library		*GalileoFMBase;
+struct Library		*IconBase;
+struct LocaleBase	*LocaleBase;
+struct Library		*UtilityBase;
+struct Library		*LayersBase;
+struct Library		*WorkbenchBase;
+struct Library		*GadToolsBase;
+struct Library		*AslBase;
+struct Library		*DiskfontBase;
+struct Device		*TimerBase;
+struct RxsLib		*RexxSysBase;
+struct GalileoLocale	*locale;
 #ifdef _TRAMPOLINE
 struct Library __far	*MyLibBase;
 #endif
 
 #ifdef RESOURCE_TRACKING
-struct Library *ResTrackBase;
+struct Library		*ResTrackBase;
 
-ULONG callerid;
+ULONG			callerid;
 #endif
 
 //extern struct ModuleData data;

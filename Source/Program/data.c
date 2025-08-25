@@ -45,7 +45,7 @@ char *__procname="galileo";
 
 // Library bases
 struct Library			*GalileoFMBase;
-struct IntuitionBase	*IntuitionBase=0;
+struct IntuitionBase		*IntuitionBase=0;
 struct GfxBase			*GfxBase=0;
 struct Library			*IconBase=0;
 struct Library			*DiskfontBase=0;
@@ -65,8 +65,9 @@ struct Library 			*P96Base=0;
 struct NewIconBase		*NewIconBase=0;
 struct muBase			*muBase=0;
 #ifdef RESOURCE_TRACKING
-struct Library 		    *ResTrackBase=0;
+struct Library			*ResTrackBase=0;
 #endif
+
 struct Process			*main_proc;		// Main process pointer
 IPCData				main_ipc={0};		// Main IPC data
 APTR				global_memory_pool=0;	// Global memory pool for anything to use
@@ -79,12 +80,12 @@ struct IOStdReq			input_req;
 struct IOStdReq			timer_req;
 struct IOStdReq			console_req;
 
-struct GalileoSemaphore	pub_semaphore;
+struct GalileoSemaphore		pub_semaphore;
 
-long main_lister_count=0;
+long				main_lister_count=0;
 
 #ifdef _DEBUG_STACK
-StackData stack_check_data;
+StackData			stack_check_data;
 #endif
 
 // Internal function definitions
@@ -117,10 +118,10 @@ Cfg_Filetype	*command_filetype=0;
 char *config_name="galileoconfig.gfmmodule";
 char *galileo_name="Galileo";
 
-char *about_1="© 1998 Jonathan Potter & GPSoftware";
+char *about_1="© 1993-2012 Jonathan Potter & GPSoftware";
 char *about_2="© 1999,2000 Mladen Milinkovic, © 2012,2013 Roman Kargin";
 char *about_3="© 2013,2014 Szilard Biro, © 2020 Mathias Heyer";
-char *about_4="© 2023,2024 Hagbard Celine";
+char *about_4="© 2023,2024,2025 Hagbard Celine";
 
 char *string_no_owner;
 char *string_no_group;

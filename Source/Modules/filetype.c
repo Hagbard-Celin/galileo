@@ -710,9 +710,9 @@ void __saveds finder_creator_proc_code( void )
     IPC_Free( data->editor_ipc );
     data->creator_ipc = NULL;
 
-    #ifdef RESOURCE_TRACKING
-	ResourceTrackingEndOfTask();
-    #endif
+#ifdef RESOURCE_TRACKING
+    ResourceTrackingEndOfTask();
+#endif
 
     return;
 }
@@ -2347,9 +2347,9 @@ void __saveds creator_editor_proc_code( void )
     IPC_Free( data->editor_ipc );
     data->editor_ipc = NULL;
 
-    #ifdef RESOURCE_TRACKING
-	ResourceTrackingEndOfTask();
-    #endif
+#ifdef RESOURCE_TRACKING
+    ResourceTrackingEndOfTask();
+#endif
 
     return;
 }
@@ -2428,7 +2428,7 @@ int creator_handle_appwindow( creator_data *data )
     int a;
     struct filetype_info *fti;
     Att_Node *node;
-    int exists = FALSE;
+    int exists;
     int ok = FALSE;
 
     // Get messages

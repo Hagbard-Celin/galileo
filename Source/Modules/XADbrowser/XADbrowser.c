@@ -571,7 +571,7 @@ static void Extract(struct XADbrowserData *xbdata, struct Tree *file, STRPTR des
 		    if (new_entry = xbdata->gci->gc_CreateFileEntry(xbdata->dest_lister, (struct FileInfoBlock *)&file->fib, NULL))
 		    {
 		        xbdata->gci->gc_AddFileEntry(xbdata->dest_lister, new_entry, TRUE);
-			    xbdata->gci->gc_RefreshLister(xbdata->dest_lister, HOOKREFRESH_FULL, FALSE);
+			xbdata->gci->gc_RefreshLister(xbdata->dest_lister, HOOKREFRESH_FULL, FALSE);
 		    }
 
 		    xbdata->gci->gc_UnlockFileList(xbdata->dest_lister);

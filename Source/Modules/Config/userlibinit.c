@@ -45,27 +45,27 @@ char *_ProgramName="galileoconfig.gfmmodule";
 
 char *version="$VER: galileoconfig.gfmmodule 0.2 "__AMIGADATE__" ";
 
-struct DosLibrary *DOSBase;
-struct Library *GalileoFMBase;
-struct IntuitionBase *IntuitionBase;
-struct GfxBase *GfxBase;
-struct Library *LayersBase;
-struct Library *DiskfontBase;
-struct Library *GadToolsBase;
-struct Library *WorkbenchBase;
-struct Library *IconBase;
-struct Library *AslBase;
-struct Library *CxBase;
-struct Library *UtilityBase;
-struct Library *P96Base;
-struct RxsLib *RexxSysBase;
-struct LocaleBase *LocaleBase;
-struct GalileoLocale *locale;
+struct DosLibrary	*DOSBase;
+struct Library		*GalileoFMBase;
+struct IntuitionBase	*IntuitionBase;
+struct GfxBase		*GfxBase;
+struct Library		*LayersBase;
+struct Library		*DiskfontBase;
+struct Library		*GadToolsBase;
+struct Library		*WorkbenchBase;
+struct Library		*IconBase;
+struct Library		*AslBase;
+struct Library		*CxBase;
+struct Library		*UtilityBase;
+struct Library		*P96Base;
+struct RxsLib		*RexxSysBase;
+struct LocaleBase	*LocaleBase;
+struct GalileoLocale	*locale;
 
 struct Library __far	*MyLibBase;
 
 #ifdef RESOURCE_TRACKING
-struct Library *ResTrackBase;
+struct Library		*ResTrackBase;
 
 ULONG callerid;
 #endif

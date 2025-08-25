@@ -55,9 +55,9 @@ enum
 	ARG_DELAY,
 	ARG_CLEANUP,
 	ARG_NEWPATH,
-    ARG_SKIP,
-    ARG_SIMPLEGELS,
-    ARG_LEGACY,
+	ARG_SKIP,
+	ARG_SIMPLEGELS,
+	ARG_LEGACY,
 	ARG_COUNT
 };
 
@@ -84,8 +84,8 @@ void __stdargs __main(char *arg_string)
 	ULONG arg_array[ARG_COUNT];
 
 #ifdef RESOURCE_TRACKING
-    if (ResTrackBase=REALL_OpenLibrary("Galileo:g_restrack.library",0))
-         StartResourceTracking (RTL_ALL);
+	if (ResTrackBase=REALL_OpenLibrary("Galileo:g_restrack.library",0))
+	     StartResourceTracking (RTL_ALL);
 #endif
 
 	// Initialise arguments
@@ -110,10 +110,10 @@ void __stdargs __main(char *arg_string)
 	
 		// See if Galileo is running
 		Forbid();
-        if (FindPort("Galileo"))
+		if (FindPort("Galileo"))
 		{
 			// Open library
-            Permit();
+			Permit();
 			if (GalileoFMBase=OpenLibrary("Galileo:libs/galileofm.library",0))
 			{
 				// Update the path list from current process
@@ -126,9 +126,9 @@ void __stdargs __main(char *arg_string)
 				ok=1;
 			}
 		}
-        else
-        {
-            Permit();
+		else
+		{
+			Permit();
 		}
 		// Is Workbench also running?
 		if (wb_running)
@@ -177,8 +177,8 @@ void __stdargs __main(char *arg_string)
 		// See if Workbench is already running; if so, we don't do WBStartup again
 		if (wb_running) wb_startup=0;
 
-        // Respect SKIPWBSTARTUP
-        if (arg_array[ARG_SKIP]) wb_startup=0;
+		// Respect SKIPWBSTARTUP
+		if (arg_array[ARG_SKIP]) wb_startup=0;
 
 		// Get this process, turn off requesters
 		proc=(struct Process *)FindTask(0);
@@ -235,9 +235,9 @@ void __stdargs __main(char *arg_string)
 
 #ifdef _DEBUG
 #ifdef RESOURCE_TRACKING
-    //PrintTrackedResources();
-    //EndResourceTracking(); /* Generate a memory usage report */
-    REALL_CloseLibrary(ResTrackBase);
+	//PrintTrackedResources();
+	//EndResourceTracking(); /* Generate a memory usage report */
+	REALL_CloseLibrary(ResTrackBase);
 #endif
 #endif
 

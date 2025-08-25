@@ -85,10 +85,6 @@ void lsprintf __ARGS((char *,...));
 
 Att_List *build_sub_options(SubOptionHandle *);
 
-IPCData *__saveds Local_IPC_ProcStartup(
-	ULONG *data,
-	ULONG (*code)(IPCData *,APTR));
-
 #define VALID_QUALIFIERS (IEQUALIFIER_LCOMMAND|IEQUALIFIER_RCOMMAND|\
 			 IEQUALIFIER_CONTROL|IEQUALIFIER_LSHIFT|\
 			 IEQUALIFIER_RSHIFT|IEQUALIFIER_LALT|IEQUALIFIER_RALT)

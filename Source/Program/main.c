@@ -62,35 +62,35 @@ void main(int argc,char **argv)
 
 	/******** Startup Stuff that happens before the progress bar is displayed ********/
 
-	startup_misc_init();									// Miscellaneous startup stuff
-	startup_check_assign();									// Check for PROGDIR: assignment
-	startup_open_galileofmlib();								// Open galileofm.library
-	init_locale_data(&locale);								// Initialise locale info
-	startup_check_duplicate();								// See if Galileo is already running
-	startup_open_libraries();								// Open libraries
-	startup_run_update();									// Run the update module
-	startup_init_gui();										// Create a global memory pool and GUI structure
-	startup_init_environment();								// Initialise environment structure
-	startup_process_args(argc,argv);						// Get startup parameters
-	startup_show_startup_picture(&startup_pic);				// Show startup picture
+	startup_misc_init();					    // Miscellaneous startup stuff
+	startup_check_assign();					    // Check for PROGDIR: assignment
+	startup_open_galileofmlib();				    // Open galileofm.library
+	init_locale_data(&locale);				    // Initialise locale info
+	startup_check_duplicate();				    // See if Galileo is already running
+	startup_open_libraries();				    // Open libraries
+	startup_run_update();					    // Run the update module
+	startup_init_gui();					    // Create a global memory pool and GUI structure
+	startup_init_environment();				    // Initialise environment structure
+	startup_process_args(argc,argv);			    // Get startup parameters
+	startup_show_startup_picture(&startup_pic);		    // Show startup picture
 
 	/******** Startup Stuff that happens after the progress bar is displayed ********/
 
-	startup_init_desktop();						PROG(1);	// Initialise desktop stuff
-	startup_read_positions();					PROG(2);	// Initialise the position list
-	startup_init_ipc();							PROG(3);	// Check registration
-	startup_init_ports();						PROG(4);	// Initialise message ports
-	startup_read_openwith();					PROG(5);	// Read the OpenWith file
-	startup_get_env();							PROG(6);	// Get environment variables
-	startup_init_arexx_cx();					PROG(7);	// Initialise ARexx and the commodity
-	startup_init_commands();					PROG(8);	// Initialise the commands
-	startup_init_filetypes();					PROG(9);	// Initialise filetypes
-	environment_open(environment,0,1,0);		PROG(10);	// Read initial environment
-	startup_init_notification();				PROG(11);	// Initialise file notifications
-	startup_init_icons();						PROG(12);	// Initialise icons and images
-	startup_prestartup_script();				PROG(13);	// Pre-Startup script
-	startup_init_display(startup_pic);			PROG(14);	// Initialise display
-	startup_misc_final();						PROG(15);	// Startup final miscellaneous steps
+	startup_init_desktop();			    PROG(1);	    // Initialise desktop stuff
+	startup_read_positions();		    PROG(2);	    // Initialise the position list
+	startup_init_ipc();			    PROG(3);	    // Check registration
+	startup_init_ports();			    PROG(4);	    // Initialise message ports
+	startup_read_openwith();		    PROG(5);	    // Read the OpenWith file
+	startup_get_env();			    PROG(6);	    // Get environment variables
+	startup_init_arexx_cx();		    PROG(7);	    // Initialise ARexx and the commodity
+	startup_init_commands();		    PROG(8);	    // Initialise the commands
+	startup_init_filetypes();		    PROG(9);	    // Initialise filetypes
+	environment_open(environment,0,1,0);	    PROG(10);	    // Read initial environment
+	startup_init_notification();		    PROG(11);	    // Initialise file notifications
+	startup_init_icons();			    PROG(12);	    // Initialise icons and images
+	startup_prestartup_script();		    PROG(13);	    // Pre-Startup script
+	startup_init_display(startup_pic);	    PROG(14);	    // Initialise display
+	startup_misc_final();			    PROG(15);	    // Startup final miscellaneous steps
 
 	// Run main event loop
 	event_loop();
@@ -191,6 +191,7 @@ void startup_misc_init()
 	// Get pointer to our Process structure, and hide requesters
 	main_proc=(struct Process *)FindTask(0);
 	main_proc->pr_WindowPtr=(APTR)-1;
+
 #ifdef _DEBUG_STACK
 	stack_check_begin((struct Task *)main_proc, &stack_check_data);
 #endif

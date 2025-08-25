@@ -210,7 +210,7 @@ FileChange *function_filechange_loadfile(
 	short flags)
 {
 	char *buffer;
-	BPTR lock = 0;
+	BPTR lock;
 	struct FileInfoBlock __aligned fib;
 	FileChange *change=0;
 	short len;
