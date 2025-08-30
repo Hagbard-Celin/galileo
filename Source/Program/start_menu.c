@@ -51,20 +51,14 @@ IPCData *start_new(char *buttons, BPTR parent_lock, char *label,char *image,shor
 {
 	StartMenu *menu;
 	IPCData *ipc;
-	APTR memhandle;
-
-	// Memory handle
-	if (!(memhandle = NewMemHandle(0,0,MEMF_CLEAR)))
-	    return 0;
 
 	// Allocate data
-	if (!(menu = AllocMemH(memhandle,sizeof(StartMenu))))
+	if (!(menu=AllocVec(sizeof(StartMenu),MEMF_CLEAR)) ||
+		!(menu->memory=NewMemHandle(1024,512,MEMF_CLEAR)))
 	{
-		FreeMemHandle(memhandle);
+		FreeVec(menu);
 		return 0;
 	}
-
-	menu->memory = memhandle;
 
 	// Fill it out
 	if (buttons)
@@ -73,9 +67,10 @@ IPCData *start_new(char *buttons, BPTR parent_lock, char *label,char *image,shor
 
 	    len = strlen(buttons) + 1;
 
-	    if (!(menu->buttons = AllocMemH(memhandle,len)))
+	    if (!(menu->buttons = AllocMemH(menu->memory,len)))
 	    {
-		FreeMemHandle(memhandle);
+		FreeMemHandle(menu->memory);
+		FreeVec(menu);
 		return 0;
 	    }
 
