@@ -323,6 +323,10 @@ UWORD __asm __saveds L_DoPopUpMenu(
 		}
 	}
 
+	// Needed by GetWindowID
+	if (data->old_port->mp_Node.ln_Name == (char *)WINDOW_MAGIC)
+	    data->port->mp_Node.ln_Name = (char *)WINDOW_MAGIC;
+
 	// Install port, set flags
 	window->UserPort=data->port;
 	ModifyIDCMP(window,
