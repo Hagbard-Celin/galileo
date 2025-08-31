@@ -4,6 +4,7 @@ XADDIR      = xadbrowser/
 FTPDIR      = ftp/
 
 STDOBJS     =   $(OBJ)libinit.o $(OBJ)lsprintf.o
+STDTROBJS   =   $(OBJ)libinitTr.o $(OBJ)lsprintf.o
 
 SHOWOBJS    =   $(OBJ)show.o $(OBJ)show_data.o $(OBJ)show_strings.o
 SHOWVER     =       0
@@ -77,15 +78,15 @@ ICONCLOCKOBJS   =   $(OBJ)iconclock.o $(OBJ)iconclock_data.o $(OBJ)iconclock_str
 ICONCLOCKVER    =   0
 ICONCLOCKREV    =   2
 
-FTPMYOBJS   = $(OBJ)$(FTPDIR)ftp_ver.o  $(OBJ)$(FTPDIR)ftp_main.o $(OBJ)$(FTPDIR)ftp_lister.o \
-	      $(OBJ)$(FTPDIR)ftp_lister_list.o $(OBJ)$(FTPDIR)ftp_lister_xfer.o \
+FTPMYOBJS   = $(OBJ)$(FTPDIR)ftp_ver.o $(OBJ)$(FTPDIR)trampoline.o $(OBJ)$(FTPDIR)ftp_main.o \
+	      $(OBJ)$(FTPDIR)ftp_lister.o $(OBJ)$(FTPDIR)ftp_lister_list.o $(OBJ)$(FTPDIR)ftp_lister_xfer.o \
 	      $(OBJ)$(FTPDIR)ftp_lister_connect.o $(OBJ)$(FTPDIR)ftp.o $(OBJ)$(FTPDIR)ftp_arexx.o \
 	      $(OBJ)$(FTPDIR)ftp_util.o $(OBJ)$(FTPDIR)ftp_recursive.o $(OBJ)$(FTPDIR)ftp_addressbook.o \
 	      $(OBJ)$(FTPDIR)ftp_addrsupp.o $(OBJ)$(FTPDIR)ftp_addrformat.o $(OBJ)$(FTPDIR)ftp_protect.o
 
-	
-FTPOBJS	    = $(OBJ)$(FTPDIR)ftp_module.o $(OBJ)$(FTPDIR)ftp_data.o $(OBJ)$(FTPDIR)ftp_strings.o $(FTPMYOBJS)
-FTPVER 	    =  0
+    
+FTPOBJS     = $(OBJ)$(FTPDIR)ftp_module.o $(OBJ)$(FTPDIR)ftp_data.o $(OBJ)$(FTPDIR)ftp_strings.o $(FTPMYOBJS)
+FTPVER      =  0
 FTPREV      =  2
 
 CONFIGMYOBJS = $(OBJ)$(CONFIGDIR)config_drag.o \
@@ -122,7 +123,7 @@ CONFIGREV   = 2
 
 XADMYOBJS   = $(OBJ)$(XADDIR)XADbrowser_progress.o $(OBJ)$(XADDIR)trampoline.o
 
-XADOBJS     = $(OBJ)$(XADDIR)libinit.o $(OBJ)lsprintf.o $(OBJ)$(XADDIR)XADbrowser.o $(OBJ)$(XADDIR)XADbrowser_data.o $(OBJ)$(XADDIR)XADbrowser_strings.o $(XADMYOBJS)
+XADOBJS     = $(OBJ)$(XADDIR)XADbrowser.o $(OBJ)$(XADDIR)XADbrowser_data.o $(OBJ)$(XADDIR)XADbrowser_strings.o $(XADMYOBJS)
 XADVER      = 0
 XADREV      = 2
 
@@ -138,11 +139,12 @@ STRINGS = cleanup.strings debug.strings diskcopy.strings filetype.strings fixico
      play.strings print.strings read.strings recyclebin.strings show.strings themes.strings \
      update.strings $(FTPDIR)ftp.strings $(CONFIGDIR)config.strings $(XADDIR)XADbrowser.strings
 
-OBJS1 = $(STDOBJS) $(SHOWOBJS) $(PLAYOBJS) $(MISCOBJS) $(ICONOBJS) $(FORMATOBJS) $(DISKCOPYOBJS) \
-	$(READOBJS) $(JOINOBJS) $(PRINTOBJS) $(LISTFORMATOBJS) $(FIXICONSOBJS) \
-	$(THEMESOBJS) $(FILETYPEOBJS) $(RECYCLEBINOBJS) $(ICONCLOCKOBJS) \
-	$(UPDATEOBJS) $(CLEANUPOBJS) $(ABOUTOBJS)
-OBJS2 = $(ENVOYOBJS) $(FTPOBJS) $(XADOBJS)
+OBJS1 = $(STDOBJS) $(STDTROBJS) $(ICONOBJS) $(JOINOBJS) $(FIXICONSOBJS) $(UPDATEOBJS) \
+	$(THEMESOBJS) $(FILETYPEOBJS) $(ICONCLOCKOBJS) $(CLEANUPOBJS) \
+	$(ENVOYOBJS) $(FTPOBJS) $(XADOBJS)
+
+OBJS2 = $(ABOUTOBJS) $(DEBUGOBJS) $(LISTFORMATOBJS) $(FORMATOBJS) $(DISKCOPYOBJS) \
+	$(READOBJS) $(PRINTOBJS) $(SHOWOBJS) $(PLAYOBJS) $(MISCOBJS)
 
 OBJS3 = $(CONFIGOBJS)
 
@@ -212,7 +214,12 @@ $(OBJ)$(CONFIGDIR)trampoline.o: $(CONFIGDIR)trampoline.asm
     sc:c/asm -o$(OBJ)$(CONFIGDIR) -iASMINC: $*.asm
 $(OBJ)$(XADDIR)trampoline.o: $(XADDIR)trampoline.asm
     sc:c/asm -o$(OBJ)$(XADDIR) -iASMINC: $*.asm
+$(OBJ)$(FTPDIR)trampoline.o: $(FTPDIR)trampoline.asm
+    sc:c/asm -o$(OBJ)$(FTPDIR) -iASMINC: $*.asm
 $(OBJ)$(FTPDIR)ftp_ver.o: $(FTPDIR)ftp_ver.c
+
+$(OBJ)libinitTr.o: libinit.c
+    sc libinit.c $(SCFLAGS) DEF=_TRAMPOLINE  objname $@
 
 
 #########################################################################
@@ -434,18 +441,18 @@ sc sd
 
 #########################################################################
 
-$(BIN)ftp.gfmmodule: $(STDOBJS) $(FTPOBJS) 
-	slink with lib:utillib.with with <<
+$(BIN)ftp.gfmmodule: $(STDTROBJS) $(FTPOBJS)
+    slink with lib:utillib.with with <<
 define __ctype=___ctype
 libprefix _L_
 libfd modules.fd
-$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(FTPOBJS)
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDTROBJS) $(FTPOBJS)
 to $(BIN)ftp.gfmmodule
 lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(FTPVER)
 librevision $(FTPREV)
 $(STRIPDEBUG) noicons
-sc sd 
+sc
 <
 
 #########################################################################
@@ -550,15 +557,13 @@ sc sd
 <
 
 #########################################################################
-$(OBJ)$(XADDIR)libinit.o: libinit.c
-    sc $*.c $(SCFLAGS) DEF=_TRAMPOLINE  objname $@
 
-$(BIN)XADbrowser.gfmmodule: $(XADOBJS) 
-	slink with lib:utillib.with with <<
+$(BIN)XADbrowser.gfmmodule: $(STDTROBJS) $(XADOBJS)
+    slink with lib:utillib.with with <<
 define __ctype=___ctype
 libprefix _L_
 libfd modules.fd
-$(ADDSYM) from lib:libent.o lib:libinit.o $(XADOBJS) 
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDTROBJS) $(XADOBJS)
 to $(BIN)XADbrowser.gfmmodule
 lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(XADVER)
