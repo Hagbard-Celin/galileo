@@ -476,6 +476,7 @@ void start_cleanup(StartMenu *menu)
 	// Free data
 	PopUpFreeHandle(menu->menu);
 	FreeMemHandle(menu->memory);
+	FreeVec(menu);
 
 	// Forbid so we don't get unloaded too soon
 	Forbid();
