@@ -812,6 +812,25 @@ FunctionEntry *function_get_entry(FunctionHandle *handle)
 		handle->anchor->ap_Info.fib_DirEntryType==ST_SOFTLINK)
 	    {
 		handle->recurse_entry_data->fe_flags|=FUNCENTF_LINK;
+
+		if (handle->anchor->ap_Info.fib_DirEntryType == ST_SOFTLINK)
+		{
+		    struct FileInfoBlock __aligned link_fib;
+		    //BPTR link, link_parent, org_dir;
+		    BPTR link, org_dir;
+
+		    //link_parent = DupLock(handle->anchor->ap_Last->an_Lock);
+		    org_dir = CurrentDir(handle->anchor->ap_Last->an_Lock);
+		    if (link = Lock(handle->anchor->ap_Info.fib_FileName, ACCESS_READ))
+		    {
+			Examine(link, &link_fib);
+			if (link_fib.fib_DirEntryType < 0)
+			    handle->recurse_entry_data->fe_flags |= FUNCENTF_LINK_FILE;
+			UnLock(link);
+		    }
+
+		    CurrentDir(org_dir);
+		}
 	    }
 	    else
 		handle->recurse_entry_data->fe_flags&=~FUNCENTF_LINK;
@@ -825,6 +844,7 @@ FunctionEntry *function_get_entry(FunctionHandle *handle)
 
 		// Do we want this entry?
 		if (handle->anchor->ap_Info.fib_DirEntryType<0 ||
+		    handle->recurse_entry_data->fe_flags&FUNCENTF_LINK_FILE ||
 		    handle->instruction_flags&INSTF_WANT_DIRS)
 		{
 		    // Point to dummy entry
@@ -835,7 +855,8 @@ FunctionEntry *function_get_entry(FunctionHandle *handle)
 		    handle->recurse_entry->fe_lock=DupLock(handle->anchor->ap_Last->an_Lock);
 
 		    // File?
-		    if (handle->anchor->ap_Info.fib_DirEntryType<0)
+		    if (handle->anchor->ap_Info.fib_DirEntryType<0 ||
+			handle->recurse_entry_data->fe_flags&FUNCENTF_LINK_FILE)
 		    {
 			// If we have a file filter, compare it
 			if (handle->got_filter==2 &&
@@ -890,7 +911,8 @@ FunctionEntry *function_get_entry(FunctionHandle *handle)
 		}
 
 		// Entering a new directory?
-		if (handle->anchor->ap_Info.fib_DirEntryType>0)
+		if (handle->anchor->ap_Info.fib_DirEntryType>0 &&
+		    !(handle->recurse_entry_data->fe_flags&FUNCENTF_LINK_FILE))
 		{
 		    BPTR lock, current;
 		    BPTR tmp_lock;

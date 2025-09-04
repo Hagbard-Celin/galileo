@@ -120,6 +120,7 @@ typedef struct _AsyncData
 #define FUNCENTF_FAKE_ICON		(1<<12)
 #define FUNCENTF_ASSIGN			(1<<13) // Assign to directory
 #define FUNCENTF_MULTI_ASSIGN		(1<<14) // Assign to directory
+#define FUNCENTF_LINK_FILE		(1<<15)
 
 typedef struct _PathNode
 {
