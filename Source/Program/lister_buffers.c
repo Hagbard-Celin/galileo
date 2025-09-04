@@ -148,8 +148,10 @@ DirBuffer *lister_find_buffer(
 			if (lock)
 			{
 			    if (flags&LISTER_BFPF_COMPARE_LOCKADDRESS)
-			    if (lock == buffer->buf_Lock)
-				match = 1;
+			    {
+				if (lock == buffer->buf_Lock)
+				    match = 1;
+			    }
 			    else
 			    if (SameLock(lock,buffer->buf_Lock) == LOCK_SAME)
 				match = 1;
