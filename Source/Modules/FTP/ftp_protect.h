@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		http://www.gpsoft.com.au
 
 */
 
@@ -42,11 +42,11 @@ For more information on Directory Opus for Windows please see:
 // Protect GUI message
 struct protectgui_msg
 {
-struct Window *pm_window;
-char          *pm_name;
-ULONG          pm_current;
-ULONG          pm_set_mask;
-ULONG          pm_clear_mask;
+	struct Window *pm_window;
+	char	      *pm_name;
+	ULONG	      pm_current;
+	ULONG	      pm_set_mask;
+	ULONG	      pm_clear_mask;
 };
 
 

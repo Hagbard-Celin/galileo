@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		http://www.gpsoft.com.au
 
 */
 
@@ -63,25 +63,27 @@ For more information on Directory Opus for Windows please see:
 /*
  * Internet address (a structure for historical reasons)
  */
-struct in_addr {
-	u_long	s_addr;
+struct in_addr
+{
+	u_long s_addr;
 };
 
 /*
  * Socket address, internet style.
  */
-struct sockaddr_in {
-	short	sin_family;
-	u_short	sin_port;
+struct sockaddr_in
+{
+	short		sin_family;
+	u_short		sin_port;
 	struct	in_addr sin_addr;
-	char	sin_zero[8];
+	char		sin_zero[8];
 };
 
 /*
  * Options for use with [gs]etsockopt at the IP level.
  * First word of comment is data type; bool is stored in int.
  */
-#define	IP_TOS		3	/* int; IP type of service and precedence */
+#define	IP_TOS		3		/* int; IP type of service and precedence */
 
 /* Types, macros, etc. for select() */
 
@@ -95,7 +97,7 @@ struct sockaddr_in {
  * I did not put it in both files since h/param.h includes this file and that
  * would be error prone anyway.
  */
-#define MAXFUPLIM 128/* Max SOCKETS allowed */
+#define MAXFUPLIM 128			/* Max SOCKETS allowed */
 #endif
 
 /*
@@ -110,17 +112,18 @@ struct sockaddr_in {
  */
 #define FD_SETSIZE MAXFUPLIM
 
-     typedef long fd_mask;
+typedef long fd_mask;
 
-#define NFDBITS (sizeof(fd_mask) * 8)           /* 8 bits per byte */
+#define NFDBITS (sizeof(fd_mask) * 8)	/* 8 bits per byte */
 
 #ifndef howmany
 #define howmany(x,y) (((x)+((y)-1))/(y))
 #endif
 
-     typedef struct fd_set {
-       fd_mask fds_bits[howmany(FD_SETSIZE, NFDBITS)];
-     } fd_set;
+typedef struct fd_set
+{
+	fd_mask fds_bits[howmany(FD_SETSIZE, NFDBITS)];
+} fd_set;
 
 #define FD_SET(n,p)  ((p)->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))
 #define FD_CLR(n,p) ((p)->fds_bits[(n)/NFDBITS] &= ~(1 << ((n) % NFDBITS)))
@@ -140,34 +143,35 @@ struct sockaddr_in {
 /*
  * Types
  */
-#define	SOCK_STREAM	1		/* stream socket */
+#define	SOCK_STREAM	1	/* stream socket */
 
 /*
  * Option flags per-socket.
  */
-#define	SO_REUSEADDR	0x0004		/* allow local address reuse */
-#define	SO_LINGER	0x0080		/* linger on close if data present */
-#define	SO_OOBINLINE	0x0100		/* leave received OOB data in line */
+#define	SO_REUSEADDR	0x0004	/* allow local address reuse */
+#define	SO_LINGER	0x0080	/* linger on close if data present */
+#define	SO_OOBINLINE	0x0100	/* leave received OOB data in line */
 
 /*
  * Structure used for manipulating linger option.
  */
-struct	linger {
-	int	l_onoff;		/* option on/off */
-	int	l_linger;		/* linger time */
+struct	linger
+{
+	int l_onoff;		/* option on/off */
+	int l_linger;		/* linger time */
 };
 
 /*
  * Level number for (get/set)sockopt() to apply to socket itself.
  */
-#define	SOL_SOCKET	0xffff		/* options for socket level */
+#define	SOL_SOCKET	0xffff	/* options for socket level */
 
 /*
  * Address families.
  */
-#define	AF_INET		2		/* internetwork: UDP, TCP, etc. */
+#define	AF_INET		2	/* internetwork: UDP, TCP, etc. */
 
-#define	MSG_OOB		0x1		/* process out-of-band data */
+#define	MSG_OOB		0x1	/* process out-of-band data */
 
 /* arpa/internet/telnet.h */
 
@@ -193,20 +197,22 @@ struct	linger {
  * supplied in host order, and returned in network order (suitable for
  * use in system calls).
  */
-struct	hostent {
-	char	*h_name;	/* official name of host */
-	char	**h_aliases;	/* alias list */
-	int	h_addrtype;	/* host address type */
-	int	h_length;	/* length of address */
-	char	**h_addr_list;	/* list of addresses from name server */
+struct	hostent
+{
+	char *h_name;		/* official name of host */
+	char **h_aliases;	/* alias list */
+	int  h_addrtype;	/* host address type */
+	int  h_length;		/* length of address */
+	char **h_addr_list;	/* list of addresses from name server */
 #define	h_addr	h_addr_list[0]	/* address, for backward compatiblity */
 };
 
-struct	servent {
-	char	*s_name;	/* official service name */
-	char	**s_aliases;	/* alias list */
-	int	s_port;		/* port # */
-	char	*s_proto;	/* protocol to use */
+struct	servent
+{
+	char *s_name;		/* official service name */
+	char **s_aliases;	/* alias list */
+	int  s_port;		/* port # */
+	char *s_proto;		/* protocol to use */
 };
 
 #endif

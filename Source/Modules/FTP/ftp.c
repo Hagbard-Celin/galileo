@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		http://www.gpsoft.com.au
 
 */
 
@@ -43,14 +43,14 @@ For more information on Directory Opus for Windows please see:
  *	19-03-96	"Get" is now asynchronous
  *	20-03-96	"List" is now also asynchronous
  *
- *	25-01-97	GP Changed Get/Put to improve speed. 
+ *	25-01-97	GP Changed Get/Put to improve speed.
  *			Scrapped Writes in other task, Added buffered r/w
  *	20-02-97	Rewrote sgets/c fns to add buffered reading from socket
  *			Changed (fixed) method of handling aborts from selectwait
  *			now uses selectwait flags correctly
  *
  *	-04-97		Added getput btw sites
- *			
+ *
  */
 
 /*************************************************************
@@ -87,108 +87,108 @@ For more information on Directory Opus for Windows please see:
 #define errno GETGLOBAL(FindTask(NULL),g_errno)
 
 /* Any printf can be used but this is designed for the one in 'lister.c' */
-extern void __stdargs logprintf( char *fmt, ... );
+extern void __stdargs logprintf(char *fmt, ...);
 
 /**
  **	Function definitions
  **/
 
 // Change to parent dir
-int ftp_cdup( struct ftp_info *info, int (*updatefn)(void *,int,char *), void *updateinfo )
+int ftp_cdup(struct ftp_info *info, int (*updatefn)(void *,int,char *), void *updateinfo)
 {
-int reply;
+	int reply;
 
-_ftpa( info, FTPFLAG_ASYNCH, "CDUP" );
-reply = _getreply( info, 0, updatefn, updateinfo );
+	_ftpa(info, FTPFLAG_ASYNCH, "CDUP");
+	reply = _getreply(info, 0, updatefn, updateinfo);
 
-return reply;
+	return reply;
 }
 
 // Change file modes
-int ftp_chmod( struct ftp_info *info, unsigned int mode, char *name )
+int ftp_chmod(struct ftp_info *info, unsigned int mode, char *name)
 {
-int reply;
+	int reply;
 
-*info->fi_serverr = 0;
+	*info->fi_serverr = 0;
 
-reply = ftpa( info, "SITE CHMOD %o %s", mode, name );
+	reply = ftpa(info, "SITE CHMOD %o %s", mode, name);
 
-if	(reply == 500 || reply == 502)
-	info->fi_flags |= FTP_NO_CHMOD;
-else if	(reply / 100 != COMPLETE)
-	stccpy( info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1 );
+	if (reply == 500 || reply == 502)
+		info->fi_flags |= FTP_NO_CHMOD;
+	else if	(reply / 100 != COMPLETE)
+		stccpy(info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1);
 
-return reply;
+	return reply;
 }
 
 // Change dir
-int ftp_cwd( struct ftp_info *info, int (*updatefn)(void *,int,char *), void *updateinfo, char *path )
+int ftp_cwd(struct ftp_info *info, int (*updatefn)(void *,int,char *), void *updateinfo, char *path)
 {
-int reply;
+	int reply;
 
-*info->fi_serverr = 0;
+	*info->fi_serverr = 0;
 
-_ftpa( info, FTPFLAG_ASYNCH, "CWD %s", path );
-reply = _getreply( info, 0, updatefn, updateinfo );
+	_ftpa(info, FTPFLAG_ASYNCH, "CWD %s", path);
+	reply = _getreply(info, 0, updatefn, updateinfo);
 
-if	(reply / 100 != COMPLETE)
-	stccpy( info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1 );
+	if (reply / 100 != COMPLETE)
+		stccpy(info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1);
 
-return reply;
+	return reply;
 }
 
 // Delete file
-int ftp_dele( struct ftp_info *info, char *name )
+int ftp_dele(struct ftp_info *info, char *name)
 {
-int reply;
+	int reply;
 
-*info->fi_serverr = 0;
+	*info->fi_serverr = 0;
 
-reply = ftpa( info, "DELE %s", name );
+	reply = ftpa(info, "DELE %s", name);
 
-if	(reply / 100 != COMPLETE)
-	stccpy( info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1 );
+	if (reply / 100 != COMPLETE)
+		stccpy(info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1);
 
-return reply;
+	return reply;
 }
 
 
 // Change transfer type to binary
-int ftp_image( struct ftp_info *info )
+int ftp_image(struct ftp_info *info)
 {
-return ftp( info, "TYPE I\r\n" );
+	return ftp(info, "TYPE I\r\n");
 }
 
 // Return file date
-int ftp_mdtm( struct ftp_info *info, char *name )
+int ftp_mdtm(struct ftp_info *info, char *name)
 {
-int reply;
+	int reply;
 
-*info->fi_serverr = 0;
+	*info->fi_serverr = 0;
 
-reply = ftpa( info, "MDTM %s", name );
+	reply = ftpa(info, "MDTM %s", name);
 
-if	(reply >= 500 && reply <= 502)
-	info->fi_flags |= FTP_NO_MDTM;
-else if	(reply / 100 != COMPLETE)
-	stccpy( info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1 );
+	if (reply >= 500 && reply <= 502)
+		info->fi_flags |= FTP_NO_MDTM;
+	else if	(reply / 100 != COMPLETE)
+		stccpy(info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1);
 
-return reply;
+	return reply;
 }
 
 // Make new dir
-int ftp_mkd( struct ftp_info *info, char *name )
+int ftp_mkd(struct ftp_info *info, char *name)
 {
-int reply;
+	int reply;
 
-*info->fi_serverr = 0;
+	*info->fi_serverr = 0;
 
-reply = ftpa( info, "MKD %s", name );
+	reply = ftpa(info, "MKD %s", name);
 
-if	(reply / 100 != COMPLETE)
-	stccpy( info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1 );
+	if (reply / 100 != COMPLETE)
+		stccpy(info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1);
 
-return reply;
+	return reply;
 }
 
 //
@@ -197,127 +197,127 @@ return reply;
 //	Note: This is also used to break data connections
 //	in site-site transfers.
 //
-int ftp_pasv( struct ftp_info *info )
+int ftp_pasv(struct ftp_info *info)
 {
-int reply;
+	int reply;
 
-*info->fi_serverr = 0;
+	*info->fi_serverr = 0;
 
-reply = ftp( info, "PASV\r\n" );
+	reply = ftp(info, "PASV\r\n");
 
-if	(reply >= 500 && reply <= 502)
+	if (reply >= 500 && reply <= 502)
 	{
-	kprintf( "** setting NO_PASV\n" );
-	info->fi_flags |= FTP_NO_PASV;
+		kprintf("** setting NO_PASV\n");
+		info->fi_flags |= FTP_NO_PASV;
 	}
-else if	(reply / 100 != COMPLETE)
-	stccpy( info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1 );
+	else if	(reply / 100 != COMPLETE)
+		stccpy(info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1);
 
-return reply;
+	return reply;
 }
 
 // Send PORT command
-int ftp_port( struct ftp_info *info, unsigned long flags, unsigned char *host, unsigned char *port )
+int ftp_port(struct ftp_info *info, unsigned long flags, unsigned char *host, unsigned char *port)
 {
-int reply;
+	int reply;
 
-if	(!(flags & PORT_QUIET))
-	*info->fi_serverr = 0;
+	if (!(flags & PORT_QUIET))
+		*info->fi_serverr = 0;
 
-reply = _ftpa( info, flags, "PORT %d,%d,%d,%d,%d,%d",
-	*host++, *host++, *host++, *host,
-	*port++, *port );
+	reply = _ftpa(info, flags, "PORT %d,%d,%d,%d,%d,%d",
+		      *host++, *host++, *host++, *host,
+		      *port++, *port);
 
-if	(!(flags & PORT_QUIET) && reply / 100 != COMPLETE)
-	stccpy( info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1 );
+	if (!(flags & PORT_QUIET) && reply / 100 != COMPLETE)
+		stccpy(info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1);
 
-return reply;
+	return reply;
 }
 
 // Return current dir
-int ftp_pwd( struct ftp_info *info )
+int ftp_pwd(struct ftp_info *info)
 {
-return ftp( info, "PWD\r\n" );
+	return ftp(info, "PWD\r\n");
 }
 
 // Rename file or dir
-int ftp_rename( struct ftp_info *info, char *oldname, char *newname )
+int ftp_rename(struct ftp_info *info, char *oldname, char *newname)
 {
-int  reply;
+	int reply;
 
-*info->fi_serverr = 0;
+	*info->fi_serverr = 0;
 
-// Can TIMEOUT
-reply = ftpa( info, "RNFR %s", oldname );
-
-if	(reply / 100 != CONTINUE)
-	stccpy( info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1 );
-else
-	{
 	// Can TIMEOUT
-	reply = ftpa( info, "RNTO %s", newname );
+	reply = ftpa(info, "RNFR %s", oldname);
 
-	if	(reply / 100 != COMPLETE)
-		stccpy( info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1 );
+	if (reply / 100 != CONTINUE)
+		stccpy(info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1);
+	else
+	{
+		// Can TIMEOUT
+		reply = ftpa(info, "RNTO %s", newname);
+
+		if (reply / 100 != COMPLETE)
+			stccpy(info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1);
 	}
 
-return reply;
+	return reply;
 }
 
 // Restart next transfer at this offset
-int ftp_rest( struct ftp_info *info, unsigned int offset )
+int ftp_rest(struct ftp_info *info, unsigned int offset)
 {
-int reply;
+	int reply;
 
-*info->fi_serverr = 0;
+	*info->fi_serverr = 0;
 
-reply = ftpa( info, "REST %lu", offset );
+	reply = ftpa(info, "REST %lu", offset);
 
-// Microsoft servers always say, "504 Reply marker must be 0."
-if	((reply >= 500 && reply <= 502) || reply == 504)
-	info->fi_flags |= FTP_NO_REST;
-else if	(reply / 100 != CONTINUE)
-	stccpy( info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1 );
+	// Microsoft servers always say, "504 Reply marker must be 0."
+	if ((reply >= 500 && reply <= 502) || reply == 504)
+		info->fi_flags |= FTP_NO_REST;
+	else if	(reply / 100 != CONTINUE)
+		stccpy(info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1);
 
-return reply;
+	return reply;
 }
 
 // Remove directory
-int ftp_rmd( struct ftp_info *info, char *name )
+int ftp_rmd(struct ftp_info *info, char *name)
 {
-int reply;
+	int reply;
 
-*info->fi_serverr = 0;
+	*info->fi_serverr = 0;
 
-reply = ftpa( info, "RMD %s", name );
+	reply = ftpa(info, "RMD %s", name);
 
-if	(reply / 100 != COMPLETE)
-	stccpy( info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1 );
+	if (reply / 100 != COMPLETE)
+		stccpy(info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1);
 
-return reply;
+	return reply;
 }
 
 // Return file size
-int ftp_size( struct ftp_info *info, char *name )
+int ftp_size(struct ftp_info *info, char *name)
 {
-int reply;
+	int reply;
 
-*info->fi_serverr = 0;
+	*info->fi_serverr = 0;
 
-reply = ftpa( info, "SIZE %s", name );
+	reply = ftpa(info, "SIZE %s", name);
 
-if	(reply >= 500 && reply <= 502)
-	info->fi_flags |= FTP_NO_SIZE;
-else if	(reply / 100 != COMPLETE)
-	stccpy( info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1 );
+	if (reply >= 500 && reply <= 502)
+		info->fi_flags |= FTP_NO_SIZE;
+	else if	(reply / 100 != COMPLETE)
+		stccpy(info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1);
 
-return reply;
+	return reply;
 }
 
 // Return system type
-int ftp_syst( struct ftp_info *info )
+int ftp_syst(struct ftp_info *info)
 {
-return ftp( info, "SYST\r\n" );
+	return ftp(info, "SYST\r\n");
 }
 
 
@@ -335,42 +335,42 @@ return ftp( info, "SYST\r\n" );
 *
 **************************************************************/
 
-static int _ftp( struct ftp_info *info, unsigned long flags, const char *cmd )
+static int _ftp(struct ftp_info *info, unsigned long flags, const char *cmd)
 {
-struct galileoftp_globals *ogp = info->fi_og;
-int len;
-
-	
-// Valid?
-if	(!info || !cmd)
-	return 600;
-
-// Socket used by non-owner task?
-if	(info->fi_task != FindTask(0))
-	return 600;
-
-// Log outgoing commands if debugging is turned on
-// NOOPs are never logged, passwords are hidden
-if	(!info->fi_doing_noop && info->fi_og->og_oc.oc_log_debug)
-	logprintf("--> %s\n", strnicmp(cmd,"PASS ",5) ? cmd : "PASS ....." );
+	struct galileoftp_globals *ogp = info->fi_og;
+	int len;
 
 
-len = strlen(cmd);
-send( info->fi_cs, (char *)cmd, len, 0 );
+	// Valid?
+	if (!info || !cmd)
+		return 600;
 
-// Don't get reply if this is an asynchronous command, simply return 0
-if	(flags & FTPFLAG_ASYNCH)
-	return 0;
+	// Socket used by non-owner task?
+	if (info->fi_task != FindTask(0))
+		return 600;
+
+	// Log outgoing commands if debugging is turned on
+	// NOOPs are never logged, passwords are hidden
+	if (!info->fi_doing_noop && info->fi_og->og_oc.oc_log_debug)
+		logprintf("--> %s\n", strnicmp(cmd,"PASS ",5) ? cmd : "PASS .....");
 
 
-// Can TIMEOUT
-return getreply( info );
+	len = strlen(cmd);
+	send(info->fi_cs, (char *)cmd, len, 0);
+
+	// Don't get reply if this is an asynchronous command, simply return 0
+	if (flags & FTPFLAG_ASYNCH)
+		return 0;
+
+
+	// Can TIMEOUT
+	return getreply(info);
 }
 
 
-int ftp( struct ftp_info *info, const char *cmd )
+int ftp(struct ftp_info *info, const char *cmd)
 {
-return _ftp( info, 0, cmd );
+	return _ftp(info, 0, cmd);
 }
 
 /*************************************************************/
@@ -382,61 +382,61 @@ return _ftp( info, 0, cmd );
 //	Return error 600 for out of memory
 //	It is technically possible for the buffer to be overwritten
 //
-static int _vftpa( struct ftp_info *info, unsigned long flags, const char *fmt, va_list ap )
+static int _vftpa(struct ftp_info *info, unsigned long flags, const char *fmt, va_list ap)
 {
-char *buf;
-int   reply;
+	char *buf;
+	int reply;
 
-if	(buf = AllocVec( 1024, MEMF_CLEAR ))
+	if (buf = AllocVec(1024, MEMF_CLEAR))
 	{
-	vsprintf( buf, fmt, ap );
+		vsprintf(buf, fmt, ap);
 
-	// add cr lf to terminate command for ftp()
-	strcat(buf,"\r\n"); 
+		// add cr lf to terminate command for ftp()
+		strcat(buf,"\r\n");
 
-	reply = _ftp( info, flags, buf );
+		reply = _ftp(info, flags, buf);
 
-	FreeVec( buf );
+		FreeVec(buf);
 	}
-else
+	else
 	{
-	reply = 600;
-	info->fi_errno = FTPERR_NO_MEM;
+		reply = 600;
+		info->fi_errno = FTPERR_NO_MEM;
 	}
 
-return reply;
+	return reply;
 }
 
 // Calls internal vftpa
 
-static int vftpa( struct ftp_info *info, const char *fmt, va_list ap )
+static int vftpa(struct ftp_info *info, const char *fmt, va_list ap)
 {
-return _vftpa( info, 0, fmt, ap );
+	return _vftpa(info, 0, fmt, ap);
 }
 
 // Internal ftpa - supports flags
 
-int _ftpa( struct ftp_info *info, unsigned long flags, const char *fmt, ... )
+int _ftpa(struct ftp_info *info, unsigned long flags, const char *fmt, ...)
 {
-va_list ap;
-int     reply;
+	va_list ap;
+	int reply;
 
-va_start( ap, fmt );
+	va_start(ap, fmt);
 
-reply = _vftpa( info, flags, fmt, ap );
+	reply = _vftpa(info, flags, fmt, ap);
 
-return reply;
+	return reply;
 }
 
-int ftpa( struct ftp_info *info, const char *fmt, ... )
+int ftpa(struct ftp_info *info, const char *fmt, ...)
 {
-va_list ap;
-int     reply;
+	va_list ap;
+	int reply;
 
-va_start( ap, fmt );
-reply = vftpa( info, fmt, ap );
+	va_start(ap, fmt);
+	reply = vftpa(info, fmt, ap);
 
-return reply;
+	return reply;
 }
 
 
@@ -448,23 +448,23 @@ return reply;
  *	after urgent byte rather than before as now is protocol
  */
 
-void ftp_abor( struct ftp_info *info )
+void ftp_abor(struct ftp_info *info)
 {
-unsigned char iac_ip[] = { IAC, IP, IAC, DM, 'A', 'B', 'O', 'R', '\r', '\n' };
-struct galileoftp_globals *ogp = info->fi_og;
+	unsigned char iac_ip[] = { IAC, IP, IAC, DM, 'A', 'B', 'O', 'R', '\r', '\n' };
+	struct galileoftp_globals *ogp = info->fi_og;
 
-err( "--> IAC,IP" );
-send( info->fi_cs, iac_ip, 2, 0 );
+	err("--> IAC,IP");
+	send(info->fi_cs, iac_ip, 2, 0);
 
-err( "--> IAC (MSG_OOB)" );
-send( info->fi_cs, iac_ip+2, 1, MSG_OOB );
+	err("--> IAC (MSG_OOB)");
+	send(info->fi_cs, iac_ip+2, 1, MSG_OOB);
 
-err( "--> DM" );
+	err("--> DM");
 
-if	(info->fi_og->og_oc.oc_log_debug)
-	logprintf( "--> ABOR\n" );
+	if (info->fi_og->og_oc.oc_log_debug)
+		logprintf("--> ABOR\n");
 
-send( info->fi_cs, iac_ip+3, 7, 0 );
+	send(info->fi_cs, iac_ip+3, 7, 0);
 }
 
 
@@ -473,108 +473,108 @@ send( info->fi_cs, iac_ip+3, 7, 0 );
 //	Open data connection
 //	Returns -1 upon failure; a socket descriptor upon success.
 //
-static int opendataconn( struct galileoftp_globals *ogp, struct ftp_info *info )
+static int opendataconn(struct galileoftp_globals *ogp, struct ftp_info *info)
 {
-int            ts;					// Temporary socket
-LONG           len = sizeof(struct sockaddr_in);	// Length of socket address
-int            reply;					// Reply from FTP commands
-int            bad_pasv = FALSE;			// Passive unavailable?
+	int ts;						// Temporary socket
+	LONG len = sizeof(struct sockaddr_in);		// Length of socket address
+	int reply;					// Reply from FTP commands
+	int bad_pasv = FALSE;				// Passive unavailable?
 
-// PASV known not to work on this site?
-if	(info->fi_flags & FTP_NO_PASV)
-	bad_pasv = TRUE;
+	// PASV known not to work on this site?
+	if (info->fi_flags & FTP_NO_PASV)
+		bad_pasv = TRUE;
 
-// PASV option not enabled?
-if	(!(info->fi_flags & FTP_PASSIVE))
-	bad_pasv = TRUE;
+	// PASV option not enabled?
+	if (!(info->fi_flags & FTP_PASSIVE))
+		bad_pasv = TRUE;
 
-// Create temporary socket
-if	((ts = socket( AF_INET, SOCK_STREAM, 0 )) >= 0)
+	// Create temporary socket
+	if ((ts = socket(AF_INET, SOCK_STREAM, 0)) >= 0)
 	{
-	// Passive mode?  Try it first.
-	if	(!bad_pasv)
+		// Passive mode?  Try it first.
+		if (!bad_pasv)
 		{
-		// Send PASV command to FTP server
-		int pasvreply;
+			// Send PASV command to FTP server
+			int pasvreply;
 
-		pasvreply=ftp_pasv( info );
+			pasvreply=ftp_pasv(info);
 
-		switch	(pasvreply)
+			switch (pasvreply)
 			{
-			case  227: // correct reply
-				if	(pasv_to_address( &info->fi_addr, info->fi_iobuf ))
+				case  227:	// correct reply
+					if (pasv_to_address(&info->fi_addr, info->fi_iobuf))
 					{
-					if	(connect( ts, (struct sockaddr *)&info->fi_addr, sizeof(info->fi_addr) ) >= 0)
-						return(ts);
+						if (connect(ts, (struct sockaddr *)&info->fi_addr, sizeof(info->fi_addr)) >= 0)
+							return(ts);
 					}
 
-				bad_pasv = TRUE;
-				break;
+					bad_pasv = TRUE;
+					break;
 
-			case 421: // sockect closed by timeout
+				case 421:	// sockect closed by timeout
 
-				s_close( ts );
-				return(-1);
+					s_close(ts);
+					return(-1);
 
-			default:
-				kprintf( "Pasv failed returns %ld\n",pasvreply);
-				bad_pasv = TRUE;
+				default:
+					kprintf("Pasv failed returns %ld\n",pasvreply);
+					bad_pasv = TRUE;
 			}
 		}
 
-	// Sendport mode - Passive may have just failed above
+		// Sendport mode - Passive may have just failed above
 
-	if	(bad_pasv || (info->fi_flags & FTP_NO_PASV))
+		if (bad_pasv || (info->fi_flags & FTP_NO_PASV))
 		{
-		getsockname( info->fi_cs, (struct sockaddr*)&info->fi_addr, &len );
+			getsockname(info->fi_cs, (struct sockaddr*)&info->fi_addr, &len);
 
-		// Set port to zero so the system will pick one
-		info->fi_addr.sin_port = 0;
+			// Set port to zero so the system will pick one
+			info->fi_addr.sin_port = 0;
 
-		if	(bind( ts, (struct sockaddr *)&info->fi_addr, sizeof(info->fi_addr) ) >= 0)
+			if (bind(ts, (struct sockaddr *)&info->fi_addr, sizeof(info->fi_addr)) >= 0)
 			{
-			// The system will now fill in the port number it picked
-			if	(getsockname( ts, (struct sockaddr*)&info->fi_addr, &len ) >= 0)
+				// The system will now fill in the port number it picked
+				if (getsockname(ts, (struct sockaddr*)&info->fi_addr, &len) >= 0)
 				{
-				if	(listen( ts, 1 ) >= 0)
+					if (listen(ts, 1) >= 0)
 					{
-					// Can TIMEOUT
-					reply = ftp_port( info, 0, (char *)&info->fi_addr.sin_addr, (char *)&info->fi_addr.sin_port );
+						// Can TIMEOUT
+						reply = ftp_port(info, 0, (char *)&info->fi_addr.sin_addr, (char *)&info->fi_addr.sin_port);
 
-					if	(reply/100 == COMPLETE)
-						return(ts);
+						if (reply/100 == COMPLETE)
+							return(ts);
 					}
+					else
+					{
+						kprintf("** listen fail\n");
+						info->fi_errno = FTPERR_LISTEN_FAIL;
+					}
+				}
 				else
-					{
-					kprintf( "** listen fail\n" );
-					info->fi_errno = FTPERR_LISTEN_FAIL;
-					}
-				}
-			else
 				{
-				kprintf( "** getsockname fail\n" );
-				info->fi_errno = FTPERR_GETSOCKNAME_FAIL;
+					kprintf("** getsockname fail\n");
+					info->fi_errno = FTPERR_GETSOCKNAME_FAIL;
 				}
 			}
-		else
+			else
 			{
-			kprintf( "** bind fail\n" );
-			info->fi_errno = FTPERR_BIND_FAIL;
+				kprintf("** bind fail\n");
+				info->fi_errno = FTPERR_BIND_FAIL;
 			}
 		}
 
-	s_close( ts );
+		s_close(ts);
 	}
-else
-	info->fi_errno = FTPERR_SOCKET_FAIL;
+	else
+		info->fi_errno = FTPERR_SOCKET_FAIL;
 
-return (-1) ;
+	return (-1);
 }
 
 //
 //	To transfer data, we do these things in order as specifed by
 //	the RFC.
-// 
+//
 //	First, we tell the other side to set up a data line.  This
 //	is done by opendataconn() which sets up  the socket.  When we do that,
 //	the other side detects a connection  attempt, so it knows we're
@@ -590,100 +590,100 @@ return (-1) ;
 //	Returns -3 under some (forgotten) circumstances
 //	Returns -1 for other errors
 //
-static int dataconna( struct ftp_info *info, int restart, const char *fmt, ... )
+static int dataconna(struct ftp_info *info, int restart, const char *fmt, ...)
 {
-struct galileoftp_globals *ogp = info->fi_og;
-va_list                 ap;			// For varargs
-int                     ts, ds = -1;		// Temporary socket, Data socket
-struct linger           linger = { 1, 120 };	// Socket option
-int                     tos = IPTOS_THROUGHPUT;	// Another socket option
-struct sockaddr_in      from;			// Socket address
-int                     reply;
-BOOL                    okay = FALSE;
+	struct galileoftp_globals *ogp = info->fi_og;
+	va_list ap;				// For varargs
+	int ts, ds = -1;			// Temporary socket, Data socket
+	struct linger linger = { 1, 120 };	// Socket option
+	int tos = IPTOS_THROUGHPUT;		// Another socket option
+	struct sockaddr_in from;		// Socket address
+	int reply;
+	BOOL okay = FALSE;
 
-if	((ts = opendataconn( ogp, info )) >= 0)
+	if ((ts = opendataconn(ogp, info)) >= 0)
 	{
-	okay = TRUE;
+		okay = TRUE;
 
-	// Have the system make an effort to deliver any unsent data
-	// even after we close the connection
-	setsockopt( ts, SOL_SOCKET, SO_LINGER, (char *)&linger, sizeof(linger) );
+		// Have the system make an effort to deliver any unsent data
+		// even after we close the connection
+		setsockopt(ts, SOL_SOCKET, SO_LINGER, (char *)&linger, sizeof(linger));
 
-	// Data connection is a non-interactive data stream, so
-	// high throughput is desired, at the expense of low
-	// response time
-	setsockopt( ts, IPPROTO_IP, IP_TOS, (char *)&tos, sizeof(tos) );
+		// Data connection is a non-interactive data stream, so
+		// high throughput is desired, at the expense of low
+		// response time
+		setsockopt(ts, IPPROTO_IP, IP_TOS, (char *)&tos, sizeof(tos));
 
-	// Resuming a transfer?
-	if	(restart)
+		// Resuming a transfer?
+		if (restart)
 		{
-		// Can we use REST command?
-		if	(!(info->fi_flags & FTP_NO_REST))
+			// Can we use REST command?
+			if (!(info->fi_flags & FTP_NO_REST))
 			{
-			// Can TIMEOUT
-			ftp_rest( info, restart );
+				// Can TIMEOUT
+				ftp_rest(info, restart);
 			}
 		}
 
-	// Result if something failed after opendataconn and before here
-	ds = -3;
+		// Result if something failed after opendataconn and before here
+		ds = -3;
 	}
 
-if	(okay)
+	if (okay)
 	{
-	va_start( ap, fmt );
+		va_start(ap, fmt);
 
-	// Send main command - Can TIMEOUT
-	reply = vftpa( info, fmt, ap );
+		// Send main command - Can TIMEOUT
+		reply = vftpa(info, fmt, ap);
 
-	if	(reply/100 == PRELIM)
+		if (reply/100 == PRELIM)
 		{
-		LONG len = sizeof(from);
+			LONG len = sizeof(from);
 
-		// Sendport mode?
-		if	((info->fi_flags & FTP_NO_PASV) || !(info->fi_flags & FTP_PASSIVE))
+			// Sendport mode?
+			if ((info->fi_flags & FTP_NO_PASV) || !(info->fi_flags & FTP_PASSIVE))
 			{
-			ds = accept( ts, (struct sockaddr*)&from, &len );
+				ds = accept(ts, (struct sockaddr*)&from, &len);
 
-			s_close( ts );
+				s_close(ts);
 			}
 
-		// Passive mode?
+			// Passive mode?
+			else
+			{
+				ds = ts;
+			}
+		}
 		else
-			{
-			ds = ts;
-			}
-		}
-	else
-		ds = -2;
+			ds = -2;
 	}
 
-return ds;
+	return ds;
 }
 
 #ifdef	DEBUG
-static void timeit( struct update_info *ui, int bytes )
+static void timeit(struct update_info *ui, int bytes)
 {
-unsigned char sizebuf[48] = "";
-int  time;
-int  rate;
+	unsigned char sizebuf[48] = "";
+	int time;
+	int rate;
 
-struct Library *TimerBase = GetTimerBase();
+	struct Library *TimerBase = GetTimerBase();
 
-GetSysTime( &ui->ui_curr );
+	GetSysTime(&ui->ui_curr);
 
-if	((time = ui->ui_curr.tv_secs - ui->ui_start.tv_secs) == 0)
-	time = 1;
+	if ((time = ui->ui_curr.tv_secs - ui->ui_start.tv_secs) == 0)
+		time = 1;
 
-rate = bytes / time;
-cat_bytes( sizebuf,bytes );
-strcat( sizebuf, " " );
-cat_bytes( sizebuf, rate );
-strcat( sizebuf, "/s" );
+	rate = bytes / time;
+	cat_bytes(sizebuf,bytes);
+	strcat(sizebuf, " ");
+	cat_bytes(sizebuf, rate);
+	strcat(sizebuf, "/s");
 
-//kprintf("time %ld done %s\n",time,sizebuf);
+	//kprintf("time %ld done %s\n",time,sizebuf);
 
-return;
+	return;
 }
 #endif
 
@@ -697,247 +697,247 @@ return;
 
 static VOID set_timeout(struct ftp_info *info, struct timeval *timer)
 {
-timer->tv_secs = info->fi_timeout;
-timer->tv_micro = 0;
+	timer->tv_secs = info->fi_timeout;
+	timer->tv_micro = 0;
 
-// check to make sure there is a valid timeout
+	// check to make sure there is a valid timeout
 
-if	(timer->tv_secs == 0)
-	timer->tv_secs=60;
+	if (timer->tv_secs == 0)
+		timer->tv_secs=60;
 
 }
 
 
-#define	WBUFSIZE (16 * 1024) // disk buffer size for buffered read
+#define	WBUFSIZE (16 * 1024)	// disk buffer size for buffered read
 
 /*************************************************************/
 
 //
 //	Get a remote file, calling the update function after each block arrives
-//	Returns the total bytes received.  
+//	Returns the total bytes received.
 //	fi_errno MUST be checked for errors
 //	Returns -2 for AmigaDos errors - Use IoErr() to report/handle them
 //	Returns -3 for FTP server errors - Use the fi_reply and fi_iobuf fields to report/handle them
 //	Returns -1 for rare unlikely errors - Could cause DisplayBeep() etc...
-//	now uses IOBUFSIZE 
+//	now uses IOBUFSIZE
 //
 //	Update callback must specify 0xffffffff for total and length if REST fails
 //	Update callback must specify 0xffffffff for unknown total
 //	Update callback must specify 0 for length of final call
 //
-unsigned int get( struct ftp_info *info, int (*updatefn)(void *,unsigned int,unsigned int), void *updateinfo, char *remote_path, char *local_path, BOOL restart )
+unsigned int get(struct ftp_info *info, int (*updatefn)(void *,unsigned int,unsigned int), void *updateinfo, char *remote_path, char *local_path, BOOL restart)
 {
-// Needed because socket library base is in our task's tc_userdata field
-struct galileoftp_globals *ogp = info->fi_og;
-unsigned int            total = 0xffffffff;	// Length of file
-unsigned int            bytes = 0;		// Bytes received so far
-APTR                    f;			// Output file
-int                     ds;			// Data socket
-int                     b;			// Byte count
-int                     reply;			// FTP reply
-fd_set                  rd, ex; 
-ULONG                   flags;
-struct timeval          timer = {0};
-int                     display_bytes;
-int                     done;
+	// Needed because socket library base is in our task's tc_userdata field
+	struct galileoftp_globals *ogp = info->fi_og;
+	unsigned int total = 0xffffffff;	// Length of file
+	unsigned int bytes = 0;			// Bytes received so far
+	APTR f;					// Output file
+	int ds;					// Data socket
+	int b;					// Byte count
+	int reply;				// FTP reply
+	fd_set rd, ex;
+	ULONG flags;
+	struct timeval timer = {0};
+	int display_bytes;
+	int done;
 
-//kprintf( "get() '%s' -> '%s'\n", remote_path, local_path );
+	//kprintf( "get() '%s' -> '%s'\n", remote_path, local_path );
 
-// Valid?
-if	(!info)
-	return 0;
+	// Valid?
+	if (!info)
+		return 0;
 
-// No abort/error yet
-info->fi_aborted = 0;
-info->fi_errno = 0;
-info->fi_ioerr = 0;
-*info->fi_serverr = 0;
+	// No abort/error yet
+	info->fi_aborted = 0;
+	info->fi_errno = 0;
+	info->fi_ioerr = 0;
+	*info->fi_serverr = 0;
 
-// More validity
-if	(!remote_path || !local_path)
+	// More validity
+	if (!remote_path || !local_path)
 	{
-	info->fi_errno |= FTPERR_XFER_RARERR;
-	return 0;
+		info->fi_errno |= FTPERR_XFER_RARERR;
+		return 0;
 	}
 
-// init counters etc
-display_bytes = done = 0;
+	// init counters etc
+	display_bytes = done = 0;
 
-// open output file for writing
-if	(f = OpenBuf( (char *)local_path, restart ? MODE_OLDFILE : MODE_NEWFILE, WBUFSIZE ))
+	// open output file for writing
+	if (f = OpenBuf((char *)local_path, restart ? MODE_OLDFILE : MODE_NEWFILE, WBUFSIZE))
 	{
-	// Resuming?  So find out where to resume from
-	if	(restart)
+		// Resuming?  So find out where to resume from
+		if (restart)
 		{
-		SeekBuf( f, 0, OFFSET_END );
-		bytes = SeekBuf( f, 0, OFFSET_CURRENT );
+			SeekBuf(f, 0, OFFSET_END);
+			bytes = SeekBuf(f, 0, OFFSET_CURRENT);
 		}
 
-	// get connected  - bytes is a market flag 0/x for RETR/REST
-	if	((ds = dataconna( info, bytes, "RETR %s", remote_path )) < 0)
+		// get connected  - bytes is a market flag 0/x for RETR/REST
+		if ((ds = dataconna(info, bytes, "RETR %s", remote_path)) < 0)
 		{
-		// Source (server error)?
-		if	(ds == -2 || ds == -3)
+			// Source (server error)?
+			if (ds == -2 || ds == -3)
 			{
-			info->fi_errno |= FTPERR_XFER_SRCERR;
-			stccpy( info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1 );
+				info->fi_errno |= FTPERR_XFER_SRCERR;
+				stccpy(info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1);
 			}
+			else
+				info->fi_errno |= FTPERR_XFER_RARERR;
+		}
 		else
-			info->fi_errno |= FTPERR_XFER_RARERR;
-		}
-	else
 		{
-		char *p;
+			char *p;
 
-		// Reset bytes if REST failed
-		if	(bytes && (info->fi_flags & FTP_NO_REST))
+			// Reset bytes if REST failed
+			if (bytes && (info->fi_flags & FTP_NO_REST))
 			{
-			if	(updatefn)
-				(*updatefn)( updateinfo, 0xffffffff, 0xffffffff );
+				if (updatefn)
+					(*updatefn)(updateinfo, 0xffffffff, 0xffffffff);
 
-			SeekBuf( f, 0, OFFSET_BEGINNING );
-			bytes = 0;
+				SeekBuf(f, 0, OFFSET_BEGINNING);
+				bytes = 0;
 			}
 
-		// First update tells callback where we're starting from
-		if	(updatefn)
-			(*updatefn)( updateinfo, total, bytes );
+			// First update tells callback where we're starting from
+			if (updatefn)
+				(*updatefn)(updateinfo, total, bytes);
 
-		// Does the RETR reply contain the file length?
-		if (p = strstr( info->fi_iobuf, " bytes)" ))
-			if	(isdigit(*--p))
+			// Does the RETR reply contain the file length?
+			if (p = strstr(info->fi_iobuf, " bytes)"))
+				if (isdigit(*--p))
 				{
-				while	(isdigit(*p--)) ;
-				total = atoi(p+2);
+					while (isdigit(*p--))   ;
+					total = atoi(p+2);
 				}
 
-		// do the transfer
+			// do the transfer
 
-		FD_ZERO( &rd );
-		FD_ZERO( &ex );
+			FD_ZERO(&rd);
+			FD_ZERO(&ex);
 
-		// set network timeout for the select wait call
-		set_timeout(info,&timer);
+			// set network timeout for the select wait call
+			set_timeout(info,&timer);
 
-		// loop fetch tcp data and save it
-		while	(!done)
+			// loop fetch tcp data and save it
+			while (!done)
 			{
-			// Note: these masks must be set before every call and
-			// are all cleared by select wait. Examine the masks
-			// afterwards to see what was set
+				// Note: these masks must be set before every call and
+				// are all cleared by select wait. Examine the masks
+				// afterwards to see what was set
 
-			FD_SET( ds, &rd );
-			FD_SET( ds, &ex );
-			flags = SIGBREAKF_CTRL_D; 
+				FD_SET(ds, &rd);
+				FD_SET(ds, &ex);
+				flags = SIGBREAKF_CTRL_D;
 
-			if	(selectwait( ds + 1 , &rd, NULL, &ex, &timer, &flags ) >= 0)
+				if (selectwait(ds + 1, &rd, NULL, &ex, &timer, &flags) >= 0)
 				{
-				// Is there some data ready for us?
-				if	(FD_ISSET( ds, &rd ))
+					// Is there some data ready for us?
+					if (FD_ISSET(ds, &rd))
 					{
-					// then get it and store it
-					if	(b = recv( ds, info->fi_iobuf, IOBUFSIZE, 0 ))
+						// then get it and store it
+						if (b = recv(ds, info->fi_iobuf, IOBUFSIZE, 0))
 						{
-						// save data
-						if	(WriteBuf( f, info->fi_iobuf, b ) == b)
+							// save data
+							if (WriteBuf(f, info->fi_iobuf, b) == b)
 							{
-							bytes += b;
-	
-							// progress bar uprate
-							display_bytes += b;
+								bytes += b;
 
-							if	(display_bytes >= UPDATE_BYTE_LIMIT)
+								// progress bar uprate
+								display_bytes += b;
+
+								if (display_bytes >= UPDATE_BYTE_LIMIT)
 								{
-								if	(updatefn)
-									(*updatefn)( updateinfo, total, display_bytes );
+									if (updatefn)
+										(*updatefn)(updateinfo, total, display_bytes);
 
-								display_bytes = 0;
+									display_bytes = 0;
 								}
 							}
-						// Write Error
-						else
+							// Write Error
+							else
 							{
-							info->fi_errno |= FTPERR_XFER_DSTERR;
-							info->fi_ioerr = IoErr();
-							info->fi_aborted = 1;
-							ftp_abor( info );
-							done = TRUE;
-							}	
+								info->fi_errno |= FTPERR_XFER_DSTERR;
+								info->fi_ioerr = IoErr();
+								info->fi_aborted = 1;
+								ftp_abor(info);
+								done = TRUE;
+							}
 						}
-					else
+						else
+							done = TRUE;
+					}
+
+					// did we get a signal to abort?
+					if (!done && (flags & SIGBREAKF_CTRL_D))
+					{
+						kprintf("*** get() CTRL-D SIGNAL ***\n");
+						info->fi_abortsignals = 0;
+						info->fi_aborted = 1;
+						ftp_abor(info);	// NEEDED why not just close socket?
 						done = TRUE;
 					}
 
-				// did we get a signal to abort?
-				if	(!done && (flags & SIGBREAKF_CTRL_D))
+					// did we get an exception? Other end closed connection maybe
+					if (FD_ISSET(ds, &ex))
 					{
-					kprintf( "*** get() CTRL-D SIGNAL ***\n" );
-					info->fi_abortsignals = 0;
-					info->fi_aborted = 1;
-					ftp_abor( info );	// NEEDED why not just close socket?
-					done = TRUE;
-					}
+						kprintf("** get() socket exception\n");
 
-				// did we get an exception? Other end closed connection maybe
-				if	(FD_ISSET( ds, &ex ))
-					{
-					kprintf("** get() socket exception\n");
-
-					// has been aborted from remote ?
-					done = TRUE;
+						// has been aborted from remote ?
+						done = TRUE;
 					}
 				}
-			else
+				else
 				{
-				// some socket error -ve a 0 == timeout
-				kprintf( "** get() selectwait error\n" );
-				done = TRUE;
+					// some socket error -ve a 0 == timeout
+					kprintf("** get() selectwait error\n");
+					done = TRUE;
 				}
 			}
 
-		// Final progress bar redraw at 100% (if it finished)
-		if	(!info->fi_aborted && !info->fi_errno && updatefn)
-			(*updatefn)( updateinfo, total, 0 );
+			// Final progress bar redraw at 100% (if it finished)
+			if (!info->fi_aborted && !info->fi_errno && updatefn)
+				(*updatefn)(updateinfo, total, 0);
 
-		//errf( "--> close(%ld)\n", ds );
-		s_close( ds );
+			//errf( "--> close(%ld)\n", ds );
+			s_close(ds);
 
 #ifdef	DEBUG
-//			if	(ui)
-//			timeit( ui, bytes );
+			//			if	(ui)
+			//			timeit( ui, bytes );
 #endif
 
-		// Get reply to socket closure  Can TIMEOUT
-		reply = getreply( info );
+			// Get reply to socket closure  Can TIMEOUT
+			reply = getreply(info);
 
-		// If transfer was aborted, read the ABOR reply (426)
-		// (This could get the reply to RETR (226) but it don't matter)
-		if	(info->fi_aborted && reply != 421)
-			reply = getreply( info );
+			// If transfer was aborted, read the ABOR reply (426)
+			// (This could get the reply to RETR (226) but it don't matter)
+			if (info->fi_aborted && reply != 421)
+				reply = getreply(info);
 
-		// RETR successful? - Don't set error if we forced it!
-		// (This could get the reply to ABOR (225) but it don't matter)
-		if	(reply / 100 != COMPLETE)
-			if	(!info->fi_errno)
+			// RETR successful? - Don't set error if we forced it!
+			// (This could get the reply to ABOR (225) but it don't matter)
+			if (reply / 100 != COMPLETE)
+				if (!info->fi_errno)
 				{
-				info->fi_errno |= FTPERR_XFER_SRCERR;
-				stccpy( info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1 );
+					info->fi_errno |= FTPERR_XFER_SRCERR;
+					stccpy(info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1);
 				}
 		}
 
-	CloseBuf( f );
+		CloseBuf(f);
 
-	// Delete empty files if there was an error and we created it
-	if	(info->fi_errno && bytes == 0 && !restart)
-		DeleteFile( (char *)local_path );
+		// Delete empty files if there was an error and we created it
+		if (info->fi_errno && bytes == 0 && !restart)
+			DeleteFile((char *)local_path);
 	}
-else
+	else
 	{
-	info->fi_errno |= FTPERR_XFER_DSTERR;
-	info->fi_ioerr = IoErr();
+		info->fi_errno |= FTPERR_XFER_DSTERR;
+		info->fi_ioerr = IoErr();
 	}
 
-return bytes;
+	return bytes;
 }
 
 /*************************************************************
@@ -950,71 +950,71 @@ return bytes;
 */
 
 
-static int iread( struct ftp_info *info, int skt, BOOL checkbreak )
+static int iread(struct ftp_info *info, int skt, BOOL checkbreak)
 {
 #define ogp info->fi_og
-int                     retval = -1;
-fd_set                  rd, ex;
-ULONG                   flags;
-struct timeval          timer = { 0, 0 };
+	int retval = -1;
+	fd_set rd, ex;
+	ULONG flags;
+	struct timeval timer = { 0, 0 };
 
-// set network timeout for the select wait call
-set_timeout(info,&timer);
+	// set network timeout for the select wait call
+	set_timeout(info,&timer);
 
-FD_ZERO( &rd );
-FD_ZERO( &ex );
+	FD_ZERO(&rd);
+	FD_ZERO(&ex);
 
-FD_SET( skt,&rd );
-FD_SET( skt,&ex );
-flags = checkbreak ? SIGBREAKF_CTRL_D : 0;
+	FD_SET(skt,&rd);
+	FD_SET(skt,&ex);
+	flags = checkbreak ? SIGBREAKF_CTRL_D : 0;
 
-//  Selectwait returns number of ready file descriptors if
-//  successful.  Zero (0) if a timeout occurred.
-//  (-1) upon error.
+	//  Selectwait returns number of ready file descriptors if
+	//  successful.  Zero (0) if a timeout occurred.
+	//  (-1) upon error.
 
 
-if	(selectwait( skt+1, &rd, 0L, &ex, &timer, &flags ) >= 0)
+	if (selectwait(skt+1, &rd, 0L, &ex, &timer, &flags) >= 0)
 	{
-	//kprintf("recv - ");
+		//kprintf("recv - ");
 
-	// is data available from the socket?
-	if	(FD_ISSET( skt, &rd ))
+		// is data available from the socket?
+		if (FD_ISSET(skt, &rd))
 		{
-		// number of bytes read if successful else -1.
-		// can be 0 for EOF
-		retval = recv( skt, info->fi_bufiobuf, BUFIOBUFSIZE, 0 );
+			// number of bytes read if successful else -1.
+			// can be 0 for EOF
+			retval = recv(skt, info->fi_bufiobuf, BUFIOBUFSIZE, 0);
 		}
 
 #ifdef DEBUG
-	// has the socket been closed?
-	if	(FD_ISSET( skt, &ex ))
-		kprintf( "** iread() socket exception\n" );
+		// has the socket been closed?
+		if (FD_ISSET(skt, &ex))
+			kprintf("** iread() socket exception\n");
 #endif
 
-	// whatever check if user has hit CTRL_D
-	if	(flags & SIGBREAKF_CTRL_D)
+		// whatever check if user has hit CTRL_D
+		if (flags & SIGBREAKF_CTRL_D)
 		{
-		info->fi_abortsignals = 0;
-		//kprintf( "*** iread() CTRL-D SIGNAL ***\n" );
-		retval = -1;
+			info->fi_abortsignals = 0;
+			//kprintf( "*** iread() CTRL-D SIGNAL ***\n" );
+			retval = -1;
 		}
 	}
 
 
-return(retval);
+	return(retval);
 #undef ogp
 }
 
 
 /*************************************************************
-*
-*	Flush the input socket buffer
-*/
+ *
+ *	Flush the input socket buffer
+ */
 
-static void flush_socket_buffer( struct ftp_info *info )
+static void flush_socket_buffer(struct ftp_info *info)
 {
-info->fi_buffer_left = 0;
-info->fi_buffer_pos = info->fi_bufiobuf;
+	info->fi_buffer_left = 0;
+	info->fi_buffer_pos = info->fi_bufiobuf;
 }
 
 /*************************************************************
@@ -1027,29 +1027,29 @@ info->fi_buffer_pos = info->fi_bufiobuf;
 * 	Function returns 1 for success or 0,-1 for timeouts/errors.
 */
 
-int buf_sgetc( struct ftp_info *info, int skt, BOOL checkbreak, char *ret )
+int buf_sgetc(struct ftp_info *info, int skt, BOOL checkbreak, char *ret)
 {
-int res;
+	int res;
 
-if	(info->fi_buffer_left)
+	if (info->fi_buffer_left)
 	{
-	-- info->fi_buffer_left;
-	*ret = *info->fi_buffer_pos++;
+		--info->fi_buffer_left;
+		*ret = *info->fi_buffer_pos++;
 	}
-else
+	else
 	{
-	info->fi_buffer_pos = info->fi_bufiobuf;
-	info->fi_buffer_left = 0;
+		info->fi_buffer_pos = info->fi_bufiobuf;
+		info->fi_buffer_left = 0;
 
-	// Fill buffer - res no chars read, 0 = timeout, -1 = error
-	if	((res = iread( info, skt, checkbreak )) <= 0)
-		return(res);
+		// Fill buffer - res no chars read, 0 = timeout, -1 = error
+		if ((res = iread(info, skt, checkbreak)) <= 0)
+			return(res);
 
-	info->fi_buffer_left = res - 1;
-	*ret = *info->fi_buffer_pos++;
+		info->fi_buffer_left = res - 1;
+		*ret = *info->fi_buffer_pos++;
 	}
 
-return 1;
+	return 1;
 }
 
 /*************************************************************
@@ -1068,34 +1068,34 @@ return 1;
  *	 the file, the buffer argument is returned.
  */
 
-static char *buf_sgets( struct ftp_info *info, int bytes, int skt, BOOL checkbreak )
+static char *buf_sgets(struct ftp_info *info, int bytes, int skt, BOOL checkbreak)
 {
-char *buf, *retval, *p;
-char c;
+	char *buf, *retval, *p;
+	char c;
 
-buf=info->fi_iobuf;
-retval = p = buf;
+	buf=info->fi_iobuf;
+	retval = p = buf;
 
-do
+	do
 	{
-	// Buffer full?
-	if	(p - buf == bytes - 1)
-		break;
+		// Buffer full?
+		if (p - buf == bytes - 1)
+			break;
 
-	//  EOF or error?
-	if	(buf_sgetc( info, skt, checkbreak, &c ) <= 0)
+		//  EOF or error?
+		if (buf_sgetc(info, skt, checkbreak, &c) <= 0)
 		{
-		retval = NULL;
-		break;
+			retval = NULL;
+			break;
 		}
-	*p++ = c;
+		*p++ = c;
 
 	} while (c != '\n');
 
-// Null terminate
-*p = 0;
+	// Null terminate
+	*p = 0;
 
-return(retval);
+	return(retval);
 }
 
 /*******************old_functions ************************************/
@@ -1108,76 +1108,76 @@ return(retval);
 //	Returns -3 for control-D break
 //
 //	checkabort_time is set either to default or special time for
-//	getput only on dest STOR command 
+//	getput only on dest STOR command
 //
-static int sgetc( struct ftp_info *info, int skt, int checkabort_time )
+static int sgetc(struct ftp_info *info, int skt, int checkabort_time)
 {
 #define ogp info->fi_og
-int retval = -1;
-unsigned char c;
-fd_set rd, ex;
-ULONG flags;
-int n, nds;
-struct timeval t = {0};
+	int retval = -1;
+	unsigned char c;
+	fd_set rd, ex;
+	ULONG flags;
+	int n, nds;
+	struct timeval t = {0};
 
-// Valid?
-if	(!info || skt < 0)
+	// Valid?
+	if (!info || skt < 0)
 	{
-	kprintf( "** sgetc invalid!\n" );
-	return retval;
+		kprintf("** sgetc invalid!\n");
+		return retval;
 	}
 
-// set network timeout for the select wait call
+	// set network timeout for the select wait call
 
-if	(checkabort_time == 2)
-	t.tv_secs = 5; // special return soon to update progress bar
-else
-	set_timeout(info,&t);
+	if (checkabort_time == 2)
+		t.tv_secs = 5;	// special return soon to update progress bar
+	else
+		set_timeout(info,&t);
 
-t.tv_micro = 0;
+	t.tv_micro = 0;
 
-FD_ZERO( &rd );
-FD_ZERO( &ex );
+	FD_ZERO(&rd);
+	FD_ZERO(&ex);
 
-FD_SET( skt, &rd );
-FD_SET( skt, &ex );
+	FD_SET(skt, &rd);
+	FD_SET(skt, &ex);
 
-flags = checkabort_time ? SIGBREAKF_CTRL_D : 0;
-	
-//	Selectwait returns number of ready file descriptors if
-//	successful.  Zero (0) if a timeout occurred.
-//	(-1) upon error.
+	flags = checkabort_time ? SIGBREAKF_CTRL_D : 0;
 
-if	((nds = selectwait( skt+1, &rd, 0L, &ex, &t, &flags )) >= 0)
+	//	Selectwait returns number of ready file descriptors if
+	//	successful.  Zero (0) if a timeout occurred.
+	//	(-1) upon error.
+
+	if ((nds = selectwait(skt+1, &rd, 0L, &ex, &t, &flags)) >= 0)
 	{
-	if	(nds == 0) // timeout or abort
+		if (nds == 0)	// timeout or abort
 		{
-		kprintf( "** sgetc() selectwait timeout\n" );
-		retval = -2;
-		}		
-
-	// abort button hit?
-	if	(flags & SIGBREAKF_CTRL_D)
-		{
-		info->fi_abortsignals = 0;
-		kprintf( "*** sgetc() CTRL-D SIGNAL ***\n" );
-		retval = -3;
+			kprintf("** sgetc() selectwait timeout\n");
+			retval = -2;
 		}
 
-	// is data ready?
-	if	(FD_ISSET( skt, &rd ))
-		if	((n = recv( skt, &c, 1, 0 )) == 1)
-			retval = c;
+		// abort button hit?
+		if (flags & SIGBREAKF_CTRL_D)
+		{
+			info->fi_abortsignals = 0;
+			kprintf("*** sgetc() CTRL-D SIGNAL ***\n");
+			retval = -3;
+		}
+
+		// is data ready?
+		if (FD_ISSET(skt, &rd))
+			if ((n = recv(skt, &c, 1, 0)) == 1)
+				retval = c;
 
 #ifdef DEBUG
-	// has the socket been closed?
-	if	(FD_ISSET( skt, &ex ))
-		kprintf( "** sgetc() socket exception\n" );
+		// has the socket been closed?
+		if (FD_ISSET(skt, &ex))
+			kprintf("** sgetc() socket exception\n");
 #endif
 
 	}
 
-return retval;
+	return retval;
 #undef ogp
 }
 
@@ -1191,54 +1191,54 @@ return retval;
 //	info->fi_reply = 800 for timeout
 //	info->fi_reply = 700 for control-D abort
 //
-static char *sgets( struct ftp_info *info, char *iobuf, int bytes, int skt, int checkabort_time )
+static char *sgets(struct ftp_info *info, char *iobuf, int bytes, int skt, int checkabort_time)
 {
-char *retval, *p;
-int   c;
+	char *retval, *p;
+	int c;
 
-if	(bytes < 1)
-	return NULL;
+	if (bytes < 1)
+		return NULL;
 
-retval = p = iobuf;
+	retval = p = iobuf;
 
-do
+	do
 	{
-	// Buffer full?
-	if	(p - iobuf == bytes - 1)
-		break;
+		// Buffer full?
+		if (p - iobuf == bytes - 1)
+			break;
 
-	// Read a character
-	c = sgetc( info, skt, checkabort_time );
+		// Read a character
+		c = sgetc(info, skt, checkabort_time);
 
-	// EOF or error?
-	if	(c == -1)
+		// EOF or error?
+		if (c == -1)
 		{
-		retval = 0;
-		break;
+			retval = 0;
+			break;
 		}
-	// Timeout?
-	else if	(c == -2)
+		// Timeout?
+		else if	(c == -2)
 		{
-		info->fi_reply = 800;
-		retval = 0;
-		break;
+			info->fi_reply = 800;
+			retval = 0;
+			break;
 		}
-	// Aborted?
-	else if	(c == -3)
+		// Aborted?
+		else if	(c == -3)
 		{
-		info->fi_reply = 700;
-		retval = 0;
-		break;
+			info->fi_reply = 700;
+			retval = 0;
+			break;
 		}
 
-	*p++ = c;
+		*p++ = c;
 
 	} while (c != '\n');
 
-// Null terminate
-*p = 0;
+	// Null terminate
+	*p = 0;
 
-return retval;
+	return retval;
 }
 
 
@@ -1257,77 +1257,77 @@ return retval;
 //	it ever helps for any site.  Also to prove to users who sometimes
 //	demand it, that it doesn't work.
 //
-int list( struct ftp_info *info, int (*updatefn)(void *, const char *), void *updateinfo, const char *cmd, const char *path )
+int list(struct ftp_info *info, int (*updatefn)(void *, const char *), void *updateinfo, const char *cmd, const char *path)
 {
-// Needed because socket library base is in our task's tc_userdata field
-struct galileoftp_globals *ogp = info->fi_og;
-int                     retval = -1;	// error - 0 is no error
-int                     ds;		// Data socket
-int                     reply;		// FTP reply
-int                     updateret = 1;	// Return value from update function
+	// Needed because socket library base is in our task's tc_userdata field
+	struct galileoftp_globals *ogp = info->fi_og;
+	int retval = -1;		// error - 0 is no error
+	int ds;				// Data socket
+	int reply;			// FTP reply
+	int updateret = 1;		// Return value from update function
 
 #ifdef QUOTE_HACK
-// For quote checking
-char env;
+	// For quote checking
+	char env;
 #endif
 
-// Valid?
-if	(!info || !cmd)
-	return -1;
+	// Valid?
+	if (!info || !cmd)
+		return -1;
 
-// Establish data connection
+	// Establish data connection
 #ifdef QUOTE_HACK
-if	(path && *path && GetVar( "Galileo/ftp_quotes", &env, 1, 0 ) != -1)
-	ds = dataconna( info, 0, "%s \"%s\"", cmd, path );
-else
+	if (path && *path && GetVar("Galileo/ftp_quotes", &env, 1, 0) != -1)
+		ds = dataconna(info, 0, "%s \"%s\"", cmd, path);
+	else
 #endif
-if	(path && *path)
-	ds = dataconna( info, 0, "%s %s", cmd, path );
-else
-	ds = dataconna( info, 0, "%s", cmd );
+	if (path && *path)
+		ds = dataconna(info, 0, "%s %s", cmd, path);
+	else
+		ds = dataconna(info, 0, "%s", cmd);
 
-if	(ds >= 0)
+	if (ds >= 0)
 	{
-	retval = 0;
+		retval = 0;
 
-	// Safety
-	flush_socket_buffer( info );
+		// Safety
+		flush_socket_buffer(info);
 
-	// Read a line and call the callback function
-	while	(updateret > 0 && buf_sgets( info, IOBUFSIZE, ds, TRUE ))
+		// Read a line and call the callback function
+		while (updateret > 0 && buf_sgets(info, IOBUFSIZE, ds, TRUE))
 		{
-		if	(updatefn)
+			if (updatefn)
 			{
-			updateret = (*updatefn)( updateinfo, info->fi_iobuf );
+				updateret = (*updatefn)(updateinfo, info->fi_iobuf);
 
-			if	(updateret <= 0)
+				if (updateret <= 0)
 				{
-				kprintf( "** list update %ld\n", updateret );
-				retval = updateret;
+					kprintf("** list update %ld\n", updateret);
+					retval = updateret;
 				}
 			}
 		}
 
-	//errf( "--> close(%ld)\n", ds );
-	s_close( ds );
+		//errf( "--> close(%ld)\n", ds );
+		s_close(ds);
 
-	// Get reply to socket closure -  Can TIMEOUT
-	reply = getreply( info );
+		// Get reply to socket closure -  Can TIMEOUT
+		reply = getreply(info);
 
-	// Server error during list?  (should be pretty rare)
-	if	(reply / 100 != COMPLETE)
+		// Server error during list?  (should be pretty rare)
+		if (reply / 100 != COMPLETE)
 		{
-		info->fi_errno |= FTPERR_XFER_SRCERR;
-		stccpy( info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1 );
+			info->fi_errno |= FTPERR_XFER_SRCERR;
+			stccpy(info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1);
 		}
 	}
-else
+	else
 	{
-	if	(ds == -2)
-		retval = -2;
+		if (ds == -2)
+			retval = -2;
 	}
 
-return retval;
+	return retval;
 }
 
 
@@ -1338,170 +1338,170 @@ return retval;
  *	1/97 changed FRead to Read
  */
 
-unsigned int put( struct ftp_info *info, int (*updatefn)(void *,unsigned int,unsigned int), void *updateinfo, char *local_path, char *remote_path, unsigned int restart )
+unsigned int put(struct ftp_info *info, int (*updatefn)(void *,unsigned int,unsigned int), void *updateinfo, char *local_path, char *remote_path, unsigned int restart)
 {
-struct galileoftp_globals *ogp = info->fi_og;
-unsigned int            bytes = 0;
-APTR                    f;				// Output file
-int                     ds;				// Data socket
-int                     b;				// Byte count
-fd_set                  wd, ex;
-ULONG                   flags = SIGBREAKF_CTRL_D;
-struct timeval          timer = {0};
-BOOL                    done = FALSE;
-int                     display_bytes = 0;
+	struct galileoftp_globals *ogp = info->fi_og;
+	unsigned int bytes = 0;
+	APTR f;						// Output file
+	int ds;						// Data socket
+	int b;						// Byte count
+	fd_set wd, ex;
+	ULONG flags = SIGBREAKF_CTRL_D;
+	struct timeval timer = {0};
+	BOOL done = FALSE;
+	int display_bytes = 0;
 
-// Valid?
-if	(!info)
-	return 0;
+	// Valid?
+	if (!info)
+		return 0;
 
-// No abort/error yet
-info->fi_aborted = 0;
-info->fi_errno = 0;
-info->fi_ioerr = 0;
-*info->fi_serverr = 0;
+	// No abort/error yet
+	info->fi_aborted = 0;
+	info->fi_errno = 0;
+	info->fi_ioerr = 0;
+	*info->fi_serverr = 0;
 
-// More validity
-if	(!remote_path || !local_path)
+	// More validity
+	if (!remote_path || !local_path)
 	{
-	info->fi_errno |= FTPERR_XFER_RARERR;
-	return 0;
+		info->fi_errno |= FTPERR_XFER_RARERR;
+		return 0;
 	}
 
-if	(f = OpenBuf( (char *)local_path, MODE_OLDFILE, WBUFSIZE ))
+	if (f = OpenBuf((char *)local_path, MODE_OLDFILE, WBUFSIZE))
 	{
-	// Can TIMEOUT
-	if	((ds = dataconna( info, restart, "STOR %s", remote_path )) < 0)
+		// Can TIMEOUT
+		if ((ds = dataconna(info, restart, "STOR %s", remote_path)) < 0)
 		{
-		// Destination (server) error?
-		if	(ds == -2 || ds == -3)
+			// Destination (server) error?
+			if (ds == -2 || ds == -3)
 			{
-			info->fi_errno |= FTPERR_XFER_DSTERR;
-			stccpy( info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1 );
+				info->fi_errno |= FTPERR_XFER_DSTERR;
+				stccpy(info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1);
 			}
+			else
+				info->fi_errno |= FTPERR_XFER_RARERR;
+		}
 		else
-			info->fi_errno |= FTPERR_XFER_RARERR;
-		}
-	else
 		{
-		// Resuming a transfer?
-		if	(restart)
+			// Resuming a transfer?
+			if (restart)
 			{
-			// Start at 0 if REST failed
-			if	(info->fi_flags & FTP_NO_REST)
+				// Start at 0 if REST failed
+				if (info->fi_flags & FTP_NO_REST)
 				{
-				if	(updatefn)
-					(*updatefn)( updateinfo, 0xffffffff, 0xffffffff );
+					if (updatefn)
+						(*updatefn)(updateinfo, 0xffffffff, 0xffffffff);
 
-				bytes = restart = 0;
+					bytes = restart = 0;
 				}
 
-			// Otherwise seek to restart position
-			else
+				// Otherwise seek to restart position
+				else
 				{
-				SeekBuf( f, restart, OFFSET_BEGINNING );
-				bytes = restart;
+					SeekBuf(f, restart, OFFSET_BEGINNING);
+					bytes = restart;
 				}
 			}
 
-		// First update tells callback where we're starting from
-		if	(updatefn)
-			(*updatefn)( updateinfo, 0xffffffff, bytes );
+			// First update tells callback where we're starting from
+			if (updatefn)
+				(*updatefn)(updateinfo, 0xffffffff, bytes);
 
-		// Transfer
+			// Transfer
 
-		FD_ZERO( &wd );
-		FD_ZERO( &ex );
+			FD_ZERO(&wd);
+			FD_ZERO(&ex);
 
-		// set network timeout for the select wait call
-		set_timeout(info,&timer);
+			// set network timeout for the select wait call
+			set_timeout(info,&timer);
 
-		while	(!done)
+			while (!done)
 			{
-			// Note: these masks must be set before every call and
-			// are all cleared by select wait. Examine the masks
-			// afterwards to see what was set
+				// Note: these masks must be set before every call and
+				// are all cleared by select wait. Examine the masks
+				// afterwards to see what was set
 
-			FD_SET( ds, &wd );
-			FD_SET( ds, &ex );
-			flags = SIGBREAKF_CTRL_D; 
+				FD_SET(ds, &wd);
+				FD_SET(ds, &ex);
+				flags = SIGBREAKF_CTRL_D;
 
-			if	(selectwait(ds+1, 0L, &wd, &ex, &timer, &flags ) >= 0)
+				if (selectwait(ds+1, 0L, &wd, &ex, &timer, &flags) >= 0)
 				{
-				if	(FD_ISSET( ds, &wd ))
+					if (FD_ISSET(ds, &wd))
 					{
-					if	((b = ReadBuf( f, info->fi_iobuf, IOBUFSIZE )) > 0)
+						if ((b = ReadBuf(f, info->fi_iobuf, IOBUFSIZE)) > 0)
 						{
-						send( ds, info->fi_iobuf, b, 0 );
-						bytes += b;
+							send(ds, info->fi_iobuf, b, 0);
+							bytes += b;
 
-						if	((display_bytes += b) >= UPDATE_BYTE_LIMIT || bytes < UPDATE_BYTE_LIMIT)
+							if ((display_bytes += b) >= UPDATE_BYTE_LIMIT || bytes < UPDATE_BYTE_LIMIT)
 							{
-							if	(updatefn)
-								(*updatefn)( updateinfo, 0xffffffff, display_bytes );
+								if (updatefn)
+									(*updatefn)(updateinfo, 0xffffffff, display_bytes);
 
-							display_bytes = 0;
+								display_bytes = 0;
 							}
 						}
-					else 
+						else
 						{
+							done = TRUE;
+
+							if (b < 0)
+							{
+								info->fi_errno |= FTPERR_XFER_SRCERR;
+								info->fi_ioerr = IoErr();
+							}
+						}
+					}
+
+					if (!done && (flags & SIGBREAKF_CTRL_D))
+					{
+						kprintf("*** put() CTRL-D SIGNAL ***\n");
+						info->fi_abortsignals = 0;
+						info->fi_aborted = TRUE;
 						done = TRUE;
-
-						if	(b < 0)
-							{
-							info->fi_errno |= FTPERR_XFER_SRCERR;
-							info->fi_ioerr = IoErr();
-							}
-						}
 					}
 
-				if	(!done && (flags & SIGBREAKF_CTRL_D))
+					if (FD_ISSET(ds, &ex))
 					{
-					kprintf( "*** put() CTRL-D SIGNAL ***\n" );
-					info->fi_abortsignals = 0;
-					info->fi_aborted = TRUE;
-					done = TRUE;
-					}
-
-				if	(FD_ISSET( ds, &ex ))
-					{
-					kprintf( "** put() socket exception\n" );
-					info->fi_abortsignals = 0;
-					done = TRUE;
+						kprintf("** put() socket exception\n");
+						info->fi_abortsignals = 0;
+						done = TRUE;
 					}
 				}
-			else
+				else
 				{
-				// some socket error -ve  a 0== timeout
-				kprintf("** put() Selectwait error\n");
-				done = TRUE;
+					// some socket error -ve  a 0== timeout
+					kprintf("** put() Selectwait error\n");
+					done = TRUE;
 				}
 			}
 
-		// Final progress bar redraw at 100% (if it finished)
-		if	(!info->fi_aborted && !info->fi_errno && updatefn)
-			(*updatefn)( updateinfo, 0xffffffff, 0 );
+			// Final progress bar redraw at 100% (if it finished)
+			if (!info->fi_aborted && !info->fi_errno && updatefn)
+				(*updatefn)(updateinfo, 0xffffffff, 0);
 
-		// Close data socket
-		//errf( "--> close(%ld)\n", ds );
-		s_close( ds );
+			// Close data socket
+			//errf( "--> close(%ld)\n", ds );
+			s_close(ds);
 
-		// Get reply to socket closure -  Can TIMEOUT
-		if	(getreply( info ) / 100 != COMPLETE)
+			// Get reply to socket closure -  Can TIMEOUT
+			if (getreply(info) / 100 != COMPLETE)
 			{
-			info->fi_errno |= FTPERR_XFER_DSTERR;
-			stccpy( info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1 );
+				info->fi_errno |= FTPERR_XFER_DSTERR;
+				stccpy(info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1);
 			}
 		}
-	CloseBuf( f );
+		CloseBuf(f);
 	}
-else
+	else
 	{
-	info->fi_errno |= FTPERR_XFER_SRCERR;
-	info->fi_ioerr = IoErr();
+		info->fi_errno |= FTPERR_XFER_SRCERR;
+		info->fi_ioerr = IoErr();
 	}
 
-return bytes;
+	return bytes;
 }
 
 /*************************************************************/
@@ -1509,29 +1509,29 @@ return bytes;
 //
 //	Attempt to get the host by address or by name
 //
-int gethost( struct galileoftp_globals *ogp, struct sockaddr_in *remote_addr, char *host )
+int gethost(struct galileoftp_globals *ogp, struct sockaddr_in *remote_addr, char *host)
 {
-BOOL            retval = FALSE;
-struct hostent *he;
+	BOOL retval = FALSE;
+	struct hostent *he;
 
-remote_addr->sin_addr.s_addr = inet_addr( (char *)host );
+	remote_addr->sin_addr.s_addr = inet_addr((char *)host);
 
-if	(remote_addr->sin_addr.s_addr != -1)
+	if (remote_addr->sin_addr.s_addr != -1)
 	{
-	remote_addr->sin_family = AF_INET;
+		remote_addr->sin_family = AF_INET;
 
-	retval = TRUE;
+		retval = TRUE;
 	}
-else if (he = gethostbyname( (char *)host ))
+	else if (he = gethostbyname((char *)host))
 	{
-	remote_addr->sin_family = he->h_addrtype;
+		remote_addr->sin_family = he->h_addrtype;
 
-	memcpy( &remote_addr->sin_addr, he->h_addr_list[0], he->h_length );
+		memcpy(&remote_addr->sin_addr, he->h_addr_list[0], he->h_length);
 
-	retval = TRUE;
+		retval = TRUE;
 	}
 
-return retval;
+	return retval;
 }
 
 /*************************************************************/
@@ -1545,117 +1545,117 @@ return retval;
 //	Returns -1 for fatal failure
 //	Returns -2 for (fatal) failure where gethost fails with no error number
 //
-int connect_host( struct ftp_info *info, int (*updatefn)(void *,int,char *), void *updateinfo, char *host, int port )
+int connect_host(struct ftp_info *info, int (*updatefn)(void *,int,char *), void *updateinfo, char *host, int port)
 {
-struct galileoftp_globals *ogp = info->fi_og;
-struct servent         *se;
-int                     retval = 0;
-struct sockaddr_in	remote_addr = {0};
-LONG			len = sizeof(struct sockaddr_in);
-int			reply;		// FTP reply
+	struct galileoftp_globals *ogp = info->fi_og;
+	struct servent *se;
+	int retval = 0;
+	struct sockaddr_in remote_addr = {0};
+	LONG len = sizeof(struct sockaddr_in);
+	int reply;			// FTP reply
 
-info->fi_cs = -1;
+	info->fi_cs = -1;
 
-if	(updatefn)
-	(*updatefn)( updateinfo, 0/*attempt*/, GetString(locale,MSG_LOOKING_UP) );
+	if (updatefn)
+		(*updatefn)(updateinfo, 0 /*attempt*/, GetString(locale,MSG_LOOKING_UP));
 
-// Lookup the FTP server's address
-if	(gethost( ogp, &remote_addr, host ))
+	// Lookup the FTP server's address
+	if (gethost(ogp, &remote_addr, host))
 	{
-	if	(updatefn)
-		(*updatefn)( updateinfo, 0/*attempt*/, GetString(locale,MSG_HOST_FOUND) );
+		if (updatefn)
+			(*updatefn)(updateinfo, 0 /*attempt*/, GetString(locale,MSG_HOST_FOUND));
 
-	// If no port specified, use the standard ftp port 21
-	if	(!port)
+		// If no port specified, use the standard ftp port 21
+		if (!port)
 		{
-		if	(se = getservbyname( "ftp", "tcp" ))
-			port = se->s_port;
-		else
-			port = 21;
+			if (se = getservbyname("ftp", "tcp"))
+				port = se->s_port;
+			else
+				port = 21;
 		}
 
-	// Specify the port in the address structure
-	remote_addr.sin_port = port;
+		// Specify the port in the address structure
+		remote_addr.sin_port = port;
 
-	// Create the control socket
-	if	((info->fi_cs = socket( remote_addr.sin_family, SOCK_STREAM, 0 )) >= 0)
+		// Create the control socket
+		if ((info->fi_cs = socket(remote_addr.sin_family, SOCK_STREAM, 0)) >= 0)
 		{
-		// Connect the control socket to the FTP server
-		//err( "--> connect()" );
-		//kprintf( "** control connect(0x%08lx)\n", remote_addr.sin_addr.s_addr );
+			// Connect the control socket to the FTP server
+			//err( "--> connect()" );
+			//kprintf( "** control connect(0x%08lx)\n", remote_addr.sin_addr.s_addr );
 
-		if	(connect( info->fi_cs, (struct sockaddr *)&remote_addr, sizeof(remote_addr) ) >= 0)
+			if (connect(info->fi_cs, (struct sockaddr *)&remote_addr, sizeof(remote_addr)) >= 0)
 			{
-			// Now get the FTP server's address from the socket itself
-			// Since the connection may have come via firewalls, this name is more meaningful
-			// and possibly different to that used to establish the connection
-			if	(getsockname( info->fi_cs, (struct sockaddr *)&info->fi_addr, &len ) >= 0)
+				// Now get the FTP server's address from the socket itself
+				// Since the connection may have come via firewalls, this name is more meaningful
+				// and possibly different to that used to establish the connection
+				if (getsockname(info->fi_cs, (struct sockaddr *)&info->fi_addr, &len) >= 0)
 				{
-				int tos = IPTOS_LOWDELAY;
-				//kprintf("  conhost: %lx\n",info->fi_addr.sin_addr);
+					int tos = IPTOS_LOWDELAY;
+					//kprintf("  conhost: %lx\n",info->fi_addr.sin_addr);
 
-				// Control connection is somewhat interactive, so quick response
-				// is desired
-				setsockopt( info->fi_cs, IPPROTO_IP, IP_TOS, (char *)&tos, sizeof(tos) );
+					// Control connection is somewhat interactive, so quick response
+					// is desired
+					setsockopt(info->fi_cs, IPPROTO_IP, IP_TOS, (char *)&tos, sizeof(tos));
 
-				// We want Out-of-band data to appear in the regular stream,
-				// since we can handle TELNET
-				// (actually, we can't handle it yet so it's disabled)
-				//setsockopt( info->fi_cs, SOL_SOCKET, SO_OOBINLINE, (char *)&on, sizeof(on) );
+					// We want Out-of-band data to appear in the regular stream,
+					// since we can handle TELNET
+					// (actually, we can't handle it yet so it's disabled)
+					//setsockopt( info->fi_cs, SOL_SOCKET, SO_OOBINLINE, (char *)&on, sizeof(on) );
 
-				if	(updatefn)
-					(*updatefn)( updateinfo, 0/*attempt*/, GetString(locale,MSG_READING_STARTUP) );
+					if (updatefn)
+						(*updatefn)(updateinfo, 0 /*attempt*/, GetString(locale,MSG_READING_STARTUP));
 
-				// Read FTP protocol startup message - Can TIMEOUT
-				while	((reply = _getreply( info, 0, updatefn, updateinfo )) == 120)
-					;
+					// Read FTP protocol startup message - Can TIMEOUT
+					while ((reply = _getreply(info, 0, updatefn, updateinfo)) == 120)
+						;
 
-				if	(reply == 220)
-					retval = 1;
+					if (reply == 220)
+						retval = 1;
 				}
 			}
 
-		// If something went wrong close and invalidate the control socket
-		if	(retval <= 0)
+			// If something went wrong close and invalidate the control socket
+			if (retval <= 0)
 			{
-			s_close( info->fi_cs );
-			info->fi_cs = -1;
+				s_close(info->fi_cs);
+				info->fi_cs = -1;
 			}
 		}
 	}
-else
+	else
 	{
-	// Call to gethost() failed, but errno not set
-	if	(errno == 0)
-		retval = -2;
+		// Call to gethost() failed, but errno not set
+		if (errno == 0)
+			retval = -2;
 	}
 
-if	(retval <= 0)
+	if (retval <= 0)
 	{
-	// Connect may have been aborted by user - reset control-c signals
-	SetSignal( 0L, SIGBREAKF_CTRL_C );
+		// Connect may have been aborted by user - reset control-c signals
+		SetSignal(0L, SIGBREAKF_CTRL_C);
 
-	if	(retval != -2)
+		if (retval != -2)
 		{
-		switch	(errno)
+			switch (errno)
 			{
-			case ENETDOWN:
-			case ENETUNREACH:
-			case ECONNABORTED:
-			case ETIMEDOUT:
-			case ECONNREFUSED:
-			case EHOSTDOWN:
-				retval = 0;
-				break;
+				case ENETDOWN:
+				case ENETUNREACH:
+				case ECONNABORTED:
+				case ETIMEDOUT:
+				case ECONNREFUSED:
+				case EHOSTDOWN:
+					retval = 0;
+					break;
 
-			default:
-				retval = -1;
-				break;
+				default:
+					retval = -1;
+					break;
 			}
 		}
 	}
 
-return retval;
+	return retval;
 }
 
 /*************************************************************/
@@ -1665,14 +1665,14 @@ return retval;
 //	although if we know the connection has been lost we should use shutdown()
 //	instead as close() will attempt to first send all queued data
 //
-void disconnect_host( struct ftp_info *info )
+void disconnect_host(struct ftp_info *info)
 {
-struct galileoftp_globals *ogp = info->fi_og;
+	struct galileoftp_globals *ogp = info->fi_og;
 
-if	(info->fi_cs >= 0)
+	if (info->fi_cs >= 0)
 	{
-	s_close( info->fi_cs );
-	info->fi_cs = -1;
+		s_close(info->fi_cs);
+		info->fi_cs = -1;
 	}
 }
 
@@ -1681,15 +1681,15 @@ if	(info->fi_cs >= 0)
 //
 //	This must be called when a connection is disconnected by the server (421 response)
 //
-void lostconn( struct ftp_info *info )
+void lostconn(struct ftp_info *info)
 {
-struct galileoftp_globals *ogp = info->fi_og;
+	struct galileoftp_globals *ogp = info->fi_og;
 
-if	(info->fi_cs >= 0)
+	if (info->fi_cs >= 0)
 	{
-	shutdown( info->fi_cs, 1 + 1 );	// Send and receive disallowed
-	s_close( info->fi_cs );		// Close control socket
-	info->fi_cs = -1;		// Descriptor invalid
+		shutdown(info->fi_cs, 1 + 1);	// Send and receive disallowed
+		s_close(info->fi_cs);		// Close control socket
+		info->fi_cs = -1;		// Descriptor invalid
 	}
 }
 
@@ -1702,42 +1702,42 @@ if	(info->fi_cs >= 0)
 //	Returns -1 if USER failed
 //	Returns -2 if PASS failed
 //
-int login( struct ftp_info *info, int (*updatefn)(void *,int,char *), void *updateinfo, char *user, char *passwd )
+int login(struct ftp_info *info, int (*updatefn)(void *,int,char *), void *updateinfo, char *user, char *passwd)
 {
-BOOL retval = 0;
-int  reply;
+	BOOL retval = 0;
+	int reply;
 
-// Clear previous error text
-*info->fi_serverr = 0;
+	// Clear previous error text
+	*info->fi_serverr = 0;
 
-_ftpa( info, FTPFLAG_ASYNCH, "USER %s", user );
-reply = _getreply( info, 0, updatefn, updateinfo ) / 100;
+	_ftpa(info, FTPFLAG_ASYNCH, "USER %s", user);
+	reply = _getreply(info, 0, updatefn, updateinfo) / 100;
 
-if	(reply != CONTINUE && reply != COMPLETE)
+	if (reply != CONTINUE && reply != COMPLETE)
 	{
-	stccpy( info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1 );
-	retval = -1;
+		stccpy(info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1);
+		retval = -1;
 	}
 
-if	(reply == CONTINUE)
+	if (reply == CONTINUE)
 	{
-	_ftpa( info, FTPFLAG_ASYNCH, "PASS %s", passwd );
-	reply = _getreply( info, 0, updatefn, updateinfo ) / 100;
+		_ftpa(info, FTPFLAG_ASYNCH, "PASS %s", passwd);
+		reply = _getreply(info, 0, updatefn, updateinfo) / 100;
 
-	if	(reply != COMPLETE)
+		if (reply != COMPLETE)
 		{
-		stccpy( info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1 );
-		retval = -2;
+			stccpy(info->fi_serverr, info->fi_iobuf, IOBUFSIZE + 1);
+			retval = -2;
 		}
 	}
 
-return retval;
+	return retval;
 }
 
-void logout( struct ftp_info *info )
+void logout(struct ftp_info *info)
 {
-// Can TIMEOUT - do we care?
-ftp( info, "QUIT\r\n" );
+	// Can TIMEOUT - do we care?
+	ftp(info, "QUIT\r\n");
 }
 
 
@@ -1763,142 +1763,142 @@ ftp( info, "QUIT\r\n" );
 //	Should this not handle this and maybe just ignore it or resend command?
 //
 int _getreply(
-	struct ftp_info  *info,
-	unsigned long     flags,
-	int             (*updatefn)(void *,int,char *),
-	void             *updateinfo )
+	struct ftp_info *info,
+	unsigned long flags,
+	int (*updatefn)(void *,int,char *),
+	void             *updateinfo)
 {
-int   actual;			// Bytes received
-int   first = 1;		// Is this the first line?
-int   multi = 0;		// Multi-line reply
-int   currcode;			// Current line's code
-int   checkabort_time = 0;	// By default don't check for aborts on replies
-char *iobuf;
+	int actual;			// Bytes received
+	int first = 1;			// Is this the first line?
+	int multi = 0;			// Multi-line reply
+	int currcode;			// Current line's code
+	int checkabort_time = 0;	// By default don't check for aborts on replies
+	char *iobuf;
 
-// Need to allocate buffer for quiet io?
-if	(flags & GETREPLY_QUIET)
+	// Need to allocate buffer for quiet io?
+	if (flags & GETREPLY_QUIET)
 	{
-	if	(!(iobuf = AllocVec( IOBUFSIZE+1, MEMF_CLEAR )))
+		if (!(iobuf = AllocVec(IOBUFSIZE+1, MEMF_CLEAR)))
 		{
-		info->fi_reply = 600;
-		return info->fi_reply;
-		}
-	}
-else
-	iobuf = info->fi_iobuf;
-
-if	(info->fi_reply < 0) 	// not accept timeouts
-	{
-	checkabort_time = 1;
-
-	// -2 is special marker for DEST STOR to return often to update progress bar
-	if	(info->fi_reply == -2)
-		checkabort_time = 2; 
-
-	}
-else
-	info->fi_reply = 600;	// Error by default 
-	
-// Safety
-flush_socket_buffer( info );
-
-// Read one line at a time
-do
-	{
-	// EOF or error
-	if	((sgets( info, iobuf, IOBUFSIZE, info->fi_cs, checkabort_time )) == 0)
-		{
-		if	(info->fi_reply == 800)
-			info->fi_errno = FTPERR_TIMEOUT;
-		else
-			info->fi_errno = FTPERR_FAKE_421;
-
-		if	(info->fi_reply < 700)
 			info->fi_reply = 600;
-
-		break;
+			return info->fi_reply;
 		}
-
-	actual = strlen(iobuf);
-
-	// NULL terminate
-	iobuf[actual] = 0;
-
-	// Got at least reply code?
-	if	(actual >= 3
-		&& isdigit( iobuf[0] )
-		&& isdigit( iobuf[1] )
-		&& isdigit( iobuf[2] ))
-		currcode = iobuf[0] * 100 + iobuf[1] * 10 + iobuf[2] - '0' * 111;
+	}
 	else
-		currcode = 0;
+		iobuf = info->fi_iobuf;
 
-	// Output reply, omitting the code if debug is off
-	// No output if doing_noop
-	if	(!info->fi_doing_noop)
+	if (info->fi_reply < 0)		// not accept timeouts
+	{
+		checkabort_time = 1;
+
+		// -2 is special marker for DEST STOR to return often to update progress bar
+		if (info->fi_reply == -2)
+			checkabort_time = 2;
+
+	}
+	else
+		info->fi_reply = 600;	// Error by default
+
+	// Safety
+	flush_socket_buffer(info);
+
+	// Read one line at a time
+	do
+	{
+		// EOF or error
+		if ((sgets(info, iobuf, IOBUFSIZE, info->fi_cs, checkabort_time)) == 0)
 		{
-		if	(!info->fi_og->og_oc.oc_log_debug && currcode)
-			{
-			if	(updatefn && updateinfo)
-				(*updatefn)( updateinfo, -1, iobuf + 4 );
+			if (info->fi_reply == 800)
+				info->fi_errno = FTPERR_TIMEOUT;
+			else
+				info->fi_errno = FTPERR_FAKE_421;
 
-			logprintf( iobuf + 4 );
-			}
+			if (info->fi_reply < 700)
+				info->fi_reply = 600;
+
+			break;
+		}
+
+		actual = strlen(iobuf);
+
+		// NULL terminate
+		iobuf[actual] = 0;
+
+		// Got at least reply code?
+		if (actual >= 3
+		    && isdigit(iobuf[0])
+		    && isdigit(iobuf[1])
+		    && isdigit(iobuf[2]))
+			currcode = iobuf[0] * 100 + iobuf[1] * 10 + iobuf[2] - '0' * 111;
 		else
-			{
-			if	(updatefn && updateinfo)
-				(*updatefn)( updateinfo, -1, iobuf );
+			currcode = 0;
 
-			logprintf( iobuf );
+		// Output reply, omitting the code if debug is off
+		// No output if doing_noop
+		if (!info->fi_doing_noop)
+		{
+			if (!info->fi_og->og_oc.oc_log_debug && currcode)
+			{
+				if (updatefn && updateinfo)
+					(*updatefn)(updateinfo, -1, iobuf + 4);
+
+				logprintf(iobuf + 4);
+			}
+			else
+			{
+				if (updatefn && updateinfo)
+					(*updatefn)(updateinfo, -1, iobuf);
+
+				logprintf(iobuf);
 			}
 		}
 
-	if	(currcode)
+		if (currcode)
 		{
-		// Invalid code on any line ?
-		if	(currcode < 100 || currcode > 559)
+			// Invalid code on any line ?
+			if (currcode < 100 || currcode > 559)
 			{
+				info->fi_reply = 600;
+				break;
+			}
+
+			// Code is okay so update it
+			info->fi_reply = currcode;
+
+			// Start of multi-line reply?
+			if (iobuf[3] == '-')
+			{
+				if (!multi)
+					multi = 1;
+			}
+			// End of multi-line reply?
+			else if	(multi)
+				multi = 0;
+		}
+
+		// First block?
+		if (first)
+			first = 0;
+
+		// Mangled code on last line of reply
+		if (!multi && !currcode)
+		{
 			info->fi_reply = 600;
 			break;
-			}
-
-		// Code is okay so update it
-		info->fi_reply = currcode;
-
-		// Start of multi-line reply?
-		if	(iobuf[3] == '-')
-			{
-			if	(!multi)
-				multi = 1;
-			}
-		// End of multi-line reply?
-		else if	(multi)
-			multi = 0;
-		}
-
-	// First block?
-	if	(first)
-		first = 0;
-
-	// Mangled code on last line of reply
-	if	(!multi && !currcode)
-		{
-		info->fi_reply = 600;
-		break;
 		}
 
 	} while (multi);
 
-// Convert ERROR codes to 'connection lost' code
-if	(info->fi_reply >= 600)
-	info->fi_reply = 421;
+	// Convert ERROR codes to 'connection lost' code
+	if (info->fi_reply >= 600)
+		info->fi_reply = 421;
 
-// Need to free buffer for quiet io?
-if	(flags & GETREPLY_QUIET)
-	if	(iobuf)
-		FreeVec( iobuf );
+	// Need to free buffer for quiet io?
+	if (flags & GETREPLY_QUIET)
+		if (iobuf)
+			FreeVec(iobuf);
 
-return info->fi_reply;
+	return info->fi_reply;
 }
 
 /*************************************************************/
@@ -1906,9 +1906,9 @@ return info->fi_reply;
 //
 //	Get reply to an FTP command
 //
-int getreply( struct ftp_info *info )
+int getreply(struct ftp_info *info)
 {
-return _getreply( info, 0, 0, 0 );
+	return _getreply(info, 0, 0, 0);
 }
 
 /*************************************************************/
@@ -1916,49 +1916,49 @@ return _getreply( info, 0, 0, 0 );
 //
 //	Convert PASV reply to address
 //
-BOOL pasv_to_address( struct sockaddr_in *address, const char *buf )
+BOOL pasv_to_address(struct sockaddr_in *address, const char *buf)
 {
-int            n;		// Scratch for address numbers
-const char    *in;		// Convert address from here
-unsigned char *out;		// Convert address to here
-BOOL           good = TRUE;
+	int n;			// Scratch for address numbers
+	const char *in;		// Convert address from here
+	unsigned char *out;	// Convert address to here
+	BOOL good = TRUE;
 
-if (!strncmp( "227 Entering Passive Mode (", buf, 27 ))
+	if (!strncmp("227 Entering Passive Mode (", buf, 27))
 	{
-	in = buf + 27;
-	out = (unsigned char *)&address->sin_addr;
+		in = buf + 27;
+		out = (unsigned char *)&address->sin_addr;
 
-	// Parse it...
-	while	(good)
+		// Parse it...
+		while (good)
 		{
-		if	(!isdigit(*in))
-			good = FALSE;
-
-		for	(n = 0; good; ++in)
-			{
-			if	(!isdigit(*in))
-				break;
-
-			n = n * 10 + *in - '0';
-
-			if	(n > 255 || n <0)
+			if (!isdigit(*in))
 				good = FALSE;
+
+			for (n = 0; good; ++in)
+			{
+				if (!isdigit(*in))
+					break;
+
+				n = n * 10 + *in - '0';
+
+				if (n > 255 || n <0)
+					good = FALSE;
 			}
 
-		if	(!good)
-			break;
+			if (!good)
+				break;
 
-		*out++ = n;
+			*out++ = n;
 
-		if	(out == (unsigned char *)(1+&address->sin_addr))
-			out = (unsigned char *)&address->sin_port;
-		if	(out == (unsigned char *)(1+&address->sin_port))
-			break;
+			if (out == (unsigned char *)(1+&address->sin_addr))
+				out = (unsigned char *)&address->sin_port;
+			if (out == (unsigned char *)(1+&address->sin_port))
+				break;
 
-		if	(*in++ != ',')
-			good = FALSE;
+			if (*in++ != ',')
+				good = FALSE;
 		}
 	}
 
-return good;
+	return good;
 }

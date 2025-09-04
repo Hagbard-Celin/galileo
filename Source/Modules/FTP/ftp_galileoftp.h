@@ -44,7 +44,7 @@ For more information on Directory Opus for Windows please see:
  *
  *	08-07-97	added template_old for backward compatibility for systems
  *			which did not specify the PORT in template
- *	
+ *
  */
 
 #ifndef _GALILEOFTP_H
@@ -63,16 +63,16 @@ For more information on Directory Opus for Windows please see:
 // Defines information about a GUI element
 typedef struct
 {
-	BOOL			visible;		// Indicates visibility
+	BOOL		 visible;			// Indicates visibility
 
-	struct IBox		box;			// Dimensions in an IBox
-	struct Rectangle	rect;			// Dimensions in a Rectangle
+	struct IBox	 box;				// Dimensions in an IBox
+	struct Rectangle rect;				// Dimensions in a Rectangle
 
-	UWORD			fg_pen;			// Foreground pen to use
-	UWORD			bg_pen;			// Background pen to use
-	struct TextFont		*font;			// Font to use
+	UWORD		 fg_pen;			// Foreground pen to use
+	UWORD		 bg_pen;			// Background pen to use
+	struct TextFont	 *font;				// Font to use
 
-	struct RastPort		rast;			// RastPort copy
+	struct RastPort	 rast;				// RastPort copy
 } GUI_Element;
 
 #include "//Program/reselect.h"
@@ -98,9 +98,9 @@ typedef struct
 
 enum
 {
-NOSOCK = -1,		/* No socket implementation specified */
-AMITCPSOCK,		/* Use AmiTCP bsdsocket.library */
-INETSOCK		/* Use AS225/INet socket.library */
+	NOSOCK = -1,					/* No socket implementation specified */
+	AMITCPSOCK,					/* Use AmiTCP bsdsocket.library */
+	INETSOCK					/* Use AS225/INet socket.library */
 };
 
 /* AS225 requires a maximum # of sockets to be set (currently 128 is maximum)*/
@@ -123,7 +123,7 @@ INETSOCK		/* Use AS225/INet socket.library */
 #define COMMENTLEN	79				// 80 including null terminator
 #define HANDLELEN	12				// lister handle
 #define HOSTNAMELEN	96				// eg, 'planet.earth'
-#define LOGNAMELEN 	256				// for logfile CON:...
+#define LOGNAMELEN	256				// for logfile CON:...
 #define ADDRESSLEN	(USERNAMELEN+1+HOSTNAMELEN)	// full internet address eg. 'foo@planet.earth'
 
 #define LSCMDLEN	20				// LIST or NLST command + arguments
@@ -139,23 +139,23 @@ SHOWINDEX/S,INDEXSIZE/K/N,AUTOINDEX/S,NOOP/S,\
 CONNECTRETRY/S,CONNECTTRIES/K/N,CONNECTRETRYTIMEOUT/K/N,\
 NODIRPROGRESS/S"
 
-enum	// offsets for parse template
+enum							// offsets for parse template
 {
-C_OPT_LIB,
-C_OPT_LOG,
-C_OPT_LOGOFF,
-C_OPT_DBUG,
-C_OPT_TIME,
-C_OPT_UPDT,
-C_OPT_ANONPASS,
-C_OPT_SHOWINDEX,
-C_OPT_INDEXSIZE,
-C_OPT_AUTOINDEX,
-C_OPT_NOOP,
-C_OPT_CONNECT_RETRY,
-C_OPT_CONNECT_TRIES,
-C_OPT_CONNECT_RETRY_TIMEOUT,
-C_OPT_DIRSCAN_PROGRESS,
+	C_OPT_LIB,
+	C_OPT_LOG,
+	C_OPT_LOGOFF,
+	C_OPT_DBUG,
+	C_OPT_TIME,
+	C_OPT_UPDT,
+	C_OPT_ANONPASS,
+	C_OPT_SHOWINDEX,
+	C_OPT_INDEXSIZE,
+	C_OPT_AUTOINDEX,
+	C_OPT_NOOP,
+	C_OPT_CONNECT_RETRY,
+	C_OPT_CONNECT_TRIES,
+	C_OPT_CONNECT_RETRY_TIMEOUT,
+	C_OPT_DIRSCAN_PROGRESS,
 };
 
 #define ADDR_TEMPLATE		"ANONYMOUS=ANON/S,USERACCOUNT=ACCT/S,ALIAS=NAME/K,HOST,ADDRESS=ADDR/K,PORT/N,PATH=DIR,USER/K,PASSWORD=PASS/K"
@@ -163,15 +163,15 @@ C_OPT_DIRSCAN_PROGRESS,
 
 enum	// offsets for parse template
 {
-A_OPT_ANON,
-A_OPT_ACCT,
-A_OPT_ALIS,
-A_OPT_HOST,
-A_OPT_ADDR,
-A_OPT_PORT,
-A_OPT_PATH,
-A_OPT_USER,
-A_OPT_PASS,
+	A_OPT_ANON,
+	A_OPT_ACCT,
+	A_OPT_ALIS,
+	A_OPT_HOST,
+	A_OPT_ADDR,
+	A_OPT_PORT,
+	A_OPT_PATH,
+	A_OPT_USER,
+	A_OPT_PASS,
 };
 
 #define CONNECT_TEMPLATE	"HOST,PORT/N/K,USER,PASSWORD=PASS,DIR/K,LISTER/N/K,SITE/K,GUI/S,NOSCAN/S,RECON/S"
@@ -190,28 +190,28 @@ A_OPT_PASS,
 
 enum
 {
-D_OPT_HOST,
-D_OPT_PORT,
-D_OPT_USER,
-D_OPT_PASS,
-D_OPT_PATH,
-D_OPT_HANDLE,
-D_OPT_SITE,
-D_OPT_GUI,
-D_OPT_NOSCAN,
-D_OPT_RECON,
+	D_OPT_HOST,
+	D_OPT_PORT,
+	D_OPT_USER,
+	D_OPT_PASS,
+	D_OPT_PATH,
+	D_OPT_HANDLE,
+	D_OPT_SITE,
+	D_OPT_GUI,
+	D_OPT_NOSCAN,
+	D_OPT_RECON,
 };
 
 // Module function IDs
 enum
 {
-ID_ADDRESSBOOK,		// <no template>
-ID_CONNECT,		// HOST,PORT,USER,PASS,DIR/K,LISTER/K/N
-ID_COMMAND,		// COMMAND/F	FTPCommand SYST HELP
-ID_SETVAR,		// VAR,VALUE/F	FTPSetVar LIST NLST -al
-ID_OPTIONS,
-ID_ADD,			// <no template>
-ID_QUIT,		// FORCE/S
+	ID_ADDRESSBOOK,	// <no template>
+	ID_CONNECT,	// HOST,PORT,USER,PASS,DIR/K,LISTER/K/N
+	ID_COMMAND,	// COMMAND/F	FTPCommand SYST HELP
+	ID_SETVAR,	// VAR,VALUE/F	FTPSetVar LIST NLST -al
+	ID_OPTIONS,
+	ID_ADD,		// <no template>
+	ID_QUIT,	// FORCE/S
 };
 
 
@@ -222,129 +222,131 @@ ID_QUIT,		// FORCE/S
 
 
 //cycle gadget values for copy_type
- enum	{
+enum
+{
 	COPY_TYPE_DEFAULT,
 	COPY_TYPE_UPDATE,
 	COPY_TYPE_NEWER,
-	};
+};
 
 //cycle gadget values for replace
- enum	{
+enum
+{
 	COPY_REPLACE_ALWAYS,
 	COPY_REPLACE_NEVER,
 	COPY_REPLACE_ASK,
-	};
+};
 
-struct ftp_environment 
+struct ftp_environment
 {
-int	e_retry_count;	// Number of times to retry a connection
-int	e_retry_delay;	// Number of seconds to wait before retrying
-int	e_list_update;	// How often is lister updated during LIST
-int	e_timeout;
-int	e_script_time;
-int	e_indexsize;
+	int	     e_retry_count;				// Number of times to retry a connection
+	int	     e_retry_delay;				// Number of seconds to wait before retrying
+	int	     e_list_update;				// How often is lister updated during LIST
+	int	     e_timeout;
+	int	     e_script_time;
+	int	     e_indexsize;
 
-char e_toolbar[256];
+	char	     e_toolbar[256];
 
-unsigned int e_custom_options	:	1;
+	unsigned int e_custom_options	    :	    1;
 
-unsigned int e_retry		:	1; // Retry failed attempt to connect?
-unsigned int e_retry_lost	:	1;
+	unsigned int e_retry		    :	    1;		// Retry failed attempt to connect?
+	unsigned int e_retry_lost	    :	    1;
 
-unsigned int e_noops		:	1; // Send noops
+	unsigned int e_noops		    :	    1;		// Send noops
 
-unsigned int e_passive		:	1;
+	unsigned int e_passive		    :	    1;
 
-unsigned int e_keep_last_dir	:	1;
-unsigned int e_safe_links	:	1;
-unsigned int e_unk_links_file	:	1;
+	unsigned int e_keep_last_dir	    :	    1;
+	unsigned int e_safe_links	    :	    1;
+	unsigned int e_unk_links_file	    :	    1;
 
-unsigned int e_show_startup	:	1;
-unsigned int e_show_dir		:	1;
-unsigned int e_progress_window	:	1; //Display progress bars while scanning dirs
+	unsigned int e_show_startup	    :	    1;
+	unsigned int e_show_dir		    :	    1;
+	unsigned int e_progress_window	    :	    1;		//Display progress bars while scanning dirs
 
 
-unsigned int oldpad		:	2;
+	unsigned int oldpad		    :	    2;
 
-unsigned int e_script_connect_ok :	1;
-unsigned int e_script_connect_fail :	1;
-unsigned int e_script_copy_ok	:	1;
-unsigned int e_script_copy_fail:	1;
-unsigned int e_script_error	:	1;
-unsigned int e_script_close	:	1;
+	unsigned int e_script_connect_ok    :	   1;
+	unsigned int e_script_connect_fail  :	 1;
+	unsigned int e_script_copy_ok	    :	    1;
+	unsigned int e_script_copy_fail	    :	     1;
+	unsigned int e_script_error	    :	    1;
+	unsigned int e_script_close	    :	    1;
 
-unsigned int e_index_enable	:	1;
-unsigned int e_index_auto	:	1; // If exceeds the limit then skip
+	unsigned int e_index_enable	    :	    1;
+	unsigned int e_index_auto	    :	    1;		// If exceeds the limit then skip
 
-unsigned int e_custom_format	:	1;
+	unsigned int e_custom_format	    :	    1;
 
-unsigned int e_copy_type	:	2; // default/update/newer
-unsigned int e_copy_set_archive :	1;
-unsigned int e_copy_replace	:	2;
+	unsigned int e_copy_type	    :	    2;		// default/update/newer
+	unsigned int e_copy_set_archive	    :	    1;
+	unsigned int e_copy_replace	    :	    2;
 
-unsigned int e_copy_galileo_default :	1;
-unsigned int e_copy_datestamp	:	1;
-unsigned int e_copy_protection	:	1;
-unsigned int e_copy_comment	:	1;
+	unsigned int e_copy_galileo_default :	1;
+	unsigned int e_copy_datestamp	    :	    1;
+	unsigned int e_copy_protection	    :	    1;
+	unsigned int e_copy_comment	    :	    1;
 
-unsigned int e_url_comment	:	1;
+	unsigned int e_url_comment	    :	    1;
 
-unsigned int e_transfer_details	:	1; //(-ve flag 0=TRUE)
-unsigned int e_rescan		:	1;
-unsigned int e_recursive_special :	1; //(recursive copy names with space)
-unsigned int e_special_dir	:	1; // old fred hack env var
-unsigned int pad7		:	1;
-unsigned int pad8		:	1;
+	unsigned int e_transfer_details	    :	    1;		//(-ve flag 0=TRUE)
+	unsigned int e_rescan		    :	    1;
+	unsigned int e_recursive_special    :	   1;		//(recursive copy names with space)
+	unsigned int e_special_dir	    :	    1;		// old fred hack env var
+	unsigned int pad7		    :	    1;
+	unsigned int pad8		    :	    1;
 
-// IMPORTANT for memcmp comparisions of different structures 
-// the ListFormat MUST BE LAST IN STRUCTURE
+	// IMPORTANT for memcmp comparisions of different structures
+	// the ListFormat MUST BE LAST IN STRUCTURE
 
-ListFormat e_listformat;
+	ListFormat   e_listformat;
 };
 
 struct	ftp_config
 {
-char oc_logname[LOGNAMELEN+1];	/* Buffer for name of log file */
-char oc_anonpass[PASSWORDLEN+1];
+	char		       oc_logname[LOGNAMELEN+1];	/* Buffer for name of log file */
+	char		       oc_anonpass[PASSWORDLEN+1];
 
-unsigned int pad1	 	:	1; // 
-unsigned int oc_enable_log 	:	1; // user wants log open on start
-unsigned int oc_log_debug	:	1; // User level debugging (print FTP commands)
-unsigned int oc_user_password	:	1; // user has defined user password
+	unsigned int	       pad1		:	1;	//
+	unsigned int	       oc_enable_log	:	1;	// user wants log open on start
+	unsigned int	       oc_log_debug	:	1;	// User level debugging (print FTP commands)
+	unsigned int	       oc_user_password	:	1;	// user has defined user password
 
-unsigned int oc_addr_auto	:	1; // auto close addressbook on connect
-unsigned int oc_addr_dc		:	2; // what to do on double click
-unsigned int pad8		:	1;
+	unsigned int	       oc_addr_auto	:	1;	// auto close addressbook on connect
+	unsigned int	       oc_addr_dc	:	2;	// what to do on double click
+	unsigned int	       pad8		:	1;
 
-// IMPORTANT for memcmp comparisions of different structures 
-// the environment MUST BE LAST IN STRUCTURE
-struct ftp_environment oc_env;		// default global environment
+	// IMPORTANT for memcmp comparisions of different structures
+	// the environment MUST BE LAST IN STRUCTURE
+	struct ftp_environment oc_env;				// default global environment
 };
 
 
 
 /****************************************************************************
-*
-*	NOTE: COPY OF SITE ENTRY STRUCTURES 
-*
-*	you cannot memcpy site_entry structures because of internal ptr
-*
-*	ALWAYS Use fn copy_site_entry(og,new,old)
-*
-*****************************************************************************/
+ *
+ *	NOTE: COPY OF SITE ENTRY STRUCTURES
+ *
+ *	you cannot memcpy site_entry structures because of internal ptr
+ *
+ *	ALWAYS Use fn copy_site_entry(og,new,old)
+ *
+ *****************************************************************************/
 
 struct site_entry
 {
-BOOL			 se_anon;
-char			 se_name[HOSTNAMELEN+1];
-char			 se_host[HOSTNAMELEN+1];
-char			 se_user[USERNAMELEN+1];
-char			 se_pass[PASSWORDLEN+1];
-char			 se_path[PATHLEN+1];
-LONG			 se_port;
-BOOL			 se_has_custom_env;	// Only Greg may touch
-struct ftp_environment	 se_env_private;	// Only Greg may touch
-struct ftp_environment	*se_env;		// back -> local or -> global env
+	BOOL		       se_anon;
+	char		       se_name[HOSTNAMELEN+1];
+	char		       se_host[HOSTNAMELEN+1];
+	char		       se_user[USERNAMELEN+1];
+	char		       se_pass[PASSWORDLEN+1];
+	char		       se_path[PATHLEN+1];
+	LONG		       se_port;
+	BOOL		       se_has_custom_env;	// Only Greg may touch
+	struct ftp_environment se_env_private;		// Only Greg may touch
+	struct ftp_environment *se_env;			// back -> local or -> global env
 
 
 
@@ -353,60 +355,60 @@ struct ftp_environment	*se_env;		// back -> local or -> global env
 	/********* 	see ftp_addressbook.h			********/
 	/***************************************************************/
 
-UWORD			 se_active_gadget;	// contains 0 or GADGET ID for
-						// gadget to be activated on gui
-						// from ftp_opuftp.h GAD_CONNECT...
+	UWORD		       se_active_gadget;	// contains 0 or GADGET ID for
+							// gadget to be activated on gui
+							// from ftp_opuftp.h GAD_CONNECT...
 
-UBYTE			 se_preserve_format;	// do not call get_site_format when copying
-						// site_entry so preserve se_listformat when
-						// pasing structure
+	UBYTE		       se_preserve_format;	// do not call get_site_format when copying
+							// site_entry so preserve se_listformat when
+							// pasing structure
 
-UBYTE			 se_pad;
+	UBYTE		       se_pad;
 
-ListFormat		 se_listformat;		// listerformat to be used as tmp 
-						// by a lister during connection
+	ListFormat	       se_listformat;		// listerformat to be used as tmp
+							// by a lister during connection
 };
 
 
 /**
- **	Global variables
- **/
+**	Global variables
+**/
 
 // 28.1.97 GP og_galileo_ipc NOW IS the REAL IPC for the main Galileo process
 
 struct galileoftp_globals
 {
-// Global for all Galileos
-IPCData			*og_galileo_ipc;			// IPC of Galileo itself
-IPCData			*og_main_ipc;			// IPC of main FTP process
-int			 og_ftp_launched;		// flag to stop duplicate running of module
-int			 og_noreq;			// TRUE to suppress ALL listers
-char			*og_socketlibname[2];
-int			 og_socketlibver[2];
-int			 og_socketlib;			// Which socket library are we using?
+	// Global for all Galileos
+	IPCData			  *og_galileo_ipc;	// IPC of Galileo itself
+	IPCData			  *og_main_ipc;		// IPC of main FTP process
+	int			  og_ftp_launched;	// flag to stop duplicate running of module
+	int			  og_noreq;		// TRUE to suppress ALL listers
+	char			  *og_socketlibname[2];
+	int			  og_socketlibver[2];
+	int			  og_socketlib;		// Which socket library are we using?
 
-struct ListLock		 og_listerlist;			// List of connected FTP listers
-int                      og_listercount;		// Number of connected FTP listers
+	struct ListLock		  og_listerlist;	// List of connected FTP listers
+	int			  og_listercount;	// Number of connected FTP listers
 
-IPCData			*og_addrproc;
-BOOL			 og_addrbook_open;		// So we don't have to queue address book messages
+	IPCData			  *og_addrproc;
+	BOOL			  og_addrbook_open;	// So we don't have to queue address book messages
 
-// Should be seperate for each lister, addressbook (multiple Galileos)
-char			 og_galileoname[PORTNAMELEN + 1];
-struct Screen		*og_screen;
+	// Should be seperate for each lister, addressbook (multiple Galileos)
+	char			  og_galileoname[PORTNAMELEN + 1];
+	struct Screen		  *og_screen;
 
-CONST GalileoCallbackInfo      *og_gci; 		       // gp
+	CONST GalileoCallbackInfo *og_gci;		// gp
 
-struct ftp_config	 og_oc;
+	struct ftp_config	  og_oc;
 
-Att_List		*og_SiteList;			// globally accesable addrress book sitelist
-struct SignalSemaphore	 og_SiteList_semaphore;
-int 			 og_log_open;			// log file is open
+	Att_List		  *og_SiteList;		// globally accesable addrress book sitelist
+	struct SignalSemaphore	  og_SiteList_semaphore;
+	int			  og_log_open;		// log file is open
 
-ListFormat		 og_galileo_format;		// holder for current galileo default lister format
+	ListFormat		  og_galileo_format;	// holder for current galileo default lister format
 
-struct site_entry	og_last_site;			//last site for connect msg
-BOOL			og_valid_site;		
+	struct site_entry	  og_last_site;		//last site for connect msg
+	BOOL			  og_valid_site;
 };
 
 /*
@@ -417,9 +419,9 @@ BOOL			og_valid_site;
 
 struct globals
 {
-struct Library	*g_socketbase;		/* Socket library must be opened by each calling process */
-int		 g_errno;		/* Socket library puts its errors here */
-IPCData 	*g_master_ipc;		/* Master process's IPC */
+	struct Library *g_socketbase;			/* Socket library must be opened by each calling process */
+	int	       g_errno;				/* Socket library puts its errors here */
+	IPCData	       *g_master_ipc;			/* Master process's IPC */
 };
 
 /******** stuff for gui adressbook */
@@ -429,170 +431,172 @@ extern ObjectDef ftp_main_objects[],ftp_edit_objects[],ftp_options_objects[];
 
 enum
 {
-GAD_BASE,
+	GAD_BASE,
 
 
-GAD_FTP_MAIN_LAYOUT,
-GAD_FTP_SITES,
+	GAD_FTP_MAIN_LAYOUT,
+	GAD_FTP_SITES,
 
-GAD_FTP_NEW,
-GAD_FTP_EDIT,
-GAD_FTP_DELETE,
-GAD_FTP_SORT,
-GAD_FTP_SITE_LAYOUT,
-GAD_FTP_SITE_NAME,
-GAD_FTP_HOST_NAME,
-GAD_FTP_PORT,
-GAD_FTP_ANON,
-GAD_FTP_CUSTOM_LAYOUT,
-GAD_FTP_CUSTOM_OPTIONS,
-GAD_FTP_SET_CUSTOM_OPTIONS,
-GAD_FTP_SAVE,
-GAD_FTP_CONNECT,
-GAD_FTP_SET_DEFAULT_OPTIONS,
-GAD_FTP_CANCEL,
-
-
-GAD_ENV_ITEM_LISTER,
-GAD_ENV_EDIT_AREA,
-GAD_ENV_SAVE,
-GAD_ENV_RESET_DEFAULT,
-GAD_ENV_CANCEL,
+	GAD_FTP_NEW,
+	GAD_FTP_EDIT,
+	GAD_FTP_DELETE,
+	GAD_FTP_SORT,
+	GAD_FTP_SITE_LAYOUT,
+	GAD_FTP_SITE_NAME,
+	GAD_FTP_HOST_NAME,
+	GAD_FTP_PORT,
+	GAD_FTP_ANON,
+	GAD_FTP_CUSTOM_LAYOUT,
+	GAD_FTP_CUSTOM_OPTIONS,
+	GAD_FTP_SET_CUSTOM_OPTIONS,
+	GAD_FTP_SAVE,
+	GAD_FTP_CONNECT,
+	GAD_FTP_SET_DEFAULT_OPTIONS,
+	GAD_FTP_CANCEL,
 
 
-GAD_ENV_START_UPDATE,	// start marker for gadgets reqd to updating the gui dissplay
-			// gadgets between here ane end automatically call update
-			// fn to check status of default/reset etc
-
-GAD_ENV_ENABLE_RETRY,
-GAD_ENV_RETRY_COUNT,
-GAD_ENV_RETRY_DELAY,
-GAD_ENV_ENABLE_RETRY_LOST,
-GAD_ENV_NOOPS,
-GAD_ENV_PASSIVE,
+	GAD_ENV_ITEM_LISTER,
+	GAD_ENV_EDIT_AREA,
+	GAD_ENV_SAVE,
+	GAD_ENV_RESET_DEFAULT,
+	GAD_ENV_CANCEL,
 
 
-GAD_ENV_TIMEOUT,
-GAD_ENV_LIST_UPDATE,
+	GAD_ENV_START_UPDATE,	// start marker for gadgets reqd to updating the gui dissplay
+				// gadgets between here ane end automatically call update
+				// fn to check status of default/reset etc
 
-GAD_ENV_KEEP_LAST_DIR,
-GAD_ENV_SPECIAL_DIR,
-GAD_ENV_SAFE_LINKS,
-GAD_ENV_UNK_LINKS,
-
-GAD_ENV_SHOW_STARTUP_MSG,
-GAD_ENV_SHOW_DIR_MSG,
-GAD_ENV_PROGRESS_WINDOW,
-GAD_ENV_TRANSFER_DETAILS,
-
-GAD_ENV_SCRIPT_CONNECT_SUCCESS,
-GAD_ENV_SCRIPT_CONNECT_FAIL,
-GAD_ENV_SCRIPT_COPY_SUCCESS,
-GAD_ENV_SCRIPT_COPY_FAIL,
-GAD_ENV_SCRIPT_ERROR,
-GAD_ENV_SCRIPT_CLOSE,
-GAD_ENV_SCRIPT_TIME,
-
-GAD_ENV_INDEX_ENABLE,
-
-GAD_ENV_AUTO_DOWNLOAD,
-GAD_ENV_AUTO_DOWNLOAD_SIZE,
-GAD_ENV_LOG_ENABLE,
-GAD_ENV_DEBUG,
-GAD_ENV_LOG_FILE,
-GAD_ENV_ANON_PASSWORD,
-
-GAD_ENV_TOOLBAR_GLASS,
-GAD_ENV_TOOLBAR,
-
-GAD_ENV_CUST_FORMAT,
-GAD_ENV_SET_FORMAT,
-
-GAD_ENV_COPY_TYPE,
-
-GAD_ENV_COPY_SET_ARCHIVE,
-GAD_ENV_COPY_URL_COMMENT,
-GAD_ENV_COPY_RESCAN,
-GAD_ENV_COPY_RECURSIVE_SPECIAL,
-
-GAD_ENV_REPLACE,
-GAD_ENV_COPY_GALILEO_DEFAULT,
-GAD_ENV_COPY_DATESTAMP,
-GAD_ENV_COPY_PROTECTION,
-GAD_ENV_COPY_COMMENT,
-GAD_ENV_ADDR_DC,		// addressbook double click
-GAD_ENV_ADDR_AUTO,		// close after DC or connect
-
-GAD_ENV_END_UPDATE,	// end marker for gadgets reqd to updating the gui dissplay
+	GAD_ENV_ENABLE_RETRY,
+	GAD_ENV_RETRY_COUNT,
+	GAD_ENV_RETRY_DELAY,
+	GAD_ENV_ENABLE_RETRY_LOST,
+	GAD_ENV_NOOPS,
+	GAD_ENV_PASSIVE,
 
 
-GAD_CONNECT_LAYOUT,
-GAD_CONNECT_GLASS,
-GAD_CONNECT_NAME,
-GAD_CONNECT_HOST,
-GAD_CONNECT_ANON,
-GAD_CONNECT_PORT,
-GAD_CONNECT_USER,
-GAD_CONNECT_PASSWORD,
-GAD_CONNECT_DIR,
-GAD_CONNECT_CONNECT,
-GAD_CONNECT_LAST,
-GAD_CONNECT_CANCEL,
+	GAD_ENV_TIMEOUT,
+	GAD_ENV_LIST_UPDATE,
 
-GAD_EDIT_NAME,
-GAD_EDIT_HOST,
-GAD_EDIT_ANON,
-GAD_EDIT_PORT,
-GAD_EDIT_USER,
-GAD_EDIT_PASSWORD,
-GAD_EDIT_DIR,
-GAD_EDIT_OK,
-GAD_EDIT_OPTIONS,
-GAD_EDIT_CANCEL,
-GAD_EDIT_CUSTOM_LAYOUT,
-GAD_EDIT_CUSTOM_OPTIONS,
-GAD_EDIT_SET_CUSTOM_OPTIONS,
+	GAD_ENV_KEEP_LAST_DIR,
+	GAD_ENV_SPECIAL_DIR,
+	GAD_ENV_SAFE_LINKS,
+	GAD_ENV_UNK_LINKS,
 
-MENU_ENV_OPEN,
-MENU_ENV_SAVE,
-MENU_ENV_SAVEAS,
-MENU_ENV_CANCEL,
-MENU_ENV_RESET_DEFAULTS,
-MENU_ENV_LAST_SAVED,
-MENU_ENV_RESTORE,
+	GAD_ENV_SHOW_STARTUP_MSG,
+	GAD_ENV_SHOW_DIR_MSG,
+	GAD_ENV_PROGRESS_WINDOW,
+	GAD_ENV_TRANSFER_DETAILS,
+
+	GAD_ENV_SCRIPT_CONNECT_SUCCESS,
+	GAD_ENV_SCRIPT_CONNECT_FAIL,
+	GAD_ENV_SCRIPT_COPY_SUCCESS,
+	GAD_ENV_SCRIPT_COPY_FAIL,
+	GAD_ENV_SCRIPT_ERROR,
+	GAD_ENV_SCRIPT_CLOSE,
+	GAD_ENV_SCRIPT_TIME,
+
+	GAD_ENV_INDEX_ENABLE,
+
+	GAD_ENV_AUTO_DOWNLOAD,
+	GAD_ENV_AUTO_DOWNLOAD_SIZE,
+	GAD_ENV_LOG_ENABLE,
+	GAD_ENV_DEBUG,
+	GAD_ENV_LOG_FILE,
+	GAD_ENV_ANON_PASSWORD,
+
+	GAD_ENV_TOOLBAR_GLASS,
+	GAD_ENV_TOOLBAR,
+
+	GAD_ENV_CUST_FORMAT,
+	GAD_ENV_SET_FORMAT,
+
+	GAD_ENV_COPY_TYPE,
+
+	GAD_ENV_COPY_SET_ARCHIVE,
+	GAD_ENV_COPY_URL_COMMENT,
+	GAD_ENV_COPY_RESCAN,
+	GAD_ENV_COPY_RECURSIVE_SPECIAL,
+
+	GAD_ENV_REPLACE,
+	GAD_ENV_COPY_GALILEO_DEFAULT,
+	GAD_ENV_COPY_DATESTAMP,
+	GAD_ENV_COPY_PROTECTION,
+	GAD_ENV_COPY_COMMENT,
+	GAD_ENV_ADDR_DC,	// addressbook double click
+	GAD_ENV_ADDR_AUTO,	// close after DC or connect
+
+	GAD_ENV_END_UPDATE,	// end marker for gadgets reqd to updating the gui dissplay
 
 
-MENU_FTP_OPEN,
-MENU_FTP_IMPORT,
-MENU_FTP_IMPORT_AMFTP,
-MENU_FTP_SAVE,
-MENU_FTP_SAVEAS,
-MENU_FTP_EXPORT,
-MENU_FTP_CANCEL,
+	GAD_CONNECT_LAYOUT,
+	GAD_CONNECT_GLASS,
+	GAD_CONNECT_NAME,
+	GAD_CONNECT_HOST,
+	GAD_CONNECT_ANON,
+	GAD_CONNECT_PORT,
+	GAD_CONNECT_USER,
+	GAD_CONNECT_PASSWORD,
+	GAD_CONNECT_DIR,
+	GAD_CONNECT_CONNECT,
+	GAD_CONNECT_LAST,
+	GAD_CONNECT_CANCEL,
 
-GAD_LIST_SITES,
-GAD_LIST_OK,
-GAD_LIST_CANCEL,
+	GAD_EDIT_NAME,
+	GAD_EDIT_HOST,
+	GAD_EDIT_ANON,
+	GAD_EDIT_PORT,
+	GAD_EDIT_USER,
+	GAD_EDIT_PASSWORD,
+	GAD_EDIT_DIR,
+	GAD_EDIT_OK,
+	GAD_EDIT_OPTIONS,
+	GAD_EDIT_CANCEL,
+	GAD_EDIT_CUSTOM_LAYOUT,
+	GAD_EDIT_CUSTOM_OPTIONS,
+	GAD_EDIT_SET_CUSTOM_OPTIONS,
+
+	MENU_ENV_OPEN,
+	MENU_ENV_SAVE,
+	MENU_ENV_SAVEAS,
+	MENU_ENV_CANCEL,
+	MENU_ENV_RESET_DEFAULTS,
+	MENU_ENV_LAST_SAVED,
+	MENU_ENV_RESTORE,
+
+
+	MENU_FTP_OPEN,
+	MENU_FTP_IMPORT,
+	MENU_FTP_IMPORT_AMFTP,
+	MENU_FTP_SAVE,
+	MENU_FTP_SAVEAS,
+	MENU_FTP_EXPORT,
+	MENU_FTP_CANCEL,
+
+	GAD_LIST_SITES,
+	GAD_LIST_OK,
+	GAD_LIST_CANCEL,
 
 };
 
-enum {
-// for main lister titles
-ENV_SUB_COPYFLAGS,
-ENV_SUB_COPYATTR,
-ENV_SUB_LISTER,
-ENV_SUB_DISPLAY,
-ENV_SUB_MISC,
-ENV_SUB_SCRIPTS,
-ENV_SUB_INDEX,
-ENV_SUB_CONNECTION,
-ENV_SUB_GLOBAL,
+enum
+{
+	// for main lister titles
+	ENV_SUB_COPYFLAGS,
+	ENV_SUB_COPYATTR,
+	ENV_SUB_LISTER,
+	ENV_SUB_DISPLAY,
+	ENV_SUB_MISC,
+	ENV_SUB_SCRIPTS,
+	ENV_SUB_INDEX,
+	ENV_SUB_CONNECTION,
+	ENV_SUB_GLOBAL,
 };
 
 // Config sub-option handles
-typedef struct _SubOptionHandle {
-	int num;		// Option number
-	ULONG name;		// Option name ID
+typedef struct _SubOptionHandle
+{
+	int	  num;		// Option number
+	ULONG	  name;		// Option name ID
 	ObjectDef *objects;	// Object list
 } SubOptionHandle;
 

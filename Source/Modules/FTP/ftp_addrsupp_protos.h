@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		http://www.gpsoft.com.au
 
 */
 
@@ -41,17 +41,17 @@ ftp/ftp_addrsupp.c
 
 extern char const * logfile;
 
-void Save_Config(struct display_globals * , BOOL );
+void Save_Config(struct display_globals *, BOOL);
 
 BOOL save_sites(struct display_globals *dg,struct Window *win,short gadgetid);
 
-BOOL save_options(struct window_params * , int, short );
+BOOL save_options(struct window_params *, int, short);
 
-Att_List *read_sites(struct window_params *, short );
+Att_List *read_sites(struct window_params *, short);
 
-Att_List *import_sites(struct window_params *, short );
+Att_List *import_sites(struct window_params *, short);
 
-struct ftp_config *read_options(struct window_params * , int );
+struct ftp_config *read_options(struct window_params *, int);
 
 void read_build_addressbook(struct galileoftp_globals *,IPCData *);
 
@@ -69,9 +69,9 @@ void set_config_to_default(struct ftp_config *oc);
 
 void copy_site_entry(struct galileoftp_globals *og,struct site_entry *e,struct site_entry *old);
 
-BPTR setup_config( struct galileoftp_globals * );
+BPTR setup_config(struct galileoftp_globals *);
 
-void cleanup_config( BPTR );
+void cleanup_config(BPTR);
 
 BOOL export_sites(struct display_globals *dg,struct Window *win);
 

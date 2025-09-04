@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		http://www.gpsoft.com.au
 
 */
 
@@ -50,13 +50,13 @@ For more information on Directory Opus for Windows please see:
 
 struct ls_parse_buf
 {
-char ls_own_grp_byt[OGBLEN+1];	//	Could be Owner, Group, or Bytes
-char ls_grp_byt_mon[GBMLEN+1];	//	Could be Group, Bytes, or Month
-char ls_byt_dat    [ BDLEN+1];	//	Could be Bytes or Date
-char ls_name[FILENAMELEN+2+3];	//	Allow for quotes + link symbol
-char ls_seconds[SECONDSLEN+1];	//	Seconds from 1/1/78 (ascii)
-LONG ls_protect;		//	Protection flags
-char ls_comment[COMMENTLEN+1];	//	Used for link's real path
+	char ls_own_grp_byt[OGBLEN+1];	//	Could be Owner, Group, or Bytes
+	char ls_grp_byt_mon[GBMLEN+1];	//	Could be Group, Bytes, or Month
+	char ls_byt_dat[ BDLEN+1];	//	Could be Bytes or Date
+	char ls_name[FILENAMELEN+2+3];	//	Allow for quotes + link symbol
+	char ls_seconds[SECONDSLEN+1];	//	Seconds from 1/1/78 (ascii)
+	LONG ls_protect;		//	Protection flags
+	char ls_comment[COMMENTLEN+1];	//	Used for link's real path
 };
 
 #endif

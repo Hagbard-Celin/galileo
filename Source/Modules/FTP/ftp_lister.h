@@ -43,114 +43,114 @@ For more information on Directory Opus for Windows please see:
 #include "ftp_galileoftp.h"
 #include "ftp.h"
 
-void __stdargs logprintf( char *fmt, ... );
+void __stdargs logprintf(char *fmt, ...);
 
 // Functions that once used ARexx but now use callbacks
-void             lister_add            ( struct ftp_node *, char *name, int size, int type, ULONG seconds, LONG prot, char *comment );
-void             ftplister_refresh     ( struct ftp_node *, int date );
+void             lister_add            (struct ftp_node *, char *name, int size, int type, ULONG seconds, LONG prot, char *comment);
+void             ftplister_refresh     (struct ftp_node *, int date);
 
-struct ftp_node *find_ftpnode          ( struct galileoftp_globals *, APTR handle );
+struct ftp_node *find_ftpnode          (struct galileoftp_globals *, APTR handle);
 
-int              lister_synch_path     ( struct ftp_info *, char *result );
-BOOL             entry_info_from_lister( struct ftp_node *, char *name, struct entry_info *, ULONG flags );
-int              entry_info_from_remote( struct ftp_node *, char *name, struct entry_info *, ULONG flags );
-ULONG            get_file_mdtm         ( struct ftp_node *, char *name );
-int              get_file_size         ( struct ftp_node *, char *name );
+int              lister_synch_path     (struct ftp_info *, char *result);
+BOOL             entry_info_from_lister(struct ftp_node *, char *name, struct entry_info *, ULONG flags);
+int              entry_info_from_remote(struct ftp_node *, char *name, struct entry_info *, ULONG flags);
+ULONG            get_file_mdtm         (struct ftp_node *, char *name);
+int              get_file_size         (struct ftp_node *, char *name);
 
-int              lister_list           ( struct galileoftp_globals *, struct ftp_node *, BOOL redo_cache );
-void             lister_doubleclick    ( struct ftp_node *, IPCMessage * );
-void             lister_xfer           ( struct ftp_node *, IPCMessage * );
-void             lister_getput         ( struct ftp_node *srcnode, IPCMessage * );
+int              lister_list           (struct galileoftp_globals *, struct ftp_node *, BOOL redo_cache);
+void             lister_doubleclick    (struct ftp_node *, IPCMessage *);
+void             lister_xfer           (struct ftp_node *, IPCMessage *);
+void             lister_getput         (struct ftp_node *srcnode, IPCMessage *);
 
-struct ftp_node *lister_new_connection ( struct galileoftp_globals *, struct msg_loop_data *, IPCMessage * );
-void             lister_disconnect     ( struct galileoftp_globals *, struct msg_loop_data * );
-void             lister_reconnect      ( struct galileoftp_globals *, struct msg_loop_data * );
+struct ftp_node *lister_new_connection (struct galileoftp_globals *, struct msg_loop_data *, IPCMessage *);
+void             lister_disconnect     (struct galileoftp_globals *, struct msg_loop_data *);
+void             lister_reconnect      (struct galileoftp_globals *, struct msg_loop_data *);
 
-unsigned long    lister_options        ( struct ftp_node *, int type );
-void             lister_remove_node    ( struct galileoftp_globals *, struct ftp_node * );
-void             lister_traptemp       ( struct ftp_node *, IPCMessage * );
+unsigned long    lister_options        (struct ftp_node *, int type);
+void             lister_remove_node    (struct galileoftp_globals *, struct ftp_node *);
+void             lister_traptemp       (struct ftp_node *, IPCMessage *);
 
-int              lister_cwd            ( struct ftp_node *, char *path, ULONG flags );
+int              lister_cwd            (struct ftp_node *, char *path, ULONG flags);
 
-void             lst_addabort          ( struct ftp_node *, ULONG signals, struct Task *task );
-void             lst_remabort          ( struct ftp_node * );
-int              lst_dos_err           ( struct galileoftp_globals *, struct ftp_node *, ULONG flags, int err );
-int              lst_server_err        ( struct galileoftp_globals *, struct ftp_node *displaynode, struct ftp_node *errnode, ULONG flags, int default_string );
-void             lst_server_reply      ( struct galileoftp_globals *, struct ftp_node *displaynode, struct ftp_node *errnode, int default_string );
-int              parent_buffer         ( struct ftp_info *, char *buf, int get_current );
-int              pathcmp               ( ULONG ftpflags, char *path1, char *path2 );
-int              casematchpattern      ( ULONG ftpflags, char *pat, char *str );
-char            *sockerr               ( void );
+void             lst_addabort          (struct ftp_node *, ULONG signals, struct Task *task);
+void             lst_remabort          (struct ftp_node *);
+int              lst_dos_err           (struct galileoftp_globals *, struct ftp_node *, ULONG flags, int err);
+int              lst_server_err        (struct galileoftp_globals *, struct ftp_node *displaynode, struct ftp_node *errnode, ULONG flags, int default_string);
+void             lst_server_reply      (struct galileoftp_globals *, struct ftp_node *displaynode, struct ftp_node *errnode, int default_string);
+int              parent_buffer         (struct ftp_info *, char *buf, int get_current);
+int              pathcmp               (ULONG ftpflags, char *path1, char *path2);
+int              casematchpattern      (ULONG ftpflags, char *pat, char *str);
+char            *sockerr               (void);
 
-BOOL            lister_xferindex       ( struct ftp_node *ftpnode,char * localname, char *remotename, int size);
+BOOL            lister_xferindex       (struct ftp_node *ftpnode,char * localname, char *remotename, int size);
 
-int             getput                 ( struct ftp_node *src,struct ftp_node *dest,char *file,struct update_info *ui,BOOL src_flag );
+int             getput                 (struct ftp_node *src,struct ftp_node *dest,char *file,struct update_info *ui,BOOL src_flag);
 
-char           *getput_pasv            ( struct ftp_node *destnode );
+char           *getput_pasv            (struct ftp_node *destnode);
 
-void            init_xfer_time         ( struct update_info *ui );
+void            init_xfer_time         (struct update_info *ui);
 
-void            lister_prog_bar        ( struct ftp_node *, int total, int count );
-void            lister_prog_bytes      ( struct ftp_node *, int total, int count );
-void            lister_prog_clear      ( struct ftp_node * );
-void            lister_prog_info       ( struct ftp_node *, char *info );
-void            lister_prog_info2      ( struct ftp_node *, char *info );
-void            lister_prog_info3      ( struct ftp_node *, char *info );
-void            lister_prog_init       ( struct ftp_node *, char *title, char *info, char *name, int file, int bar );
-void            lister_prog_init_multi ( struct ftp_node *, char *title, BOOL short_display, char *name, int file, int bar );
-void            lister_prog_name       ( struct ftp_node *, char *name );
-int             lister_request         ( struct ftp_node *, Tag, ... );
-int             handle_has_handler     ( const char *galileo, APTR handle );
-int             lister_get_path        ( struct ftp_node *, char *buffer );
-int             lister_long_message    ( struct ftp_node *, Att_List *msg, ULONG flags );
-int             message_update         ( struct message_update_info *, int num, char *text );
+void            lister_prog_bar        (struct ftp_node *, int total, int count);
+void            lister_prog_bytes      (struct ftp_node *, int total, int count);
+void            lister_prog_clear      (struct ftp_node *);
+void            lister_prog_info       (struct ftp_node *, char *info);
+void            lister_prog_info2      (struct ftp_node *, char *info);
+void            lister_prog_info3      (struct ftp_node *, char *info);
+void            lister_prog_init       (struct ftp_node *, char *title, char *info, char *name, int file, int bar);
+void            lister_prog_init_multi (struct ftp_node *, char *title, BOOL short_display, char *name, int file, int bar);
+void            lister_prog_name       (struct ftp_node *, char *name);
+int lister_request         (struct ftp_node *, Tag, ...);
+int             handle_has_handler     (const char *galileo, APTR handle);
+int             lister_get_path        (struct ftp_node *, char *buffer);
+int             lister_long_message    (struct ftp_node *, Att_List *msg, ULONG flags);
+int             message_update         (struct message_update_info *, int num, char *text);
 
-int             ftplister_write_listformat( struct ftp_node*, int ok );
-void            ftplister_read_listformat ( struct ftp_node* );
+int             ftplister_write_listformat(struct ftp_node*, int ok);
+void            ftplister_read_listformat (struct ftp_node*);
 
 // Flags for entry_info_from_XXX function
 enum
 {
-ENTRYFROMF_DEFAULT	= 1 << 0,	// Fill in default values if entry not found
-ENTRYFROMF_DEFDIR	= 1 << 1,	// Default values for directory rather than file
+	ENTRYFROMF_DEFAULT	= 1 << 0,			// Fill in default values if entry not found
+	ENTRYFROMF_DEFDIR	= 1 << 1,			// Default values for directory rather than file
 };
 
 // Flags for lister_cwd
 enum
 {
-CWD_RELATIVE		= 1 << 0,	// CD to relative path rather than absolute
-CWD_ALWAYS_SYNCH	= 1 << 1,	// Always synchronize path with PWD command
-CWD_NO_MSG		= 1 << 2,	// Don't show message even if option is on
+	CWD_RELATIVE		= 1 << 0,			// CD to relative path rather than absolute
+	CWD_ALWAYS_SYNCH	= 1 << 1,			// Always synchronize path with PWD command
+	CWD_NO_MSG		= 1 << 2,			// Don't show message even if option is on
 };
 
 // Flags for lister_long_msg
 enum
 {
-LONGMSG_MULTI		= 1 << 0,	// Only show multi-line messages
+	LONGMSG_MULTI		= 1 << 0,			// Only show multi-line messages
 };
 
 // ftp lister structure
 // ln_Name used to hold the lister handle in ascii - no more!
 struct ftp_node
 {
-struct Node		fn_node;		// For linking
-struct galileoftp_globals *fn_og;			// Points back to global info
-APTR			fn_handle;		// Lister handle
-IPCData *		fn_ipc;			// IPC of this lister process
-struct ftp_info		fn_ftp;			// Socket & site details + FTP reply code
-ULONG			fn_flags;		// See below
-char			fn_galileo[PORTNAMELEN+1];	// GALILEO.1 etc
-/*
-char			fn_path[PATHLEN+1];	// Current directory
-*/
-char			fn_pasvport[ADDRESSLEN+1];
-int			fn_systype;		// Unix, Amiga, unknown etc
-char			fn_lscmd[LSCMDLEN+1];	// The command sent to get the list of files
-int                   (*fn_ls_to_entryinfo)(struct entry_info *,const char *line,ULONG flags );
-struct Task            *fn_signaltask;		// Task to signal on abort
-APTR                    fn_proghandle;
-struct site_entry       fn_site;		// As used in Address book etc
-ULONG                   fn_read_handle;		// Handle of our Galileo text viewer
+	struct Node		  fn_node;			// For linking
+	struct galileoftp_globals *fn_og;			// Points back to global info
+	APTR			  fn_handle;			// Lister handle
+	IPCData			  *		  fn_ipc;	// IPC of this lister process
+	struct ftp_info		  fn_ftp;			// Socket & site details + FTP reply code
+	ULONG			  fn_flags;			// See below
+	char			  fn_galileo[PORTNAMELEN+1];	// GALILEO.1 etc
+	/*
+	   char			fn_path[PATHLEN+1];	// Current directory
+	 */
+	char			  fn_pasvport[ADDRESSLEN+1];
+	int			  fn_systype;			// Unix, Amiga, unknown etc
+	char			  fn_lscmd[LSCMDLEN+1];		// The command sent to get the list of files
+	int			  (*fn_ls_to_entryinfo)(struct entry_info *,const char *line,ULONG flags);
+	struct Task		  *fn_signaltask;		// Task to signal on abort
+	APTR			  fn_proghandle;
+	struct site_entry	  fn_site;			// As used in Address book etc
+	ULONG			  fn_read_handle;		// Handle of our Galileo text viewer
 };
 
 //	The default FTP command to get a directory listing
@@ -159,33 +159,33 @@ ULONG                   fn_read_handle;		// Handle of our Galileo text viewer
 //	Lister flags
 enum
 {
-LST_OPENED		= 1<<0,		// Lister is open
-LST_CONNECTED		= 1<<1,		// Lister is connected to a server
-LST_LOGGEDIN		= 1<<2,		// Lister is logged in to a server
-LST_LEAVEOPEN		= 1<<3,		// Don't close this lister when we disconnect
-LST_ABORT		= 1<<4,		// Set to stop lister processing entries
-LST_LEAVEOPENIFFAIL	= 1<<5,		// Don't close lister if we can't connect
-LST_CONNECTFAILED	= 1<<6,		// Tried to connect but failed
-LST_RECONNECTING	= 1<<7,		// Don't close lister unless we can't connect
-LST_INVISIBLE		= 1<<8,		// Lister is purposefully invisible
-LST_NOREQ		= 1<<9,		// Suppress *all* requesters on this lister
-LST_LOCAL		= 1<<10,	// Lister is local, NOT FTP!
-LST_NOOP_QUIT		= 1<<11,	// Quit caused by NOOP stuff
+	LST_OPENED		= 1<<0,				// Lister is open
+	LST_CONNECTED		= 1<<1,				// Lister is connected to a server
+	LST_LOGGEDIN		= 1<<2,				// Lister is logged in to a server
+	LST_LEAVEOPEN		= 1<<3,				// Don't close this lister when we disconnect
+	LST_ABORT		= 1<<4,				// Set to stop lister processing entries
+	LST_LEAVEOPENIFFAIL	= 1<<5,				// Don't close lister if we can't connect
+	LST_CONNECTFAILED	= 1<<6,				// Tried to connect but failed
+	LST_RECONNECTING	= 1<<7,				// Don't close lister unless we can't connect
+	LST_INVISIBLE		= 1<<8,				// Lister is purposefully invisible
+	LST_NOREQ		= 1<<9,				// Suppress *all* requesters on this lister
+	LST_LOCAL		= 1<<10,			// Lister is local, NOT FTP!
+	LST_NOOP_QUIT		= 1<<11,			// Quit caused by NOOP stuff
 };
 
 //	Option types
 enum
 {
-OPTION_COPY,
-OPTION_DELETE
+	OPTION_COPY,
+	OPTION_DELETE
 };
 
 //	Replace actions
 enum
 {
-RA_SKIP,
-RA_REPLACE,
-RA_RESUME
+	RA_SKIP,
+	RA_REPLACE,
+	RA_RESUME
 };
 
 //
@@ -196,15 +196,15 @@ RA_RESUME
 //
 struct entry_info
 {
-struct Node ei_node;			// Used by recursive routines
-char        ei_name[FILENAMELEN + 1];	// Big enough for 256 char filenames
-ULONG       ei_size;
-int         ei_type;			// Compatible with what Galileo uses
-ULONG       ei_seconds;
-LONG        ei_prot;			// Amiga-style protection bits
-char        ei_comment[COMMENTLEN + 1];	// Or real path for Unix links
-ULONG       ei_unixprot;		// Unix-style protection bits
-int         ei_linkinfo;		// Extra information about links
+	struct Node ei_node;			// Used by recursive routines
+	char	    ei_name[FILENAMELEN + 1];	// Big enough for 256 char filenames
+	ULONG	    ei_size;
+	int	    ei_type;			// Compatible with what Galileo uses
+	ULONG	    ei_seconds;
+	LONG	    ei_prot;			// Amiga-style protection bits
+	char	    ei_comment[COMMENTLEN + 1];	// Or real path for Unix links
+	ULONG	    ei_unixprot;		// Unix-style protection bits
+	int	    ei_linkinfo;		// Extra information about links
 };
 
 // Unknown values for some fields
@@ -228,62 +228,62 @@ int         ei_linkinfo;		// Extra information about links
 
 struct msg_loop_data
 {
-IPCData         *mld_ipc;
-struct ftp_node *mld_node;
-int             *mld_ftpreply;
-IPCMessage      *mld_quitmsg;
-char            *mld_quit_command;
-int              mld_done;
-int              mld_reconnecting;
+	IPCData		*mld_ipc;
+	struct ftp_node *mld_node;
+	int		*mld_ftpreply;
+	IPCMessage	*mld_quitmsg;
+	char		*mld_quit_command;
+	int		mld_done;
+	int		mld_reconnecting;
 };
 
 //
 //	Used when updating the display during a file transfer and directory listing
-//	NOTE: when self-aborted because of a Write error, ui_abort == 2 
+//	NOTE: when self-aborted because of a Write error, ui_abort == 2
 //
 struct update_info
 {
-struct galileoftp_globals *ui_og;
-struct SignalSemaphore	ui_sem;
-ULONG			ui_flags;			// See below...
-struct ftp_node        *ui_ftpnode;
-APTR                    ui_handle;			// Lister
-char                   *ui_galileo;			// Galileo Arexx port name
-BOOL                   *ui_abort;			// TRUE when transfer is aborted - This is the only part the FTP code needs
-char                   *ui_filename;
-unsigned int		ui_total_bytes;			// Total size of file
-unsigned int		ui_bytes_so_far;		// Bytes transferred so far
-unsigned int		ui_resumed_bytes;		// resume point for peed calc
-struct timeval		ui_start, ui_last, ui_curr;
-int                     ui_info_type;			// extended display
-char                    ui_infotext_path[256];		
+	struct galileoftp_globals *ui_og;
+	struct SignalSemaphore	  ui_sem;
+	ULONG			  ui_flags;		// See below...
+	struct ftp_node		  *ui_ftpnode;
+	APTR			  ui_handle;		// Lister
+	char			  *ui_galileo;		// Galileo Arexx port name
+	BOOL			  *ui_abort;		// TRUE when transfer is aborted - This is the only part the FTP code needs
+	char			  *ui_filename;
+	unsigned int		  ui_total_bytes;	// Total size of file
+	unsigned int		  ui_bytes_so_far;	// Bytes transferred so far
+	unsigned int		  ui_resumed_bytes;	// resume point for peed calc
+	struct timeval		  ui_start, ui_last, ui_curr;
+	int			  ui_info_type;		// extended display
+	char			  ui_infotext_path[256];
 };
 
 // Flags for update_info
 enum
 {
-UI_NO_LINK_FIELD   = 1 << 0,	// LIST - skip links field for MACOS
-UI_DOT_HIDDEN      = 1 << 1,	// LIST - entries starting with '.' are hidden
-UI_STORING         = 1 << 2,	// XFER - storing if set, otherwise retrieving
-UI_REMOTE          = 1 << 3,	// XFER - FTP to FTP if set
-UI_FIRSTDONE       = 1 << 4,	// First callback done already
-UI_LINKS_ARE_FILES = 1 << 5,	// Treat unknown links as files rather than dirs
-UI_SPECIAL_DIR     = 1 << 6,	// Fred Hack - for dirs starting with spaces
+	UI_NO_LINK_FIELD   = 1 << 0,			// LIST - skip links field for MACOS
+	UI_DOT_HIDDEN      = 1 << 1,			// LIST - entries starting with '.' are hidden
+	UI_STORING         = 1 << 2,			// XFER - storing if set, otherwise retrieving
+	UI_REMOTE          = 1 << 3,			// XFER - FTP to FTP if set
+	UI_FIRSTDONE       = 1 << 4,			// First callback done already
+	UI_LINKS_ARE_FILES = 1 << 5,			// Treat unknown links as files rather than dirs
+	UI_SPECIAL_DIR     = 1 << 6,			// Fred Hack - for dirs starting with spaces
 
 };
 
 /*
 
-// Info type for update_info
-enum
-{
-UI_UPDATE_SWAP,			// Swap between bytes and path
-UI_UPDATE_BYTES,		// "nnn/nnn n/s"
-UI_UPDATE_PATH,			// "From 'xxx' to 'yyy'"
-UI_UPDATE_BOTH,			// "nnn/nnn n/s From 'xxx' to 'yyy'"
-};
+   // Info type for update_info
+   enum
+   {
+   UI_UPDATE_SWAP,			// Swap between bytes and path
+   UI_UPDATE_BYTES,		// "nnn/nnn n/s"
+   UI_UPDATE_PATH,			// "From 'xxx' to 'yyy'"
+   UI_UPDATE_BOTH,			// "nnn/nnn n/s From 'xxx' to 'yyy'"
+   };
 
-*/
+ */
 
 // Flags for Info type for update_info
 
@@ -295,14 +295,14 @@ UI_UPDATE_BOTH,			// "nnn/nnn n/s From 'xxx' to 'yyy'"
 // Flags for request_user() and request_pass()
 enum
 {
-REQUSERF_LAST_USER	= 1 << 0,	// Show last used username in requester
-REQUSERF_SAME_USER	= 1 << 1,	// Show same username as in connect message
+	REQUSERF_LAST_USER	= 1 << 0,	// Show last used username in requester
+	REQUSERF_SAME_USER	= 1 << 1,	// Show same username as in connect message
 };
 
 struct message_update_info
 {
-struct ftp_node *mu_node;
-Att_List        *mu_msg;
+	struct ftp_node *mu_node;
+	Att_List	*mu_msg;
 };
 
 /***********************

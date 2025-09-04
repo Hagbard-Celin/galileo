@@ -31,26 +31,26 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		http://www.gpsoft.com.au
 
 */
 
 #ifndef _LISTER_XFER_H
 #define _LISTER_XFER_H
 
-int replace_requester( struct hook_rec_data *, ULONG flags, struct entry_info *src, struct entry_info *dst );
+int replace_requester(struct hook_rec_data *, ULONG flags, struct entry_info *src, struct entry_info *dst);
 
-int xfer_update  ( struct update_info *ui, unsigned int total, unsigned int bytes );
-int getput_update( struct update_info *ui, unsigned int total, unsigned int bytes );
+int xfer_update  (struct update_info *ui, unsigned int total, unsigned int bytes);
+int getput_update(struct update_info *ui, unsigned int total, unsigned int bytes);
 
 //
 //	Flags for replace_requester()
 //
 enum
 {
-REPLACEF_NORESUME	= (1 << 0),	// Resume option not supported on some endpoint
-REPLACEF_UPDATE		= (1 << 1),	// Handle the 'Copy UPDATE' option
-REPLACEF_NEWER		= (1 << 2),	// Handle the 'Copy NEWER' option
+	REPLACEF_NORESUME	= (1 << 0),	// Resume option not supported on some endpoint
+	REPLACEF_UPDATE		= (1 << 1),	// Handle the 'Copy UPDATE' option
+	REPLACEF_NEWER		= (1 << 2),	// Handle the 'Copy NEWER' option
 };
 
 //
@@ -58,14 +58,14 @@ REPLACEF_NEWER		= (1 << 2),	// Handle the 'Copy NEWER' option
 //
 enum
 {
-REPLACE_ABORT,
-REPLACE_RESUME,
-REPLACE_RESUMEALL,
-REPLACE_REPLACE,
-REPLACE_REPLACEALL,
-REPLACE_SKIP,
-REPLACE_SKIPALL,
-REPLACE_INVALID
+	REPLACE_ABORT,
+	REPLACE_RESUME,
+	REPLACE_RESUMEALL,
+	REPLACE_REPLACE,
+	REPLACE_REPLACEALL,
+	REPLACE_SKIP,
+	REPLACE_SKIPALL,
+	REPLACE_INVALID
 };
 
 //
@@ -73,10 +73,10 @@ REPLACE_INVALID
 //
 enum
 {
-SKIP_RESUME_AND_REPLACE = 0,
-SKIP_REPLACE            = 1,
-SKIP_RESUME             = 2,
-REQUEST_ALL             = 3
+	SKIP_RESUME_AND_REPLACE = 0,
+	SKIP_REPLACE            = 1,
+	SKIP_RESUME             = 2,
+	REQUEST_ALL             = 3
 };
 
 #endif
