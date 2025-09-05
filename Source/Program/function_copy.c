@@ -1096,7 +1096,6 @@ GALILEOFM_FUNC(function_copy)
 								if (!(ret=function_error(handle,entry->fe_name,MSG_COPYING,error)) ||
 									ret==-1)
 								{
-									ret = -1;
 									break;
 								}
 							}
