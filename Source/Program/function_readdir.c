@@ -421,7 +421,6 @@ void function_read_directory(
 	if (lock)
 	{
 		short mode;
-	        struct DateStamp date = {0};
 
 		// Refresh
 		IPC_Command(
@@ -442,10 +441,8 @@ void function_read_directory(
 		// Initial mode
 		mode=(lister->flags&LISTERF_VIEW_ICONS)?0:LISTERMODE_ICON;
 
-		VolIdFromLock(lock, &date, NULL);
-
 		// Get position entry
-		if (!(GetListerPosition(path_full_name, &date, 0, 0, &lister->other_dims, &mode, 0, 0, 0, GLPF_USE_MODE)))
+		if (!(GetListerPosition(path_full_name, stamp_ptr, 0, 0, &lister->other_dims, &mode, 0, 0, 0, GLPF_USE_MODE)))
 		{
 			// No entry; use same dimensions as current
 			if (lister_valid_window(lister)) lister->other_dims=*((struct IBox *)&lister->window->LeftEdge);
