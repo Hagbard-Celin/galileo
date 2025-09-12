@@ -70,41 +70,37 @@ void  __asm __saveds L_StackCheckBegin(register __a0 struct Task *check_task, re
     stack_data->GlobalSPLower = (UWORD *)check_task->tc_SPLower;
     stack_data->SPUpperFirst = stack_data->SPUpper;
 
-   /* ensure we still have the same stack area */
-   if(stack_data->SPUpper == stack_data->SPUpperFirst)
-   {
-	stack_data->SPReg = check_task->tc_SPReg;
-	SPLower = stack_data->GlobalSPLower;
-	if(stack_data->SPReg < SPLower || stack_data->SPReg > stack_data->SPUpper)
-	{
-	    Forbid();
-	    KPrintF("Taskname: %s (0x%08.lx)\n", check_task->tc_Node.ln_Name, check_task);
-	    KPrintF("Could not fill unused stack area.\n");
-	    KPrintF("Task uses alternative stack or stack already overflowed.\n");
-	    Permit();
-	    return;
-	}
-	Free = ((ULONG)stack_data->SPReg - (ULONG)SPLower)/2L;
-
-	for(i=0; i < 8; i++) stack_data->StackBase[i] = SPLower[i];
-	/* Let's fill up the unused stack area (if it's not already done) */
-	/* we assume that the unused area contains 0 bytes                */
-	if((SPLower[0] == 0) && (SPLower[1] == 0) && (Free > 2))
-	{
-	    i=0;
-	    stack_data->Filled = FILLED_ZERO;
-	    while((SPLower[i] == 0) && (i < Free)) SPLower[i++] = ConstFill;
-	}
-
-	/* if the unused area is filled with an unknown pattern,      */
-	/* let's fill it with our own pattern                         */
-	/* WARNING: by doing that UsedMax becomes inaccurate          */
-	else if((SPLower[0] != ConstFill) || (SPLower[1] != ConstFill))
-	{
-	    for(i = 0; i < Free; i++) SPLower[i] = ConstFill;
-	}
-	else stack_data->Filled = FILLED_PATTERN;
+    stack_data->SPReg = (UWORD *)getreg(REG_A7);
+    SPLower = stack_data->GlobalSPLower;
+    if(stack_data->SPReg < SPLower || stack_data->SPReg > stack_data->SPUpper)
+    {
+	Forbid();
+	KPrintF("Taskname: %s (0x%08.lx)\n", check_task->tc_Node.ln_Name, check_task);
+	KPrintF("Could not fill unused stack area.\n");
+	KPrintF("Task uses alternative stack or stack already overflowed.\n");
+	Permit();
+	return;
     }
+    Free = ((ULONG)stack_data->SPReg - (ULONG)SPLower)/2L;
+
+    for(i=0; i < 8; i++) stack_data->StackBase[i] = SPLower[i];
+    /* Let's fill up the unused stack area (if it's not already done) */
+    /* we assume that the unused area contains 0 bytes                */
+    if((SPLower[0] == 0) && (SPLower[1] == 0) && (Free > 2))
+    {
+	i=0;
+	stack_data->Filled = FILLED_ZERO;
+	while((SPLower[i] == 0) && (i < Free)) SPLower[i++] = ConstFill;
+    }
+
+    /* if the unused area is filled with an unknown pattern,      */
+    /* let's fill it with our own pattern                         */
+    /* WARNING: by doing that UsedMax becomes inaccurate          */
+    else if((SPLower[0] != ConstFill) || (SPLower[1] != ConstFill))
+    {
+	for(i = 0; i < Free; i++) SPLower[i] = ConstFill;
+    }
+    else stack_data->Filled = FILLED_PATTERN;
 }
 
 void  __asm __saveds L_StackCheckEnd(register __a0 struct Task *check_task, register __a1 StackData *stack_data)
@@ -127,7 +123,7 @@ void  __asm __saveds L_StackCheckEnd(register __a0 struct Task *check_task, regi
     /* ensure we still have the same stack area */
     if(stack_data->SPUpper == stack_data->SPUpperFirst)
     {
-	stack_data->SPReg = (UWORD *)check_task->tc_SPReg;
+	stack_data->SPReg = (UWORD *)getreg(REG_A7);
 	SPLower = stack_data->GlobalSPLower;
 	Free = ((ULONG)stack_data->SPUpper - (ULONG)SPLower) / 2;
 
