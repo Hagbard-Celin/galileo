@@ -1230,11 +1230,7 @@ GALILEOFM_FUNC(function_copy)
 
 			// Aborted?
 			if (ret==-1)
-			{
-				function_abort(handle);
-				ret=0;
-				break;
-			}
+			    break;
 		}
 
 		// Need to delete source?
