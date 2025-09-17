@@ -138,7 +138,7 @@ void filetype_find_typelist(Lister *lister,short flags)
 
 			// Need to get version?
 			else
-			if (flags&SNIFFF_VERSION && !(entry->de_Flags&ENTF_VERSION)) ok=1;
+			if (flags&SNIFFF_VERSION && entry->de_Node.dn_Type < 0 && !(entry->de_Flags&ENTF_VERSION)) ok=1;
 
 			// Ok to do this one?
 			if (ok)
