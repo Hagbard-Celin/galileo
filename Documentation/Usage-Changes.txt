@@ -144,6 +144,37 @@ Lister changes:
 
                Ctrl Z  Equivalent to "Shift Right-Arrow".
 
+- The background routine that scans files for version information is changed
+  and is now configurable with two new environment variables:
+
+        Galileo/GetFileVerBufSize Sets the main read buffer size in
+                                  multiples of 512 bytes. The default
+                                  is 8 which equals 4096 bytes.
+
+        Galileo/GetFileVerLimit   Sets the scanning size limit for
+                                  non-exe files in multiples of the
+                                  main buffer size. The default value
+                                  is 10. 0 equals no-limit. This does
+                                  not affect version scanning initiated
+                                  from the "replace file"-requester.
+
+  When scanning non-exe files that are bigger than the double the size of the
+  main buffer and no sign of a version string is found in the first buffer-size
+  of data, it will try scanning one buffer-size of data from the end of the
+  file before continuing where it left off.
+
+  In case it finds the beginning of a possible version string in the end of a
+  buffer, the scanning of the end of the file will be held off until the next
+  buffer is processed.
+
+  The end-of-file scanning will only happen if the scanning size limit has not
+  been reached. If the buffer size is 4096 and the limit is 2 and a possible
+  version-string is found at offset 4095, it will scan the first 8KB of the
+  file.
+
+  Note: This is a simplified explanation, in reality it does not advance
+        exactly one buffer-size of file-data for each read.
+
 
 StringGadget changes:
 

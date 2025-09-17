@@ -120,6 +120,9 @@ struct LibData
 	CxObj			*cx_select_up_down;
 	struct PathEditBuffer   path_editbuff;
 
+	ULONG			getfilever_bufsize;
+	ULONG			getfilever_bailsize;
+
 #ifdef RESOURCE_TRACKING
 	struct Library          *restrack_base;
 #endif

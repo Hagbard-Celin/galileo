@@ -304,6 +304,23 @@ __asm __saveds __UserLibInit(register __a6 struct Library *libbase)
 		gfmlib_data.flags|=LIBDF_FT_CACHE;
 	}
 
+	// Variable set to adjust GetFileVersion buffer size
+	if (GetVar("Galileo/GetFileVerBufSize", buf, 14, GVF_GLOBAL_ONLY) > -1)
+	{
+	    gfmlib_data.getfilever_bufsize |= atoi(buf) * 512;
+	    if (gfmlib_data.getfilever_bufsize < 1024)
+		gfmlib_data.getfilever_bufsize = 1024;
+	}
+	else
+	    gfmlib_data.getfilever_bufsize = 4096;
+
+	// Variable set for when to bail out version-sniffing on big non-exe files
+	// Multiples of gfmlib_data.getfilever_bufsize, 0 equals no limit
+	if (GetVar("Galileo/GetFileVerLimit", buf, 14, GVF_GLOBAL_ONLY) > -1)
+	    gfmlib_data.getfilever_bailsize |= atoi(buf);
+	else
+	    gfmlib_data.getfilever_bailsize = 10;
+
 	// Create some memory handles
 	gfmlib_data.memory=L_NewMemHandle(sizeof(IPCMessage)<<5,sizeof(IPCMessage)<<4,MEMF_CLEAR|MEMF_PUBLIC);
 	gfmlib_data.dos_list_memory=L_NewMemHandle(1024,512,MEMF_CLEAR);

@@ -102,7 +102,7 @@ long SmartAskReplace(
 			{
 				BPTR dir;
 				BOOL ok;
-				APTR progress=0;
+				APTR progress = (APTR)-1;
 
 				// Change to new directory
 				dir=CurrentDir(dir_new);
@@ -136,7 +136,7 @@ long SmartAskReplace(
 					got_version|=1;
 
 					// Set second filename
-					if (progress)
+					if ((LONG)progress > 0)
 						SetProgressWindowTags(
 							progress,
 							PW_FileName,old_name,
@@ -155,7 +155,8 @@ long SmartAskReplace(
 				CurrentDir(dir);
 
 				// Close progress requester
-				CloseProgressWindow(progress);
+				if ((LONG)progress > 0)
+				    CloseProgressWindow(progress);
 			}
 		}
 
