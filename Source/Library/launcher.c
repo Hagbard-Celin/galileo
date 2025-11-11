@@ -1091,7 +1091,7 @@ LaunchProc *launcher_launch_arg(
 	// Not a project, get original name
 	else run_name=launch->startup.sm_ArgList[0].wa_Name;
 	// Change current directory
-	old_dir=CurrentDir(launch->startup.sm_ArgList[0].wa_Lock);
+	old_dir=CurrentDir(DupLock(launch->startup.sm_ArgList[0].wa_Lock));
 
 	// Get process name
 	proc_name=FilePart(run_name);
@@ -1208,7 +1208,7 @@ LaunchProc *launcher_launch_arg(
 	}
 
 	// Restore current directory
-	CurrentDir(old_dir);
+	UnLock(CurrentDir(old_dir));
 	if (cur_dir) UnLock(cur_dir);
 
 	// If failed, show error
