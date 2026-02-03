@@ -39,6 +39,7 @@ For more information on Directory Opus for Windows please see:
 
 #include <devices/audio.h>
 
+#include <gfm/version.h>
 #include "misc.strings"
 #include "modules_lib.h"
 

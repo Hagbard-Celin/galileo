@@ -20,9 +20,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <gfm/version.h>
 #include "XADbrowser.h"
 
-static const char *version="\0$VER: XADbrowser.gfmmodule 0.2 "__AMIGADATE__" Written by Mladen Milinkovic <max2@iname.com>\0";
+char __far _LibID[] = "XADbrowser.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 
 char *viewcmds="Read Play Show HexRead AnsiRead IconInfo";
  

@@ -39,7 +39,7 @@ For more information on Directory Opus for Windows please see:
 #include "play.h"
 #include "music.h"
 
-char *version="$VER: play.gfmmodule 0.2 "__AMIGADATE__" ";
+char __far _LibID[] = "play.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 
 static char *modtypes[]={"SoundTracker","MED","Octalyzer","SoundTracker 15"};
 

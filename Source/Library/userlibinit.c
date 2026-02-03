@@ -36,6 +36,7 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/version.h>
 #include "galileofmlib.h"
 #include "boopsi.h"
 
@@ -44,15 +45,13 @@ void __asm __saveds __UserLibCleanup(register __a6 struct Library *libbase);
 __asm low_mem_handlerTr(register __a0 struct MemHandlerData *);
 __asm low_mem_handler(register __a0 struct MemHandlerData *);
 
-char *_ProgramName="galileofm.library";
+char __far _LibID[] = "galileofm "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 
 void init_locale_data(struct GalileoLocale *locale);
 void free_locale_data(struct GalileoLocale *locale);
 void free_libdata(void);
 
 static const struct TextAttr topaz_attr={"topaz.font",8,0,0};
-
-char *version="$VER: galileofm.library 0.2 "__AMIGADATE__" ";
 
 #ifdef RESOURCE_TRACKING
 ULONG callerid;

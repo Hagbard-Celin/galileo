@@ -37,7 +37,7 @@ For more information on Directory Opus for Windows please see:
 
 #include "envoy.h"
 
-static const char *version="$VER: envoy.gfmmodule 0.2 "__AMIGADATE__" ";
+char __far _LibID[] = "envoy.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 
 int __asm __saveds L_Module_Entry(
 	register __a0 char *args,

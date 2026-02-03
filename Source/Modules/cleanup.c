@@ -40,7 +40,7 @@ For more information on Directory Opus for Windows please see:
 #include "/Program/position.h"
 #include "/Program/main_commands.h"
 
-char *version="$VER: cleanup.gfmmodule 0.2 "__AMIGADATE__" ";
+char __far _LibID[] = "cleanup.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 
 int __asm __saveds L_Module_Entry(
 	register __a0 char *args,

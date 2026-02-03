@@ -1,6 +1,7 @@
+#include <gfm/version.h>
 #include "font.h"
 
-char *version="$VER: ViewFont 0.2 "__AMIGADATE__" ";
+char *version="$VER: ViewFont "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 
 ConfigWindow
 	font_window={

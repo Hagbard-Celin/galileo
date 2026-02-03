@@ -35,6 +35,7 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/version.h>
 #include "//Library/galileofmbase.h"
 #include "//Library/galileofmpragmas.h"
 
@@ -47,7 +48,7 @@ struct Library *ResTrackBase;
 ULONG callerid;
 #endif
 
-char *version="$VER: LoadDB 0.2 "__AMIGADATE__" ";
+char *version="$VER: LoadDB "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 
 enum
 {

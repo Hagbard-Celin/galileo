@@ -38,7 +38,7 @@ For more information on Directory Opus for Windows please see:
 
 #include "join.h"
 
-char *version="$VER: join.gfmmodule 0.2 "__AMIGADATE__" ";
+char __far _LibID[] = "join.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 
 void get_trunc_filename(char *source,char *dest);
 

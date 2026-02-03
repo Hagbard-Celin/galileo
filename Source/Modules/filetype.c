@@ -85,7 +85,7 @@ enum
     GOODBYE_ABORT
 };
 
-char *version="$VER: filetype.gfmmodule 0.2 "__AMIGADATE__" ";
+char __far _LibID[] = "filetype.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 
 /********************************/
 

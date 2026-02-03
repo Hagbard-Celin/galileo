@@ -1,8 +1,9 @@
 #include 	<proto/dos.h>
 #include    <proto/exec.h>
 
+#include <gfm/version.h>
 
-UBYTE *vers = "\0$VER: IFFtoGalileo 0.2 "__AMIGADATE__" ";
+UBYTE *vers = "\0$VER: IFFtoGalileo "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 
 #define TEMPLATE "FILES/A/M,QUIET/S,REVERSE/S"
 #define OPT_FILES  	0

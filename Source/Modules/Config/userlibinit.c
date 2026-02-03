@@ -35,6 +35,7 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/version.h>
 #include "config_lib.h"
 
 #define LIB_VER 0
@@ -43,7 +44,7 @@ int __asm __saveds __UserLibInit(register __a6 struct Library *libbase);
 void __asm __saveds __UserLibCleanup(void);
 char *_ProgramName="galileoconfig.gfmmodule";
 
-char *version="$VER: galileoconfig.gfmmodule 0.2 "__AMIGADATE__" ";
+char __far _LibID[] = "galileoconfig.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 
 struct DosLibrary	*DOSBase;
 struct Library		*GalileoFMBase;

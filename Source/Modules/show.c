@@ -39,7 +39,7 @@ For more information on Directory Opus for Windows please see:
 #include "show.h"
 
 static const unsigned short pens[1]={(unsigned short)~0};
-char *version="$VER: show.gfmmodule 0.2 "__AMIGADATE__" ";
+char __far _LibID[] = "show.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 
 int __asm __saveds L_Module_Entry_Internal(
 	register __a0 struct List *files,

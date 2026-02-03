@@ -42,7 +42,7 @@ For more information on Directory Opus for Windows please see:
 
 #define IEQUALIFIER_BAD	(IEQUALIFIER_LSHIFT|IEQUALIFIER_RSHIFT|IEQUALIFIER_LALT|IEQUALIFIER_RALT|IEQUALIFIER_CONTROL)
 
-char *version="$VER: read.gfmmodule 0.2 "__AMIGADATE__" ";
+char __far _LibID[] = "read.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 static struct IBox dims;
 static short tab_size=8;
 static short search_flags=SEARCHF_NOCASE;

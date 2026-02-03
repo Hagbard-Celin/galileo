@@ -44,7 +44,7 @@ For more information on Directory Opus for Windows please see:
 #define kprintf ;   /##/
 #endif
 
-char *version="$VER: fixicons.gfmmodule 0.2 "__AMIGADATE__" ";
+char __far _LibID[] = "fixicons.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 
 /************************************************************************
 *

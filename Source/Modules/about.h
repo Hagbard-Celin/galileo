@@ -35,6 +35,7 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/version.h>
 #include "modules_lib.h"
 
 #define logo_width	63

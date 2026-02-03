@@ -35,8 +35,9 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-short revision_num=2;
-short version_num=0;
-char *version_string="Buildable Beta";
+#include <gfm/version.h>
 
-char *_version_str="$VER: Galileo 0.2 "__AMIGADATE__" ";
+short revision_num = _GFM_REVISION;
+short version_num = _GFM_VERSION;
+char *version_string = __SUBTITLE__;
+char *_version_str="$VER: Galileo "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;

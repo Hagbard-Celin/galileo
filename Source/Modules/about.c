@@ -44,7 +44,7 @@ For more information on Directory Opus for Windows please see:
 #define TEXT_TIME	40000
 #define ROLL_TICKS	500
 
-char *version="$VER: about.gfmmodule 0.2 "__AMIGADATE__" ";
+char __far _LibID[] = "about.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 
 static const struct TextAttr topaz_attr={"topaz.font",8,0,0};
 

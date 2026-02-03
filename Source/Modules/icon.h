@@ -39,6 +39,7 @@ For more information on Directory Opus for Windows please see:
 #define CATCOMP_NUMBERS
 #include <math.h>
 #include "icon.strings"
+#include <gfm/version.h>
 #include "modules_lib.h"
 #include "/Program/main_commands.h"
 

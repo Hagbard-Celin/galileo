@@ -37,7 +37,7 @@ For more information on Directory Opus for Windows please see:
 
 #include "print.h"
 
-char *version="$VER: print.gfmmodule 0.2 "__AMIGADATE__" ";
+char __far _LibID[] = "print.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 
 int __asm __saveds L_Module_Entry_Internal(
 	register __a0 struct List *files,

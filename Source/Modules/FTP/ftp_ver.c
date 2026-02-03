@@ -35,7 +35,9 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-char *versionstring ="$VER: ftp.gfmmodule 0.2 "__AMIGADATE__" ";
+#include <gfm/version.h>
+
+char __far _LibID[] = "ftp.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 
 /****************************************************************
 
