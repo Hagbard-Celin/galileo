@@ -38,6 +38,10 @@ For more information on Directory Opus for Windows please see:
 #ifndef _GALILEOFM_REQUESTERS
 #define _GALILEOFM_REQUESTERS
 
+#ifndef _GALILEOFM_SIMPLEREQUEST_H
+#include <gfm/simplerequest.h>
+#endif
+
 #define CHECKERROR_ABORT		3
 #define CHECKERROR_SKIP			2
 #define CHECKERROR_TRY_AGAIN	1

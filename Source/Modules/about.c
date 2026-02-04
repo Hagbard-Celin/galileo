@@ -35,6 +35,7 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include "about_data.h"
 #include "about.h"
 #include "modules.h"
 

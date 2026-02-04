@@ -39,59 +39,6 @@ For more information on Directory Opus for Windows please see:
 #ifndef _GALILEOFM_MODULES
 #define _GALILEOFM_MODULES
 
-#include "/Include/galileo/os.h"
-
-#include "/Library/galileofmbase.h"
-
-typedef struct
-{
-	ULONG	id;		// Function ID code
-	char	*name;          // Function name
-	ULONG	desc;           // Locale string ID for function description
-	ULONG	flags;		// Function flags
-	char	*template;	// Command template
-} ModuleFunction;
-
-
-// Function flags
-#define FUNCF_NEED_SOURCE		(1<<0)	// Needs a source directory
-#define FUNCF_NEED_DEST			(1<<1)	// Needs a destination directory
-#define FUNCF_NEED_FILES		(1<<2)	// Needs some files to work with
-#define FUNCF_NEED_DIRS			(1<<3)	// Needs some files to work with
-#define FUNCF_NEED_ENTRIES	(FUNCF_NEED_FILES|FUNCF_NEED_DIRS)
-#define FUNCF_CAN_DO_ICONS		(1<<6)	// Function can do icons
-#define FUNCF_SINGLE_SOURCE		(1<<8)	// Only a single source needed
-#define FUNCF_SINGLE_DEST		(1<<9)	// Only a single destination needed
-#define FUNCF_NO_LOOP_SOURCE	(1<<10)	// Don't loop through sources
-#define FUNCF_WANT_DEST			(1<<11)	// Want destinations, don't need them
-#define FUNCF_WANT_SOURCE		(1<<12)	// Want source, don't need it
-#define FUNCF_CREATE_SOURCE		(1<<13)	// Can create our own source
-
-#define FUNCF_WANT_ENTRIES		(1<<19)	// Want entries
-#define FUNCF_NO_ARGS			(1<<20)	// Don't pass arguments
-#define FUNCF_NO_BUSY			(1<<21)	// Don't send lister busy
-#define FUNCF_SYNC				(1<<24)	// Function wants to be synchronous
-
-#define ENTRYF_RECURSE_DIRS		(1<<0)
-
-typedef struct
-{
-	ULONG		ver;		// Module version
-	char		*name;		// Module name
-	char		*locale_name;	// Catalog name
-	ULONG		flags;		// Module flags
-	ULONG		function_count;	// Number of functions in module
-	ModuleFunction	function[1];	// Definition of first function
-} ModuleInfo;
-
-
-#define MODULEF_CALL_STARTUP		(1<<0)	// Call ModuleEntry() on startup
-#define MODULEF_STARTUP_SYNC		(1<<1)	// Run Synchronously on startup
-#define MODULEF_CATALOG_VERSION		(1<<2)	// Use version for catalog
-#define MODULEF_HELP_AVAILABLE		(1<<3)	// Help is available
-
-#define FUNCID_STARTUP			0xffffffff
-
 
 struct GalileoScreenData
 {

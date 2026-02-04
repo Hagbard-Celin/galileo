@@ -35,8 +35,27 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <stdlib.h>
+#include <proto/intuition.h>
+#include <proto/asl.h>
+#include <gfm/listlock.h>
+#include <gfm/list_management.h>
+#include <gfm/layout.h>
+#include <gfm/galileo_ipc.h>
+#include <gfm/cfg_filetype.h>
+#include <gfm/selectionlist.h>
+#include <gfm/configuration.h>
+#include <gfm/windowdata.h>
+#include <proto/rexxsyslib.h>
 #include "config_lib.h"
+#include "galileoconfig_ipc_commands.h"
+#include "function_editor.h"
+#include "funceddata.h"
 #include "config_filetypes.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 
 void __asm __saveds FileclassEditor(void)

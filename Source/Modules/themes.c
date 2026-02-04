@@ -37,6 +37,7 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "themes.h"
+#include "themes_data.h"
 
 char __far _LibID[] = "themes.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 

@@ -36,9 +36,43 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <clib/alib_protos.h>
+#include <proto/layers.h>
+#include <proto/intuition.h>
+#include <proto/wb.h>
+#include <proto/asl.h>
+#include <workbench/workbench.h>
+#include <workbench/startup.h>
+#include <gfm/listlock.h>
+#include <gfm/list_management.h>
+#include <gfm/galileo_ipc.h>
+#include <gfm/layout.h>
+#include <gfm/cfg_filetype.h>
+#include <gfm/gadtools.h>
+#include <gfm/image_protos.h>
+#include <gfm/image_tags.h>
+#include <gfm/imageremap_protos.h>
+#include <gfm/paths_protos.h>
+#include <gfm/configuration.h>
+#include <gfm/windowdata.h>
+#include <gfm/windowid_protos.h>
+#include <gfm/function_flags.h>
+#include <gfm/glistview.h>
+#include <gfm/config_command.h>
+#include <gfm/functype.h>
+#include <gfm/button_protos.h>
+#include <gfm/stack_size.h>
 #include "config_lib.h"
+#include "galileoconfig_ipc_commands.h"
+#include "function_editor_protos.h"
+#include "funceddata.h"
+#include "select_colours.h"
 #include "config_filetypes.h"
 #include "config_buttons.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 
 void __asm __saveds FiletypeEditor(void)

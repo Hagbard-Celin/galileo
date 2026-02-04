@@ -35,6 +35,13 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <stdlib.h>
+#include <string.h>
+#include <proto/exec.h>
+#include <proto/dos.h>
+#include <proto/input.h>
+#include <proto/intuition.h>
+
 #include <gfm/version.h>
 #include "//Library/galileofmbase.h"
 #include "//Library/galileofmpragmas.h"

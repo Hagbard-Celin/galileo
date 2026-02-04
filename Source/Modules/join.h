@@ -36,9 +36,20 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#define CATCOMP_NUMBERS
-#include "join.strings"
+#include <stdlib.h>
+#include <proto/intuition.h>
+#include <proto/gadtools.h>
+#include <proto/timer.h>
+#include <proto/wb.h>
+#include <proto/asl.h>
+#include <dos/filehandler.h>
+#include <gfm/devices.h>
+#include <gfm/misc_protos.h>
+#include <gfm/gadget_tags.h>
+#include <gfm/simplerequest_protos.h>
 #include <gfm/version.h>
+#include "/Library/galileofmbase.h"
+#include "modules.h"
 #include "modules_lib.h"
 #include "module.h"
 
@@ -46,12 +57,6 @@ For more information on Directory Opus for Windows please see:
 #define COPY_MIN_BUFFER		2048
 #define COPY_LOW_THRESH		500000
 #define COPY_HIGH_THRESH	1000000
-
-enum
-{
-	JOIN,
-	SPLIT
-};
 
 enum
 {
@@ -65,31 +70,6 @@ enum
 	SPLITARG_TO,
 	SPLITARG_CHUNK,
 	SPLITARG_STEM,
-};
-
-enum
-{
-	GAD_JOIN_LAYOUT,
-	GAD_JOIN_LISTER,
-	GAD_JOIN_ADD,
-	GAD_JOIN_REMOVE,
-	GAD_JOIN_CLEAR,
-	GAD_JOIN_MOVE_UP,
-	GAD_JOIN_MOVE_DOWN,
-	GAD_JOIN_OK,
-	GAD_JOIN_CANCEL,
-	GAD_JOIN_TO_POPUP,
-	GAD_JOIN_TO_FIELD,
-
-	GAD_SPLIT_FROM_POPUP,
-	GAD_SPLIT_FROM,
-	GAD_SPLIT_TO_POPUP,
-	GAD_SPLIT_TO,
-	GAD_SPLIT_STEM,
-	GAD_SPLIT_INTO,
-	GAD_SPLIT_SKIP,
-	GAD_SPLIT_OK,
-	GAD_SPLIT_SIZES,
 };
 
 extern ConfigWindow join_window,split_window;

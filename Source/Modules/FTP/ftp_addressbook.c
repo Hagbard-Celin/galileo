@@ -63,15 +63,40 @@ For more information on Directory Opus for Windows please see:
  *
  */
 
+#include <stddef.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <exec/types.h>
+#include <proto/graphics.h>
+#include <proto/intuition.h>
+#include <proto/layers.h>
+#include <proto/input.h>
+#include <proto/asl.h>
+#include <gfm/memory.h>
+#include <gfm/suboptionhandle.h>
+#include <gfm/layout.h>
+#include <gfm/windowdata.h>
+#include "//Library/pos.h"
+#include <gfm/gadtools.h>
+#include <gfm/list_management.h>
+#include <gfm/config_command.h>
+#include <gfm/drag_routines_protos.h>
+#include <gfm/button_protos.h>
+#include <gfm/configuration.h>
+#include "//Library/list.h"
+#include "/Config/galileoconfig_ipc_commands.h"
 #include "ftp.h"
-#include "ftp/ftp_ad_sockproto2.h"
+#ifndef AD_INTERNET_INTERN_H
+#include "ftp_intern_pragmas.h"
+#endif
 #include "ftp/ftp_addressbook.h"
 #include "ftp/ftp_addrsupp.h"
 #include "ftp/ftp_addrformat.h"
 #include "ftp/ftp_ipc.h"
 #include "ftp/ftp_util.h"
-
-#include "/config/galileoconfig.h"
+#ifndef _FTP_SOCKET_H
+#include "ftp_socket.h"
+#endif
 
 
 
@@ -1688,7 +1713,7 @@ static void display_options_gadgets(struct window_params *wp)
 				else
 				{
 					if (((struct globals *)dg->dg_ipc->userdata)->g_socketbase)
-						getuseraddress(dg->dg_anonpass);
+						getuseraddress(dg->dg_anonpass, ((struct globals *)dg->dg_ipc->userdata)->g_socketbase);
 					else
 						stccpy(dg->dg_anonpass,"Unknown - No Socket",PASSWORDLEN);
 				}

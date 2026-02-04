@@ -35,7 +35,26 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <ctype.h>
+#include <stdlib.h>
+#include <proto/intuition.h>
+#include <proto/asl.h>
+#include <gfm/suboptionhandle.h>
+#include <gfm/list_management.h>
+#include <gfm/objectlist.h>
+#include <gfm/gadtools.h>
+#include <gfm/cfg_function.h>
+#include <gfm/cfg_instruction.h>
+#include <gfm/windowdata.h>
+#include <gfm/config_command.h>
+#include <gfm/icon_cache_protos.h>
+#include <gfm/configuration.h>
+#include "funced_internal_protos.h"
 #include "config_lib.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
+
 
 // Build a sub-option list
 Att_List *build_sub_options(SubOptionHandle *list)

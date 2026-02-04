@@ -35,7 +35,18 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <proto/layers.h>
+#include <proto/intuition.h>
+#include <proto/utility.h>
+#include <intuition/gadgetclass.h>
+#include <gfm/windowdata.h>
+#include <gfm/drag_routines_protos.h>
+#include <gfm/glistview.h>
+#include <gfm/gadtools.h>
+#include <gfm/button_protos.h>
+#include "config_drag.h"
 #include "config_lib.h"
+#include "galileoconfig_ipc_commands.h"
 
 void config_drag_init(CfgDragInfo *drag);
 

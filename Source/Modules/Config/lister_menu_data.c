@@ -35,7 +35,18 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/list_management.h>
+#include <gfm/layout.h>
+#include <gfm/listlock.h>
+#include <gfm/galileo_ipc.h>
+#include <gfm/cfg_buttonbank.h>
+#include <gfm/cfgdraginfo.h>
 #include "config_lib.h"
+#include "lister_menu.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 ConfigWindow
 	hotkeys_window={

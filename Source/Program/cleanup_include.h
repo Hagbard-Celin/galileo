@@ -39,8 +39,14 @@ For more information on Directory Opus for Windows please see:
 #define GALILEOFM_CLEANUP_INCLUDE
 
 #include "galileofm.h"
+#include <gfm/icon_cache_protos.h>
+#include <gfm/button_protos.h>
+#include <gfm/image_protos.h>
+#include <gfm/popup_protos.h>
+#include <gfm/appmessage.h>
 #include "cleanup_protos.h"
 #include "main_protos.h"
+#include "toolbar_protos.h"
 #include "environment.h"
 #include "rexx_protos.h"
 #include "buffers_protos.h"
@@ -49,6 +55,9 @@ For more information on Directory Opus for Windows please see:
 #include "notify.h"
 #include "scripts.h"
 #include "handler.h"
+#ifdef _DEBUG_STACK
+#include "stack_check.h"
+#endif
 
 extern struct Library	*ConsoleDevice;
 

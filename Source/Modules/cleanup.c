@@ -37,6 +37,7 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "cleanup.h"
+#include "cleanup_data.h"
 #include "/Program/position.h"
 #include "/Program/main_commands.h"
 

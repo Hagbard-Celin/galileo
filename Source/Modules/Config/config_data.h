@@ -35,6 +35,13 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#ifndef _GALILEOFM_CONFIGWIN_H
+#include <gfm/configwin.h>
+#endif
+#ifndef _GFM_SUBOPTIONHANDLE_H
+#include <gfm/suboptionhandle.h>
+#endif
+
 extern ConfigWindow
 	_config_settings_window,
 	_config_environment_window,

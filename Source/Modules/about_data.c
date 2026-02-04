@@ -35,7 +35,14 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#include "about.h"
+#include <exec/types.h>
+#include <libraries/gadtools.h>
+#include <gfm/gadtools.h>
+#include <gfm/configwin.h>
+#include <gfm/imageremap.h>
+#include "module_func_flags.h"
+#include "moduleinfo.h"
+#include "about_data.h"
 
 ModuleInfo
 	module_info={

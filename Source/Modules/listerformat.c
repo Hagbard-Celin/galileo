@@ -46,6 +46,7 @@ For more information on Directory Opus for Windows please see:
 */		
 
 #include "listerformat.h"
+#include "listerformat_data.h"
 #include "Config/galileoconfig.h"
 
 char __far _LibID[] = "listerformat.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;

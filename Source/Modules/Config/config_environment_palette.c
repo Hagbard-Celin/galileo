@@ -35,11 +35,23 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <proto/graphics.h>
+#include <proto/intuition.h>
+#include <proto/asl.h>
+#include <datatypes/pictureclass.h>
 #include <prefs/palette.h>
+#include <prefs/prefhdr.h>
+#include <gfm/gadget_tags.h>
+#include <gfm/iff.h>
+#include <gfm/windowdata.h>
 
 #include "config_lib.h"
 #include "config_environment.h"
 #include "//Modules/modules.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 // Update palette sliders
 void _config_env_palette_update_sliders(config_env_data *data)

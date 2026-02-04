@@ -35,7 +35,19 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <proto/graphics.h>
+#include <proto/intuition.h>
+#include <gfm/windowdata.h>
+#include <gfm/objectlist.h>
+#include <gfm/colorspec.h>
+#include <gfm/gadget_tags.h>
 #include "config_lib.h"
+#include "select_colours.h"
+#include "galileoconfig_ipc_commands.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 
 struct Window *palette_box_open(PaletteBoxData *data,ObjectDef *,short *,short *);

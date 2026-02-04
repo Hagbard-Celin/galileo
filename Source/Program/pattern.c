@@ -35,7 +35,10 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/config_display.h>
+#include <gfm/rect.h>
 #include "galileofm.h"
+#include "pattern_protos.h"
 #include "misc_protos.h"
 #include "rexx_protos.h"
 #include "backdrop.h"

@@ -36,6 +36,9 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include <libraries/newicon.h>
+#ifndef GALILEOFM_IMAGE_PROTOS_H
+#include <gfm/openimageinfo.h>
+#endif
 
 typedef struct
 {

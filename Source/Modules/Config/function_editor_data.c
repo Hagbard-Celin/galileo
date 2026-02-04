@@ -35,7 +35,15 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <libraries/gadtools.h>
+#include <gfm/function_flags.h>
+#include <gfm/gadget_tags.h>
 #include "config_lib.h"
+#include "function_editor.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 // Function editor window dimensions
 ConfigWindow

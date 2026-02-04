@@ -35,6 +35,7 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/simplerequest.h>
 #include "simplerequest.h"
 
 #define TEXT_X_SPACE	16

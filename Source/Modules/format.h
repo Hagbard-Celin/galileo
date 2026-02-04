@@ -35,9 +35,15 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#define CATCOMP_NUMBERS
-#include "format.strings"
+#include <proto/intuition.h>
+#include <proto/gadtools.h>
+#include <proto/icon.h>
+#include <dos/filehandler.h>
+#include <devices/trackdisk.h>
+#include <gfm/simplerequest_protos.h>
 #include <gfm/version.h>
+#include "/Library/galileofmbase.h"
+#include "modules.h"
 #include "modules_lib.h"
 
 typedef struct
@@ -90,26 +96,5 @@ void do_install(format_data *data,DiskHandle *disk,struct Window *status);
 
 extern ConfigWindow format_window;
 extern ObjectDef format_objects[];
-
-enum
-{
-	GAD_BASE,
-
-	GAD_FORMAT_LAYOUT,
-
-	GAD_FORMAT_DEVICES,
-	GAD_FORMAT_NAME,
-	GAD_FORMAT_FFS,
-	GAD_FORMAT_INTERNATIONAL,
-	GAD_FORMAT_CACHING,
-    GAD_FORMAT_LONG,
-	GAD_FORMAT_TRASHCAN,
-	GAD_FORMAT_INSTALL,
-	GAD_FORMAT_VERIFY,
-	GAD_FORMAT_STATUS,
-	GAD_FORMAT_FORMAT,
-	GAD_FORMAT_QUICK_FORMAT,
-	GAD_FORMAT_CANCEL,
-};
 
 extern unsigned long bootblock_20[22];

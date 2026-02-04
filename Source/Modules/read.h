@@ -35,14 +35,31 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#define CATCOMP_NUMBERS
-#include "read.strings"
+#include <ctype.h>
+#include <stdlib.h>
+#include <clib/alib_protos.h>
+#include <proto/input.h>
+#include <proto/diskfont.h>
+#include <proto/graphics.h>
+#include <proto/intuition.h>
+#include <proto/gadtools.h>
+#include <proto/icon.h>
+#include <proto/wb.h>
+#include <proto/asl.h>
+#include <graphics/gfxmacros.h>
+#include <datatypes/textclass.h>
+#include <gfm/simplerequest_protos.h>
+#include <gfm/wbarg.h>
+#include <gfm/rect.h>
+#include <gfm/windowid_protos.h>
+#include <gfm/cli_launch.h>
 #include <gfm/version.h>
+#include "/Library/galileofmbase.h"
+#include "modules.h"
 #include "modules_lib.h"
 #include "modules_internal_protos.h"
 
 #define HEX_DISPLAY_WIDTH	16
-#define PEN_COUNT		8
 
 enum
 {
@@ -210,43 +227,6 @@ extern ObjectDef search_objects[];
 #define SEARCHF_WILDCARD	(1<<1)
 #define SEARCHF_ONLYWORDS	(1<<2)
 #define SEARCHF_REVERSE		(1<<3)
-
-enum
-{
-	MENU_BASE,
-	MENU_NEXT,
-	MENU_SEARCH,
-	MENU_REPEAT,
-	MENU_PRINT,
-	MENU_QUIT,
-	MENU_TAB_1,
-	MENU_TAB_2,
-	MENU_TAB_4,
-	MENU_TAB_8,
-	MENU_MODE_NORMAL,
-	MENU_MODE_ANSI,
-	MENU_MODE_HEX,
-	MENU_SAVE,
-
-	GAD_SEARCH_LAYOUT,
-	GAD_SEARCH_TEXT,
-	GAD_SEARCH_CASE,
-	GAD_SEARCH_WILD,
-	GAD_SEARCH_ONLYWORD,
-	GAD_SEARCH_REVERSE,
-	GAD_SEARCH_OKAY,
-	GAD_SEARCH_CANCEL,
-
-	MENU_USE_SCREEN,
-	MENU_SCREEN_MODE,
-	MENU_SELECT_FONT,
-
-	MENU_SAVE_AS,
-	MENU_TO_EDITOR,
-	MENU_SELECT_EDITOR_NORMAL,
-	MENU_SELECT_EDITOR_ANSI,
-	MENU_SELECT_EDITOR_HEX,
-};
 
 enum
 {

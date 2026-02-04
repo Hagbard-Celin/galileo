@@ -36,6 +36,8 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include <gfm/popup_protos.h>
+#include <gfm/button_flags.h>
 #include "misc_protos.h"
 
 // Build PopUp menu from a button bank

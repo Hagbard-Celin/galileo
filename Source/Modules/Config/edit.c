@@ -35,7 +35,21 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/list_management.h>
+#include <gfm/layout.h>
+#include <gfm/listlock.h>
+#include <gfm/galileo_ipc.h>
+#include <gfm/cfg_buttonbank.h>
+#include <gfm/cfgdraginfo.h>
+#include <gfm/cfg_function.h>
+#include <gfm/configuration.h>
+#include <gfm/stack_size.h>
 #include "config_lib.h"
+#include "galileoconfig_ipc_commands.h"
+#include "select_colours.h"
+#include "function_editor_protos.h"
+#include "button_editor_protos.h"
+#include "funceddata.h"
 
 Cfg_Function *__asm __saveds L_Config_EditFunction(
 	register __a0 IPCData *ipc,

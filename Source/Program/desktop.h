@@ -43,6 +43,10 @@ For more information on Directory Opus for Windows please see:
 #include "app_msg.h"
 #include "lister.h"
 
+#ifndef _GALILEOFM_CFG_DESKTOP_H
+#include <gfm/cfg_desktop.h>
+#endif
+
 BOOL desktop_find_hidden(char *,BOOL);
 #ifdef DISTINCT_OK
 Cfg_Desktop *desktop_snapshot_icon(BackdropObject *icon,short x,short y);

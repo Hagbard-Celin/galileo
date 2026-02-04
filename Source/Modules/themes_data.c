@@ -35,7 +35,10 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#include "themes.h"
+#include <exec/types.h>
+#include "module_func_flags.h"
+#include "moduleinfo.h"
+#include "themes_data.h"
 
 #define ARG_1	"AS=TO"
 #define ARG_2	"FILE=FROM,APPLYPALETTE=AP/S,APPLYFONTS=AF/S,APPLYBACKGROUNDS=AB/S,APPLYSOUNDS=AS/S"

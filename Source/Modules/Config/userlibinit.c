@@ -35,6 +35,10 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#ifndef GRAPHICS_GFXBASE_H
+#include <graphics/gfxbase.h>
+#endif
+
 #include <gfm/version.h>
 #include "config_lib.h"
 

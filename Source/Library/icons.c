@@ -36,7 +36,9 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/paths.h>
 #include "galileofmlib.h"
+#include <proto/icon.h>
 #include <proto/newicon.h>
 
 /*	

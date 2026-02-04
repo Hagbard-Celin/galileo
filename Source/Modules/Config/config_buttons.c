@@ -35,9 +35,31 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <clib/alib_protos.h>
+#include <proto/intuition.h>
+#include <proto/asl.h>
+#include <gfm/semaphores_protos.h>
+#include <gfm/config_return.h>
+#include <gfm/imageremap_protos.h>
+#include <gfm/button_protos.h>
+#include <gfm/button_flags.h>
+#include <gfm/layout_protos.h>
+#include <gfm/appmessage.h>
+#include <gfm/strings_protos.h>
+#include <gfm/windowid_protos.h>
+#include <gfm/stack_size.h>
 #include "config_lib.h"
-#include "config_buttons.h"
+#include "config_data.h"
+#include <gfm/buttonstartup.h>
+#include "select_colours.h"
+#include "button_editor_protos.h"
+#include "config_buttons_protos.h"
 #include "//Program/main_commands.h"
+#include "galileoconfig_ipc_commands.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 int __asm __saveds L_Config_Buttons(
 	register __a0 ButtonsStartup *startup,

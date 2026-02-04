@@ -36,6 +36,9 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include <gfm/popup_protos.h>
+#include <gfm/functype.h>
+#include <gfm/button_flags.h>
 #include "buttons_protos.h"
 #include "menu_data.h"
 #include "help.h"

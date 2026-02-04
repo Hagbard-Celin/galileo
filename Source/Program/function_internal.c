@@ -37,6 +37,7 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include <gfm/function_flags.h>
 #include "function_launch_protos.h"
 #include "misc_protos.h"
 #include "rexx_protos.h"
@@ -44,7 +45,7 @@ For more information on Directory Opus for Windows please see:
 #include "lsprintf_protos.h"
 #include "callback.h"
 #include "handler.h"
-#include "/Modules/modules.h"
+#include "/Modules/module_func_flags.h"
 #include "/Modules/modules_protos.h"
 
 extern CONST GalileoCallbackInfo CallBackInfo;

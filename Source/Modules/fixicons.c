@@ -37,6 +37,7 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "fixicons.h"
+#include "fixicons_data.h"
 
 /*void kprintf( const char *, ... );*/
 

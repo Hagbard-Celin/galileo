@@ -38,6 +38,10 @@ For more information on Directory Opus for Windows please see:
 #ifndef _GALILEOFM_RESELECT
 #define _GALILEOFM_RESELECT
 
+#ifndef DOS_DOS_H
+#include <dos/dos.h>
+#endif
+
 typedef struct
 {
 	struct DirectoryBuffer	*buffer;	// Buffer these came from

@@ -36,10 +36,42 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <dos.h>
+#include <proto/layers.h>
+#include <proto/intuition.h>
+#include <proto/commodities.h>
+#include <proto/wb.h>
+#include <proto/asl.h>
+#include <datatypes/pictureclass.h>
+#include <gfm/configuration.h>
+#include <gfm/config_command.h>
+#include <gfm/windowid_protos.h>
+#include <gfm/windowdata.h>
+#include <gfm/button_protos.h>
+#include <gfm/iff.h>
+#include <gfm/iff_form.h>
+#include <gfm/misc_protos.h>
+#include <gfm/glistview.h>
+#include <gfm/function_flags.h>
+#include <gfm/selectionlist.h>
+#include <gfm/strings_protos.h>
+#include <gfm/paths_protos.h>
+#include <gfm/wbarg.h>
 #include "config_lib.h"
+#include "select_colours.h"
+#include "button_editor.h"
+#include "function_export.h"
+#include "function_editor_protos.h"
+#include "function_editor_internal.h"
+#include "config_protos.h"
+#include "galileoconfig_ipc_commands.h"
 #include "//Program/function_data.h"
 #include "//Program/main_commands.h"
 #include "config_buttons.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 #define FUNCF_PRIVATE			(1<<26) // Function is private
 

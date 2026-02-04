@@ -35,6 +35,23 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <clib/alib_protos.h>
+#include <proto/dos.h>
+#include <proto/intuition.h>
+#include <proto/asl.h>
+#include <libraries/iffparse.h>
+#include <gfm/iff.h>
+#include <gfm/iff_form.h>
+#include <gfm/layout.h>
+#include <gfm/windowdata.h>
+#include <gfm/requester.h>
+#include "//Library/funcargs.h"
+#include <gfm/list_management.h>
+#include <gfm/suboptionhandle.h>
+//#include "//Program/galileo_config.h"
 #include "ftp.h"
 #include "ftp/ftp_ipc.h"
 #include "ftp/ftp_addressbook.h"

@@ -37,6 +37,7 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "format.h"
+#include "format_data.h"
 
 char __far _LibID[] = "format.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 

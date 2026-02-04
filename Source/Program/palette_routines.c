@@ -35,6 +35,7 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/semaphores_protos.h>
 #include "galileofm.h"
 #include "palette_routines.h"
 

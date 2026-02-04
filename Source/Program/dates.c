@@ -36,6 +36,7 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include <gfm/cfg_flags.h>
 #include "lsprintf_protos.h"
 
 // Turn a DateStamp into a string

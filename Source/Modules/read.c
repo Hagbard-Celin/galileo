@@ -36,6 +36,7 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include "read_data.h"
 #include "read.h"
 
 #define H_EXTRA		1

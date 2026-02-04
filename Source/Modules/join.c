@@ -37,6 +37,7 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "join.h"
+#include "join_data.h"
 
 char __far _LibID[] = "join.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 

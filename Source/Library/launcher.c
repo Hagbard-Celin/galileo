@@ -36,8 +36,11 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/semaphores.h>
 #include "galileofmlib.h"
 #include "clipboard.h"
+#include <dos/dostags.h>
+#include <proto/icon.h>
 #include <libraries/multiuser.h>
 #include <proto/multiuser.h>
 

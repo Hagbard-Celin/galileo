@@ -37,6 +37,9 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include <gfm/devices.h>
+#include <gfm/popup_protos.h>
+#include <gfm/config_display.h>
 #include "callback_protos.h"
 #include "lister_protos.h"
 #include "function_launch_protos.h"
@@ -48,6 +51,7 @@ For more information on Directory Opus for Windows please see:
 #include "menu_data.h"
 #include "callback_protos.h"
 #include "/Modules/modules.h"
+#include "/Modules/module_func_flags.h"
 
 APTR __asm __saveds HookConvertEntry(
 	register __a0 FunctionEntry *entry)

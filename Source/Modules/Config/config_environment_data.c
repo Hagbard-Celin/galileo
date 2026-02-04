@@ -35,8 +35,15 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <proto/graphics.h>
+#include <gfm/gadget_tags.h>
 #include "config_lib.h"
+#include "config_data.h"
 #include "config_environment.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 void __asm __saveds _palette_slider_callbackTr(
 	register __a1 struct TagItem *tag,

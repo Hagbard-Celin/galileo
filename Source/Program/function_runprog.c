@@ -37,6 +37,7 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include <gfm/cli_launch.h>
 #include "misc_protos.h"
 #include "function_launch_protos.h"
 #include "clock_task.h"

@@ -36,8 +36,33 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <clib/alib_protos.h>
+#include <proto/intuition.h>
+#include <proto/wb.h>
+#include <graphics/gfxbase.h>
+#include <proto/layers.h>
+#include <gfm/windowid_protos.h>
+#include <gfm/windowdata.h>
+#include <gfm/image_protos.h>
+#include <gfm/imageremap_protos.h>
+#include <gfm/button_protos.h>
+#include <gfm/button_flags.h>
+#include <gfm/strings_protos.h>
+#include <gfm/wbarg.h>
+#include <gfm/configuration.h>
+#include <gfm/glistview.h>
+#include <gfm/stack_size.h>
 #include "config_lib.h"
-#include "config_buttons.h"
+#include "config_protos.h"
+#include "select_colours.h"
+#include "button_editor_protos.h"
+#include "function_editor_protos.h"
+#include "config_buttons_protos.h"
+#include "galileoconfig_ipc_commands.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 void buttoned_copy_string(ButtonEdData *data,char *from,char **to);
 

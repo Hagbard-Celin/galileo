@@ -35,9 +35,18 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <proto/graphics.h>
+#include <proto/intuition.h>
+#include <gfm/list_management.h>
+#include <gfm/config_screen.h>
+#include <gfm/layout_protos.h>
 #include "config_lib.h"
 #include "config_environment.h"
 #include "//Modules/modules.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 // Display mode support
 void _config_env_screenmode_init(config_env_data *data,BOOL refresh)

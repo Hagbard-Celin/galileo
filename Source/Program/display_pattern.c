@@ -36,8 +36,10 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include <gfm/config_display.h>
 #include "notify.h"
 #include "lister.h"
+#include "pattern_protos.h"
 
 #define NUM_PATTERNS	3
 

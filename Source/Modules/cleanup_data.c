@@ -35,7 +35,9 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#include "cleanup.h"
+#include <exec/types.h>
+#include "moduleinfo.h"
+#include "cleanup_data.h"
 
 ModuleInfo
 	module_info={

@@ -35,9 +35,34 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <clib/alib_protos.h>
+#include <proto/graphics.h>
+#include <proto/intuition.h>
+#include <proto/wb.h>
+#include <graphics/gfxmacros.h>
+#include <gfm/list_management.h>
+#include <gfm/layout.h>
+#include <gfm/listlock.h>
+#include <gfm/galileo_ipc.h>
+#include <gfm/cfg_buttonbank.h>
+#include <gfm/cfgdraginfo.h>
+#include <gfm/configuration.h>
+#include <gfm/button_protos.h>
+#include <gfm/button_flags.h>
+#include <gfm/windowdata.h>
+#include <gfm/windowid_protos.h>
 #include "config_lib.h"
+#include "config_drag.h"
+#include "config_protos.h"
+#include "galileoconfig_ipc_commands.h"
+#include "select_colours.h"
+#include "function_editor.h"
 #include "config_menus.h"
 #include "config_buttons.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 ULONG __asm __saveds L_Config_Menus(
 	register __a0 IPCData *ipc,

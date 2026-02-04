@@ -38,20 +38,11 @@ For more information on Directory Opus for Windows please see:
 #ifndef _GALILEOFM_ENVOY
 #define _GALILEOFM_ENVOY
 
-// Envoy stuff
-struct UserInfo
-{
-	UBYTE	ui_UserName[32];
-	UWORD	ui_UserID;
-	UWORD	ui_PrimaryGroupID;
-	ULONG   ui_Flags;
-};
+#ifndef _GALILEOFM_ENVOY_INFO_H
+#include "envoy_info.h"
+#endif
 
-struct GroupInfo
-{
-	UBYTE	gi_GroupName[32];
-	UWORD	gi_GroupID;
-};
+// Envoy stuff
 
 struct UserInfo *AllocUserInfo( void );
 struct GroupInfo *AllocGroupInfo( void );

@@ -35,6 +35,13 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <prefs/font.h>
+#include <prefs/prefhdr.h>
+#include <gfm/cfg_flags.h>
+#include <gfm/config_lister.h>
+#include <gfm/config_screen.h>
+#include <gfm/config_display.h>
+#include <gfm/config_icon.h>
 #include "galileofmlib.h"
 #include "config.h"
 #include "/Program/galileo_config.h"

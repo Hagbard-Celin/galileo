@@ -35,9 +35,15 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#define CATCOMP_NUMBERS
-#include "listerformat.strings"
+#include <proto/graphics.h>
+#include <proto/intuition.h>
+#include <proto/gadtools.h>
+#include <graphics/gfxmacros.h>
+#include <gfm/drag_routines_protos.h>
+#include <gfm/config_return.h>
 #include <gfm/version.h>
+#include "/Library/galileofmbase.h"
+#include "modules.h"
 #include "modules_lib.h"
 
 extern ConfigWindow
@@ -46,27 +52,6 @@ extern ConfigWindow
 extern ObjectDef
 	listformat_objects[],listformat_ftp_objects[],listformat_nosave_objects[],
 	listformat_save_objects[],listformat_ftp_use_objects[],listformat_ftp_use_objects_big[];
-
-enum
-{
-	GAD_LISTER_LAYOUT,
-	GAD_LISTER_USE,
-	GAD_LISTER_CANCEL,
-	GAD_LISTER_FORMAT_SELITEMS,
-	GAD_LISTER_FORMAT_ITEMS,
-	GAD_LISTER_FORMAT_SEPARATION,
-	GAD_LISTER_FORMAT_REVERSE,
-	GAD_LISTER_REJECT_ICONS,
-	GAD_LISTER_HIDDEN_BIT,
-	GAD_LISTER_SHOW,
-	GAD_LISTER_HIDE,
-	GAD_LISTER_SAVE,
-	GAD_LISTER_FUEL_GAUGE,
-	GAD_LISTER_INHERIT,
-	GAD_FTP_DEFAULTS,
-	GAD_DEFAULTS,
-	GAD_SET_AS_DEFAULTS,
-};
 
 typedef struct {
 	NewConfigWindow		newwin;

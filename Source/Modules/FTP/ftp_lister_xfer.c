@@ -49,8 +49,17 @@ For more information on Directory Opus for Windows please see:
 // Greg remove this define if the filter has problems
 #define ILLEGAL_CHAR_FILTER
 
+#include <stdio.h>
+#include <proto/intuition.h>
+#include <proto/timer.h>
+#include <proto/rexxsyslib.h>
+#include <gfm/requester.h>
+#include <gfm/timer.h>
+#include <gfm/config_flags.h>
 #include "ftp.h"
-#include "ftp_ad_sockproto.h"
+#ifndef AD_INTERNET_INTERN_H
+#include "ftp_intern_pragmas.h"
+#endif
 #include "ftp_ad_errno.h"
 #include "ftp_arexx.h"
 #include "ftp_ipc.h"

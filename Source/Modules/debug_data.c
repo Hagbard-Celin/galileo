@@ -35,7 +35,10 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <exec/types.h>
 #include "debug.h"
+#include "module_func_flags.h"
+#include "moduleinfo.h"
 
 ModuleInfo
 	module_info={

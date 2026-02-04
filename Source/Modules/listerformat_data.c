@@ -35,7 +35,13 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#include "listerformat.h"
+#include <exec/types.h>
+#include <libraries/gadtools.h>
+#include <gfm/gadtools.h>
+#include <gfm/configwin.h>
+#include "module_func_flags.h"
+#include "moduleinfo.h"
+#include "listerformat_data.h"
 
 ModuleInfo
 	module_info={

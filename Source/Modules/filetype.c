@@ -45,6 +45,8 @@ For more information on Directory Opus for Windows please see:
  *			Finder now hilites the best match even if it isn't installed
  */
 
+#include <dos.h>
+#include "filetype_data.h"
 #include "filetype.h"
 
 #include <string.h>		/* SAS needs string.h before math.h for built-in abs(), max(), min() */

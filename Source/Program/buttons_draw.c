@@ -36,6 +36,12 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include <gfm/button_flags.h>
+#include <gfm/rect.h>
+#include <gfm/image_protos.h>
+#include <gfm/image_tags.h>
+#include <gfm/functype.h>
+#include <gfm/config_display.h>
 #include "buttons_protos.h"
 
 void buttons_EraseRect(struct RastPort *,struct Rectangle *,short);

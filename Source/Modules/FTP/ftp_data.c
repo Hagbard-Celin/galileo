@@ -35,6 +35,11 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <proto/gadtools.h>
+#include <gfm/suboptionhandle.h>
+#include <gfm/gadtools.h>
+#include "module_func_flags.h"
+#include "moduleinfo.h"
 #include "ftp.h"
 #include "ftp/ftp_galileoftp.h"
 

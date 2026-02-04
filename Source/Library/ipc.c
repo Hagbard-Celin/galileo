@@ -37,9 +37,11 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <dos/dostags.h>
+#include <gfm/semaphores.h>
 #include "galileofmlib.h"
 #ifdef _DEBUG_STACK
-#include "stack_check.h"
+#include <gfm/stack_check_ipc.h>
 #endif
 
 

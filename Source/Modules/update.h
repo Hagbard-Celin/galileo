@@ -37,7 +37,17 @@ For more information on Directory Opus for Windows please see:
 */
 
 #define CATCOMP_NUMBERS
+#include <clib/alib_protos.h>
+#include <proto/icon.h>
+#include <gfm/devices.h>
+#include <gfm/status.h>
+#include <gfm/function_flags.h>
+#include <gfm/button_protos.h>
+#include <gfm/simplerequest_protos.h>
+#include <gfm/iff_form.h>
 #include <gfm/version.h>
+#include "/Library/galileofmbase.h"
+#include "modules.h"
 #include "update.strings"
 #include "modules_lib.h"
 #include "module.h"
@@ -61,7 +71,6 @@ For more information on Directory Opus for Windows please see:
 struct Window *open_status(struct Screen *);
 BOOL update_do_leftouts(struct List *,APTR);
 BOOL update_groups(void);
-BOOL update_groups1(void);
 BOOL update_iffchunk(void);
 short update_convert_leftouts(APTR file,APTR memory,struct List *list);
 BOOL update_storage(void);

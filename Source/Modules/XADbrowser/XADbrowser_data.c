@@ -18,6 +18,8 @@
 */
 
 #include "XADbrowser.h"
+#include "module_func_flags.h"
+#include "moduleinfo.h"
 
 // Definition of the module
 ModuleInfo module_info =

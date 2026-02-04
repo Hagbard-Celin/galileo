@@ -37,22 +37,31 @@ For more information on Directory Opus for Windows please see:
 #ifndef _GALILEOFM_MODULES_LIB
 #define _GALILEOFM_MODULES_LIB
 
-#include "//Library/galileofmbase.h"
-#include "//Library/galileofmpragmas.h"
-#include "//Program/galileo_config.h"
-#include "galileoconfig.h"
-#include "//Modules/modules.h"
+#include <string.h>
+#include <sys/commargs.h>
+#include <proto/exec.h>
+#include <proto/dos.h>
+#include <proto/utility.h>
+#include <proto/locale.h>
+#include <gfm/memory.h>
+#include <gfm/galileolocale.h>
+#include "moduleinfo.h"
+#include "/Library/galileofmpragmas.h"
 
-
-#define CATCOMP_NUMBERS
-#include "config.strings"
-
+#ifdef _DEBUG
+#include <clib/debug_protos.h>
+#endif
 #ifdef RESOURCE_TRACKING
 #include <restrack_protos.h>
 #include <g_restrack_pragmas.h>
 #endif
 
+#define D_S(type,name) char a_##name[sizeof(type)+3]; \
+		       type *name = (type *)((ULONG)(a_##name+3) & ~3UL)
+extern struct DosLibrary	*DOSBase;
 extern struct Library		*GalileoFMBase;
+extern struct IntuitionBase	*IntuitionBase;
+extern struct GfxBase		*GfxBase;
 extern struct Library		*LayersBase;
 extern struct Library		*DiskfontBase;
 extern struct Library		*GadToolsBase;
@@ -72,81 +81,12 @@ extern ULONG callerid;
 #endif
 
 
-// Config sub-option handles
-typedef struct _SubOptionHandle {
-	int num;		// Option number
-	ULONG name;		// Option name ID
-	ObjectDef *objects;	// Object list
-} SubOptionHandle;
-
 void init_locale_data(struct GalileoLocale *);
 /*void KPrintF __ARGS((char *,...));*/
 void lsprintf __ARGS((char *,...));
 
-Att_List *build_sub_options(SubOptionHandle *);
-
 #define VALID_QUALIFIERS (IEQUALIFIER_LCOMMAND|IEQUALIFIER_RCOMMAND|\
 			 IEQUALIFIER_CONTROL|IEQUALIFIER_LSHIFT|\
 			 IEQUALIFIER_RSHIFT|IEQUALIFIER_LALT|IEQUALIFIER_RALT)
-
-typedef struct
-{
-	struct Window		*window;
-
-	DragInfo		*drag;
-	Att_Node		*drag_node;
-	short			drag_x;
-	short			drag_y;
-
-	long			tick_count;
-	long			last_tick;
-	TimerHandle		*timer;
-
-	unsigned long		old_flags;
-	unsigned long		old_idcmp;
-
-	short			lock_count;
-	short			flags;
-} CfgDragInfo;
-
-BOOL config_drag_check(CfgDragInfo *drag);
-void config_drag_move(CfgDragInfo *drag);
-void config_drag_start(CfgDragInfo *,Att_List *,short,struct TagItem *,BOOL);
-struct Window *config_drag_end(CfgDragInfo *,short);
-BOOL config_drag_send_button(CfgDragInfo *,IPCData *,Cfg_Button *,Cfg_ButtonFunction *);
-Cfg_Button *config_drag_get_button(Cfg_Button *button,Cfg_ButtonFunction *func);
-void config_drag_start_window(CfgDragInfo *,struct Window *,struct Rectangle *,short,short);
-
-char *function_label(Cfg_ButtonFunction *);
-BOOL config_filereq(struct Window *window,ULONG title,char *path,char *defpath,short flags);
-BOOL config_valid_path(char *path);
-
-Cfg_Instruction *instruction_from_wbarg(struct WBArg *,APTR);
-void parse_number(char **,unsigned short *);
-void store_window_pos(struct Window *window,struct IBox *pos);
-
-long __asm L_ShowPaletteBox(
-	register __a0 struct Window *,
-	register __a1 GalileoScreenData *,
-	register __a2 short *,
-	register __a3 short *,
-	register __a4 struct TextAttr *,
-	register __a5 ColourSpec32 *,
-	register __d0 short *);
-
-BOOL __asm L_FunctionExportASCII(
-	register __a0 char *,
-	register __a1 Cfg_Button *,
-	register __a2 Cfg_Function *,
-	register __d0 ULONG);
-
-short error_saving(short,struct Window *);
-
-#include "enums.h"
-#include "config_data.h"
-#include "function_export.h"
-#include "function_editor.h"
-#include "select_colours.h"
-#include "button_editor.h"
 
 #endif

@@ -36,12 +36,42 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <proto/exec.h>
+#include <proto/dos.h>
+#include <proto/locale.h>
+#include <proto/graphics.h>
+#include <proto/intuition.h>
+#include <proto/gadtools.h>
+#include <proto/utility.h>
+#include <proto/rexxsyslib.h>
+#include <proto/layers.h>
+#include <proto/wb.h>
+#include <proto/asl.h>
+#include <proto/Picasso96.h>
+#include <graphics/gfxmacros.h>
+#include <intuition/imageclass.h>
+#include <intuition/icclass.h>
+#include <dos/filehandler.h>
+#include <devices/trackdisk.h>
+#include <prefs/wbpattern.h>
+#include <datatypes/textclass.h>
+#ifdef _DEBUG
+#include <clib/debug_protos.h>
+#endif
+
 #include "galileofmbase.h"
 #include "read_ilbm.h"
 #include "wb.h"
 #include "filetypes.h"
 #include "images.h"
 #include "dos_patch.h"
+
+#define D_S(type,name) char a_##name[sizeof(type)+3]; \
+		       type *name = (type *)((ULONG)(a_##name+3) & ~3UL)
 
 #define STACK_DEFAULT	8192
 #define STACK_LARGE	   16384

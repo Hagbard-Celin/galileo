@@ -35,9 +35,30 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <clib/alib_protos.h>
+#include <proto/intuition.h>
+#include <gfm/list_management.h>
+#include <gfm/layout.h>
+#include <gfm/listlock.h>
+#include <gfm/galileo_ipc.h>
+#include <gfm/cfg_buttonbank.h>
+#include <gfm/cfg_function.h>
+#include <gfm/cfgdraginfo.h>
+#include <gfm/configuration.h>
+#include <gfm/simplerequest_protos.h>
+#include <gfm/button_flags.h>
+#include <gfm/stack_size.h>
 #include "config_lib.h"
+#include "select_colours.h"
+#include "function_editor_protos.h"
+#include "button_editor_protos.h"
+#include "funceddata.h"
 #include "config_menus.h"
 #include "config_buttons.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 // Got a new name
 void config_menus_new_name(config_menus_data *data,short type)

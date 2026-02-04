@@ -35,8 +35,34 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <ctype.h>
+#include <stdlib.h>
+#include <clib/alib_protos.h>
+#include <graphics/gfxbase.h>
+#include <libraries/iffparse.h>
+#include <gfm/galileo_ipc.h>
+#include <gfm/cfg_buttonbank.h>
+#include <gfm/cfg_environment.h>
+#include <gfm/cfg_flags.h>
+#include <gfm/cfg_filetype.h>
+#include <gfm/configuration.h>
+#include <gfm/config_lister.h>
+#include <gfm/layout.h>
+#include <gfm/status.h>
+#include <gfm/strings_protos.h>
+#include <gfm/button_protos.h>
+#include <gfm/button_flags.h>
+#include <gfm/functype.h>
+#include <gfm/function_flags.h>
+#include <gfm/iff.h>
+#include <gfm/iff_form.h>
 #include "config_lib.h"
+#include "config_data.h"
 #include "old_config.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 // Function types
 enum {

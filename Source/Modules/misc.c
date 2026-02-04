@@ -36,6 +36,7 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "misc.h"
+#include "misc_data.h"
 
 char __far _LibID[] = "misc.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 

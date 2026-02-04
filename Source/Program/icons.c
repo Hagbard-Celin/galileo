@@ -36,6 +36,8 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include <gfm/icon_cache_protos.h>
+#include <gfm/config_display.h>
 #include "misc_protos.h"
 #include "icons.h"
 #include <proto/newicon.h>

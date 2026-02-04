@@ -42,8 +42,10 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/semaphores.h>
 #include "galileofmlib.h"
 #include "/Modules/modules_internal_protos.h"
+#include <proto/icon.h>
 #include <proto/newicon.h>
 
 

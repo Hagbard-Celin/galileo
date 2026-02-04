@@ -35,8 +35,12 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <proto/asl.h>
 #include "config_lib.h"
 #include "config_environment.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 void _env_select_icon_font(
 	config_env_data *data,

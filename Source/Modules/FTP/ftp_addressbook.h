@@ -43,6 +43,15 @@ For more information on Directory Opus for Windows please see:
  *	09-04-96	Changed CONFIGFILE from "PROGDIR:FTP/ftp.config" to "PROGDIR:System/ftp.config"
  */
 
+#ifndef GALILEOFM_OBJECTLIST_H
+#include <gfm/objectlist.h>
+#endif
+#ifndef _GALILEOFM_TIMER_H
+#include <gfm/timer.h>
+#endif
+#ifndef _GALILEOFM_DRAG_ROUTINES_H
+#include <gfm/drag_routines.h>
+#endif
 #include "ftp_galileoftp.h"
 #include "ftp/ftp_addressbook_protos.h"
 
@@ -213,36 +222,5 @@ struct window_params
 #define ID_ENV			MAKE_ID('F','E','N','V')
 
 #define FINDWP(win) ((struct window_params *)(DATA(win)->userdata))
-
-
-#define SocketBase GETSOCKBASE(FindTask(0L))
-
-
-/**********************************************************/
-//
-//	Stuff copied from main Opus config include files.
-//	We can't include them ourselved becuase of loads
-//	of conflicts and stuff.
-/**********************************************************/
-
-typedef struct
-{
-	struct Window *window;
-
-	DragInfo      *drag;
-	Att_Node      *drag_node;
-	short	      drag_x;
-	short	      drag_y;
-
-	long	      tick_count;
-	long	      last_tick;
-	TimerHandle   *timer;
-
-	unsigned long old_flags;
-	unsigned long old_idcmp;
-
-	short	      lock_count;
-	short	      pad;
-} CfgDragInfo;
 
 #endif

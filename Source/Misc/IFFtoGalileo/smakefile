@@ -36,7 +36,7 @@ sc sd
 ################
 
 depend:
-    makedepend -Y -p$$(OBJ) -Q$(OBJ) $(OBJS)
+    makedepend -Y//h/ -p$$(OBJ) -O$(OBJ) $(OBJS)
 
 ################
 

@@ -38,7 +38,8 @@ For more information on Directory Opus for Windows please see:
 #ifndef _GALILEOFM_MODULES_PROTOS
 #define _GALILEOFM_MODULES_PROTOS
 
-#include "/Modules/modules_pragmas.h"
+#include "modules_pragmas.h"
+#include "moduleinfo.h"
 
 
 int		Module_Entry(struct List *,struct Screen *,IPCData *,IPCData *,ULONG,CONST GalileoCallbackInfo *);

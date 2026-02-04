@@ -35,6 +35,14 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <graphics/gfxbase.h>
+#include <gfm/list_management.h>
+#include <gfm/devices.h>
+#include <gfm/semaphores_protos.h>
+#include <gfm/cfg_desktop.h>
+#include <gfm/config_display.h>
+#include <gfm/misc_protos.h>
+#include <gfm/glistview.h>
 #include "config_lib.h"
 #include "config_environment.h"
 #include "//Modules/modules.h"

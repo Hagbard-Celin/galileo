@@ -35,6 +35,8 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/selectionlist.h>
+#include <gfm/paths.h>
 #include "galileofmlib.h"
 #include "layout_routines.h"
 

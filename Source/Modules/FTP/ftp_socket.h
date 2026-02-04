@@ -1,0 +1,68 @@
+/*
+
+Galileo Amiga File-Manager and Workbench Replacement
+Copyright 1993-2012 Jonathan Potter & GP Software
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+This program is based on the source code of Directory Opus Magellan II,
+released by GPSoftware under the APL license in 2012. Re-licensed under GPL by
+permission of Dr Greg Perry, Managing Director of GPSoftware.
+
+Opus® and Directory Opus® and associated images are registered trademarks of GPSoftware.
+DOpus(TM), DirOpus(TM) and Opus File Manager(TM) are trademarked 1991 by GPSoftware.
+Opus Magellan (TM) is trademarked 1996 GPSoftware.
+All other trademarks are the property of their respective owners.
+
+The release of Directory Opus 5 under the GPL in NO WAY affects
+the existing commercial status of Directory Opus for Windows.
+
+For more information on Directory Opus for Windows please see:
+
+		 http://www.gpsoft.com.au
+
+*/
+
+#ifndef _FTP_SOCKET_H
+#define _FTP_SOCKET_H
+
+#ifndef _GALILEOFMBASE_IPC_H
+#include "//Library/galileo_ipc.h"
+#endif
+
+/*
+ *	This structure contains any per-process global variables
+ *	ie. variables which much not be accessed by two multitasking processes
+ *	at the same time
+ */
+
+struct globals
+{
+	struct Library *g_socketbase;			/* Socket library must be opened by each calling process */
+	int	       g_errno;				/* Socket library puts its errors here */
+	IPCData	       *g_master_ipc;			/* Master process's IPC */
+};
+
+#define GETSOCKBASE(t) ((struct globals *)((IPCData*)(t->tc_UserData))->userdata)->g_socketbase
+
+
+enum
+{
+	NOSOCK = -1,					/* No socket implementation specified */
+	AMITCPSOCK,					/* Use AmiTCP bsdsocket.library */
+	INETSOCK					/* Use AS225/INet socket.library */
+};
+
+#endif

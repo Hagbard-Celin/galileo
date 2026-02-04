@@ -36,6 +36,11 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include <gfm/semaphores_protos.h>
+#include <gfm/image_protos.h>
+#include <gfm/image_tags.h>
+#include <gfm/button_flags.h>
+#include <gfm/functype.h>
 #include "buttons_protos.h"
 
 // Refresh buttons display

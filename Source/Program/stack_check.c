@@ -36,10 +36,10 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-
-#include "/Include/galileo/os.h"
-#include "stack_check.h"
 #ifdef _DEBUG_STACK
+
+#include <galileo/os.h>
+#include "stack_check.h"
 
 #define WHITE  "\x1B[32m"
 #define NORMAL "\x1B[39m"

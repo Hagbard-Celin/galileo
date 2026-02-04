@@ -35,8 +35,13 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <stdio.h>
+#include <proto/exec.h>
 #include "galileofmbase.h"
 #include "galileofmpragmas.h"
+#ifdef _DEBUG
+#include <clib/debug_protos.h>
+#endif
 
 #ifdef RESOURCE_TRACKING
 #include <restrack_protos.h>

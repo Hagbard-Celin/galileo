@@ -36,8 +36,13 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/semaphores.h>
+#include <gfm/image_tags.h>
+#include <gfm/rect.h>
 #include "galileofmlib.h"
  
+#include <proto/icon.h>
+#include <workbench/icon.h>
 #include <proto/newicon.h>
 
 

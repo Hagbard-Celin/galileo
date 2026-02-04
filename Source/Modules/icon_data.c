@@ -36,7 +36,17 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#include "icon.h"
+#include <dos/dos.h>
+#include <exec/types.h>
+#include <libraries/gadtools.h>
+#include <workbench/workbench.h>
+#include <gfm/gadtools.h>
+#include <gfm/glistview.h>
+#include <gfm/configwin.h>
+#include <gfm/filesystem_id.h>
+#include "module_func_flags.h"
+#include "moduleinfo.h"
+#include "icon_data.h"
 
 ModuleInfo
 	module_info={

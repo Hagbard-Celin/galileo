@@ -37,18 +37,15 @@ For more information on Directory Opus for Windows please see:
 
 #define CATCOMP_NUMBERS
 
+#include <clib/alib_protos.h>
+#include <proto/intuition.h>
 #include <devices/audio.h>
 
 #include <gfm/version.h>
+#include "/Library/galileofmbase.h"
+#include "modules.h"
 #include "misc.strings"
 #include "modules_lib.h"
-
-enum
-{
-	BEEP,
-	FLASH,
-	ALARM,
-};
 
 extern __chip char beepwave[16];
 extern UBYTE achannels[8];

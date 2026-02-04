@@ -43,6 +43,10 @@ For more information on Directory Opus for Windows please see:
 *
 ************************************************************/
 
+#include <gfm/layout.h>
+#include "//Library/list.h"
+#include <gfm/windowdata.h>
+#include <gfm/suboptionhandle.h>
 #include "ftp.h"
 #include "ftp/ftp_ipc.h"
 #include "ftp/ftp_addressbook.h"

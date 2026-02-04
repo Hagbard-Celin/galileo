@@ -41,10 +41,29 @@ For more information on Directory Opus for Windows please see:
  *		Dates for these are set at 0 time 1/1/78
  */
 
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
+#include <clib/alib_protos.h>
+
+#include <proto/intuition.h>
+#include <proto/icon.h>
+#include <libraries/iffparse.h>
+
+#include <gfm/requester.h>
+#include "//Library/paths_proto.h"
+#include <gfm/iff.h>
+#include <gfm/iff_form.h>
+#include <gfm/functype.h>
+#include <gfm/cfg_environment.h>
+#include <gfm/configuration.h>
 
 #include "ftp.h"
-#include "ftp_ad_sockproto.h"
+#ifndef AD_INTERNET_INTERN_H
+#include "ftp_intern_pragmas.h"
+#endif
+
 #include "ftp_galileoftp.h"
 #include "ftp_list.h"
 #include "ftp_lister.h"
@@ -57,8 +76,6 @@ For more information on Directory Opus for Windows please see:
 #define kprintf ;   /##/
 #endif
 
-
-#define SocketBase GETSOCKBASE(FindTask(0L))
 
 extern struct galileoftp_globals og;
 
@@ -162,7 +179,7 @@ char *getlogname(char *buf)
  *	****************************************************
  */
 
-char *getuseraddress(char *buf)
+char *getuseraddress(char *buf, struct Library *SocketBase)
 {
 	char logname[USERNAMELEN+1];
 	int l;
@@ -172,7 +189,7 @@ char *getuseraddress(char *buf)
 	l = strlen(buf);
 
 	// Empty string if unsuccessful
-	if (gethostname(buf + l, ADDRESSLEN - l) < 0)
+	if (gethostname(buf + l, ADDRESSLEN - l, SocketBase) < 0)
 		strcpy(buf, "''");
 
 	return buf;

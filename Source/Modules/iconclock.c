@@ -35,6 +35,7 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <dos.h>
 #include "iconclock.h"
 
 char __far _LibID[] = "iconclock.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;

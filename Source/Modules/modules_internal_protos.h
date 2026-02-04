@@ -38,7 +38,7 @@ For more information on Directory Opus for Windows please see:
 #ifndef _GALILEOFM_MODULES_INTERNAL_PROTOS
 #define _GALILEOFM_MODULES_INTERNAL_PROTOS
 
-#include "/Modules/modules_internal_pragmas.h"
+#include "modules_internal_pragmas.h"
 
 
 int		Module_Entry_Internal(struct List *,struct Screen *,IPCData *,IPCData *,ULONG,ULONG);

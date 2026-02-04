@@ -36,10 +36,39 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#define CATCOMP_NUMBERS
+#include <ctype.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
-#include "icon.strings"
+#include <proto/graphics.h>
+#include <proto/intuition.h>
+#include <proto/layers.h>
+#include <proto/gadtools.h>
+#include <proto/icon.h>
+#include <proto/wb.h>
+#include <proto/asl.h>
+#include <proto/mathffp.h>
+#include <proto/mathtrans.h>
+#include <libraries/mathffp.h>
+#include <dos/filehandler.h>
+#include <graphics/gfxmacros.h>
+#include <workbench/icon.h>
+#include <gfm/galileo_ipc.h>
+#include <gfm/glistview.h>
+#include <gfm/strings_protos.h>
+#include <gfm/devices.h>
+#include <gfm/paths_protos.h>
+#include <gfm/simplerequest_protos.h>
+#include <gfm/windowid_protos.h>
+#include <gfm/drag_routines_protos.h>
+#include <gfm/icon_cache_protos.h>
+#include <gfm/popup_protos.h>
+#include <gfm/rect.h>
+#include <gfm/cfg_flags.h>
+#include <gfm/wbarg.h>
 #include <gfm/version.h>
+#include "/Library/galileofmbase.h"
+#include "modules.h"
 #include "modules_lib.h"
 #include "/Program/main_commands.h"
 
@@ -268,105 +297,6 @@ extern ObjectDef
 	icon_disk_objects[],
 	icon_pcent_free_objects[],
 	icon_pcent_used_objects[];
-
-
-enum
-{
-	GAD_BASE,
-
-	GAD_ICON_AREA,
-	GAD_ICON_IMAGE,
-	GAD_ICON_FILE_INFO,
-	GAD_INFO_ICON_TYPE,
-	GAD_INFO_FILE_DIMS,
-	GAD_INFO_FILE_COLORS,
-	GAD_INFO_FILE_MORE,
-	GAD_INFO_FILE_SIZE,
-	GAD_ICON_SAVE,
-	GAD_ICON_NEXT,
-	GAD_ICON_CANCEL,
-	GAD_BOTTOM_LINE,
-
-	GAD_ICON_BLOCKS,
-	GAD_ICON_BYTES,
-	GAD_ICON_STACK,
-	GAD_ICON_PROTECTION_AREA,
-	GAD_ICON_PROTECTION_LAYOUT,
-	GAD_ICON_PROTECTION_HS,
-	GAD_ICON_PROTECTION_PA,
-	GAD_ICON_PROTECTION_RW,
-	GAD_ICON_PROTECTION_ED,
-	GAD_ICON_TYPE,
-	GAD_ICON_LAST_CHANGED,
-	GAD_ICON_COMMENT,
-	GAD_TOOLTYPES_TOOL_AREA,
-	GAD_TOOLTYPES_PROJECT_AREA,
-	GAD_ICON_TOOLTYPES,
-	GAD_ICON_TOOLTYPES_EDIT,
-	GAD_ICON_TOOLTYPES_NEW,
-	GAD_ICON_TOOLTYPES_DELETE,
-	GAD_ICON_TOOLTYPES_SORT,
-	GAD_ICON_DEFAULT_TOOL_GLASS,
-	GAD_ICON_DEFAULT_TOOL,
-	GAD_RIGHT_LAYOUT_AREA,
-	GAD_PCENT_FREE_LAYOUT_AREA,
-	GAD_PCENT_USED_LAYOUT_AREA,
-	GAD_PCENT_FREE,
-	GAD_PCENT_USED,
-	GAD_SIZE_LAYOUT_AREA,
-	GAD_LOWER_LAYOUT_AREA,
-	GAD_ICON_STATUS,
-	GAD_DEVICE,
-	GAD_STATE,
-	GAD_ERRORS,
-	GAD_FILESYSTEM,
-	GAD_HANDLER,
-	GAD_VOL_NAME,
-	GAD_DEV_NAME,
-	GAD_USED_KEY_AREA,
-	GAD_USED_KEY,
-	GAD_FREE_KEY_AREA,
-	GAD_FREE_KEY,
-	GAD_PCENT_USED_KEY_AREA,
-	GAD_PCENT_USED_KEY,
-	GAD_PCENT_FREE_KEY_AREA,
-	GAD_PCENT_FREE_KEY,
-	GAD_USED,
-	GAD_USED_MB,
-	GAD_FREE,
-	GAD_FREE_MB,
-	GAD_CAPACITY,
-	GAD_CAPACITY_MB,
-	GAD_GRAPH,
-	GAD_BLOCKSIZE,
-
-	MENU_BORDERLESS,
-	MENU_NO_LABEL,
-	MENU_STRIP_NEWICONS,
-
-	GAD_ICON_NAME1,
-	GAD_ICON_NAME2,
-	GAD_ICON_NAME3,
-
-	GAD_VIRTUAL_PROTBITLIST,
-
-	MENU_STRIP_OLD,
-	MENU_NEWICONS,
-	MENU_OLDICONS,
-
-	MENU_ICON_EDIT,
-	MENU_ICON_PICK_EDITOR,
-	MENU_DISK,
-	MENU_DRAWER,
-	MENU_TOOL,
-	MENU_PROJECT,
-	MENU_GARBAGE,
-
-	MENU_COPY_OLDICON,
-	MENU_COPY_NEWICON,
-	MENU_COPY_BOTHICONS,
-	MENU_COPY_TOOLTYPES,
-};
 
 extern short diskinfo_colours[4][3];
 extern ULONG disktype_lookup[];

@@ -35,6 +35,9 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <graphics/gfx.h>
+#include <intuition/intuition.h>
+#include <gfm/config_return.h>
 #include "config_lib.h"
 #include "old_config.h"
 

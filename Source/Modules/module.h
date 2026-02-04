@@ -39,6 +39,8 @@ For more information on Directory Opus for Windows please see:
 #ifndef _GALILEOFM_MODULE
 #define _GALILEOFM_MODULE
 
+#include <gfm/galileo_ipc.h>
+
 typedef struct _PathNode
 {
 	struct MinNode		pn_node;

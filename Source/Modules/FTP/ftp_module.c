@@ -41,6 +41,12 @@ For more information on Directory Opus for Windows please see:
  *	17-10-97	Added forbid/permit around findport.
  */
 
+#include <stdio.h>
+#include <gfm/galileo_ipc.h>
+#include "//Library/funcargs.h"
+#ifndef _FTP_SOCKETTYPE_H
+#include "ftp_sockettype.h"
+#endif
 #include "ftp.h"
 #include "ftp_arexx.h"
 #include "ftp_module.h"

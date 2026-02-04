@@ -36,6 +36,7 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "print.h"
+#include "print_data.h"
 
 char __far _LibID[] = "print.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 

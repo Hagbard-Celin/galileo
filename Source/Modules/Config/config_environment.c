@@ -36,13 +36,53 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <string.h>
+#include <dos.h>
+#include <clib/alib_protos.h>
+#include <proto/graphics.h>
+#include <proto/intuition.h>
+#include <proto/commodities.h>
+#include <proto/utility.h>
+#include <proto/asl.h>
+#include <proto/wb.h>
+#include <proto/Picasso96.h>
+#include <gfm/galileo_ipc.h>
+#include <gfm/list_management.h>
+#include <gfm/suboptionhandle.h>
+#include <gfm/config_return.h>
+#include <gfm/config_screen.h>
+#include <gfm/wbarg.h>
+#include <gfm/cli_launch.h>
+#include <gfm/layout_protos.h>
+#include <gfm/semaphores_protos.h>
+#include <gfm/config_lister.h>
+#include <gfm/config_display.h>
+#include <gfm/config_icon.h>
+#include <gfm/config_flags.h>
+#include <gfm/cfg_flags.h>
+#include <gfm/cfg_soundentry.h>
+#include <gfm/windowdata.h>
+#include <gfm/glistview.h>
+#include <gfm/misc_protos.h>
+#include <gfm/environment.h>
+#include <gfm/simplerequest_protos.h>
+#include "enums.h"
+#include "galileoconfig_ipc_commands.h"
 #include "config_lib.h"
+#include "config_drag.h"
+#include "config_data.h"
 #include "config_environment.h"
+#include "select_colours_intern_protos.h"
 #include "//Modules/modules_internal_protos.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 //#define FUCKOFF
 
 #define NUM_CHANGE_FLAGS	2
+
+Att_List *build_sub_options(SubOptionHandle *);
 
 void funced_edit_insertstring(ObjectList *,ULONG,char *string);
 BOOL config_env_popkey(config_env_data *);

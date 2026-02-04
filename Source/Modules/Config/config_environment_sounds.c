@@ -35,9 +35,18 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <clib/alib_protos.h>
+#include <proto/intuition.h>
+#include <gfm/cfg_soundentry.h>
+#include <gfm/layout.h>
+#include <gfm/glistview.h>
 #include "config_lib.h"
 #include "config_environment.h"
 #include "//Modules/modules_internal_protos.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 void config_env_show_sound(config_env_data *data)
 {

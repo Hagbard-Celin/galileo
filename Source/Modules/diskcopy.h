@@ -35,9 +35,16 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#define CATCOMP_NUMBERS
-#include "diskcopy.strings"
+#include <proto/intuition.h>
+#include <proto/gadtools.h>
+#include <proto/icon.h>
+#include <dos/filehandler.h>
+#include <devices/trackdisk.h>
+#include <gfm/glistview.h>
+#include <gfm/simplerequest_protos.h>
 #include <gfm/version.h>
+#include "/Library/galileofmbase.h"
+#include "modules.h"
 #include "modules_lib.h"
 
 typedef struct
@@ -83,22 +90,6 @@ short diskcopy_error(struct Window *,long,long,char *,long,long);
 
 extern ConfigWindow diskcopy_window;
 extern ObjectDef diskcopy_objects[];
-
-enum
-{
-	GAD_BASE,
-
-	GAD_DISKCOPY_LAYOUT,
-
-	GAD_DISKCOPY_SOURCE,
-	GAD_DISKCOPY_DEST,
-	GAD_DISKCOPY_VERIFY,
-	GAD_DISKCOPY_BUMP,
-
-	GAD_DISKCOPY_STATUS,
-	GAD_DISKCOPY_DISKCOPY,
-	GAD_DISKCOPY_CANCEL,
-};
 
 void diskcopy_motor(DiskHandle *handle,short on);
 

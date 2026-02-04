@@ -11,9 +11,6 @@ set builddir GalileoD:Build
 stack 8192
 assign GalileoD: ""
 
-assign include: SDK/include/ ADD
-assign include: 3rdPartyInclude ADD
-
 assign GalileoS: EXISTS >NIL:
 if WARN
 assign GalileoS: Source
@@ -26,17 +23,9 @@ assign GalileoB: $builddir
 set bassign made
 endif
 
-if NOT EXISTS 3rdPartyInclude/os.gst
 cd GalileoS:GST
-smake gst
+smake all
 cd GalileoD:
-endif
-
-if NOT EXISTS 3rdPartyInclude/osffp.gst
-cd GalileoS:GST
-smake gstffp
-cd GalileoD:
-endif
 
 if <Only> EQ "SDK"
 cd GalileoS:Library
@@ -75,9 +64,6 @@ if $bassign EQ made
 assign GalileoB:
 unset bassign
 endif
-
-assign include: SDK/include/ REMOVE
-assign include: 3rdPartyInclude REMOVE
 
 unset builddir
 

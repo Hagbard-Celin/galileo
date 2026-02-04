@@ -36,6 +36,7 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/strings.h>
 #include "galileofmlib.h"
 
 // When one insists on perusing a scheme that is in no way supported

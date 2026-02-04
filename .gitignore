@@ -1,6 +1,5 @@
 etc/
 Source/**/*.lib
-*.gst
 *.lnk
 *.bak
 *.h.bak
@@ -20,6 +19,7 @@ Build/OBJ/Misc/Viewfont/*
 Build/OBJ/Misc/C/*
 Build/OBJ/Program/*
 Build/OBJ/Library/*
+Build/OBJ/*.gst
 Build/Binary/*
 !Build/Binary/Storage/
 !Build/Binary/Modules/

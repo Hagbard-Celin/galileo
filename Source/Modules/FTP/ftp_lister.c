@@ -111,20 +111,59 @@ For more information on Directory Opus for Windows please see:
  *
  */
 
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include <errno.h>
+#include <proto/intuition.h>
+#include <proto/rexxsyslib.h>
+#define CATCOMP_NUMBERS
+#include "ftp.strings"
+#include "modules_lib.h"
+#include "module.h"
 
-#include "ftp.h"
-#include "ftp_ad_sockproto2.h"
+#include <gfm/drag_routines.h>
+#include <gfm/list_management.h>
+#include <gfm/requester.h>
+#include <gfm/timer.h>
+#include <gfm/popupmenu.h>
+#include "//Program/toolbar.h"
+#include <gfm/config_flags.h>
+#include "gui_element.h"
+#include <gfm/listformat.h>
+#include "//Program/listerwindow.h"
+#include "//Program/lister_ipc.h"
+#ifndef _FTP_CORE_H
+#include "ftp_core.h"
+#endif
+#ifndef AD_INTERNET_INTERN_H
+#include "ftp_intern_pragmas.h"
+#endif
 #include "ftp_ad_errno.h"
 #include "ftp_arexx.h"
 #include "ftp_ipc.h"
+#ifndef _FTP_INFO_H
+#include "ftp_info.h"
+#endif
 #include "ftp_lister.h"
 #include "ftp_galileoftp.h"
 #include "ftp_util.h"
 #include "ftp_recursive.h"
 #include "ftp_addrsupp_protos.h"
 #include "ftp_protect.h"
+#ifndef _FTP_SOCKET_H
+#include "ftp_socket.h"
+#endif
+#ifdef _DEBUG
+#include <clib/debug_protos.h>
+#endif
+#ifdef RESOURCE_TRACKING
+#include <restrack_protos.h>
+#include <g_restrack_pragmas.h>
+
+extern ULONG callerid;
+#endif
 
 
 #ifndef DEBUG
@@ -1218,7 +1257,7 @@ static void ftplister_cleanup(struct galileoftp_globals *ogp, IPCData *ipc)
 	{
 		if (g->g_socketbase)
 		{
-			cleanup_sockets();
+			cleanup_sockets(g->g_socketbase);
 			CloseLibrary(g->g_socketbase);
 		}
 		FreeVec(g);
@@ -1248,7 +1287,7 @@ static ULONG __asm ftplister_init(register __a0 IPCData *ipc, register __a1 stru
 			if (g->g_socketbase = OpenLibrary(ogp->og_socketlibname[ogp->og_socketlib],
 							  ogp->og_socketlibver[ogp->og_socketlib]))
 			{
-				if (setup_sockets(MAX_AS225_SOCKETS, &g->g_errno))
+				if (setup_sockets(MAX_AS225_SOCKETS, &g->g_errno, g->g_socketbase))
 					retval = 1;
 				else
 					CloseLibrary(g->g_socketbase);

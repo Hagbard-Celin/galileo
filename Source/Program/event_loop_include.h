@@ -39,6 +39,11 @@ For more information on Directory Opus for Windows please see:
 #define _GALILEOFM_EVENT_LOOP_INCLUDE
 
 #include "galileofm.h"
+#include <gfm/semaphores_protos.h>
+#include <gfm/appmessage.h>
+#include <gfm/config_display.h>
+#include <gfm/config_lister.h>
+#include <gfm/cfg_flags.h>
 #include "lister_protos.h"
 #include "buttons_protos.h"
 #include "app_msg_protos.h"

@@ -35,8 +35,19 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/listlock.h>
+#include <gfm/list_management.h>
+#include <gfm/galileo_ipc.h>
+#include <gfm/layout.h>
+#include <gfm/cfg_filetype.h>
 #include "config_lib.h"
+#include "function_editor.h"
+#include "funceddata.h"
 #include "config_filetypes.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 // Filetypes editor window dimensions
 ConfigWindow

@@ -38,6 +38,19 @@ For more information on Directory Opus for Windows please see:
 #define SCRIPTF_NO_LOCK		(1<<0)
 #define SCRIPTF_NO_SOUND	(1<<1)
 
+#ifndef GALILEOFM_LAYOUT_H
+#include <gfm/layout.h>
+#endif
+#ifndef _GALILEOFM_CFG_ENVIRONMENT_H
+#include <gfm/cfg_environment.h>
+#endif
+#ifndef GALILEOFM_CFGDRAGINFO_H
+#include <gfm/cfgdraginfo.h>
+#endif
+#ifndef _GALILEOFMBASE_IPC_H
+#include <gfm/galileo_ipc.h>
+#endif
+
 #include "//Program/main_commands.h"
 
 enum

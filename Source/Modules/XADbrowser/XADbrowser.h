@@ -19,23 +19,29 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#define CATCOMP_NUMBERS
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <exec/memory.h>
-#include <dos/filehandler.h>
+#include <clib/alib_protos.h>
 
 #include <proto/exec.h>
 #include <proto/dos.h>
+#include <proto/intuition.h>
+#include <exec/memory.h>
+#include <dos/filehandler.h>
 
-#include <clib/alib_protos.h>
 #define __NOLIBBASE__
 #include <proto/xadmaster.h>
 #undef __NOLIBBASE__
 
+#include <gfm/strings_protos.h>
+#include <gfm/selectionlist.h>
+#include "/Library/galileofmbase.h"
+
+#define CATCOMP_NUMBERS
 #include "XADbrowser.strings"
 #include "modules_lib.h"
+#include "modules.h"
 #include "//Program/lister_ipc.h"
 #include "module.h"
 

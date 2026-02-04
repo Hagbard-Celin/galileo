@@ -35,9 +35,16 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <stdlib.h>
+#include <proto/graphics.h>
+#include <proto/intuition.h>
 #include "config_lib.h"
 #include "config_environment.h"
 #include "//Modules/modules.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 // Update output window settings
 void _config_env_update_output(config_env_data *data)

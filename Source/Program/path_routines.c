@@ -37,6 +37,8 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include <gfm/strings_protos.h>
+#include <gfm/misc_protos.h>
 
 // Get the parent of a path
 STRPTR path_parent_alloch(APTR memory, STRPTR path)

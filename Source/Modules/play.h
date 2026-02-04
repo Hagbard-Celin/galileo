@@ -35,12 +35,21 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#define CATCOMP_NUMBERS
-
+#include <ctype.h>
+#include <stdlib.h>
+#include <clib/alib_protos.h>
+#include <proto/graphics.h>
+#include <proto/intuition.h>
+#include <proto/gadtools.h>
+#include <proto/icon.h>
+#include <proto/datatypes.h>
+#include <proto/wb.h>
+#include <datatypes/soundclass.h>
 #include <devices/audio.h>
 
 #include <gfm/version.h>
-#include "play.strings"
+#include "/Library/galileofmbase.h"
+#include "modules.h"
 #include "modules_lib.h"
 
 #define ENV_PLAY	"Galileo/Player"
@@ -140,16 +149,3 @@ void play_snapshot(play_data *data,struct AppSnapshotMsg *msg);
 
 extern ConfigWindow play_window;
 extern ObjectDef play_objects[];
-
-enum
-{
-	GAD_BASE,
-
-	GAD_PLAY_LAYOUT,
-	GAD_PLAY_NEXT,
-	GAD_PLAY_ABORT,
-	GAD_PLAY_FILENAME,
-	GAD_PLAY_LENGTH,
-	GAD_PLAY_TYPE,
-	GAD_PLAY_STATUS,
-};

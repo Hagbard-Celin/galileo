@@ -39,7 +39,9 @@ For more information on Directory Opus for Windows please see:
 #ifndef _GALILEOFM_DIRLIST
 #define _GALILEOFM_DIRLIST
 
-#include "lister.h"
+#ifndef _GALILEOFM_LISTERWINDOW_H
+#include "listerwindow.h"
+#endif
 
 #define RESORT_SORT		1
 #define RESORT_REJECTS		2
@@ -64,30 +66,6 @@ typedef struct _VersionInfo {
 	char		vi_Char;		// Version character
 	char		vi_String[1];		// Version string
 } VersionInfo;
-
-// Special node structure
-typedef struct _DirNode {
-	struct _DirNode	*dn_Succ;
-	struct _DirNode	*dn_Pred;
-	short		dn_Type;
-	char		*dn_Name;
-} DirNode;
-
-// Structure defining a directory entry
-typedef struct DirectoryEntry {
-	DirNode			de_Node;
-	short			de_SubType;		// Entry subtype
-	unsigned long		de_Size;		// Entry size
-	unsigned short		de_Protection;		// Protection
-	unsigned short		de_Flags;		// Entry flags
-	struct DateStamp	de_Date;		// Date
-	char			de_ProtBuf[9];		// Protection string
-	char			de_DateBuf[23];		// Date/time string
-	unsigned char		de_NameLen;		// Length of name field
-	unsigned char		de_Colour;		// Display pens
-	unsigned long		de_UserData;		// User data
-	struct TagItem		*de_Tags;		// Extension tags
-} DirEntry;
 
 #define DE_PopupMenu		( TAG_USER + 0x1 )
 #define DE_NetworkInfo		( TAG_USER + 0x2 )
@@ -140,106 +118,6 @@ typedef struct DirectoryEntry {
 
 // Define to return a useful entry type
 #define ENTRYTYPE(t) ((t==0)?ENTRY_DEVICE:((t<0)?ENTRY_FILE:ENTRY_DIRECTORY))
-
-// Holds information about a directory list
-typedef struct DirectoryBuffer
-{
-	struct Node		node;
-	struct SignalSemaphore	semaphore;		// Semaphore for locking
-
-	struct ListerWindow	*buf_CurrentLister;	// Lister showing this buffer
-	ListFormat		buf_ListFormat;		// Current format of this list
-
-	short			dim_valid;		// Are dimensions valid?
-	struct IBox		dimensions;		// Last window dimensions
-
-	unsigned long		flags;			// Flags
-	ULONG			cust_flags;
-	long			more_flags;		// More flags
-
-	struct MinList		entry_list;		// List of entries
-	DirEntry		*first_file;		// First file in list
-	DirEntry		*first_dir;		// First directory in list
-
-	char			*buf_Path;		// Path this list is showing
-
-	long			buf_TotalEntries[2];	// Total number of entries
-	long			buf_TotalFiles[2];	// Total number of files
-	long			buf_TotalDirs[2];	// Total number of directories
-	unsigned long		buf_TotalBytes[2];	// Total number of bytes
-	long			buf_SelectedFiles[2];	// Selected files
-	long			buf_SelectedDirs[2];	// Selected directories
-	unsigned long		buf_SelectedBytes[2];	// Selected bytes
-
-	unsigned long		buf_TotalDiskSpace;	// Total disk space
-	unsigned long		buf_FreeDiskSpace;	// Free disk space
-
-	long			buf_VertOffset;		// Vertical display offset
-	long			buf_HorizOffset;	// Horizontal display offset
-	long			buf_OldVertOffset;	// Old vertical offset
-	long			buf_OldHorizOffset;	// Old horizontal offset
-	long			buf_HorizLength;	// Horizontal display width
-
-	char			buf_CustomHandler[32];	// Port name of custom handler
-	char			buf_CustomTitle[32];	// User title
-
-	struct DateStamp	buf_DirectoryDate;	// Datestamp of this directory
-	struct DateStamp	buf_VolumeDate;		// Disk datestamp
-
-	char			buf_VolumeLabel[32];	// Volume name
-	char			*buf_ObjectName;	// Object filename
-
-	char			*buf_ExpandedPath;	// Expanded pathname
-
-	unsigned short		last_owner;		// Owner ID of last entry we read
-	unsigned short		last_group;		// Group ID of last entry we read
-	char			owner_name[32];		// Last owner name (optimisation)
-	char			group_name[32];		// Last group name
-
-	APTR			memory;			// Memory pool to allocate files from
-	struct MinList		reject_list;		// Files rejected by display
-
-	short			size_length;		// Length of longest size
-	short			comment_length;		// Length of longest comment
-	short			type_length;		// Length of longest filetype
-	short			owner_length;		// Length of longest owner
-	short			group_length;		// Length of longest group
-	short			name_length;		// Length of largest name
-	unsigned char		name_field_size;	// Size of name field
-	unsigned char		date_length;		// Length of date field
-
-	char			last_status[80];	// Buffer status
-
-	struct UserInfo		*user_info;
-	struct GroupInfo	*group_info;
-
-	char			buf_CustomLabel[32];	// User icon label
-
-	short			version_length;		// Length of longest version
-
-	short			comment_field_size;	// Size of comment field
-
-	short			buf_FieldWidth[18];	// Field widths (pixels)
-
-	Lister			*buf_OwnerLister;	// Lister that owns us
-
-	ULONG			buf_DiskType;		// Current disk type
-
-	ULONG			buf_VolNameLength;	// Name length for current disk
-
-
-	char			buf_CustomHeader[80];	// Custom header
-
-	char			*buf_TitleFields[10];	// User-strings for field titles
-
-	struct muUserInfo	*mu_user_info;
-	struct muGroupInfo	*mu_group_info;
-
-	ULONG			buf_CustomWidthFlags;
-
-
-	BPTR			buf_Lock;		// Lock on the dir this buffer represents
-} DirBuffer;
 
 // DirList flags
 #define DWF_ABORTED 		(1<<0)	// Read was aborted

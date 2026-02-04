@@ -60,6 +60,10 @@ For more information on Directory Opus for Windows please see:
  */
 
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <proto/rexxsyslib.h>
 
 #include "modules_lib.h"
 #include "ftp_arexx.h"

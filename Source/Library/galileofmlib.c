@@ -36,6 +36,8 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofmbase.h"
+#include <gfm/simplerequest_protos.h>
+#include <gfm/image_protos.h>
 
 extern struct Library *GalileoFMBase;
 

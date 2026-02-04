@@ -36,6 +36,11 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <proto/console.h>
+#include <proto/icon.h>
+#include <gfm/paths.h>
+#include <gfm/config_return.h>
+#include <gfm/semaphores.h>
 #include "galileofmlib.h"
 #include "/Modules/Config/galileoconfig.h"
 

@@ -36,14 +36,24 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#define CATCOMP_NUMBERS
-#include "filetype.strings"
+#include <stdlib.h>
+#include <ctype.h>
+#include <clib/alib_protos.h>
+#include <proto/intuition.h>
+#include <proto/gadtools.h>
+#include <proto/wb.h>
+#include <proto/asl.h>
+#include <proto/datatypes.h>
+#include <gfm/glistview.h>
+#include <gfm/simplerequest_protos.h>
+#include <gfm/config_filetype.h>
 #include <gfm/version.h>
+#include "/Library/galileofmbase.h"
+#include "modules.h"
 #include "modules_lib.h"
 #include "module.h"
 
 #include "Config/galileoconfig.h"
-#include "Config/galileoconfig_pragmas.h"
 
 /* mod_ids */
 enum
@@ -51,11 +61,6 @@ enum
     MODID_FIND_FT,
     MODID_CREATE_FT
 };
-
-#define FILENAME_MAXLEN	(30)
-#define FILETYPE_MAXLEN	(31)
-#define ID_MAXLEN	(7)
-#define PRI_MAXLEN	(4)
 
 /* How many bytes to look at at start of file */
 #define BYTECOUNT	16
@@ -169,46 +174,6 @@ extern ObjectDef _finder_objects[];
 
 extern ConfigWindow _creator_window;
 extern ObjectDef _creator_objects[];
-
-enum
-{
-    GAD_FIND_LAYOUT,
-    GAD_FIND_LISTVIEW,
-    GAD_FIND_TEXT1,
-    GAD_FIND_TEXT2,
-    GAD_FIND_TEXT3,
-    GAD_FIND_TEXT4,
-    GAD_FIND_TEXT5,
-    GAD_FIND_TEXT6,
-    GAD_FIND_TEXT7,
-    GAD_FIND_TEXT8,
-    GAD_FIND_USE,
-    GAD_FIND_INSTALL,
-    GAD_FIND_CREATE,
-    GAD_FIND_EDIT,
-    GAD_FIND_CANCEL,
-
-    GAD_CREATE_LAYOUT,
-    GAD_CREATE_LISTVIEW,
-    GAD_CREATE_ADD,
-    GAD_CREATE_DELETE,
-    GAD_CREATE_CLEAR,
-    GAD_CREATE_FILETYPE,
-    GAD_CREATE_NAME,
-    GAD_CREATE_NAME_FIELD,
-    GAD_CREATE_IFF,
-    GAD_CREATE_IFF_FIELD,
-    GAD_CREATE_GROUP,
-    GAD_CREATE_GROUP_FIELD,
-    GAD_CREATE_ID,
-    GAD_CREATE_ID_FIELD,
-    GAD_CREATE_BYTES,
-    GAD_CREATE_BYTES_FIELD,
-    GAD_CREATE_CYCLE,
-    GAD_CREATE_EDIT,
-    GAD_CREATE_SAVE,
-    GAD_CREATE_CANCEL,
-};
 
 #define FTIF_USED		(1 << 0)
 #define FTIF_FILENAME		(1 << 1)

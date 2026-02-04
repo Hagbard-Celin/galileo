@@ -35,9 +35,43 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <clib/alib_protos.h>
+#include <proto/layers.h>
+#include <proto/intuition.h>
+#include <proto/wb.h>
+#include <proto/asl.h>
+#include <workbench/startup.h>
+#include <workbench/workbench.h>
+#include <gfm/list_management.h>
+#include <gfm/layout.h>
+#include <gfm/listlock.h>
+#include <gfm/windowdata.h>
+#include <gfm/galileo_ipc.h>
+#include <gfm/cfg_buttonbank.h>
+#include <gfm/cfgdraginfo.h>
+#include <gfm/button_protos.h>
+#include <gfm/button_flags.h>
+#include <gfm/configuration.h>
+#include <gfm/windowid_protos.h>
+#include <gfm/misc_protos.h>
+#include <gfm/simplerequest_protos.h>
+#include <gfm/glistview.h>
+#include <gfm/stack_size.h>
+#include "//Library/pos.h"
+#include "galileoconfig_ipc_commands.h"
 #include "config_lib.h"
-#include "lister_menu.h"
+#include "config_protos.h"
+#include "config_drag.h"
+#include "function_editor_protos.h"
+#include "funceddata.h"
+#include "select_colours.h"
+#include "button_editor_protos.h"
+#include "lister_menu_protos.h"
 #include "config_buttons.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 BOOL buttoned_function_empty(Cfg_ButtonFunction *);
 

@@ -35,6 +35,7 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/cfg_flags.h>
 #include "galileofmlib.h"
 
 // Parse a date/time string into separate date and time buffers

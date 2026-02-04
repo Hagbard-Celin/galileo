@@ -1,16 +1,185 @@
+OBJ = GalileoB:OBJ/
 
-all: gst gstffp
+all: $(OBJ)galileo.gst $(OBJ)galileoffp.gst
 
 ################
 
-gst:
-    sc noobjname mgst=//3rdPartyInclude/os.gst gst.c
+$(OBJ)galileo.gst:
+    sc $(SCOPTIONS) noobjname mgst=$(OBJ)galileo.gst gst.c
 
-gstffp:
-    sc noobjname math=ffp mgst=//3rdPartyInclude/osffp.gst gst.c
+$(OBJ)galileoffp.gst:
+    sc $(SCOPTIONS) noobjname math=ffp mgst=$(OBJ)galileoffp.gst gst.c
 
 ################
 
 clean:
-    -delete //3rdPartyInclude/\#?.gst quiet
+    -delete $(OBJ)\#?.gst quiet
 
+
+$(OBJ)galileo.gst: scoptions
+$(OBJ)galileoffp.gst: scoptions
+
+$(OBJ)galileo.gst: /h/gfm/memory.h
+$(OBJ)galileo.gst: /h/gfm/stackdata.h
+$(OBJ)galileo.gst: /h/gfm/stack_check_ipc.h
+$(OBJ)galileo.gst: /h/gfm/suboptionhandle.h
+$(OBJ)galileo.gst: /h/gfm/filesystem_id.h
+$(OBJ)galileo.gst: /h/gfm/config_command.h
+$(OBJ)galileo.gst: /h/gfm/buffered_io.h
+$(OBJ)galileo.gst: /h/gfm/configuration.h
+$(OBJ)galileo.gst: /h/gfm/cfg_filetype.h
+$(OBJ)galileo.gst: /h/gfm/layout.h
+$(OBJ)galileo.gst: /h/gfm/colorspec.h
+$(OBJ)galileo.gst: /h/gfm/misc_protos.h
+$(OBJ)galileo.gst: /h/gfm/simplerequest.h
+$(OBJ)galileo.gst: /h/gfm/icon_cache_protos.h
+$(OBJ)galileo.gst: /h/gfm/function_flags.h
+$(OBJ)galileo.gst: /h/gfm/config_lister.h
+$(OBJ)galileo.gst: /h/gfm/cfg_function.h
+$(OBJ)galileo.gst: /h/gfm/drag_routines.h
+$(OBJ)galileo.gst: /h/gfm/gfx.h
+$(OBJ)galileo.gst: /h/gfm/paths_protos.h
+$(OBJ)galileo.gst: /h/gfm/paths.h
+$(OBJ)galileo.gst: /h/gfm/cfgdraginfo.h
+$(OBJ)galileo.gst: /h/gfm/config_icon.h
+$(OBJ)galileo.gst: /h/gfm/pathlist.h
+$(OBJ)galileo.gst: /h/gfm/stack_size.h
+$(OBJ)galileo.gst: /h/gfm/config_filetype.h
+$(OBJ)galileo.gst: /h/gfm/listformat.h
+$(OBJ)galileo.gst: /h/gfm/config_flags.h
+$(OBJ)galileo.gst: /h/gfm/cfg_buttonbank.h
+$(OBJ)galileo.gst: /h/gfm/cfg_environment.h
+$(OBJ)galileo.gst: /h/gfm/galileolocale.h
+$(OBJ)galileo.gst: /h/gfm/galileo_ipc.h
+$(OBJ)galileo.gst: /h/gfm/listlock.h
+$(OBJ)galileo.gst: /h/gfm/list_management.h
+$(OBJ)galileo.gst: /h/gfm/configwin.h
+$(OBJ)galileo.gst: /h/gfm/gadtools.h
+$(OBJ)galileo.gst: /h/gfm/requester.h
+$(OBJ)galileo.gst: /h/gfm/timer.h
+$(OBJ)galileo.gst: /h/gfm/popupmenu.h
+$(OBJ)galileo.gst: /h/gfm/imageremap.h
+$(OBJ)galileo.gst: /h/gfm/iff.h
+$(OBJ)galileo.gst: /h/gfm/cfg_instruction.h
+$(OBJ)galileo.gst: /h/gfm/objectlist.h
+$(OBJ)galileo.gst: /h/gfm/windowdata.h
+$(OBJ)galileo.gst: /h/gfm/windowid.h
+$(OBJ)galileo.gst: /h/gfm/popupitem.h
+$(OBJ)galileo.gst: /h/gfm/galileoscreendata.h
+$(OBJ)galileo.gst: /h/gfm/buttonstartup.h
+$(OBJ)galileo.gst: /h/gfm/semaphores_protos.h
+$(OBJ)galileo.gst: /h/gfm/semaphores.h
+$(OBJ)galileo.gst: /h/gfm/config_display.h
+$(OBJ)galileo.gst: /h/gfm/rect.h
+$(OBJ)galileo.gst: /h/gfm/windowid_protos.h
+$(OBJ)galileo.gst: /h/gfm/button_flags.h
+$(OBJ)galileo.gst: /h/gfm/simplerequest_protos.h
+$(OBJ)galileo.gst: /h/gfm/popup_protos.h
+$(OBJ)galileo.gst: /h/gfm/image_protos.h
+$(OBJ)galileo.gst: /h/gfm/openimageinfo.h
+$(OBJ)galileo.gst: /h/gfm/iff_form.h
+$(OBJ)galileo.gst: /h/gfm/functype.h
+$(OBJ)galileo.gst: /h/gfm/devices.h
+$(OBJ)galileo.gst: /h/gfm/cfg_desktop.h
+$(OBJ)galileo.gst: /h/gfm/cfg_flags.h
+$(OBJ)galileo.gst: /h/gfm/appmessage.h
+$(OBJ)galileo.gst: /h/gfm/config_return.h
+$(OBJ)galileo.gst: /h/gfm/button_protos.h
+$(OBJ)galileo.gst: /h/gfm/config_screen.h
+$(OBJ)galileo.gst: /h/gfm/drag_routines_protos.h
+$(OBJ)galileo.gst: /h/gfm/cli_launch.h
+$(OBJ)galileo.gst: /h/gfm/strings_protos.h
+$(OBJ)galileo.gst: /h/gfm/strings.h
+$(OBJ)galileo.gst: /h/gfm/image_tags.h
+$(OBJ)galileo.gst: /h/gfm/imageremap_protos.h
+$(OBJ)galileo.gst: /h/gfm/status.h
+$(OBJ)galileo.gst: /h/gfm/cfg_soundentry.h
+$(OBJ)galileo.gst: /h/gfm/gadget_tags.h
+$(OBJ)galileo.gst: /h/gfm/wbarg.h
+$(OBJ)galileo.gst: /h/gfm/selectionlist.h
+$(OBJ)galileo.gst: /h/gfm/layout_protos.h
+$(OBJ)galileo.gst: /h/gfm/glistview.h
+$(OBJ)galileo.gst: /h/gfm/environment.h
+$(OBJ)galileo.gst: /h/gfm/readcfg.h
+$(OBJ)galileoffp.gst: /h/gfm/memory.h
+$(OBJ)galileoffp.gst: /h/gfm/stackdata.h
+$(OBJ)galileoffp.gst: /h/gfm/stack_check_ipc.h
+$(OBJ)galileoffp.gst: /h/gfm/suboptionhandle.h
+$(OBJ)galileoffp.gst: /h/gfm/filesystem_id.h
+$(OBJ)galileoffp.gst: /h/gfm/config_command.h
+$(OBJ)galileoffp.gst: /h/gfm/buffered_io.h
+$(OBJ)galileoffp.gst: /h/gfm/configuration.h
+$(OBJ)galileoffp.gst: /h/gfm/cfg_filetype.h
+$(OBJ)galileoffp.gst: /h/gfm/layout.h
+$(OBJ)galileoffp.gst: /h/gfm/colorspec.h
+$(OBJ)galileoffp.gst: /h/gfm/misc_protos.h
+$(OBJ)galileoffp.gst: /h/gfm/simplerequest.h
+$(OBJ)galileoffp.gst: /h/gfm/icon_cache_protos.h
+$(OBJ)galileoffp.gst: /h/gfm/function_flags.h
+$(OBJ)galileoffp.gst: /h/gfm/config_lister.h
+$(OBJ)galileoffp.gst: /h/gfm/cfg_function.h
+$(OBJ)galileoffp.gst: /h/gfm/drag_routines.h
+$(OBJ)galileoffp.gst: /h/gfm/gfx.h
+$(OBJ)galileoffp.gst: /h/gfm/paths_protos.h
+$(OBJ)galileoffp.gst: /h/gfm/paths.h
+$(OBJ)galileoffp.gst: /h/gfm/cfgdraginfo.h
+$(OBJ)galileoffp.gst: /h/gfm/config_icon.h
+$(OBJ)galileoffp.gst: /h/gfm/pathlist.h
+$(OBJ)galileoffp.gst: /h/gfm/stack_size.h
+$(OBJ)galileoffp.gst: /h/gfm/config_filetype.h
+$(OBJ)galileoffp.gst: /h/gfm/listformat.h
+$(OBJ)galileoffp.gst: /h/gfm/config_flags.h
+$(OBJ)galileoffp.gst: /h/gfm/cfg_buttonbank.h
+$(OBJ)galileoffp.gst: /h/gfm/cfg_environment.h
+$(OBJ)galileoffp.gst: /h/gfm/galileolocale.h
+$(OBJ)galileoffp.gst: /h/gfm/galileo_ipc.h
+$(OBJ)galileoffp.gst: /h/gfm/listlock.h
+$(OBJ)galileoffp.gst: /h/gfm/list_management.h
+$(OBJ)galileoffp.gst: /h/gfm/configwin.h
+$(OBJ)galileoffp.gst: /h/gfm/gadtools.h
+$(OBJ)galileoffp.gst: /h/gfm/requester.h
+$(OBJ)galileoffp.gst: /h/gfm/timer.h
+$(OBJ)galileoffp.gst: /h/gfm/popupmenu.h
+$(OBJ)galileoffp.gst: /h/gfm/imageremap.h
+$(OBJ)galileoffp.gst: /h/gfm/iff.h
+$(OBJ)galileoffp.gst: /h/gfm/cfg_instruction.h
+$(OBJ)galileoffp.gst: /h/gfm/objectlist.h
+$(OBJ)galileoffp.gst: /h/gfm/windowdata.h
+$(OBJ)galileoffp.gst: /h/gfm/windowid.h
+$(OBJ)galileoffp.gst: /h/gfm/popupitem.h
+$(OBJ)galileoffp.gst: /h/gfm/galileoscreendata.h
+$(OBJ)galileoffp.gst: /h/gfm/buttonstartup.h
+$(OBJ)galileoffp.gst: /h/gfm/semaphores_protos.h
+$(OBJ)galileoffp.gst: /h/gfm/semaphores.h
+$(OBJ)galileoffp.gst: /h/gfm/config_display.h
+$(OBJ)galileoffp.gst: /h/gfm/rect.h
+$(OBJ)galileoffp.gst: /h/gfm/windowid_protos.h
+$(OBJ)galileoffp.gst: /h/gfm/button_flags.h
+$(OBJ)galileoffp.gst: /h/gfm/simplerequest_protos.h
+$(OBJ)galileoffp.gst: /h/gfm/popup_protos.h
+$(OBJ)galileoffp.gst: /h/gfm/image_protos.h
+$(OBJ)galileoffp.gst: /h/gfm/openimageinfo.h
+$(OBJ)galileoffp.gst: /h/gfm/iff_form.h
+$(OBJ)galileoffp.gst: /h/gfm/functype.h
+$(OBJ)galileoffp.gst: /h/gfm/devices.h
+$(OBJ)galileoffp.gst: /h/gfm/cfg_desktop.h
+$(OBJ)galileoffp.gst: /h/gfm/cfg_flags.h
+$(OBJ)galileoffp.gst: /h/gfm/appmessage.h
+$(OBJ)galileoffp.gst: /h/gfm/config_return.h
+$(OBJ)galileoffp.gst: /h/gfm/button_protos.h
+$(OBJ)galileoffp.gst: /h/gfm/config_screen.h
+$(OBJ)galileoffp.gst: /h/gfm/drag_routines_protos.h
+$(OBJ)galileoffp.gst: /h/gfm/cli_launch.h
+$(OBJ)galileoffp.gst: /h/gfm/strings_protos.h
+$(OBJ)galileoffp.gst: /h/gfm/strings.h
+$(OBJ)galileoffp.gst: /h/gfm/image_tags.h
+$(OBJ)galileoffp.gst: /h/gfm/imageremap_protos.h
+$(OBJ)galileoffp.gst: /h/gfm/status.h
+$(OBJ)galileoffp.gst: /h/gfm/cfg_soundentry.h
+$(OBJ)galileoffp.gst: /h/gfm/gadget_tags.h
+$(OBJ)galileoffp.gst: /h/gfm/wbarg.h
+$(OBJ)galileoffp.gst: /h/gfm/selectionlist.h
+$(OBJ)galileoffp.gst: /h/gfm/layout_protos.h
+$(OBJ)galileoffp.gst: /h/gfm/glistview.h
+$(OBJ)galileoffp.gst: /h/gfm/environment.h
+$(OBJ)galileoffp.gst: /h/gfm/readcfg.h

@@ -36,6 +36,7 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "envoy.h"
+#include "envoy_data.h"
 
 char __far _LibID[] = "envoy.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 

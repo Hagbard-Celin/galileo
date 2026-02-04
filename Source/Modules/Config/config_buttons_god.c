@@ -35,8 +35,14 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <clib/alib_protos.h>
+#include <gfm/button_protos.h>
+#include <gfm/semaphores_protos.h>
 #include "config_lib.h"
-#include "config_buttons.h"
+#include "select_colours.h"
+#include "button_editor.h"
+#include "galileoconfig_ipc_commands.h"
+#include "config_buttons_protos.h"
 
 // Add a row of buttons
 BOOL _config_buttons_rows_add(

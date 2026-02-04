@@ -35,33 +35,21 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-typedef struct
-{
-	struct Window		*window;
-	Cfg_Function		*function;
-	APTR			memory;
-	IPCData			*owner_ipc;
-	struct _FuncEdData	*data;
-	ConfigWindow		*win_def;
-	ObjectDef		*obj_def;
+#ifndef _GFM_FUNCTION_EDITOR_H
+#define _GFM_FUNCTION_EDITOR_H
 
-	ConfigWindow		*req_win_def;
-	ObjectDef		*req_obj_def;
-
-	UWORD			*func_labels;
-	long			*flag_list;
-	ULONG			func_list;
-	UWORD			*arg_list;
-
-	APTR			object;
-	ULONG			object_flags;
-
-	char			title[80];
-
-	ULONG			flags;
-
-	IPCData			*main_owner;
-} FunctionStartup;
+#ifndef _GALILEOFM_CONFIGWIN_H
+#include <gfm/configwin.h>
+#endif
+#ifndef _GALILEOFM_GADTOOLS_H
+#include <gfm/gadtools.h>
+#endif
+#ifndef _GALILEOFM_CFG_FUNCTION_H
+#include <gfm/cfg_function.h>
+#endif
+#ifndef _GALILEOFM_LIST_MANAGEMENT_H
+#include <gfm/list_management.h>
+#endif
 
 #define FUNCEDF_NO_KEY		(1<<0)
 #define FUNCEDF_LABEL		(1<<1)
@@ -76,33 +64,6 @@ typedef struct
 	Cfg_Function		*function;
 } FunctionReturn;
 
-typedef struct _FuncEdData
-{
-	struct Window		*window;		// Window
-	ObjectList		*objlist;		// List of objects
-
-	struct MsgPort		*appport;		// WB App port
-	struct AppWindow	*appwindow;		// WB App window
-	struct AppIcon		*appicon;		// WB App icon
-
-	Cfg_Function		*function;		// Function to be edited
-	Att_Node		*edit_node;		// Line being edited
-	Att_List		*function_list;		// Function list
-	Att_List		*func_display_list;	// Function display list
-	Att_List		*flag_list;		// List of flags
-	FunctionStartup		*startup;
-
-	short			last_type;
-
-	CfgDragInfo		drag;
-	short			drag_shift;
-
-	char			buffer[256];
-
-	ObjectList		*p_objlist;
-
-	char			label[80];
-} FuncEdData;
 
 extern ConfigWindow
 	_function_editor_window,
@@ -184,29 +145,5 @@ enum
 
 extern MenuData _funced_menus[];
 
-// prototypes
-void __asm FunctionEditorTr(void);
-void __asm FunctionEditor(void);
-ULONG __asm funced_init(register __a0 IPCData *,register __a1 FunctionStartup *);
-void funced_cleanup(FuncEdData *);
-void funced_build_flaglist(FuncEdData *);
-void funced_update_flaglist(FuncEdData *);
-void funced_decompile(FuncEdData *);
-void funced_compile(FuncEdData *);
-void funced_build_display(FuncEdData *);
-void funced_build_entrydisplay(FuncEdData *,Att_Node *,FunctionEditorEntry *);
-void funced_start_edit(FuncEdData *);
-BOOL funced_end_edit(FuncEdData *,Att_Node *,int,UWORD);
-Att_Node *funced_new_entry(FuncEdData *,Att_Node *,FunctionEditorEntry *);
-void funced_check_flag(ULONG *,ULONG);
-void funced_edit_insertstring(ObjectList *,ULONG,char *);
-void funced_store_edits(FuncEdData *);
-void funced_init_gads(FuncEdData *);
-BOOL funced_command_req(FuncEdData *,char *,short);
-void funced_appmsg(FuncEdData *,struct AppMessage *);
-short funced_appmsg_arg(struct WBArg *,char *);
-void functioned_end_drag(FuncEdData *,short);
-void functioned_copy_line(FuncEdData *,FunctionEditorEntry *,unsigned short,Point *);
-short functioned_get_line(struct Window *,GL_Object *,unsigned short,unsigned short);
-void funced_show_key(FuncEdData *data);
-BOOL funced_rexx_args(char *name,char *buffer);
+#endif
+

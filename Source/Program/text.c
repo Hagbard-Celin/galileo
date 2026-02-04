@@ -37,6 +37,7 @@ For more information on Directory Opus for Windows please see:
 
 //#include "text.h"
 #include "galileofm.h"
+#include <gfm/config_display.h>
 #include "text.h"
 #include "clock_task.h"
 

@@ -40,8 +40,16 @@ For more information on Directory Opus for Windows please see:
 #ifndef _LISTER_H
 #define _LISTER_H
 
-#include "ftp_galileoftp.h"
-#include "ftp.h"
+#ifndef _GALILEOFMBASE_IPC_H
+#include "//Library/galileo_ipc.h"
+#endif
+#ifndef _FTP_INFO_H
+#include "ftp_info.h"
+#endif
+#ifndef _FTP_GLOBALS_H
+#include "ftp_globals.h"
+#endif
+
 
 void __stdargs logprintf(char *fmt, ...);
 

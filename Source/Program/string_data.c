@@ -35,9 +35,12 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <proto/exec.h>
+#include <proto/locale.h>
+
 #define CATCOMP_BLOCK
 #include "galileo.strings"
-#include "/Library/galileofmbase.h"
+#include <gfm/galileolocale.h>
 
 #define LocaleBase locale->li_LocaleBase
 

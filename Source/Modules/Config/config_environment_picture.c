@@ -35,9 +35,16 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <graphics/gfxbase.h>
+#include <gfm/popup_protos.h>
+#include <gfm/config_display.h>
 #include "config_lib.h"
 #include "config_environment.h"
 #include "//Modules/modules.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 void config_env_fix_picture_gads(config_env_data *data)
 {

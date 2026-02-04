@@ -36,6 +36,7 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include <gfm/cfg_flags.h>
 #include "function_launch_protos.h"
 #include "dates.h"
 #include "replace.h"

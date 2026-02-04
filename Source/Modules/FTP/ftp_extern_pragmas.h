@@ -38,6 +38,19 @@ For more information on Directory Opus for Windows please see:
 #ifndef AD_INTERNET_EXTERN_H
 #define AD_INTERNET_EXTERN_H
 
+#ifndef _TYPES_
+#include <sys/types.h>
+#endif
+#ifndef _FTP_FD_SET_H
+#include "ftp_fd_set.h"
+#endif
+#ifndef _FTP_SOCKETADDR_H
+#include "ftp_socketaddr.h"
+#endif
+#ifndef _FTP_SERVENT_H
+#include "ftp_servent.h"
+#endif
+
 
 /* AS225 */
 
@@ -122,26 +135,5 @@ LONG amitcp_WaitSelect(LONG nfds, fd_set *readfds, fd_set *writefds, fd_set *exe
 #pragma libcall SocketBase amitcp_GetServByName EA 9802
 #pragma libcall SocketBase amitcp_GetServByPort F0 8002
 #pragma libcall SocketBase amitcp_GetHostName 11A 0802
-
-/* GENERIC */
-
-int accept (int, struct sockaddr *, int *);
-int bind (int, struct sockaddr *, int);
-void cleanup_sockets (void);
-int connect (int, struct sockaddr *, int);
-struct hostent *gethostbyname (char *);
-int gethostname (char *, int);
-struct servent *getservbyname (char *, char *);
-struct servent *getservbyport (int, char *);
-int getsockname (int, struct sockaddr *, int *);
-u_long inet_addr (char *);
-int listen (int, int);
-int recv(int, char *, int, int);
-int s_close (int);
-int selectwait (int, fd_set *, fd_set *, fd_set *, struct timeval *, long *);
-int send (int, char *, int, int);
-ULONG setup_sockets (UWORD, int *);
-int shutdown (int, int);
-int socket(int, int, int);
 
 #endif

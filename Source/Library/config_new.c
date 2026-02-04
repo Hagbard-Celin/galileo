@@ -35,6 +35,8 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/functype.h>
+#include <gfm/button_flags.h>
 #include "galileofmlib.h"
 #include "/Program/galileo_config.h"
 

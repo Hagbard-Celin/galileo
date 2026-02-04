@@ -37,11 +37,18 @@ For more information on Directory Opus for Windows please see:
 #ifndef _GALILEOFM_MODULES_LIB
 #define _GALILEOFM_MODULES_LIB
 
-#include "/Library/galileofmbase.h"
+#include <string.h>
+#include <sys/commargs.h>
+#include <proto/exec.h>
+#include <proto/dos.h>
+#include <proto/utility.h>
+#include <proto/locale.h>
+#include <gfm/galileolocale.h>
 #include "/Library/galileofmpragmas.h"
-#include "/Program/galileo_config.h"
-#include "modules.h"
 
+#ifdef _DEBUG
+#include <clib/debug_protos.h>
+#endif
 #ifdef RESOURCE_TRACKING
 #include <restrack_protos.h>
 #include <g_restrack_pragmas.h>
@@ -63,7 +70,6 @@ extern struct Library *DiskfontBase;
 extern struct Library *AslBase;
 extern struct RxsLib  *RexxSysBase;
 extern struct GalileoLocale *locale;
-extern ModuleInfo module_info;
 
 #ifdef RESOURCE_TRACKING
 extern struct Library * ResTrackBase;

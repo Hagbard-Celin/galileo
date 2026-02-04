@@ -77,8 +77,22 @@ For more information on Directory Opus for Windows please see:
  *
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <clib/alib_protos.h>
+#include <proto/intuition.h>
+#include "//Library/funcargs.h"
+#include <gfm/galileo_ipc.h>
+#include <gfm/list_management.h>
+#include "//Library/galileonotify.h"
+#include <gfm/requester.h>
+#include "//Library/paths_proto.h"
+#include <gfm/config_command.h>
 #include "ftp.h"
-#include "ftp_ad_sockproto2.h"
+#ifndef AD_INTERNET_INTERN_H
+#include "ftp_intern_pragmas.h"
+#endif
+#include "ftp_socket.h"
 #include "ftp_arexx.h"
 #include "ftp_module.h"
 #include "ftp_ipc.h"

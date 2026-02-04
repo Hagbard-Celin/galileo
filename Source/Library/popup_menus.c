@@ -35,6 +35,7 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/image_tags.h>
 #include "galileofmlib.h"
 #include "boopsi.h"
 #include "popup.h"

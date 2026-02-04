@@ -48,7 +48,7 @@ long display_msg(struct galileoftp_globals *, IPCData *, struct Window *, ULONG 
 char *getlogname(char *);
 
 // Get the hostname of the user's Amiga (for anonymous FTPs)
-char *getuseraddress(char *);
+char *getuseraddress(char *, struct Library *SocketBase);
 
 // Initialize a ListLock and counter
 void ad_InitListLock(struct ListLock *, int *count);

@@ -37,7 +37,7 @@ For more information on Directory Opus for Windows please see:
 
 #define CATCOMP_BLOCK
 #include "update.strings"
-#include "/Library/galileofmbase.h"
+#include <gfm/galileolocale.h>
 
 void init_locale_data(struct GalileoLocale *locale)
 {

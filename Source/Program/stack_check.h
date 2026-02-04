@@ -40,21 +40,9 @@ For more information on Directory Opus for Windows please see:
 #ifndef _GALILEOFM_STACK_CHECK_H
 #define _GALILEOFM_STACK_CHECK_H
 
-/* NOTE: all 680x0 processors keep A7 word-aligned                  */
-/* WARNING: the last word on the stack has the address SPUpper - 2  */
-typedef struct
-{
-	UWORD	    *SPReg;           /* register A7 of the task we check */
-	UWORD       *SPUpper;         /* upper bound of the stack we are checking */
-	UWORD       *SPUpperFirst;
-	UWORD       *GlobalSPLower;   /* a copy of the local SPLower */
-	ULONG       UsedMax;         /* the maximum stack used so far */
-	UWORD       StackBase[8];    /* the last 8 words on the stack */
-	ULONG       LongStackBase[4];
-
-	WORD        Filled;
-	UWORD       StackStatus;
-} StackData;
+#ifndef _GALILEOFM_STACKDATA_H
+#include <gfm/stackdata.h>
+#endif
 
 void stack_check_begin(struct Task *check_task, StackData *stack_data);
 void stack_check_end(struct Task *check_task, StackData *stack_data);

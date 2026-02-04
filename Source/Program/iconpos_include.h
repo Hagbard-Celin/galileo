@@ -36,6 +36,12 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include <gfm/semaphores_protos.h>
+#include <gfm/rect.h>
+#include <gfm/config_display.h>
+#include <gfm/popup_protos.h>
+#include <gfm/windowid_protos.h>
+#include <gfm/cfg_desktop.h>
 #include "lsprintf_protos.h"
 #include "misc_protos.h"
 #include "requesters.h"

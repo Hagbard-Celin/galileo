@@ -35,9 +35,18 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#define CATCOMP_NUMBERS
-#include "show.strings"
+#include <stdio.h>
+#include <proto/graphics.h>
+#include <proto/intuition.h>
+#include <proto/gadtools.h>
+#include <proto/datatypes.h>
+#include <datatypes/datatypesclass.h>
+#include <datatypes/pictureclass.h>
+#include <gfm/glistview.h>
+#include <gfm/status.h>
 #include <gfm/version.h>
+#include "/Library/galileofmbase.h"
+#include "modules.h"
 #include "modules_lib.h"
 #include "/Library/read_ilbm.h"
 
@@ -121,28 +130,3 @@ extern ObjectDef
 	anim_info_objects[],
 	show_info_objects[],
 	print_objects[];
-
-enum
-{
-	GAD_dummy,
-
-	GAD_INFO_AREA,
-	GAD_INFO_FILE,
-	GAD_INFO_IMAGE_SIZE,
-	GAD_INFO_COLOURS,
-	GAD_INFO_MODE,
-	GAD_INFO_FRAME,
-	GAD_INFO_ANIM,
-	GAD_OK,
-
-	GAD_PRINT_AREA,
-	GAD_PRINT_ASPECT,
-	GAD_PRINT_IMAGE,
-	GAD_PRINT_SHADE,
-	GAD_PRINT_PLACEMENT,
-	GAD_PRINT_FORM_FEED,
-	GAD_PRINT_PRINT_TITLE,
-	GAD_PRINT,
-
-	GAD_INFO_TYPE,
-};

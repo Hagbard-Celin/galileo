@@ -39,6 +39,12 @@ For more information on Directory Opus for Windows please see:
 #define GALILEOFM_MISC_PROC_H
 
 #include "galileofm.h"
+#include <gfm/function_flags.h>
+#include <gfm/status.h>
+#include <gfm/config_return.h>
+#include <gfm/config_display.h>
+#include <gfm/button_flags.h>
+#include <gfm/simplerequest_protos.h>
 #include "misc_protos.h"
 #include "function_launch_protos.h"
 #include "buttons_protos.h"
@@ -57,7 +63,7 @@ For more information on Directory Opus for Windows please see:
 #include "menu_data.h"
 #include "callback.h"
 #include "commands.h"
-#include "/Modules/modules.h"
+#include "/Modules/module_func_flags.h"
 #include "/Modules/modules_protos.h"
 #include "/Modules/modules_internal_protos.h"
 #include "scripts.h"

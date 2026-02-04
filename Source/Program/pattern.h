@@ -35,7 +35,10 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#define PATTILE_SIZE	64
+#ifndef _GALILEO_PATTERN_H
+#define _GALILEO_PATTERN_H
+#include <intuition/classusr.h>
+#include <prefs/wbpattern.h>
 
 typedef struct PatternInstance
 {
@@ -76,30 +79,4 @@ typedef struct PatternData
 	short			precision;		// Precision type
 } PatternData;
 
-#define PATF_LOCK	0x00000002
-#define PATF_STRETCH	0x10000000
-#define PATF_CENTER	0x20000000
-#define PATF_TILE	0x40000000
-#define PATF_FILL	0x80000000
-
-#define PATF_RANDOM	0x00004000
-
-#define PATF_WB_MODE(f)		(((f)&0x3000000)>>20)
-#define PATF_LISTER_MODE(f)	(((f)&0x30000)>>16)
-
-#define ID_FIP0 MAKE_ID('F','I','P','0')
-#define ID_WPOS MAKE_ID('W','P','O','S')
-
-void GetPattern(PatternData *,struct Screen *,ULONG);
-void GetPatternBorder(PatternData *,struct Screen *,ULONG);
-void FreePattern(PatternData *);
-
-void __asm backdrop_pattern_rotate(register __a0 UWORD *,register __d0 short);
-void __asm __saveds PatternBackfill(
-	register __a0 PatternInstance *,
-	register __a1 struct BackFillInfo *,
-	register __a2 struct RastPort *);
-
-#define MOD(x,y) ((x)<0 ? (y)-((-(x))%(y)) : (x)%(y))
-
-BOOL pattern_check_random(PatternData *,char *);
+#endif

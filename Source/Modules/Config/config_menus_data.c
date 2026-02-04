@@ -35,7 +35,12 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/layout.h>
 #include "config_lib.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 ConfigWindow
 	config_menu_window={

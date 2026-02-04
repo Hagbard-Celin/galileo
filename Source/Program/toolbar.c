@@ -36,6 +36,16 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include <gfm/button_protos.h>
+#include <gfm/image_protos.h>
+#include <gfm/image_tags.h>
+#include <gfm/button_flags.h>
+#include <gfm/imageremap_protos.h>
+#include <gfm/functype.h>
+#include <gfm/rect.h>
+#include <gfm/gfx.h>
+#include <gfm/config_display.h>
+#include "toolbar_protos.h"
 
 // Get a toolbar
 ToolBarInfo *OpenToolBar(Cfg_ButtonBank *buttons,char *pathname)

@@ -35,8 +35,37 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <clib/alib_protos.h>
+#include <proto/graphics.h>
+#include <proto/layers.h>
+#include <proto/intuition.h>
+#include <workbench/workbench.h>
+#include <gfm/button_protos.h>
+#include <gfm/button_flags.h>
+#include <gfm/semaphores_protos.h>
+#include <gfm/configuration.h>
+#include <gfm/stack_size.h>
+#include <gfm/imageremap_protos.h>
+#include <gfm/image_protos.h>
+#include <gfm/iff.h>
+#include <gfm/iff_form.h>
+#include <gfm/objectlist.h>
+#include <gfm/image_tags.h>
+#include <gfm/rect.h>
+#include <gfm/gfx.h>
+#include <gfm/windowdata.h>
 #include "config_lib.h"
-#include "config_buttons.h"
+#include "config_protos.h"
+#include "select_colours.h"
+#include "button_editor_protos.h"
+#include "funced_internal_protos.h"
+#include "galileoconfig_ipc_commands.h"
+#include "config_buttons_protos.h"
+#include "colrow_data.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 // Create some new buttons
 BOOL _config_buttons_create_new(

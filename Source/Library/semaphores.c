@@ -35,6 +35,7 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/semaphores.h>
 #include "galileofmlib.h"
 
 #undef TRAP_SEMAPHORE

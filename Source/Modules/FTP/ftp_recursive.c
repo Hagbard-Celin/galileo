@@ -40,6 +40,15 @@ For more information on Directory Opus for Windows please see:
 //
 // gp 4/5/98 changed site-site selectwait time to 1 secs from 20 micros
 
+#include <ctype.h>
+#include <stdlib.h>
+#include <clib/alib_protos.h>
+#include <gfm/requester.h>
+#include <gfm/list_management.h>
+#include "//Library/paths_proto.h"
+#include <gfm/config_flags.h>
+#include "ftp_socket.h"
+#include "gui_element.h"
 #include "ftp_recursive.h"
 #include "ftp_galileoftp.h"
 #include "ftp_util.h"
@@ -51,7 +60,9 @@ For more information on Directory Opus for Windows please see:
 #include "ftp_lister.h"
 #include "ftp_lister_xfer.h"
 
-#include "ftp_ad_sockproto2.h"
+#ifndef AD_INTERNET_INTERN_H
+#include "ftp_intern_pragmas.h"
+#endif
 #include "ftp_addrsupp_protos.h"
 
 #define   min(a,b)    (((a) <= (b)) ? (a) : (b))
@@ -3092,7 +3103,7 @@ int rec_ftp_select(endpoint *ep)
 	FD_SET(ep->ep_ftpnode->fn_ftp.fi_cs, &rd);
 	FD_SET(ep->ep_ftpnode->fn_ftp.fi_cs, &ex);
 
-	if ((nds = selectwait(ep->ep_ftpnode->fn_ftp.fi_cs + 1, &rd, 0L, &ex, &t, &flags)) > 0)
+	if ((nds = selectwait(ep->ep_ftpnode->fn_ftp.fi_cs + 1, &rd, 0L, &ex, &t, &flags, ((struct globals *)((IPCData*)(ep->ep_ftpnode->fn_ftp.fi_task->tc_UserData))->userdata)->g_socketbase)) > 0)
 	{
 		// Data ready?
 		if (FD_ISSET(ep->ep_ftpnode->fn_ftp.fi_cs, &rd))

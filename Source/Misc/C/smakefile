@@ -69,7 +69,7 @@ sc sd
 ################
 
 depend:
-    makedepend -Y -p$$(OBJ) -Q$(OBJ) $(OBJS)
+    makedepend -A -Y//h/ -p$$(OBJ) -O$(OBJ) $(OBJS)
 
 ################
 
@@ -82,8 +82,37 @@ clean:
 
 # DO NOT DELETE THIS LINE makedepend needs it
 
-$(OBJ)GalileoRT.o: GalileoRT.c //Library/galileofmbase.h
-$(OBJ)GalileoRT.o: //Include/galileo/os.h //Program/galileo_config.h
+$(OBJ)GalileoRT.o: GalileoRT.c //h/gfm/version.h //Library/galileofmbase.h
+$(OBJ)GalileoRT.o: //Program/galileo_config.h //h/gfm/listformat.h
+$(OBJ)GalileoRT.o: //h/gfm/config_command.h //h/gfm/config_flags.h
+$(OBJ)GalileoRT.o: //h/gfm/cfg_buttonbank.h //h/gfm/cfg_environment.h
+$(OBJ)GalileoRT.o: //h/gfm/galileolocale.h //h/gfm/galileo_ipc.h
+$(OBJ)GalileoRT.o: //h/gfm/listlock.h //h/gfm/list_management.h
+$(OBJ)GalileoRT.o: //h/gfm/configwin.h //Library/funcargs.h
+$(OBJ)GalileoRT.o: //h/gfm/gadtools.h //h/gfm/requester.h
+$(OBJ)GalileoRT.o: //Library/galileonotify.h //Library/paths_proto.h
+$(OBJ)GalileoRT.o: //h/gfm/timer.h //h/gfm/popupmenu.h //h/gfm/imageremap.h
+$(OBJ)GalileoRT.o: //h/gfm/buffered_io.h //h/gfm/iff.h
+$(OBJ)GalileoRT.o: //h/gfm/configuration.h //h/gfm/cfg_function.h
+$(OBJ)GalileoRT.o: //h/gfm/cfg_instruction.h //h/gfm/cfg_filetype.h
+$(OBJ)GalileoRT.o: //h/gfm/layout.h //h/gfm/objectlist.h
+$(OBJ)GalileoRT.o: //h/gfm/drag_routines.h //h/gfm/windowdata.h
+$(OBJ)GalileoRT.o: //h/gfm/windowid.h //Library/list.h //h/gfm/colorspec.h
+$(OBJ)GalileoRT.o: //h/gfm/popupitem.h //h/gfm/memory.h
 $(OBJ)GalileoRT.o: //Library/galileofmpragmas.h
-$(OBJ)LoadGB.o: LoadGB.c //Library/galileofmbase.h //Include/galileo/os.h
-$(OBJ)LoadGB.o: //Program/galileo_config.h //Library/galileofmpragmas.h
+$(OBJ)LoadGB.o: LoadGB.c //h/gfm/version.h //Library/galileofmbase.h
+$(OBJ)LoadGB.o: //Program/galileo_config.h //h/gfm/listformat.h
+$(OBJ)LoadGB.o: //h/gfm/config_command.h //h/gfm/config_flags.h
+$(OBJ)LoadGB.o: //h/gfm/cfg_buttonbank.h //h/gfm/cfg_environment.h
+$(OBJ)LoadGB.o: //h/gfm/galileolocale.h //h/gfm/galileo_ipc.h
+$(OBJ)LoadGB.o: //h/gfm/listlock.h //h/gfm/list_management.h
+$(OBJ)LoadGB.o: //h/gfm/configwin.h //Library/funcargs.h //h/gfm/gadtools.h
+$(OBJ)LoadGB.o: //h/gfm/requester.h //Library/galileonotify.h
+$(OBJ)LoadGB.o: //Library/paths_proto.h //h/gfm/timer.h //h/gfm/popupmenu.h
+$(OBJ)LoadGB.o: //h/gfm/imageremap.h //h/gfm/buffered_io.h //h/gfm/iff.h
+$(OBJ)LoadGB.o: //h/gfm/configuration.h //h/gfm/cfg_function.h
+$(OBJ)LoadGB.o: //h/gfm/cfg_instruction.h //h/gfm/cfg_filetype.h
+$(OBJ)LoadGB.o: //h/gfm/layout.h //h/gfm/objectlist.h //h/gfm/drag_routines.h
+$(OBJ)LoadGB.o: //h/gfm/windowdata.h //h/gfm/windowid.h //Library/list.h
+$(OBJ)LoadGB.o: //h/gfm/colorspec.h //h/gfm/popupitem.h //h/gfm/memory.h
+$(OBJ)LoadGB.o: //Library/galileofmpragmas.h

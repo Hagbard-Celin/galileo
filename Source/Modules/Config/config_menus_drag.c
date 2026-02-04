@@ -36,9 +36,37 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <dos.h>
+#include <proto/layers.h>
+#include <proto/intuition.h>
+#include <workbench/startup.h>
+#include <workbench/workbench.h>
+#include <gfm/list_management.h>
+#include <gfm/layout.h>
+#include <gfm/listlock.h>
+#include <gfm/galileo_ipc.h>
+#include <gfm/cfg_buttonbank.h>
+#include <gfm/cfg_function.h>
+#include <gfm/cfgdraginfo.h>
+#include <gfm/button_protos.h>
+#include <gfm/button_flags.h>
+#include <gfm/wbarg.h>
+#include <gfm/simplerequest_protos.h>
+#include <gfm/configuration.h>
+#include <gfm/windowid_protos.h>
 #include "config_lib.h"
+#include "config_drag.h"
+#include "galileoconfig_ipc_commands.h"
+#include "config_protos.h"
+#include "select_colours.h"
+#include "function_editor_protos.h"
+#include "button_editor.h"
 #include "config_menus.h"
-#include "config_buttons.h"
+#include "config_buttons_protos.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 // Find out which lister a drop occurred on
 short config_menus_which_list(config_menus_data *data,short x,short y)

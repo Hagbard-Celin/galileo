@@ -37,6 +37,7 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <proto/datatypes.h>
 #include "galileofmlib.h"
 #include "/Program/galileo_config.h"
 

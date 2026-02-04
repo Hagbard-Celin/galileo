@@ -40,13 +40,19 @@ For more information on Directory Opus for Windows please see:
  *	13-06-96	Now strips trailing '#' from filenames as well as '/', '*', and '@'
  */
 
+#include <proto/timer.h>
+#include <gfm/requester.h>
+#include "gui_element.h"
+#include "//Program/listerwindow.h"
 #include "ftp.h"
-#include "ftp_ad_sockproto.h"
+#ifndef AD_INTERNET_INTERN_H
+#include "ftp_intern_pragmas.h"
+#endif
 #include "ftp_ad_errno.h"
-#include "ftp_lister.h"
 #include "ftp_arexx.h"
 #include "ftp_ipc.h"
 #include "ftp_galileoftp.h"
+#include "ftp_lister.h"
 #include "ftp_util.h"
 #include "ftp_list.h"
 

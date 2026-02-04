@@ -35,8 +35,36 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <clib/alib_protos.h>
+#include <proto/intuition.h>
+#include <gfm/listlock.h>
+#include <gfm/listformat.h>
+#include <gfm/list_management.h>
+#include <gfm/cfg_filetype.h>
+#include <gfm/galileo_ipc.h>
+#include <gfm/layout.h>
+#include <gfm/configuration.h>
+#include <gfm/configwin.h>
+#include <gfm/objectlist.h>
+#include <gfm/simplerequest_protos.h>
+#include <gfm/requester.h>
+#include <gfm/stack_size.h>
+
+
+#include "//Library/pos.h"
 #include "config_lib.h"
+#include "config_data.h"
+#include "select_colours.h"
+#include "config_protos.h"
+#include "function_editor.h"
+#include "button_editor.h"
+#include "funceddata.h"
 #include "config_filetypes.h"
+#include "galileoconfig_ipc_commands.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 short __asm __saveds L_Config_Filetypes(
 	register __a0 struct Screen *screen,

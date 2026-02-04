@@ -35,6 +35,19 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#ifndef GALILEOFM_LAYOUT_H
+#include <gfm/layout.h>
+#endif
+#ifndef _GALILEOFMBASE_IPC_H
+#include <gfm/galileo_ipc.h>
+#endif
+#ifndef _GALILEOSCREENDATA_H
+#include <gfm/galileoscreendata.h>
+#endif
+#ifndef GALILEOFM_OBJECTLIST_H
+#include <gfm/objectlist.h>
+#endif
+
 typedef struct
 {
 	NewConfigWindow			newwin;

@@ -35,9 +35,15 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <proto/layers.h>
+#include <proto/intuition.h>
+#include <gfm/pathlist.h>
 #include "config_lib.h"
+#include "config_drag.h"
+#include "function_editor_protos.h"
 #include "config_environment.h"
 #include "//Modules/modules.h"
+#include "enums.h"
 
 typedef struct
 {

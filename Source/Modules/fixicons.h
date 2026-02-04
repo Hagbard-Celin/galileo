@@ -36,9 +36,13 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#define CATCOMP_NUMBERS
-#include "fixicons.strings"
+#include <clib/alib_protos.h>
+#include <proto/intuition.h>
+#include <proto/icon.h>
+#include <gfm/paths_protos.h>
 #include <gfm/version.h>
+#include "/Library/galileofmbase.h"
+#include "modules.h"
 #include "modules_lib.h"
 #include "module.h"
 

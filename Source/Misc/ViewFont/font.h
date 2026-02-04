@@ -1,6 +1,23 @@
+#include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdlib.h>
+#include <proto/exec.h>
+#include <proto/dos.h>
+#include <proto/graphics.h>
+#include <proto/layers.h>
+#include <proto/intuition.h>
+#include <proto/locale.h>
+#include <proto/diskfont.h>
+#include <proto/asl.h>
+#include <proto/wb.h>
+
+
 #define CATCOMP_NUMBERS
 #include "font.strings"
 #include "//Library/galileofmbase.h"
+#include <gfm/devices.h>
+#include <gfm/layout_protos.h>
 #include "//Library/galileofmpragmas.h"
 
 #ifdef RESOURCE_TRACKING

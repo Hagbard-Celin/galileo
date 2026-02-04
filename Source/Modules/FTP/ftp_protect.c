@@ -35,6 +35,12 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <ctype.h>
+#include <exec/types.h>
+#include <libraries/gadtools.h>
+#include <gfm/gadtools.h>
+#include <gfm/layout.h>
+#include <gfm/objectlist.h>
 #include "ftp.h"
 #include "ftp/ftp_galileoftp.h"
 #include "ftp/ftp_ipc.h"

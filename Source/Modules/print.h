@@ -35,9 +35,15 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#define CATCOMP_NUMBERS
-#include "print.strings"
+#include <stddef.h>
+#include <proto/intuition.h>
+#include <proto/gadtools.h>
+#include <proto/asl.h>
+#include <datatypes/datatypesclass.h>
+#include <gfm/simplerequest_protos.h>
 #include <gfm/version.h>
+#include "/Library/galileofmbase.h"
+#include "modules.h"
 #include "modules_lib.h"
 
 typedef struct
@@ -111,33 +117,6 @@ BOOL print_check_abort(print_data *data);
 BOOL print_print_file(print_data *data,BPTR file);
 BOOL print_print_string(print_data *data,char *buf);
 BOOL print_header_footer(print_data *data,short which);
-
-
-enum
-{
-	GAD_PRINT_LAYOUT,
-	GAD_PRINT_OKAY,
-	GAD_PRINT_CANCEL,
-	GAD_PRINT_TEXT_LAYOUT,
-	GAD_PRINT_TEXT_QUALITY,
-	GAD_PRINT_TEXT_SPACING,
-	GAD_PRINT_TEXT_PITCH,
-	GAD_PRINT_LEFT_MARGIN,
-	GAD_PRINT_RIGHT_MARGIN,
-	GAD_PRINT_PAGE_LENGTH,
-	GAD_PRINT_TAB_SIZE,
-	GAD_PRINT_HEADER_LAYOUT,
-	GAD_PRINT_HEADER_FOOTER,
-	GAD_PRINT_TITLE,
-	GAD_PRINT_TITLE_STRING,
-	GAD_PRINT_DATE,
-	GAD_PRINT_PAGE,
-	GAD_PRINT_STYLE,
-	GAD_PRINT_FILENAME,
-	GAD_PRINT_STATUS,
-	GAD_PRINT_ABORT,
-	GAD_PRINT_OUTPUT,
-};
 
 enum
 {

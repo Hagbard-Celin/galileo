@@ -35,6 +35,15 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#ifndef _GALILEOFM_TOOLBAR_H
+#define _GALILEOFM_TOOLBAR_H
+
+#ifndef _GALILEOFM_CFG_BUTTONBANK_H
+#include <gfm/cfg_buttonbank.h>
+#endif
+#ifndef _GALILEOFM_IMAGEREMAP_H
+#include <gfm/imageremap.h>
+#endif
 
 typedef struct ToolBarInfo
 {
@@ -59,9 +68,4 @@ typedef struct ToolBarInfo
 	short			max_width;
 } ToolBarInfo;
 
-ToolBarInfo *OpenToolBar(Cfg_ButtonBank *,char *);
-void FreeToolBar(ToolBarInfo *);
-BOOL GetToolBarCache(ToolBarInfo *,BOOL);
-void FreeToolBarCache(ToolBarInfo *);
-void RemapToolBar(ToolBarInfo *);
-void FreeToolBarRemap(ToolBarInfo *);
+#endif

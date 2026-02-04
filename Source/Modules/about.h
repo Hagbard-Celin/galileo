@@ -35,13 +35,17 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <proto/graphics.h>
+#include <proto/layers.h>
+#include <proto/intuition.h>
+#include <proto/gadtools.h>
+#include <graphics/gfxmacros.h>
+#include <gfm/image_protos.h>
+#include <gfm/imageremap_protos.h>
 #include <gfm/version.h>
+#include "/Library/galileofmbase.h"
+#include "modules.h"
 #include "modules_lib.h"
-
-#define logo_width	63
-#define logo_height	59
-#define logo_mod	8
-#define logo_frames	37
 
 typedef struct
 {
@@ -64,31 +68,6 @@ extern struct Library *DataTypesBase;
 extern APTR logo_obj[logo_frames];
 
 extern ImageRemap remap;
-
-enum
-{
-	GAD_ABOUT_LOGO,
-	GAD_ABOUT_COPYRIGHT,
-	GAD_ABOUT_LICENSE,
-	GAD_ABOUT_OK,
-	GAD_COPYRIGHT_1,
-	GAD_COPYRIGHT_2,
-	GAD_COPYRIGHT_3,
-    GAD_COPYRIGHT_4,
-    GAD_COPYRIGHT_5,
-	GAD_LICENSE_1,
-	GAD_LICENSE_2,
-	GAD_LICENSE_3,
-	GAD_LICENSE_4,
-	GAD_LICENSE_5,
-	GAD_LICENSE_6,
-	GAD_LICENSE_7,
-	GAD_LICENSE_8,
-	GAD_LICENSE_9,
-	GAD_LICENSE_10,
-	GAD_LICENSE_11,
-	GAD_LICENSE_12,
-};
 
 typedef struct
 {

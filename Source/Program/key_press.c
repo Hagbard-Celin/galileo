@@ -35,6 +35,11 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <dos/dos.h>
+#include <gfm/semaphores_protos.h>
+#include <gfm/windowid_protos.h>
+#include <gfm/misc_protos.h>
+#include <gfm/button_flags.h>
 #include "galileofm.h"
 #include "misc_protos.h"
 #include "key_finder.h"

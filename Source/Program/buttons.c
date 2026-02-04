@@ -37,6 +37,9 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include <gfm/semaphores_protos.h>
+#include <gfm/button_protos.h>
+#include <gfm/config_display.h>
 #include "misc_protos.h"
 #include "backdrop_protos.h"
 #include "buttons_protos.h"

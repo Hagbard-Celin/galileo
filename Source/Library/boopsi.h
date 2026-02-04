@@ -36,6 +36,8 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <intuition/gadgetclass.h>
+
 #define THICK	0
 #define THIN	1
 

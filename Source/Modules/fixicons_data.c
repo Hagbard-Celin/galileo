@@ -35,7 +35,10 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#include "fixicons.h"
+#include <exec/types.h>
+#include "module_func_flags.h"
+#include "moduleinfo.h"
+#include "fixicons_data.h"
 
 #define ARG_TEMPLATE	"FILE/M,ALLOWNOBORDERS=ANB/S,ALLOWNOLABELS=ANL/S,NOFIXOFFSET=NFO/S,SYNCWBTOGALILEO=SWG/S,SYNCGALILEOTOWB=SGW/S,REPORT/S"
 

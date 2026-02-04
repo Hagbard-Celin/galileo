@@ -17,8 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-This program is based on the source code of Directory Opus Magellan II, 
-released by GPSoftware under the APL license in 2012. Re-licensed under GPL by 
+This program is based on the source code of Directory Opus Magellan II,
+released by GPSoftware under the APL license in 2012. Re-licensed under GPL by
 permission of Dr Greg Perry, Managing Director of GPSoftware.
 
 Opus® and Directory Opus® and associated images are registered trademarks of GPSoftware.
@@ -31,34 +31,24 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-				 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
-#ifdef _DEBUG_STACK
+#ifndef _GALILEOFMBASE_LOCALE_H
+#define _GALILEOFMBASE_LOCALE_H
 
-#ifndef _GALILEOFM_STACK_CHECK_H
-#define _GALILEOFM_STACK_CHECK_H
-
-/* NOTE: all 680x0 processors keep A7 word-aligned                  */
-/* WARNING: the last word on the stack has the address SPUpper - 2  */
-typedef struct
+// Locale marker
+struct GalileoLocale
 {
-	UWORD	    *SPReg;           /* register A7 of the task we check */
-	UWORD       *SPUpper;         /* upper bound of the stack we are checking */
-	UWORD       *SPUpperFirst;
-	UWORD       *GlobalSPLower;   /* a copy of the local SPLower */
-	ULONG       UsedMax;         /* the maximum stack used so far */
-	UWORD       StackBase[8];    /* the last 8 words on the stack */
-	ULONG       LongStackBase[4];
+    APTR	    li_LocaleBase;
+    APTR	    li_Catalog;
+    char	    *li_BuiltIn;
+    struct Locale   *li_Locale;
+};
 
-	WORD        Filled;
-	UWORD       StackStatus;
-} StackData;
+STRPTR GetString(struct GalileoLocale *,LONG);
 
-void  __asm L_StackCheckBegin(register __a0 struct Task *check_task, register __a1 StackData *stack_data);
-void  __asm L_StackCheckEnd(register __a0 struct Task *check_task, register __a1 StackData *stack_data);
-
-#endif
+struct Library *GetTimerBase(void);
 
 #endif

@@ -36,6 +36,11 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "config_lib.h"
+#include "select_colours.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 // Palette box window dimensions
 ConfigWindow

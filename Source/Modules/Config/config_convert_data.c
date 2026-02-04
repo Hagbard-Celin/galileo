@@ -35,7 +35,14 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <libraries/gadtools.h>
+#include <gfm/suboptionhandle.h>
+#include <gfm/gadtools.h>
 #include "config_lib.h"
+#include "enums.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 ConfigWindow
 	_config_convert_window={

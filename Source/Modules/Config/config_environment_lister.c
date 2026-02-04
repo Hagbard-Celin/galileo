@@ -35,9 +35,14 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/selectionlist.h>
 #include "config_lib.h"
+#include "function_editor_protos.h"
 #include "config_environment.h"
 #include "//Modules/modules.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 // Show list of status bar options
 void _config_env_status_list(ObjectList *objlist,ULONG id,long first,long last)

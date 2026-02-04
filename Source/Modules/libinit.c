@@ -37,8 +37,11 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "modules_lib.h"
+#include "moduleinfo.h"
 
 #define LIB_VER	0
+
+extern ModuleInfo module_info;
 
 int __asm __saveds __UserLibInit(register __a6 struct Library *libbase);
 void __asm __saveds __UserLibCleanup(void);

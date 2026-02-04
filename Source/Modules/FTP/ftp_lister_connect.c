@@ -51,9 +51,17 @@ For more information on Directory Opus for Windows please see:
  */
 
 #include <errno.h>
+#include <stdio.h>
 
+#include <gfm/requester.h>
+#include <gfm/list_management.h>
+#include <gfm/timer.h>
+#include "gui_element.h"
+#include "//Program/lister.h"
 #include "ftp.h"
-#include "ftp_ad_sockproto.h"
+#ifndef AD_INTERNET_INTERN_H
+#include "ftp_intern_pragmas.h"
+#endif
 #include "ftp_ad_errno.h"
 #include "ftp_arexx.h"
 #include "ftp_ipc.h"
@@ -62,6 +70,9 @@ For more information on Directory Opus for Windows please see:
 #include "ftp_util.h"
 #include "ftp_module.h"
 #include "ftp_addrsupp_protos.h"
+#ifndef _FTP_SOCKET_H
+#include "ftp_socket.h"
+#endif
 
 
 #ifndef DEBUG
@@ -812,7 +823,7 @@ static int lister_get_args(
 		if (*ogp->og_oc.oc_anonpass)
 			strcpy(cm->cm_site.se_pass, ogp->og_oc.oc_anonpass);
 		else
-			getuseraddress(cm->cm_site.se_pass);
+			getuseraddress(cm->cm_site.se_pass, ((struct globals *)mld->mld_ipc->userdata)->g_socketbase);
 	}
 
 	return okay;

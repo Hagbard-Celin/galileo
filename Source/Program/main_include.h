@@ -40,6 +40,14 @@ For more information on Directory Opus for Windows please see:
 
 
 #include "galileofm.h"
+#include <gfm/simplerequest_protos.h>
+#include <gfm/popup_protos.h>
+#include <gfm/image_protos.h>
+#include <gfm/icon_cache_protos.h>
+#include <gfm/iff_form.h>
+#ifdef _DEBUG_STACK
+#include "stack_check.h"
+#endif
 #include "lister.h"
 #include "menu_data.h"
 #include "misc_protos.h"
@@ -58,6 +66,7 @@ For more information on Directory Opus for Windows please see:
 #include "notify.h"
 #include "wb.h"
 #include "event_loop_protos.h"
+#include "pattern_protos.h"
 
 
 #include "/Modules/modules.h"

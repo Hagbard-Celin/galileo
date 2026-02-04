@@ -35,6 +35,10 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/semaphores_protos.h>
+#include <gfm/config_display.h>
+#include <gfm/functype.h>
+#include <gfm/button_flags.h>
 #include "galileofm.h"
 #include "misc_protos.h"
 #include "menu_data.h"

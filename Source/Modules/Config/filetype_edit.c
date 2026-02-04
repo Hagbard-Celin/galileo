@@ -35,7 +35,20 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <gfm/listlock.h>
+#include <gfm/list_management.h>
+#include <gfm/galileo_ipc.h>
+#include <gfm/layout.h>
+#include <gfm/listformat.h>
+#include <gfm/cfg_filetype.h>
+#include <gfm/configuration.h>
+#include <gfm/stack_size.h>
+#include <gfm/config_filetype.h>
 #include "config_lib.h"
+#include "config_data.h"
+#include "galileoconfig_ipc_commands.h"
+#include "function_editor.h"
+#include "funceddata.h"
 #include "config_filetypes.h"
 #include "//Program/main_commands.h"
 

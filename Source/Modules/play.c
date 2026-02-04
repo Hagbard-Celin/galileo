@@ -37,6 +37,7 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "play.h"
+#include "play_data.h"
 #include "music.h"
 
 char __far _LibID[] = "play.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;

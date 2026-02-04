@@ -37,9 +37,9 @@ For more information on Directory Opus for Windows please see:
 */
 
 
-#include "galileofmlib.h"
-#include "stack_check.h"
 #ifdef _DEBUG_STACK
+#include "galileofmlib.h"
+#include <gfm/stack_check_ipc.h>
 
 
 #define WHITE  "\x1B[32m"

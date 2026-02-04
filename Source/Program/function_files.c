@@ -37,6 +37,10 @@ For more information on Directory Opus for Windows please see:
 */
 
 #include "galileofm.h"
+#include <gfm/semaphores_protos.h>
+#include <gfm/paths_protos.h>
+#include <gfm/cfg_flags.h>
+#include "lister.h"
 #include "dirlist_protos.h"
 #include "misc_protos.h"
 #include "reselect_protos.h"

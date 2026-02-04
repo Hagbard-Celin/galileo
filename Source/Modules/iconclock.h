@@ -35,9 +35,16 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <ctype.h>
+#include <stdlib.h>
+#include <proto/graphics.h>
+#include <proto/intuition.h>
+#include <proto/wb.h>
+
 #define CATCOMP_NUMBERS
 #include "iconclock.strings"
 #include <gfm/version.h>
+#include "/Library/galileofmbase.h"
 #include "modules_lib.h"
 #include "module.h"
 

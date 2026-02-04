@@ -35,7 +35,14 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#include "join.h"
+#include <exec/types.h>
+#include <libraries/gadtools.h>
+#include <gfm/gadtools.h>
+#include <gfm/gadget_tags.h>
+#include <gfm/configwin.h>
+#include "module_func_flags.h"
+#include "moduleinfo.h"
+#include "join_data.h"
 
 #define ARG_1	"FILE=FROM/M/A,AS=TO/A"
 #define ARG_2	"FILE=FROM/A,TO/A,CHUNK/N/A,STEM"

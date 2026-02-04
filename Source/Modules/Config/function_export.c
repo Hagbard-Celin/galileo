@@ -35,7 +35,21 @@ For more information on Directory Opus for Windows please see:
 
 */
 
+#include <libraries/iffparse.h>
+#include <gfm/cfg_buttonbank.h>
+#include <gfm/cfg_function.h>
+#include <gfm/cfg_instruction.h>
+#include <gfm/buffered_io.h>
+#include <gfm/button_flags.h>
+#include <gfm/misc_protos.h>
+#include <gfm/config_command.h>
+#include <gfm/iff.h>
+#include <gfm/iff_form.h>
+#include <gfm/configuration.h>
 #include "config_lib.h"
+
+#define CATCOMP_NUMBERS
+#include "config.strings"
 
 void write_str(APTR file,char *str,...);
 
