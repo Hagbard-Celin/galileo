@@ -386,7 +386,7 @@ void diskcopy_free(diskcopy_data *data)
 		Att_RemList(data->source_list,0);
 
 		// Delete port
-        while (msg=GetMsg(data->dest_port))
+		while (msg=GetMsg(data->dest_port))
 			ReplyMsg(msg);
 		DeleteMsgPort(data->dest_port);
 
@@ -881,7 +881,7 @@ BOOL do_diskcopy(diskcopy_data *data,APTR status)
 			disktype==ID_INTER_FFS_DISK ||
 			disktype==ID_FASTDIR_DOS_DISK ||
 			disktype==ID_FASTDIR_FFS_DISK ||
-            disktype==ID_LONG_DOS_DISK ||
+			disktype==ID_LONG_DOS_DISK ||
 			disktype==ID_LONG_FFS_DISK) serialise=1;
 	}
 

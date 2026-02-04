@@ -646,19 +646,19 @@ static int lister_connect_and_login(struct galileoftp_globals *og, struct connec
 
 			// Add all the FTP stuff to the lister now
 
-		/*************************************************
-		*	WAS LST_CLEAR but should be LST_EMPTY
-		*
-		*	rexx_lst_clear( cld->cld_cm->cm_galileo, cld->cld_handle );
-		*	send_rexxa( cld->cld_cm->cm_galileo, REXX_REPLY_NONE, "lister set %lu title FTP:%s", cld->cld_handle, cld->cld_cm->cm_site.se_host );
-		*
-		*
-		* NOTE: these are done by lister empty command
-		*
-		*	send_rexxa( cld->cld_cm->cm_galileo, REXX_REPLY_NONE, "lister set %lu namelength 256", cld->cld_handle );
-		*	send_rexxa( cld->cld_cm->cm_galileo, REXX_REPLY_NONE, "lister set %lu case on", cld->cld_handle );
-		*
-		****************************************************/
+			/*************************************************
+			 *	WAS LST_CLEAR but should be LST_EMPTY
+			 *
+			 *	rexx_lst_clear( cld->cld_cm->cm_galileo, cld->cld_handle );
+			 *	send_rexxa( cld->cld_cm->cm_galileo, REXX_REPLY_NONE, "lister set %lu title FTP:%s", cld->cld_handle, cld->cld_cm->cm_site.se_host );
+			 *
+			 *
+			 * NOTE: these are done by lister empty command
+			 *
+			 *	send_rexxa( cld->cld_cm->cm_galileo, REXX_REPLY_NONE, "lister set %lu namelength 256", cld->cld_handle );
+			 *	send_rexxa( cld->cld_cm->cm_galileo, REXX_REPLY_NONE, "lister set %lu case on", cld->cld_handle );
+			 *
+			 ****************************************************/
 
 			rexx_lst_empty(cld->cld_cm->cm_galileo, cld->cld_handle);
 

@@ -466,7 +466,7 @@ ULONG __asm __saveds start_init(
 void start_cleanup(StartMenu *menu)
 {
 	IPCData *ipc;
-    struct Message *msg;
+	struct Message *msg;
 	
 	// Invalid?
 	if (!menu) return;

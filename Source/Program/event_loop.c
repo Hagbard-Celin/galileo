@@ -71,7 +71,7 @@ void event_loop()
 	// Open timer for filetype updating
 	filetype_timer=AllocTimer(UNIT_VBLANK,drag_timer->port);
 
-    // Open timer to check for screen needing to open
+	// Open timer to check for screen needing to open
 	open_timer=AllocTimer(UNIT_VBLANK,drag_timer->port);
 
 	// Start random seed timer

@@ -2255,7 +2255,7 @@ void _config_env_set(config_env_data *data,short option)
 				data->config->env_NewIconsPrecision);
 
 
-		if	(IconBase->lib_Version>=44)
+			if (IconBase->lib_Version>=44)
 			{
 			DisableObject(data->option_list,GAD_ENVIRONMENT_NEWICONS_ENABLE,TRUE);
 			DisableObject(data->option_list,GAD_ENVIRONMENT_NEWICONS_DISCOURAGE,TRUE);

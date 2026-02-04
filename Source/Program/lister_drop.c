@@ -410,7 +410,6 @@ void lister_receive_drop(Lister *dest, GalileoListerAppMessage *msg)
 }
 
 
-
 // Test to see whether a drag is over a lister
 DirEntry *lister_test_drag(
 	Lister *our_lister,

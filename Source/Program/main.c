@@ -499,9 +499,9 @@ void startup_init_gui()
 	else GUI->date_length=9;
 
 	// See if SysIHack is running
-    Forbid();
+	Forbid();
 	if (FindTask("« sysihack »")) GUI->flags|=GUIF_SYSIHACK;
-    Permit();
+	Permit();
 
 	// Allocate a string for spaces, and the global undo buffer
 	if (!(str_space_string=AllocMemH(global_memory_pool,MAXDISPLAYLENGTH)) ||

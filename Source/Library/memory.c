@@ -32,7 +32,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -64,7 +64,7 @@ For more information on Directory Opus for Windows please see:
 	              MEMF_CLEAR  = clear memory
 	              MEMF_PUBLIC = use semaphore locking when accessing pool
 
-                  Other MEMF flags as normal
+		  Other MEMF flags as normal
 */
 
 void *__asm __saveds L_NewMemHandle(
@@ -77,7 +77,7 @@ void *__asm __saveds L_NewMemHandle(
 
 	// Allocate handle
 #ifdef RESOURCE_TRACKING
-    if (!(handle=NRT_AllocVec(sizeof(MemHandle),MEMF_CLEAR)))
+	if (!(handle=NRT_AllocVec(sizeof(MemHandle),MEMF_CLEAR)))
 #else
 	if (!(handle=AllocVec(sizeof(MemHandle),MEMF_CLEAR)))
 #endif
@@ -123,8 +123,8 @@ void *__asm __saveds L_NewMemHandle(
 	// If puddle size is >0, try to create a pool
 	if (puddle_size>0)
 	{
-        // Avoid redundant clearing of memory
-        type&=~MEMF_CLEAR;
+	// Avoid redundant clearing of memory
+	type&=~MEMF_CLEAR;
 
 		handle->pool_header=
 			(SysBase->lib_Version>=39)?	CreatePool(type,puddle_size,thresh_size):
@@ -159,7 +159,7 @@ void __asm __saveds L_FreeMemHandle(register __a0 MemHandle *handle)
 
 		// Free the handle
 #ifdef RESOURCE_TRACKING
-        NRT_FreeVec(handle);
+		NRT_FreeVec(handle);
 #else
 		FreeVec(handle);
 #endif
@@ -213,7 +213,7 @@ void __asm __saveds L_ClearMemHandle(register __a0 MemHandle *handle)
 				// Free this entry
 				ptr=(ULONG *)node;
 #ifdef RESOURCE_TRACKING
-                NRT_FreeMem(node,ptr[3]);
+				NRT_FreeMem(node,ptr[3]);
 #else
 				FreeMem(node,ptr[3]);
 #endif
@@ -255,8 +255,8 @@ void __asm __saveds L_ClearMemHandle(register __a0 MemHandle *handle)
 	                  <memory pointer>	0
 
 	handle = handle to use for allocations
-             can be 0 in which case size will be tracked but memory must be
-             freed manually (ie can't FreeMemHandle())
+	     can be 0 in which case size will be tracked but memory must be
+	     freed manually (ie can't FreeMemHandle())
 	size   = size of allocation
 */
 
@@ -272,13 +272,13 @@ void *__asm __saveds L_AllocMemH(
 
 	// If no handle supplied, use AllocMem()
 	if (!handle)
-    {
+	{
 #ifdef RESOURCE_TRACKING
-        mem=NRT_AllocMem(size,MEMF_CLEAR);
+		mem=NRT_AllocMem(size,MEMF_CLEAR);
 #else
-        mem=AllocMem(size,MEMF_CLEAR);
+		mem=AllocMem(size,MEMF_CLEAR);
 #endif
-    }
+	}
 	// Allocate memory through handle
 	else
 	{
@@ -318,7 +318,7 @@ void *__asm __saveds L_AllocMemH(
 
 			// Allocate extra, for a node
 #ifdef RESOURCE_TRACKING
-            if (mem=NRT_AllocMem(size,handle->type))
+			if (mem=NRT_AllocMem(size,handle->type))
 #else
 			if (mem=AllocMem(size,handle->type))
 #endif
@@ -410,7 +410,7 @@ void __asm __saveds L_FreeMemH(register __a0 void *memory)
 
 					// Free allocation
 #ifdef RESOURCE_TRACKING
-                    NRT_FreeMem(node,mem[1]);
+					NRT_FreeMem(node,mem[1]);
 #else
 					FreeMem(node,mem[1]);
 #endif
@@ -423,12 +423,12 @@ void __asm __saveds L_FreeMemH(register __a0 void *memory)
 
 		// Free with FreeMem()
 		else
-        {
+		{
 #ifdef RESOURCE_TRACKING
-            NRT_FreeMem(mem,mem[1]);
+			NRT_FreeMem(mem,mem[1]);
 #else
-        	FreeMem(mem,mem[1]);
+			FreeMem(mem,mem[1]);
 #endif
-        }
+		}
 	}
 }

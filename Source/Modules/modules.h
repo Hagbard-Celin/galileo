@@ -76,7 +76,7 @@ struct pointer_packet
 };
 
 #define POINTERF_COPY		(1<<0)
-#define POINTERF_DELPORT    (1<<1)
+#define POINTERF_DELPORT	(1<<1)
 #define POINTERF_LOCKED		(1<<16)
 
 #define COMMANDF_RESULT		(1<<0)
@@ -95,22 +95,22 @@ struct GalileoCommandList
 	char		*gcl_Help;
 };
 
-#define GCNLF_ICONIFIED		  (1<<0)	  // Lister opens iconified
-#define GCNLF_DEVICE_LIST	  (1<<1)	  // Lister shows device list
-#define GCNLF_NO_POSITION	  (1<<2)	  // No position set
-#define GCNLF_LOCK_POS		  (1<<3)	  // Position is locked
-#define GCNLF_SOURCE		  (1<<4)	  // Lister starts as a source
-#define GCNLF_DEST			  (1<<5)	  // Starts as destination
-#define GCNLF_LOCKED		  (1<<6)	  // Source/dest locked
-#define GCNLF_ICON			  (1<<7)	  // View as icons
-#define GCNLF_SHOW_ALL		  (1<<8)	  // Show all
-#define GCNLF_CACHE_LIST	  (1<<9)	  // Cache list
-#define GCNLF_ICON_ACTION	  (1<<10)	  // Icon action
-#define GCNLF_DEV_FULL		  (1<<11)	  // Full device list
-#define GCNLF_DEV_BRIEF		  (1<<12)	  // Brief device list
-#define GCNLF_INVISIBLE		  (1<<13)	  // Opens invisible
-#define GCNLF_NOACTIVE		  (1<<14)	  // No activate
-#define GCNLF_FROMICON        (1<<31)
+#define GCNLF_ICONIFIED		(1<<0)		// Lister opens iconified
+#define GCNLF_DEVICE_LIST	(1<<1)		// Lister shows device list
+#define GCNLF_NO_POSITION	(1<<2)		// No position set
+#define GCNLF_LOCK_POS		(1<<3)		// Position is locked
+#define GCNLF_SOURCE		(1<<4)		// Lister starts as a source
+#define GCNLF_DEST		(1<<5)		// Starts as destination
+#define GCNLF_LOCKED		(1<<6)		// Source/dest locked
+#define GCNLF_ICON		(1<<7)		// View as icons
+#define GCNLF_SHOW_ALL		(1<<8)		// Show all
+#define GCNLF_CACHE_LIST	(1<<9)		// Cache list
+#define GCNLF_ICON_ACTION	(1<<10)		// Icon action
+#define GCNLF_DEV_FULL		(1<<11)		// Full device list
+#define GCNLF_DEV_BRIEF		(1<<12)		// Brief device list
+#define GCNLF_INVISIBLE		(1<<13)		// Opens invisible
+#define GCNLF_NOACTIVE		(1<<14)		// No activate
+#define GCNLF_FROMICON		(1<<31)
 
 #endif
 

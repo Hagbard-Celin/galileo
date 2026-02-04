@@ -55,7 +55,7 @@ For more information on Directory Opus for Windows please see:
 
 /*************************************************************
      This file controls the interaction with FTP protocol
-**************************************************************/
+ **************************************************************/
 
 #include <ctype.h>
 #include <stdarg.h>
@@ -66,6 +66,7 @@ For more information on Directory Opus for Windows please see:
 #include <exec/types.h>
 
 #include <gfm/buffered_io.h>
+
 // Network includes
 #ifndef AD_INTERNET_INTERN_H
 #include "ftp_intern_pragmas.h"
@@ -98,8 +99,8 @@ For more information on Directory Opus for Windows please see:
 extern void __stdargs logprintf(char *fmt, ...);
 
 /**
- **	Function definitions
- **/
+**	Function definitions
+**/
 
 // Change to parent dir
 int ftp_cdup(struct ftp_info *info, int (*updatefn)(void *,int,char *), void *updateinfo)
@@ -330,18 +331,18 @@ int ftp_syst(struct ftp_info *info)
 
 
 /*************************************************************
-*	3.3.99 GP
-*	Send the ftp command string
-*
-*	This function expects the cmd to be terminated by \r\n
-*
-*	The alternative does not work on all servers. The \r\n MUST be sent as
-*	part of the main command
-*
-*	Not work: send( info->fi_cs, (char *)cmd, len, 0 );
-*		  send( info->fi_cs, "\r\n", 2, 0 );
-*
-**************************************************************/
+ *	3.3.99 GP
+ *	Send the ftp command string
+ *
+ *	This function expects the cmd to be terminated by \r\n
+ *
+ *	The alternative does not work on all servers. The \r\n MUST be sent as
+ *	part of the main command
+ *
+ *	Not work: send( info->fi_cs, (char *)cmd, len, 0 );
+ *		  send( info->fi_cs, "\r\n", 2, 0 );
+ *
+ **************************************************************/
 
 static int _ftp(struct ftp_info *info, unsigned long flags, const char *cmd)
 {
@@ -819,7 +820,7 @@ unsigned int get(struct ftp_info *info, int (*updatefn)(void *,unsigned int,unsi
 			if (p = strstr(info->fi_iobuf, " bytes)"))
 				if (isdigit(*--p))
 				{
-					while (isdigit(*p--))   ;
+					while (isdigit(*p--));
 					total = atoi(p+2);
 				}
 
@@ -915,7 +916,7 @@ unsigned int get(struct ftp_info *info, int (*updatefn)(void *,unsigned int,unsi
 			s_close(ds, SocketBase);
 
 #ifdef	DEBUG
-			//			if	(ui)
+			//			if (ui)
 			//			timeit( ui, bytes );
 #endif
 
@@ -953,13 +954,13 @@ unsigned int get(struct ftp_info *info, int (*updatefn)(void *,unsigned int,unsi
 }
 
 /*************************************************************
-*
-* Wait until data ready from socket and fill buffer
-*
-* Function returns number of chars read for success or 0,-1 for timeouts/errors.
-* also can return 0 for EOF condition I think!
-*
-*/
+ *
+ * Wait until data ready from socket and fill buffer
+ *
+ * Function returns number of chars read for success or 0,-1 for timeouts/errors.
+ * also can return 0 for EOF condition I think!
+ *
+ */
 
 
 static int iread(struct ftp_info *info, int skt, BOOL checkbreak)
@@ -1031,14 +1032,14 @@ static void flush_socket_buffer(struct ftp_info *info)
 }
 
 /*************************************************************
-*
-*	The function for reading from socket skt, char-by-char. If
-*	there is anything in the buffer, the character is returned from the
-*	buffer. Otherwise, refill the buffer and return the first
-*	character.
-*
-* 	Function returns 1 for success or 0,-1 for timeouts/errors.
-*/
+ *
+ *	The function for reading from socket skt, char-by-char. If
+ *	there is anything in the buffer, the character is returned from the
+ *	buffer. Otherwise, refill the buffer and return the first
+ *	character.
+ *
+ * 	Function returns 1 for success or 0,-1 for timeouts/errors.
+ */
 
 int buf_sgetc(struct ftp_info *info, int skt, BOOL checkbreak, char *ret)
 {
@@ -1891,7 +1892,7 @@ int _getreply(
 					multi = 1;
 			}
 			// End of multi-line reply?
-			else if	(multi)
+			else if (multi)
 				multi = 0;
 		}
 
@@ -1937,9 +1938,9 @@ int getreply(struct ftp_info *info)
 //
 BOOL pasv_to_address(struct sockaddr_in *address, const char *buf)
 {
-	int n;			// Scratch for address numbers
-	const char *in;		// Convert address from here
-	unsigned char *out;	// Convert address to here
+	int n;				// Scratch for address numbers
+	const char *in;			// Convert address from here
+	unsigned char *out;		// Convert address to here
 	BOOL good = TRUE;
 
 	if (!strncmp("227 Entering Passive Mode (", buf, 27))

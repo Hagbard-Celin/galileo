@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -487,13 +487,13 @@ void __asm __saveds L_DecodeILBM(
 	unsigned long bmoffset=0;
 	struct RastPort rp,temprp;
 	struct BitMap *tempbm=0;
-    UBYTE *buffer=0;
+	UBYTE *buffer=0;
 
 //    UBYTE destp96 = p96GetBitMapAttr(dest,P96BMA_ISP96);
-    struct TrueColorInfo buffer_infop;
-    struct RenderInfo rinfop;
+	struct TrueColorInfo buffer_infop;
+	struct RenderInfo rinfop;
 
-    // Check valid source and destination
+	// Check valid source and destination
 	if (!source || !dest) return;
 
 	// Masking?
@@ -517,8 +517,6 @@ void __asm __saveds L_DecodeILBM(
 		dest_depth=dest->Depth;
 	}
 
-           
-
 	// Check height doesn't exceed destination bitmap
 	if (height>dest_rows) height=dest_rows;
 
@@ -537,22 +535,23 @@ void __asm __saveds L_DecodeILBM(
 		// Got buffer?
 		if (buffer)
 		{
-            if (planes==24)
-            {
-            buffer_infop.PixelDistance=3;
-            buffer_infop.BytesPerRow=width*3;
-            buffer_infop.RedData=buffer;
-            buffer_infop.GreenData=buffer+1;
-            buffer_infop.BlueData=buffer+2;
-            }
-            else
-            {
-            rinfop.Memory=buffer;
-            rinfop.BytesPerRow = (WORD)width;
-            rinfop.pad = 0;
-            rinfop.RGBFormat = RGBFB_CLUT;
-            }
-            // Set up dummy rastport
+			if (planes==24)
+			{
+				buffer_infop.PixelDistance=3;
+				buffer_infop.BytesPerRow=width*3;
+				buffer_infop.RedData=buffer;
+				buffer_infop.GreenData=buffer+1;
+				buffer_infop.BlueData=buffer+2;
+			}
+			else
+			{
+				rinfop.Memory=buffer;
+				rinfop.BytesPerRow = (WORD)width;
+				rinfop.pad = 0;
+				rinfop.RGBFormat = RGBFB_CLUT;
+			}
+
+			// Set up dummy rastport
 			InitRastPort(&rp);
 			rp.BitMap=dest;
 
@@ -721,39 +720,38 @@ void __asm __saveds L_DecodeILBM(
 			// Writepixel?
 			if (flags&GILBMF_WRITEPIX)
 			{
+			    // P96?
+			    if (P96Base)
+			    {
+				if (planes==24)
+				{
+				    //Write true color
+				    p96WriteTrueColorData(
+				    &buffer_infop,0,0,
+				    &rp,0,row,
+				    width,1);
+				}
+				else
+				{
+				    //Write pixel array
+				    p96WritePixelArray(&rinfop,0,0,&rp,0,row,width,1);
+				}
 
-                // P96?
-                if (P96Base)
-                {
-                    if (planes==24)
-                    {
-                    	//Write true color
-                   	    p96WriteTrueColorData(
-               		    &buffer_infop,0,0,
-                   	    &rp,0,row,
-                   	    width,1);
-                    }
-                    else
-                    {
-                        //Write pixel array
-                    	p96WritePixelArray(&rinfop,0,0,&rp,0,row,width,1);
-                    }
+			    }
 
-                }
-
-/*
+			    /*
 				// CyberGfx?
 				if (CyberGfxBase)
 				{
-					// Write pixel array
-					WritePixelArray(buffer,0,0,width,&rp,0,row,width,1,(planes==24)?RECTFMT_RGB:RECTFMT_LUT8);
+				    // Write pixel array
+				    WritePixelArray(buffer,0,0,width,&rp,0,row,width,1,(planes==24)?RECTFMT_RGB:RECTFMT_LUT8);
 				}
-*/
-				else
-                {
-				     // Write to bitmap
-                     WritePixelLine8(&rp,0,row,width,buffer,&temprp);
-                }
+			    */
+			    else
+			    {
+				// Write to bitmap
+				WritePixelLine8(&rp,0,row,width,buffer,&temprp);
+			    }
 			}
 
 			// Increment bitmap offset

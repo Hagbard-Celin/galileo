@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -48,39 +48,39 @@ For more information on Directory Opus for Windows please see:
 
 typedef struct
 {
-	struct Screen		 *screen;
-	struct Window		 *window;
-	IPCData				 *ipc;
+	struct Screen		*screen;
+	struct Window		*window;
+	IPCData			*ipc;
 
-	ConfigWindow		 win_dims;
-	NewConfigWindow		 new_win;
-	ObjectList			 *list;
+	ConfigWindow		win_dims;
+	NewConfigWindow		new_win;
+	ObjectList		*list;
 
-	Att_List			 *device_list;
+	Att_List		*device_list;
 
-	struct InfoData		 info;
-	struct FileInfoBlock fib;
-	char				 disk_name[32];
+	struct InfoData		info;
+	struct FileInfoBlock	fib;
+	char			disk_name[32];
 
-	char				 default_name[32];
-	char				 default_ffs;
-	char				 default_int;
-	char				 default_cache;
-    char    	         default_long;
-	char			 	 default_trash;
-	char			 	 default_boot;
-	char			 	 default_verify;
+	char			default_name[32];
+	char			default_ffs;
+	char			default_int;
+	char			default_cache;
+	char			default_long;
+	char			default_trash;
+	char			default_boot;
+	char			default_verify;
 
-	Point			 	 window_pos;
-	char			 	 pos_valid;
+	Point			window_pos;
+	char			pos_valid;
 
-	char			 	 status_title[80];
-	unsigned long	 	 dos_type;
-    int             	 latestffs_ver;
+	char			status_title[80];
+	unsigned long	 	dos_type;
+	int			latestffs_ver;
 
-	char				 selection[80];
+	char			selection[80];
 
-	short				 abort_bit;
+	short			abort_bit;
 } format_data;
 
 BOOL format_open(format_data *data,BOOL);

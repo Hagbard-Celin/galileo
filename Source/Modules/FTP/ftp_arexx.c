@@ -104,33 +104,33 @@ extern struct Library *ResTrackBase;
 
    // call "lister getstring" if we have a handle, "galileo getstring" otherwise
    char *rexx_getstring(
-        const char *galileo,
-        ULONG       handle,
-        char       *text,
-        BOOL        secure,
-        int         length,
-        char       *deflt,
-        char       *buttons )
+	const char *galileo,
+	ULONG       handle,
+	char       *text,
+	BOOL        secure,
+	int         length,
+	char       *deflt,
+	char       *buttons )
    {
    char *result = 0;
 
    if	(handle)
-        result = (char *)send_rexxa( galileo, REXX_REPLY_RESULT,
-                "lister getstring %lu '%s'%s%ld '%s' %s",
-                handle,
-                text,
-                secure ? " secure " : " ",
-                length,
-                deflt,
-                buttons );
+	result = (char *)send_rexxa( galileo, REXX_REPLY_RESULT,
+		"lister getstring %lu '%s'%s%ld '%s' %s",
+		handle,
+		text,
+		secure ? " secure " : " ",
+		length,
+		deflt,
+		buttons );
    else
-        result = (char *)send_rexxa( galileo, REXX_REPLY_RESULT,
-                "galileo getstring '%s'%s%ld '%s' %s",
-                text,
-                secure ? " secure " : " ",
-                length,
-                deflt,
-                buttons );
+	result = (char *)send_rexxa( galileo, REXX_REPLY_RESULT,
+		"galileo getstring '%s'%s%ld '%s' %s",
+		text,
+		secure ? " secure " : " ",
+		length,
+		deflt,
+		buttons );
 
    return result;
    }

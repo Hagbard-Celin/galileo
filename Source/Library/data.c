@@ -40,8 +40,8 @@ For more information on Directory Opus for Windows please see:
 
 struct DosLibrary	*DOSBase;
 
-struct IntuitionBase *IntuitionBase;
-struct GfxBase *GfxBase;
+struct IntuitionBase	*IntuitionBase;
+struct GfxBase		*GfxBase;
 
 struct Library		*GadToolsBase;
 struct Library		*AslBase;

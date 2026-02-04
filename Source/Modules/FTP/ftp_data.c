@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-		http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -66,7 +66,7 @@ ModuleFunction
 	{3,"FTPSetVar",		MSG_FTP_SETVAR,	FUNCF_WANT_SOURCE,	SETVAR_TEMPLATE},
 	{4,"FTPOptions",	MSG_FTP_OPTIONS,FUNCF_WANT_SOURCE,	OPTIONS_TEMPLATE},
 	{5,"FTPAdd",		MSG_FTP_FTPADD,	FUNCF_NEED_SOURCE,	ADD_TEMPLATE},
-		{6,"FTPQuit",		MSG_FTP_QUIT,	0,			QUIT_TEMPLATE}};
+	{6,"FTPQuit",		MSG_FTP_QUIT,	0,			QUIT_TEMPLATE}};
 
 
 /************** gui stuff *****************************/

@@ -117,7 +117,7 @@ BOOL __asm __saveds L_IPC_Launch(
 		L_FreeSemaphore(&gfmlib_data.path_lock);
 
 #ifdef _DEBUG_IPCPROC
-	KPrintF("L_IPC_Launch3 Launching: %s with Pathlist: %lx \n", name, pathlist);
+		KPrintF("L_IPC_Launch3 Launching: %s with Pathlist: %lx \n", name, pathlist);
 #endif
 
 		// Fill out tags

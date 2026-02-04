@@ -107,7 +107,7 @@ void            lister_prog_info3      (struct ftp_node *, char *info);
 void            lister_prog_init       (struct ftp_node *, char *title, char *info, char *name, int file, int bar);
 void            lister_prog_init_multi (struct ftp_node *, char *title, BOOL short_display, char *name, int file, int bar);
 void            lister_prog_name       (struct ftp_node *, char *name);
-int lister_request         (struct ftp_node *, Tag, ...);
+int             lister_request         (struct ftp_node *, Tag, ...);
 int             handle_has_handler     (const char *galileo, APTR handle);
 int             lister_get_path        (struct ftp_node *, char *buffer);
 int             lister_long_message    (struct ftp_node *, Att_List *msg, ULONG flags);
