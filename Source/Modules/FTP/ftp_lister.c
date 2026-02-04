@@ -147,7 +147,6 @@ For more information on Directory Opus for Windows please see:
 #include "ftp_info.h"
 #endif
 #include "ftp_lister.h"
-#include "ftp_galileoftp.h"
 #include "ftp_util.h"
 #include "ftp_recursive.h"
 #include "ftp_addrsupp_protos.h"
