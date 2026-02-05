@@ -46,7 +46,6 @@ For more information on Directory Opus for Windows please see:
 
 int __asm __saveds __UserLibInit(register __a6 struct Library *libbase);
 void __asm __saveds __UserLibCleanup(void);
-char *_ProgramName="galileoconfig.gfmmodule";
 
 char __far _LibID[] = "galileoconfig.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 
