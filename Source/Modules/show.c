@@ -40,6 +40,7 @@ For more information on Directory Opus for Windows please see:
 #include "show_data.h"
 
 static const unsigned short pens[1]={(unsigned short)~0};
+
 char __far _LibID[] = "show.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 
 int __asm __saveds L_Module_Entry_Internal(

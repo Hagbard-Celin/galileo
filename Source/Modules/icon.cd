@@ -6,9 +6,6 @@
 MSG_ICON_TITLE (1000//)
 %s : %s (%s)
 ;
-MSG_ICON_FILE_SIZE (//)
-Info-file Size:
-;
 MSG_ICON_SAVE (//)
 _Save
 ;
@@ -21,68 +18,11 @@ _Cancel
 MSG_BLOCKS (//)
 Blocks:
 ;
-MSG_BLOCKS_POSTFIX (//)
- blocks
-;
 MSG_BYTES (//)
 Bytes:
 ;
-MSG_IMG_SIZE (//)
-Pixels:
-;
-MSG_COLORS (//)
-Colors:
-;
-MSG_MORE (//)
-More..
-;
-MSG_INFO_FILE_MORE (//)
-.info file details
-;
-MSG_DEV_NAME (//)
-on
-;
-MSG_DEVICE (//)
-Device:
-;
-MSG_STATE (//)
-State:
-;
-MSG_ERRORS (//)
-Errors:
-;
-MSG_FILESYSTEM (//)
-Filesystem:
-;
-MSG_DEFAULT_TOOL (//)
-Defau_lt Tool:
-;
-MSG_RAM_DEVICE (//)
-n/a
-;
-MSG_HANDLER (//)
-Handler:
-;
-MSG_UNIT (//)
-unit
-;
-MSG_CAPACITY (//)
-Total:
-;
-MSG_BLOCKSIZE (//)
-Blocksize:
-;
-MSG_BYTES_POSTFIX (//)
- bytes
-;
 MSG_STACK (//)
 St_ack:
-;
-MSG_VOLNAME (//)
-_Name:
-;
-MSG_TYPE (//)
-Type:
 ;
 MSG_LAST_CHANGED (//)
 Changed:
@@ -99,6 +39,9 @@ _New
 MSG_DELETE (//)
 _Delete
 ;
+MSG_DEFAULT_TOOL (//)
+Defau_lt Tool:
+;
 MSG_SIZE (//)
 Size:
 ;
@@ -108,8 +51,14 @@ Used:
 MSG_FREE (//)
 Free:
 ;
+MSG_FILESYSTEM (//)
+Filesystem:
+;
 MSG_CREATED (//)
 Created:
+;
+MSG_BLOCKS_POSTFIX (//)
+ blocks
 ;
 MSG_ICON_DISK (//)
 Volume
@@ -123,35 +72,8 @@ Tool
 MSG_ICON_PROJECT (//)
 Project
 ;
-MSG_ICON_HOLD (//)
-Hold
-;
-MSG_ICON_SCRIPT (//)
-Script
-;
-MSG_ICON_PURE (//)
-Pure
-;
-MSG_ICON_ARCHIVED (//)
-Archived
-;
-MSG_ICON_READABLE (//)
-Readable
-;
-MSG_ICON_WRITABLE (//)
-Writable
-;
-MSG_ICON_EXECUTABLE (//)
-Executable
-;
-MSG_ICON_DELETABLE (//)
-Deletable
-;
-MSG_VALIDATING (//)
+MSG_VALIDATING (+7//)
 Validating
-;
-MSG_READ_ONLY (//)
-Read Only
 ;
 MSG_WRITE_PROTECTED (//)
 Read Only
@@ -162,7 +84,7 @@ Read/Write
 MSG_UNREADABLE (//)
 Unreadable
 ;
-MSG_UNKNOWN (//)
+MSG_UNKNOWN (+8//)
 ???
 ;
 ;
@@ -170,7 +92,7 @@ MSG_ICONINFO_DESC (//)
 Show/edit icon information
 ;
 ;
-MSG_SPECIAL_MENU (//)
+MSG_SPECIAL_MENU (+4//)
 Special
 ;
 MSG_AUTHOR (+2//)
@@ -244,23 +166,11 @@ Copy Both Images
 MSG_COPY_TOOLTYPES (//)
 Copy Tooltypes
 ;
-MSG_DEFICON_NEWICON (//)
-NewIcon (DefIcon)
-;
-MSG_DEFICON_OLDICON (//)
-Bitmap DefIcon
-;
-MSG_DEFICON_PALETTEMAPPED (//)
-Palette Mapped DefIcon
-;
 MSG_ICON_NEWICON (//)
 NewIcon
 ;
 MSG_ICON_OLDICON (//)
 Bitmap Icon
-;
-MSG_ICON_PALETTEMAPPED (//)
-Palette Mapped Icon
 ;
 MSG_ENTER_FUNCTION (//)
 Enter function to call icon editor\n(To use IconEdit you must\ntick the AppMessage box)
@@ -280,11 +190,106 @@ Icon has been modified.\nDo you wish to save it first?
 MSG_SORT (//)
 S_ort
 ;
+MSG_ICON_FILE_SIZE (//)
+Info-file Size:
+;
+MSG_DEFICON_NEWICON (//)
+NewIcon (DefIcon)
+;
+MSG_DEFICON_OLDICON (//)
+Bitmap DefIcon
+;
+MSG_DEFICON_PALETTEMAPPED (//)
+Palette Mapped DefIcon
+;
+MSG_ICON_PALETTEMAPPED (//)
+Palette Mapped Icon
+;
+MSG_READ_ONLY (//)
+Read Only
+;
+MSG_IMG_SIZE (//)
+Pixels:
+;
+MSG_COLORS (//)
+Colors:
+;
+MSG_MORE (//)
+More..
+;
+MSG_INFO_FILE_MORE (//)
+.info file details
+;
+MSG_DEV_NAME (//)
+on
+;
+MSG_DEVICE (//)
+Device:
+;
+MSG_STATE (//)
+State:
+;
+MSG_ERRORS (//)
+Errors:
+;
+MSG_DISABLED_TOOL (//)
+Auto _Start:
+;
+MSG_RAM_DEVICE (//)
+n/a
+;
+MSG_HANDLER (//)
+Handler:
+;
+MSG_UNIT (//)
+unit
+;
+MSG_CAPACITY (//)
+Total:
+;
+MSG_BLOCKSIZE (//)
+Blocksize:
+;
+MSG_BYTES_POSTFIX (//)
+ bytes
+;
+MSG_VOLNAME (//)
+_Name:
+;
+MSG_TYPE (//)
+Type:
+;
+;
+;
+;
+MSG_ICON_HOLD (2000//)
+Hold
+;
+MSG_ICON_SCRIPT (//)
+Script
+;
+MSG_ICON_PURE (//)
+Pure
+;
+MSG_ICON_ARCHIVED (//)
+Archived
+;
+MSG_ICON_READABLE (//)
+Readable
+;
+MSG_ICON_WRITABLE (//)
+Writable
+;
+MSG_ICON_EXECUTABLE (//)
+Executable
+;
+MSG_ICON_DELETABLE (//)
+Deletable
 ;
 ;
 ; DOS types
 ;
-MSG_DOSTYPE_0 (2000//)
+MSG_DOSTYPE_0 (4000//)
 Old File System (DOS\\0)
 ;
 MSG_DOSTYPE_1 (//)

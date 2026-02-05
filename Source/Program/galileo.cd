@@ -753,7 +753,7 @@ Rename...
 MSG_ICON_FORMAT (//)
 Format Disk...
 ;
-MSG_ICON_UNSNAPSHOT_MENU (//)
+MSG_ICON_UNSNAPSHOT_MENU (+1//)
 Un-Snapshot
 ;
 MSG_ICON_COPY (+1//)
@@ -1009,7 +1009,7 @@ MSG_ALREADY_RUNNING (//)
 Galileo appears to be already running!\n\
 Running a second copy is not supported.
 ;
-MSG_UNABLE_TO_CLOSE_SCREEN (//)
+MSG_UNABLE_TO_CLOSE_SCREEN (+1//)
 Galileo is unable to close its screen.\nPlease close all windows and try again.
 ;
 MSG_ERROR_INVALID_DATE (//)
@@ -1232,7 +1232,7 @@ Encrypt files
 MSG_FUNC_DESC_FINDFILE (//)
 Search for filenames
 ;
-MSG_FUNC_DESC_FORMAT (//)
+MSG_FUNC_DESC_FORMAT (+1//)
 Format disks
 ;
 MSG_FUNC_DESC_GETSIZES (//)

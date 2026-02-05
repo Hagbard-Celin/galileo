@@ -27,9 +27,6 @@ _International Mode
 MSG_FORMAT_CACHING (//)
 _Directory Caching
 ;
-MSG_FORMAT_LONG (//)
-_Long Filenames
-;
 MSG_FORMAT_TRASHCAN (//)
 _Put Trashcan
 ;
@@ -106,4 +103,7 @@ Installing Bootblock...
 ;
 MSG_FORMAT_DESC (//)
 Format disks
+;
+MSG_FORMAT_LONG (//)
+_Long Filenames
 ;
