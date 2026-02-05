@@ -81,7 +81,7 @@ long __asm __saveds L_GetSemaphore(
 			if (!(res=AttemptSemaphoreShared(sem)))
 			{
 				// Fix <v39 bug
-				if (((struct Library *)*((ULONG *)4))->lib_Version<39)
+				if (SysBase->LibNode.lib_Version<39)
 				{
 					// Try for exclusive instead
 					res=AttemptSemaphore(sem);
@@ -149,7 +149,7 @@ long __asm __saveds L_GetSemaphore(
 	else
 	{
 		// Fix <v39 bug
-		if (((struct Library *)*((ULONG *)4))->lib_Version<39)
+		if (SysBase->LibNode.lib_Version<39)
 		{
 			// Try to get shared semaphore
 			if (!AttemptSemaphoreShared(sem))

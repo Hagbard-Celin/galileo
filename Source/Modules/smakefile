@@ -66,7 +66,7 @@ CLEANUPOBJS =   $(OBJ)cleanup.o $(OBJ)cleanup_data.o $(OBJ)cleanup_strings.o
 CLEANUPVER  =   0
 CLEANUPREV  =   2
 
-FILETYPEOBJS    =   $(OBJ)filetype.o $(OBJ)filetype_data.o $(OBJ)filetype_strings.o
+FILETYPEOBJS    =   $(OBJ)filetype.o $(OBJ)filetype_trampoline.o $(OBJ)filetype_data.o $(OBJ)filetype_strings.o
 FILETYPEVER =       0
 FILETYPEREV =       2
 
@@ -74,7 +74,7 @@ RECYCLEBINOBJS  =   $(OBJ)recyclebin.o $(OBJ)recyclebin_data.o $(OBJ)recyclebin_
 RECYCLEBINVER   =   0
 RECYCLEBINREV   =   2
 
-ICONCLOCKOBJS   =   $(OBJ)iconclock.o $(OBJ)iconclock_data.o $(OBJ)iconclock_strings.o
+ICONCLOCKOBJS   =   $(OBJ)iconclock.o $(OBJ)iconclock_trampoline.o $(OBJ)iconclock_data.o $(OBJ)iconclock_strings.o
 ICONCLOCKVER    =   0
 ICONCLOCKREV    =   2
 
@@ -210,6 +210,8 @@ modules_internal_pragmas.h: modules_internal.fd
     fd2pragma modules_internal.fd modules_internal_pragmas.h
 
 $(OBJ)lsprintf.o: lsprintf.asm
+$(OBJ)filetype_trampoline.o: filetype_trampoline.asm
+$(OBJ)iconclock_trampoline.o: iconclock_trampoline.asm
 $(OBJ)$(CONFIGDIR)trampoline.o: $(CONFIGDIR)trampoline.asm
     sc:c/asm -o$(OBJ)$(CONFIGDIR) -iASMINC: $*.asm
 $(OBJ)$(XADDIR)trampoline.o: $(XADDIR)trampoline.asm
@@ -428,18 +430,18 @@ sc sd
 
 #########################################################################
 
-$(BIN)filetype.gfmmodule: $(STDOBJS) $(FILETYPEOBJS)
+$(BIN)filetype.gfmmodule: $(STDTROBJS) $(FILETYPEOBJS)
 	slink with lib:utillib.with with <<
 define __ctype=___ctype
 libprefix _L_
 libfd modules.fd
-$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(FILETYPEOBJS) 
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDTROBJS) $(FILETYPEOBJS) 
 to $(BIN)filetype.gfmmodule
 lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(FILETYPEVER)
 librevision $(FILETYPEREV)
 $(STRIPDEBUG) noicons
-sc sd 
+sc
 <
 
 #########################################################################
@@ -476,18 +478,18 @@ sc sd
 
 #########################################################################
 
-$(SBIN)iconclock.gfmmodule: $(STDOBJS) $(ICONCLOCKOBJS) 
+$(SBIN)iconclock.gfmmodule: $(STDTROBJS) $(ICONCLOCKOBJS) 
 	slink with lib:utillib.with with <<
 define __ctype=___ctype
 libprefix _L_
 libfd modules.fd
-$(ADDSYM) from lib:libent.o lib:libinit.o $(STDOBJS) $(ICONCLOCKOBJS) 
+$(ADDSYM) from lib:libent.o lib:libinit.o $(STDTROBJS) $(ICONCLOCKOBJS) 
 to $(SBIN)iconclock.gfmmodule
 lib lib:sc.lib lib:amiga.lib $(DEBUGLIB) //SDK/lib/galileofmlib.lib
 libversion $(ICONCLOCKVER)
 librevision $(ICONCLOCKREV)
 $(STRIPDEBUG) noicons
-sc sd 
+sc
 <
 	#slink from $(BIN)$@ to $(DISTBIN)$@ $(STRIPDEBUG) $(STRIPDEBUG) noicons
     #copy $(BIN)$@ $(DEBUGBIN)$@

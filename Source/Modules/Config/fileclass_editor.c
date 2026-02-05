@@ -67,7 +67,7 @@ void __asm __saveds FileclassEditor(void)
 	struct Message *msg;
 
 	// Do startup
-	if (!(ipc=IPC_ProcStartup((ULONG *)&data,_fileclassed_init)))
+	if (!(ipc=IPC_ProcStartup((ULONG *)&data,_fileclassed_initTr)))
 		return;
 
 	// Can't view files if no ARexx
@@ -411,7 +411,7 @@ void __asm __saveds FileclassEditor(void)
 }
 
 
-ULONG __asm _fileclassed_init(
+ULONG __asm __saveds _fileclassed_init(
 	register __a0 IPCData *ipc,
 	register __a1 fileclass_ed_data *data)
 {

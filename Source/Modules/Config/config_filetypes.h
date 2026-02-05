@@ -221,6 +221,7 @@ short filetype_save(config_filetypes_data *);
 
 void __asm FiletypeEditorTr(void);
 void __asm FiletypeEditor(void);
+ULONG __asm _filetypeed_initTr(register __a0 IPCData *,register __a1 filetype_ed_data *);
 ULONG __asm _filetypeed_init(register __a0 IPCData *,register __a1 filetype_ed_data *);
 void filetypeed_update_actions(filetype_ed_data *);
 void filetypeed_edit_action(filetype_ed_data *,short,char *);
@@ -232,6 +233,7 @@ BOOL filetypeed_pick_icon(filetype_ed_data *);
 
 void __asm FileclassEditorTr(void);
 void __asm FileclassEditor(void);
+ULONG __asm _fileclassed_initTr(register __a0 IPCData *,register __a1 fileclass_ed_data *);
 ULONG __asm _fileclassed_init(register __a0 IPCData *,register __a1 fileclass_ed_data *);
 void _fileclassed_build_list(fileclass_ed_data *);
 void _fileclassed_build_recognition(fileclass_ed_data *);

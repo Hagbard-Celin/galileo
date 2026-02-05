@@ -48,6 +48,10 @@ For more information on Directory Opus for Windows please see:
 #define CATCOMP_NUMBERS
 #include "config.strings"
 
+void __asm __saveds button_editor_task_callbackTr(
+	register __a1 struct TagItem *tag,
+	register __a2 struct Window *window);
+
 // Button editor window dimensions
 ConfigWindow
 	_button_editor_window={
@@ -56,7 +60,7 @@ ConfigWindow
 
 
 // Call-back hook to get task pointer
-static void __asm button_editor_task_callback(
+void __asm __saveds button_editor_task_callback(
 	register __a1 struct TagItem *tag,
 	register __a2 struct Window *window)
 {
@@ -110,7 +114,7 @@ struct TagItem
 
 	_button_editor_label[]={
 		{GTST_MaxChars,255},
-		{GTCustom_CallBack,(ULONG)button_editor_task_callback},
+		{GTCustom_CallBack,(ULONG)button_editor_task_callbackTr},
 		{GTCustom_CallBack,(ULONG)button_editor_bit_callback},
 		{GTCustom_ThinBorders,TRUE},
 		{TAG_MORE,(ULONG)_button_editor_function_layout}},

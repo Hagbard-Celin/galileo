@@ -57,7 +57,6 @@ For more information on Directory Opus for Windows please see:
 #include "scripts.h"
 #include "menu_data.h"
 
-#define ExecLib		((struct ExecBase *)*((ULONG *)4))
 
 // Open the display
 BOOL display_open(long flags)
@@ -408,13 +407,13 @@ BOOL display_open(long flags)
 				!(GetBitMapAttr(GUI->window->RPort->BitMap,BMA_FLAGS)&BMF_STANDARD))
 			{
 				// P96?
-				if (FindName(&ExecLib->LibList,"rtg.library"))
+				if (FindName(&SysBase->LibList,"rtg.library"))
 					strcpy(GUI->ver_chips,"P96");
 
 				// CyberGfx
 				else
-				if (FindName(&ExecLib->LibList,"cgxsystem.library") ||
-					FindName(&ExecLib->LibList,"cyberintuition.library"))
+				if (FindName(&SysBase->LibList,"cgxsystem.library") ||
+					FindName(&SysBase->LibList,"cyberintuition.library"))
 					strcpy(GUI->ver_chips,"CGX");
 			}
 

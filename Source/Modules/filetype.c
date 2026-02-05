@@ -45,7 +45,6 @@ For more information on Directory Opus for Windows please see:
  *			Finder now hilites the best match even if it isn't installed
  */
 
-#include <dos.h>
 #include "filetype_data.h"
 #include "filetype.h"
 
@@ -73,6 +72,11 @@ Cfg_FiletypeList *creator_generic(
 	CONST GalileoCallbackInfo *gci,
 	Att_List *list,
 	BPTR parent_lock );
+
+void __asm finder_creator_proc_codeTr( void );
+void __asm finder_editor_proc_codeTr( void );
+void __asm creator_editor_proc_codeTr( void );
+
 
 #define FTLISTF_INSTALLED	(1<<15)
 
@@ -645,21 +649,16 @@ ULONG __saveds __asm finder_creator_proc_init(
 /********************************/
 
 // Code for the sub-tasks
-void __saveds finder_creator_proc_code( void )
+void __asm __saveds finder_creator_proc_code( void )
 {
     finder_data *data;
-    struct Library *GalileoFMBase;
     Att_List *list;
     struct filetype_info *fti;
     Att_Node *node;
     Cfg_FiletypeList *ftl, *ftl2;
     int ok = FALSE;
 
-    GalileoFMBase = (struct Library *)FindName( &((struct ExecBase *)*((ULONG *)4))->LibList, "galileofm.library" );
-
     IPC_ProcStartup( (ULONG *)&data, finder_creator_proc_init );
-
-    putreg( REG_A4, data->a4 );
 
     if (list = Att_NewList( LISTF_POOL ))
     {
@@ -725,13 +724,11 @@ int finder_create_filetype( finder_data *data )
 {
     int ok = FALSE;
 
-    data->a4 = getreg( REG_A4 );
-
     // Launch a new task
     IPC_Launch(0,				       // List to add task to (optional, but useful)
 	       &data->creator_ipc,		       // IPCData ** to store task IPC pointer in (optional)
 	       "filetype_creator",		       // Name
-	       (ULONG)finder_creator_proc_code,	       // Code
+	       (ULONG)finder_creator_proc_codeTr,      // Code
 	       4000,				       // Stack size
 	       (ULONG)data);			       // Data passed to task
 
@@ -822,18 +819,13 @@ int finder_save_edited_filetype( finder_data *data )
 /********************************/
 
 // Code for the sub-tasks
-void __saveds finder_editor_proc_code( void )
+void __asm __saveds finder_editor_proc_code( void )
 {
     finder_data *data;
-    struct Library *GalileoFMBase;
     struct Library *GalileoConfigBase;
     Cfg_Filetype *edited_filetype;
 
-    GalileoFMBase = (struct Library *)FindName( &((struct ExecBase *)*((ULONG *)4))->LibList, "galileofm.library" );
-
     IPC_ProcStartup( (ULONG *)&data, finder_editor_proc_init );
-
-    putreg( REG_A4, data->a4 );
 
     if (data->best_installed_ft && (GalileoConfigBase = OpenLibrary( "PROGDIR:Modules/galileoconfig.gfmmodule", 0 )))
     {
@@ -878,15 +870,13 @@ int finder_edit_filetype( finder_data *data )
 {
     int ok = FALSE;
 
-    data->a4 = getreg( REG_A4 );
-
     // Launch a new task
-    IPC_Launch(0,			       // List to add task to (optional, but useful)
-	       &data->editor_ipc,	       // IPCData ** to store task IPC pointer in (optional)
-	       "filetype_editor",	       // Name
-	       (ULONG)finder_editor_proc_code, // Code
-	       4000,			       // Stack size
-	       (ULONG)data);		       // Data passed to task
+    IPC_Launch(0,			         // List to add task to (optional, but useful)
+	       &data->editor_ipc,	         // IPCData ** to store task IPC pointer in (optional)
+	       "filetype_editor",	         // Name
+	       (ULONG)finder_editor_proc_codeTr, // Code
+	       4000,			         // Stack size
+	       (ULONG)data);		         // Data passed to task
 
     return ok;
 }
@@ -2267,19 +2257,14 @@ ULONG __saveds __asm creator_editor_proc_init(register __a0 IPCData *ipc,
 /********************************/
 
 // Code for the sub-tasks
-void __saveds creator_editor_proc_code( void )
+void __asm __saveds creator_editor_proc_code( void )
 {
     creator_data *data;
-    struct Library *GalileoFMBase;
     struct Library *GalileoConfigBase;
     Cfg_Filetype *edited_filetype;
     int ok = FALSE;
 
-    GalileoFMBase = (struct Library *)FindName( &((struct ExecBase *)*((ULONG *)4))->LibList, "galileofm.library" );
-
     IPC_ProcStartup( (ULONG *)&data, creator_editor_proc_init );
-
-    putreg( REG_A4, data->a4 );
 
     // Make a filetype from our current information if filetype has been changed
     if (!data->filetype || !data->edited)
@@ -2366,14 +2351,12 @@ int creator_edit_filetype( creator_data *data )
 	IPC_Command( data->editor_ipc, IPC_ACTIVATE, 0, 0, 0, (struct MsgPort *)-1 );
     else
     {
-	data->a4 = getreg( REG_A4 );
-
 	// Launch a new task
 	IPC_Launch(
 		0,					// List to add task to (optional, but useful)
 		&data->editor_ipc,			// IPCData ** to store task IPC pointer in (optional)
 		"filetype_editor",			// Name
-		(ULONG)creator_editor_proc_code,	// Code
+		(ULONG)creator_editor_proc_codeTr,	// Code
 		4000,					// Stack size
 		(ULONG)data);				// Data passed to task
     }

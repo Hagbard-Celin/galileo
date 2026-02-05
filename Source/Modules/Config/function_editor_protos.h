@@ -56,6 +56,7 @@ For more information on Directory Opus for Windows please see:
 
 void __asm FunctionEditorTr(void);
 void __asm FunctionEditor(void);
+ULONG __asm funced_initTr(register __a0 IPCData *,register __a1 FunctionStartup *);
 ULONG __asm funced_init(register __a0 IPCData *,register __a1 FunctionStartup *);
 void funced_cleanup(FuncEdData *);
 void funced_build_flaglist(FuncEdData *);

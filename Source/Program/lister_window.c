@@ -519,7 +519,7 @@ void lister_close_window(Lister *lister,BOOL run_script)
 		HideProgressWindow(lister->progress_window);
 
 	// Fix current directory
-	if (lister->lister_orgdir != ((struct Process *)((struct ExecBase *)*((ULONG *)4))->ThisTask)->pr_CurrentDir)
+	if (lister->lister_orgdir != ((struct Process *)SysBase->ThisTask)->pr_CurrentDir)
 	    UnLock(CurrentDir(lister->lister_orgdir));
 
 	// Free icon remapping

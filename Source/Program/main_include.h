@@ -79,7 +79,6 @@ For more information on Directory Opus for Windows please see:
 
 #define INIT_STEPS	14
 
-#define ExecLib		((struct ExecBase *)*((ULONG *)4))
 
 struct Library *main_open_library(char *lib,short ver);
 

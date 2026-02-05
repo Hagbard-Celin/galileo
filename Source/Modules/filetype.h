@@ -105,7 +105,6 @@ typedef struct
 
     IPCData			*editor_ipc;
     IPCData			*creator_ipc;
-    ULONG			a4;
 
     char			buffer[1024];
 } finder_data;
@@ -166,7 +165,6 @@ typedef struct
     BPTR		    rec_dir_parent;
 
     IPCData		    *editor_ipc;
-    ULONG		    a4;
 } creator_data;
 
 extern ConfigWindow _finder_window;

@@ -46,6 +46,7 @@ extern ModuleInfo module_info;
 int __asm __saveds __UserLibInit(register __a6 struct Library *libbase);
 void __asm __saveds __UserLibCleanup(void);
 
+struct ExecBase		*SysBase;
 struct DosLibrary	*DOSBase;
 struct IntuitionBase	*IntuitionBase;
 struct GfxBase		*GfxBase;
@@ -77,6 +78,7 @@ ULONG			callerid;
 // Initialise libraries we need
 __asm __saveds __UserLibInit(register __a6 struct Library *libbase)
 {
+	SysBase = ((struct ExecBase *)*((ULONG *)4));
 
 #ifdef RESOURCE_TRACKING
 	callerid=(ULONG)&__UserLibInit;

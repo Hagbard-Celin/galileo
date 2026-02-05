@@ -93,7 +93,7 @@ void __asm __saveds FunctionEditor(void)
 	ConfigWindow windims;
 
 	// Do startup
-	if (!(ipc=IPC_ProcStartup((ULONG *)&startup,funced_init)))
+	if (!(ipc=IPC_ProcStartup((ULONG *)&startup,funced_initTr)))
 	{
 		funced_cleanup(startup->data);
 		return;
@@ -925,10 +925,14 @@ void __asm __saveds FunctionEditor(void)
 	funced_cleanup(data);
 
 	FreeVec(startup);
+
+#ifdef RESOURCE_TRACKING
+	ResourceTrackingEndOfTask();
+#endif
 }
 
 
-ULONG __asm funced_init(
+ULONG __asm __saveds funced_init(
 	register __a0 IPCData *ipc,
 	register __a1 FunctionStartup *startup)
 {

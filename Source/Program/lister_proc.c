@@ -1848,7 +1848,7 @@ ULONG __saveds __asm lister_init(
 		SetFont(&lister->text_area.rast,lister->font);
 	}
 
-	lister->lister_orgdir = ((struct Process *)((struct ExecBase *)*((ULONG *)4))->ThisTask)->pr_CurrentDir;
+	lister->lister_orgdir = ((struct Process *)SysBase->ThisTask)->pr_CurrentDir;
 
 	return 1;
 }

@@ -35,8 +35,12 @@ For more information on Directory Opus for Windows please see:
 
 */
 
-#include <dos.h>
 #include "iconclock.h"
+
+void __asm icon_clockTr(void);
+ULONG __asm iconclock_startupTr(
+	register __a0 IPCData *ipc,
+	register __a1 iconclock_data *data);
 
 char __far _LibID[] = "iconclock.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 
@@ -59,10 +63,7 @@ int __asm __saveds L_Module_Entry(
 	// Allocate data
 	if (data=AllocVec(sizeof(iconclock_data),MEMF_CLEAR))
 	{
-		// Store A4 and library bases
-		data->a4=getreg(REG_A4);
-		data->library=GalileoFMBase;
-		data->module=(struct Library *)getreg(REG_A6);
+		// Store IPC
 		data->main_ipc=main_ipc;
 
 		// Store initial screen
@@ -74,7 +75,7 @@ int __asm __saveds L_Module_Entry(
 			0,
 			&clock_ipc,
 			NAME_ICONCLOCK,
-			(ULONG)icon_clock,
+			(ULONG)icon_clockTr,
 			4000,
 			(ULONG)data))) FreeVec(data);
 	}
@@ -87,25 +88,17 @@ int __asm __saveds L_Module_Entry(
 
 
 // Icon clock process
-void __saveds icon_clock(void)
+void __asm __saveds icon_clock(void)
 {
 	IPCData *ipc;
 	IPCMessage *msg;
 	GalileoNotify *nmsg;
 	struct AppMessage *amsg;
-	struct Library *GalileoFMBase;
 	iconclock_data *data;
 	BOOL quit=0,visible=1;
 
-	// Get galileo library
-	if (!(GalileoFMBase=(struct Library *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"galileofm.library")))
-		return;
-
 	// Do startup
-	ipc=IPC_ProcStartup((ULONG *)&data,iconclock_startup);
-
-	// Fix A4
-	putreg(REG_A4,data->a4);
+	ipc=IPC_ProcStartup((ULONG *)&data,iconclock_startupTr);
 
 	// Failed?
 	if (!ipc)
@@ -306,7 +299,7 @@ void __saveds icon_clock(void)
 	}
 
 	// Decrement open count so we can be flushed again
-	--data->module->lib_OpenCnt;
+	--MyLibBase->lib_OpenCnt;
 
 	// Cleanup
 	iconclock_cleanup(data);
@@ -318,16 +311,8 @@ ULONG __asm __saveds iconclock_startup(
 	register __a0 IPCData *ipc,
 	register __a1 iconclock_data *data)
 {
-	struct Library *GalileoFMBase;
-
-	// Fix A4
-	putreg(REG_A4,data->a4);
-
 	// Store IPC
 	data->ipc=ipc;
-
-	// Get library
-	GalileoFMBase=data->library;
 
 	// Initialise data
 	data->icon_x=NO_ICON_POSITION;
@@ -369,7 +354,7 @@ ULONG __asm __saveds iconclock_startup(
 	}
 
 	// Bump library open count so we don't get flushed
-	++data->module->lib_OpenCnt;
+	++MyLibBase->lib_OpenCnt;
 
 	// Start timer
 	StartTimer(data->timer,0,900000);

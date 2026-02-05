@@ -23,5 +23,10 @@ _\1Tr:
         TRAMPOLINE FiletypeEditor
         TRAMPOLINE FileclassEditor
         TRAMPOLINE _palette_slider_callback
+        TRAMPOLINE _buttoned_init
+        TRAMPOLINE _fileclassed_init
+        TRAMPOLINE _filetypeed_init
+        TRAMPOLINE funced_init
+        TRAMPOLINE button_editor_task_callback
 
         END

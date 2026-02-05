@@ -39,6 +39,7 @@ For more information on Directory Opus for Windows please see:
 #include "galileofmlib.h"
 
 struct DosLibrary	*DOSBase;
+struct ExecBase		*SysBase;
 
 struct IntuitionBase	*IntuitionBase;
 struct GfxBase		*GfxBase;

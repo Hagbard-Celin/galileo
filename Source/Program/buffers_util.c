@@ -325,7 +325,7 @@ void buffer_show_special(Lister *lister,char *title)
 		}
 
 		// Fix current directory
-		if (lister->lister_orgdir != ((struct Process *)((struct ExecBase *)*((ULONG *)4))->ThisTask)->pr_CurrentDir)
+		if (lister->lister_orgdir != ((struct Process *)SysBase->ThisTask)->pr_CurrentDir)
 		    UnLock(CurrentDir(lister->lister_orgdir));
 	}
 
@@ -333,7 +333,7 @@ void buffer_show_special(Lister *lister,char *title)
 	strcpy(lister->special_buffer->buf_VolumeLabel,title);
 
 	// Fix current directory
-	if (lister->lister_orgdir != ((struct Process *)((struct ExecBase *)*((ULONG *)4))->ThisTask)->pr_CurrentDir)
+	if (lister->lister_orgdir != ((struct Process *)SysBase->ThisTask)->pr_CurrentDir)
 	    UnLock(CurrentDir(lister->lister_orgdir));
 
 	// Clear path field

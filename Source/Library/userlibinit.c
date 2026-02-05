@@ -59,9 +59,6 @@ ULONG callerid;
 
 #endif
 
-#define ExecLib		((struct ExecBase *)*((ULONG *)4))
-#define SysBase		((struct ExecBase *)*((ULONG *)4))
-
 
 void free_libdata(void)
 {
@@ -146,6 +143,8 @@ void free_libdata(void)
 __asm __saveds __UserLibInit(register __a6 struct Library *libbase)
 {
 	char buf[16];
+
+	SysBase = ((struct ExecBase *)*((ULONG *)4));
 
 #ifdef RESOURCE_TRACKING
 
@@ -462,7 +461,7 @@ __asm __saveds __UserLibInit(register __a6 struct Library *libbase)
 	gfmlib_data.launcher=launcher_ipc;
 
 	// Initialise low-memory handler
-	if (ExecLib->LibNode.lib_Version>=39)
+	if (SysBase->LibNode.lib_Version>=39)
 	{
 		// Initialise interrupt
 		gfmlib_data.low_mem_handler.is_Node.ln_Pri=50;

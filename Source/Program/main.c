@@ -48,18 +48,6 @@ void main(int argc,char **argv)
 {
 	IPCData *startup_pic;
 
-
-#ifdef RESOURCE_TRACKING
-	if (ResTrackBase=REALL_OpenLibrary("g_restrack.library",0))
-	     StartResourceTracking (RTL_ALL);
-
-	callerid=(ULONG)&main;
-#endif
-
-#ifdef _DEBUG_IPCPROC
-	KPrintF("Main ResTrackBase: %lx at: %lx SysBase %lx GalileoFMBase: %lx\n", ResTrackBase, &ResTrackBase, SysBase, GalileoFMBase);
-#endif
-
 	/******** Startup Stuff that happens before the progress bar is displayed ********/
 
 	startup_misc_init();					    // Miscellaneous startup stuff
@@ -185,6 +173,17 @@ struct Library *main_open_library(char *lib,short ver)
 // Miscellaneous startup code
 void startup_misc_init()
 {
+#ifdef RESOURCE_TRACKING
+	if (ResTrackBase=REALL_OpenLibrary("g_restrack.library",0))
+	     StartResourceTracking (RTL_ALL);
+
+	callerid=(ULONG)&main;
+#endif
+
+#ifdef _DEBUG_IPCPROC
+	KPrintF("Main ResTrackBase: %lx at: %lx SysBase %lx GalileoFMBase: %lx\n", ResTrackBase, &ResTrackBase, SysBase, GalileoFMBase);
+#endif
+
 	// Set wildstar bit in dos
 	DOSBase->dl_Root->rn_Flags|=RNF_WILDSTAR;
 
@@ -1017,7 +1016,7 @@ void startup_init_arexx_cx()
 {
 
 #ifdef _DEBUG_IPCPROC
-KPrintF("Main before rexx_proc ResTrackBase: %lx at: %lx SysBase: %lx IconBase: %lx ExecLib: %lx \n", ResTrackBase, &ResTrackBase, SysBase, IconBase, ExecLib);
+KPrintF("Main before rexx_proc ResTrackBase: %lx at: %lx SysBase: %lx IconBase: %lx \n", ResTrackBase, &ResTrackBase, SysBase, IconBase);
 #endif
 
 	// Launch the ARexx process

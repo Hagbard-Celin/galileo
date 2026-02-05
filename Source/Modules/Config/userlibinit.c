@@ -50,6 +50,7 @@ char *_ProgramName="galileoconfig.gfmmodule";
 
 char __far _LibID[] = "galileoconfig.gfmmodule "__VERSTR__" "__AMIGADATE__" "__SUBTITLE__;
 
+struct ExecBase		*SysBase;
 struct DosLibrary	*DOSBase;
 struct Library		*GalileoFMBase;
 struct IntuitionBase	*IntuitionBase;
@@ -79,6 +80,8 @@ ULONG callerid;
 // Initialise libraries we need
 __asm __saveds __UserLibInit(register __a6 struct Library *libbase)
 {
+	SysBase = ((struct ExecBase *)*((ULONG *)4));
+
 #ifdef RESOURCE_TRACKING
 	callerid=(ULONG)&__UserLibInit;
 

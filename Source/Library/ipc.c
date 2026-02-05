@@ -155,17 +155,13 @@ BOOL __asm __saveds L_IPC_Launch(
 
 
 // Send an IPC startup
-BOOL __asm L_IPC_Startup(
+BOOL __asm __saveds L_IPC_Startup(
 	register __a0 IPCData *ipc,
 	register __a1 APTR data,
 	register __a2 struct MsgPort *reply)
 {
 	struct MsgPort *port=0;
 	IPCMessage startup;
-
-#ifdef RESOURCE_TRACKING
-#define ResTrackBase (struct Library *)FindName(&((struct ExecBase *)*((ULONG *)4))->LibList,"g_restrack.library")
-#endif
 
 	// If no message port supplied, create one
 	if (!reply) port=reply=CreateMsgPort();
@@ -193,7 +189,7 @@ BOOL __asm L_IPC_Startup(
 
 
 // Generic IPC startup code
-IPCData *__asm L_IPC_ProcStartup(
+IPCData *__asm __saveds L_IPC_ProcStartup(
 	register __a0 ULONG *data,
 	register __a1 ULONG (*__asm code)(register __a0 IPCData *,register __a1 APTR))
 {
@@ -306,9 +302,6 @@ void __asm __saveds L_IPC_Flush(register __a0 IPCData *ipc)
 	}
 }
 
-#ifdef RESOURCE_TRACKING
-#undef ResTrackBase
-#endif
 
 // Send an IPC command
 ULONG __asm __saveds L_IPC_Command(

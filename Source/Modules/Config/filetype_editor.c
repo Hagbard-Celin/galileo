@@ -83,7 +83,7 @@ void __asm __saveds FiletypeEditor(void)
 	BOOL change_flag=0;
 
 	// Do startup
-	if (!(ipc=IPC_ProcStartup((ULONG *)&data,_filetypeed_init)))
+	if (!(ipc=IPC_ProcStartup((ULONG *)&data,_filetypeed_initTr)))
 		return;
 
 	// Create App stuff
@@ -631,7 +631,7 @@ void __asm __saveds FiletypeEditor(void)
 
 
 // Editor init
-ULONG __asm _filetypeed_init(
+ULONG __asm __saveds _filetypeed_init(
 	register __a0 IPCData *ipc,
 	register __a1 filetype_ed_data *data)
 {

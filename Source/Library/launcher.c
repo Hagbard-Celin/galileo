@@ -46,7 +46,6 @@ For more information on Directory Opus for Windows please see:
 
 #define LAUNCH_TIMEOUT			6
 
-#define ExecLib		((struct ExecBase *)*((ULONG *)4))
 
 #define IPC_LAUNCH	1000
 #define IPC_LOGIN	1001
@@ -442,8 +441,8 @@ void __asm __saveds launcher_proc(void)
 
 	// We need to initialise task count
 	Forbid();
-	gfmlib_data.task_count=L_Att_NodeCount((Att_List *)&ExecLib->TaskReady);
-	gfmlib_data.task_count+=L_Att_NodeCount((Att_List *)&ExecLib->TaskWait);
+	gfmlib_data.task_count=L_Att_NodeCount((Att_List *)&SysBase->TaskReady);
+	gfmlib_data.task_count+=L_Att_NodeCount((Att_List *)&SysBase->TaskWait);
 
 	// Install patches
 	L_WB_Install_Patch();
@@ -1643,9 +1642,7 @@ void free_launch_packet(LaunchPacket *packet)
 	    FreeVec(packet);
 	}
 }
-#ifdef RESOURCE_TRACKING
-#undef ResTrackBase
-#endif
+
 
 /*
 // varargs CreateNewProcTags

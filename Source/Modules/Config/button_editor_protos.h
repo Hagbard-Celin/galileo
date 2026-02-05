@@ -63,6 +63,7 @@ For more information on Directory Opus for Windows please see:
 // prototypes
 void __asm ButtonEditorTr(void);
 void __asm ButtonEditor(void);
+ULONG __asm _buttoned_initTr(register __a0 IPCData *,register __a1 ButtonEdStartup *);
 ULONG __asm _buttoned_init(register __a0 IPCData *,register __a1 ButtonEdStartup *);
 void _buttoned_show_button(ButtonEdData *);
 void _button_editor_edit_function(ButtonEdData *);

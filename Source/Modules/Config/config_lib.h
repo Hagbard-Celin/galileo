@@ -58,6 +58,8 @@ For more information on Directory Opus for Windows please see:
 
 #define D_S(type,name) char a_##name[sizeof(type)+3]; \
 		       type *name = (type *)((ULONG)(a_##name+3) & ~3UL)
+
+extern struct ExecBase		*SysBase;
 extern struct DosLibrary	*DOSBase;
 extern struct Library		*GalileoFMBase;
 extern struct IntuitionBase	*IntuitionBase;

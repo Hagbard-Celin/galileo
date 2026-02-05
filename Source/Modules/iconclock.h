@@ -59,6 +59,8 @@ For more information on Directory Opus for Windows please see:
 #define COLON_WIDTH	6
 #define COLON_HEIGHT	13
 
+extern struct Library __far	*MyLibBase;
+
 typedef struct
 {
 	struct SignalSemaphore	sem;
@@ -67,10 +69,6 @@ typedef struct
 
 typedef struct
 {
-	ULONG			a4;
-	struct Library		*library;
-	struct Library		*module;
-
 	IPCData			*ipc;
 	struct MsgPort		*notify_port;
 	APTR			notify_req;
@@ -103,7 +101,7 @@ typedef struct
 	struct Window		*about;
 } iconclock_data;
 
-void icon_clock(void);
+void __asm icon_clock(void);
 ULONG __asm iconclock_startup(
 	register __a0 IPCData *,
 	register __a1 iconclock_data *);

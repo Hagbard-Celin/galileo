@@ -1312,7 +1312,7 @@ void __asm __saveds L_WB_AddPort(register __a1 struct MsgPort *port)
 	// Pass through
 	((void (* __asm)
 		(register __a1 struct MsgPort *,register __a6 struct ExecBase *))gfmlib_data.wb_data.old_function[WB_PATCH_ADDPORT])
-		(port,(struct ExecBase *)*((ULONG *)4));
+		(port,SysBase);
 }
 
 
@@ -1386,7 +1386,7 @@ struct Library *wb_get_patchbase(short type)
 
 		// Exec
 		case WB_PATCH_EXEC:
-			lib=(struct Library *)(struct Library *)*((ULONG *)4);
+			lib=(struct Library *)SysBase;
 			break;
 
 		// Icon
@@ -1466,9 +1466,9 @@ APTR __asm __saveds L_PatchedAddTask(register __a1 struct Task *task,register __
 
 	// Call original function
 	return ((APTR (* __asm)
-		(register __a1 struct Task *,register __a2 APTR,register __a3 APTR,register __a6 struct Library *))
+		(register __a1 struct Task *,register __a2 APTR,register __a3 APTR,register __a6 struct ExecBase *))
 			gfmlib_data.wb_data.old_function[WB_PATCH_ADDTASK])
-			(task,initialPC,finalPC,(struct Library *)*((ULONG *)4));
+			(task,initialPC,finalPC,SysBase);
 }
 
 // Patched RemTask (for statistics)
@@ -1479,9 +1479,9 @@ void __asm __saveds L_PatchedRemTask(register __a1 struct Task *task)
 
 	// Call original function
 	((void (* __asm)
-		(register __a1 struct Task *,register __a6 struct Library *))
+		(register __a1 struct Task *,register __a6 struct ExecBase *))
 			gfmlib_data.wb_data.old_function[WB_PATCH_REMTASK])
-			(task,(struct Library *)*((ULONG *)4));
+			(task,SysBase);
 }
 
 
@@ -1491,13 +1491,13 @@ struct Task *__asm __saveds L_PatchedFindTask(register __a1 char *name)
 	struct Task *task;
 
 	// This task?
-	if (!name) return ((struct ExecBase *)*((ULONG *)4))->ThisTask;
+	if (!name) return SysBase->ThisTask;
 
 	// Call original function
 	if (task=((struct Task * (* __asm)
-			(register __a1 char *,register __a6 struct Library *))
+			(register __a1 char *,register __a6 struct ExecBase *))
 				gfmlib_data.wb_data.old_function[WB_PATCH_FINDTASK])
-				(name,(struct Library *)*((ULONG *)4)))
+				(name,SysBase))
 		return task;
 
 	// Task not found, were they looking for workbench?
@@ -1517,7 +1517,7 @@ struct Task *__asm __saveds L_PatchedFindTask(register __a1 char *name)
 struct Window *__asm __saveds L_PatchedOpenWindowTags(register __a0 struct NewWindow *newwin,register __a1 struct TagItem *tags)
 {
 	// Is window being opened by the kludge task?
-	if (gfmlib_data.open_window_kludge==(struct Process *)((struct ExecBase *)*((ULONG *)4))->ThisTask)
+	if (gfmlib_data.open_window_kludge==(struct Process *)SysBase->ThisTask)
 	{
 		short x,y,w,h;
 		struct Screen *scr;

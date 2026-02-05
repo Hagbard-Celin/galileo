@@ -76,7 +76,7 @@ void __asm __saveds ButtonEditor(void)
 	BOOL open_window=1;
 
 	// Do startup
-	if (!(ipc=IPC_ProcStartup((ULONG *)&startup,_buttoned_init)))
+	if (!(ipc=IPC_ProcStartup((ULONG *)&startup,_buttoned_initTr)))
 		return;
 
 	// Get data pointer
@@ -821,7 +821,7 @@ void __asm __saveds ButtonEditor(void)
 }
 
 
-ULONG __asm _buttoned_init(
+ULONG __asm __saveds _buttoned_init(
 	register __a0 IPCData *ipc,
 	register __a1 ButtonEdStartup *startup)
 {
