@@ -49,7 +49,6 @@ For more information on Directory Opus for Windows please see:
 // Sub-process data used when launching new processes
 struct subproc_data
 {
-	struct galileoftp_globals *spd_ogp;
 	IPCData			  *spd_ipc;
 	IPCData			  *spd_owner_ipc;
 };

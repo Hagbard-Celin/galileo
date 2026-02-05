@@ -125,7 +125,6 @@ struct long_site_entry
 
 struct display_globals
 {
-	struct galileoftp_globals *dg_og;
 	IPCData			  *dg_ipc;
 
 	WORD			  dg_selected;			//current highlighted item in ftp list

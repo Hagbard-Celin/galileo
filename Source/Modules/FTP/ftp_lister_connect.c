@@ -80,7 +80,6 @@ For more information on Directory Opus for Windows please see:
 #endif
 
 
-#define SocketBase GETSOCKBASE(FindTask(0L))
 #define errno GETGLOBAL(FindTask(NULL),g_errno)
 
 int lister_retry_connect_requester(struct ftp_node *, struct connect_log_data *);
@@ -353,7 +352,7 @@ struct connect_log_data
 //	Returns 1 if succeeded
 //	Returns 0 if failed
 //
-static int lister_connect_and_login(struct galileoftp_globals *og, struct connect_log_data *cld)
+static int lister_connect_and_login(struct connect_log_data *cld)
 {
 	int reply;
 	int connected = 0;
@@ -467,7 +466,7 @@ static int lister_connect_and_login(struct galileoftp_globals *og, struct connec
 						*cld->cld_errmsg = 0;
 
 					// Include error number or message only?
-					cld->cld_errmsg = node->fn_ftp.fi_serverr + (og->og_oc.oc_log_debug ? 0 : 4);
+					cld->cld_errmsg = node->fn_ftp.fi_serverr + (og.og_oc.oc_log_debug ? 0 : 4);
 				}
 				else if	(loginerr == -1)
 					cld->cld_errmsg = GetString(locale,MSG_FTP_USERNAME_FAILED);
@@ -670,7 +669,7 @@ static int lister_connect_and_login(struct galileoftp_globals *og, struct connec
 			// Scan initial directory - Can TIMEOUT
 			if (reply != 421 && !(cld->cld_flags & CONN_OPT_NOSCAN))
 				//			lister_list( og, node, FALSE );
-				lister_list(og, node, TRUE);
+				lister_list(node, TRUE);
 
 			if (reply == 421)
 			{
@@ -703,7 +702,7 @@ static int lister_connect_and_login(struct galileoftp_globals *og, struct connec
 		lister_prog_clear(node);
 
 		// Connect/login error requester
-		if (!cld->cld_aborted && !og->og_noreq)
+		if (!cld->cld_aborted && !og.og_noreq)
 		{
 			char buffer[1024+1];
 
@@ -744,7 +743,6 @@ static int lister_connect_and_login(struct galileoftp_globals *og, struct connec
 //	If there is a host and user name but no password, prompt for a password
 //
 static int lister_get_args(
-	struct galileoftp_globals *ogp,
 	struct msg_loop_data	  *mld,
 	IPCMessage		  *imsg)
 {
@@ -764,7 +762,7 @@ static int lister_get_args(
 		if (imsg->flags & CONN_OPT_PATH)
 			stccpy(path, cm->cm_site.se_path, PATHLEN + 1);
 
-		get_site_entry(ogp, &cm->cm_site, mld->mld_ipc);
+		get_site_entry(&cm->cm_site, mld->mld_ipc);
 
 		if (imsg->flags & CONN_OPT_PATH)
 			stccpy(cm->cm_site.se_path, path, PATHLEN + 1);
@@ -785,7 +783,7 @@ static int lister_get_args(
 	}
 
 	// Need to use GUI?
-	if (gui && ogp->og_addrproc)
+	if (gui && og.og_addrproc)
 	{
 
 		/*************************************
@@ -793,8 +791,8 @@ static int lister_get_args(
 		*	now has new gadget to get last site.
 		*
 		*	// Put last site in GUI if we're not reconnecting
-		*	if	(!(imsg->flags & CONN_OPT_RECON) && ogp->og_valid_site)
-		*		copy_site_entry( ogp, &cm->cm_site, &ogp->og_last_site );
+		*	if	(!(imsg->flags & CONN_OPT_RECON) && og.og_valid_site)
+		*		copy_site_entry( ogp, &cm->cm_site, &og.og_last_site );
 		*
 		*************************************/
 
@@ -803,7 +801,7 @@ static int lister_get_args(
 		if (!*cm->cm_site.se_name)
 			noname = 1;
 
-		okay = IPC_Command(ogp->og_addrproc, IPC_CONNECTVISUAL, 0, cm, 0, REPLY_NO_PORT);
+		okay = IPC_Command(og.og_addrproc, IPC_CONNECTVISUAL, 0, cm, 0, REPLY_NO_PORT);
 
 		if (noname)
 			*cm->cm_site.se_name = 0;
@@ -820,8 +818,8 @@ static int lister_get_args(
 	if (okay && (cm->cm_site.se_anon || !strcmp(cm->cm_site.se_user, "anonymous") || !strcmp(cm->cm_site.se_user, "ftp")))
 	{
 		// Has user defined an anonymous password?
-		if (*ogp->og_oc.oc_anonpass)
-			strcpy(cm->cm_site.se_pass, ogp->og_oc.oc_anonpass);
+		if (*og.og_oc.oc_anonpass)
+			strcpy(cm->cm_site.se_pass, og.og_oc.oc_anonpass);
 		else
 			getuseraddress(cm->cm_site.se_pass, ((struct globals *)mld->mld_ipc->userdata)->g_socketbase);
 	}
@@ -834,19 +832,18 @@ static int lister_get_args(
 //
 //	Attempt to allocate and initialize a new lister node and add it to the global list.
 //
-static struct ftp_node *lister_create_node(struct galileoftp_globals *ogp, IPCData *ipc, struct connect_msg *cm)
+static struct ftp_node *lister_create_node(IPCData *ipc, struct connect_msg *cm)
 {
 	struct ftp_node *node;
 
 	if (node = AllocVec(sizeof(struct ftp_node), MEMF_CLEAR))
 	{
 		node->fn_ipc = ipc;
-		node->fn_ftp.fi_og = node->fn_og = ogp;	// MUST set this to access hook fns
 		node->fn_ftp.fi_task = FindTask(0);	// To check against cross-task usage
 
 		stccpy(node->fn_galileo, cm->cm_galileo, PORTNAMELEN + 1);
 
-		copy_site_entry(ogp,&node->fn_site,&cm->cm_site);
+		copy_site_entry(&node->fn_site,&cm->cm_site);
 
 		//	ftp.ncr.com needs -l when using options or defaults to names only!
 		//	for OS/2 no options should be used
@@ -854,7 +851,7 @@ static struct ftp_node *lister_create_node(struct galileoftp_globals *ogp, IPCDa
 
 		// Default list command
 		strcpy(node->fn_lscmd, LSCMD);
-		ListLockAddHead(&ogp->og_listerlist, (struct Node *)node, &ogp->og_listercount);
+		ListLockAddHead(&og.og_listerlist, (struct Node *)node, &og.og_listercount);
 	}
 
 	return node;
@@ -865,7 +862,7 @@ static struct ftp_node *lister_create_node(struct galileoftp_globals *ogp, IPCDa
 //
 //	Attempt to create a new lister, connect to a site and log in
 //
-struct ftp_node *lister_new_connection(struct galileoftp_globals *ogp, struct msg_loop_data *mld, IPCMessage *imsg)
+struct ftp_node *lister_new_connection(struct msg_loop_data *mld, IPCMessage *imsg)
 {
 	struct connect_msg *cm = NULL;	// Connection message - this must be FreeVec'd
 	struct ftp_node *node = NULL;	// The new node
@@ -874,9 +871,9 @@ struct ftp_node *lister_new_connection(struct galileoftp_globals *ogp, struct ms
 
 	if (imsg && (cm = imsg->data_free))
 	{
-		if (cm->cm_galileo && *cm->cm_galileo && lister_get_args(ogp, mld, imsg))
+		if (cm->cm_galileo && *cm->cm_galileo && lister_get_args(mld, imsg))
 		{
-			if (node = lister_create_node(ogp, mld->mld_ipc, cm))
+			if (node = lister_create_node(mld->mld_ipc, cm))
 			{
 				// Some options need to be known at a lower level
 				node->fn_ftp.fi_timeout = node->fn_site.se_env->e_timeout;
@@ -928,10 +925,10 @@ struct ftp_node *lister_new_connection(struct galileoftp_globals *ogp, struct ms
 					cld.cld_okay   = FALSE;
 					cld.cld_flags  = imsg->flags;
 
-					if (!lister_connect_and_login(ogp, &cld))
+					if (!lister_connect_and_login(&cld))
 					{
 						node->fn_flags |= LST_CONNECTFAILED;
-						lister_disconnect(ogp, mld);
+						lister_disconnect(mld);
 						mld->mld_node = 0;
 						node = 0;
 					}
@@ -939,7 +936,7 @@ struct ftp_node *lister_new_connection(struct galileoftp_globals *ogp, struct ms
 
 				if (!cld.cld_okay && node)
 				{
-					lister_remove_node(ogp, node);
+					lister_remove_node(node);
 					node = NULL;
 				}
 			}
@@ -947,16 +944,16 @@ struct ftp_node *lister_new_connection(struct galileoftp_globals *ogp, struct ms
 	}
 
 	// Trigger connect script
-	if (!cld.cld_aborted && ogp->og_gci->gc_Script && handle)
+	if (!cld.cld_aborted && og.og_gci->gc_Script && handle)
 	{
 		char script_arg[13];
 
 		sprintf(script_arg, "%lu", handle);
 
 		if (cm->cm_site.se_env->e_script_connect_ok && cld.cld_okay)
-			ogp->og_gci->gc_Script("FTP connect success", script_arg);
+			og.og_gci->gc_Script("FTP connect success", script_arg);
 		else if	(cm->cm_site.se_env->e_script_connect_fail && !cld.cld_okay)
-			ogp->og_gci->gc_Script("FTP connect fail", script_arg);
+			og.og_gci->gc_Script("FTP connect fail", script_arg);
 	}
 
 	// Reply to message from main process?
@@ -998,7 +995,7 @@ static int errno_known(void)
 //	Returns 1 if reconnect is desired
 //	Returns 0 if not
 //
-static int galileo_lostconn(struct galileoftp_globals *og, struct ftp_node *ftpnode)
+static int galileo_lostconn(struct ftp_node *ftpnode)
 {
 	APTR handle = ftpnode->fn_handle;
 	int msg;
@@ -1035,7 +1032,7 @@ static int galileo_lostconn(struct galileoftp_globals *og, struct ftp_node *ftpn
 		retval = 1;
 
 	// Show reconnect requester?
-	else if	(!og->og_noreq)
+	else if	(!og.og_noreq)
 	{
 		ftpnode->fn_ftp.fi_errno &= ~FTPERR_XFER_MASK;
 
@@ -1077,7 +1074,7 @@ static int galileo_lostconn(struct galileoftp_globals *og, struct ftp_node *ftpn
 //
 //	See galileo_quitcommand() and galileo_drop() for ScanDir and DeviceList stuff
 //
-void lister_disconnect(struct galileoftp_globals *og, struct msg_loop_data *mld)
+void lister_disconnect(struct msg_loop_data *mld)
 {
 	char galileo[PORTNAMELEN+1];
 	struct ftp_node *ftpnode = mld->mld_node;
@@ -1090,10 +1087,10 @@ void lister_disconnect(struct galileoftp_globals *og, struct msg_loop_data *mld)
 
 	// save site entry
 
-	copy_site_entry(og,&og->og_last_site, &ftpnode->fn_site);
+	copy_site_entry(&og.og_last_site, &ftpnode->fn_site);
 
 	// set marker
-	og->og_valid_site=TRUE;
+	og.og_valid_site=TRUE;
 
 	handle = ftpnode->fn_handle;
 
@@ -1101,7 +1098,7 @@ void lister_disconnect(struct galileoftp_globals *og, struct msg_loop_data *mld)
 	// And only ones that had been successfully connected
 	if ((ftpnode->fn_flags & (LST_CONNECTED | LST_LOCAL)) == LST_CONNECTED
 	    && ftpnode->fn_site.se_env->e_script_close
-	    && og->og_gci->gc_Script)
+	    && og.og_gci->gc_Script)
 		do_script = 1;
 
 	// Need to remember last path?
@@ -1110,9 +1107,9 @@ void lister_disconnect(struct galileoftp_globals *og, struct msg_loop_data *mld)
 	{
 		if (sm = AllocVec(sizeof(*sm), MEMF_CLEAR))
 		{
-			copy_site_entry(og,&sm->cm_site,&ftpnode->fn_site);
+			copy_site_entry(&sm->cm_site,&ftpnode->fn_site);
 
-			IPC_Command(og->og_main_ipc, IPC_REMEMBERPATH, 0, sm, 0, REPLY_NO_PORT);
+			IPC_Command(og.og_main_ipc, IPC_REMEMBERPATH, 0, sm, 0, REPLY_NO_PORT);
 
 			FreeVec(sm);
 		}
@@ -1125,7 +1122,7 @@ void lister_disconnect(struct galileoftp_globals *og, struct msg_loop_data *mld)
 	    || (mld->mld_node->fn_flags & LST_NOOP_QUIT))
 	{
 		// shut down the connection
-		if (!(mld->mld_reconnecting = galileo_lostconn(og, ftpnode)))
+		if (!(mld->mld_reconnecting = galileo_lostconn(ftpnode)))
 		{
 			// Flag to close lister if not reconnecting
 			ftpnode->fn_flags &= ~LST_LEAVEOPENIFFAIL;
@@ -1181,7 +1178,7 @@ void lister_disconnect(struct galileoftp_globals *og, struct msg_loop_data *mld)
 		}
 	}
 
-	lister_remove_node(og, ftpnode);
+	lister_remove_node(ftpnode);
 
 	// Command to issue after quitting?
 	if (mld->mld_quitmsg && (qm = (struct quit_msg *)mld->mld_quitmsg->flags))
@@ -1208,13 +1205,13 @@ void lister_disconnect(struct galileoftp_globals *og, struct msg_loop_data *mld)
 		char handlebuf[13];
 		sprintf(handlebuf, "%lu", handle);
 
-		og->og_gci->gc_Script("FTP close connection", handlebuf);
+		og.og_gci->gc_Script("FTP close connection", handlebuf);
 	}
 }
 
 /********************************/
 
-void lister_reconnect(struct galileoftp_globals *og, struct msg_loop_data *mld)
+void lister_reconnect(struct msg_loop_data *mld)
 {
 	char command[1024+1];
 
@@ -1222,7 +1219,7 @@ void lister_reconnect(struct galileoftp_globals *og, struct msg_loop_data *mld)
 
 	// Valid?
 
-	if (!og || !mld)
+	if (!mld)
 		return;
 
 	// Build command string user:pass@host:port/path
@@ -1303,7 +1300,7 @@ int lister_retry_connect_requester(struct ftp_node *node, struct connect_log_dat
 		// Activate 'User' gadget
 		cld->cld_cm->cm_site.se_active_gadget = GAD_CONNECT_USER;
 
-		if (!IPC_Command(node->fn_og->og_addrproc, IPC_CONNECTVISUAL, 0, cld->cld_cm, 0, REPLY_NO_PORT))
+		if (!IPC_Command(og.og_addrproc, IPC_CONNECTVISUAL, 0, cld->cld_cm, 0, REPLY_NO_PORT))
 			cld->cld_aborted = 1;
 	}
 

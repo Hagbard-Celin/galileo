@@ -129,8 +129,9 @@ extern ObjectDef ftp_options_objects[],ftp_connect_objects[],ftp_opt_lister[],ft
 extern SubOptionHandle ftp_custom_suboptions[],ftp_default_suboptions[];
 extern MenuData options_menus[],site_menus[];
 
+ULONG __asm addressbook_initTr(register __a0 IPCData *ipc, register __a1 struct subproc_data *data);
 ULONG __asm addressbook_init(register __a0 IPCData *ipc, register __a1 struct subproc_data *data);
-VOID free_address_book(register struct galileoftp_globals *);	// ftp_main.c
+VOID free_address_book(void);	// ftp_main.c
 static void close_addrbook(struct window_params *,BOOL);
 static BOOL end_edit(struct window_params *,BOOL);
 static void end_connect(struct window_params *,BOOL);
@@ -272,7 +273,7 @@ static VOID myWindowToFront(struct window_params *wp, BOOL activate)
 static VOID create_dummy_env(struct display_globals *dg,struct site_entry *e)
 {
 
-	*(&e->se_env_private)=*(&dg->dg_og->og_oc.oc_env);
+	*(&e->se_env_private)=*(&og.og_oc.oc_env);
 	e->se_env=&e->se_env_private;
 
 	// Clear format marker
@@ -303,7 +304,7 @@ static DragInfo *address_drag_start(struct display_globals *dg,int item,int left
 
 	// Find drag node
 
-	if (!(drag_node = Att_FindNode(dg->dg_og->og_SiteList, item)))
+	if (!(drag_node = Att_FindNode(og.og_SiteList, item)))
 		return 0;
 
 	// We want to drag outside the window.
@@ -387,14 +388,14 @@ static void address_drag_copy(struct display_globals *dg,struct window_params *w
 	Att_Node *drag_node;
 
 	// Find drag node
-	drag_node = Att_FindNode(dg->dg_og->og_SiteList, dg->dg_drag_item);
+	drag_node = Att_FindNode(og.og_SiteList, dg->dg_drag_item);
 
 	if (drag_node)
 	{
 		struct site_entry *newe;
 		newe=(struct site_entry *)drag_node->att_data;
 
-		copy_site_entry(dg->dg_og,wp->wp_se_copy,newe);
+		copy_site_entry(wp->wp_se_copy,newe);
 
 		display_edit_gadgets(dg,wp);
 	}
@@ -417,8 +418,8 @@ static void address_drag_arrange(struct display_globals *dg, int swap)
 
 	if (obj = GetObject(dg->dg_addrwp->wp_objlist, GAD_FTP_SITES))
 	{
-		x = dg->dg_og->og_screen->MouseX - dg->dg_addrwp->wp_win->LeftEdge;
-		y = dg->dg_og->og_screen->MouseY - dg->dg_addrwp->wp_win->TopEdge;
+		x = og.og_screen->MouseX - dg->dg_addrwp->wp_win->LeftEdge;
+		y = og.og_screen->MouseY - dg->dg_addrwp->wp_win->TopEdge;
 
 		// Dropped on listview?
 		if (CheckObjectArea(obj, x, y))
@@ -436,7 +437,7 @@ static void address_drag_arrange(struct display_globals *dg, int swap)
 				return;
 
 			// Find drag node
-			drag_node = Att_FindNode(dg->dg_og->og_SiteList, dg->dg_drag_item);
+			drag_node = Att_FindNode(og.og_SiteList, dg->dg_drag_item);
 
 			if (drag_node)
 			{
@@ -445,7 +446,7 @@ static void address_drag_arrange(struct display_globals *dg, int swap)
 
 				// Find drop node
 				if (drop_item != -1)
-					drop_node = Att_FindNode(dg->dg_og->og_SiteList, drop_item);
+					drop_node = Att_FindNode(og.og_SiteList, drop_item);
 				else
 					drop_node = 0;
 
@@ -454,14 +455,14 @@ static void address_drag_arrange(struct display_globals *dg, int swap)
 					if (swap)
 					{
 						// Swap two entries?
-						SwapListNodes((struct List *)dg->dg_og->og_SiteList,
+						SwapListNodes((struct List *)og.og_SiteList,
 							      (struct Node *)drag_node,
 							      (struct Node *)drop_node);
 					}
 					else
 					{
 						Remove((struct Node *)drag_node);
-						Insert((struct List *)dg->dg_og->og_SiteList,
+						Insert((struct List *)og.og_SiteList,
 						       (struct Node *)drag_node,
 						       (struct Node *)drop_node->node.ln_Pred);
 					}
@@ -470,11 +471,11 @@ static void address_drag_arrange(struct display_globals *dg, int swap)
 				{
 					// Otherwise drag entry to end of list
 					Remove((struct Node *)drag_node);
-					AddTail((struct List *)dg->dg_og->og_SiteList, (struct Node *)drag_node);
+					AddTail((struct List *)og.og_SiteList, (struct Node *)drag_node);
 				}
 
 				// Reattach item list using SetGadgetChoices
-				SetGadgetChoices(dg->dg_addrwp->wp_objlist,GAD_FTP_SITES,dg->dg_og->og_SiteList);
+				SetGadgetChoices(dg->dg_addrwp->wp_objlist,GAD_FTP_SITES,og.og_SiteList);
 			}
 		}
 	}
@@ -493,7 +494,7 @@ static int address_drag_to_backdrop(struct display_globals *dg)
 	int ok = 0;
 
 	// Find entry in phonebook
-	if (node = Att_FindNode(dg->dg_og->og_SiteList, dg->dg_drag_item))
+	if (node = Att_FindNode(og.og_SiteList, dg->dg_drag_item))
 	{
 		entry = (struct site_entry *)node->att_data;
 
@@ -511,7 +512,7 @@ static int address_drag_to_backdrop(struct display_globals *dg)
 			}
 
 			// Get desktop path
-			dg->dg_og->og_gci->gc_GetDesktop(path);
+			og.og_gci->gc_GetDesktop(path);
 
 			// Get site name
 			AddPart(path, name, PATHLEN+1);
@@ -528,7 +529,7 @@ static int address_drag_to_backdrop(struct display_globals *dg)
 				*PathPart(path) = 0;
 
 				// Make icon appear
-				dg->dg_og->og_gci->gc_CheckDesktop(path);
+				og.og_gci->gc_CheckDesktop(path);
 			}
 			FreeVec(name);
 		}
@@ -561,7 +562,7 @@ static int address_drag_to_editor(struct display_globals *dg, IPCData *ipc, int 
 
 		if (func = NewButtonFunction(0, FTYPE_LEFT_BUTTON))
 		{
-			if (node = Att_FindNode(dg->dg_og->og_SiteList, dg->dg_drag_item))
+			if (node = Att_FindNode(og.og_SiteList, dg->dg_drag_item))
 			{
 				char label[80];
 
@@ -618,14 +619,14 @@ static int address_drag_to_lister(struct display_globals *dg, IPCData *ipc)
 	struct connect_msg *cm;
 
 
-	if (node = Att_FindNode(dg->dg_og->og_SiteList, dg->dg_drag_item))
+	if (node = Att_FindNode(og.og_SiteList, dg->dg_drag_item))
 	{
 		e = (struct site_entry *)node->att_data;
 
 		// no need to get_blank_connectmsg() since we overwrite anyway
 		if (cm=AllocVec(sizeof(struct connect_msg),MEMF_CLEAR))
 		{
-			copy_site_entry(dg->dg_og,&cm->cm_site,e);
+			copy_site_entry(&cm->cm_site,e);
 
 			// if anon the blank user and password
 			if (e->se_anon)
@@ -641,7 +642,7 @@ static int address_drag_to_lister(struct display_globals *dg, IPCData *ipc)
 			// send IPC_CONNECT to MAIN proccess so it can open new connection
 			// in curent lister we dropped onto.
 
-			IPC_Command(dg->dg_og->og_main_ipc, IPC_CONNECT, 0, 0, cm, 0);
+			IPC_Command(og.og_main_ipc, IPC_CONNECT, 0, 0, cm, 0);
 
 			ok = 1;
 		}
@@ -683,12 +684,12 @@ static void address_drag_end(struct display_globals *dg, int option)
 		struct window_params *mywp;
 		struct Layer *layer;
 
-		LockLayerInfo(&dg->dg_og->og_screen->LayerInfo);
+		LockLayerInfo(&og.og_screen->LayerInfo);
 
-		if (layer = WhichLayer(&dg->dg_og->og_screen->LayerInfo, x, y))
+		if (layer = WhichLayer(&og.og_screen->LayerInfo, x, y))
 			win = layer->Window;
 
-		UnlockLayerInfo(&dg->dg_og->og_screen->LayerInfo);
+		UnlockLayerInfo(&og.og_screen->LayerInfo);
 
 		if (win)
 		{
@@ -724,8 +725,8 @@ static void address_drag_end(struct display_globals *dg, int option)
 			}
 			else
 			{
-				IPCData *win_ipc = 0;
-				ULONG win_id = 0;
+				IPCData *win_ipc;
+				ULONG win_id;
 
 				// Get window ID
 				win_id = GetWindowID(win);
@@ -768,7 +769,7 @@ static void address_drag_end(struct display_globals *dg, int option)
 	}
 
 	if (!ok)
-		DisplayBeep(dg->dg_og->og_screen);
+		DisplayBeep(og.og_screen);
 }
 
 
@@ -784,14 +785,14 @@ static void address_drag_end(struct display_globals *dg, int option)
 
 static BOOL make_sitelist_available(struct display_globals *dg)
 {
-	if (!dg->dg_og->og_SiteList)
-		read_build_addressbook(dg->dg_og,dg->dg_ipc);
+	if (!og.og_SiteList)
+		read_build_addressbook(dg->dg_ipc);
 
 	// still not there?
 
-	if (!dg->dg_og->og_SiteList)
+	if (!og.og_SiteList)
 	{
-		DisplayBeep(dg->dg_og->og_screen);
+		DisplayBeep(og.og_screen);
 		return(FALSE);
 	}
 
@@ -892,12 +893,12 @@ static int env_not_default(struct display_globals *dg,struct ftp_environment *ne
 	int result;
 
 	// adjust for formats! Grrr
-	format=dg->dg_og->og_oc.oc_env.e_custom_format;
-	dg->dg_og->og_oc.oc_env.e_custom_format=0;
+	format=og.og_oc.oc_env.e_custom_format;
+	og.og_oc.oc_env.e_custom_format=0;
 
-	result=env_different(new,&dg->dg_og->og_oc.oc_env);
+	result=env_different(new,&og.og_oc.oc_env);
 
-	dg->dg_og->og_oc.oc_env.e_custom_format=format;
+	og.og_oc.oc_env.e_custom_format=format;
 
 	return(result);
 }
@@ -906,8 +907,11 @@ static int env_not_default(struct display_globals *dg,struct ftp_environment *ne
 
 VOID set_reset_button(struct display_globals *dg,struct window_params *wp)
 {
-
+#if 0
 	BOOL disabled=FALSE;
+#else
+	BOOL disabled;
+#endif
 	struct MenuItem *item;
 
 	// compare current version with actual global default values
@@ -960,9 +964,9 @@ static void reset_default_options(struct window_params *wp)
 	else
 	{
 		// overcopy current version being edited with current default
-		*(&wp->wp_se_copy->se_env_private)=*(&dg->dg_og->og_oc.oc_env);
+		*(&wp->wp_se_copy->se_env_private)=*(&og.og_oc.oc_env);
 
-		wp->wp_se_copy->se_env=&dg->dg_og->og_oc.oc_env;
+		wp->wp_se_copy->se_env=&og.og_oc.oc_env;
 		wp->wp_se_copy->se_has_custom_env=FALSE;
 
 		// adjust for global settings being different for format meaning ?
@@ -998,7 +1002,7 @@ static void restore_options(struct window_params *wp)
 	{
 		// restore to last used default set
 
-		*(&dg->dg_oc)=*(&dg->dg_og->og_oc);
+		*(&dg->dg_oc)=*(&og.og_oc);
 	}
 
 }
@@ -1068,7 +1072,7 @@ Att_Node *check_duplicate_entry(struct display_globals *dg,struct site_entry *e)
 	struct Node *node,*next;
 	Att_Node *found=NULL;
 
-	list=&dg->dg_og->og_SiteList->list;
+	list=&og.og_SiteList->list;
 
 	if (list && !IsListEmpty(list))
 	{
@@ -1097,25 +1101,21 @@ Att_Node *check_duplicate_entry(struct display_globals *dg,struct site_entry *e)
 
 static void set_new_config(struct display_globals *dg,struct window_params *wp)
 {
-	register struct galileoftp_globals *ogp;
-
-	ogp=dg->dg_og;
-
-	if (config_different(&dg->dg_oc,&ogp->og_oc))
+	if (config_different(&dg->dg_oc,&og.og_oc))
 	{
 		LONG ipcflags=0;
 
-		if (ogp->og_log_open!=dg->dg_log_open)
+		if (og.og_log_open!=dg->dg_log_open)
 		{
-			ogp->og_log_open=dg->dg_log_open;
+			og.og_log_open=dg->dg_log_open;
 			ipcflags|=ID_LOGON_F;
 		}
 
-		if (stricmp(ogp->og_oc.oc_logname,dg->dg_oc.oc_logname))
+		if (stricmp(og.og_oc.oc_logname,dg->dg_oc.oc_logname))
 			ipcflags|=ID_LOGNAME_F;
 
 		// copy new one over orig
-		*(&ogp->og_oc)=*(&dg->dg_oc);
+		*(&og.og_oc)=*(&dg->dg_oc);
 
 
 		// if log details have changed then signal mainprocess to check them
@@ -1124,7 +1124,7 @@ static void set_new_config(struct display_globals *dg,struct window_params *wp)
 
 
 		if (ipcflags)
-			IPC_Command(dg->dg_og->og_main_ipc, IPC_UPDATECONFIG, ipcflags, 0, 0, REPLY_NO_PORT);
+			IPC_Command(og.og_main_ipc, IPC_UPDATECONFIG, ipcflags, 0, 0, REPLY_NO_PORT);
 	}
 }
 
@@ -1135,12 +1135,12 @@ static void send_connect(struct display_globals *dg,int selection,struct window_
 	Att_Node *node;
 
 
-	if (dg->dg_og->og_main_ipc)
+	if (og.og_main_ipc)
 	{
 		// Should be passed the screen pointer (multiple Galileos)
-		if (dg->dg_og->og_screen)
+		if (og.og_screen)
 		{
-			if (node=Att_FindNode(dg->dg_og->og_SiteList, selection))
+			if (node=Att_FindNode(og.og_SiteList, selection))
 			{
 				e=(struct site_entry *)node->att_data;
 
@@ -1154,7 +1154,7 @@ static void send_connect(struct display_globals *dg,int selection,struct window_
 
 				if (cm=AllocVec(sizeof(struct connect_msg),MEMF_CLEAR))
 				{
-					copy_site_entry(dg->dg_og,&cm->cm_site,e);
+					copy_site_entry(&cm->cm_site,e);
 
 					// if anon the blank user and password
 					if (e->se_anon)
@@ -1165,7 +1165,7 @@ static void send_connect(struct display_globals *dg,int selection,struct window_
 
 					stccpy(cm->cm_galileo, dg->dg_galileoport, PORTNAMELEN);
 
-					IPC_Command(dg->dg_og->og_main_ipc, IPC_CONNECT, 0, 0, cm, 0);
+					IPC_Command(og.og_main_ipc, IPC_CONNECT, 0, 0, cm, 0);
 				}
 			}
 		}
@@ -1350,7 +1350,7 @@ static void close_a_child(struct window_params *wp)
 
 	if (!(parentwp=wp->wp_parentwp))
 	{
-		DisplayBeep(wp->wp_dg->dg_og->og_screen);
+		DisplayBeep(og.og_screen);
 		return;
 	}
 
@@ -1516,7 +1516,7 @@ static struct window_params *open_configwin(struct display_globals *dg,NewConfig
 
 	// failed
 
-	DisplayBeep(dg->dg_og->og_screen);
+	DisplayBeep(og.og_screen);
 	return(NULL);
 }
 
@@ -1583,7 +1583,7 @@ static void display_main_gadgets(struct display_globals *dg,int number)
 {
 	Att_Node * node;
 
-	if (node=Att_FindNode(dg->dg_og->og_SiteList,number))
+	if (node=Att_FindNode(og.og_SiteList,number))
 	{
 		// if there is a node then display it
 
@@ -1872,8 +1872,6 @@ static void store_options_gadgets(struct window_params *wp)
 				int logopen;
 				tmp_oc=&dg->dg_oc;
 
-				env=&tmp_oc->oc_env;
-
 				strcpy(oldlog,tmp_oc->oc_logname);
 				logopen=tmp_oc->oc_enable_log;
 
@@ -2049,10 +2047,10 @@ static void edit_options(struct display_globals *dg,struct Window *win,WORD type
 		subopts=ftp_default_suboptions;
 
 		// make tmp copy of current config
-		*(&dg->dg_oc)=*(&dg->dg_og->og_oc);
+		*(&dg->dg_oc)=*(&og.og_oc);
 
 		// get current start of log file
-		dg->dg_log_open=dg->dg_og->og_log_open;
+		dg->dg_log_open=og.og_log_open;
 
 	}
 	else
@@ -2108,7 +2106,7 @@ static void edit_options(struct display_globals *dg,struct Window *win,WORD type
 					// get environment/options settings from calling window
 					// make a copy for this wp node.
 
-					copy_site_entry(dg->dg_og,e,parentwp->wp_se_copy);
+					copy_site_entry(e,parentwp->wp_se_copy);
 
 					// update private env copy with global so we can edit it
 					if (!e->se_has_custom_env)
@@ -2164,10 +2162,10 @@ static struct window_params *show_ftp_options(struct display_globals *dg,struct 
 		subopts=ftp_default_suboptions;
 
 		// make tmp copy of current config
-		*(&dg->dg_oc)=*(&dg->dg_og->og_oc);
+		*(&dg->dg_oc)=*(&og.og_oc);
 
 		// get current start of log file
-		dg->dg_log_open=dg->dg_og->og_log_open;
+		dg->dg_log_open=og.og_log_open;
 
 	}
 	else
@@ -2188,7 +2186,7 @@ static struct window_params *show_ftp_options(struct display_globals *dg,struct 
 			struct window_params *wp;
 
 			// Fill out new window structure
-			newwin.parent=dg->dg_og->og_screen;
+			newwin.parent=og.og_screen;
 			newwin.dims=&ftp_environment_window;
 			newwin.locale=locale;
 			newwin.port=dg->idcmp_port;
@@ -2214,7 +2212,7 @@ static struct window_params *show_ftp_options(struct display_globals *dg,struct 
 					// get environment/options settings from calling connect msg
 					// make a copy of the old entry
 
-					copy_site_entry(dg->dg_og,e,&cm->cm_site);
+					copy_site_entry(e,&cm->cm_site);
 
 					// if no custom options then create a dummy copy of the default options
 					if (!e->se_has_custom_env)
@@ -2265,7 +2263,7 @@ static struct window_params *show_connect(struct display_globals *dg,struct subp
 		if (e=AllocVec(sizeof(struct site_entry), MEMF_CLEAR))
 		{
 			// Fill out new window structure
-			newwin.parent=dg->dg_og->og_screen;
+			newwin.parent=og.og_screen;
 			newwin.dims=&ftp_connect_window;
 			newwin.locale=locale;
 			newwin.port=dg->idcmp_port;
@@ -2282,7 +2280,7 @@ static struct window_params *show_connect(struct display_globals *dg,struct subp
 				wp->wp_se_copy=e;
 
 				// get site_entry from connect message
-				copy_site_entry(dg->dg_og,e,&cm->cm_site);
+				copy_site_entry(e,&cm->cm_site);
 
 				if (!*e->se_user)
 					e->se_anon = TRUE;
@@ -2339,7 +2337,7 @@ static struct window_params *add_entry(struct display_globals *dg,struct subproc
 		{
 			struct window_params *wp;
 
-			newwin.parent=dg->dg_og->og_screen;
+			newwin.parent=og.og_screen;
 			newwin.dims=&ftp_edit_window;
 			newwin.locale=locale;
 			newwin.port=dg->idcmp_port;
@@ -2356,7 +2354,7 @@ static struct window_params *add_entry(struct display_globals *dg,struct subproc
 				wp->wp_se_copy=e;
 
 				// copy site_entry from connect message
-				copy_site_entry(dg->dg_og,e,&cm->cm_site);
+				copy_site_entry(e,&cm->cm_site);
 
 
 				if (!*e->se_user)
@@ -2445,7 +2443,7 @@ static void edit_entry(struct display_globals *dg,struct Window *win)
 	Att_Node *node;
 
 
-	if (node=Att_FindNode(dg->dg_og->og_SiteList,dg->dg_selected))
+	if (node=Att_FindNode(og.og_SiteList,dg->dg_selected))
 	{
 		struct window_params *wp,*parentwp,*oldwp;
 
@@ -2473,7 +2471,7 @@ static void edit_entry(struct display_globals *dg,struct Window *win)
 				wp->wp_se_copy=new;
 
 				// make a copy of the old entry
-				copy_site_entry(dg->dg_og,new,wp->wp_se_real);
+				copy_site_entry(new,wp->wp_se_real);
 
 				display_edit_gadgets(dg,wp);
 
@@ -2528,10 +2526,10 @@ static void small_site_list(struct display_globals *dg,struct window_params *par
 		// find in site list if there
 		// and adjust to ordinal value from get_site
 
-		if (pos=get_site_entry(dg->dg_og,e,dg->dg_ipc))
+		if (pos=get_site_entry(e,dg->dg_ipc))
 			--pos;
 
-		list=dg->dg_og->og_SiteList;
+		list=og.og_SiteList;
 
 		if (list && !IsListEmpty((struct List *)list))
 		{
@@ -2567,7 +2565,7 @@ static VOID change_site_list_entry(struct display_globals *dg, struct site_entry
 	if (e->se_has_custom_env)
 		e->se_env=&e->se_env_private;
 	else
-		e->se_env=&dg->dg_og->og_oc.oc_env;
+		e->se_env=&og.og_oc.oc_env;
 
 	// if addressbook i visible then detach list
 	if (dg->dg_addrwp)
@@ -2581,13 +2579,13 @@ static VOID change_site_list_entry(struct display_globals *dg, struct site_entry
 	}
 
 	// add the new entry
-	if (node=Att_NewNode(dg->dg_og->og_SiteList, e->se_name,(ULONG)e, ADDNODE_SORT))
+	if (node=Att_NewNode(og.og_SiteList, e->se_name,(ULONG)e, ADDNODE_SORT))
 	{
 		// Specific place to put this node?
 		if (nextnode)
-			Att_PosNode(dg->dg_og->og_SiteList, node, nextnode);
+			Att_PosNode(og.og_SiteList, node, nextnode);
 
-		dg->dg_selected=Att_FindNodeNumber(dg->dg_og->og_SiteList,node);
+		dg->dg_selected=Att_FindNodeNumber(og.og_SiteList,node);
 
 		// mark as changed site details
 		SetFlag(dg->dg_config_changed,CHANGED_ADR);
@@ -2599,7 +2597,7 @@ static VOID change_site_list_entry(struct display_globals *dg, struct site_entry
 	// reattach the list if visible and show it
 	if (dg->dg_addrwp)
 	{
-		SetGadgetChoices(dg->dg_addrwp->wp_objlist, GAD_FTP_SITES, dg->dg_og->og_SiteList);
+		SetGadgetChoices(dg->dg_addrwp->wp_objlist, GAD_FTP_SITES, og.og_SiteList);
 		SetGadgetValue(dg->dg_addrwp->wp_objlist,GAD_FTP_SITES,dg->dg_selected);
 		display_main_gadgets(dg,dg->dg_selected);
 	}
@@ -2679,7 +2677,7 @@ static VOID update_sitelist(struct display_globals *dg,struct site_entry *copy, 
 				if (list && !IsListEmpty(list))
 				{
 					myWindowToFront(oldwp,FALSE);
-					DisplayBeep(dg->dg_og->og_screen);
+					DisplayBeep(og.og_screen);
 
 					FreeVec(copy);
 					return;
@@ -2689,7 +2687,7 @@ static VOID update_sitelist(struct display_globals *dg,struct site_entry *copy, 
 
 			// otherwise we can update the old entry and free copy
 
-			copy_site_entry(dg->dg_og,olde,copy);
+			copy_site_entry(olde,copy);
 
 			FreeVec(copy);
 		}
@@ -2707,7 +2705,7 @@ static VOID update_sitelist(struct display_globals *dg,struct site_entry *copy, 
 		{
 			WindowToFront(oldwp->wp_win);
 			display_edit_gadgets(dg,oldwp);
-			DisplayBeep(dg->dg_og->og_screen);
+			DisplayBeep(og.og_screen);
 		}
 		else
 		{
@@ -2758,7 +2756,7 @@ static void end_small_site_list(struct window_params *wp,BOOL flag)
 
 		hit=GetGadgetValue(wp->wp_objlist,GAD_LIST_SITES);
 
-		if (node=Att_FindNode(dg->dg_og->og_SiteList, hit))
+		if (node=Att_FindNode(og.og_SiteList, hit))
 			e=(struct site_entry*)node->att_data;
 
 	}
@@ -2768,7 +2766,7 @@ static void end_small_site_list(struct window_params *wp,BOOL flag)
 	if (e && parentwp)
 	{
 		// update caller site entry and refresh
-		copy_site_entry(dg->dg_og,parentwp->wp_se_copy,e);
+		copy_site_entry(parentwp->wp_se_copy,e);
 		display_connect_gadgets(dg,parentwp);
 	}
 }
@@ -2810,7 +2808,7 @@ static void end_connect(struct window_params *wp,BOOL flag)
 
 		if (!*copy->se_host || !strcmp(copy->se_host,"Shrubbery"))
 		{
-			display_msg(dg->dg_og,dg->dg_ipc,wp->wp_win,0,GetString(locale,MSG_BADSITE));
+			display_msg(dg->dg_ipc,wp->wp_win,0,GetString(locale,MSG_BADSITE));
 			SetGadgetValue(objlist,GAD_CONNECT_HOST,(ULONG)"Shrubbery");
 			return;
 		}
@@ -2842,7 +2840,7 @@ static void end_connect(struct window_params *wp,BOOL flag)
 			cm=(struct connect_msg*)imsg->data;
 
 			// copy site back to connect message
-			copy_site_entry(dg->dg_og,&cm->cm_site,copy);
+			copy_site_entry(&cm->cm_site,copy);
 
 		}
 	}
@@ -2906,7 +2904,7 @@ static BOOL end_edit(struct window_params *wp,BOOL flag)
 
 		if (!*copy->se_host || !strcmp(copy->se_host,"Shrubbery"))
 		{
-			display_msg(dg->dg_og,dg->dg_ipc,wp->wp_win,0,GetString(locale,MSG_BADSITE));
+			display_msg(dg->dg_ipc,wp->wp_win,0,GetString(locale,MSG_BADSITE));
 			SetGadgetValue(objlist,GAD_EDIT_HOST,(ULONG)"Shrubbery");
 			return(FALSE);
 		}
@@ -2949,7 +2947,7 @@ static BOOL end_edit(struct window_params *wp,BOOL flag)
 			if (memcmp(copy,wp->wp_se_real,sizeof(struct site_entry)))
 			{
 				// copy back over old
-				copy_site_entry(dg->dg_og,wp->wp_se_real,copy);
+				copy_site_entry(wp->wp_se_real,copy);
 
 				// update old new entry
 				change_site_list_entry(dg,wp->wp_se_real,wp->wp_sitenode);
@@ -3001,10 +2999,8 @@ static void end_options(struct window_params *wp,BOOL flag)
 {
 	BOOL default_opt=FALSE;
 	struct display_globals *dg;
-	struct galileoftp_globals *ogp;
 
 	dg=wp->wp_dg;
-	ogp=dg->dg_og;
 
 	// check if we are using the default options
 
@@ -3021,7 +3017,7 @@ static void end_options(struct window_params *wp,BOOL flag)
 		if (default_opt)
 		{
 			//	compare REAL config with our copy to see if user changed anything
-			if (config_different(&dg->dg_oc,&ogp->og_oc))
+			if (config_different(&dg->dg_oc,&og.og_oc))
 			{
 				// update old config with new one
 				set_new_config(dg,wp);
@@ -3044,7 +3040,7 @@ static void end_options(struct window_params *wp,BOOL flag)
 			{
 				// if the same then reset ptr to point to global values
 				wp->wp_se_copy->se_has_custom_env=FALSE;
-				wp->wp_se_copy->se_env=&ogp->og_oc.oc_env;
+				wp->wp_se_copy->se_env=&og.og_oc.oc_env;
 			}
 
 			// if options window from adressbook site entry then
@@ -3092,7 +3088,7 @@ static void end_options(struct window_params *wp,BOOL flag)
 
 					cm=(struct connect_msg*)wp->wp_imsg->data;
 
-					copy_site_entry(dg->dg_og,&cm->cm_site,wp->wp_se_copy);
+					copy_site_entry(&cm->cm_site,wp->wp_se_copy);
 				}
 			}
 
@@ -3111,7 +3107,7 @@ static void delete_entry(struct display_globals *dg)
 	Att_Node * node;
 	int count;
 
-	if (node=Att_FindNode(dg->dg_og->og_SiteList,dg->dg_selected))
+	if (node=Att_FindNode(og.og_SiteList,dg->dg_selected))
 	{
 		struct window_params *oldwp;
 
@@ -3129,10 +3125,10 @@ static void delete_entry(struct display_globals *dg)
 		Att_RemNode(node);
 
 		// add list
-		SetGadgetChoices(dg->dg_addrwp->wp_objlist, GAD_FTP_SITES, dg->dg_og->og_SiteList);
+		SetGadgetChoices(dg->dg_addrwp->wp_objlist, GAD_FTP_SITES, og.og_SiteList);
 
 		// check if we have run off the end of the list ?
-		if (dg->dg_selected>=(count=Att_NodeCount(dg->dg_og->og_SiteList)))
+		if (dg->dg_selected>=(count=Att_NodeCount(og.og_SiteList)))
 			dg->dg_selected=count-1;
 
 		SetGadgetValue(dg->dg_addrwp->wp_objlist,GAD_FTP_SITES,dg->dg_selected);
@@ -3187,8 +3183,8 @@ static void close_addrbook(struct window_params *wp,BOOL flag)
 
 		close_configwin(wp);
 
-		ReleaseSemaphore(&dg->dg_og->og_SiteList_semaphore);
-		dg->dg_og->og_addrbook_open = FALSE;
+		ReleaseSemaphore(&og.og_SiteList_semaphore);
+		og.og_addrbook_open = FALSE;
 
 
 		// reply to intial calling message
@@ -3229,17 +3225,17 @@ static struct window_params *show_addrbook(struct display_globals *dg,struct sub
 		stccpy(dg->dg_galileoport, am->am_galileo, PORTNAMELEN);
 
 		// make tmp copy of current config
-		*(&dg->dg_oc)=*(&dg->dg_og->og_oc);
+		*(&dg->dg_oc)=*(&og.og_oc);
 
 		// get current start of log file
-		dg->dg_log_open=dg->dg_og->og_log_open;
+		dg->dg_log_open=og.og_log_open;
 
 		// copy configwindow structure to preserve real for next call
 
 		*(&ftp_win)=*(&ftp_main_window);
 
 		// Fill out new window structure
-		newwin.parent=dg->dg_og->og_screen;
+		newwin.parent=og.og_screen;
 		newwin.dims=&ftp_win;
 		newwin.locale=locale;
 		newwin.port=dg->idcmp_port;
@@ -3250,10 +3246,10 @@ static struct window_params *show_addrbook(struct display_globals *dg,struct sub
 		// Try to load size
 		if (LoadPos("Galileo/windows/ftp",&pos,&old_font_size))
 		{
-			kprintf("font size %ld , old_font_size %ld\n", dg->dg_og->og_screen->RastPort.TxHeight,old_font_size);
+			kprintf("font size %ld , old_font_size %ld\n", og.og_screen->RastPort.TxHeight,old_font_size);
 
 			// Is font size the same?
-			if (dg->dg_og->og_screen->RastPort.TxHeight==old_font_size)
+			if (og.og_screen->RastPort.TxHeight==old_font_size)
 			{
 				newwin.dims->char_dim.Width=0;
 				newwin.dims->char_dim.Height=0;
@@ -3300,19 +3296,19 @@ static struct window_params *show_addrbook(struct display_globals *dg,struct sub
 			// now keep site list in memory under semaphore
 			// and free when addressbook shut down or low memory
 
-			ObtainSemaphoreShared(&dg->dg_og->og_SiteList_semaphore);
+			ObtainSemaphoreShared(&og.og_SiteList_semaphore);
 
-			if (!dg->dg_og->og_SiteList)
-				read_build_addressbook(dg->dg_og,dg->dg_ipc);
+			if (!og.og_SiteList)
+				read_build_addressbook(dg->dg_ipc);
 
 			// initialise the list and set to 1st entry
-			SetGadgetChoices(dg->dg_addrwp->wp_objlist, GAD_FTP_SITES, dg->dg_og->og_SiteList);
+			SetGadgetChoices(dg->dg_addrwp->wp_objlist, GAD_FTP_SITES, og.og_SiteList);
 
 			SetGadgetValue(dg->dg_addrwp->wp_objlist,GAD_FTP_SITES,0);
 			display_main_gadgets(dg,0);
 
 			// mark global pointer to say addressbook on screen
-			dg->dg_og->og_addrbook_open = TRUE;
+			og.og_addrbook_open = TRUE;
 
 			return(dg->dg_addrwp);
 		}
@@ -3329,12 +3325,12 @@ static struct window_params *show_addrbook(struct display_globals *dg,struct sub
  *	socket library has become available this time
  */
 
-static void recheck_for_socketlib(struct galileoftp_globals *ogp, IPCData *ipc)
+static void recheck_for_socketlib(IPCData *ipc)
 {
 	struct globals *g = ipc->userdata;
 
 	if (!g->g_socketbase)
-		g->g_socketbase = OpenLibrary(ogp->og_socketlibname[ogp->og_socketlib], ogp->og_socketlibver[ogp->og_socketlib]);
+		g->g_socketbase = OpenLibrary(og.og_socketlibname[og.og_socketlib], og.og_socketlibver[og.og_socketlib]);
 
 }
 
@@ -3365,7 +3361,7 @@ static void add_to_main_list(struct display_globals *dg, Att_List *atlist)
 
 		// add to current list
 
-		if (!Att_NewNode(dg->dg_og->og_SiteList, e->se_name,(ULONG)e, ADDNODE_SORT))
+		if (!Att_NewNode(og.og_SiteList, e->se_name,(ULONG)e, ADDNODE_SORT))
 			break;
 	}
 	// discard any remaining list stuff
@@ -3386,7 +3382,7 @@ static BOOL get_toolbar(struct window_params *wp,char *filename)
 {
 	BOOL ok;
 	char path[256],file[80];
-	char *ptr=0;
+	char *ptr;
 
 	*path=0;
 
@@ -3509,13 +3505,10 @@ static BOOL store_dir(struct display_globals *dg,struct subproc_data *data,IPCMe
 
 static void idle_loop(struct display_globals *dg,struct subproc_data *data,IPCMessage **loop_quitmsg)
 {
-	int selected=GOT_NO_SELECTION;
+	int selected;
 	LONG mask,signals;
 	IPCMessage *imsg;
 	struct IntuiMessage *msg;
-	struct galileoftp_globals *ogp;
-
-	ogp=dg->dg_og;
 
 	mask=SIGBREAKF_CTRL_C  | dg->win_sig |  (1 << data->spd_ipc->command_port->mp_SigBit);
 
@@ -3571,7 +3564,7 @@ static void idle_loop(struct display_globals *dg,struct subproc_data *data,IPCMe
 						// save calling message and only reply when ADR closes
 						// to maintain synchronicity of messages
 
-						if (ogp->og_addrbook_open)
+						if (og.og_addrbook_open)
 						{
 							WindowToFront(dg->dg_addrwp->wp_win);
 							ActivateWindow(dg->dg_addrwp->wp_win);
@@ -3580,7 +3573,7 @@ static void idle_loop(struct display_globals *dg,struct subproc_data *data,IPCMe
 						else
 						{
 
-							recheck_for_socketlib(data->spd_ogp,data->spd_ipc);
+							recheck_for_socketlib(data->spd_ipc);
 
 							if (tmpwp=show_addrbook(dg,data,imsg))
 							{
@@ -3739,7 +3732,7 @@ static void idle_loop(struct display_globals *dg,struct subproc_data *data,IPCMe
 							Att_Node *node;
 							char key;
 							short offset;
-							Att_List *list=ogp->og_SiteList;
+							Att_List *list=og.og_SiteList;
 
 							// Get key press
 							key=tolower(msg_copy.Code);
@@ -3828,7 +3821,7 @@ static void idle_loop(struct display_globals *dg,struct subproc_data *data,IPCMe
 												if (selected>GOT_NO_SELECTION)
 												{
 													// set to edit or connect?
-													if (ogp->og_oc.oc_addr_dc==1)	// edit
+													if (og.og_oc.oc_addr_dc==1)	// edit
 														edit_entry(dg,msg_copy.IDCMPWindow);
 													else
 													{
@@ -3837,7 +3830,7 @@ static void idle_loop(struct display_globals *dg,struct subproc_data *data,IPCMe
 
 														send_connect(dg,selected,wp);
 
-														if (!qual && ogp->og_oc.oc_addr_auto)
+														if (!qual && og.og_oc.oc_addr_auto)
 															quit_flag=GAD_FTP_SAVE;
 														else
 															quit_flag=GAD_FTP_CONNECT;
@@ -3876,7 +3869,7 @@ static void idle_loop(struct display_globals *dg,struct subproc_data *data,IPCMe
 							SetWindowBusy(wp->wp_win);
 
 							// Send help request
-							IPC_Command(ogp->og_galileo_ipc,IPC_HELP,(1<<31),"FTPAddressbook",0,0);
+							IPC_Command(og.og_galileo_ipc,IPC_HELP,(1<<31),"FTPAddressbook",0,0);
 
 							// Clear busy pointer
 							ClearWindowBusy(wp->wp_win);
@@ -3954,7 +3947,7 @@ static void idle_loop(struct display_globals *dg,struct subproc_data *data,IPCMe
 
 									send_connect(dg,selected,wp);
 
-									if (!qual && ogp->og_oc.oc_addr_auto)
+									if (!qual && og.og_oc.oc_addr_auto)
 										quit_flag=GAD_FTP_SAVE;
 									else
 										quit_flag=GAD_FTP_CONNECT;	// will not close adr win
@@ -3972,12 +3965,12 @@ static void idle_loop(struct display_globals *dg,struct subproc_data *data,IPCMe
 
 								if (FlagIsSet(dg->dg_config_changed,CHANGED_ADR))
 								{
-									ReleaseSemaphore(&ogp->og_SiteList_semaphore);
-									free_address_book(ogp);
-									ObtainSemaphoreShared(&ogp->og_SiteList_semaphore);
+									ReleaseSemaphore(&og.og_SiteList_semaphore);
+									free_address_book();
+									ObtainSemaphoreShared(&og.og_SiteList_semaphore);
 
-									if (!ogp->og_SiteList)
-										read_build_addressbook(ogp,dg->dg_ipc);
+									if (!og.og_SiteList)
+										read_build_addressbook(dg->dg_ipc);
 
 									ClearFlag(dg->dg_config_changed,CHANGED_ADR);
 								}
@@ -3998,10 +3991,10 @@ static void idle_loop(struct display_globals *dg,struct subproc_data *data,IPCMe
 								// detach list
 								SetGadgetChoices(wp->wp_objlist, GAD_FTP_SITES, (APTR) ~0);
 
-								sort_list(ogp->og_SiteList);
+								sort_list(og.og_SiteList);
 
 								// add list
-								SetGadgetChoices(wp->wp_objlist, GAD_FTP_SITES, ogp->og_SiteList);
+								SetGadgetChoices(wp->wp_objlist, GAD_FTP_SITES, og.og_SiteList);
 
 								dg->dg_selected=0;
 
@@ -4053,12 +4046,12 @@ static void idle_loop(struct display_globals *dg,struct subproc_data *data,IPCMe
 										// detach list
 										SetGadgetChoices(wp->wp_objlist, GAD_FTP_SITES, (APTR) ~0);
 
-										Att_RemList(ogp->og_SiteList, REMLIST_FREEDATA);
+										Att_RemList(og.og_SiteList, REMLIST_FREEDATA);
 
-										ogp->og_SiteList=list;
+										og.og_SiteList=list;
 
 										// add list
-										SetGadgetChoices(wp->wp_objlist, GAD_FTP_SITES, dg->dg_og->og_SiteList);
+										SetGadgetChoices(wp->wp_objlist, GAD_FTP_SITES, og.og_SiteList);
 
 										dg->dg_selected=0;
 
@@ -4086,7 +4079,7 @@ static void idle_loop(struct display_globals *dg,struct subproc_data *data,IPCMe
 										add_to_main_list(dg,list);
 
 										// add list
-										SetGadgetChoices(wp->wp_objlist, GAD_FTP_SITES, dg->dg_og->og_SiteList);
+										SetGadgetChoices(wp->wp_objlist, GAD_FTP_SITES, og.og_SiteList);
 
 										dg->dg_selected=0;
 
@@ -4388,9 +4381,9 @@ static void idle_loop(struct display_globals *dg,struct subproc_data *data,IPCMe
 									active=wp->wp_se_copy->se_active_gadget;
 
 									// Put last site in GUI
-									if (dg->dg_og->og_valid_site)
+									if (og.og_valid_site)
 									{
-										copy_site_entry(dg->dg_og, wp->wp_se_copy, &dg->dg_og->og_last_site);
+										copy_site_entry(wp->wp_se_copy, &og.og_last_site);
 										wp->wp_se_copy->se_active_gadget=active;
 
 										display_connect_gadgets(dg,wp);
@@ -4538,26 +4531,25 @@ static struct display_globals * init_globals(struct subproc_data *data)
 
 	if (dg=AllocVec(sizeof (struct display_globals), MEMF_CLEAR))
 	{
-		dg->dg_og=data->spd_ogp;// get global data ptr
 		dg->dg_ipc=data->spd_ipc;
 
 
 		if (dg->dg_wp_list = Att_NewList(LISTF_POOL))
 		{
 			// make tmp copy of current global ftp_config
-			*(&dg->dg_oc)=*(&dg->dg_og->og_oc);
+			*(&dg->dg_oc)=*(&og.og_oc);
 
 			// initialise a default config for comparisons
 			set_config_to_default(&dg->dg_default_oc);
 
 			// get current start of log file
-			dg->dg_log_open=dg->dg_og->og_log_open;
+			dg->dg_log_open=og.og_log_open;
 
 			// read addresbook into memory for later use.
 			// Not under semaphore so can be freed by low mem handler
 
-			if (!dg->dg_og->og_SiteList)
-				read_build_addressbook(dg->dg_og,dg->dg_ipc);
+			if (!og.og_SiteList)
+				read_build_addressbook(dg->dg_ipc);
 
 			if (dg->idcmp_port = CreateMsgPort())
 			{
@@ -4574,7 +4566,7 @@ static struct display_globals * init_globals(struct subproc_data *data)
 }
 
 
-static void addressbook_cleanup(struct galileoftp_globals *ogp, IPCData *ipc)
+static void addressbook_cleanup(IPCData *ipc)
 {
 	struct globals *g = ipc->userdata;
 
@@ -4585,7 +4577,7 @@ static void addressbook_cleanup(struct galileoftp_globals *ogp, IPCData *ipc)
 		FreeVec(g);
 	}
 
-	free_address_book(ogp);
+	free_address_book();
 }
 
 /*****************************************************************
@@ -4601,7 +4593,7 @@ void __asm __saveds addressbook(void)
 	struct display_globals *dg;
 
 	/* returns true if 'data' is filled in correctly */
-	if (IPC_ProcStartup((ULONG *)&data, addressbook_init))
+	if (IPC_ProcStartup((ULONG *)&data, addressbook_initTr))
 	{
 		if (dg=init_globals(data))
 		{
@@ -4617,7 +4609,7 @@ void __asm __saveds addressbook(void)
 
 		IPC_Flush(data->spd_ipc);
 		IPC_Goodbye(data->spd_ipc, data->spd_owner_ipc, 0);
-		addressbook_cleanup(data->spd_ogp, data->spd_ipc);
+		addressbook_cleanup(data->spd_ipc);
 
 		IPC_Free(data->spd_ipc);
 		FreeVec(data);
@@ -4634,21 +4626,17 @@ void __asm __saveds addressbook(void)
  * 	 open it and store it in the 'userdata' field of our IPCData
  *
  */
-ULONG __asm addressbook_init(register __a0 IPCData *ipc, register __a1 struct subproc_data *data)
+ULONG __asm __saveds addressbook_init(register __a0 IPCData *ipc, register __a1 struct subproc_data *data)
 {
 	struct globals *g;
-	struct galileoftp_globals *ogp;
-
 	if (data)
 	{
-		ogp = data->spd_ogp;
-
 		data->spd_ipc = ipc;	/* 'ipc' points to this task's tc_UserData field */
 
 		if (g = ipc->userdata = AllocVec(sizeof(struct globals), MEMF_CLEAR))
-			g->g_socketbase = OpenLibrary(ogp->og_socketlibname[ogp->og_socketlib], ogp->og_socketlibver[ogp->og_socketlib]);
+			g->g_socketbase = OpenLibrary(og.og_socketlibname[og.og_socketlib], og.og_socketlibver[og.og_socketlib]);
 		else
-			addressbook_cleanup(ogp, ipc);
+			addressbook_cleanup(ipc);
 	}
 	return(1);
 }

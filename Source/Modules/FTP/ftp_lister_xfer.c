@@ -77,9 +77,6 @@ For more information on Directory Opus for Windows please see:
 #endif
 
 
-#define SocketBase GETSOCKBASE(FindTask(0L))
-
-
 /********************************/
 
 //
@@ -118,22 +115,20 @@ static void time_from_seconds(char *buf,ULONG seconds)
 //	Which in turn requires a fake IPCData structure with its proc field filled out
 //	We then add our ARexx handler to the lister so we can trap the 'abort' message
 //
-static struct ftp_node *add_abort_trap(struct galileoftp_globals *ogp, char *galileo, APTR lclhandle, IPCData *rmtipc)
+static struct ftp_node *add_abort_trap(char *galileo, APTR lclhandle, IPCData *rmtipc)
 {
 	struct ftp_node *tmpnode;
 	int ok = 0;
 
 	if (tmpnode = AllocVec(sizeof(struct ftp_node), MEMF_CLEAR))
 	{
-		tmpnode->fn_og = ogp;
 		tmpnode->fn_handle = lclhandle;
-		tmpnode->fn_ftp.fi_og = tmpnode->fn_og = ogp;
 		tmpnode->fn_flags = LST_LOCAL;
 		strcpy(tmpnode->fn_galileo, galileo);
 
 		if (tmpnode->fn_ipc = rmtipc)
 		{
-			ListLockAddHead(&ogp->og_listerlist, (struct Node *)tmpnode, &ogp->og_listercount);
+			ListLockAddHead(&og.og_listerlist, (struct Node *)tmpnode, &og.og_listercount);
 			ok = 1;
 		}
 
@@ -155,13 +150,13 @@ static struct ftp_node *add_abort_trap(struct galileoftp_globals *ogp, char *gal
 //
 //	Remove an abort trap from a local lister (not controlled by us)
 //
-static void rem_abort_trap(struct galileoftp_globals *ogp, char *galileo, struct ftp_node *tmpnode, APTR lclhandle)
+static void rem_abort_trap(char *galileo, struct ftp_node *tmpnode, APTR lclhandle)
 {
 	if (tmpnode)
 	{
 		send_rexxa(galileo, REXX_REPLY_RESULT, "lister set %lu handler ''", lclhandle);
 
-		ListLockRemove(&ogp->og_listerlist, (struct Node *)tmpnode, &ogp->og_listercount);
+		ListLockRemove(&og.og_listerlist, (struct Node *)tmpnode, &og.og_listercount);
 		//	if	(tmpnode->fn_ipc)
 		//		FreeVec( tmpnode->fn_ipc );
 		FreeVec(tmpnode);
@@ -881,13 +876,13 @@ void lister_xfer(struct ftp_node *remotenode, IPCMessage *msg)
 	if (msg->command == IPC_GET)
 	{
 		srcnode    = remotenode;
-		destnode   = find_ftpnode(remotenode->fn_og, xm->xm_otherhandle);
+		destnode   = find_ftpnode(xm->xm_otherhandle);
 		srchandle  = remotenode->fn_handle;
 		desthandle = xm->xm_otherhandle;
 	}
 	else
 	{
-		srcnode    = find_ftpnode(remotenode->fn_og, xm->xm_otherhandle);
+		srcnode    = find_ftpnode(xm->xm_otherhandle);
 		destnode   = remotenode;
 		srchandle  = xm->xm_otherhandle;
 		desthandle = remotenode->fn_handle;
@@ -916,7 +911,7 @@ void lister_xfer(struct ftp_node *remotenode, IPCMessage *msg)
 
 		// Add an ARexx handler to the source lister so we can trap the abort button
 		if (msg->command == IPC_PUT)
-			srcnode = add_abort_trap(remotenode->fn_og, remotenode->fn_galileo, srchandle, remotenode->fn_ipc);
+			srcnode = add_abort_trap(remotenode->fn_galileo, srchandle, remotenode->fn_ipc);
 
 		// Select node and handle for progress bar (should be source)
 		if (srchandle)
@@ -935,7 +930,6 @@ void lister_xfer(struct ftp_node *remotenode, IPCMessage *msg)
 		if (msg->command == IPC_GET)
 		{
 			source = create_endpoint_tags(
-				remotenode->fn_og,
 				EP_TYPE,	ENDPOINT_FTP,
 				EP_FTPNODE,	remotenode,
 				TAG_DONE);
@@ -952,7 +946,6 @@ void lister_xfer(struct ftp_node *remotenode, IPCMessage *msg)
 			}
 
 			dest = create_endpoint_tags(
-				remotenode->fn_og,
 				EP_TYPE,	ENDPOINT_FILESYS,
 				EP_PATH,	path,
 				TAG_DONE);
@@ -988,7 +981,6 @@ void lister_xfer(struct ftp_node *remotenode, IPCMessage *msg)
 			}
 
 			source = create_endpoint_tags(
-				remotenode->fn_og,
 				EP_TYPE,	ENDPOINT_FILESYS,
 				EP_FTPNODE,	srcnode,
 				EP_PATH,	path,
@@ -1024,7 +1016,6 @@ void lister_xfer(struct ftp_node *remotenode, IPCMessage *msg)
 			}
 
 			dest = create_endpoint_tags(
-				remotenode->fn_og,
 				EP_TYPE,	ENDPOINT_FTP,
 				EP_FTPNODE,	remotenode,
 				TAG_DONE);
@@ -1117,7 +1108,6 @@ void lister_xfer(struct ftp_node *remotenode, IPCMessage *msg)
 					PROGRESS_BAR_ON);
 
 				// Set up copy hook data
-				l->hc.hc_og = remotenode->fn_og;
 				l->hc.hc_source = source;
 				l->hc.hc_dest = dest;
 				l->hc.hc_pre = hook_copy_pre;
@@ -1356,7 +1346,7 @@ void lister_xfer(struct ftp_node *remotenode, IPCMessage *msg)
 
 		// Remove the custom handler from the source lister
 		if (msg->command == IPC_PUT && srcnode)
-			rem_abort_trap(remotenode->fn_og, remotenode->fn_galileo, srcnode, srchandle);
+			rem_abort_trap(remotenode->fn_galileo, srcnode, srchandle);
 	}
 
 
@@ -1364,7 +1354,7 @@ void lister_xfer(struct ftp_node *remotenode, IPCMessage *msg)
 	if (msg->command == IPC_PUT
 	    && remotenode->fn_site.se_env->e_rescan
 	    && remotenode->fn_ftp.fi_reply != 421)
-		lister_list(remotenode->fn_og, remotenode, TRUE);
+		lister_list(remotenode, TRUE);
 
 	// Make listers non-busy
 	rexx_lst_unlock(remotenode->fn_galileo, remotenode->fn_handle);
@@ -1374,7 +1364,7 @@ void lister_xfer(struct ftp_node *remotenode, IPCMessage *msg)
 
 
 	// Trigger script
-	if (remotenode->fn_og->og_gci->gc_Script
+	if (og.og_gci->gc_Script
 	    && !(remotenode->fn_flags & LST_ABORT)
 	    && timer && CheckTimer(timer))
 	{
@@ -1385,12 +1375,12 @@ void lister_xfer(struct ftp_node *remotenode, IPCMessage *msg)
 		if (rexx_result && remotenode->fn_site.se_env->e_script_copy_ok)
 		{
 			kprintf("** script copy success\n");
-			remotenode->fn_og->og_gci->gc_Script("FTP copy success", handle);
+			og.og_gci->gc_Script("FTP copy success", handle);
 		}
 		else if	(!rexx_result && remotenode->fn_site.se_env->e_script_copy_fail)
 		{
 			kprintf("** script copy fail\n");
-			remotenode->fn_og->og_gci->gc_Script("FTP copy fail", handle);
+			og.og_gci->gc_Script("FTP copy fail", handle);
 		}
 	}
 
@@ -1440,14 +1430,14 @@ void lister_doubleclick(struct ftp_node *node, IPCMessage *msg)
 	// Shift-doubleclick?
 	if (fm->fm_flags)
 	{
-		if (cm = get_blank_connectmsg(node->fn_og))
+		if (cm = get_blank_connectmsg())
 		{
-			stccpy(cm->cm_galileo, node->fn_og->og_galileoname, PORTNAMELEN + 1);
+			stccpy(cm->cm_galileo, og.og_galileoname, PORTNAMELEN + 1);
 
-			copy_site_entry(node->fn_og, &cm->cm_site, &node->fn_site);
+			copy_site_entry(&cm->cm_site, &node->fn_site);
 			AddPart(cm->cm_site.se_path, fm->fm_names, PATHLEN + 1);
 
-			IPC_Command(node->fn_og->og_main_ipc, IPC_CONNECT, 0, 0, cm, 0);
+			IPC_Command(og.og_main_ipc, IPC_CONNECT, 0, 0, cm, 0);
 			rexx_result = 1;
 		}
 	}
@@ -1500,7 +1490,7 @@ void lister_doubleclick(struct ftp_node *node, IPCMessage *msg)
 					}
 					else if	(reply != 421 && ei.ei_type != 0)
 					{
-						lst_server_reply(node->fn_og, node, node, MSG_FTP_PATH_NOT_FOUND);
+						lst_server_reply(node, node, MSG_FTP_PATH_NOT_FOUND);
 					}
 
 					rexx_lst_label(node->fn_galileo, handle, "FTP:", node->fn_site.se_host, NULL);
@@ -1510,7 +1500,7 @@ void lister_doubleclick(struct ftp_node *node, IPCMessage *msg)
 					if (reply < 500 && node->fn_ftp.fi_reply != 421)
 					{
 						// Can TIMEOUT
-						lister_list(node->fn_og, node, FALSE);
+						lister_list(node, FALSE);
 						rexx_result = 1;
 					}
 				}
@@ -1574,14 +1564,14 @@ void lister_doubleclick(struct ftp_node *node, IPCMessage *msg)
 				// Report errors
 				if (node->fn_ftp.fi_errno & FTPERR_XFER_DSTERR)
 				{
-					lst_dos_err(node->fn_og, node, 0, node->fn_ftp.fi_ioerr);
+					lst_dos_err(node, 0, node->fn_ftp.fi_ioerr);
 				}
 
 				else if	(node->fn_ftp.fi_errno & FTPERR_XFER_SRCERR)
-					lst_server_err(node->fn_og, node, node, 0, 0);
+					lst_server_err(node, node, 0, 0);
 
 				else if	(node->fn_ftp.fi_errno)
-					DisplayBeep(node->fn_og->og_screen);
+					DisplayBeep(og.og_screen);
 
 				rexx_lst_label(node->fn_galileo, handle, "FTP:", node->fn_site.se_host, NULL);
 				lister_prog_clear(node);
@@ -1710,14 +1700,14 @@ void lister_traptemp(struct ftp_node *node, IPCMessage *msg)
 						if (node->fn_ftp.fi_errno & FTPERR_XFER_DSTERR)
 						{
 
-							lst_dos_err(node->fn_og, node, 0, node->fn_ftp.fi_ioerr);
+							lst_dos_err(node, 0, node->fn_ftp.fi_ioerr);
 						}
 
 						else if	(node->fn_ftp.fi_errno & FTPERR_XFER_SRCERR)
-							lst_server_err(node->fn_og, node, node, 0, 0);
+							lst_server_err(node, node, 0, 0);
 
 						else if	(node->fn_ftp.fi_errno)
-							DisplayBeep(node->fn_og->og_screen);
+							DisplayBeep(og.og_screen);
 
 						if (size_known != (ei.ei_size >= 0))
 							lister_prog_clear(node);
@@ -1813,14 +1803,14 @@ BOOL lister_xferindex(struct ftp_node *ftpnode, char *localname, char *remotenam
 	// Report errors
 	if (ftpnode->fn_ftp.fi_errno & FTPERR_XFER_DSTERR)
 	{
-		lst_dos_err(ftpnode->fn_og, ftpnode, 0, ftpnode->fn_ftp.fi_ioerr);
+		lst_dos_err(ftpnode, 0, ftpnode->fn_ftp.fi_ioerr);
 	}
 
 	else if	(ftpnode->fn_ftp.fi_errno & FTPERR_XFER_SRCERR)
-		lst_server_err(ftpnode->fn_og, ftpnode, ftpnode, 0, 0);
+		lst_server_err(ftpnode, ftpnode, 0, 0);
 
 	else if	(ftpnode->fn_ftp.fi_errno)
-		DisplayBeep(ftpnode->fn_og->og_screen);
+		DisplayBeep(og.og_screen);
 
 	rexx_lst_label(ftpnode->fn_galileo, handle, "FTP:", ftpnode->fn_site.se_host, NULL);
 	lister_prog_clear(ftpnode);
@@ -1884,7 +1874,7 @@ void lister_getput(struct ftp_node *thisnode, IPCMessage *msg)
 	if (thisnode == xm->xm_rm_dest)
 	{
 		kprintf("** can't drag and drop within a single FTP lister\n");
-		DisplayBeep(thisnode->fn_og->og_screen);
+		DisplayBeep(og.og_screen);
 		goto reply;
 	}
 
@@ -1946,13 +1936,11 @@ void lister_getput(struct ftp_node *thisnode, IPCMessage *msg)
 
 		// Create endpoints
 		source = create_endpoint_tags(
-			thisnode->fn_og,
 			EP_TYPE,	ENDPOINT_FTP,
 			EP_FTPNODE,	srcnode,
 			TAG_DONE);
 
 		dest = create_endpoint_tags(
-			thisnode->fn_og,
 			EP_TYPE,	ENDPOINT_FTP,
 			EP_FTPNODE,	destnode,
 			TAG_DONE);
@@ -2052,7 +2040,6 @@ void lister_getput(struct ftp_node *thisnode, IPCMessage *msg)
 					PROGRESS_BAR_ON);
 
 				// Set up copy hook data
-				hc.hc_og = thisnode->fn_og;
 				hc.hc_source = source;
 				hc.hc_dest = dest;
 				hc.hc_pre = hook_copy_pre;
@@ -2233,7 +2220,7 @@ void lister_getput(struct ftp_node *thisnode, IPCMessage *msg)
 	rexx_lst_unlock(thisnode->fn_galileo, xm->xm_rm_dest->fn_handle);
 
 	// Trigger script
-	if (thisnode->fn_og->og_gci->gc_Script
+	if (og.og_gci->gc_Script
 	    && !(prognode->fn_flags & LST_ABORT)
 	    && timer && CheckTimer(timer))
 	{
@@ -2245,12 +2232,12 @@ void lister_getput(struct ftp_node *thisnode, IPCMessage *msg)
 		    && (srcnode->fn_site.se_env->e_script_copy_ok
 			|| destnode->fn_site.se_env->e_script_copy_ok))
 		{
-			thisnode->fn_og->og_gci->gc_Script("FTP copy success", handle);
+			og.og_gci->gc_Script("FTP copy success", handle);
 		}
 		else if	(srcnode->fn_site.se_env->e_script_copy_fail
 			 || destnode->fn_site.se_env->e_script_copy_fail)
 		{
-			thisnode->fn_og->og_gci->gc_Script("FTP copy fail", handle);
+			og.og_gci->gc_Script("FTP copy fail", handle);
 		}
 	}
 

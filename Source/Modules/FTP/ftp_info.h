@@ -57,7 +57,6 @@ For more information on Directory Opus for Windows please see:
 //
 struct ftp_info
 {
-	struct galileoftp_globals *fi_og;			// Global data pointer - we really shouldn't need this at this low level!!
 	struct Task		  *fi_task;			// Task who owns this socket
 	struct sockaddr_in	  fi_addr;			// Socket address
 	int			  fi_cs;			// Control socket

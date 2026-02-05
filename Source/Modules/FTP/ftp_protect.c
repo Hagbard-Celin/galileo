@@ -318,7 +318,7 @@ static void bcheck(ObjectList *objlist,short gadgetid)
 
 
 // Get protection
-int function_change_get_protect(struct galileoftp_globals *og,struct protectgui_msg *pm)
+int function_change_get_protect(struct protectgui_msg *pm)
 {
 	NewConfigWindow new_win;
 	struct Window *window;
@@ -349,7 +349,7 @@ int function_change_get_protect(struct galileoftp_globals *og,struct protectgui_
 		new_win.parent=pm->pm_window;
 	else
 	{
-		new_win.parent=og->og_screen;
+		new_win.parent=og.og_screen;
 		new_win.flags=WINDOW_SCREEN_PARENT;
 	}
 

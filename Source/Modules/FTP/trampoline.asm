@@ -21,5 +21,7 @@ _\1Tr:
         TRAMPOLINE format_code
         TRAMPOLINE lister
         TRAMPOLINE galileo_ftp
+        TRAMPOLINE addressbook_init
+        TRAMPOLINE ftplister_init
 
         END

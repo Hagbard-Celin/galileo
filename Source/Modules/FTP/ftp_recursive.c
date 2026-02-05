@@ -72,8 +72,6 @@ For more information on Directory Opus for Windows please see:
 #endif
 
 
-#define SocketBase GETSOCKBASE(FindTask(0L))
-
 static unsigned int recursive_getput(endpoint *source, endpoint *dest, int (*updatefn)(void *,unsigned int,unsigned int), void *updateinfo, char *remote_path, char *local_path, unsigned int restart);
 static int callback_func(void *, char *str);
 static int rec_ask_lister_favour(int favour, endpoint *, void *arg1, void *arg2);
@@ -85,7 +83,7 @@ static int rec_ask_lister_favour(int favour, endpoint *, void *arg1, void *arg2)
 //
 //	Allocate and fill in an endpoint structure
 //
-endpoint *create_endpoint(struct galileoftp_globals *og, struct TagItem *tags)
+endpoint *create_endpoint(struct TagItem *tags)
 {
 	endpoint *ep;
 	int success = 1;
@@ -145,7 +143,7 @@ endpoint *create_endpoint(struct galileoftp_globals *og, struct TagItem *tags)
 		if (ftpn)
 		{
 			ep->ep_ftpnode = ftpn;
-			ep->ep_ftpnode->fn_og = og;
+
 			if (path = (char *)GetTagData(EP_PATH, 0, tags))
 			{
 				BPTR lock;
@@ -199,9 +197,9 @@ endpoint *create_endpoint(struct galileoftp_globals *og, struct TagItem *tags)
 //
 //	Varargs create_endpoint
 //
-endpoint *create_endpoint_tags(struct galileoftp_globals *og, Tag tag, ...)
+endpoint *create_endpoint_tags(Tag tag, ...)
 {
-	return create_endpoint(og, (struct TagItem *)&tag);
+	return create_endpoint((struct TagItem *)&tag);
 }
 
 //
@@ -1095,7 +1093,7 @@ int recursive_copy(struct hook_rec_data *hc, char *startdir, char *fulldirname, 
 		case -1:// File
 			// Init update info callback structure (from old lister_xfer())
 			InitSemaphore(&hc->hc_ui.ui_sem);
-			hc->hc_ui.ui_og     = hc->hc_og;
+
 			hc->hc_ui.ui_galileo   = hc->hc_galileo;
 			hc->hc_ui.ui_abort  = &l->abort;
 
@@ -2056,20 +2054,20 @@ int rec_findfile_newlister(struct ftp_node *ftpnode, const char *path, const cha
 	struct ftp_node *newnode;
 	int ok = 0;
 
-	if (cm = get_blank_connectmsg(ftpnode->fn_og))
+	if (cm = get_blank_connectmsg())
 	{
 		cm->cm_handle = 0;
 
-		stccpy(cm->cm_galileo, ftpnode->fn_og->og_galileoname, PORTNAMELEN + 1);
+		stccpy(cm->cm_galileo, og.og_galileoname, PORTNAMELEN + 1);
 
-		copy_site_entry(ftpnode->fn_og, &cm->cm_site, &ftpnode->fn_site);
+		copy_site_entry(&cm->cm_site, &ftpnode->fn_site);
 		stccpy(cm->cm_site.se_path, path, PATHLEN + 1);
 
-		if (IPC_Command(ftpnode->fn_og->og_main_ipc, IPC_CONNECT, 0, cm, 0, REPLY_NO_PORT))
+		if (IPC_Command(og.og_main_ipc, IPC_CONNECT, 0, cm, 0, REPLY_NO_PORT))
 		{
 			if (patterncopy = AllocVec(strlen(pattern) + 1, MEMF_ANY))
 			{
-				if (newnode = find_ftpnode(ftpnode->fn_og, cm->cm_handle))
+				if (newnode = find_ftpnode(cm->cm_handle))
 				{
 					strcpy(patterncopy, pattern);
 					IPC_Command(newnode->fn_ipc, IPC_SELECTPATTERN, 0, 0, patterncopy, 0);
@@ -3070,7 +3068,6 @@ int rec_filesys_getreply(endpoint *ep, ULONG flags)
 //
 int rec_ftp_select(endpoint *ep)
 {
-	struct galileoftp_globals *ogp = ep->ep_ftpnode->fn_og;
 	struct timeval t = {0};
 	fd_set rd, ex;
 	ULONG flags = SIGBREAKF_CTRL_D;
@@ -3157,7 +3154,7 @@ int rec_ftp_errorreq(endpoint *ep, struct ftp_node *prognode, ULONG flags)
 		// Ask the appropriate lister to do it for us
 		return rec_ask_lister_favour(FAVOUR_ERRORREQ, ep, prognode, (void *)flags);
 
-	return lst_server_err(ep->ep_ftpnode->fn_og, prognode, ep->ep_ftpnode, flags, 0);
+	return lst_server_err(prognode, ep->ep_ftpnode, flags, 0);
 }
 
 //
@@ -3165,7 +3162,7 @@ int rec_ftp_errorreq(endpoint *ep, struct ftp_node *prognode, ULONG flags)
 //
 int rec_filesys_errorreq(endpoint *ep, struct ftp_node *prognode, ULONG flags)
 {
-	return lst_dos_err(prognode->fn_og, prognode, flags, prognode->fn_ftp.fi_ioerr);
+	return lst_dos_err(prognode, flags, prognode->fn_ftp.fi_ioerr);
 }
 
 //
@@ -3182,7 +3179,7 @@ unsigned long rec_ftp_opts(endpoint *ep, int type)
 unsigned long rec_filesys_opts(endpoint *ep, int type)
 {
 	//kprintf( "**** FILESYS OPTIONS!! ****\n" );
-	return ftpmod_options(ep->ep_ftpnode->fn_og, type);
+	return ftpmod_options(type);
 }
 
 //

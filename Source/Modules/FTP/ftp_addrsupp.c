@@ -173,17 +173,17 @@ VOID read_old_config(struct ftp_config *oc)
 }
 
 
-BPTR setup_config(struct galileoftp_globals *ogp)
+BPTR setup_config(void)
 {
 	BPTR lfp = NULL;
 	struct ftp_config *oc;
 	BPTR lock;
 
-	oc = &ogp->og_oc;
+	oc = &og.og_oc;
 
 	// initialise blank config and read config from disk
 
-	if (!get_global_options(ogp))
+	if (!get_global_options())
 	{
 		set_config_to_default(oc);
 
@@ -200,7 +200,7 @@ BPTR setup_config(struct galileoftp_globals *ogp)
 	if (*oc->oc_logname && oc->oc_enable_log)
 	{
 		if (lfp = Open(oc->oc_logname, MODE_NEWFILE))
-			ogp->og_log_open=TRUE;
+			og.og_log_open=TRUE;
 	}
 
 
@@ -302,7 +302,7 @@ static BOOL write_entry(BPTR cf,struct site_entry *e)
 	return(TRUE);
 }
 
-static int disk_error(struct galileoftp_globals *ogp,struct Window * win,LONG err,int type,IPCData *ipc)
+static int disk_error(struct Window * win,LONG err,int type,IPCData *ipc)
 {
 	char buf[80],error_text[140];
 	int result=1;
@@ -323,7 +323,7 @@ static int disk_error(struct galileoftp_globals *ogp,struct Window * win,LONG er
 	if (win)
 		screen=win->WScreen;
 	else
-		screen=ogp->og_screen;
+		screen=og.og_screen;
 
 	Fault(err,"",buf,80);	// dos error
 
@@ -331,7 +331,7 @@ static int disk_error(struct galileoftp_globals *ogp,struct Window * win,LONG er
 	lsprintf(error_text,"%s\n%s %ld%s",title,GetString(locale,MSG_FTP_DOS_ERROR),err,buf);
 
 
-	if (!ogp->og_noreq)
+	if (!og.og_noreq)
 	{
 		tags[0].ti_Data = (ULONG)win;
 		tags[1].ti_Data = (ULONG)screen;
@@ -393,7 +393,7 @@ static BOOL do_filereq(struct Window *win,char *path,int title,ULONG flags)
 }
 
 
-static BOOL do_export_sites(struct display_globals *dg,char *path,LONG *diskerr)
+static BOOL do_export_sites(char *path,LONG *diskerr)
 {
 	BPTR cf;
 	struct site_entry *e;
@@ -405,7 +405,7 @@ static BOOL do_export_sites(struct display_globals *dg,char *path,LONG *diskerr)
 	{
 		if (ok=Write(cf,head1,strlen(head1)))
 		{
-			node = dg->dg_og->og_SiteList->list.lh_Head;
+			node = og.og_SiteList->list.lh_Head;
 			while (next = node->ln_Succ)
 			{
 				e=(struct site_entry*)((Att_Node *)node)->att_data;
@@ -450,14 +450,14 @@ BOOL export_sites(struct display_globals *dg,struct Window *win)
 		{
 			long err=0;
 			// Save TRUE == ok
-			if (do_export_sites(dg,path,&err))
+			if (do_export_sites(path,&err))
 				ret=TRUE;
 
 			// Error?
 			else
 			{
 				// Show error
-				loop=disk_error(dg->dg_og,win,err,ERROR_WRITE,dg->dg_ipc);
+				loop=disk_error(win,err,ERROR_WRITE,dg->dg_ipc);
 			}
 		}
 
@@ -577,7 +577,7 @@ static BOOL do_save_options_iff(struct window_params *wp,char *filename,int type
 }
 
 
-static BOOL do_save_sites_iff(struct display_globals *dg,char *filename,LONG *diskerr)
+static BOOL do_save_sites_iff(char *filename,LONG *diskerr)
 {
 	APTR iff;
 	BOOL ok=FALSE;
@@ -592,7 +592,7 @@ static BOOL do_save_sites_iff(struct display_globals *dg,char *filename,LONG *di
 
 		ok=TRUE;// mark in case no entries in list
 
-		node = dg->dg_og->og_SiteList->list.lh_Head;
+		node = og.og_SiteList->list.lh_Head;
 		while (next = node->ln_Succ)
 		{
 			e=(struct site_entry*)((Att_Node *)node)->att_data;
@@ -637,7 +637,7 @@ static BOOL do_save_sites_iff(struct display_globals *dg,char *filename,LONG *di
 }
 
 
-static Att_List *do_read_sites_iff(struct galileoftp_globals *og,char *filename,LONG *diskerr)
+static Att_List *do_read_sites_iff(char *filename,LONG *diskerr)
 {
 	APTR iff;
 	BOOL err=FALSE;
@@ -685,7 +685,7 @@ static Att_List *do_read_sites_iff(struct galileoftp_globals *og,char *filename,
 					if (e->se_has_custom_env)
 						e->se_env=&e->se_env_private;
 					else
-						e->se_env=&og->og_oc.oc_env;
+						e->se_env=&og.og_oc.oc_env;
 
 
 					Att_NewNode(list, e->se_name,(ULONG)e,0);
@@ -751,7 +751,7 @@ BOOL save_sites(struct display_globals *dg,struct Window *win,short gadgetid)
 		{
 			long err=0;
 			// Save TRUE == ok
-			if (do_save_sites_iff(dg,path,&err))
+			if (do_save_sites_iff(path,&err))
 			{
 				// Clear change flag
 				dg->dg_site_change=0;
@@ -763,7 +763,7 @@ BOOL save_sites(struct display_globals *dg,struct Window *win,short gadgetid)
 			else
 			{
 				// Show error
-				loop=disk_error(dg->dg_og,win,err,ERROR_WRITE,dg->dg_ipc);
+				loop=disk_error(win,err,ERROR_WRITE,dg->dg_ipc);
 			}
 		}
 
@@ -836,7 +836,7 @@ BOOL save_options(struct window_params *wp,int opt_type,short gadgetid)
 			else
 			{
 				// Show error
-				loop=disk_error(dg->dg_og,wp->wp_win,err,ERROR_WRITE,dg->dg_ipc);
+				loop=disk_error(wp->wp_win,err,ERROR_WRITE,dg->dg_ipc);
 			}
 		}
 
@@ -886,7 +886,7 @@ Att_List *read_sites(struct window_params *wp,short gadgetid)
 		{
 			LONG err=0;
 
-			if (sitelist=do_read_sites_iff(dg->dg_og,path,&err))
+			if (sitelist=do_read_sites_iff(path,&err))
 			{
 				// Clear change flag
 				dg->dg_site_change=0;
@@ -896,7 +896,7 @@ Att_List *read_sites(struct window_params *wp,short gadgetid)
 			else
 			{
 				// Show error
-				loop=disk_error(dg->dg_og,wp->wp_win,err,ERROR_READ,dg->dg_ipc);
+				loop=disk_error(wp->wp_win,err,ERROR_READ,dg->dg_ipc);
 			}
 		}
 	} while (loop);
@@ -963,7 +963,7 @@ struct ftp_config *read_options(struct window_params *wp,int opt_type)
 			else
 			{
 				// Show error
-				loop=disk_error(dg->dg_og,wp->wp_win,err,ERROR_READ,dg->dg_ipc);
+				loop=disk_error(wp->wp_win,err,ERROR_READ,dg->dg_ipc);
 			}
 		}
 
@@ -1051,7 +1051,7 @@ void set_config_to_default(struct ftp_config *oc)
  *
  */
 
-BOOL  get_global_options(struct galileoftp_globals *og)
+BOOL  get_global_options(void)
 {
 	struct ftp_config *conf;
 	LONG err;
@@ -1060,7 +1060,7 @@ BOOL  get_global_options(struct galileoftp_globals *og)
 	if (conf=do_read_options_iff(FTP_OPTIONS_NAME,WT_DEFOPT,&err))
 	{
 		// copy new one over orig
-		*(&og->og_oc)=*conf;
+		*(&og.og_oc)=*conf;
 
 		FreeVec(conf);
 		return(TRUE);
@@ -1070,42 +1070,43 @@ BOOL  get_global_options(struct galileoftp_globals *og)
 }
 
 
-static BOOL read_addrbook(struct galileoftp_globals *ogp,IPCData *ipc)
+static BOOL read_addrbook(IPCData *ipc)
 {
 	BOOL ok=FALSE;
 	Att_List *list;
 	LONG err=0;
-	int loop=0;
+	int loop;
 
 
-	do	{
+	do
+	{
 		loop=0;
-		if (list=do_read_sites_iff(ogp,FTP_ADDR_NAME,&err))
+		if (list=do_read_sites_iff(FTP_ADDR_NAME,&err))
 		{
-			ogp->og_SiteList=list;
+			og.og_SiteList=list;
 			ok=TRUE;
 		}
 
 		else if (err!=205)	// Error? but ignore object not found
 		{
 			// Show error
-			loop=disk_error(ogp,NULL,err,ERROR_READ,ipc);
+			loop=disk_error(NULL,err,ERROR_READ,ipc);
 		}
 
-	}while (loop);
+	} while (loop);
 
 	return(ok);
 }
 
 
-static Att_List *do_import_sites(struct galileoftp_globals *og,char *path)
+static Att_List *do_import_sites(char *path)
 {
 	FuncArgs * fa;
 	struct site_entry *e;
 	int anon, acct;
 	BPTR cf;
 	char *buf;
-	Att_List *list=NULL;
+	Att_List *list;
 
 	if (!(buf=AllocVec(TMPBUFLEN,MEMF_CLEAR)))
 	{
@@ -1194,7 +1195,7 @@ static Att_List *do_import_sites(struct galileoftp_globals *og,char *path)
 
 							// set env to point to global default
 
-							e->se_env=&og->og_oc.oc_env;
+							e->se_env=&og.og_oc.oc_env;
 							e->se_has_custom_env=FALSE;
 
 
@@ -1220,28 +1221,28 @@ static Att_List *do_import_sites(struct galileoftp_globals *og,char *path)
  *	Read the addressbook ONLY not the config. Done in setup_config
  *
  */
-void read_build_addressbook(struct galileoftp_globals *ogp,IPCData *ipc)
+void read_build_addressbook(IPCData *ipc)
 {
 	//kprintf( "read_build_addressbook()\n" );
 
-	if (ogp->og_SiteList)
+	if (og.og_SiteList)
 	{
 		DisplayBeep(NULL);
 		return;
 	}
 
 	// read new one ok then return
-	if (read_addrbook(ogp,ipc))
+	if (read_addrbook(ipc))
 		return;
 
 
 	// try to read old one
 
-	if (!(ogp->og_SiteList=do_import_sites(ogp,CONFIGFILE)))
+	if (!(og.og_SiteList=do_import_sites(CONFIGFILE)))
 	{
 		// failed?
 		DisplayBeep(0);
-		//	display_msg(ogp,ipc,NULL,0,GetString(locale,MSG_BADADRBOOK));
+		//	display_msg(ipc,NULL,0,GetString(locale,MSG_BADADRBOOK));
 	}
 
 }
@@ -1281,7 +1282,7 @@ Att_List *import_sites(struct window_params *wp,short gadgetid)
 		AddPart(path,DATA(wp->wp_win)->request->fr_File,256);
 
 		if (gadgetid==MENU_FTP_IMPORT)
-			sitelist=do_import_sites(dg->dg_og,path);
+			sitelist=do_import_sites(path);
 		else if	(gadgetid==MENU_FTP_IMPORT_AMFTP)
 			sitelist=do_import_amftp(dg,path);
 
@@ -1335,7 +1336,7 @@ void sort_list(Att_List *input_list)
  *		either from default ftp env or galileo default
  */
 
-static VOID get_site_format(struct galileoftp_globals *og,struct site_entry *e)
+static VOID get_site_format(struct site_entry *e)
 {
 	ListFormat *format;
 
@@ -1344,7 +1345,7 @@ static VOID get_site_format(struct galileoftp_globals *og,struct site_entry *e)
 	if (e->se_env->e_custom_format)
 		format=&e->se_env->e_listformat;
 	else
-		format=get_galileo_format(og);
+		format=get_galileo_format();
 
 	// copy correct format to site entry
 	*(&e->se_listformat)=*format;
@@ -1359,18 +1360,18 @@ static VOID get_site_format(struct galileoftp_globals *og,struct site_entry *e)
  *	Initialse the site entry format to appropriate one
  *		either from default ftp env or galileo default
  */
-struct connect_msg *get_blank_connectmsg(struct galileoftp_globals *og)
+struct connect_msg *get_blank_connectmsg(void)
 {
 	struct connect_msg *cm;
 
 	if (cm=AllocVec(sizeof(struct connect_msg),MEMF_CLEAR))
 	{
 		// initialise pointer to default environment
-		cm->cm_site.se_env=&og->og_oc.oc_env;
+		cm->cm_site.se_env=&og.og_oc.oc_env;
 		cm->cm_site.se_has_custom_env=FALSE;
 
 		// fill in the site entry format structure with appropriate format
-		get_site_format(og,&cm->cm_site);
+		get_site_format(&cm->cm_site);
 
 		return(cm);
 	}
@@ -1386,7 +1387,7 @@ struct connect_msg *get_blank_connectmsg(struct galileoftp_globals *og)
  *	Initialse the site entry format to appropriate one
  *		either from default ftp env or galileo default
  */
-struct site_entry *get_blank_site_entry(struct galileoftp_globals *og)
+struct site_entry *get_blank_site_entry(void)
 {
 	struct site_entry *e;
 
@@ -1396,11 +1397,11 @@ struct site_entry *get_blank_site_entry(struct galileoftp_globals *og)
 		e->se_port=21;
 
 		// initialise pointer to default environment
-		e->se_env=&og->og_oc.oc_env;
+		e->se_env=&og.og_oc.oc_env;
 		e->se_has_custom_env=FALSE;
 
 		// fill in the site entry format structure with appropriate format
-		get_site_format(og,e);
+		get_site_format(e);
 
 		return(e);
 	}
@@ -1424,11 +1425,15 @@ enum
  *	Else return FALSE
  */
 
-int get_site_entry(struct galileoftp_globals *og,struct site_entry *e,IPCData *ipc)
+int get_site_entry(struct site_entry *e,IPCData *ipc)
 {
 	struct List *list;
 	struct Node *node,*next;
+#if 0
 	int type=MATCH_NONE;
+#else
+	int type;
+#endif
 	int result=0;
 	struct site_entry *site;
 
@@ -1436,12 +1441,12 @@ int get_site_entry(struct galileoftp_globals *og,struct site_entry *e,IPCData *i
 		return(FALSE);
 
 
-	ObtainSemaphoreShared(&og->og_SiteList_semaphore);
+	ObtainSemaphoreShared(&og.og_SiteList_semaphore);
 
-	if (!og->og_SiteList)
-		read_build_addressbook(og,ipc);
+	if (!og.og_SiteList)
+		read_build_addressbook(ipc);
 
-	if (!og->og_SiteList)
+	if (!og.og_SiteList)
 		goto  done;
 
 	if (*e->se_name)	type=MATCH_NAME;
@@ -1449,7 +1454,7 @@ int get_site_entry(struct galileoftp_globals *og,struct site_entry *e,IPCData *i
 	else if (*e->se_host)	type=MATCH_HOST;
 	else goto done;
 
-	list=&og->og_SiteList->list;
+	list=&og.og_SiteList->list;
 
 	if (list && !IsListEmpty(list))
 	{
@@ -1472,7 +1477,7 @@ int get_site_entry(struct galileoftp_globals *og,struct site_entry *e,IPCData *i
 				if (found==0)
 				{
 					// copy site entry
-					copy_site_entry(og,e,site);
+					copy_site_entry(e,site);
 
 					// keep match position as return value
 					result=count;
@@ -1487,7 +1492,7 @@ int get_site_entry(struct galileoftp_globals *og,struct site_entry *e,IPCData *i
 
 done:
 
-	ReleaseSemaphore(&og->og_SiteList_semaphore);
+	ReleaseSemaphore(&og.og_SiteList_semaphore);
 
 	return(result);
 }
@@ -1500,7 +1505,7 @@ done:
  *	and make sure listFormat structure is correctly set
  *
  */
-VOID copy_site_entry(struct galileoftp_globals *og,struct site_entry *to,struct site_entry *from)
+VOID copy_site_entry(struct site_entry *to,struct site_entry *from)
 {
 
 	*to=*from;
@@ -1509,8 +1514,8 @@ VOID copy_site_entry(struct galileoftp_globals *og,struct site_entry *to,struct 
 		to->se_env=&to->se_env_private;
 	else
 	{
-		to->se_env=&og->og_oc.oc_env;
-		*(&to->se_env_private)=*(&og->og_oc.oc_env);
+		to->se_env=&og.og_oc.oc_env;
+		*(&to->se_env_private)=*(&og.og_oc.oc_env);
 	}
 
 
@@ -1519,7 +1524,7 @@ VOID copy_site_entry(struct galileoftp_globals *og,struct site_entry *to,struct 
 	// UNLESS we are editing an existing one in a lister then just preserve it
 
 	if (!to->se_preserve_format)
-		get_site_format(og,to);
+		get_site_format(to);
 }
 
 
@@ -1580,7 +1585,6 @@ static BOOL check_amftpfile(struct display_globals *dg,char *path)
 	if (!ok)
 	{
 		ok=ftpmod_request(
-			dg->dg_og,
 			dg->dg_ipc,
 			AR_Window,	dg->dg_addrwp->wp_win,
 			FR_MsgNum,	MSG_FTP_IMPORT_BAD_AMFTPFILE,
@@ -1594,10 +1598,8 @@ static BOOL check_amftpfile(struct display_globals *dg,char *path)
 
 static Att_List *do_import_amftp(struct display_globals *dg,char *path)
 {
-	struct galileoftp_globals *og;
 	Att_List *list=NULL;
 	char *buf;
-	og=dg->dg_og;
 
 
 	if (!check_amftpfile(dg,path))
@@ -1661,7 +1663,7 @@ static Att_List *do_import_amftp(struct display_globals *dg,char *path)
 
 						// get global default  env and mark as custom
 
-						*(&e->se_env_private)=*(&og->og_oc.oc_env);
+						*(&e->se_env_private)=*(&og.og_oc.oc_env);
 						e->se_env=&e->se_env_private;
 
 						e->se_has_custom_env=TRUE;

@@ -94,7 +94,7 @@ const char *months[] =
 //	NB: 	The ipc must be the calling process's ipc data
 //		Not that of the main galileo ipc
 //
-long display_msg(struct galileoftp_globals *ogp, IPCData *ipc, struct Window *win, ULONG flags, char *str)
+long display_msg(IPCData *ipc, struct Window *win, ULONG flags, char *str)
 {
 	long result;
 	struct TagItem tags[] =
@@ -125,9 +125,9 @@ long display_msg(struct galileoftp_globals *ogp, IPCData *ipc, struct Window *wi
 	}
 
 	// if not then use the global pointer to get the Galileo screen
-	else if	(ogp)
+	else
 	{
-		tags[1].ti_Data = (ULONG)ogp->og_screen;
+		tags[1].ti_Data = (ULONG)og.og_screen;
 	}
 
 	tags[2].ti_Data = (ULONG)str;
@@ -1254,7 +1254,7 @@ BOOL CreateFunctionFile(char *name,short type,char *instruction,char *icon)
 //	For us, this usually means enter was pressed in an empty string
 //	gadget.
 //
-int ftpmod_request(struct galileoftp_globals *og, IPCData *ipc, Tag tag, ...)
+int ftpmod_request(IPCData *ipc, Tag tag, ...)
 {
 	char buffer[1024+1];
 	struct Window *window;
@@ -1279,7 +1279,7 @@ int ftpmod_request(struct galileoftp_globals *og, IPCData *ipc, Tag tag, ...)
 	}
 
 	// Requesters suppressed?
-	else if	(og->og_noreq)
+	else if	(og.og_noreq)
 		return 0;
 
 	else if	(taglist = CloneTagItems((struct TagItem *)&tag))
@@ -1289,7 +1289,7 @@ int ftpmod_request(struct galileoftp_globals *og, IPCData *ipc, Tag tag, ...)
 			if (!GetTagData(AR_Screen, 0, taglist))
 			{
 				tags[0].ti_Tag = AR_Screen;
-				tags[0].ti_Data = (ULONG)og->og_screen;
+				tags[0].ti_Data = (ULONG)og.og_screen;
 			}
 
 		// Need to add OK button?
@@ -1378,7 +1378,7 @@ int ftpmod_request(struct galileoftp_globals *og, IPCData *ipc, Tag tag, ...)
 //
 //	Check certain Galileo options
 //
-unsigned long ftpmod_options(struct galileoftp_globals *og, int type)
+unsigned long ftpmod_options(int type)
 {
 	struct pointer_packet pp;
 	CFG_SETS *options;
@@ -1388,7 +1388,7 @@ unsigned long ftpmod_options(struct galileoftp_globals *og, int type)
 	pp.pointer = 0;
 	pp.flags   = 0;
 
-	og->og_gci->gc_GetPointer(&pp);
+	og.og_gci->gc_GetPointer(&pp);
 
 	options = (CFG_SETS *)pp.pointer;
 
@@ -1401,7 +1401,7 @@ unsigned long ftpmod_options(struct galileoftp_globals *og, int type)
 		rv = options->delete_flags;
 
 	if (pp.flags & POINTERF_LOCKED)
-		og->og_gci->gc_FreePointer(&pp);
+		og.og_gci->gc_FreePointer(&pp);
 
 	return rv;
 }

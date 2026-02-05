@@ -41,7 +41,7 @@ For more information on Directory Opus for Windows please see:
 
 BOOL get_listformat(struct window_params *wp);
 BOOL configure_format(struct display_globals *dg,struct subproc_data *data,IPCMessage *imsg);
-void get_formats(struct galileoftp_globals *og,struct ftp_environment *env,ListFormat **def_format);
-ListFormat *get_galileo_format(struct galileoftp_globals *og);
+void get_formats(struct ftp_environment *env,ListFormat **def_format);
+ListFormat *get_galileo_format(void);
 
 #endif

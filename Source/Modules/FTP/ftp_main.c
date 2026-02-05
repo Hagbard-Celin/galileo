@@ -106,15 +106,12 @@ For more information on Directory Opus for Windows please see:
 #endif
 
 
-
-#define SocketBase GETSOCKBASE(FindTask(0L))
-
 #define MAX_REXX_ARGS  16
 #define REXX_ARGLEN   256
 
 extern struct Library *GalileoFMBase;
 
-typedef int (*rxfuncptr)(struct galileoftp_globals *, struct RexxMsg *, int argc, char *argv[]);
+typedef int (*rxfuncptr)(struct RexxMsg *, int argc, char *argv[]);
 
 // Sub processes
 void __asm addressbookTr(void);
@@ -149,27 +146,27 @@ struct main_event_data
 //
 //	Check for AmiTCP or AS225
 //
-static int check_socketlib(register struct galileoftp_globals *og,IPCData *ipc)
+static int check_socketlib(IPCData *ipc)
 {
 	int retval = 0;
 	struct Library *L_SocketBase = NULL;
 
-	//kprintf( "** %s requested\n", og->og_socketlib == NOSOCK ? "no specific library" : og->og_socketlib == AMITCPSOCK ? "bsdsocket.library" : og->og_socketlib == INETSOCK ? "socket.library" : "some unknown socket library" );
+	//kprintf( "** %s requested\n", og.og_socketlib == NOSOCK ? "no specific library" : og.og_socketlib == AMITCPSOCK ? "bsdsocket.library" : og.og_socketlib == INETSOCK ? "socket.library" : "some unknown socket library" );
 
 	// Try for AmiTCP if we need it or don't know
-	if (og->og_socketlib == AMITCPSOCK || og->og_socketlib == NOSOCK)
-		if (L_SocketBase = OpenLibrary(og->og_socketlibname[AMITCPSOCK], og->og_socketlibver[AMITCPSOCK]))
-			og->og_socketlib = AMITCPSOCK;
+	if (og.og_socketlib == AMITCPSOCK || og.og_socketlib == NOSOCK)
+		if (L_SocketBase = OpenLibrary(og.og_socketlibname[AMITCPSOCK], og.og_socketlibver[AMITCPSOCK]))
+			og.og_socketlib = AMITCPSOCK;
 
 	// Try for AS225 if we need it, don't know, or AmiTCP failed
-	if (og->og_socketlib == INETSOCK || L_SocketBase == NULL)
-		if (L_SocketBase = OpenLibrary(og->og_socketlibname[INETSOCK], og->og_socketlibver[INETSOCK]))
-			og->og_socketlib = INETSOCK;
+	if (og.og_socketlib == INETSOCK || L_SocketBase == NULL)
+		if (L_SocketBase = OpenLibrary(og.og_socketlibname[INETSOCK], og.og_socketlibver[INETSOCK]))
+			og.og_socketlib = INETSOCK;
 
 	// Try for AmiTCP if AS225 failed
-	if (og->og_socketlib == INETSOCK && L_SocketBase == NULL)
-		if (L_SocketBase = OpenLibrary(og->og_socketlibname[AMITCPSOCK], og->og_socketlibver[AMITCPSOCK]))
-			og->og_socketlib = AMITCPSOCK;
+	if (og.og_socketlib == INETSOCK && L_SocketBase == NULL)
+		if (L_SocketBase = OpenLibrary(og.og_socketlibname[AMITCPSOCK], og.og_socketlibver[AMITCPSOCK]))
+			og.og_socketlib = AMITCPSOCK;
 
 	if (L_SocketBase)
 	{
@@ -178,8 +175,8 @@ static int check_socketlib(register struct galileoftp_globals *og,IPCData *ipc)
 	}
 	else
 	{
-		if (!og->og_noreq)
-			display_msg(og, ipc, NULL, 0, GetString(locale,MSG_MAIN_NEED_TCPIP));
+		if (!og.og_noreq)
+			display_msg(ipc, NULL, 0, GetString(locale,MSG_MAIN_NEED_TCPIP));
 	}
 
 	return retval;
@@ -193,17 +190,17 @@ static int check_socketlib(register struct galileoftp_globals *og,IPCData *ipc)
 //	Get the source lister handle given a function ipc
 //	(Equivalent to ARexx "lister query source")
 //
-APTR handle_from_function_handle(struct galileoftp_globals *og, APTR function_handle)
+APTR handle_from_function_handle(APTR function_handle)
 {
 	APTR path_handle;
 	APTR handle = 0;
 
-	if (path_handle = og->og_gci->gc_GetSource(function_handle, 0))
+	if (path_handle = og.og_gci->gc_GetSource(function_handle, 0))
 	{
-		if (!(handle = og->og_gci->gc_GetLister(path_handle)))
+		if (!(handle = og.og_gci->gc_GetLister(path_handle)))
 			;
 
-		og->og_gci->gc_EndSource(function_handle, 0);
+		og.og_gci->gc_EndSource(function_handle, 0);
 	}
 
 	return handle;
@@ -214,21 +211,21 @@ APTR handle_from_function_handle(struct galileoftp_globals *og, APTR function_ha
 //
 //	Find the ftp node for a handle
 //
-struct ftp_node *find_ftpnode(struct galileoftp_globals *og, APTR handle)
+struct ftp_node *find_ftpnode(APTR handle)
 {
 	struct ftp_node *n;
 
 	if (!handle)
 		return 0;
 
-	ObtainSemaphoreShared(&og->og_listerlist.lock);
+	ObtainSemaphoreShared(&og.og_listerlist.lock);
 
 	// Scan list
-	for (n = (struct ftp_node *)og->og_listerlist.list.lh_Head;
+	for (n = (struct ftp_node *)og.og_listerlist.list.lh_Head;
 	     n->fn_handle != handle && n->fn_node.ln_Succ;
 	     n = (struct ftp_node *)n->fn_node.ln_Succ) ;
 
-	ReleaseSemaphore(&og->og_listerlist.lock);
+	ReleaseSemaphore(&og.og_listerlist.lock);
 
 	// Return node
 	return n->fn_node.ln_Succ ? n : 0;
@@ -239,7 +236,7 @@ struct ftp_node *find_ftpnode(struct galileoftp_globals *og, APTR handle)
 //
 //	Launch a sub process (with global data pointer)
 //
-static IPCData *launch(struct galileoftp_globals *og, IPCData *ipc, struct ListLock *tasklist, char *name, void proc_code(void))
+static IPCData *launch(IPCData *ipc, struct ListLock *tasklist, char *name, void proc_code(void))
 {
 	struct subproc_data *data;
 	IPCData *ipcd = NULL;
@@ -247,7 +244,7 @@ static IPCData *launch(struct galileoftp_globals *og, IPCData *ipc, struct ListL
 	if (data = AllocVec(sizeof(struct subproc_data), MEMF_CLEAR))
 	{
 		int stack =4096*2;
-		data->spd_ogp = og;
+
 		data->spd_owner_ipc = ipc;
 
 		// Listers now have 8k stack * stack_multiplier for recursive safety
@@ -265,7 +262,7 @@ static IPCData *launch(struct galileoftp_globals *og, IPCData *ipc, struct ListL
 //
 //	Sent from addressbook to change log details
 //
-static int ipc_updateconfig(struct galileoftp_globals *og, struct main_event_data *med, LONG flags)
+static int ipc_updateconfig(struct main_event_data *med, LONG flags)
 {
 	BPTR old_fp;
 	int result = FALSE;
@@ -276,12 +273,12 @@ static int ipc_updateconfig(struct galileoftp_globals *og, struct main_event_dat
 
 		// If logfile name changed and wants log on then
 		// close current and reopen
-		if (og->og_log_open)
+		if (og.og_log_open)
 		{
 			if (old_fp)
 				Close(old_fp);
 
-			if (med->med_log_fp = Open(og->og_oc.oc_logname, MODE_NEWFILE))
+			if (med->med_log_fp = Open(og.og_oc.oc_logname, MODE_NEWFILE))
 				result = TRUE;
 		}
 
@@ -302,11 +299,11 @@ static int ipc_updateconfig(struct galileoftp_globals *og, struct main_event_dat
 		old_fp = med->med_log_fp;
 
 		// If log should be open then open it if not open
-		if (og->og_log_open)
+		if (og.og_log_open)
 		{
 			// Log is open - leave it
 			if (!old_fp)
-				if (med->med_log_fp = Open(og->og_oc.oc_logname, MODE_NEWFILE))
+				if (med->med_log_fp = Open(og.og_oc.oc_logname, MODE_NEWFILE))
 					result = TRUE;
 		}
 		else
@@ -337,7 +334,7 @@ enum
 //	Returns 1 if message forwarded
 //	Returns 0 if message still needs replying
 //
-static int ipc_setvar(struct galileoftp_globals *og, struct main_event_data *med, IPCMessage *msg)
+static int ipc_setvar(struct main_event_data *med, IPCMessage *msg)
 {
 	char *args;
 	FuncArgs *fa;
@@ -364,7 +361,7 @@ static int ipc_setvar(struct galileoftp_globals *og, struct main_event_data *med
 				{
 					if (log_fp2 = Open((char *)fa->FA_Arguments[OPT_VAL], MODE_NEWFILE))
 					{
-						stccpy(og->og_oc.oc_logname, (char *)fa->FA_Arguments[OPT_VAL], LOGNAMELEN);
+						stccpy(og.og_oc.oc_logname, (char *)fa->FA_Arguments[OPT_VAL], LOGNAMELEN);
 						old_fp = med->med_log_fp;
 						med->med_log_fp = log_fp2;
 						if (old_fp)
@@ -388,7 +385,7 @@ static int ipc_setvar(struct galileoftp_globals *og, struct main_event_data *med
 					}
 
 					// Log is closed - open it
-					else if	(log_fp2 = Open(og->og_oc.oc_logname, MODE_NEWFILE))
+					else if	(log_fp2 = Open(og.og_oc.oc_logname, MODE_NEWFILE))
 
 						// Enable log use
 						med->med_log_fp = log_fp2;
@@ -404,11 +401,11 @@ static int ipc_setvar(struct galileoftp_globals *og, struct main_event_data *med
 				if (fa->FA_Arguments[OPT_VAL])
 
 					// Set new value
-					og->og_oc.oc_log_debug = atoi((char *)fa->FA_Arguments[OPT_VAL]);
+					og.og_oc.oc_log_debug = atoi((char *)fa->FA_Arguments[OPT_VAL]);
 				else
 
 					// Toggle on/off
-					og->og_oc.oc_log_debug = og->og_oc.oc_log_debug ? 0 : 1;
+					og.og_oc.oc_log_debug = og.og_oc.oc_log_debug ? 0 : 1;
 			}
 
 			// TimeOut
@@ -419,7 +416,7 @@ static int ipc_setvar(struct galileoftp_globals *og, struct main_event_data *med
 			{
 				// SetVar Timout <value>
 				if (fa->FA_Arguments[OPT_VAL])
-					og->og_oc.oc_env.e_timeout = atoi((char *)fa->FA_Arguments[OPT_VAL]);
+					og.og_oc.oc_env.e_timeout = atoi((char *)fa->FA_Arguments[OPT_VAL]);
 			}
 
 			// ListUpdate
@@ -430,7 +427,7 @@ static int ipc_setvar(struct galileoftp_globals *og, struct main_event_data *med
 			{
 				// SetVar ListUpdate <value>
 				if (fa->FA_Arguments[OPT_VAL])
-					og->og_oc.oc_env.e_list_update = atoi((char *)fa->FA_Arguments[OPT_VAL]);
+					og.og_oc.oc_env.e_list_update = atoi((char *)fa->FA_Arguments[OPT_VAL]);
 			}
 
 			// List
@@ -459,7 +456,7 @@ static int ipc_setvar(struct galileoftp_globals *og, struct main_event_data *med
 				struct ftp_node *node;
 				char *cmd = NULL;
 
-				if (node = find_ftpnode(og, handle_from_function_handle(og, fm->fm_function_handle)))
+				if (node = find_ftpnode(handle_from_function_handle(fm->fm_function_handle)))
 				{
 					if (fa->FA_Arguments[OPT_VAL])
 					{
@@ -492,12 +489,12 @@ static int ipc_setvar(struct galileoftp_globals *og, struct main_event_data *med
 //
 //	Summons the address book requester
 //
-static int ipc_addrbook(struct galileoftp_globals *og, IPCMessage *msg)
+static int ipc_addrbook(IPCMessage *msg)
 {
 	int sent = 0;
-	if (og->og_addrproc)
+	if (og.og_addrproc)
 	{
-		ipc_forward(og->og_addrproc, msg, 0);
+		ipc_forward(og.og_addrproc, msg, 0);
 		sent = 1;
 	}
 
@@ -510,7 +507,6 @@ static int ipc_addrbook(struct galileoftp_globals *og, IPCMessage *msg)
 //	Receive an options message
 //
 static int ipc_options(
-	struct galileoftp_globals *og,
 	IPCData			  *ipc,
 	IPCMessage		  *msg)
 {
@@ -524,17 +520,17 @@ static int ipc_options(
 	// Default options?
 	if (msg->flags)
 	{
-		og->og_gci->gc_UnlockSource(sm->cm_function_handle);
+		og.og_gci->gc_UnlockSource(sm->cm_function_handle);
 
 		need_reply = 0;
 
 		msg->flags = 0;
-		ipc_forward(og->og_addrproc, msg, 0);
+		ipc_forward(og.og_addrproc, msg, 0);
 		sent = 1;
 	}
 
 	// Site-specific options?
-	else if	(node = find_ftpnode(og, handle_from_function_handle(og, sm->cm_function_handle)))
+	else if	(node = find_ftpnode(handle_from_function_handle(sm->cm_function_handle)))
 	{
 		need_reply = 0;
 
@@ -554,16 +550,15 @@ static int ipc_options(
 /********************************/
 
 static int ipc_remember_path(
-	struct galileoftp_globals *og,
 	IPCData			  *ipc,
 	IPCMessage		  *msg)
 {
 	int sent = 0;
 
-	if (og->og_addrproc)
+	if (og.og_addrproc)
 	{
 		Forbid();
-		ipc_forward(og->og_addrproc, msg, 0);
+		ipc_forward(og.og_addrproc, msg, 0);
 		Permit();
 		sent = 1;
 	}
@@ -577,7 +572,7 @@ static int ipc_remember_path(
 //	Receive a connect message (from the address book or FTPConnect command)
 //	Create a new lister process and forward the connect message
 //
-static int ipc_connect(struct galileoftp_globals *og,IPCData *ipc,struct ListLock *tasklist,IPCMessage *msg)
+static int ipc_connect(IPCData *ipc,struct ListLock *tasklist,IPCMessage *msg)
 {
 	struct connect_msg *cm = msg->data_free;
 	struct ftp_node *node;
@@ -590,7 +585,7 @@ static int ipc_connect(struct galileoftp_globals *og,IPCData *ipc,struct ListLoc
 	if (cm)
 	{
 		// Handle of ftp lister?
-		if (node = find_ftpnode(og, cm->cm_handle))
+		if (node = find_ftpnode(cm->cm_handle))
 		{
 			if (cm->cm_site.se_name && *cm->cm_site.se_name)
 			{
@@ -617,22 +612,22 @@ static int ipc_connect(struct galileoftp_globals *og,IPCData *ipc,struct ListLoc
 				IPC_Quit(node->fn_ipc, (ULONG)qm, 0);
 			}
 			else
-				DisplayBeep(og->og_screen);
+				DisplayBeep(og.og_screen);
 		}
 
 		// Ignore if source has a handler
 		else if	(handle_has_handler(cm->cm_galileo, cm->cm_handle))
 		{
 			kprintf("** can't drag site to non-FTP handler\n");
-			DisplayBeep(og->og_screen);
+			DisplayBeep(og.og_screen);
 		}
 		else
 		{
 			// TCP/IP running?
-			if (check_socketlib(og, ipc))
+			if (check_socketlib(ipc))
 			{
 				// Launch FTP lister task
-				if (listerproc = launch(og, ipc, tasklist, "galileo_ftp_lister", listerTr))
+				if (listerproc = launch(ipc, tasklist, "galileo_ftp_lister", listerTr))
 				{
 					// Send connect message
 					ipc_forward(listerproc, msg, 0);
@@ -657,7 +652,7 @@ static int ipc_connect(struct galileoftp_globals *og,IPCData *ipc,struct ListLoc
 
 /********************************/
 
-static int handle_ipc_msg(struct galileoftp_globals *og, struct main_event_data *med)
+static int handle_ipc_msg(struct main_event_data *med)
 {
 	IPCMessage *msg;
 	struct ftp_node *node;
@@ -693,7 +688,7 @@ static int handle_ipc_msg(struct galileoftp_globals *og, struct main_event_data 
 			case IPC_ADDRBOOK:
 				if (med->med_status == STATE_RUNNING)
 				{
-					if (ipc_addrbook(og, msg))
+					if (ipc_addrbook(msg))
 						msg = 0;
 					else
 						msg->command = FALSE;
@@ -705,7 +700,7 @@ static int handle_ipc_msg(struct galileoftp_globals *og, struct main_event_data 
 			case IPC_OPTIONS:
 				if (med->med_status == STATE_RUNNING)
 				{
-					ipc_options(og, med->med_ipc, msg);
+					ipc_options(med->med_ipc, msg);
 					msg = 0;
 				}
 				else
@@ -715,7 +710,7 @@ static int handle_ipc_msg(struct galileoftp_globals *og, struct main_event_data 
 			case IPC_REMEMBERPATH:
 				if (med->med_status == STATE_RUNNING)
 				{
-					if (ipc_remember_path(og, med->med_ipc, msg))
+					if (ipc_remember_path(med->med_ipc, msg))
 						msg = 0;
 				}
 				else
@@ -725,7 +720,7 @@ static int handle_ipc_msg(struct galileoftp_globals *og, struct main_event_data 
 			case IPC_CONNECT:
 				if (med->med_status == STATE_RUNNING)
 				{
-					ipc_connect(og, med->med_ipc, &med->med_tasklist, msg);
+					ipc_connect(med->med_ipc, &med->med_tasklist, msg);
 					msg = 0;
 				}
 				else
@@ -741,9 +736,9 @@ static int handle_ipc_msg(struct galileoftp_globals *og, struct main_event_data 
 
 					if (fm = (struct ftp_msg *)msg->data)
 					{
-						if (handle = handle_from_function_handle(og, fm->fm_function_handle))
+						if (handle = handle_from_function_handle(fm->fm_function_handle))
 						{
-							if (node = find_ftpnode(og, handle))
+							if (node = find_ftpnode(handle))
 							{
 								ipc_forward(node->fn_ipc, msg, 0);
 								msg = 0;
@@ -762,13 +757,13 @@ static int handle_ipc_msg(struct galileoftp_globals *og, struct main_event_data 
 				break;
 
 			case IPC_UPDATECONFIG:
-				msg->command = ipc_updateconfig(og, med, msg->flags);
+				msg->command = ipc_updateconfig(med, msg->flags);
 				break;
 
 			case IPC_SETVAR:
 				if (med->med_status == STATE_RUNNING)
 				{
-					if (ipc_setvar(og, med, msg))
+					if (ipc_setvar(med, msg))
 						msg = 0;
 					else
 						msg->command = FALSE;
@@ -825,14 +820,14 @@ static int handle_ipc_msg(struct galileoftp_globals *og, struct main_event_data 
 //	argv[2] = file names
 //	argv[3] = dest handle (src from "drop" command)
 //
-static void galileo_dnd_remote(struct galileoftp_globals *og, int argc, char **argv)
+static void galileo_dnd_remote(int argc, char **argv)
 {
 	struct ftp_node *srcnode, *dstnode, *tmpnode;
 	struct xfer_msg *xm;
 
 	//kprintf( "galileo_dnd_remote()\n" );
 
-	if (argc >= 4 && (srcnode = find_ftpnode(og, (APTR)atoi(argv[1]))) && (dstnode = find_ftpnode(og, (APTR)atoi(argv[3]))))
+	if (argc >= 4 && (srcnode = find_ftpnode((APTR)atoi(argv[1]))) && (dstnode = find_ftpnode((APTR)atoi(argv[3]))))
 	{
 		// We are usually called from the "dropfrom" command
 		// In case this changes, swap the source and destination for the "drop" command
@@ -921,7 +916,6 @@ static BOOL check_is_dir(char *name)
 //	Returns 1 if ARexx message was forwarded, else 0
 //
 static int galileo_active(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -932,7 +926,7 @@ static int galileo_active(
 
 	//kprintf( "galileo_active(%s)\n", argv[3] );
 
-	if (argc < 5 || !(node = find_ftpnode(og, (APTR)atoi(argv[1]))))
+	if (argc < 5 || !(node = find_ftpnode((APTR)atoi(argv[1]))))
 		return 0;
 
 	// Redisplay the list if not same path
@@ -962,7 +956,6 @@ static int galileo_active(
 //	argv[1] = handle, argv[2] = name, argv[3] = (not used)
 //
 static int galileo_doubleclick(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -971,7 +964,7 @@ static int galileo_doubleclick(
 	struct ftp_msg *fm;
 	int retval = 0;
 
-	if (argc >= 7 && (node = find_ftpnode(og, (APTR)atoi(argv[1]))))
+	if (argc >= 7 && (node = find_ftpnode((APTR)atoi(argv[1]))))
 	{
 		if (fm = AllocVec(sizeof(struct ftp_msg) + FILENAMELEN + 1, MEMF_CLEAR))
 		{
@@ -1013,7 +1006,6 @@ static int galileo_doubleclick(
 //	See galileo_quitcommand() and lister_disconnect() for the ScanDir stuff
 //
 static int galileo_drop(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -1028,20 +1020,20 @@ static int galileo_drop(
 	int retval = 0;
 
 	// Valid?
-	if (argc < 4 || !(node = find_ftpnode(og, (APTR)atoi(argv[1]))))
+	if (argc < 4 || !(node = find_ftpnode((APTR)atoi(argv[1]))))
 		return 0;
 
 	// Source is a lister?
 	if (srchandle = (APTR)atoi(argv[3]))
 	{
 		// Ignore Drop if both are FTP listers
-		if (find_ftpnode(og, srchandle))
+		if (find_ftpnode(srchandle))
 			return 0;
 
 		// Ignore if source has a handler
 		if (handle_has_handler(node->fn_galileo, srchandle))
 		{
-			DisplayBeep(og->og_screen);
+			DisplayBeep(og.og_screen);
 			kprintf("** can't drag to FTP from other handler\n");
 			return retval;
 		}
@@ -1093,7 +1085,7 @@ static int galileo_drop(
 		// The above flag is not used anywhere. And the following
 		// code-path just generates MuForce hits due to empty
 		// string-pointers. So just beep and bail out for now.
-		DisplayBeep(og->og_screen);
+		DisplayBeep(og.og_screen);
 		return 0;
 	}
 
@@ -1122,7 +1114,7 @@ static int galileo_drop(
 //
 //	Leave entries out on the desktop
 //
-static void galileo_leaveout(struct galileoftp_globals *og, struct ftp_node *node, char *names)
+static void galileo_leaveout(struct ftp_node *node, char *names)
 {
 	char command[1024+1];
 	char desktop[PATHLEN+1];
@@ -1133,7 +1125,7 @@ static void galileo_leaveout(struct galileoftp_globals *og, struct ftp_node *nod
 
 	kprintf("galileo_leaveout()\n");
 
-	og->og_gci->gc_GetDesktop(desktop);
+	og.og_gci->gc_GetDesktop(desktop);
 
 	strcpy(path, desktop);
 
@@ -1237,7 +1229,7 @@ static void galileo_leaveout(struct galileoftp_globals *og, struct ftp_node *nod
 	}
 
 	// Make icons appear
-	og->og_gci->gc_CheckDesktop(desktop);
+	og.og_gci->gc_CheckDesktop(desktop);
 }
 
 /********************************/
@@ -1261,7 +1253,6 @@ static void galileo_leaveout(struct galileoftp_globals *og, struct ftp_node *nod
 //	argv[6] = Which qualifier keys held down
 //
 static int galileo_dropfrom(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -1277,7 +1268,7 @@ static int galileo_dropfrom(
 	//kprintf( "galileo_dropfrom()\n" );
 
 	// Valid?
-	if (argc < 4 || !(node = find_ftpnode(og, (APTR)atoi(argv[1]))))
+	if (argc < 4 || !(node = find_ftpnode((APTR)atoi(argv[1]))))
 		return 0;
 
 	// Destination is a lister?
@@ -1288,15 +1279,15 @@ static int galileo_dropfrom(
 			flags |= XFER_SUBDIR;
 
 		// Destination is also an FTP lister?
-		if (find_ftpnode(og, desthandle))
+		if (find_ftpnode(desthandle))
 		{
 			// FTP-FTP subdirectory drag and drop not supported
 			if (flags & XFER_SUBDIR)
-				DisplayBeep(og->og_screen);
+				DisplayBeep(og.og_screen);
 
 			// Handle FTP-FTP drag-n-drop
 			else
-				galileo_dnd_remote(og, argc, argv);
+				galileo_dnd_remote(argc, argv);
 
 			return retval;
 		}
@@ -1304,7 +1295,7 @@ static int galileo_dropfrom(
 		// Ignore if destination has a handler
 		if (handle_has_handler(node->fn_galileo, desthandle))
 		{
-			DisplayBeep(og->og_screen);
+			DisplayBeep(og.og_screen);
 			return retval;
 		}
 
@@ -1341,7 +1332,7 @@ static int galileo_dropfrom(
 		// Dragged somewhere incompatible? (KingCon etc)
 		if (!argv[5])
 		{
-			DisplayBeep(og->og_screen);
+			DisplayBeep(og.og_screen);
 			return retval;
 		}
 
@@ -1367,16 +1358,16 @@ static int galileo_dropfrom(
 			if (!stricmp(argv[5], "desktop"))
 			{
 				// Get desktop path and popup setting
-				int result = og->og_gci->gc_GetDesktop(desktop);
+				int result = og.og_gci->gc_GetDesktop(desktop);
 
 				// Popup not disabled?
 				if (result == 1
 				    || (argv[6] && strstr(argv[6], "shift")))
 				{
 					// Galileo version supports callback?
-					if (og->og_gci->gc_DesktopPopup)
+					if (og.og_gci->gc_DesktopPopup)
 					{
-						result = og->og_gci->gc_DesktopPopup(0);
+						result = og.og_gci->gc_DesktopPopup(0);
 
 						switch (result)
 						{
@@ -1411,7 +1402,7 @@ static int galileo_dropfrom(
 
 					case 2:			// Create leftout
 						/* flags |= XFER_DROPFROM_CREATE_LEFTOUT; */
-						galileo_leaveout(og, node, argv[2]);
+						galileo_leaveout(node, argv[2]);
 						return retval;
 						break;
 
@@ -1449,7 +1440,7 @@ static int galileo_dropfrom(
 				// To non-directory icon
 				else
 				{
-					DisplayBeep(og->og_screen);
+					DisplayBeep(og.og_screen);
 					FreeVec(xm);
 					return retval;
 				}
@@ -1484,7 +1475,6 @@ static int galileo_dropfrom(
 //	argv[6] = empty
 //
 static int galileo_edit(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -1494,7 +1484,7 @@ static int galileo_edit(
 
 	//kprintf( "galileo_edit()\n" );
 
-	if (argc <5 || !(node = find_ftpnode(og, (APTR)atoi(argv[1]))))
+	if (argc <5 || !(node = find_ftpnode((APTR)atoi(argv[1]))))
 		return 0;
 
 	if (!(em = AllocVec(sizeof(struct edit_msg) + strlen(argv[3]) + 1 + strlen(argv[2]) + 1 + strlen(argv[4]) + 1, MEMF_CLEAR)))
@@ -1527,7 +1517,6 @@ static int galileo_edit(
 //	argv[3] contains 1 if the lister is closed, 0 otherwise
 //
 static int galileo_inactive(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -1538,7 +1527,7 @@ static int galileo_inactive(
 
 	//kprintf( "galileo_inactive(%s)\n", argv[3] );
 
-	if (argc >= 3 && (node = find_ftpnode(og, (APTR)atoi(argv[1]))))
+	if (argc >= 3 && (node = find_ftpnode((APTR)atoi(argv[1]))))
 	{
 		// Has lister disappeared?  Ignore if lister is supposed to be invisible
 		if (atoi(argv[3]))
@@ -1569,7 +1558,6 @@ static int galileo_inactive(
 //	or the '/' key
 //
 static int galileo_parent(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -1577,7 +1565,7 @@ static int galileo_parent(
 	struct ftp_node *node;
 	int retval = 0;
 
-	if (node = find_ftpnode(og, (APTR)atoi(argv[1])))
+	if (node = find_ftpnode((APTR)atoi(argv[1])))
 	{
 		IPC_Command(node->fn_ipc, IPC_PARENT, 0, rxmsg, 0, 0);
 		retval = 1;
@@ -1592,7 +1580,6 @@ static int galileo_parent(
 //	A new path has been entered in the path gadget
 //
 static int galileo_path(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -1603,7 +1590,7 @@ static int galileo_path(
 	int len;
 	int retval = 0;
 
-	if (node = find_ftpnode(og, (APTR)atoi(argv[1])))
+	if (node = find_ftpnode((APTR)atoi(argv[1])))
 	{
 		if (!strnicmp(argv[2], "ftp://", 6))
 		{
@@ -1639,7 +1626,6 @@ static int galileo_path(
 //	"Re-read Directory" is chosen from the lister popup menu
 //
 static int galileo_reread(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -1647,7 +1633,7 @@ static int galileo_reread(
 	struct ftp_node *node;
 	int retval = 0;
 
-	if (node = find_ftpnode(og, (APTR)atoi(argv[1])))
+	if (node = find_ftpnode((APTR)atoi(argv[1])))
 	{
 		IPC_Command(node->fn_ipc, IPC_REREAD, 0, rxmsg, 0, 0);
 		retval = 1;
@@ -1662,7 +1648,6 @@ static int galileo_reread(
 //	Caused by the "Root" command, or the ':' key
 //
 static int galileo_root(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -1670,7 +1655,7 @@ static int galileo_root(
 	struct ftp_node *node;
 	int retval = 0;
 
-	if (node = find_ftpnode(og, (APTR)atoi(argv[1])))
+	if (node = find_ftpnode((APTR)atoi(argv[1])))
 	{
 		IPC_Command(node->fn_ipc, IPC_ROOT, 0, rxmsg, 0, 0);
 		retval = 1;
@@ -1685,7 +1670,6 @@ static int galileo_root(
 //	From the lister menu, or pressing 'Save' on the List format editor
 //
 static int galileo_snapshot(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -1693,7 +1677,7 @@ static int galileo_snapshot(
 	struct ftp_node *node;
 	int retval = 0;
 
-	if (node = find_ftpnode(og, (APTR)atoi(argv[1])))
+	if (node = find_ftpnode((APTR)atoi(argv[1])))
 	{
 		IPC_Command(node->fn_ipc, IPC_SNAPSHOT, 0, rxmsg, 0, 0);
 		retval = 1;
@@ -1708,7 +1692,6 @@ static int galileo_snapshot(
 //	From the lister menu
 //
 static int galileo_unsnapshot(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -1716,7 +1699,7 @@ static int galileo_unsnapshot(
 	struct ftp_node *node;
 	int retval = 0;
 
-	if (node = find_ftpnode(og, (APTR)atoi(argv[1])))
+	if (node = find_ftpnode((APTR)atoi(argv[1])))
 	{
 		IPC_Command(node->fn_ipc, IPC_UNSNAPSHOT, 0, rxmsg, 0, 0);
 		retval = 1;
@@ -1731,7 +1714,6 @@ static int galileo_unsnapshot(
 //	Added by us to the lister [srce/dest] popup menu
 //
 static int popup_add(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -1740,7 +1722,7 @@ static int popup_add(
 	int retval = 0;
 
 
-	if (node = find_ftpnode(og, (APTR)atoi(argv[1])))
+	if (node = find_ftpnode((APTR)atoi(argv[1])))
 	{
 		IPC_Command(node->fn_ipc, IPC_ADD, 0, 0, 0, 0);
 		retval = 1;
@@ -1755,7 +1737,6 @@ static int popup_add(
 //	Added by us to the lister [srce/dest] popup menu
 //
 static int popup_options(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -1763,7 +1744,7 @@ static int popup_options(
 	struct ftp_node *node;
 	int retval = 0;
 
-	if (node = find_ftpnode(og, (APTR)atoi(argv[1])))
+	if (node = find_ftpnode((APTR)atoi(argv[1])))
 	{
 		IPC_Command(node->fn_ipc, IPC_OPTIONS, 0, 0, 0, 0);
 		retval = 1;
@@ -1782,7 +1763,6 @@ static int popup_options(
 //	Receive an abort message from Galileo
 //
 static int trap_abort(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -1790,7 +1770,7 @@ static int trap_abort(
 	struct ftp_node *node;
 	int retval = 0;
 
-	if (node = find_ftpnode(og, (APTR)atoi(argv[1])))
+	if (node = find_ftpnode((APTR)atoi(argv[1])))
 	{
 		// Stop high level stuff
 		node->fn_flags |= LST_ABORT;
@@ -1829,7 +1809,6 @@ static int trap_abort(
 //	Receive a configure message from Galileo
 //
 static int trap_configure(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -1841,7 +1820,7 @@ static int trap_configure(
 	//kprintf( "trap_configure()\n" );
 
 	// Valid?
-	if (argc < 5 || !argv[1] || !(node = find_ftpnode(og, (APTR)atoi(argv[1]))))
+	if (argc < 5 || !argv[1] || !(node = find_ftpnode((APTR)atoi(argv[1]))))
 		return 0;
 
 	if (fm = AllocVec(sizeof(*fm), MEMF_CLEAR))
@@ -1890,7 +1869,6 @@ static int trap_configure(
 //			Ignored unless NAME is also specified
 
 static int trap_copy(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -1985,8 +1963,8 @@ static int trap_copy(
 			flags |= XFER_OPT_NEWNAME;
 
 		// Which listers are FTP sites?
-		srcnode = find_ftpnode(og, (APTR)atoi(argv[1]));
-		dstnode = find_ftpnode(og, (APTR)atoi(argv[3]));
+		srcnode = find_ftpnode((APTR)atoi(argv[1]));
+		dstnode = find_ftpnode((APTR)atoi(argv[3]));
 
 		// One end local and one end FTP?
 		if ((srcnode || dstnode) && !(srcnode && dstnode))
@@ -2141,7 +2119,6 @@ enum
 };
 
 static int trap_delete(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -2153,7 +2130,7 @@ static int trap_delete(
 	FuncArgs *fa;
 	char *args = argv[5];
 	int retval = 0;
-	CONST GalileoCallbackInfo *h = og->og_gci;
+	CONST GalileoCallbackInfo *h = og.og_gci;
 	APTR function_handle;
 	APTR entry, entry2;
 	int num;
@@ -2175,7 +2152,7 @@ static int trap_delete(
 		args = " ";
 
 	// Valid?
-	if (argc < 8 || !argv[1] || !argv[2] || !(node = find_ftpnode(og, (APTR)atoi(argv[1]))))
+	if (argc < 8 || !argv[1] || !argv[2] || !(node = find_ftpnode((APTR)atoi(argv[1]))))
 		return 0;
 
 	// This template MUST be identical to the current internal command template!
@@ -2280,7 +2257,6 @@ static int trap_delete(
 // FindFile:	<no template> (should have a comment switch)
 
 static int trap_findfile(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -2290,7 +2266,7 @@ static int trap_findfile(
 	int retval = 0;
 
 	// Valid?
-	if (argc < 5 || !argv[1] || !(node = find_ftpnode(og, (APTR)atoi(argv[1]))))
+	if (argc < 5 || !argv[1] || !(node = find_ftpnode((APTR)atoi(argv[1]))))
 		return retval;
 
 	if (fm = AllocVec(sizeof(struct findfile_msg) + strlen(argv[2]) + 1, MEMF_CLEAR))
@@ -2326,7 +2302,6 @@ enum
 };
 
 static int trap_getsizes(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -2345,7 +2320,7 @@ static int trap_getsizes(
 		args = " ";
 
 	// Valid?
-	if (argc < 5 || !argv[1] || !(node = find_ftpnode(og, (APTR)atoi(argv[1]))))
+	if (argc < 5 || !argv[1] || !(node = find_ftpnode((APTR)atoi(argv[1]))))
 		return 0;
 
 	// This template MUST be identical to the current internal command template!
@@ -2387,7 +2362,6 @@ static int trap_getsizes(
 // MakeDir:	NAME,NOICON/S,SELECT/S,NEW/S,READ/S
 
 static int trap_makedir(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -2406,7 +2380,7 @@ static int trap_makedir(
 		args = " ";
 
 	// Valid?
-	if (argc < 5 || !argv[1] || !(node = find_ftpnode(og, (APTR)atoi(argv[1]))))
+	if (argc < 5 || !argv[1] || !(node = find_ftpnode((APTR)atoi(argv[1]))))
 		return 0;
 
 	// This template MUST be identical to the current internal command template!
@@ -2469,7 +2443,6 @@ enum
 };
 
 static int trap_protect(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -2490,7 +2463,7 @@ static int trap_protect(
 		args = " ";
 
 	// Valid?
-	if (argc < 5 || !argv[1] || !(node = find_ftpnode(og, (APTR)atoi(argv[1]))))
+	if (argc < 5 || !argv[1] || !(node = find_ftpnode((APTR)atoi(argv[1]))))
 		return retval;
 
 	// This template MUST be identical to the current internal command template!
@@ -2551,7 +2524,6 @@ static int trap_protect(
 // Rename:	NAME/NEWNAME
 
 static int trap_rename(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -2560,7 +2532,7 @@ static int trap_rename(
 	struct ftp_msg *fm;
 	int retval = 0;
 
-	if (argc >= 3 && argv[1] && argv[2] && (node = find_ftpnode(og, (APTR)atoi(argv[1]))))
+	if (argc >= 3 && argv[1] && argv[2] && (node = find_ftpnode((APTR)atoi(argv[1]))))
 	{
 		if (fm = AllocVec(sizeof(struct ftp_msg) + strlen(argv[2]) + 1, MEMF_CLEAR))
 		{
@@ -2595,7 +2567,6 @@ static int trap_rename(
 // others:	NAME/F,WAIT/S
 
 static int galileo_traptemp(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -2605,7 +2576,7 @@ static int galileo_traptemp(
 	int retval = 0;
 
 	// Valid?
-	if (argc < 2 || !argv[0] || !argv[1] || !argv[2] || !(node = find_ftpnode(og, (APTR)atoi(argv[1]))))
+	if (argc < 2 || !argv[0] || !argv[1] || !argv[2] || !(node = find_ftpnode((APTR)atoi(argv[1]))))
 		return 0;
 
 	if (tm = AllocVec(sizeof(*tm) + strlen(argv[2]) + 1, MEMF_CLEAR))
@@ -2634,7 +2605,6 @@ static int galileo_traptemp(
 //	Uses a slight kludge - also used by galileo_drop()
 //
 static int galileo_devicelist(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -2644,7 +2614,7 @@ static int galileo_devicelist(
 	int len;
 	struct quit_msg *qm;
 
-	if (argc < 2 || !(node = find_ftpnode(og, (APTR)atoi(argv[1]))))
+	if (argc < 2 || !(node = find_ftpnode((APTR)atoi(argv[1]))))
 		return 0;
 
 	if (argc >= 6 && argv[5] && *argv[5])
@@ -2689,7 +2659,6 @@ enum
 };
 
 static int galileo_scandir(
-	struct galileoftp_globals *og,
 	struct RexxMsg		  *rxmsg,
 	int			  argc,
 	char			  **argv)
@@ -2707,7 +2676,7 @@ static int galileo_scandir(
 		args = " ";
 
 	// Valid?
-	if (argc < 2 || !(node = find_ftpnode(og, (APTR)atoi(argv[1]))))
+	if (argc < 2 || !(node = find_ftpnode((APTR)atoi(argv[1]))))
 		return 0;
 
 	// This template MUST be identical to the current internal command template...
@@ -2826,7 +2795,7 @@ static struct rexx_func_info rexx_func_table[] =
 //	Functions return 0 if they didn't reply to their ARexx message
 //	Functions return 1 if they did
 //
-static void handle_rexx(struct galileoftp_globals *og, struct main_event_data *med, struct MsgPort *rexport)
+static void handle_rexx(struct main_event_data *med, struct MsgPort *rexport)
 {
 	struct RexxMsg *rxmsg;
 	int argc;
@@ -2853,7 +2822,7 @@ static void handle_rexx(struct galileoftp_globals *og, struct main_event_data *m
 					if (!stricmp(argv[0], rfi->rfi_name))
 					{
 						kprintf("** trapped '%s'\n", argv[0]);
-						result = rfi->rfi_function(og, rxmsg, argc, argv);
+						result = rfi->rfi_function(rxmsg, argc, argv);
 						break;
 					}
 
@@ -2870,11 +2839,11 @@ static void handle_rexx(struct galileoftp_globals *og, struct main_event_data *m
 					}
 
 					// Warn about unsupported command
-					else if	(!og->og_noreq)
+					else if	(!og.og_noreq)
 					{
 						struct ftp_node *node;
 
-						if (node = find_ftpnode(og, (APTR)atoi(argv[1])))
+						if (node = find_ftpnode((APTR)atoi(argv[1])))
 						{
 							lister_request(
 								node,
@@ -2954,15 +2923,15 @@ static void addtraps(char *galileo)
 
 /********************************/
 
-void free_address_book(register struct galileoftp_globals *og)
+void free_address_book(void)
 {
-	if (og->og_SiteList && AttemptSemaphore(&og->og_SiteList_semaphore))
+	if (og.og_SiteList && AttemptSemaphore(&og.og_SiteList_semaphore))
 	{
-		Att_RemList(og->og_SiteList, REMLIST_FREEDATA);
-		og->og_SiteList=NULL;
-		ReleaseSemaphore(&og->og_SiteList_semaphore);
+		Att_RemList(og.og_SiteList, REMLIST_FREEDATA);
+		og.og_SiteList=NULL;
+		ReleaseSemaphore(&og.og_SiteList_semaphore);
 	}
-	else if	(og->og_SiteList)
+	else if	(og.og_SiteList)
 	{
 		kprintf("** address book not freed!\n");
 		kprintf("    because couldn't get semaphore\n");
@@ -2975,7 +2944,7 @@ void free_address_book(register struct galileoftp_globals *og)
 //	Galileo sends us a message whenever its screen is opened or closed
 //	Returns 1 if we should quit becuase there are no open listers
 //
-static int handle_notify(struct galileoftp_globals *og, struct MsgPort *nfyport)
+static int handle_notify(struct MsgPort *nfyport)
 {
 	GalileoNotify *nmsg;
 	int quit = 0;
@@ -2985,25 +2954,25 @@ static int handle_notify(struct galileoftp_globals *og, struct MsgPort *nfyport)
 		if (nmsg->gn_Type & GN_GALILEOFM_HIDE)
 		{
 			// Screen is not valid to use in this time
-			og->og_screen = 0;
+			og.og_screen = 0;
 
-			IPC_Command(og->og_addrproc, IPC_HIDE, 0, 0, 0, 0);
+			IPC_Command(og.og_addrproc, IPC_HIDE, 0, 0, 0, 0);
 		}
 
 		else if	(nmsg->gn_Type & GN_GALILEOFM_SHOW)
 		{
 			// Requester code may still rely on this
-			if (og->og_screen != ((struct Window *)nmsg->gn_Data)->WScreen)
-				og->og_screen = ((struct Window *)nmsg->gn_Data)->WScreen;
+			if (og.og_screen != ((struct Window *)nmsg->gn_Data)->WScreen)
+				og.og_screen = ((struct Window *)nmsg->gn_Data)->WScreen;
 
-			IPC_Command(og->og_addrproc, IPC_SHOW, 0, 0, 0, 0);
+			IPC_Command(og.og_addrproc, IPC_SHOW, 0, 0, 0, 0);
 		}
 
 		// Low memory handler
 		else if	(nmsg->gn_Type & GN_FLUSH_MEM)
 		{
 			// Quit address book
-			free_address_book(og);
+			free_address_book();
 		}
 		else
 			kprintf("** notify UNEXPECTED 0x%lx\n", nmsg->gn_Type);
@@ -3148,7 +3117,6 @@ static void check_script_file(void)
 void __asm __saveds galileo_ftp(void)
 {
 	struct main_event_data med = {0};
-	struct galileoftp_globals *og;
 	struct Library *ourbase;
 	struct modlaunch_data *mldata;			/* Data from the module when we are launched */
 	struct MsgPort *rexport, *nfyport = 0;		/* Our ARexx and Galileo Notify  message ports */
@@ -3168,18 +3136,15 @@ void __asm __saveds galileo_ftp(void)
 		// Process startup function
 		if (IPC_ProcStartup((ULONG *)&mldata, galileo_ftp_init))
 		{
-			// Fix pointer to global info
-			og = mldata->mld_og;
-
 			// IPC for "galileo_ftp" process
-			og->og_main_ipc = mldata->mld_ftp_ipc;
+			og.og_main_ipc = mldata->mld_ftp_ipc;
 			med.med_ipc = mldata->mld_ftp_ipc;
 
 			// Get Galileo ARexx port name via callbacks
-			og->og_gci->gc_GetPort(med.med_galileo);
+			og.og_gci->gc_GetPort(med.med_galileo);
 
 			// Scan configuration file
-			med.med_log_fp = setup_config(og);
+			med.med_log_fp = setup_config();
 
 			// Make sure the script file has been created
 			check_script_file();
@@ -3201,10 +3166,10 @@ void __asm __saveds galileo_ftp(void)
 					ipcbit = 1 << mldata->mld_ftp_ipc->command_port->mp_SigBit;
 
 					// Set up info for last login
-					ad_InitListLock(&og->og_listerlist, &og->og_listercount);
+					ad_InitListLock(&og.og_listerlist, &og.og_listercount);
 
 					// init addressbook memory semaphore
-					InitSemaphore(&og->og_SiteList_semaphore);
+					InitSemaphore(&og.og_SiteList_semaphore);
 
 					// Trap some internal Galileo commands
 					addtraps(med.med_galileo);
@@ -3212,10 +3177,10 @@ void __asm __saveds galileo_ftp(void)
 					add_lister_popup_extensions(med.med_galileo);
 
 					// Spawn address book
-					og->og_addrproc = launch(og, mldata->mld_ftp_ipc, &med.med_tasklist, "galileo_ftp_address_book", addressbookTr);
+					og.og_addrproc = launch(mldata->mld_ftp_ipc, &med.med_tasklist, "galileo_ftp_address_book", addressbookTr);
 
 					// Make sure address book has set up before continuing
-					IPC_Command(og->og_addrproc, IPC_HURRYUP, 0, 0, 0, REPLY_NO_PORT);
+					IPC_Command(og.og_addrproc, IPC_HURRYUP, 0, 0, 0, REPLY_NO_PORT);
 
 					// Event loop
 					while (med.med_status < STATE_DONE)
@@ -3238,7 +3203,7 @@ void __asm __saveds galileo_ftp(void)
 
 							if (sigbits & ipcbit)
 							{
-								if (!handle_ipc_msg(og, &med))
+								if (!handle_ipc_msg(&med))
 									sigbits &= ~ipcbit;
 							}
 
@@ -3248,7 +3213,7 @@ void __asm __saveds galileo_ftp(void)
 
 							if (sigbits & rexbit)
 							{
-								handle_rexx(og, &med, rexport);
+								handle_rexx(&med, rexport);
 								sigbits &= ~rexbit;
 							}
 
@@ -3259,7 +3224,7 @@ void __asm __saveds galileo_ftp(void)
 
 							if (sigbits & nfybit)
 							{
-								if (handle_notify(og, nfyport))
+								if (handle_notify(nfyport))
 									med.med_status = STATE_START_QUITTING;
 
 								sigbits &= ~nfybit;
@@ -3278,12 +3243,12 @@ void __asm __saveds galileo_ftp(void)
 							if (med.med_status == STATE_START_QUITTING_FORCE)
 							{
 								// Turn all requesters off for quick quit
-								og->og_noreq = TRUE;
+								og.og_noreq = TRUE;
 
-								ipc_list_signal(&og->og_listerlist, 1);
+								ipc_list_signal(&og.og_listerlist, 1);
 							}
 
-							// kprintf( "** ABORT %ld listers...\n", og->og_listercount );
+							// kprintf( "** ABORT %ld listers...\n", og.og_listercount );
 
 							IPC_ListQuit(&med.med_tasklist, mldata->mld_ftp_ipc, 0, FALSE);
 
@@ -3339,7 +3304,7 @@ void __asm __saveds galileo_ftp(void)
 			// so we do not re-start prog
 			// og_ftp_launched is initialised by mod_init and
 			// cleared when process quits mod_quit
-			og->og_ftp_launched = FALSE;
+			og.og_ftp_launched = FALSE;
 		}
 		CloseLibrary(ourbase);
 	}

@@ -62,7 +62,6 @@ For more information on Directory Opus for Windows please see:
 #define kprintf ;   /##/
 #endif
 
-#define SocketBase GETSOCKBASE(FindTask(0L))
 
 extern const char *months[];
 
@@ -120,7 +119,7 @@ static int ask_index(struct ftp_node *ftpnode, char *name, int size)
 	int result = 0;
 	char *bytes;
 
-	if (!ftpnode->fn_og->og_noreq && (lister = (Lister *)ftpnode->fn_handle))
+	if (!og.og_noreq && (lister = (Lister *)ftpnode->fn_handle))
 	{
 		if (size > 1024)
 		{
@@ -166,7 +165,7 @@ static void update_lister_comments(struct ftp_node *ftpnode, char *indexname)
 	lister = ftpnode->fn_handle;
 
 	// lock list.  lister is still busy from previous fn call
-	ftpnode->fn_og->og_gci->gc_LockFileList(lister, TRUE);
+	og.og_gci->gc_LockFileList(lister, TRUE);
 
 	// open file
 	if (cf = Open(indexname, MODE_OLDFILE))
@@ -199,13 +198,13 @@ static void update_lister_comments(struct ftp_node *ftpnode, char *indexname)
 
 			// update the lister
 			if (*fname && *comment)
-				ftpnode->fn_og->og_gci->gc_SetFileComment(lister, fname, comment);
+				og.og_gci->gc_SetFileComment(lister, fname, comment);
 		}
 		Close(cf);
 	}
 
 	// unlock list
-	ftpnode->fn_og->og_gci->gc_UnlockFileList(lister);
+	og.og_gci->gc_UnlockFileList(lister);
 
 	// refresh lister
 	ftplister_refresh(ftpnode, REFRESH_NODATE);
@@ -261,7 +260,7 @@ static void get_index(struct ftp_node *ftpnode)
 //
 //	Load directory into a lister, updates the path from the ftp_node structure
 //
-int lister_list(struct galileoftp_globals *ogp, struct ftp_node *ftpnode, BOOL redo_cache)
+int lister_list(struct ftp_node *ftpnode, BOOL redo_cache)
 {
 	int retval = 0, buffered = 0;
 	int lsresult;
@@ -280,7 +279,7 @@ int lister_list(struct galileoftp_globals *ogp, struct ftp_node *ftpnode, BOOL r
 	ftpnode->fn_ftp.fi_found_fbbs_size = 0;
 
 	// To avoid usless snapshot attempt when quitting
-	ftpnode->fn_og->og_gci->gc_ListerSet(ftpnode->fn_handle, tags);
+	og.og_gci->gc_ListerSet(ftpnode->fn_handle, tags);
 
 	// Passive mode required?
 	ftpnode->fn_ftp.fi_flags &= ~FTP_PASSIVE;
@@ -323,7 +322,6 @@ int lister_list(struct galileoftp_globals *ogp, struct ftp_node *ftpnode, BOOL r
 			if (ftpnode->fn_site.se_env->e_special_dir)
 				ui->ui_flags |= UI_SPECIAL_DIR;
 
-			ui->ui_og      = ogp;
 			ui->ui_ftpnode = ftpnode;
 			ui->ui_handle  = handle;
 			ui->ui_galileo    = ftpnode->fn_galileo;

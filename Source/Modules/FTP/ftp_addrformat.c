@@ -90,10 +90,10 @@ struct format_data
 /***********************************************************
  *
  *	Get current default lister format from Galileo
- *	copy and store it in og->og_galileo_format
+ *	copy and store it in og.og_galileo_format
  *
  */
-ListFormat *get_galileo_format(struct galileoftp_globals *og)
+ListFormat *get_galileo_format(void)
 {
 	struct pointer_packet pp;
 	ListFormat *galileo;
@@ -102,17 +102,17 @@ ListFormat *get_galileo_format(struct galileoftp_globals *og)
 	pp.pointer = 0;
 	pp.flags   = 0;
 
-	if (og->og_gci->gc_GetPointer(&pp))
+	if (og.og_gci->gc_GetPointer(&pp))
 	{
 		galileo=(ListFormat *)pp.pointer;
 
-		*(&og->og_galileo_format)=*galileo;
+		*(&og.og_galileo_format)=*galileo;
 
 		if (pp.flags & POINTERF_LOCKED)
-			og->og_gci->gc_FreePointer(&pp);
+			og.og_gci->gc_FreePointer(&pp);
 	}
 
-	return(&og->og_galileo_format);
+	return(&og.og_galileo_format);
 }
 
 
@@ -220,7 +220,7 @@ void __asm __saveds format_code(void)
 }
 
 
-static BOOL do_list_format(struct galileoftp_globals *og,struct Window * win,struct ftp_environment *env,struct formats *forms,IPCMessage *imsg)
+static BOOL do_list_format(struct Window * win,struct ftp_environment *env,struct formats *forms,IPCMessage *imsg)
 {
 	struct format_data *data;
 	IPCData *format_ipc = NULL;
@@ -228,10 +228,8 @@ static BOOL do_list_format(struct galileoftp_globals *og,struct Window * win,str
 
 	if (data = AllocVec(sizeof(struct format_data), MEMF_CLEAR))
 	{
-		data->fd_ogp = og;
-
 		data->fd_win=win;
-		data->fd_main_ipc=og->og_main_ipc;
+		data->fd_main_ipc=og.og_main_ipc;
 		*(&data->fd_f)=*forms;
 
 		data->fd_env=env;
@@ -267,15 +265,15 @@ static BOOL do_list_format(struct galileoftp_globals *og,struct Window * win,str
  *	either from ftp default env or galileo
  */
 
-static ListFormat *get_default_format(struct galileoftp_globals *og)
+static ListFormat *get_default_format(void)
 {
 	ListFormat *format;
 
 	// Have we set a default ftp format?
-	if (og->og_oc.oc_env.e_custom_format)
-		format=&og->og_oc.oc_env.e_listformat;
+	if (og.og_oc.oc_env.e_custom_format)
+		format=&og.og_oc.oc_env.e_listformat;
 	else
-		format=get_galileo_format(og);
+		format=get_galileo_format();
 
 	return(format);
 }
@@ -298,7 +296,7 @@ BOOL get_listformat(struct window_params *wp)
 	dg=wp->wp_dg;
 
 
-	forms.def_galileo_format=get_galileo_format(dg->dg_og);
+	forms.def_galileo_format=get_galileo_format();
 
 	// what env are we dealing with?
 
@@ -306,7 +304,7 @@ BOOL get_listformat(struct window_params *wp)
 	{
 		env=&dg->dg_oc.oc_env;
 		// for default config default format is always Galileo default
-		forms.def_ftp_format=get_galileo_format(dg->dg_og);
+		forms.def_ftp_format=get_galileo_format();
 	}
 	else
 	{
@@ -315,7 +313,7 @@ BOOL get_listformat(struct window_params *wp)
 		// for custom config default format can be Opus default or FTP default
 		// get the default format to use according to settings in default env
 
-		forms.def_ftp_format=get_default_format(dg->dg_og);
+		forms.def_ftp_format=get_default_format();
 	}
 
 	// if no custom format set the update private copy to use for editing
@@ -328,7 +326,7 @@ BOOL get_listformat(struct window_params *wp)
 	// Make window busy
 	SetWindowBusy(wp->wp_win);
 
-	result=do_list_format(dg->dg_og,wp->wp_win,env,&forms,NULL);
+	result=do_list_format(wp->wp_win,env,&forms,NULL);
 
 	return(result);
 }
@@ -354,13 +352,13 @@ BOOL configure_format(struct display_globals *dg,struct subproc_data *data,IPCMe
 	{
 		struct ftp_environment *env=&e->se_env_private;
 
-		forms.def_galileo_format=get_galileo_format(dg->dg_og);
+		forms.def_galileo_format=get_galileo_format();
 
 		forms.current=&e->se_listformat;
 
-		forms.def_ftp_format=get_default_format(dg->dg_og);
+		forms.def_ftp_format=get_default_format();
 
-		result=do_list_format(dg->dg_og,cm->cm_window,env,&forms,imsg);
+		result=do_list_format(cm->cm_window,env,&forms,imsg);
 	}
 	return(result);
 }

@@ -111,7 +111,7 @@ static int mod_init(IPCData *galileo_ipc, IPCData *function_ipc)
 	// No callback hooks, no play
 	if (!gci->gc_CheckDesktop)				// new 2/5/97
 	{
-		display_msg(&og, function_ipc, NULL, 0, GetString(locale,MSG_BADVER));
+		display_msg(function_ipc, NULL, 0, GetString(locale,MSG_BADVER));
 		return FALSE;
 	}
 
@@ -122,7 +122,6 @@ static int mod_init(IPCData *galileo_ipc, IPCData *function_ipc)
 	{
 		mldata->mld_screen        = og.og_screen;	// Galileo's screen (should be passed to support multiple Galileos)
 		mldata->mld_function_ipc  = function_ipc;	// Module IPC for new callback hooks
-		mldata->mld_og            = &og;		// Global info
 
 		// Launch a new task - returns TRUE if CreateNewProc() succeeds
 		if (IPC_Launch(
@@ -186,7 +185,7 @@ static int mod_connect(IPCData *function_ipc, char *args, int arglen)
 
 	if (fa = ParseArgs(CONNECT_TEMPLATE, args))
 	{
-		if (cm = get_blank_connectmsg(&og))
+		if (cm = get_blank_connectmsg())
 		{
 			cm->cm_handle = 0;
 

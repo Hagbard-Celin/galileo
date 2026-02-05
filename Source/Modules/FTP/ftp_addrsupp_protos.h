@@ -53,23 +53,23 @@ Att_List *import_sites(struct window_params *, short);
 
 struct ftp_config *read_options(struct window_params *, int);
 
-void read_build_addressbook(struct galileoftp_globals *,IPCData *);
+void read_build_addressbook(IPCData *);
 
-struct connect_msg *get_blank_connectmsg(struct galileoftp_globals *);
+struct connect_msg *get_blank_connectmsg(void);
 
-struct site_entry *get_blank_site_entry(struct galileoftp_globals *og);
+struct site_entry *get_blank_site_entry(void);
 
 void sort_list(Att_List *);
 
-int get_site_entry(struct galileoftp_globals *og,struct site_entry *e,IPCData *ipc);
+int get_site_entry(struct site_entry *e,IPCData *ipc);
 
-BOOL  get_global_options(struct galileoftp_globals *og);
+BOOL  get_global_options(void);
 
 void set_config_to_default(struct ftp_config *oc);
 
-void copy_site_entry(struct galileoftp_globals *og,struct site_entry *e,struct site_entry *old);
+void copy_site_entry(struct site_entry *e,struct site_entry *old);
 
-BPTR setup_config(struct galileoftp_globals *);
+BPTR setup_config(void);
 
 void cleanup_config(BPTR);
 

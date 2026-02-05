@@ -170,8 +170,10 @@ extern ULONG callerid;
 #endif
 
 
-#define SocketBase GETSOCKBASE(FindTask(0L))
 #define errno GETGLOBAL(FindTask(NULL),g_errno)
+
+
+ULONG __asm ftplister_initTr(register __a0 IPCData *ipc, register __a1 struct subproc_data *data);
 
 
 /********************************/
@@ -263,13 +265,13 @@ void lister_add(
 
 	fib.fib_Protection = prot;
 
-	if (entry = node->fn_og->og_gci->gc_CreateFileEntry((APTR)node->fn_handle, &fib, NULL))
+	if (entry = og.og_gci->gc_CreateFileEntry((APTR)node->fn_handle, &fib, NULL))
 	{
-		node->fn_og->og_gci->gc_AddFileEntry((APTR)node->fn_handle, entry, TRUE);
+		og.og_gci->gc_AddFileEntry((APTR)node->fn_handle, entry, TRUE);
 
 		tags[0].ti_Data = (ULONG)name;
 
-		node->fn_og->og_gci->gc_FileSet((APTR)node->fn_handle, entry, tags);
+		og.og_gci->gc_FileSet((APTR)node->fn_handle, entry, tags);
 	}
 
 	if (node->fn_site.se_env->e_index_enable)
@@ -302,7 +304,7 @@ void ftplister_refresh(struct ftp_node *node, int date)
 		return;
 	}
 
-	//node->fn_og->og_gci->gc_RefreshLister( node->fn_handle, date );
+	//og.og_gci->gc_RefreshLister( node->fn_handle, date );
 
 	rexx_lst_refresh(node->fn_galileo, node->fn_handle, HOOKREFRESH_DATE ? REFRESH_DATE : 0);
 }
@@ -389,7 +391,7 @@ unsigned long lister_options(struct ftp_node *node, int type)
 	// Use global default options or site-specific options?
 	if (type != OPTION_COPY || node->fn_site.se_env->e_copy_galileo_default)
 	{
-		options = ftpmod_options(node->fn_og, type);
+		options = ftpmod_options(type);
 	}
 
 	else
@@ -876,18 +878,18 @@ char *sockerr(void)
 //	Print the most recent line of reply text from the server
 //	 in a requester.
 //
-void lst_server_reply(struct galileoftp_globals *og, struct ftp_node *displaynode, struct ftp_node *errnode, int default_string)
+void lst_server_reply(struct ftp_node *displaynode, struct ftp_node *errnode, int default_string)
 {
 	char *str = 0;
 
 	//kprintf( "lst_server_reply()\n" );
 
 	// Valid?
-	if (!og || !displaynode || !errnode || !errnode->fn_ipc)
+	if (!displaynode || !errnode || !errnode->fn_ipc)
 		return;
 
 	// Requesters disabled?
-	if (og->og_noreq
+	if (og.og_noreq
 	    || (displaynode->fn_flags & LST_NOREQ)
 	    || (errnode->fn_flags & LST_NOREQ))
 		return;
@@ -899,7 +901,7 @@ void lst_server_reply(struct galileoftp_globals *og, struct ftp_node *displaynod
 			*str = 0;
 
 		// Include error number or message only?
-		str = errnode->fn_ftp.fi_iobuf + (og->og_oc.oc_log_debug ? 0 : 4);
+		str = errnode->fn_ftp.fi_iobuf + (og.og_oc.oc_log_debug ? 0 : 4);
 	}
 	else if	(default_string)
 	{
@@ -918,7 +920,7 @@ void lst_server_reply(struct galileoftp_globals *og, struct ftp_node *displaynod
 //
 //	Print the server error reply text
 //
-int lst_server_err(struct galileoftp_globals *og, struct ftp_node *displaynode, struct ftp_node *errnode, ULONG flags, int default_string)
+int lst_server_err(struct ftp_node *displaynode, struct ftp_node *errnode, ULONG flags, int default_string)
 {
 	char handle[13];
 	char *str = 0;
@@ -926,21 +928,21 @@ int lst_server_err(struct galileoftp_globals *og, struct ftp_node *displaynode, 
 	//kprintf( "lst_server_err()\n" );
 
 	// Valid?
-	if (!og || !displaynode || !errnode || !errnode->fn_ipc)
+	if (!displaynode || !errnode || !errnode->fn_ipc)
 		return 0;
 
 	// Trigger script
-	if (og->og_gci->gc_Script
-	    && ((errnode->fn_flags & LST_LOCAL) && og->og_oc.oc_env.e_script_error)
+	if (og.og_gci->gc_Script
+	    && ((errnode->fn_flags & LST_LOCAL) && og.og_oc.oc_env.e_script_error)
 	    || errnode->fn_site.se_env->e_script_error)
 	{
 		sprintf(handle, "%lu", errnode->fn_handle);
 
-		og->og_gci->gc_Script("FTP error", handle);
+		og.og_gci->gc_Script("FTP error", handle);
 	}
 
 	// Requesters disabled due to shutdown?
-	if (og->og_noreq)
+	if (og.og_noreq)
 		return flags & ERRORREQ_RETRYABORT ? 0 : 1;
 
 	// Requesters disabled at users request?
@@ -960,7 +962,7 @@ int lst_server_err(struct galileoftp_globals *og, struct ftp_node *displaynode, 
 			*str = 0;
 
 		// Include error number or message only?
-		str = errnode->fn_ftp.fi_serverr + (og->og_oc.oc_log_debug ? 0 : 4);
+		str = errnode->fn_ftp.fi_serverr + (og.og_oc.oc_log_debug ? 0 : 4);
 	}
 	else if	(default_string)
 		str = GetString(locale,default_string);
@@ -984,27 +986,27 @@ int lst_server_err(struct galileoftp_globals *og, struct ftp_node *displaynode, 
 //	Print the most recent line of reply text from the server in a requester.
 //	Optionally with buttons: "Try Again | Skip | Abort"
 //
-int lst_dos_err(struct galileoftp_globals *og, struct ftp_node *ftpnode, ULONG flags, int err)
+int lst_dos_err(struct ftp_node *ftpnode, ULONG flags, int err)
 {
 	char handle[13];
 	char buf[80];
 	char *msg = GetString(locale,MSG_FTP_DOS_ERROR);
-	int result = 0;
+	int result;
 
 	// Valid?
-	if (!og || !ftpnode)
+	if (!ftpnode)
 		return 0;
 
 	// Trigger script
-	if (og->og_gci->gc_Script  && ((ftpnode->fn_flags & LST_LOCAL) && og->og_oc.oc_env.e_script_error)
+	if (og.og_gci->gc_Script  && ((ftpnode->fn_flags & LST_LOCAL) && og.og_oc.oc_env.e_script_error)
 	    || ftpnode->fn_site.se_env->e_script_error)
 	{
 		sprintf(handle, "%lu", ftpnode->fn_handle);
 
-		og->og_gci->gc_Script("FTP error", handle);
+		og.og_gci->gc_Script("FTP error", handle);
 	}
 
-	if (!og->og_noreq)
+	if (!og.og_noreq)
 	{
 		if (flags & ERRORREQ_RETRYABORT)
 			flags = DSPMSG_RETRYABORT;
@@ -1014,7 +1016,7 @@ int lst_dos_err(struct galileoftp_globals *og, struct ftp_node *ftpnode, ULONG f
 		if (!Fault(err, msg, buf, 79))
 			stccpy(buf, msg, 80);
 
-		result = display_msg(og, ftpnode->fn_ipc, ((Lister *)ftpnode->fn_handle)->window, flags, buf);
+		result = display_msg(ftpnode->fn_ipc, ((Lister *)ftpnode->fn_handle)->window, flags, buf);
 	}
 	else
 		result = 2;
@@ -1234,11 +1236,11 @@ static int lister_cdup(struct ftp_node *ftpnode)
 //
 //	Remove a lister from the global list and free its resources.
 //
-void lister_remove_node(struct galileoftp_globals *og, struct ftp_node *ftpnode)
+void lister_remove_node(struct ftp_node *ftpnode)
 {
 	if (ftpnode)
 	{
-		ListLockRemove(&og->og_listerlist, (struct Node *)ftpnode, &og->og_listercount);
+		ListLockRemove(&og.og_listerlist, (struct Node *)ftpnode, &og.og_listercount);
 		FreeVec(ftpnode);
 	}
 }
@@ -1248,7 +1250,7 @@ void lister_remove_node(struct galileoftp_globals *og, struct ftp_node *ftpnode)
 //
 //	Cleans up what ftplister_init does
 //
-static void ftplister_cleanup(struct galileoftp_globals *ogp, IPCData *ipc)
+static void ftplister_cleanup(IPCData *ipc)
 {
 	struct globals *g = ipc->userdata;
 
@@ -1269,22 +1271,19 @@ static void ftplister_cleanup(struct galileoftp_globals *ogp, IPCData *ipc)
  *	Init code for lister process
  */
 
-static ULONG __asm ftplister_init(register __a0 IPCData *ipc, register __a1 struct subproc_data *data)
+ULONG __asm __saveds ftplister_init(register __a0 IPCData *ipc, register __a1 struct subproc_data *data)
 {
-	register struct galileoftp_globals *ogp;
 	ULONG retval  = 0;
 	register struct globals *g;
 
 	if (data)
 	{
-		ogp = data->spd_ogp;
-
 		data->spd_ipc = ipc;	/* 'ipc' points to this task's tc_UserData field */
 
 		if (g = ipc->userdata = AllocVec(sizeof(struct globals), MEMF_CLEAR))
 		{
-			if (g->g_socketbase = OpenLibrary(ogp->og_socketlibname[ogp->og_socketlib],
-							  ogp->og_socketlibver[ogp->og_socketlib]))
+			if (g->g_socketbase = OpenLibrary(og.og_socketlibname[og.og_socketlib],
+							  og.og_socketlibver[og.og_socketlib]))
 			{
 				if (setup_sockets(MAX_AS225_SOCKETS, &g->g_errno, g->g_socketbase))
 					retval = 1;
@@ -1295,7 +1294,7 @@ static ULONG __asm ftplister_init(register __a0 IPCData *ipc, register __a1 stru
 			g->g_master_ipc = data->spd_owner_ipc;
 		}
 		if (!retval)
-			ftplister_cleanup(ogp, ipc);
+			ftplister_cleanup(ipc);
 	}
 
 
@@ -1317,7 +1316,7 @@ static void lister_makedir(struct ftp_node *ftpnode, IPCMessage *msg)
 	struct ftp_msg *fm;
 	int reply;
 	char namebuf[FILENAMELEN+1] = "";
-	char *name = 0;
+	char *name;
 	struct connect_msg *cm;
 	int rexx_result = 0;
 
@@ -1327,7 +1326,7 @@ static void lister_makedir(struct ftp_node *ftpnode, IPCMessage *msg)
 
 	fm = msg->data_free;
 
-	if (!(name = fm->fm_names) && !ftpnode->fn_og->og_noreq)
+	if (!(name = fm->fm_names) && !og.og_noreq)
 	{
 		if (lister_request(
 			    ftpnode,
@@ -1387,20 +1386,20 @@ static void lister_makedir(struct ftp_node *ftpnode, IPCMessage *msg)
 				if (ftpnode->fn_ftp.fi_reply < 500 && ftpnode->fn_ftp.fi_reply != 421)
 				{
 					// Can TIMEOUT
-					lister_list(ftpnode->fn_og, ftpnode, FALSE);
+					lister_list(ftpnode, FALSE);
 					rexx_result = 1;
 				}
 			}
 			else if	(msg->flags & MKDIR_NEW)
 			{
-				if (cm = get_blank_connectmsg(ftpnode->fn_og))
+				if (cm = get_blank_connectmsg())
 				{
-					stccpy(cm->cm_galileo, ftpnode->fn_og->og_galileoname, PORTNAMELEN + 1);
+					stccpy(cm->cm_galileo, og.og_galileoname, PORTNAMELEN + 1);
 
-					copy_site_entry(ftpnode->fn_og, &cm->cm_site, &ftpnode->fn_site);
+					copy_site_entry(&cm->cm_site, &ftpnode->fn_site);
 					stccpy(cm->cm_site.se_path, name, PATHLEN + 1);
 
-					IPC_Command(ftpnode->fn_og->og_main_ipc, IPC_CONNECT, 0, cm, 0, REPLY_NO_PORT);
+					IPC_Command(og.og_main_ipc, IPC_CONNECT, 0, cm, 0, REPLY_NO_PORT);
 					rexx_result = 1;
 
 					FreeVec(cm);
@@ -1410,7 +1409,7 @@ static void lister_makedir(struct ftp_node *ftpnode, IPCMessage *msg)
 				rexx_result = 1;
 		}
 		else
-			lst_server_err(ftpnode->fn_og, ftpnode, ftpnode, 0, MSG_FTP_MAKEDIR_ERROR);
+			lst_server_err(ftpnode, ftpnode, 0, MSG_FTP_MAKEDIR_ERROR);
 
 		rexx_lst_unlock(ftpnode->fn_galileo, ftpnode->fn_handle);
 	}
@@ -1548,7 +1547,7 @@ static void lister_rename(struct ftp_node *ftpnode, IPCMessage *msg)
 						ftplister_refresh(ftpnode, 0);
 					}
 					else
-						lst_server_reply(ftpnode->fn_og, ftpnode, ftpnode, MSG_FTP_RENAME_ERROR);
+						lst_server_reply(ftpnode, ftpnode, MSG_FTP_RENAME_ERROR);
 
 					if (reply == 421)
 						abort = TRUE;
@@ -1641,7 +1640,6 @@ static void lister_delete(struct ftp_node *ftpnode, IPCMessage *msg)
 
 		// Create endpoint
 		if (source = create_endpoint_tags(
-			    ftpnode->fn_og,
 			    EP_TYPE,	    ENDPOINT_FTP,
 			    EP_FTPNODE,	    ftpnode,
 			    TAG_DONE))
@@ -1703,7 +1701,6 @@ static void lister_delete(struct ftp_node *ftpnode, IPCMessage *msg)
 					PROGRESS_BAR_ON);			// Bar
 
 				// Set up delete hook data
-				hc.hc_og = ftpnode->fn_og;
 				hc.hc_source = source;
 				hc.hc_pre = hook_delete_pre;
 				hc.hc_galileo = ftpnode->fn_galileo;
@@ -1803,7 +1800,7 @@ static void lister_reread(struct ftp_node *ftpnode, IPCMessage *msg)
 {
 	int ok;
 
-	ok = lister_list(ftpnode->fn_og, ftpnode, TRUE);
+	ok = lister_list(ftpnode, TRUE);
 
 	if (msg->data)
 		reply_rexx((struct RexxMsg *)msg->data, ok, 0);
@@ -1829,10 +1826,10 @@ static void lister_parent(struct ftp_node *ftpnode, IPCMessage *msg)
 	if (reply / 100 == COMPLETE)
 	{
 		// Can TIMEOUT
-		rexx_result = lister_list(ftpnode->fn_og, ftpnode, FALSE);
+		rexx_result = lister_list(ftpnode, FALSE);
 	}
 	else if	(reply != 421)
-		lst_server_reply(ftpnode->fn_og, ftpnode, ftpnode, MSG_FTP_PATH_NOT_FOUND);
+		lst_server_reply(ftpnode, ftpnode, MSG_FTP_PATH_NOT_FOUND);
 
 	if (msg->data)
 		reply_rexx((struct RexxMsg *)msg->data, rexx_result, 0);
@@ -1863,10 +1860,10 @@ static void lister_root(struct ftp_node *ftpnode, IPCMessage *msg)
 	if (reply / 100 == COMPLETE)
 	{
 		// Can TIMEOUT
-		rexx_result = lister_list(ftpnode->fn_og, ftpnode, FALSE);
+		rexx_result = lister_list(ftpnode, FALSE);
 	}
 	else if	(reply != 421)
-		lst_server_reply(ftpnode->fn_og, ftpnode, ftpnode, MSG_FTP_PATH_NOT_FOUND);
+		lst_server_reply(ftpnode, ftpnode, MSG_FTP_PATH_NOT_FOUND);
 
 	if (msg->data)
 		reply_rexx((struct RexxMsg *)msg->data, rexx_result, 0);
@@ -1914,11 +1911,11 @@ static void lister_path(struct ftp_node *ftpnode, IPCMessage *msg)
 		if (reply / 100 == COMPLETE)
 		{
 			// Can TIMEOUT
-			success = lister_list(ftpnode->fn_og, ftpnode, rescan);
+			success = lister_list(ftpnode, rescan);
 		}
 		else if	(reply != 421)
 		{
-			lst_server_reply(ftpnode->fn_og, ftpnode, ftpnode, MSG_FTP_PATH_NOT_FOUND);
+			lst_server_reply(ftpnode, ftpnode, MSG_FTP_PATH_NOT_FOUND);
 
 			rexx_lst_set_path(
 				ftpnode->fn_galileo,
@@ -1959,7 +1956,7 @@ static void lister_cache_path(struct ftp_node *ftpnode, IPCMessage *msg)
 
 			else if	(reply != 421 && reply < 600)
 			{
-				lst_server_reply(ftpnode->fn_og, ftpnode, ftpnode, MSG_FTP_PATH_NOT_FOUND);
+				lst_server_reply(ftpnode, ftpnode, MSG_FTP_PATH_NOT_FOUND);
 
 				rexx_lst_set_path(
 					ftpnode->fn_galileo,
@@ -2042,7 +2039,7 @@ static int lister_cmd(struct ftp_node *ftpnode, IPCMessage *msg)
 
 			// Normal response?
 			else if	(!(fm->fm_flags & CMD_OPT_QUIET) && reply < 600 && reply != 421)
-				lst_server_reply(ftpnode->fn_og, ftpnode, ftpnode, 0);
+				lst_server_reply(ftpnode, ftpnode, 0);
 
 			lister_prog_clear(ftpnode);
 
@@ -2253,7 +2250,7 @@ static void lister_edit(struct ftp_node *ftpnode, IPCMessage *msg)
 			}
 		}
 		else
-			lst_server_reply(ftpnode->fn_og, ftpnode, ftpnode, MSG_FTP_RENAME_ERROR);
+			lst_server_reply(ftpnode, ftpnode, MSG_FTP_RENAME_ERROR);
 	}
 	else if	(!strcmp(em->em_field, "protect"))
 	{
@@ -2299,10 +2296,10 @@ static void lister_edit(struct ftp_node *ftpnode, IPCMessage *msg)
 			}
 		}
 		else
-			lst_server_reply(ftpnode->fn_og, ftpnode, ftpnode, MSG_FTP_CHMOD_ERROR);
+			lst_server_reply(ftpnode, ftpnode, MSG_FTP_CHMOD_ERROR);
 	}
 	else
-		DisplayBeep(ftpnode->fn_og->og_screen);
+		DisplayBeep(og.og_screen);
 
 	if (em->em_rxmsg)
 		reply_rexx(em->em_rxmsg, rexx_result, 0);
@@ -2354,7 +2351,6 @@ static void lister_findfile(struct ftp_node *ftpnode, IPCMessage *msg)
 
 		// Create endpoint
 		if (source = create_endpoint_tags(
-			    ftpnode->fn_og,
 			    EP_TYPE,	    ENDPOINT_FTP,
 			    EP_FTPNODE,	    ftpnode,
 			    TAG_DONE))
@@ -2394,7 +2390,6 @@ static void lister_findfile(struct ftp_node *ftpnode, IPCMessage *msg)
 					PROGRESS_BAR_ON);			// Bar
 
 				// Set up getsizes hook data
-				hc.hc_og = ftpnode->fn_og;
 				hc.hc_source = source;
 				hc.hc_pre = 0;
 				hc.hc_galileo = ftpnode->fn_galileo;
@@ -2537,7 +2532,6 @@ static void lister_getsizes(struct ftp_node *ftpnode, IPCMessage *msg)
 
 		// Create endpoint
 		if (source = create_endpoint_tags(
-			    ftpnode->fn_og,
 			    EP_TYPE,	    ENDPOINT_FTP,
 			    EP_FTPNODE,	    ftpnode,
 			    TAG_DONE))
@@ -2557,7 +2551,6 @@ static void lister_getsizes(struct ftp_node *ftpnode, IPCMessage *msg)
 				PROGRESS_BAR_ON);			// Bar
 
 			// Set up getsizes hook data
-			hc.hc_og         = ftpnode->fn_og;
 			hc.hc_source     = source;
 			hc.hc_pre        = 0;
 			hc.hc_galileo       = ftpnode->fn_galileo;
@@ -2673,10 +2666,10 @@ static void lister_ftpadd(struct ftp_node *ftpnode, IPCMessage *msg)
 
 	if (sm = AllocVec(sizeof(*sm), MEMF_CLEAR))
 	{
-		copy_site_entry(ftpnode->fn_og,&sm->cm_site,&ftpnode->fn_site);
+		copy_site_entry(&sm->cm_site,&ftpnode->fn_site);
 
-		if (IPC_Command(ftpnode->fn_og->og_addrproc, IPC_ADD, 1, sm, 0, REPLY_NO_PORT))
-			copy_site_entry(ftpnode->fn_og,&ftpnode->fn_site,&sm->cm_site);
+		if (IPC_Command(og.og_addrproc, IPC_ADD, 1, sm, 0, REPLY_NO_PORT))
+			copy_site_entry(&ftpnode->fn_site,&sm->cm_site);
 
 		FreeVec(sm);
 	}
@@ -2705,13 +2698,13 @@ static void ftplister_configure(struct ftp_node *ftpnode, IPCMessage *msg)
 		ftpnode->fn_site.se_preserve_format=TRUE;
 
 		// Copy entire site details into message
-		copy_site_entry(ftpnode->fn_og,&sm->cm_site,&ftpnode->fn_site);
+		copy_site_entry(&sm->cm_site,&ftpnode->fn_site);
 
 		// Tell Galileo lister there'll be a lister format editor
 		IPC_Command(((Lister *)ftpnode->fn_handle)->ipc, LISTER_CONFIGURE, 1, 0, 0, 0);
 
-		if (retval = IPC_Command(ftpnode->fn_og->og_addrproc, IPC_CONFIGURE, 1, sm, 0, REPLY_NO_PORT))
-			copy_site_entry(ftpnode->fn_og,&ftpnode->fn_site,&sm->cm_site);
+		if (retval = IPC_Command(og.og_addrproc, IPC_CONFIGURE, 1, sm, 0, REPLY_NO_PORT))
+			copy_site_entry(&ftpnode->fn_site,&sm->cm_site);
 
 		// Send new format to Galileo lister - will de-busy the lister too
 		ftplister_write_listformat(ftpnode, retval ? 1 : 0);
@@ -2805,11 +2798,11 @@ static void lister_ftpoptions(struct ftp_node *ftpnode, IPCMessage *msg)
 		ftpnode->fn_site.se_preserve_format=TRUE;
 
 		// Copy entire site details into message
-		copy_site_entry(ftpnode->fn_og,&sm->cm_site,&ftpnode->fn_site);
+		copy_site_entry(&sm->cm_site,&ftpnode->fn_site);
 
-		if (IPC_Command(ftpnode->fn_og->og_addrproc, IPC_OPTIONS, 1, sm, 0, REPLY_NO_PORT))
+		if (IPC_Command(og.og_addrproc, IPC_OPTIONS, 1, sm, 0, REPLY_NO_PORT))
 		{
-			copy_site_entry(ftpnode->fn_og,&ftpnode->fn_site,&sm->cm_site);
+			copy_site_entry(&ftpnode->fn_site,&sm->cm_site);
 			ftplister_write_listformat(ftpnode, 1);
 		}
 
@@ -2889,7 +2882,6 @@ static void lister_protect(struct ftp_node *ftpnode, IPCMessage *msg)
 
 		// Create endpoint
 		if (source = create_endpoint_tags(
-			    ftpnode->fn_og,
 			    EP_TYPE,	    ENDPOINT_FTP,
 			    EP_FTPNODE,	    ftpnode,
 			    TAG_DONE))
@@ -2958,7 +2950,6 @@ static void lister_protect(struct ftp_node *ftpnode, IPCMessage *msg)
 					PROGRESS_BAR_OFF);			// Bar
 
 				// Set up protect hook data
-				hc.hc_og = ftpnode->fn_og;
 				hc.hc_source = source;
 				hc.hc_pre = hook_protect_pre;
 				hc.hc_galileo = ftpnode->fn_galileo;
@@ -2992,7 +2983,7 @@ static void lister_protect(struct ftp_node *ftpnode, IPCMessage *msg)
 							info.pm_window = ((Lister *)ftpnode->fn_handle)->window;
 							info.pm_name = ei.ei_name;
 							info.pm_current = ei.ei_unixprot;
-							confirm_entry = function_change_get_protect(ftpnode->fn_og, &info);
+							confirm_entry = function_change_get_protect(&info);
 						}
 
 						// All?
@@ -3178,7 +3169,7 @@ static struct lister_msg_info lister_msg_table[] =
 //	Returns 1 if msg->command is set to meaningful result
 //	Returns 0 if msg->command has not been set
 //
-static int lister_msg_switch(struct galileoftp_globals *og, struct ftp_node *ftpnode, IPCMessage *msg)
+static int lister_msg_switch(struct ftp_node *ftpnode, IPCMessage *msg)
 {
 	struct lister_msg_info *lmi;
 	int result = 0;
@@ -3235,7 +3226,7 @@ static int lister_msg_switch(struct galileoftp_globals *og, struct ftp_node *ftp
 
 /********************************/
 
-static int send_noop(struct galileoftp_globals *og, struct ftp_node *ftpnode)
+static int send_noop(struct ftp_node *ftpnode)
 {
 	int reply;
 	int result = FALSE;
@@ -3292,7 +3283,7 @@ static int send_noop(struct galileoftp_globals *og, struct ftp_node *ftpnode)
 
 #define	NOOP_TIME 30
 
-static void lister_msg_loop(struct galileoftp_globals *og, struct msg_loop_data *mld)
+static void lister_msg_loop(struct msg_loop_data *mld)
 {
 	IPCMessage *imsg;
 	ULONG sigbits;
@@ -3301,7 +3292,7 @@ static void lister_msg_loop(struct galileoftp_globals *og, struct msg_loop_data 
 
 	if (!(timer = AllocTimer(UNIT_VBLANK, 0)))
 	{
-		DisplayBeep(og->og_screen);
+		DisplayBeep(og.og_screen);
 		return;
 	}
 
@@ -3346,7 +3337,7 @@ static void lister_msg_loop(struct galileoftp_globals *og, struct msg_loop_data 
 						break;
 
 					case IPC_CONNECT:
-						mld->mld_node = lister_new_connection(og, mld, imsg);
+						mld->mld_node = lister_new_connection(mld, imsg);
 
 						// Don't reply here - called function will handle it
 						imsg = 0;
@@ -3361,7 +3352,7 @@ static void lister_msg_loop(struct galileoftp_globals *og, struct msg_loop_data 
 
 					default:
 						// Set result if not set already
-						if (!lister_msg_switch(og, mld->mld_node, imsg))
+						if (!lister_msg_switch(mld->mld_node, imsg))
 							imsg->command = FALSE;
 						break;
 				}
@@ -3387,7 +3378,7 @@ static void lister_msg_loop(struct galileoftp_globals *og, struct msg_loop_data 
 			else if	(mld->mld_node->fn_site.se_env->e_noops)
 			{
 				// if this returns TRUE then error of some sort. shut down!
-				mld->mld_done = send_noop(og, mld->mld_node);
+				mld->mld_done = send_noop(mld->mld_node);
 			}
 
 			StartTimer(timer, NOOP_TIME, 0);
@@ -3396,7 +3387,7 @@ static void lister_msg_loop(struct galileoftp_globals *og, struct msg_loop_data 
 
 	// If connection was lost, try to reconnect
 	if (*mld->mld_ftpreply == 421)
-		lister_reconnect(og, mld);
+		lister_reconnect(mld);
 
 	if (timer)
 		FreeTimer(timer);
@@ -3413,26 +3404,24 @@ static void lister_msg_loop(struct galileoftp_globals *og, struct msg_loop_data 
 //
 void __asm __saveds lister(void)
 {
-	struct galileoftp_globals *og;
 	int zero = 0;
 	struct subproc_data *data;	// This is passed from the creator process
 	struct msg_loop_data mld;
 
 	// This returns true if 'data' is filled in correctly
-	if (IPC_ProcStartup((ULONG *)&data, ftplister_init))
+	if (IPC_ProcStartup((ULONG *)&data, ftplister_initTr))
 	{
-		og               = data->spd_ogp;
 		mld.mld_ipc      = data->spd_ipc;
 		mld.mld_node     = NULL;
 		mld.mld_ftpreply = &zero;
 		mld.mld_quitmsg  = NULL;
 		mld.mld_done     = FALSE;
 
-		lister_msg_loop(og, &mld);
+		lister_msg_loop(&mld);
 
 		// We have a lister here (but it may be closed)
 		if (mld.mld_node)
-			lister_disconnect(og, &mld);
+			lister_disconnect(&mld);
 
 		// Clean up quit message
 		if (mld.mld_quitmsg)
@@ -3453,7 +3442,7 @@ void __asm __saveds lister(void)
 
 		IPC_Flush(data->spd_ipc);
 		IPC_Goodbye(data->spd_ipc, data->spd_owner_ipc, 0);
-		ftplister_cleanup(og, data->spd_ipc);
+		ftplister_cleanup(data->spd_ipc);
 		IPC_Free(data->spd_ipc);
 		FreeVec(data);
 	}
@@ -3697,7 +3686,7 @@ int lister_request(struct ftp_node *node, Tag tag, ...)
 	IPCData *ipc;
 
 	// Requesters suppressed so we can shut down?  Same as pressing 'Cancel' button...
-	if (node->fn_og->og_noreq)
+	if (og.og_noreq)
 		return 0;
 
 	// Requesters suppressed by the user?  Same as pressing the default (leftmost) button...
@@ -3714,7 +3703,6 @@ int lister_request(struct ftp_node *node, Tag tag, ...)
 	}
 	else
 		return ftpmod_request(
-			node->fn_og,
 			ipc,
 			AR_Window,	((Lister *)node->fn_handle)->window,
 			TAG_MORE,	&tag);
@@ -3759,7 +3747,7 @@ int lister_long_message(struct ftp_node *ftpnode, Att_List *list, ULONG flags)
 		     node = (Att_Node *)node->node.ln_Pred)
 		{
 			if (strlen(node->node.ln_Name) == 0
-			    || (ftpnode->fn_og->og_oc.oc_log_debug
+			    || (og.og_oc.oc_log_debug
 				&& strlen(node->node.ln_Name) == 4
 				&& isdigit(node->node.ln_Name[0])
 				&& isdigit(node->node.ln_Name[1])

@@ -57,7 +57,7 @@ void __stdargs logprintf(char *fmt, ...);
 void             lister_add            (struct ftp_node *, char *name, int size, int type, ULONG seconds, LONG prot, char *comment);
 void             ftplister_refresh     (struct ftp_node *, int date);
 
-struct ftp_node *find_ftpnode          (struct galileoftp_globals *, APTR handle);
+struct ftp_node *find_ftpnode          (APTR handle);
 
 int              lister_synch_path     (struct ftp_info *, char *result);
 BOOL             entry_info_from_lister(struct ftp_node *, char *name, struct entry_info *, ULONG flags);
@@ -65,26 +65,26 @@ int              entry_info_from_remote(struct ftp_node *, char *name, struct en
 ULONG            get_file_mdtm         (struct ftp_node *, char *name);
 int              get_file_size         (struct ftp_node *, char *name);
 
-int              lister_list           (struct galileoftp_globals *, struct ftp_node *, BOOL redo_cache);
+int              lister_list           (struct ftp_node *, BOOL redo_cache);
 void             lister_doubleclick    (struct ftp_node *, IPCMessage *);
 void             lister_xfer           (struct ftp_node *, IPCMessage *);
 void             lister_getput         (struct ftp_node *srcnode, IPCMessage *);
 
-struct ftp_node *lister_new_connection (struct galileoftp_globals *, struct msg_loop_data *, IPCMessage *);
-void             lister_disconnect     (struct galileoftp_globals *, struct msg_loop_data *);
-void             lister_reconnect      (struct galileoftp_globals *, struct msg_loop_data *);
+struct ftp_node *lister_new_connection (struct msg_loop_data *, IPCMessage *);
+void             lister_disconnect     (struct msg_loop_data *);
+void             lister_reconnect      (struct msg_loop_data *);
 
 unsigned long    lister_options        (struct ftp_node *, int type);
-void             lister_remove_node    (struct galileoftp_globals *, struct ftp_node *);
+void             lister_remove_node    (struct ftp_node *);
 void             lister_traptemp       (struct ftp_node *, IPCMessage *);
 
 int              lister_cwd            (struct ftp_node *, char *path, ULONG flags);
 
 void             lst_addabort          (struct ftp_node *, ULONG signals, struct Task *task);
 void             lst_remabort          (struct ftp_node *);
-int              lst_dos_err           (struct galileoftp_globals *, struct ftp_node *, ULONG flags, int err);
-int              lst_server_err        (struct galileoftp_globals *, struct ftp_node *displaynode, struct ftp_node *errnode, ULONG flags, int default_string);
-void             lst_server_reply      (struct galileoftp_globals *, struct ftp_node *displaynode, struct ftp_node *errnode, int default_string);
+int              lst_dos_err           (struct ftp_node *, ULONG flags, int err);
+int              lst_server_err        (struct ftp_node *displaynode, struct ftp_node *errnode, ULONG flags, int default_string);
+void             lst_server_reply      (struct ftp_node *displaynode, struct ftp_node *errnode, int default_string);
 int              parent_buffer         (struct ftp_info *, char *buf, int get_current);
 int              pathcmp               (ULONG ftpflags, char *path1, char *path2);
 int              casematchpattern      (ULONG ftpflags, char *pat, char *str);
@@ -142,7 +142,6 @@ enum
 struct ftp_node
 {
 	struct Node		  fn_node;			// For linking
-	struct galileoftp_globals *fn_og;			// Points back to global info
 	APTR			  fn_handle;			// Lister handle
 	IPCData			  *		  fn_ipc;	// IPC of this lister process
 	struct ftp_info		  fn_ftp;			// Socket & site details + FTP reply code
@@ -251,7 +250,6 @@ struct msg_loop_data
 //
 struct update_info
 {
-	struct galileoftp_globals *ui_og;
 	struct SignalSemaphore	  ui_sem;
 	ULONG			  ui_flags;		// See below...
 	struct ftp_node		  *ui_ftpnode;

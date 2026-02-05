@@ -50,8 +50,6 @@ struct modlaunch_data
 	struct Screen		  *mld_screen;		// Screen we're on
 	IPCData			  *mld_galileo_ipc;	// The main Galileo process's ipc
 	IPCData			  *mld_function_ipc;	// galileo_function's ipc, needed for callback hooks
-
-	struct galileoftp_globals *mld_og;		// Points back to global info
 };
 
 #endif

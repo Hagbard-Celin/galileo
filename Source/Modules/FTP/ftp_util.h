@@ -42,7 +42,7 @@ For more information on Directory Opus for Windows please see:
 #define DSPMSG_RETRYABORT	(1<<0)
 
 // Display a string, with optional Retry/Abort buttons
-long display_msg(struct galileoftp_globals *, IPCData *, struct Window *, ULONG flags, char *);
+long display_msg(IPCData *, struct Window *, ULONG flags, char *);
 
 // Get the name of the logged-in user on the Amiga
 char *getlogname(char *);
@@ -112,7 +112,7 @@ int split_url(const char *url, char *user, char *pass, char *host, long *port, c
 BOOL CreateFunctionFile (char *name, short type, char *instruction, char *icon);
 
 // Generic requester
-int ftpmod_request(struct galileoftp_globals *og, IPCData *ipc, Tag tag, ...);
+int ftpmod_request(IPCData *ipc, Tag tag, ...);
 
 // Tags for ftpmod_request
 #define FR_IPC		(TAG_USER + 1000)	// Mainly to override lister IPC
@@ -121,7 +121,7 @@ int ftpmod_request(struct galileoftp_globals *og, IPCData *ipc, Tag tag, ...);
 #define FR_ButtonNum	(TAG_USER + 1003)	// As above for button text
 
 // Check certain Galileo options
-unsigned long ftpmod_options(struct galileoftp_globals *, int type);
+unsigned long ftpmod_options(int type);
 
 // Open a temporary file
 BPTR open_temp_file(char *filename, IPCData *ipc);

@@ -71,7 +71,7 @@ typedef struct _endpoint
 
 } endpoint;
 
-endpoint *create_endpoint_tags(struct galileoftp_globals *, Tag, ...);
+endpoint *create_endpoint_tags(Tag, ...);
 void      delete_endpoint(endpoint *);
 
 void free_entry_list(struct rec_entry_list *);
@@ -149,7 +149,6 @@ enum
 //
 struct hook_rec_data
 {
-	struct galileoftp_globals *hc_og;
 	endpoint		  *hc_source;
 	endpoint		  *hc_dest;
 	int			  (*hc_pre)(struct hook_rec_data *,char *dirname,struct rec_entry_list *dest_list, struct entry_info *);

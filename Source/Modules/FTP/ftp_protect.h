@@ -52,7 +52,7 @@ struct protectgui_msg
 
 
 // Get protection
-int function_change_get_protect(struct galileoftp_globals *og,struct protectgui_msg *pm);
+int function_change_get_protect(struct protectgui_msg *pm);
 
 
 #endif

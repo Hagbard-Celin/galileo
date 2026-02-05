@@ -346,7 +346,6 @@ int ftp_syst(struct ftp_info *info)
 
 static int _ftp(struct ftp_info *info, unsigned long flags, const char *cmd)
 {
-	struct galileoftp_globals *ogp = info->fi_og;
 	int len;
 
 
@@ -360,7 +359,7 @@ static int _ftp(struct ftp_info *info, unsigned long flags, const char *cmd)
 
 	// Log outgoing commands if debugging is turned on
 	// NOOPs are never logged, passwords are hidden
-	if (!info->fi_doing_noop && info->fi_og->og_oc.oc_log_debug)
+	if (!info->fi_doing_noop && og.og_oc.oc_log_debug)
 		logprintf("--> %s\n", strnicmp(cmd,"PASS ",5) ? cmd : "PASS .....");
 
 
@@ -461,7 +460,6 @@ void ftp_abor(struct ftp_info *info)
 {
 	struct Library *SocketBase = ((struct globals *)((IPCData*)(info->fi_task->tc_UserData))->userdata)->g_socketbase;
 	unsigned char iac_ip[] = { IAC, IP, IAC, DM, 'A', 'B', 'O', 'R', '\r', '\n' };
-	struct galileoftp_globals *ogp = info->fi_og;
 
 	err("--> IAC,IP");
 	send(info->fi_cs, iac_ip, 2, 0, SocketBase);
@@ -471,7 +469,7 @@ void ftp_abor(struct ftp_info *info)
 
 	err("--> DM");
 
-	if (info->fi_og->og_oc.oc_log_debug)
+	if (og.og_oc.oc_log_debug)
 		logprintf("--> ABOR\n");
 
 	send(info->fi_cs, iac_ip+3, 7, 0, SocketBase);
@@ -483,7 +481,7 @@ void ftp_abor(struct ftp_info *info)
 //	Open data connection
 //	Returns -1 upon failure; a socket descriptor upon success.
 //
-static int opendataconn(struct galileoftp_globals *ogp, struct ftp_info *info)
+static int opendataconn(struct ftp_info *info)
 {
 	struct Library *SocketBase = ((struct globals *)((IPCData*)(info->fi_task->tc_UserData))->userdata)->g_socketbase;
 	int ts;						// Temporary socket
@@ -604,7 +602,6 @@ static int opendataconn(struct galileoftp_globals *ogp, struct ftp_info *info)
 static int dataconna(struct ftp_info *info, int restart, const char *fmt, ...)
 {
 	struct Library *SocketBase = ((struct globals *)((IPCData*)(info->fi_task->tc_UserData))->userdata)->g_socketbase;
-	struct galileoftp_globals *ogp = info->fi_og;
 	va_list ap;				// For varargs
 	int ts, ds = -1;			// Temporary socket, Data socket
 	struct linger linger = { 1, 120 };	// Socket option
@@ -613,7 +610,7 @@ static int dataconna(struct ftp_info *info, int restart, const char *fmt, ...)
 	int reply;
 	BOOL okay = FALSE;
 
-	if ((ts = opendataconn(ogp, info)) >= 0)
+	if ((ts = opendataconn(info)) >= 0)
 	{
 		okay = TRUE;
 
@@ -740,7 +737,6 @@ static VOID set_timeout(struct ftp_info *info, struct timeval *timer)
 unsigned int get(struct ftp_info *info, int (*updatefn)(void *,unsigned int,unsigned int), void *updateinfo, char *remote_path, char *local_path, BOOL restart)
 {
 	// Needed because socket library base is in our task's tc_userdata field
-	struct galileoftp_globals *ogp = info->fi_og;
 	struct Library *SocketBase = ((struct globals *)((IPCData*)(info->fi_task->tc_UserData))->userdata)->g_socketbase;
 	unsigned int total = 0xffffffff;	// Length of file
 	unsigned int bytes = 0;			// Bytes received so far
@@ -965,7 +961,6 @@ unsigned int get(struct ftp_info *info, int (*updatefn)(void *,unsigned int,unsi
 
 static int iread(struct ftp_info *info, int skt, BOOL checkbreak)
 {
-#define ogp info->fi_og
 	struct Library *SocketBase = ((struct globals *)((IPCData*)(info->fi_task->tc_UserData))->userdata)->g_socketbase;
 	int retval = -1;
 	fd_set rd, ex;
@@ -1126,7 +1121,6 @@ static char *buf_sgets(struct ftp_info *info, int bytes, int skt, BOOL checkbrea
 //
 static int sgetc(struct ftp_info *info, int skt, int checkabort_time)
 {
-#define ogp info->fi_og
 	struct Library *SocketBase = ((struct globals *)((IPCData*)(info->fi_task->tc_UserData))->userdata)->g_socketbase;
 	int retval = -1;
 	unsigned char c;
@@ -1275,7 +1269,6 @@ static char *sgets(struct ftp_info *info, char *iobuf, int bytes, int skt, int c
 int list(struct ftp_info *info, int (*updatefn)(void *, const char *), void *updateinfo, const char *cmd, const char *path)
 {
 	// Needed because socket library base is in our task's tc_userdata field
-	struct galileoftp_globals *ogp = info->fi_og;
 	struct Library *SocketBase = ((struct globals *)((IPCData*)(info->fi_task->tc_UserData))->userdata)->g_socketbase;
 	int retval = -1;		// error - 0 is no error
 	int ds;				// Data socket
@@ -1356,7 +1349,6 @@ int list(struct ftp_info *info, int (*updatefn)(void *, const char *), void *upd
 
 unsigned int put(struct ftp_info *info, int (*updatefn)(void *,unsigned int,unsigned int), void *updateinfo, char *local_path, char *remote_path, unsigned int restart)
 {
-	struct galileoftp_globals *ogp = info->fi_og;
 	struct Library *SocketBase = ((struct globals *)((IPCData*)(info->fi_task->tc_UserData))->userdata)->g_socketbase;
 	unsigned int bytes = 0;
 	APTR f;						// Output file
@@ -1564,7 +1556,6 @@ int gethost(struct sockaddr_in *remote_addr, char *host, struct Library *SocketB
 //
 int connect_host(struct ftp_info *info, int (*updatefn)(void *,int,char *), void *updateinfo, char *host, int port)
 {
-	struct galileoftp_globals *ogp = info->fi_og;
 	struct Library *SocketBase = ((struct globals *)((IPCData*)(info->fi_task->tc_UserData))->userdata)->g_socketbase;
 	struct servent *se;
 	int retval = 0;
@@ -1685,7 +1676,6 @@ int connect_host(struct ftp_info *info, int (*updatefn)(void *,int,char *), void
 //
 void disconnect_host(struct ftp_info *info)
 {
-	struct galileoftp_globals *ogp = info->fi_og;
 	struct Library *SocketBase = ((struct globals *)((IPCData*)(info->fi_task->tc_UserData))->userdata)->g_socketbase;
 
 	if (info->fi_cs >= 0)
@@ -1702,7 +1692,6 @@ void disconnect_host(struct ftp_info *info)
 //
 void lostconn(struct ftp_info *info)
 {
-	struct galileoftp_globals *ogp = info->fi_og;
 	struct Library *SocketBase = ((struct globals *)((IPCData*)(info->fi_task->tc_UserData))->userdata)->g_socketbase;
 
 	if (info->fi_cs >= 0)
@@ -1857,7 +1846,7 @@ int _getreply(
 		// No output if doing_noop
 		if (!info->fi_doing_noop)
 		{
-			if (!info->fi_og->og_oc.oc_log_debug && currcode)
+			if (!og.og_oc.oc_log_debug && currcode)
 			{
 				if (updatefn && updateinfo)
 					(*updatefn)(updateinfo, -1, iobuf + 4);
