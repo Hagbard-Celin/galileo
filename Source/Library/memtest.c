@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -64,8 +64,8 @@ void main(void)
 
 #ifdef RESOURCE_TRACKING
 
-    if (ResTrackBase=REALL_OpenLibrary("g_restrack.library",0))
-         StartResourceTracking (RTL_ALL);
+	if (ResTrackBase=REALL_OpenLibrary("g_restrack.library",0))
+		StartResourceTracking (RTL_ALL);
 #endif
 
 	if (GalileoFMBase=OpenLibrary("galileofm.library",0))
@@ -173,8 +173,8 @@ void main(void)
 		CloseLibrary(GalileoFMBase);
 	}
 #ifdef RESOURCE_TRACKING
-    KPrintF("Quitting......\n");
-    PrintTrackedResources();
-    //EndResourceTracking(); /* Generate a memory usage report */
+	KPrintF("Quitting......\n");
+	PrintTrackedResources();
+	//EndResourceTracking(); /* Generate a memory usage report */
 #endif
 }

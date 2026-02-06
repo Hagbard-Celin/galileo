@@ -489,7 +489,7 @@ void print_print(print_data *data)
 
 		// Cleanup
 		DeleteIORequest((struct IORequest *)data->printer_io);
-        while (msg=GetMsg(data->printer_port))
+		while (msg=GetMsg(data->printer_port))
 			ReplyMsg(msg);
 		DeleteMsgPort(data->printer_port);
 	}

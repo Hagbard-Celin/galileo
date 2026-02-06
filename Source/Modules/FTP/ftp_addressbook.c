@@ -907,11 +907,7 @@ static int env_not_default(struct display_globals *dg,struct ftp_environment *ne
 
 VOID set_reset_button(struct display_globals *dg,struct window_params *wp)
 {
-#if 0
-	BOOL disabled=FALSE;
-#else
 	BOOL disabled;
-#endif
 	struct MenuItem *item;
 
 	// compare current version with actual global default values

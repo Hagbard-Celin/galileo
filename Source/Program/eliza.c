@@ -31,7 +31,7 @@ the existing commercial status of Directory Opus for Windows.
 
 For more information on Directory Opus for Windows please see:
 
-                 http://www.gpsoft.com.au
+		 http://www.gpsoft.com.au
 
 */
 
@@ -45,13 +45,12 @@ For more information on Directory Opus for Windows please see:
 #define isws(x)  ((x)==' ' || (x)=='\t' || (x)=='\n')
 
 static void exchange_words(char *string, int word_start, int word_len,
-                    char *new_word);
+		    char *new_word);
 static void reformat_input(struct eliza_data *);
 static char *find_keyword(struct eliza_data *);
 static char *conjugate(char *found,struct eliza_data *);
 static void response(char *tail,struct eliza_data *);
 char *strstri(char *,char *);
-void eliza_decrypt_strings(unsigned char **);
 
 
 static unsigned char *keyword[] =
@@ -343,19 +342,19 @@ BOOL init_eliza(struct eliza_data *data)
     /* Set data->first_response, data->current_response, and data->last_response */
     for (loop=0;loop<num_of_responses_size;loop++)
     {
-        if (num_of_responses[loop]==-1)
-        {
-            response_number-=number; /* Synonym of last word */
-        }
-        else
-        {
-            number=num_of_responses[loop];
-        }
+	if (num_of_responses[loop]==-1)
+	{
+	    response_number-=number; /* Synonym of last word */
+	}
+	else
+	{
+	    number=num_of_responses[loop];
+	}
 
-        data->first_response[loop]=response_number;
-        data->current_response[loop]=response_number;
-        data->last_response[loop]=response_number+number-1;
-        response_number+=number;
+	data->first_response[loop]=response_number;
+	data->current_response[loop]=response_number;
+	data->last_response[loop]=response_number+number-1;
+	response_number+=number;
     }
 
 	return 1;
@@ -374,7 +373,7 @@ void free_eliza(struct eliza_data *data)
  a new word to swap in, this function does the swap
  **************************************************************/
 static void exchange_words(char *string, int word_start, int word_len,
-                    char *new_word)
+		    char *new_word)
 {
     /* This function makes the assumption that all the values given to
      * it are valid.
@@ -401,21 +400,21 @@ static void reformat_input(struct eliza_data *data)
     /* Second, strip punctuation */
     for (loop=0;loop<strlen(data->input_string);loop++)
     {
-        while (!isalnum(data->input_string[loop]) && data->input_string[loop]!='\'' &&
-               data->input_string[loop]!=' ' && data->input_string[loop]!='\0')
-        {
-            memmove(data->input_string+loop, data->input_string+loop+1,
-                    strlen(data->input_string)-loop);
-        }
+	while (!isalnum(data->input_string[loop]) && data->input_string[loop]!='\'' &&
+	       data->input_string[loop]!=' ' && data->input_string[loop]!='\0')
+	{
+	    memmove(data->input_string+loop, data->input_string+loop+1,
+		    strlen(data->input_string)-loop);
+	}
     }
 
     /* Third, strip redundant white spaces (spaces and tabs) */
     for (loop=0;loop<strlen(data->input_string);loop++)
     {
-        while (isws(data->input_string[loop]) && isws(data->input_string[loop+1]))
-        {
-            exchange_words(data->input_string, loop, 2, " ");
-        }
+	while (isws(data->input_string[loop]) && isws(data->input_string[loop+1]))
+	{
+	    exchange_words(data->input_string, loop, 2, " ");
+	}
     }
 
     /* Fourth, trim the string */
@@ -423,7 +422,7 @@ static void reformat_input(struct eliza_data *data)
 
     while (isws(data->input_string[loop]))
     {
-        loop++;
+	loop++;
     }
 
     memmove(data->input_string, data->input_string+loop, strlen(data->input_string)-loop+1);
@@ -432,7 +431,7 @@ static void reformat_input(struct eliza_data *data)
 
     while (isws(data->input_string[loop]) && data->input_string[loop]!='\0')
     {
-        loop--;
+	loop--;
     }
 
     data->input_string[loop+1]='\0';
@@ -451,17 +450,17 @@ static char *find_keyword(struct eliza_data *data)
 
     for (data->key=0;data->key <= data->n1;data->key++)
     {
-        if (strstri(data->input_string_buffer, keyword[data->key]))
-        {
-            /* Keyword has been identified */
-            strcpy (found, keyword[data->key]);
-            break;
-        }
+	if (strstri(data->input_string_buffer, keyword[data->key]))
+	{
+	    /* Keyword has been identified */
+	    strcpy (found, keyword[data->key]);
+	    break;
+	}
     }
 
     if (data->key > data->n1)
     {
-        data->key=data->n1; /* In case no key was found */
+	data->key=data->n1; /* In case no key was found */
     }
 
     return found;
@@ -488,18 +487,18 @@ static char *conjugate(char *found,struct eliza_data *data)
     /* swap first and second person phrases */
     for (string_pos=0;string_pos<strlen(tail);string_pos++)
     {
-        for (word=0;word <= data->n2;word++)
-        {
-            tail_ptr=tail+string_pos;
+	for (word=0;word <= data->n2;word++)
+	{
+	    tail_ptr=tail+string_pos;
 
-            /* Search through the string for phrases character by character */
-            if (strnicmp(wordin[word], tail_ptr, strlen(wordin[word]))==0)
-            {
-                exchange_words(tail, string_pos, strlen(wordin[word]), wordout[word]);
-                string_pos=string_pos+strlen(wordout[word])-2;
-                break;
-            }
-        }
+	    /* Search through the string for phrases character by character */
+	    if (strnicmp(wordin[word], tail_ptr, strlen(wordin[word]))==0)
+	    {
+		exchange_words(tail, string_pos, strlen(wordin[word]), wordout[word]);
+		string_pos=string_pos+strlen(wordout[word])-2;
+		break;
+	    }
+	}
     }
 
     return tail;
@@ -519,20 +518,20 @@ static void response(char *tail,struct eliza_data *data)
 
     if (data->current_response[data->key] > data->last_response[data->key])
     {
-        data->current_response[data->key]=data->first_response[data->key];
+	data->current_response[data->key]=data->first_response[data->key];
     }
 
     if (output[strlen(output)-1]!='*')
     {
-        print_string(output);
-        print_string("\n");
-        return;
+	print_string(output);
+	print_string("\n");
+	return;
     }
 
     if (strcmp(tail, "  ")==0)
     {
-        print_string("You will have to elaborate more for me to help you.\n");
-        return;
+	print_string("You will have to elaborate more for me to help you.\n");
+	return;
     }
 
     output[strlen(output)-1]='\0';
@@ -554,14 +553,14 @@ short eliza_line(struct eliza_data *data,char *line)
     /* See if the user told Eliza to shutup (thereby quitting the program */
     if (strstri(data->input_string, "shut"))
     {
-        print_string("Ok. If you feel that way I'll shut up....\n");
-        return 0;
+	print_string("Ok. If you feel that way I'll shut up....\n");
+	return 0;
     }
 
     if (stricmp(data->input_string, data->last_input_string)==0)
     {
-        print_string("Please don't repeat yourself!\n");
-        return 1;
+	print_string("Please don't repeat yourself!\n");
+	return 1;
     }
 
     strcpy(data->last_input_string, data->input_string);

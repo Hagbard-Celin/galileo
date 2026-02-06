@@ -56,7 +56,6 @@ static const struct TextAttr topaz_attr={"topaz.font",8,0,0};
 
 #ifdef RESOURCE_TRACKING
 ULONG callerid;
-
 #endif
 
 

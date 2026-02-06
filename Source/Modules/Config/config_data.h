@@ -43,7 +43,6 @@ For more information on Directory Opus for Windows please see:
 #endif
 
 extern ConfigWindow
-	_config_settings_window,
 	_config_environment_window,
 	_config_buttons_window,
 	_config_buttons_clip_window,
@@ -54,11 +53,9 @@ extern ConfigWindow
 	_fileclass_editor_window;
 
 extern SubOptionHandle
-	_settings_options[],
 	_environment_options[];
 
 extern ObjectDef
-	_config_settings_objects[],
 	_config_environment_objects[],
 	_config_buttons_objects[],
 	_config_buttons_clip_objects[],
