@@ -943,14 +943,6 @@ FunctionEntry *function_get_entry(FunctionHandle *handle)
 		    // Doesn't exist, something went wrong, skip over it
 		    else
 		    {
-			if (!current)
-			{
-			    char *ptr;
-
-			    // Strip new filename
-			    ptr=FilePart(handle->anchor_path);
-			    if (ptr) *ptr=0;
-			}
 			// Don't enter
 			handle->anchor->ap_Flags&=~APF_DODIR;
 		    }
