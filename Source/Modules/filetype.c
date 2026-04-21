@@ -2758,6 +2758,12 @@ Cfg_FiletypeList *creator_generic(
 	FreeAslRequest( data->filereq );
 
 	UnLock(data->rec_dir_parent);
+
+	// Free message port
+	while (msg=GetMsg(data->app_port))
+	    ReplyMsg(msg);
+	DeleteMsgPort( data->app_port );
+
 	FreeVec( data );
     }
 
