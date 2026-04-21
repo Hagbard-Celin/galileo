@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2025 Hagbard Celine
+Copyright 2025,2026 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -102,6 +102,14 @@ void GetPositions(struct ListLock *list,APTR memory,char *name)
 		{
 			position_rec_old *rec=(position_rec_old *)entry;
 
+			// Lister snapshots has made corrupt entires in system/position-info since commit 98c825a.
+			// This cludge filters out those entires.
+			if (*(UWORD *)(rec->name + 1) == 0xFFFF)
+			{
+			    FreeMemH(entry);
+			    continue;
+			}
+
 			// Set type and name
 			entry->ln_Type=PTYPE_POSITION;
 			entry->ln_Name=rec->name;
@@ -129,6 +137,11 @@ void GetPositions(struct ListLock *list,APTR memory,char *name)
 		{
 			entry->ln_Type=PTYPE_APPICON;
 			entry->ln_Name=((appicon_record *)entry)->name;
+		}
+		else
+		{
+		    FreeMemH(entry);
+		    continue;
 		}
 
 		// Add to list
@@ -709,6 +722,8 @@ position_rec *PositionUpdate(Lister *lister,short flags)
 		// Not found?
 		if (!(pos=(position_rec *)entry))
 		{
+			struct DateStamp *volumedate;
+
 			// Fail?
 			if (flags&POSUPF_FAIL) return 0;
 
@@ -723,6 +738,7 @@ position_rec *PositionUpdate(Lister *lister,short flags)
 			// Initialise entry
 			pos->node.ln_Type=PTYPE_POSITION;
 			pos->node.ln_Name=pos->name;
+			pos->node.ln_Pri=1;
 			strcpy(pos->name,lister->cur_buffer->buf_ExpandedPath);
 			pos->code=0xffff;
 			new=1;
@@ -732,6 +748,15 @@ position_rec *PositionUpdate(Lister *lister,short flags)
 				(char *)&environment->env->list_format,
 				(char *)&pos->format,
 				sizeof(ListFormatStorage));
+
+			volumedate = &lister->cur_buffer->buf_VolumeDate;
+			if (volumedate->ds_Days || volumedate->ds_Minute || volumedate->ds_Tick)
+		        {
+			    pos->type = PPTYPE_DISKID;
+			    memcpy(&pos->vol_date, volumedate, sizeof(struct DateStamp));
+		        }
+		        else
+			    pos->type = PPTYPE_NODISKID;
 
 			// Add to list
 			AddTail((struct List *)&GUI->positions,(struct Node *)pos);

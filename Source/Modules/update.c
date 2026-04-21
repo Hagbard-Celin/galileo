@@ -2,7 +2,7 @@
 
 Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
-Copyright 2025 Hagbard Celine
+Copyright 2025,2026 Hagbard Celine
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -1016,6 +1016,14 @@ BOOL update_position_info(struct List *list)
 
 		position_rec *upgrade_entry;
 		position_rec_old *org_entry = (position_rec_old *)entry;
+
+		// Lister snapshots has made corrupt entires in system/position-info since commit 98c825a.
+		// This cludge filters out those entires.
+		if (*(UWORD *)(org_entry->name + 1) == 0xFFFF)
+		{
+		    FreeMemH(org_entry);
+		    continue;
+		}
 
 		size += sizeof(position_rec) - sizeof(position_rec_old);
 
