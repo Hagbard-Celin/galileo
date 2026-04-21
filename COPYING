@@ -6,7 +6,7 @@ version.
 This does not include the files in the directory "3rdPartyInclude" which are
 covered by their own licences (if any).
 
-The GNU General Public License version 2 is in the file "gpl-2.0.txt"
-The GNU General Public License version 3 is in the file "gpl-3.0.txt"
+The GNU General Public License version 2 is in the file "LICENSE.GPL2"
+The GNU General Public License version 3 is in the file "LICENSE.GPL3"
 
 
