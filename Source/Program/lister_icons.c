@@ -240,7 +240,7 @@ void lister_get_icons(FunctionHandle *handle,Lister *lister,char *add_name,short
 				if (object && !(object->bdo_flags&BDOF_NO_POSITION))
 				{
 					if (handle)
-						IPC_Command(lister->ipc,LISTER_SHOW_ICON,0,object,0,REPLY_NO_PORT);
+						IPC_Command(lister->ipc,LISTER_SHOW_ICON,0,object,0,0);
 					else
 						lister_show_icon(lister,object);
 				}
@@ -639,9 +639,9 @@ void lister_show_icon(Lister *lister,BackdropObject *object)
 	lock_listlock(&lister->backdrop_info->objects,0);
 
 	// Look for icon in list
-	for (test=(BackdropObject *)lister->backdrop_info->objects.list.lh_Head;
-		test->bdo_node.ln_Succ;
-		test=(BackdropObject *)test->bdo_node.ln_Succ)
+	for (test=(BackdropObject *)lister->backdrop_info->objects.list.lh_TailPred;
+		test->bdo_node.ln_Pred;
+		test=(BackdropObject *)test->bdo_node.ln_Pred)
 	{
 		// Found?
 		if (test==object)
