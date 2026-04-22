@@ -4,6 +4,7 @@ Galileo Amiga File-Manager and Workbench Replacement
 Copyright 1993-2012 Jonathan Potter & GP Software
 Copyright 2012 Roman Kargin <kas1e@yandex.ru>
 Copyright 2023,2025 Hagbard Celine
+Copyright 2026 Dimitris Panokostas <midwan@gmail.com>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -829,7 +830,22 @@ BOOL function_lock_paths(FunctionHandle *handle,PathList *list,int locker)
 		// Check path not already locked
 		if (node->pn_lister && !(node->pn_flags&LISTNF_LOCKED))
 		{
+			Lister *lister;
+
+			// Validate the lister before dereferencing it. The stored pointer may be
+			// stale if the lister was closed while this function was pending; the
+			// shared lock on GUI->lister_list keeps a validated lister alive until we
+			// either lock it busy or release the list lock.
+			lister = function_valid_lister(handle, node->pn_lister);
+
+			// Lister is gone (freed or closing)
+			if (!lister)
+			{
+				node->pn_lister = 0;
+			}
+
 			// Lister not available first time unless this is a read dir op
+			else
 			if (node->pn_lister->flags2&LISTERF2_UNAVAILABLE && locker!=3)
 			{
 				// Clear lister
@@ -844,11 +860,12 @@ BOOL function_lock_paths(FunctionHandle *handle,PathList *list,int locker)
 				node->pn_lister=0;
 			}
 
-			// Check lister is valid
+			// Lister is valid, lock it
 			else
-			if (node->pn_lister=function_valid_lister(handle,node->pn_lister))
 			{
 				IPCMessage *msg;
+
+				node->pn_lister = lister;
 
 				// Make lister busy
 				IPC_Command(
@@ -930,7 +947,31 @@ void function_unlock_paths(FunctionHandle *handle,PathList *list,int locker)
 		// Valid lister?
 		if (node->pn_lister)
 		{
+			struct MinNode *lnode;
+			BOOL still_listed = FALSE;
+
+			// The stored lister pointer may be stale if the lister was closed while
+			// we held it busy. Confirm it is still in GUI->lister_list before any
+			// dereference; the list lock keeps a found lister alive until we release.
+			for (lnode = (struct MinNode *)GUI->lister_list.list.lh_Head;
+				 lnode->mln_Succ;
+				 lnode = lnode->mln_Succ)
+			{
+				if (node->pn_lister == (Lister *)IPCDATA(((IPCData *)lnode)))
+				{
+					still_listed = TRUE;
+					break;
+				}
+			}
+
+			if (!still_listed)
+			{
+				node->pn_flags &= ~LISTNF_LOCKED;
+				node->pn_lister = 0;
+			}
+
 			// Check list is locked by us
+			else
 			if (node->pn_flags&LISTNF_LOCKED)
 			{
 				ULONG ref;
