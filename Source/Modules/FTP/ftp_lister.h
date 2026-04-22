@@ -146,7 +146,7 @@ struct ftp_node
 	IPCData			  *		  fn_ipc;	// IPC of this lister process
 	struct ftp_info		  fn_ftp;			// Socket & site details + FTP reply code
 	ULONG			  fn_flags;			// See below
-	char			  fn_galileo[PORTNAMELEN+1];	// GALILEO.1 etc
+	char			  fn_galileo[PORTNAMELEN+1];	// GALILEOFM
 	/*
 	   char			fn_path[PATHLEN+1];	// Current directory
 	 */

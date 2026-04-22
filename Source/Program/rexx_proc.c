@@ -362,33 +362,23 @@ ULONG __asm __saveds rexx_init(
 	register __a0 IPCData *ipc,
 	register __a1 ULONG *foo)
 {
-	short a;
 	struct MsgPort *port=0;
 
 	// Create a unique port name
 	Forbid();
 
-	// Start at 1; only try 100 times (why would you want 100 copies of Galileo? :)
-	for (a=1;a<100;a++)
+	strcpy(GUI->rexx_port_name,"GALILEOFM");
+
+	// See if port already exists
+	if (!(FindPort(GUI->rexx_port_name)))
 	{
-		// Build port name
-		lsprintf(GUI->rexx_port_name,"GALILEO.%ld",a);
-
-		// See if port already exists
-		if (!(FindPort(GUI->rexx_port_name)))
+		// It doesn't; try to create it
+		if (port=CreateMsgPort())
 		{
-			// It doesn't; try to create it
-			if (port=CreateMsgPort())
-			{
-				// Make port public
-				port->mp_Node.ln_Pri=50;
-				port->mp_Node.ln_Name=GUI->rexx_port_name;
-				AddPort(port);
-
-				// Store copy number
-				GUI->galileo_copy=a;
-			}
-			break;
+			// Make port public
+			port->mp_Node.ln_Pri=50;
+			port->mp_Node.ln_Name=GUI->rexx_port_name;
+			AddPort(port);
 		}
 	}
 	Permit();

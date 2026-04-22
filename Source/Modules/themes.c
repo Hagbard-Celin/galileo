@@ -553,7 +553,7 @@ void write_theme_intro(APTR file,char *filename)
 	// Bit that gets the ARexx port
 	WriteBuf(file,	"parse arg galileo_port apply_flags\n"
 					"if galileo_port='' then\n"
-					"\tgalileo_port='GALILEO.1'\n"
+					"\tgalileo_port='GALILEOFM'\n"
 					"address value galileo_port\n\n", -1);
 	WriteBuf(file,	"if apply_flags='' then\n"
 					"\tapply_flags='PFBS'\n"

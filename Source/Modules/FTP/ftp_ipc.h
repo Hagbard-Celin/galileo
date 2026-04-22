@@ -163,7 +163,7 @@ struct addrbook_msg
 struct connect_msg
 {
 	APTR		  cm_function_handle;		// Useful for callback functions
-	char		  cm_galileo[PORTNAMELEN+1];	// Port name of this copy of Galileo (GALILEO.1, GALILEO.2, ...)
+	char		  cm_galileo[PORTNAMELEN+1];	// Port name of Galileo (GALILEOFM)
 	struct Window	  *cm_window;			// Window to open requester over
 	APTR		  cm_handle;			// Lister handle if called with one
 	struct site_entry cm_site;

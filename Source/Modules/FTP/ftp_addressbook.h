@@ -139,7 +139,7 @@ struct display_globals
 
 	char			  dg_anonpass[PASSWORDLEN+1];
 
-	char			  dg_galileoport[PORTNAMELEN+1];//Port name of this copy of Opus (GALILEO.1, GALILEO.2, ...)
+	char			  dg_galileoport[PORTNAMELEN+1];//Port name of Galileo (GALILEOFM)
 
 	Att_List		  *dg_wp_list;			// lists of all wps
 

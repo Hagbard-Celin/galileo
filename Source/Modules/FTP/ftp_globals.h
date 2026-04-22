@@ -62,7 +62,7 @@ For more information on Directory Opus for Windows please see:
 #define COMMENTLEN	79				// 80 including null terminator
 
 #define PATHLEN		256
-#define PORTNAMELEN	10				// Galileo Arexx port name eg. 'GALILEO.1'
+#define PORTNAMELEN	10				// Galileo Arexx port name 'GALILEOFM'
 #define LSCMDLEN	20				// LIST or NLST command + arguments
 
 struct ftp_environment

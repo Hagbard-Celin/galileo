@@ -1018,7 +1018,7 @@ void set_config_to_default(struct ftp_config *oc)
 
 	memset(oc,0,sizeof(struct ftp_config));
 
-	sprintf(oc->oc_logname, "CON:/300/500/150/FTP Log/Auto/Close/Screen GALILEO.1");
+	sprintf(oc->oc_logname, "CON:/300/500/150/FTP Log/Auto/Close/Screen GALILEOFM");
 
 	env=&oc->oc_env;
 

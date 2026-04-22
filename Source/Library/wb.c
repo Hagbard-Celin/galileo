@@ -1330,7 +1330,7 @@ void __asm __saveds L_WB_CloseWindow(register __a0 struct Window *window)
 	if (node=L_FindPubScreen(window->WScreen,0))
 	{
 		// Is it the Galileo screen?
-		if (strncmp(node->psn_Node.ln_Name,"GALILEO.",8)==0)
+		if (strncmp(node->psn_Node.ln_Name,"GALILEOFM",9)==0)
 		{
 			// Get task to signal
 			sigtask=node->psn_SigTask;

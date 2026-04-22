@@ -1,7 +1,6 @@
 The prefix for AREXX scripts is changed to ".galileo"
 
-The AREXX port name is changed to "GALILEO.x", where x is the instance number
-of the program (usually 1).
+The AREXX port name is changed to "GALILEOFM".
 
 The "dopus" commands has been renamed to "galileo".
 
