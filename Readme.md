@@ -161,8 +161,9 @@ inovamusic.library from elsewhere and place it in "Libs:" or
 "<install_location>/Galileo/Libs/".
 
 
-Special thanks to Roman Kargin <kas1e@yandex.ru>, Szilard Biro and Mathias Heyer
-for letting me use their code in my GPL-licensed fork.
+Special thanks to Roman Kargin <kas1e@yandex.ru>, Szilard Biro, Mathias Heyer
+and Dimitris Panokostas <midwan@gmail.com> for letting me use their code in my
+GPL-licensed fork.
 As a thanks, special permission is hereby given to the corresponding projects
 for using any of my changes to this code-base in their APL-licensed versions.
 
