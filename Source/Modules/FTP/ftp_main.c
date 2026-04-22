@@ -3280,7 +3280,8 @@ void __asm __saveds galileo_ftp(void)
 			// Remove, flush and delete ARexx port
 			if (rexport)
 			{
-				RemPort(rexport);
+				if (nfyport)
+				    RemPort(rexport);
 				kprintf("**** GALILEOFTP PORT REMOVED ****\n");
 				flush_arexxport(rexport);
 				DeleteMsgPort(rexport);
