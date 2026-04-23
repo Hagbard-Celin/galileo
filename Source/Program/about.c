@@ -65,19 +65,19 @@ void show_about(struct Screen *screen,IPCData *ipc)
 	Att_NewNode(list,"General Public License version 2 or later.",1,0);
 	Att_NewNode(list,"See LICENSE.(gpl2|glp3) in the distribution archive.",2,0);
 
+	// Name of the translator
+	Att_NewNode(list,GetString(&locale,MSG_TRANSLATION_BY_YOUR_NAME),3,0);
+
 	Att_NewNode(list,about_1,1,0);
 	Att_NewNode(list,about_2,1,0);
 	Att_NewNode(list,about_3,1,0);
 	Att_NewNode(list,about_4,2,0);
 
-	// Name of the translator
-	Att_NewNode(list,GetString(&locale,MSG_TRANSLATION_BY_YOUR_NAME),3,0);
-
 	Att_NewNode(list,"",1,0);
 	Att_NewNode(list,"The release of Directory Opus 5 under the GPL in NO",1,0);
 	Att_NewNode(list,"WAY affects the existing commercial status of Directory",1,0);
 	Att_NewNode(list,"Opus for Windows.",1,0);
-	Att_NewNode(list,"",1,0);
+	//Att_NewNode(list,"",1,0);
 	Att_NewNode(list,"For more information on Directory Opus for Windows please",1,0);
 	Att_NewNode(list,"see: http://www.gpsoft.com.au",1,0);
 	//Att_NewNode(list,"",1,0);
