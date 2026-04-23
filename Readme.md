@@ -1,13 +1,5 @@
 Galileo File-Manager and Workbench replacement.
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
-version.
-
-This does not include the files in the directory "3rdPartyInclude" which are
-covered by their own licences (if any).
-
 This is a GPL fork of the 2012 APL release of the legendary Amiga file manager
 and Workbench replacement by GPSoftware.
 
@@ -172,6 +164,16 @@ my stupid programming questions.
 
 
 -Hagbard Celine
+
+---
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2 of the License, or (at your option) any later
+version.
+
+This does not include the files in the directory "3rdPartyInclude" which are
+covered by their own licences (if any).
 
 ---
 
