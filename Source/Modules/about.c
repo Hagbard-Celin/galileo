@@ -260,12 +260,14 @@ int __asm __saveds L_Module_Entry_Internal(
 				OrRectRegion(data.text_reg,&rect);
 			}
 
+			// FIXME: Gadget and variable names no longer matches contents.
 			// Render copyright text
 			SetAPen(data.window->RPort,DRAWINFO(data.window)->dri_Pens[TEXTPEN]);
 			node=files->lh_Head;
 			for (a=0;a<5 && node->ln_Succ;a++,node=node->ln_Succ)
 				SetGadgetValue(objlist,GAD_COPYRIGHT_1+a,(ULONG)node->ln_Name);
 
+			// FIXME: this is not right. see program/about.c
 			// Get translator information
 			if (node->ln_Succ)
 			{
