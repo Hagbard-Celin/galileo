@@ -1,0 +1,79 @@
+# GPSoftware Provenance Record: GPL License Authorization
+
+The following documentation establishes an explicit corporate license grant from
+GPSoftware for the Directory Opus 5 Amiga codebase used in this repository.
+
+*Note: This document contains heavily condensed and redacted transcripts of the
+original 2023 communications to preserve personal privacy, remove unrelated
+technical forum chatter, and focus strictly on the licensing outcome. Full,
+unedited message archives are maintained privately by the repository owner for
+legal verification.*
+
+---
+
+### Part 1: Developer Clarification & CEO Referral
+In January 2023, an inquiry regarding the open-source reuse of the Directory
+Opus 5 Amiga source code was made to original developer Jonathan ("Jon") Potter,
+who referred the matter directly to the corporate ownership of GPSoftware.
+
+```text
+From: Jonathan Potter (Directory Opus Developer)
+Date: Mon, Jan 16, 2023
+To: Me <address redacted>
+
+"Greg would have even less memory of it than I do... Feel free to email him at
+greg@gpsoft.com.au if you like... The original readme.txt (written by me)
+referred only to APL..."
+```
+
+---
+
+### Part 2: Explicit Email Authorization from CEO Dr. Greg Perry
+Direct follow-up with GPSoftware Managing Director, Dr. Greg Perry, to formally
+authorize releasing an independent, non-commercial adaptation of the Amiga
+codebase on GitHub under the GNU General Public License (GPL).
+
+```text
+From: Me <address redacted>
+Date: Mon, Jan 16, 2023 at 10:52 AM
+To: Dr. Greg Perry <greg@gpsoft.com.au>
+
+Dear Dr. Greg Perry,
+[...] My memory is that when the DOpus Amiga source was released in response to
+the fundraiser in 2012: You released it as dual-license with a choice of APL
+or GPL...
+
+---
+
+From: Dr. Greg Perry <greg@gpsoft.com.au>
+Date: Tue, Jan 17, 2023 at 2:28 AM
+To: Me <address redacted>
+
+[...] If you want to put it on GitHub, you have our permission to do that. We do
+not express any rights of the code providing it is not used to create commercial
+products. The Amiga code is in no way related to the windows version of
+Directory Opus.
+
+---
+
+From: Me <address redacted>
+Date: Tue, Jan 17, 2023 at 11:01 AM
+To: Dr. Greg Perry <greg@gpsoft.com.au>
+
+Dear Dr. Greg Perry,
+
+Thank you so much for your answer.
+
+Just to clarify so no-one can come after me later, telling me what I do is
+illegal. Are you giving me permission to put my adaption of the code on GitHub
+under the GPL license. I'm just learning Amiga programming again, and have no
+commercial interests.
+
+---
+
+From: Dr. Greg Perry <greg@gpsoft.com.au>
+Date: Tue, Jan 17, 2023 at 11:06 PM
+To: Me <address redacted>
+
+Yes. You have permission to do that.
+```

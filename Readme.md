@@ -167,6 +167,16 @@ my stupid programming questions.
 
 ---
 
+## Licensing & Provenance
+
+* **Core Codebase:** This repository contains an adaptation of the Directory
+  Opus 5 source code for Amiga.
+* **License:** This project is licensed under the **GNU General Public License
+  (GPL)**, following explicit corporate authorization from GPSoftware.
+* **Verification:** The full, unbroken chain of authorization (from developer
+  Jonathan Potter to Managing Director Dr. Greg Perry) is completely documented
+  and verifiable in the [LICENSE.GPSoft](./LICENSE.GPSoft) file.
+
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation; either version 2 of the License, or (at your option) any later
