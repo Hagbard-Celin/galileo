@@ -185,6 +185,26 @@ version.
 This does not include the files in the directory "3rdPartyInclude" which are
 covered by their own licences (if any).
 
+### Third-Party Components & Attributions
+
+The `3rdPartyInclude` directory contains components from various third-party
+SDKs used for compatibility.
+
+**P96 (Picasso96) Development Files:**
+The P96 include files within this directory are derived from the official
+**P96 SDK**.
+* **Author:** Jens Schönfeld (Individual Computers / iComp)
+* **License:** Creative Commons Attribution 4.0 International (CC-BY 4.0)
+* **Source:** Distributed on Aminet (`dev/misc/P96Develop.lha`)
+
+In accordance with the CC-BY conditions, the original structure names,
+functional declarations, and accompanying documentation comments remain the
+copyright of the original author and are included here strictly for software
+interoperability.
+
+Other files within the `3rdPartyInclude` directory belong to their respective
+copyright holders.
+
 ---
 
 Opus® and Directory Opus® and associated images are registered trademarks of
