@@ -1,0 +1,64 @@
+The following transcript is edited to to remove mail adresses and my name.
+
+From: Geert Uytterhoeven
+Date: Mon, Jun 29, 2026 at 11:38 AM
+To: Me
+Hi (name redacted).
+
+
+On Mon, 29 Jun 2026 at 11:31, Me
+<redacted> wrote:
+> On Mon, Jun 29, 2026 at 11:10 AM Geert Uytterhoeven <redacted> wrote:
+>> On Mon, 29 Jun 2026 at 11:00, Me
+>> <redacted> wrote:
+>> > On Mon, Jun 29, 2026 at 10:08 AM Geert Uytterhoeven <redacted> wrote:
+>> >> On Sun, 28 Jun 2026 at 12:37, Me
+>> >> <redacted> wrote:
+>> >> > May I please use the files in MultiUser18api.lha under a GPL2 compatible license?
+>> >>
+>> >> Yes, I relicensed MultiUser under the GNU GPL v2 almost 30 years ago,
+>> >> when I no longer had time to work on it.
+>> >>
+>> >> The latest version (maintained by Wez Furlong) seems to be at
+>> >> https://sourceforge.net/projects/mufs/ but it does not mention any
+>> >> license.  That website no longer supports browsing CVS, but apparently
+>> >> you can still download mufs.zip, extract it, and use "git cvsimport
+>> >> -d /path/to/extracted/mufs".
+>> >> I think I also saw it on github.com, but I can no longer find it.
+>> >>
+>> >> > May I please use the files in MultiUser18src.lha under a GPL2 compatible license?
+>> >>
+>> >> Yes you can, Enjoy! ;-)
+>> >>
+>> > I was so happy with the answer I forgot to ask:
+>> > Is that "GPL2" or "GPL2 (or later)"?
+>>
+>> Hmm, that was long before v3 and the accompanying discussions...
+>>
+>> /me dives into old emails...
+>>
+>>    "Hereby I rerelease MultiUser under the terms and conditions of the
+>> GNU General
+>>     Public License (GPL). All terms and conditions in the original license of
+>>     MultiUser that conflict with the GPL should be considered void.
+>>
+>>     <Copy of GPL v2>"
+>>
+>> So I guess the following clause from Section 9 applies:
+>>
+>>    "If the Program does not specify a version number of
+>>     this License, you may choose any version ever published by the Free Software
+>>     Foundation."
+>>
+>> So you can pick GPLv2 for the changes you make, and for your own software.
+>>
+> I am very sorry, my last question was somewhat ambiguous.
+> My project is GPL2 (or later).
+> I was wondering what to put in the copyright headers for the files that belong to Multiuser Filesystem,
+> "version 2 of the License"
+> or
+> "either version 2 of the License, or (at your option) any later version"?
+> I think your answer adds up to the latter, but I am very worried about doing this wrong.
+
+The latter is fine.
+Thanks!
